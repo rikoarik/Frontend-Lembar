@@ -33,7 +33,6 @@ export default function MarketingFooter() {
               <a className="font-caption text-caption text-secondary hover:text-burgundy hover:underline transition-all duration-200" href="/">Produk</a>
               <a className="font-caption text-caption text-secondary hover:text-burgundy hover:underline transition-all duration-200" href="/untuk-sekolah">Untuk Sekolah</a>
               <a className="font-caption text-caption text-secondary hover:text-burgundy hover:underline transition-all duration-200" href="/harga">Harga</a>
-              <a className="font-caption text-caption text-secondary hover:text-burgundy hover:underline transition-all duration-200" href="#">Fitur Utama</a>
             </div>
           </div>
 
@@ -41,10 +40,9 @@ export default function MarketingFooter() {
           <div className="md:col-span-2 flex flex-col gap-unit-4">
             <span className="font-label-semibold text-ink text-body-sm uppercase tracking-wider">Perusahaan</span>
             <div className="flex flex-col gap-unit-2">
-              <a className="font-caption text-caption text-secondary hover:text-burgundy hover:underline transition-all duration-200" href="#">Tentang Kami</a>
-              <a className="font-caption text-caption text-secondary hover:text-burgundy hover:underline transition-all duration-200" href="#">Karir <span className="text-[10px] text-burgundy bg-burgundy/10 px-1.5 py-0.5 rounded font-bold ml-1">Hiring</span></a>
-              <a className="font-caption text-caption text-secondary hover:text-burgundy hover:underline transition-all duration-200" href="#">Keamanan Data</a>
-              <a className="font-caption text-caption text-secondary hover:text-burgundy hover:underline transition-all duration-200" href="#">Kontak Kami</a>
+              <a className="font-caption text-caption text-secondary hover:text-burgundy hover:underline transition-all duration-200" href="/tentang">Tentang Kami</a>
+              <a className="font-caption text-caption text-secondary hover:text-burgundy hover:underline transition-all duration-200" href="/keamanan-data">Keamanan Data</a>
+              <a className="font-caption text-caption text-secondary hover:text-burgundy hover:underline transition-all duration-200" href="/kontak">Kontak Kami</a>
             </div>
           </div>
 
@@ -52,10 +50,10 @@ export default function MarketingFooter() {
           <div className="md:col-span-2 flex flex-col gap-unit-4">
             <span className="font-label-semibold text-ink text-body-sm uppercase tracking-wider">Dukungan</span>
             <div className="flex flex-col gap-unit-2">
-              <a className="font-caption text-caption text-secondary hover:text-burgundy hover:underline transition-all duration-200" href="#">Pusat Bantuan</a>
-              <a className="font-caption text-caption text-secondary hover:text-burgundy hover:underline transition-all duration-200" href="#">FAQ</a>
-              <a className="font-caption text-caption text-secondary hover:text-burgundy hover:underline transition-all duration-200" href="#">Kebijakan Privasi</a>
-              <a className="font-caption text-caption text-secondary hover:text-burgundy hover:underline transition-all duration-200" href="#">Syarat & Ketentuan</a>
+              <a className="font-caption text-caption text-secondary hover:text-burgundy hover:underline transition-all duration-200" href="/bantuan">Pusat Bantuan</a>
+              <a className="font-caption text-caption text-secondary hover:text-burgundy hover:underline transition-all duration-200" href="/faq">FAQ</a>
+              <a className="font-caption text-caption text-secondary hover:text-burgundy hover:underline transition-all duration-200" href="/privasi">Kebijakan Privasi</a>
+              <a className="font-caption text-caption text-secondary hover:text-burgundy hover:underline transition-all duration-200" href="/syarat">Syarat & Ketentuan</a>
             </div>
           </div>
 
