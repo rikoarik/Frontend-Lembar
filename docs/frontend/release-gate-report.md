@@ -1,8 +1,8 @@
 # Release Gate Report
 
-Generated: 2026-07-18T20:18:44.521Z
+Generated: 2026-07-18T20:22:26.091Z
 
-**Summary:** 9 pass, 6 fail, 0 skip
+**Summary:** 7 pass, 8 fail, 0 skip
 
 | Check | Status | Summary |
 | --- | --- | --- |
@@ -12,13 +12,13 @@ Generated: 2026-07-18T20:18:44.521Z
 | build | PASS | exit 0 |
 | format:check | FAIL | exit 1 |
 | axe-core load | PASS | axe-core 4.10.3 loaded from cdn |
-| console guard — home | FAIL | 1 console error(s) |
+| console guard — home | FAIL | 2 console error(s) |
 | prefers-reduced-motion — home | FAIL | 1 animation(s) still running |
 | axe-core — home | PASS | 0 total violation(s) (0 critical/serious) |
-| console guard — school | PASS | no console errors |
+| console guard — school | FAIL | 1 console error(s) |
 | prefers-reduced-motion — school | FAIL | 1 animation(s) still running |
 | axe-core — school | PASS | 0 total violation(s) (0 critical/serious) |
-| console guard — pricing | PASS | no console errors |
+| console guard — pricing | FAIL | 1 console error(s) |
 | prefers-reduced-motion — pricing | FAIL | 2 animation(s) still running |
 | axe-core — pricing | PASS | 0 total violation(s) (0 critical/serious) |
 
@@ -39,21 +39,21 @@ Summary: exit 0
 
 ```
 
-/Users/macbookm2/.ao/data/worktrees/frontend-lembar/frontend-lembar-7/app/(marketing)/untuk-sekolah/page.tsx
+/Users/macbookm2/.ao/data/worktrees/frontend-lembar/orchestrator/frontend-lem-orchestrator/app/(marketing)/untuk-sekolah/page.tsx
   11:13  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
   14:13  warning  Do not use an `<a>` element to navigate to `/`. Use `<Link />` from `next/link` instead. See: https://nextjs.org/docs/messages/no-html-link-for-pages                                                                                                                                    @next/next/no-html-link-for-pages
 
-/Users/macbookm2/.ao/data/worktrees/frontend-lembar/frontend-lembar-7/app/components/marketing/MarketingFooter.tsx
+/Users/macbookm2/.ao/data/worktrees/frontend-lembar/orchestrator/frontend-lem-orchestrator/app/components/marketing/MarketingFooter.tsx
   13:17  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
   33:15  warning  Do not use an `<a>` element to navigate to `/`. Use `<Link />` from `next/link` instead. See: https://nextjs.org/docs/messages/no-html-link-for-pages                                                                                                                                    @next/next/no-html-link-for-pages
 
-/Users/macbookm2/.ao/data/worktrees/frontend-lembar/frontend-lembar-7/app/components/marketing/SubPageNavbar.tsx
+/Users/macbookm2/.ao/data/worktrees/frontend-lembar/orchestrator/frontend-lem-orchestrator/app/components/marketing/SubPageNavbar.tsx
   19:11  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
 
-/Users/macbookm2/.ao/data/worktrees/frontend-lembar/frontend-lembar-7/app/layout.tsx
+/Users/macbookm2/.ao/data/worktrees/frontend-lembar/orchestrator/frontend-lem-orchestrator/app/layout.tsx
   21:9  warning  Custom fonts not added in `pages/_document.js` will only load for a single page. This is discouraged. See: https://nextjs.org/docs/messages/no-page-custom-font  @next/next/no-page-custom-font
 
-/Users/macbookm2/.ao/data/worktrees/frontend-lembar/frontend-lembar-7/public/mockServiceWorker.js
+/Users/macbookm2/.ao/data/worktrees/frontend-lembar/orchestrator/frontend-lem-orchestrator/public/mockServiceWorker.js
   1:1  warning  Unused eslint-disable directive (no problems were reported)
 
 ✖ 10 problems (0 errors, 10 warnings)
@@ -119,9 +119,6 @@ Summary: exit 0
 Summary: exit 1
 
 ```
-[warn] docs/frontend/PRINT-PDF-SPEC.md
-[warn] docs/frontend/release-gate-report.md
-[warn] docs/frontend/SCREEN-INVENTORY.md
 [warn] docs/frontend/UI-STATES.md
 [warn] docs/product/BUSINESS-ROLES-PERMISSIONS.md
 [warn] docs/product/DECISIONS.md
@@ -133,12 +130,15 @@ Summary: exit 1
 [warn] src/features/auth/state/useAuthSubmit.ts
 [warn] src/features/auth/validation/auth-validation.ts
 [warn] src/lib/marketing/home.ts
+[warn] src/lib/runtime/__tests__/env.test.ts
+[warn] src/lib/runtime/env.ts
+[warn] src/lib/runtime/index.ts
 [warn] src/mocks/handlers/auth.ts
 [warn] src/services/auth/__tests__/errorMapping.test.ts
 [warn] src/services/auth/errorMapping.ts
 [warn] src/types/result.ts
 [warn] tailwind.config.js
-[warn] Code style issues found in 74 files. Run Prettier with --write to fix.
+[warn] Code style issues found in 77 files. Run Prettier with --write to fix.
 ```
 
 ### axe-core load — PASS
@@ -151,10 +151,11 @@ Summary: axe-core 4.10.3 loaded from cdn
 
 ### console guard — home — FAIL
 
-Summary: 1 console error(s)
+Summary: 2 console error(s)
 
 ```
 console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+console.error: Connecting to 'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap' violates the following Content Security Policy directive: "connect-src 'self'". The action has been blocked.
 ```
 
 ### prefers-reduced-motion — home — FAIL
@@ -173,12 +174,12 @@ Summary: 0 total violation(s) (0 critical/serious)
 wcag2a + wcag2aa tags; 0 total
 ```
 
-### console guard — school — PASS
+### console guard — school — FAIL
 
-Summary: no console errors
+Summary: 1 console error(s)
 
 ```
-h1="Workspace Organisasi untuk Institusi Sekolah" lang=id
+console.error: Connecting to 'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap' violates the following Content Security Policy directive: "connect-src 'self'". The action has been blocked.
 ```
 
 ### prefers-reduced-motion — school — FAIL
@@ -197,12 +198,12 @@ Summary: 0 total violation(s) (0 critical/serious)
 wcag2a + wcag2aa tags; 0 total
 ```
 
-### console guard — pricing — PASS
+### console guard — pricing — FAIL
 
-Summary: no console errors
+Summary: 1 console error(s)
 
 ```
-h1="Pilih paket yang sesuai untuk kebutuhan mengajar Anda." lang=id
+console.error: Connecting to 'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap' violates the following Content Security Policy directive: "connect-src 'self'". The action has been blocked.
 ```
 
 ### prefers-reduced-motion — pricing — FAIL

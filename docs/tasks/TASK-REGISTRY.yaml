@@ -20,13 +20,28 @@ rules:
   owner_starts_with: "START <TASK-ID>"
   owner_accepts_with: "ACCEPT <TASK-ID>"
   owner_requests_changes_with: "CHANGES_REQUESTED <TASK-ID>: <reason>"
-  max_in_progress_per_repository: 1
+  max_in_progress_per_repository: 5
   max_context_documents_per_task: 3
   max_handoff_words: 500
-  nested_agent_spawn: forbidden_unless_owner_explicit
-  auto_start_next_task: false
-  auto_merge: false
+  nested_agent_spawn: orchestrator_only
+  auto_start_next_task: true
+  auto_merge: true
+  auto_review_and_correct: true
+  auto_commit: true
+  auto_push_task_branches: true
+  auto_push_integration_branch: true
+  direct_main_merge_push: forbidden
+  force_push: forbidden
+  destructive_ops: forbidden
+  production_deploy: forbidden
+  paid_resources: forbidden
+  production_secrets: forbidden
   production_actions_default: forbidden
+  backend_repository_modifications: forbidden
+  api_endpoint_invention: forbidden
+  execution_target: COMPLETE_LEMBAR_WEB_V1
+  marketing_visual_baseline: origin/main@299fd95d2d232e87ca972d52daa89a24458b967e
+  shutdown_checkpoint_mode: true
 
 tasks:
   - id: O0-01
@@ -67,41 +82,107 @@ tasks:
     repository: Frontend-Lembar
     sprint: F0
     title: Bootstrap frontend repository
-    status: BLOCKED
+    status: PARTIAL
     depends_on: [X0-01]
     decisions: [D-014, D-015]
     outcome: Accepted framework boots a minimal brand-correct shell with reproducible tooling.
     evidence: [install, typecheck, lint, format, test, build, desktop-and-390-smoke]
+    checkpoint:
+      mode: shutdown
+      branch: ao/frontend-integration
+      latest_pushed_commit: pending-integration-push
+      completed_scope:
+        - "Next.js App Router + strict TypeScript baseline exists at accepted visual baseline 299fd95."
+        - "Integration verification after wave: typecheck PASS, lint PASS with 10 warnings, build PASS, secret-scan PASS."
+      remaining_scope:
+        - "Repo-wide test gate still fails in app/__tests__/marketing.test.tsx expecting .nav__wordmark on three routes."
+        - "Repo-wide format:check still fails across existing files."
+        - "Desktop/mobile smoke gates need rerun after F0-03 smoke selectors are repaired."
+      changed_files: [package.json, pnpm-lock.yaml, tsconfig.json, vitest.config.ts, playwright.config.ts, scripts/gates, scripts/secret-scan.mjs, next.config.mjs]
+      verification_executed: [pnpm_install, pnpm_run_typecheck_PASS, pnpm_run_lint_PASS_WARNINGS, pnpm_run_test_FAIL_BASELINE_MARKETING, pnpm_run_build_PASS, pnpm_run_format_check_FAIL_BASELINE, secret_scan_PASS, release_gate_FAIL_RECORDED]
+      verification_still_required: [repo_test_green, repo_format_green, desktop_1280_smoke, mobile_390_smoke]
+      exact_next_action: "Resume by fixing baseline marketing tests and repo formatting, then rerun all F0-01 gates."
 
   - id: F0-02
     repository: Frontend-Lembar
     sprint: F0
     title: Runtime config and web security baseline
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [F0-01]
     decisions: []
     outcome: Typed public/server config boundaries, headers, safe env example.
     evidence: [config-tests, header-smoke, secret-scan]
+    checkpoint:
+      mode: shutdown
+      branch: feat/f0-02-runtime-config
+      latest_pushed_commit: db52c8343ede5b9f5189bb3772eef2f9ddc43ee4
+      integration_commit: d6d32b9
+      completed_scope:
+        - "Typed runtime config loader in src/lib/runtime/* with safe defaults."
+        - "Security headers in next.config.mjs with CSP corrected for committed marketing assets and Next runtime compatibility."
+        - "Secret scan CLI and tests."
+      remaining_scope:
+        - "Upgrade temporary script-src unsafe-inline to nonce/hash CSP pipeline in future security hardening."
+      changed_files: [.env.example, next.config.mjs, scripts/secret-scan.mjs, scripts/__tests__/secret-scan.test.ts, src/lib/runtime/env.ts, src/lib/runtime/index.ts, src/lib/runtime/__tests__/env.test.ts]
+      verification_executed: [lint_PASS_WARNINGS, typecheck_PASS, focused_runtime_tests_PASS_11, build_PASS, header_smoke_PASS, marketing_routes_rendered_no_CSP_console_errors, secret_scan_PASS]
+      verification_still_required: [full_repo_test_after_baseline_marketing_fix, full_repo_format_after_baseline_format_fix]
+      exact_next_action: "No immediate F0-02 action; revisit CSP nonce/hash after route/header pipeline exists."
 
   - id: F0-03
     repository: Frontend-Lembar
     sprint: F0
     title: Frontend CI and test foundation
-    status: BLOCKED
+    status: PARTIAL
     depends_on: [F0-01]
     decisions: []
     outcome: Unit, component, accessibility, Playwright, and CI gates are executable.
     evidence: [all-local-gates, CI-workflow-review]
+    checkpoint:
+      mode: shutdown
+      branch: feat/f0-03-ci-tests
+      latest_pushed_commit: 94c4791574e9e051ea3fe26431b41d2caeb65588
+      integrated_commit: 16fb498
+      completed_scope:
+        - "GitHub Actions CI workflow added."
+        - "Playwright config and smoke spec for 1280 and 390 routes added."
+        - "scripts/gates wrappers added."
+        - "Frontend quality doc updated with local equivalents."
+      remaining_scope:
+        - "Repair Playwright smoke selectors/expectations to match current accepted route markup without redesign."
+        - "Make repo-wide test and format gates green after baseline fixes."
+      changed_files: [.github/workflows/ci.yml, playwright.config.ts, scripts/gates, vitest.config.ts, tsconfig.json, docs/frontend/FRONTEND-QUALITY.md]
+      verification_executed: [install_PASS, typecheck_PASS, lint_PASS_WARNINGS, build_PASS, changed_file_prettier_PASS, repo_test_FAIL_BASELINE_MARKETING, repo_format_FAIL_BASELINE, playwright_smoke_FAIL_SELECTOR_MISMATCH]
+      verification_still_required: [all_local_gates_green, CI_workflow_review, playwright_smoke_green_desktop_mobile]
+      blockers:
+        - "app/__tests__/marketing.test.tsx expects .nav__wordmark that the accepted baseline routes do not render."
+        - "Repo-wide format:check fails across pre-existing files."
+      exact_next_action: "Resume F0-03 by aligning smoke spec/tests to accepted baseline and addressing repo-wide test/format blockers."
 
   - id: F0-04
     repository: Frontend-Lembar
     sprint: F0
     title: Design tokens and accessible primitives
-    status: BLOCKED
+    status: PARTIAL
     depends_on: [F0-01, F0-03]
     decisions: []
     outcome: BRAND and DESIGN-SYSTEM tokens plus core component states implemented.
     evidence: [storybook-or-fixtures, a11y, 390, visual-snapshots]
+    checkpoint:
+      mode: shutdown
+      branch: feat/f0-04-tokens
+      latest_pushed_commit: c6a2e1eb66a55108d5c0073eff36e871af32a907
+      integrated: false
+      completed_scope:
+        - "Tailwind/design token alignment and brand CSS vars checkpointed."
+        - "app/components/ui primitives added with focused tests/fixtures."
+      remaining_scope:
+        - "Review unmerged branch before integration."
+        - "Decide whether true axe-core dependency is required for a11y gate."
+        - "Run full integration gates after baseline test/format blockers are fixed."
+      changed_files: [tailwind.config.js, app/globals.css, app/components/ui, docs/frontend/DESIGN-SYSTEM.md]
+      verification_executed: [changed_file_prettier_PASS, typecheck_PASS, primitive_tests_PASS_10, build_PASS, lint_PASS_WARNINGS]
+      verification_still_required: [review_branch_diff, axe_or_equivalent_a11y_gate, visual_snapshots_390_review, full_repo_test_green, full_repo_format_green]
+      exact_next_action: "Resume by reviewing feat/f0-04-tokens@c6a2e1e, then merge only if it satisfies F0-04 acceptance or continue correction on same branch."
 
   - id: F0-05
     repository: Frontend-Lembar
@@ -117,31 +198,56 @@ tasks:
     repository: Frontend-Lembar
     sprint: F1
     title: Landing header, hero, and output specimen
-    status: BLOCKED
+    status: PARTIAL
     depends_on: [F0-04]
     decisions: []
     outcome: Honest output-first hero and responsive header from landing spec.
     evidence: [claim-audit, 390-768-1280, keyboard, screenshot]
+    checkpoint:
+      mode: shutdown
+      branch: feat/f1-shared-shell
+      latest_pushed_commit: f393913efa95e683ea18a868591342f16cff9cb8
+      integration_commit: 4c28203
+      completed_scope: ["Accepted visual baseline preserved; before/after screenshots captured for / at 1280 and 390."]
+      remaining_scope: ["Acceptance not final: shared navbar/footer adoption failed pixel parity; no route markup changed.", "Keyboard/claim audit still required after F0-04/F0-03 blockers clear."]
+      changed_files: [docs/frontend/screenshots/f1-shell]
+      verification_executed: [desktop_1280_screenshot, mobile_390_screenshot, parity_noop_evidence]
+      verification_still_required: [claim_audit, keyboard, final_390_768_1280_review]
+      exact_next_action: "Resume landing work by fixing baseline tests/reduced-motion first; do not redesign routes."
 
   - id: F1-02
     repository: Frontend-Lembar
     sprint: F1
     title: Landing workflow, trust, and product depth
-    status: BLOCKED
+    status: PARTIAL
     depends_on: [F1-01]
     decisions: []
     outcome: How-it-works, source trust, output, teacher/school, and reuse sections.
     evidence: [content-review, accessibility, no-fabricated-proof]
+    checkpoint:
+      mode: shutdown
+      branch: feat/f1-shared-shell
+      latest_pushed_commit: f393913efa95e683ea18a868591342f16cff9cb8
+      completed_scope: ["Accepted baseline content preserved and screenshot evidence captured."]
+      remaining_scope: ["Formal content-review/no-fabricated-proof pass still required.", "Accessibility/reduced-motion blockers remain in release-gate report."]
+      exact_next_action: "Resume by auditing current baseline content against LANDING-PAGE-SPEC without adding sections unless a failed criterion requires it."
 
   - id: F1-03
     repository: Frontend-Lembar
     sprint: F1
     title: Packaging, FAQ, footer, and school landing shell
-    status: BLOCKED
+    status: PARTIAL
     depends_on: [F1-02]
     decisions: []
     outcome: Pricing-unresolved-safe pages and school value proposition.
     evidence: [D-009-guard-test, route-metadata, responsive]
+    checkpoint:
+      mode: shutdown
+      branch: feat/f1-05-release-gate
+      latest_pushed_commit: 3f26fee78bcf25a10be73d405def4de5ba248f8a
+      completed_scope: ["Per-route metadata added for /, /harga, /untuk-sekolah via page/layout files.", "Robots/sitemap/OG image artifacts added in release gate branch."]
+      remaining_scope: ["Pricing page still contains approved baseline price copy; D-009 guard test still required.", "Responsive/reduced-motion gates failing per release-gate report."]
+      exact_next_action: "Resume by deciding whether price copy is owner-approved baseline or needs D-009-safe fallback, then fix route metadata/reduced-motion blockers."
 
   - id: F1-04
     repository: Frontend-Lembar
@@ -157,11 +263,29 @@ tasks:
     repository: Frontend-Lembar
     sprint: F1
     title: Landing release quality gate
-    status: BLOCKED
+    status: PARTIAL
     depends_on: [F1-01, F1-02, F1-03]
     decisions: []
     outcome: SEO, performance, accessibility, analytics, and visual release evidence.
     evidence: [lighthouse-or-equivalent, axe, playwright, metadata, event-audit]
+    checkpoint:
+      mode: shutdown
+      branch: feat/f1-05-release-gate
+      latest_pushed_commit: 3f26fee78bcf25a10be73d405def4de5ba248f8a
+      integrated_commit: e674232
+      completed_scope:
+        - "robots.ts, sitemap.ts, OG image, per-route metadata, and scripts/release-gate.mjs added."
+        - "Release gate report generated and committed on integration."
+      remaining_scope:
+        - "Fix baseline marketing unit tests."
+        - "Fix repo-wide formatting."
+        - "Fix reduced-motion failures: / has 1 running animation, /untuk-sekolah has 1, /harga has 2."
+        - "Fix console guard failures recorded in latest release-gate report."
+        - "Complete analytics/event audit and Lighthouse-equivalent evidence."
+      changed_files: [app/(marketing)/page.tsx, app/(marketing)/harga/page.tsx, app/(marketing)/untuk-sekolah/layout.tsx, app/robots.ts, app/sitemap.ts, public/og-image.svg, scripts/release-gate.mjs, docs/frontend/release-gate-report.md]
+      verification_executed: [typecheck_PASS, lint_PASS_WARNINGS, test_FAIL_BASELINE_MARKETING, build_PASS, format_FAIL_BASELINE, axe_PASS_ALL_THREE_ROUTES, reduced_motion_FAIL, console_guard_FAIL]
+      verification_still_required: [release_gate_all_green, lighthouse_or_equivalent, event_audit, screenshots_final]
+      exact_next_action: "Resume by addressing release-gate-report.md failures, then rerun node scripts/release-gate.mjs and commit updated evidence."
 
   - id: F1-06
     repository: Frontend-Lembar
