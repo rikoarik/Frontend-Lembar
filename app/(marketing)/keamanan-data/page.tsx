@@ -1,6 +1,9 @@
+import SubPageNavbar from '@/app/components/marketing/SubPageNavbar';
+
 export default function KeamananDataPage() {
   return (
     <>
+      <SubPageNavbar />
       <main>
         <section className="py-unit-16 px-margin-mobile md:px-margin-desktop bg-paper">
           <div className="max-w-container-max mx-auto">

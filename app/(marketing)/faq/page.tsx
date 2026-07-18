@@ -1,3 +1,5 @@
+import SubPageNavbar from '@/app/components/marketing/SubPageNavbar';
+
 export default function FAQPage() {
   const faqs = [
     { q: 'Apa itu lembar?', a: 'lembar adalah platform pembuatan asesmen berbasis AI yang dirancang khusus untuk guru dan institusi pendidikan di Indonesia. Dengan lembar, guru dapat membuat, mengelola, dan mengekspor soal ujian secara cepat dan efisien.' },
@@ -10,6 +12,7 @@ export default function FAQPage() {
 
   return (
     <>
+      <SubPageNavbar />
       <main>
         <section className="py-unit-16 px-margin-mobile md:px-margin-desktop bg-paper">
           <div className="max-w-container-max mx-auto">
