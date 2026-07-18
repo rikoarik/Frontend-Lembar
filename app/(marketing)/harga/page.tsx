@@ -1,4 +1,36 @@
 import Link from 'next/link';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://lembar.id'),
+  title: 'Harga lembar — paket untuk guru dan sekolah',
+  description:
+    'Paket Coba Gratis, Guru Pro, dan Sekolah & Institusi. Bandingkan hak pakai, kuota generasi soal, dan fitur kolaborasi untuk guru serta tim sekolah.',
+  alternates: {
+    canonical: '/harga',
+  },
+  openGraph: {
+    title: 'Harga lembar — paket untuk guru dan sekolah',
+    description:
+      'Bandingkan paket Coba Gratis, Guru Pro, dan Sekolah & Institusi. Tidak ada biaya tersembunyi.',
+    url: '/harga',
+    siteName: 'lembar',
+    locale: 'id_ID',
+    type: 'website',
+    images: ['/og-image.svg'],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Harga lembar — paket untuk guru dan sekolah',
+    description: 'Coba Gratis, Guru Pro, dan Sekolah & Institusi.',
+    images: ['/og-image.svg'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+};
+
 
 export default function HargaPage() {
   return (
