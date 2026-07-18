@@ -1,25 +1,27 @@
+import Link from 'next/link';
+
 export default function LandingPage() {
   return (
     <>
       <header className="bg-background dark:bg-background font-body-default text-body-default w-full sticky top-0 z-50 border-b border-border-subtle dark:border-outline-variant transition-colors duration-200">
         <div className="flex justify-between items-center h-unit-16 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
-          <div className="flex items-center gap-4">
+          <Link href="/" className="flex items-center gap-4" aria-label="lembar — beranda">
             <div className="flex items-center h-unit-8 w-unit-8">
-              <img alt="lembar logo" className="h-full w-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAp9K9UpBGq9yeOy6I3PxGbePnCwa9H_U_j13dh3aLeDE7Xpey3plk3vcS9Qm8hePmA36hgFgFfqWaBE7DynvVBU8-VkN_84GcCwNalagl0xQUsI3GKLwX68vtO6wsj4EvslKJ-3n56fnKadcVUAqkIbbxmdeREsfROoHsp6ZJd0-vRRdU6adFbLVPTzh7F3x0BZtxH4aiwxdXGaNXGw5ysRu6VhS0JZ_ZhU1BVqmeFqlb-8GFKPXzzQZVuRC-vsTSmCY6Agq3p5A" />
+              <img alt="" className="h-full w-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAp9K9UpBGq9yeOy6I3PxGbePnCwa9H_U_j13dh3aLeDE7Xpey3plk3vcS9Qm8hePmA36hgFgFfqWaBE7DynvVBU8-VkN_84GcCwNalagl0xQUsI3GKLwX68vtO6wsj4EvslKJ-3n56fnKadcVUAqkIbbxmdeREsfROoHsp6ZJd0-vRRdU6adFbLVPTzh7F3x0BZtxH4aiwxdXGaNXGw5ysRu6VhS0JZ_ZhU1BVqmeFqlb-8GFKPXzzQZVuRC-vsTSmCY6Agq3p5A" />
             </div>
-          </div>
-          <nav className="hidden md:flex items-center gap-8">
-            <a className="font-body-default hover:text-burgundy transition-colors duration-200 text-burgundy font-bold active-nav-indicator border-b-2 border-burgundy pb-1" href="#">Produk</a>
-            <a className="text-secondary font-body-default hover:text-burgundy transition-colors duration-200" href="/untuk-sekolah">Untuk Sekolah</a>
-            <a className="font-body-default text-secondary hover:text-burgundy transition-colors duration-200" href="/harga">Harga</a>
+          </Link>
+          <nav className="hidden md:flex items-center gap-8" aria-label="Navigasi utama">
+            <Link className="font-body-default hover:text-burgundy transition-colors duration-200 text-burgundy font-bold active-nav-indicator border-b-2 border-burgundy pb-1" href="/">Produk</Link>
+            <Link className="text-secondary font-body-default hover:text-burgundy transition-colors duration-200" href="/untuk-sekolah">Untuk Sekolah</Link>
+            <Link className="font-body-default text-secondary hover:text-burgundy transition-colors duration-200" href="/harga">Harga</Link>
           </nav>
           <div className="flex items-center gap-4">
-            <button className="text-secondary font-label-semibold px-unit-4 py-unit-2 hover:text-burgundy transition-colors">Masuk</button>
-            <button className="bg-burgundy text-on-primary font-label-semibold h-[44px] px-unit-6 rounded-lg hover:brightness-110 transition-all">Coba Gratis</button>
+            <Link className="text-secondary font-label-semibold px-unit-4 py-unit-2 hover:text-burgundy transition-colors" href="/masuk">Masuk</Link>
+            <Link className="bg-burgundy text-on-primary font-label-semibold h-[44px] px-unit-6 rounded-lg hover:brightness-110 transition-all flex items-center" href="/daftar">Coba Gratis</Link>
           </div>
         </div>
       </header>
-      
+
       <main className="flex-grow">
         <section className="py-24 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto overflow-hidden">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-center">
@@ -32,25 +34,25 @@ export default function LandingPage() {
                 Susun draft soal dari Buku Siswa atau PDF Anda, periksa sumbernya, lalu cetak, download, atau bagikan.
               </p>
               <div className="flex flex-wrap gap-4 mt-4">
-                <a className="font-label-semibold text-label-semibold bg-burgundy text-white px-6 py-3 rounded h-[44px] flex items-center justify-center transition-colors hover:bg-primary shadow-sm" href="#">Buat lembar gratis</a>
-                <a className="font-label-semibold text-label-semibold text-ink border border-ink px-6 py-3 rounded h-[44px] flex items-center justify-center transition-colors hover:bg-surface-container-highest" href="#">Lihat contoh hasil</a>
+                <Link className="font-label-semibold text-label-semibold bg-burgundy text-white px-6 py-3 rounded h-[44px] flex items-center justify-center transition-colors hover:bg-primary shadow-sm" href="/daftar">Buat lembar gratis</Link>
+                <a className="font-label-semibold text-label-semibold text-ink border border-ink px-6 py-3 rounded h-[44px] flex items-center justify-center transition-colors hover:bg-surface-container-highest" href="#contoh-hasil">Lihat contoh hasil</a>
               </div>
             </div>
-            
-            <div className="lg:col-span-7 relative mt-12 lg:mt-0 flex justify-center lg:justify-end">
+
+            <div className="lg:col-span-7 relative mt-12 lg:mt-0 flex justify-center lg:justify-end" id="contoh-hasil">
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-surface-container rounded-full blur-3xl opacity-50 z-0"></div>
-              
+
               <div className="bg-surface border border-border-subtle p-8 md:p-12 shadow-[0_4px_24px_rgba(0,0,0,0.06)] rounded-DEFAULT w-full max-w-lg relative z-10 rotate-1 hover:rotate-0 transition-transform duration-500 ease-out origin-bottom-right">
                 <div className="absolute -top-4 -right-4 bg-surface border border-border-strong px-3 py-1.5 rounded-full shadow-sm flex items-center gap-2">
                   <span className="material-symbols-outlined text-[16px] text-green-600" data-icon="check_circle">check_circle</span>
                   <span className="font-caption text-caption text-ink">20 soal, Sumber terlihat, Siap cetak</span>
                 </div>
-                
+
                 <div className="border-b border-border-subtle pb-6 mb-6">
                   <h3 className="font-h3 text-h3 text-ink mb-2">Penilaian Akhir Semester</h3>
                   <p className="font-caption text-caption text-secondary">Bahasa Indonesia - Kelas 6</p>
                 </div>
-                
+
                 <div className="space-y-6">
                   <div className="flex gap-4">
                     <span className="font-label-semibold text-label-semibold text-ink">1.</span>
@@ -65,7 +67,7 @@ export default function LandingPage() {
                         <div className="flex gap-2 items-start"><span className="font-label-semibold text-ink">C.</span><span className="font-body-sm text-ink">Budi belajar membaca sejak sekolah dasar.</span></div>
                         <div className="flex gap-2 items-start"><span className="font-label-semibold text-ink">D.</span><span className="font-body-sm text-ink">Berita pagi penting untuk perkembangan dunia.</span></div>
                       </div>
-                      
+
                       <div className="mt-3 inline-flex items-center gap-1 bg-surface-container-low px-2 py-1 rounded-DEFAULT border border-border-subtle">
                         <span className="material-symbols-outlined text-[12px] text-secondary" data-icon="menu_book">menu_book</span>
                         <span className="font-caption text-caption text-secondary">Buku Siswa Hal 45</span>
@@ -73,13 +75,13 @@ export default function LandingPage() {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-surface to-transparent rounded-b-DEFAULT"></div>
               </div>
             </div>
           </div>
         </section>
-        
+
         <section className="border-y border-border-subtle bg-surface-bright py-8">
           <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
             <div className="flex flex-col md:flex-row items-center justify-between gap-8">
@@ -88,13 +90,13 @@ export default function LandingPage() {
                 <span className="font-body-default text-ink font-medium">Pilih materi</span>
               </div>
               <div className="hidden md:block flex-1 h-[1px] bg-border-subtle"></div>
-              
+
               <div className="flex items-center gap-4 flex-1">
                 <div className="w-10 h-10 rounded-full border border-border-strong flex items-center justify-center font-label-semibold text-secondary shrink-0">02</div>
                 <span className="font-body-default text-ink font-medium">Tinjau draft</span>
               </div>
               <div className="hidden md:block flex-1 h-[1px] bg-border-subtle"></div>
-              
+
               <div className="flex items-center gap-4 flex-1">
                 <div className="w-10 h-10 rounded-full border border-border-strong flex items-center justify-center font-label-semibold text-secondary shrink-0">03</div>
                 <span className="font-body-default text-ink font-medium">Gunakan hasil</span>
@@ -102,7 +104,7 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
-        
+
         <section className="py-32 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto space-y-32">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-gutter items-center">
             <div className="md:col-span-5 flex flex-col gap-4">
@@ -113,12 +115,12 @@ export default function LandingPage() {
               <div className="flex flex-col gap-4">
                 <div className="flex items-center justify-between border-b border-border-subtle pb-4">
                   <span className="font-label-semibold text-ink">Sumber Materi</span>
-                  <button className="text-burgundy font-label-semibold flex items-center gap-1">
+                  <span className="text-burgundy font-label-semibold flex items-center gap-1">
                     <span className="material-symbols-outlined text-[16px]" data-icon="add">add</span> Tambah
-                  </button>
+                  </span>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="border border-border-strong p-4 rounded bg-surface-container-low flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-surface-container transition-colors">
+                  <div className="border border-border-strong p-4 rounded bg-surface-container-low flex flex-col items-center justify-center gap-2">
                     <span className="material-symbols-outlined text-[24px] text-secondary" data-icon="upload_file">upload_file</span>
                     <span className="font-caption text-secondary">Unggah PDF</span>
                   </div>
@@ -132,7 +134,7 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-12 gap-gutter items-center">
             <div className="md:col-span-7 order-2 md:order-1">
               <div className="bg-surface border border-border-subtle rounded-lg shadow-sm overflow-hidden">
@@ -151,19 +153,19 @@ export default function LandingPage() {
                       <div className="flex gap-2">
                         <span className="inline-flex items-center px-2 py-1 rounded text-[10px] font-semibold bg-surface-container text-secondary">C3 - Aplikasi</span>
                       </div>
-                      <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
-                        <button className="text-secondary hover:text-ink"><span className="material-symbols-outlined text-[16px]" data-icon="edit">edit</span></button>
-                        <button className="text-secondary hover:text-ink"><span className="material-symbols-outlined text-[16px]" data-icon="delete">delete</span></button>
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-2" aria-hidden="true">
+                        <span className="text-secondary"><span className="material-symbols-outlined text-[16px]" data-icon="edit">edit</span></span>
+                        <span className="text-secondary"><span className="material-symbols-outlined text-[16px]" data-icon="delete">delete</span></span>
                       </div>
                     </div>
                     <p className="font-body-default text-ink mb-3">Apa kesimpulan utama dari teks bacaan pada halaman 45?</p>
                     <div className="space-y-1">
                       <div className="flex items-center gap-2 bg-green-50/50 p-1 rounded border border-green-200">
-                        <span className="material-symbols-outlined text-[14px] text-green-600" data-icon="check">check</span> 
+                        <span className="material-symbols-outlined text-[14px] text-green-600" data-icon="check">check</span>
                         <span className="font-body-sm text-ink">A. Pahlawan nasional berjuang tanpa pamrih. (Kunci)</span>
                       </div>
                       <div className="flex items-center gap-2 p-1">
-                        <span className="w-[14px]"></span> 
+                        <span className="w-[14px]"></span>
                         <span className="font-body-sm text-secondary">B. Sejarah kemerdekaan sangat panjang.</span>
                       </div>
                     </div>
@@ -176,7 +178,7 @@ export default function LandingPage() {
               <p className="font-body-lead text-body-lead text-secondary">Guru tetap memegang kendali. Periksa tingkat kognitif, sesuaikan kunci jawaban, dan pastikan setiap butir soal selaras dengan standar kurikulum Anda.</p>
             </div>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-12 gap-gutter items-center">
             <div className="md:col-span-5 flex flex-col gap-4">
               <h2 className="font-h1 text-h1 text-ink">Gunakan sesuai kebutuhan.</h2>
@@ -184,15 +186,15 @@ export default function LandingPage() {
             </div>
             <div className="md:col-span-7">
               <div className="bg-surface-container p-8 rounded-lg flex gap-4 justify-center">
-                <div className="bg-surface p-4 rounded border border-border-subtle shadow-sm flex flex-col items-center gap-2 w-32 hover:-translate-y-1 transition-transform cursor-pointer">
+                <div className="bg-surface p-4 rounded border border-border-subtle shadow-sm flex flex-col items-center gap-2 w-32">
                   <span className="material-symbols-outlined text-[32px] text-ink" data-icon="print">print</span>
                   <span className="font-label-semibold text-ink">Cetak</span>
                 </div>
-                <div className="bg-surface p-4 rounded border border-border-subtle shadow-sm flex flex-col items-center gap-2 w-32 hover:-translate-y-1 transition-transform cursor-pointer">
+                <div className="bg-surface p-4 rounded border border-border-subtle shadow-sm flex flex-col items-center gap-2 w-32">
                   <span className="material-symbols-outlined text-[32px] text-ink" data-icon="picture_as_pdf">picture_as_pdf</span>
                   <span className="font-label-semibold text-ink">PDF</span>
                 </div>
-                <div className="bg-surface p-4 rounded border border-border-subtle shadow-sm flex flex-col items-center gap-2 w-32 hover:-translate-y-1 transition-transform cursor-pointer">
+                <div className="bg-surface p-4 rounded border border-border-subtle shadow-sm flex flex-col items-center gap-2 w-32">
                   <span className="material-symbols-outlined text-[32px] text-ink" data-icon="link">link</span>
                   <span className="font-label-semibold text-ink">Tautan</span>
                 </div>
@@ -200,11 +202,11 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
-        
+
         <section className="bg-ink text-white py-24 px-margin-mobile md:px-margin-desktop">
           <div className="max-w-container-max mx-auto flex flex-col items-center text-center gap-12">
             <h2 className="font-h1 text-h1 max-w-2xl">AI menyusun draft. Guru melihat alasannya.</h2>
-            
+
             <div className="bg-surface rounded-lg p-6 md:p-8 max-w-3xl w-full text-left shadow-2xl relative">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-burgundy to-transparent opacity-50"></div>
               <div className="flex justify-between items-start border-b border-border-subtle pb-4 mb-4">
@@ -218,7 +220,7 @@ export default function LandingPage() {
                   <p className="font-label-semibold text-secondary mb-2 uppercase text-[10px] tracking-wider">Opsi Jawaban</p>
                   <div className="space-y-2">
                     <div className="p-2 border border-green-200 bg-green-50 rounded flex items-center justify-between">
-                      <span className="font-body-sm text-ink">A. Tidak adanya akar pohon penahan air.</span> 
+                      <span className="font-body-sm text-ink">A. Tidak adanya akar pohon penahan air.</span>
                       <span className="material-symbols-outlined text-[16px] text-green-600" data-icon="check_circle">check_circle</span>
                     </div>
                     <div className="p-2 border border-border-subtle rounded"><span className="font-body-sm text-secondary">B. Curah hujan yang rendah.</span></div>
@@ -230,7 +232,7 @@ export default function LandingPage() {
                     <p className="font-label-semibold text-ink flex items-center gap-1">
                       <span className="material-symbols-outlined text-[16px]" data-icon="find_in_page">find_in_page</span> Sumber Kutipan
                     </p>
-                    <button className="text-burgundy font-caption hover:underline">Lihat Dokumen</button>
+                    <span className="text-burgundy font-caption">Dokumen sumber</span>
                   </div>
                   <p className="font-body-sm text-secondary italic border-l-2 border-border-strong pl-3 py-1">&quot;...erosi paling sering terjadi pada lereng yang telah ditebang habis. Tanpa adanya sistem perakaran pohon yang kuat untuk mengikat tanah dan menyerap air hujan, lapisan atas tanah sangat mudah terbawa arus air...&quot;</p>
                   <p className="font-caption text-secondary mt-2 text-right">- IPA Kelas 6, Hal 72</p>
@@ -239,12 +241,12 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
-        
+
         <section className="py-32 px-margin-mobile md:px-margin-desktop text-center bg-paper">
           <div className="max-w-2xl mx-auto flex flex-col items-center gap-6">
             <h2 className="font-display-xl-mobile md:font-display-xl text-ink">Mulai dari satu lembar.</h2>
-            <p className="font-body-lead text-secondary mb-4">Bergabung dengan pendidik yang bekerja lebih cermat.</p>
-            <a className="font-label-semibold text-label-semibold bg-burgundy text-white px-8 py-4 rounded h-[56px] flex items-center justify-center transition-colors hover:bg-primary shadow-sm text-[16px]" href="#">Buat lembar gratis</a>
+            <p className="font-body-lead text-secondary mb-4">Buat ruang kerja pribadi Anda dan mulai menyusun draft pertama.</p>
+            <Link className="font-label-semibold text-label-semibold bg-burgundy text-white px-8 py-4 rounded h-[56px] flex items-center justify-center transition-colors hover:bg-primary shadow-sm text-[16px]" href="/daftar">Buat lembar gratis</Link>
           </div>
         </section>
       </main>

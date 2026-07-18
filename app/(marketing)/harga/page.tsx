@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export default function HargaPage() {
   return (
     <>
@@ -12,8 +14,8 @@ export default function HargaPage() {
             <a className="text-burgundy font-bold font-body-default active-nav-indicator border-b-2 border-burgundy pb-1" href="/harga">Harga</a>
           </div>
           <div className="flex items-center gap-unit-4">
-            <button className="text-secondary font-label-semibold px-unit-4 py-unit-2 hover:text-burgundy transition-colors">Masuk</button>
-            <button className="bg-burgundy text-on-primary font-label-semibold h-[44px] px-unit-6 rounded-lg hover:brightness-110 transition-all">Coba Gratis</button>
+            <Link className="text-secondary font-label-semibold px-unit-4 py-unit-2 hover:text-burgundy transition-colors" href="/masuk">Masuk</Link>
+            <Link className="bg-burgundy text-on-primary font-label-semibold h-[44px] px-unit-6 rounded-lg hover:brightness-110 transition-all flex items-center" href="/daftar">Coba Gratis</Link>
           </div>
         </div>
       </nav>
@@ -47,7 +49,7 @@ export default function HargaPage() {
                 <div className="flex items-start gap-unit-3"><span className="material-symbols-outlined text-burgundy" style={{ fontVariationSettings: "'wght' 600" }}>check_circle</span><span className="text-body-default text-ink">Batas ekspor terbatas</span></div>
                 <div className="flex items-start gap-unit-3"><span className="material-symbols-outlined text-burgundy" style={{ fontVariationSettings: "'wght' 600" }}>check_circle</span><span className="text-body-default text-ink">Tanpa kartu kredit</span></div>
               </div>
-              <button className="w-full border-2 border-burgundy text-burgundy font-label-semibold h-[44px] rounded-lg group-hover:bg-burgundy group-hover:text-white active:scale-95 transition-all duration-300">Mulai Gratis</button>
+              <Link className="w-full border-2 border-burgundy text-burgundy font-label-semibold h-[44px] rounded-lg group-hover:bg-burgundy group-hover:text-white active:scale-95 transition-all duration-300 flex items-center justify-center" href="/daftar">Mulai Gratis</Link>
             </div>
 
             <div className="bento-card bg-paper border-2 border-burgundy/50 rounded-xl p-unit-6 flex flex-col relative overflow-hidden page-shadow hover:-translate-y-3 hover:shadow-2xl hover:shadow-burgundy/20 hover:border-burgundy transition-all duration-300 group cursor-pointer z-10">
@@ -86,7 +88,7 @@ export default function HargaPage() {
                   <span className="text-body-default text-ink">Ekspor DOCX &amp; PDF</span>
                 </div>
               </div>
-              <button className="w-full bg-burgundy text-on-primary font-label-semibold h-[44px] rounded-lg group-hover:brightness-110 group-hover:shadow-lg group-hover:shadow-burgundy/40 active:scale-95 transition-all duration-300">Langganan Sekarang</button>
+              <Link className="w-full bg-burgundy text-on-primary font-label-semibold h-[44px] rounded-lg group-hover:brightness-110 group-hover:shadow-lg group-hover:shadow-burgundy/40 active:scale-95 transition-all duration-300 flex items-center justify-center" href="/daftar">Langganan Sekarang</Link>
             </div>
 
             <div className="bento-card bg-surface border border-border-strong rounded-xl p-unit-6 flex flex-col page-shadow hover:-translate-y-2 hover:shadow-xl transition-all duration-300 group cursor-pointer">
@@ -105,7 +107,7 @@ export default function HargaPage() {
                 <div className="flex items-start gap-unit-3"><span className="material-symbols-outlined text-burgundy" style={{ fontVariationSettings: "'wght' 600" }}>check_circle</span><span className="text-body-default text-ink">Onboarding &amp; support khusus</span></div>
                 <div className="flex items-start gap-unit-3"><span className="material-symbols-outlined text-burgundy" style={{ fontVariationSettings: "'wght' 600" }}>check_circle</span><span className="text-body-default text-ink">Branding sekolah pada output</span></div>
               </div>
-              <button className="w-full border-2 border-burgundy text-burgundy font-label-semibold h-[44px] rounded-lg group-hover:bg-burgundy group-hover:text-white active:scale-95 transition-all duration-300">Daftar Pilot</button>
+              <Link className="w-full border-2 border-burgundy text-burgundy font-label-semibold h-[44px] rounded-lg group-hover:bg-burgundy group-hover:text-white active:scale-95 transition-all duration-300 flex items-center justify-center" href="/kontak">Daftar Pilot</Link>
             </div>
           </div>
 
@@ -126,10 +128,10 @@ export default function HargaPage() {
                 <p className="text-body-default text-secondary mb-unit-6">
                   Informasi lebih detail mengenai bagaimana kami mengelola kuota dan pembayaran Anda.
                 </p>
-                <a className="text-burgundy font-label-semibold flex items-center gap-unit-1 group" href="#">
+                <Link className="text-burgundy font-label-semibold flex items-center gap-unit-1 group" href="/bantuan">
                   Pusat Bantuan Lengkap
                   <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform text-burgundy">check_circle</span>
-                </a>
+                </Link>
               </div>
               <div className="md:col-span-2 space-y-unit-6">
                 <div className="p-unit-6 border border-border-subtle rounded-lg bg-surface">
@@ -157,8 +159,8 @@ export default function HargaPage() {
             </div>
             <h2 className="font-h1 text-h1 text-white mb-unit-6 relative z-10">Siap untuk mulai merancang asesmen lebih baik?</h2>
             <div className="flex flex-col md:flex-row items-center justify-center gap-unit-4 relative z-10">
-              <button className="bg-burgundy text-white px-unit-12 h-[52px] rounded-lg font-label-semibold text-body-lead hover:brightness-110 transition-all">Daftar Sekarang</button>
-              <button className="border border-surface-variant text-white px-unit-12 h-[52px] rounded-lg font-label-semibold text-body-lead hover:bg-white/10 transition-all">Jadwalkan Demo</button>
+              <Link className="bg-burgundy text-white px-unit-12 h-[52px] rounded-lg font-label-semibold text-body-lead hover:brightness-110 transition-all flex items-center" href="/daftar">Daftar Sekarang</Link>
+              <Link className="border border-surface-variant text-white px-unit-12 h-[52px] rounded-lg font-label-semibold text-body-lead hover:bg-white/10 transition-all flex items-center" href="/kontak">Jadwalkan Demo</Link>
             </div>
           </div>
         </section>

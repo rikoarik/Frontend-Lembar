@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 export default function UntukSekolahPage() {
   return (
     <>
@@ -14,8 +16,8 @@ export default function UntukSekolahPage() {
             <a className="text-secondary hover:text-burgundy transition-colors duration-200" href="/harga">Harga</a>
           </div>
           <div className="flex items-center gap-unit-4">
-            <button className="text-ink font-label-semibold px-unit-4 py-unit-2 hover:opacity-80 transition-opacity">Masuk</button>
-            <button className="bg-burgundy text-on-primary px-unit-6 py-unit-3 rounded font-label-semibold hover:opacity-90 transition-opacity">Coba Gratis</button>
+            <Link className="text-ink font-label-semibold px-unit-4 py-unit-2 hover:opacity-80 transition-opacity" href="/masuk">Masuk</Link>
+            <Link className="bg-burgundy text-on-primary px-unit-6 py-unit-3 rounded font-label-semibold hover:opacity-90 transition-opacity" href="/daftar">Coba Gratis</Link>
           </div>
         </div>
       </nav>
@@ -29,7 +31,7 @@ export default function UntukSekolahPage() {
                 Sentralisasi pembuatan soal, manajemen akun guru, dan berbagi kuota AI dalam satu dasbor yang aman. Memastikan kualitas standar asesmen di seluruh departemen.
               </p>
               <div className="flex flex-wrap gap-unit-4">
-                <button className="bg-burgundy text-on-primary px-unit-8 py-unit-4 rounded font-label-semibold text-body-default shadow-sm hover:opacity-90 transition-all">Diskusikan kebutuhan sekolah</button>
+                <Link className="bg-burgundy text-on-primary px-unit-8 py-unit-4 rounded font-label-semibold text-body-default shadow-sm hover:opacity-90 transition-all" href="/kontak">Diskusikan kebutuhan sekolah</Link>
               </div>
             </div>
             <div className="lg:col-span-6 relative">
@@ -272,9 +274,9 @@ export default function UntukSekolahPage() {
               <h2 className="font-h2 text-h2 text-ink mb-unit-2">Siap untuk digitalisasi asesmen sekolah?</h2>
               <p className="text-secondary text-body-default">Bergabunglah dengan puluhan institusi yang telah meningkatkan efisiensi guru hingga 70%.</p>
             </div>
-            <button className="bg-burgundy text-on-primary px-unit-12 py-unit-4 rounded font-label-semibold text-body-lead hover:shadow-lg transition-all transform active:scale-95 whitespace-nowrap">
+            <Link className="bg-burgundy text-on-primary px-unit-12 py-unit-4 rounded font-label-semibold text-body-lead hover:shadow-lg transition-all transform active:scale-95 whitespace-nowrap" href="/kontak">
               Diskusikan kebutuhan sekolah
-            </button>
+            </Link>
           </div>
         </section>
       </main>
