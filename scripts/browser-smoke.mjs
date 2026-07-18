@@ -144,6 +144,7 @@ async function smokeViewport(viewport) {
             innerWidth: window.innerWidth,
             clientWidth: html.clientWidth,
             scrollWidth: Math.max(html.scrollWidth, body.scrollWidth),
+            iconsaxSvgs: document.querySelectorAll('.icon-accent svg').length,
           };
         })()`,
         returnByValue: true,
@@ -170,6 +171,11 @@ async function smokeViewport(viewport) {
       if (overflow) {
         throw new Error(
           `${viewport.name}: horizontal overflow ${result.scrollWidth}px > ${result.innerWidth}px`,
+        );
+      }
+      if (result.iconsaxSvgs < 9) {
+        throw new Error(
+          `${viewport.name}: expected at least 9 iconsax icons in .icon-accent, got ${result.iconsaxSvgs}`,
         );
       }
     } finally {

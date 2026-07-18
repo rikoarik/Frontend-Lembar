@@ -1,24 +1,39 @@
+import {
+  Book1,
+  Buildings2,
+  DocumentText,
+  Edit2,
+  Export,
+  ShieldTick,
+  Teacher,
+  TickCircle,
+  Verify,
+} from 'iconsax-react';
 import Link from 'next/link';
 import Reveal from './components/Reveal';
 
 const workflow = [
   {
     no: '01',
+    icon: DocumentText,
     title: 'Generate Lembar',
     body: 'Pilih materi, kelas, dan jenis lembar. Sistem menyiapkan draf terstruktur dengan kisi-kisi dan tingkat kesulitan.',
   },
   {
     no: '02',
+    icon: Edit2,
     title: 'Review & Koreksi',
     body: 'Setiap soal dapat Anda terima, sunting, atau minta ulang drafnya. Sumber tetap terlihat di samping soal.',
   },
   {
     no: '03',
+    icon: Export,
     title: 'Export PDF, Cetak, atau Tautan',
     body: 'Hasil akhir dicetak langsung atau diunduh sebagai PDF A4. Buat tautan terbatas untuk dibagikan.',
   },
   {
     no: '04',
+    icon: Book1,
     title: 'Bank Soal',
     body: 'Simpan soal tepercaya Anda sebagai arsip pribadi. Versi, sumber, dan revisi rapi untuk lintas tahun ajaran.',
   },
@@ -201,15 +216,23 @@ export default function Home() {
           </Reveal>
 
           <div className="workflow__grid">
-            {workflow.map((step, i) => (
-              <Reveal key={step.no} delay={0.04 * i}>
-                <article className="step">
-                  <span className="step__no">{step.no}</span>
-                  <h3 className="step__title">{step.title}</h3>
-                  <p className="step__body">{step.body}</p>
-                </article>
-              </Reveal>
-            ))}
+            {workflow.map((step, i) => {
+              const Icon = step.icon;
+              return (
+                <Reveal key={step.no} delay={0.04 * i}>
+                  <article className="step">
+                    <div className="step__top">
+                      <span className="icon-accent" aria-hidden="true">
+                        <Icon size={22} variant="Linear" />
+                      </span>
+                      <span className="step__no">{step.no}</span>
+                    </div>
+                    <h3 className="step__title">{step.title}</h3>
+                    <p className="step__body">{step.body}</p>
+                  </article>
+                </Reveal>
+              );
+            })}
           </div>
         </section>
 
@@ -226,6 +249,9 @@ export default function Home() {
           <div className="audience__grid">
             <Reveal>
               <article id="untuk-sekolah" className="audience__card">
+                <span className="icon-accent icon-accent--lg" aria-hidden="true">
+                  <Buildings2 size={24} variant="Linear" />
+                </span>
                 <p className="audience__eyebrow">Untuk Sekolah</p>
                 <h3 className="audience__title">
                   Dasbor admin, bank soal internal, dan kursi yang terlihat.
@@ -242,6 +268,9 @@ export default function Home() {
             </Reveal>
             <Reveal delay={0.06}>
               <article className="audience__card">
+                <span className="icon-accent icon-accent--lg" aria-hidden="true">
+                  <Teacher size={24} variant="Linear" />
+                </span>
                 <p className="audience__eyebrow">Untuk Guru Individual</p>
                 <h3 className="audience__title">
                   Mulai dari satu kelas, kelola semuanya tanpa ribet.
@@ -271,6 +300,9 @@ export default function Home() {
           <div className="trust__grid">
             <Reveal>
               <article className="trust__card">
+                <span className="icon-accent" aria-hidden="true">
+                  <Verify size={22} variant="Linear" />
+                </span>
                 <span className="trust__no">01</span>
                 <h3 className="trust__title">Selaras Kurikulum Merdeka</h3>
                 <p className="trust__body">
@@ -280,6 +312,9 @@ export default function Home() {
             </Reveal>
             <Reveal delay={0.05}>
               <article className="trust__card">
+                <span className="icon-accent" aria-hidden="true">
+                  <ShieldTick size={22} variant="Linear" />
+                </span>
                 <span className="trust__no">02</span>
                 <h3 className="trust__title">Sumber terlihat, bukan disembunyikan</h3>
                 <p className="trust__body">
@@ -289,6 +324,9 @@ export default function Home() {
             </Reveal>
             <Reveal delay={0.1}>
               <article className="trust__card">
+                <span className="icon-accent" aria-hidden="true">
+                  <TickCircle size={22} variant="Linear" />
+                </span>
                 <span className="trust__no">03</span>
                 <h3 className="trust__title">Tinjauan guru sebelum final</h3>
                 <p className="trust__body">
