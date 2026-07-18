@@ -1,15 +1,33 @@
 import { spawn } from 'node:child_process';
 import { mkdtempSync, rmSync } from 'node:fs';
+import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
 const chrome = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
-const appPort = 3100;
-const appUrl = `http://127.0.0.1:${appPort}/`;
 const viewports = [
-  { name: 'desktop', width: 1280, height: 800, debugPort: 9322 },
-  { name: 'mobile', width: 390, height: 844, debugPort: 9323 },
+  { name: 'desktop', width: 1280, height: 800 },
+  { name: 'mobile', width: 390, height: 844 },
 ];
+
+function getFreePort() {
+  return new Promise((resolvePort, reject) => {
+    const server = createServer();
+    server.unref();
+    server.on('error', reject);
+    server.listen(0, '127.0.0.1', () => {
+      const address = server.address();
+      const port = typeof address === 'object' && address ? address.port : null;
+      server.close(() => {
+        if (port) resolvePort(port);
+        else reject(new Error('Could not allocate a free port'));
+      });
+    });
+  });
+}
+
+const appPort = await getFreePort();
+const appUrl = `http://127.0.0.1:${appPort}/`;
 
 function wait(ms) {
   return new Promise((resolvePromise) => setTimeout(resolvePromise, ms));
@@ -75,6 +93,7 @@ function connectCdp(url) {
 }
 
 async function smokeViewport(viewport) {
+  const debugPort = await getFreePort();
   const profile = mkdtempSync(join(tmpdir(), `lembar-${viewport.name}-`));
   const browser = spawn(
     chrome,
@@ -82,7 +101,7 @@ async function smokeViewport(viewport) {
       '--headless=new',
       '--disable-gpu',
       '--no-first-run',
-      `--remote-debugging-port=${viewport.debugPort}`,
+      `--remote-debugging-port=${debugPort}`,
       `--user-data-dir=${profile}`,
       `--window-size=${viewport.width},${viewport.height}`,
       'about:blank',
@@ -91,7 +110,7 @@ async function smokeViewport(viewport) {
   );
 
   try {
-    const pages = await waitForJson(`http://127.0.0.1:${viewport.debugPort}/json/list`);
+    const pages = await waitForJson(`http://127.0.0.1:${debugPort}/json/list`);
     const page = pages.find((candidate) => candidate.type === 'page');
     if (!page) throw new Error('Chrome did not expose a page target');
 
@@ -119,7 +138,7 @@ async function smokeViewport(viewport) {
           const html = document.documentElement;
           const body = document.body;
           return {
-            wordmark: document.querySelector('.shell__wordmark')?.textContent?.trim(),
+            wordmark: document.querySelector('.nav__wordmark')?.textContent?.trim(),
             heading: document.querySelector('h1')?.textContent?.trim(),
             lang: html.lang,
             innerWidth: window.innerWidth,
@@ -136,8 +155,11 @@ async function smokeViewport(viewport) {
 
       if (result.wordmark !== 'lembar')
         throw new Error(`${viewport.name}: lowercase wordmark missing`);
-      if (result.heading !== 'Buat draft lembar soal yang siap cetak.') {
-        throw new Error(`${viewport.name}: Indonesian heading missing`);
+      if (
+        result.heading !==
+        'Buat lembar soal siap cetak dalam hitungan menit — draf AI, tinjauan guru, hasil akhir.'
+      ) {
+        throw new Error(`${viewport.name}: Indonesian hero heading missing`);
       }
       if (result.lang !== 'id') throw new Error(`${viewport.name}: html lang must be id`);
       if (result.innerWidth !== viewport.width) {
