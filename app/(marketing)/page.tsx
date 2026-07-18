@@ -13,6 +13,7 @@ import {
 } from 'iconsax-react';
 import Button from '../components/marketing/Button';
 import { RevealSection, RevealText, RevealMedia } from '../components/marketing/Reveal';
+import { Panel1Visual, Panel2Visual, Panel3Visual } from '../components/marketing/MockupPanels';
 import { homeContent } from '@/src/lib/marketing/home';
 import { getMarketingCta } from '@/src/lib/marketing/ctas';
 
@@ -228,55 +229,9 @@ export default function HomePage() {
                   <p className="editorial__body">{panel.body}</p>
                 </div>
                 <div className="editorial__visual" aria-label={panel.title}>
-                  {panel.visual === 'generate' ? (
-                    <div className="generate-panel">
-                      <div className="generate-panel__row">
-                        <span>Kelas</span>
-                        <strong>V (SD)</strong>
-                      </div>
-                      <div className="generate-panel__row">
-                        <span>Mata pelajaran</span>
-                        <strong>Matematika</strong>
-                      </div>
-                      <div className="generate-panel__row">
-                        <span>Materi</span>
-                        <strong>Pecahan senilai</strong>
-                      </div>
-                      <div className="generate-panel__row">
-                        <span>Jenis lembar</span>
-                        <strong>Pilihan ganda · 20</strong>
-                      </div>
-                      <span className="generate-panel__button">Buat draft</span>
-                    </div>
-                  ) : null}
-                  {panel.visual === 'review' ? (
-                    <div className="review-panel">
-                      <div className="review-panel__rail" />
-                      <div>
-                        <p className="review-panel__label">Soal 08 · Perlu ditinjau</p>
-                        <p className="review-panel__question">
-                          Pecahan yang senilai dengan 3/6 adalah …
-                        </p>
-                        <p className="review-panel__source">Rujukan · Buku Siswa hlm. 44–45</p>
-                      </div>
-                    </div>
-                  ) : null}
-                  {panel.visual === 'export' ? (
-                    <div className="export-panel">
-                      <span>
-                        <DocumentDownload size={22} variant="Linear" />
-                        PDF A4
-                      </span>
-                      <span>
-                        <DocumentText size={22} variant="Linear" />
-                        Cetak
-                      </span>
-                      <span>
-                        <Link1 size={22} variant="Linear" />
-                        Tautan
-                      </span>
-                    </div>
-                  ) : null}
+                  {panel.visual === 'generate' ? <Panel1Visual /> : null}
+                  {panel.visual === 'review' ? <Panel2Visual /> : null}
+                  {panel.visual === 'export' ? <Panel3Visual /> : null}
                 </div>
               </RevealSection>
             </div>
