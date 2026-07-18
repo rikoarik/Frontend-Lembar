@@ -1,364 +1,284 @@
-'use client';
-
-import { useState, useEffect, useRef } from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
-import {
-  Book1,
-  DocumentDownload,
-  DocumentText,
-  Edit2,
-  Export,
-  Link1,
-  ShieldTick,
-  TickCircle,
-} from 'iconsax-react';
-import Button from '../components/marketing/Button';
-import { RevealSection, RevealText, RevealMedia } from '../components/marketing/Reveal';
-import { Panel1Visual, Panel2Visual, Panel3Visual } from '../components/marketing/MockupPanels';
-import { homeContent } from '@/src/lib/marketing/home';
-import { getMarketingCta } from '@/src/lib/marketing/ctas';
-
-const panelIcons = [DocumentText, Edit2, Export];
-
-export default function HomePage() {
-  const content = homeContent;
-  const primary = getMarketingCta(content.hero.primaryCta);
-  const secondary = getMarketingCta(content.hero.secondaryCta);
-
-  const panel0Ref = useRef<HTMLDivElement>(null);
-  const panel1Ref = useRef<HTMLDivElement>(null);
-  const panel2Ref = useRef<HTMLDivElement>(null);
-  
-  const panelsRefs = [panel0Ref, panel1Ref, panel2Ref];
-  const [activeStep, setActiveStep] = useState<number>(0);
-
-  useEffect(() => {
-    const observerOptions = {
-      root: null,
-      rootMargin: '-30% 0px -50% 0px',
-      threshold: 0,
-    };
-
-    const handleIntersection = (entries: IntersectionObserverEntry[]) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          const index = panelsRefs.findIndex((ref) => ref.current === entry.target);
-          if (index !== -1) {
-            setActiveStep(index);
-          }
-        }
-      });
-    };
-
-    const observer = new IntersectionObserver(handleIntersection, observerOptions);
-
-    panelsRefs.forEach((ref) => {
-      if (ref.current) observer.observe(ref.current);
-    });
-
-    return () => {
-      observer.disconnect();
-    };
-  }, []);
-
-  const scrollToPanel = (index: number) => {
-    const targetRef = panelsRefs[index];
-    if (targetRef.current) {
-      targetRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  };
-
-
-  const previewContainerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.15,
-        delayChildren: 0.1,
-      },
-    },
-  };
-
-  const previewItemVariants = {
-    hidden: { opacity: 0, y: 15 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const },
-    },
-  };
-
-  const badgeVariants = {
-    hidden: { opacity: 0, scale: 0.5 },
-    visible: {
-      opacity: 1,
-      scale: 1,
-      transition: { type: 'spring' as const, stiffness: 200, damping: 10, delay: 0.8 },
-    },
-  };
-
+export default function LandingPage() {
   return (
     <>
-      <RevealSection className="hero" id="produk">
-        <div className="hero__copy">
-          <RevealText>
-            <p className="eyebrow">{content.hero.eyebrow}</p>
-          </RevealText>
-          <RevealText delay={0.04}>
-            <h1 className="hero__heading">{content.hero.title}</h1>
-          </RevealText>
-          <RevealText delay={0.08}>
-            <p className="hero__sub">{content.hero.body}</p>
-          </RevealText>
-          <RevealText delay={0.12}>
-            <div className="hero__cta">
-              <Button ctaId={primary.id} href={primary.href} label={primary.label} size="lg" />
-              <Button
-                ctaId={secondary.id}
-                href={secondary.href}
-                label={secondary.label}
-                variant="secondary"
-                size="lg"
-              />
+      <header className="bg-background dark:bg-background font-body-default text-body-default w-full sticky top-0 z-50 border-b border-border-subtle dark:border-outline-variant transition-colors duration-200">
+        <div className="flex justify-between items-center h-unit-16 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center h-unit-8 w-unit-8">
+              <img alt="lembar logo" className="h-full w-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAp9K9UpBGq9yeOy6I3PxGbePnCwa9H_U_j13dh3aLeDE7Xpey3plk3vcS9Qm8hePmA36hgFgFfqWaBE7DynvVBU8-VkN_84GcCwNalagl0xQUsI3GKLwX68vtO6wsj4EvslKJ-3n56fnKadcVUAqkIbbxmdeREsfROoHsp6ZJd0-vRRdU6adFbLVPTzh7F3x0BZtxH4aiwxdXGaNXGw5ysRu6VhS0JZ_ZhU1BVqmeFqlb-8GFKPXzzQZVuRC-vsTSmCY6Agq3p5A" />
             </div>
-          </RevealText>
-          <RevealText delay={0.16}>
-            <p className="hero__meta">{content.hero.meta}</p>
-          </RevealText>
+          </div>
+          <nav className="hidden md:flex items-center gap-8">
+            <a className="font-body-default hover:text-burgundy transition-colors duration-200 text-burgundy font-bold active-nav-indicator border-b-2 border-burgundy pb-1" href="#">Produk</a>
+            <a className="text-secondary font-body-default hover:text-burgundy transition-colors duration-200" href="/untuk-sekolah">Untuk Sekolah</a>
+            <a className="font-body-default text-secondary hover:text-burgundy transition-colors duration-200" href="/harga">Harga</a>
+          </nav>
+          <div className="flex items-center gap-4">
+            <button className="text-secondary font-label-semibold px-unit-4 py-unit-2 hover:text-burgundy transition-colors">Masuk</button>
+            <button className="bg-burgundy text-on-primary font-label-semibold h-[44px] px-unit-6 rounded-lg hover:brightness-110 transition-all">Coba Gratis</button>
+          </div>
         </div>
-
-        <RevealMedia className="hero__preview" delay={0.08}>
-          <motion.div
-            className="preview"
-            id="contoh-hasil"
-            aria-label="Contoh kerja Generate Lembar"
-            variants={previewContainerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.2 }}
-          >
-            <div className="preview__topbar">
-              <div className="preview__brand">
-                <span className="preview__brand-mark" aria-hidden="true">
-                  L
-                </span>
-                <span>{content.preview.title}</span>
+      </header>
+      
+      <main className="flex-grow">
+        <section className="py-24 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto overflow-hidden">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-center">
+            <div className="lg:col-span-5 flex flex-col gap-6 relative z-10">
+              <span className="font-label-semibold text-label-semibold text-secondary uppercase tracking-wider">Workspace asesmen untuk guru</span>
+              <h1 className="font-display-xl-mobile md:font-display-xl text-display-xl-mobile md:text-display-xl text-ink leading-tight">
+                Dari materi menjadi lembar ujian yang siap ditinjau.
+              </h1>
+              <p className="font-body-lead text-body-lead text-secondary max-w-md">
+                Susun draft soal dari Buku Siswa atau PDF Anda, periksa sumbernya, lalu cetak, download, atau bagikan.
+              </p>
+              <div className="flex flex-wrap gap-4 mt-4">
+                <a className="font-label-semibold text-label-semibold bg-burgundy text-white px-6 py-3 rounded h-[44px] flex items-center justify-center transition-colors hover:bg-primary shadow-sm" href="#">Buat lembar gratis</a>
+                <a className="font-label-semibold text-label-semibold text-ink border border-ink px-6 py-3 rounded h-[44px] flex items-center justify-center transition-colors hover:bg-surface-container-highest" href="#">Lihat contoh hasil</a>
               </div>
-              <span className="status status--draft">{content.preview.draft}</span>
             </div>
-
-            <div className="preview__settings">
-              {content.preview.settings.map((setting) => (
-                <span key={setting}>{setting}</span>
-              ))}
-            </div>
-
-            <div className="preview__document">
-              <div className="preview__doc-head">
-                <div>
-                  <p className="preview__doc-kicker">Lembar Soal</p>
-                  <p className="preview__doc-title">{content.preview.documentTitle}</p>
+            
+            <div className="lg:col-span-7 relative mt-12 lg:mt-0 flex justify-center lg:justify-end">
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-surface-container rounded-full blur-3xl opacity-50 z-0"></div>
+              
+              <div className="bg-surface border border-border-subtle p-8 md:p-12 shadow-[0_4px_24px_rgba(0,0,0,0.06)] rounded-DEFAULT w-full max-w-lg relative z-10 rotate-1 hover:rotate-0 transition-transform duration-500 ease-out origin-bottom-right">
+                <div className="absolute -top-4 -right-4 bg-surface border border-border-strong px-3 py-1.5 rounded-full shadow-sm flex items-center gap-2">
+                  <span className="material-symbols-outlined text-[16px] text-green-600" data-icon="check_circle">check_circle</span>
+                  <span className="font-caption text-caption text-ink">20 soal, Sumber terlihat, Siap cetak</span>
                 </div>
-                <span>{content.preview.duration}</span>
-              </div>
-
-              {content.preview.questions.map((question) => (
-                <motion.article
-                  key={question.no}
-                  className="question"
-                  variants={previewItemVariants}
-                >
-                  <span className="question__index">{question.no}</span>
-                  <div className="question__body">
-                    <span className="question__no">Soal {question.no.replace(/^0+/, '')}</span>
-                    <span className="question__text" style={{ whiteSpace: 'pre-line' }}>{question.text}</span>
-                    <ul className="question__answers">
-                      {question.answers.map((answer, index) => (
-                        <li key={answer}>
-                          <span className="question__bullet">
-                            {String.fromCharCode(65 + index)}
-                          </span>
-                          <span>{answer.replace(/^[A-D]\.\s*/, '')}</span>
-                        </li>
-                      ))}
-                    </ul>
-                    <p className="question__source">{question.source}</p>
+                
+                <div className="border-b border-border-subtle pb-6 mb-6">
+                  <h3 className="font-h3 text-h3 text-ink mb-2">Penilaian Akhir Semester</h3>
+                  <p className="font-caption text-caption text-secondary">Bahasa Indonesia - Kelas 6</p>
+                </div>
+                
+                <div className="space-y-6">
+                  <div className="flex gap-4">
+                    <span className="font-label-semibold text-label-semibold text-ink">1.</span>
+                    <div>
+                      <p className="font-body-default text-body-default text-ink mb-3">
+                        Bacalah paragraf berikut dengan saksama!<br /><br />Setiap pagi, Budi selalu menyempatkan diri untuk membaca berita terkini. Ia merasa bahwa dengan mengetahui perkembangan dunia, ia bisa lebih siap menghadapi tantangan. Kebiasaan ini sudah ia tanamkan sejak duduk di bangku sekolah dasar.
+                      </p>
+                      <p className="font-label-semibold text-label-semibold text-ink mb-2">Ide pokok paragraf di atas adalah...</p>
+                      <div className="space-y-2 pl-2">
+                        <div className="flex gap-2 items-start"><span className="font-label-semibold text-ink">A.</span><span className="font-body-sm text-ink">Budi suka membaca berita pagi hari.</span></div>
+                        <div className="flex gap-2 items-start"><span className="font-label-semibold text-ink">B.</span><span className="font-body-sm text-ink">Kebiasaan membaca berita membuat Budi siap menghadapi tantangan.</span></div>
+                        <div className="flex gap-2 items-start"><span className="font-label-semibold text-ink">C.</span><span className="font-body-sm text-ink">Budi belajar membaca sejak sekolah dasar.</span></div>
+                        <div className="flex gap-2 items-start"><span className="font-label-semibold text-ink">D.</span><span className="font-body-sm text-ink">Berita pagi penting untuk perkembangan dunia.</span></div>
+                      </div>
+                      
+                      <div className="mt-3 inline-flex items-center gap-1 bg-surface-container-low px-2 py-1 rounded-DEFAULT border border-border-subtle">
+                        <span className="material-symbols-outlined text-[12px] text-secondary" data-icon="menu_book">menu_book</span>
+                        <span className="font-caption text-caption text-secondary">Buku Siswa Hal 45</span>
+                      </div>
+                    </div>
                   </div>
-                  <motion.span
-                    className={`badge badge--success`}
-                    variants={badgeVariants}
-                  >
-                    {question.status}
-                  </motion.span>
-                </motion.article>
-              ))}
+                </div>
+                
+                <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-surface to-transparent rounded-b-DEFAULT"></div>
+              </div>
             </div>
-
-            <motion.div
-              className="preview__outputs"
-              aria-label="Pilihan hasil akhir"
-              variants={previewItemVariants}
-            >
-              {content.preview.outputs.map((output, index) => (
-                <span
-                  key={output}
-                  className={`output-chip ${index === 0 ? 'output-chip--dark' : ''}`.trim()}
-                >
-                  {index === 0 ? (
-                    <DocumentDownload size={15} variant="Linear" aria-hidden="true" />
-                  ) : null}
-                  {output === 'Cetak' ? (
-                    <DocumentText size={15} variant="Linear" aria-hidden="true" />
-                  ) : null}
-                  {output === 'Tautan' ? (
-                    <Link1 size={15} variant="Linear" aria-hidden="true" />
-                  ) : null}
-                  {output}
-                </span>
-              ))}
-            </motion.div>
-          </motion.div>
-        </RevealMedia>
-      </RevealSection>
-
-      <div className="proof" aria-labelledby="proof-heading">
-        <h2 id="proof-heading" className="sr-only">
-          Alur kerja lembar
-        </h2>
-        <div className="proof__inner">
-          {content.proof.map((step, index) => (
-            <button
-              key={step.no}
-              className={`proof__step-btn ${activeStep === index ? 'proof__step-btn--active' : ''}`}
-              onClick={() => scrollToPanel(index)}
-              aria-label={`Scroll ke langkah ${step.title}`}
-            >
-              <span className="proof__no">{step.no}</span>
-              <span className="proof__title">{step.title}</span>
-            </button>
-          ))}
+          </div>
+        </section>
+        
+        <section className="border-y border-border-subtle bg-surface-bright py-8">
+          <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+              <div className="flex items-center gap-4 flex-1">
+                <div className="w-10 h-10 rounded-full border border-border-strong flex items-center justify-center font-label-semibold text-secondary shrink-0">01</div>
+                <span className="font-body-default text-ink font-medium">Pilih materi</span>
+              </div>
+              <div className="hidden md:block flex-1 h-[1px] bg-border-subtle"></div>
+              
+              <div className="flex items-center gap-4 flex-1">
+                <div className="w-10 h-10 rounded-full border border-border-strong flex items-center justify-center font-label-semibold text-secondary shrink-0">02</div>
+                <span className="font-body-default text-ink font-medium">Tinjau draft</span>
+              </div>
+              <div className="hidden md:block flex-1 h-[1px] bg-border-subtle"></div>
+              
+              <div className="flex items-center gap-4 flex-1">
+                <div className="w-10 h-10 rounded-full border border-border-strong flex items-center justify-center font-label-semibold text-secondary shrink-0">03</div>
+                <span className="font-body-default text-ink font-medium">Gunakan hasil</span>
+              </div>
+            </div>
+          </div>
+        </section>
+        
+        <section className="py-32 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto space-y-32">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-gutter items-center">
+            <div className="md:col-span-5 flex flex-col gap-4">
+              <h2 className="font-h1 text-h1 text-ink">Pilih sumber yang Anda percaya.</h2>
+              <p className="font-body-lead text-body-lead text-secondary">Unggah PDF materi Anda sendiri, atau pilih dari kurasi Buku Siswa resmi. Lembar hanya akan menyusun pertanyaan berdasarkan teks yang Anda berikan, meminimalisir halusinasi.</p>
+            </div>
+            <div className="md:col-span-7 bg-surface border border-border-subtle p-8 rounded-lg shadow-sm">
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center justify-between border-b border-border-subtle pb-4">
+                  <span className="font-label-semibold text-ink">Sumber Materi</span>
+                  <button className="text-burgundy font-label-semibold flex items-center gap-1">
+                    <span className="material-symbols-outlined text-[16px]" data-icon="add">add</span> Tambah
+                  </button>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="border border-border-strong p-4 rounded bg-surface-container-low flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-surface-container transition-colors">
+                    <span className="material-symbols-outlined text-[24px] text-secondary" data-icon="upload_file">upload_file</span>
+                    <span className="font-caption text-secondary">Unggah PDF</span>
+                  </div>
+                  <div className="border border-border-strong p-4 rounded bg-surface flex flex-col gap-2 relative overflow-hidden">
+                    <div className="absolute top-2 right-2 w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="material-symbols-outlined text-[24px] text-ink" data-icon="menu_book">menu_book</span>
+                    <span className="font-caption text-ink font-medium truncate">Buku Siswa B.Indo Kls 6</span>
+                    <span className="text-[10px] text-secondary">Terpilih (Bab 3-4)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-gutter items-center">
+            <div className="md:col-span-7 order-2 md:order-1">
+              <div className="bg-surface border border-border-subtle rounded-lg shadow-sm overflow-hidden">
+                <div className="bg-surface-container-low border-b border-border-subtle px-4 py-3 flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-red-400"></span>
+                    <span className="w-3 h-3 rounded-full bg-amber-400"></span>
+                    <span className="w-3 h-3 rounded-full bg-green-400"></span>
+                  </div>
+                  <span className="font-caption text-secondary">Tinjauan Draft</span>
+                </div>
+                <div className="p-6 flex flex-col gap-4">
+                  <div className="border border-border-strong rounded p-4 relative group">
+                    <div className="absolute -left-3 top-4 w-6 h-6 bg-surface border border-border-strong rounded-full flex items-center justify-center font-caption text-ink shadow-sm">2</div>
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="flex gap-2">
+                        <span className="inline-flex items-center px-2 py-1 rounded text-[10px] font-semibold bg-surface-container text-secondary">C3 - Aplikasi</span>
+                      </div>
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+                        <button className="text-secondary hover:text-ink"><span className="material-symbols-outlined text-[16px]" data-icon="edit">edit</span></button>
+                        <button className="text-secondary hover:text-ink"><span className="material-symbols-outlined text-[16px]" data-icon="delete">delete</span></button>
+                      </div>
+                    </div>
+                    <p className="font-body-default text-ink mb-3">Apa kesimpulan utama dari teks bacaan pada halaman 45?</p>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 bg-green-50/50 p-1 rounded border border-green-200">
+                        <span className="material-symbols-outlined text-[14px] text-green-600" data-icon="check">check</span> 
+                        <span className="font-body-sm text-ink">A. Pahlawan nasional berjuang tanpa pamrih. (Kunci)</span>
+                      </div>
+                      <div className="flex items-center gap-2 p-1">
+                        <span className="w-[14px]"></span> 
+                        <span className="font-body-sm text-secondary">B. Sejarah kemerdekaan sangat panjang.</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="md:col-span-5 order-1 md:order-2 flex flex-col gap-4 pl-0 md:pl-8">
+              <h2 className="font-h1 text-h1 text-ink">Tinjau sebelum digunakan.</h2>
+              <p className="font-body-lead text-body-lead text-secondary">Guru tetap memegang kendali. Periksa tingkat kognitif, sesuaikan kunci jawaban, dan pastikan setiap butir soal selaras dengan standar kurikulum Anda.</p>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-gutter items-center">
+            <div className="md:col-span-5 flex flex-col gap-4">
+              <h2 className="font-h1 text-h1 text-ink">Gunakan sesuai kebutuhan.</h2>
+              <p className="font-body-lead text-body-lead text-secondary">Format siap pakai. Cetak langsung untuk ujian kelas, unduh sebagai PDF untuk arsip, atau bagikan tautan untuk dikerjakan secara digital.</p>
+            </div>
+            <div className="md:col-span-7">
+              <div className="bg-surface-container p-8 rounded-lg flex gap-4 justify-center">
+                <div className="bg-surface p-4 rounded border border-border-subtle shadow-sm flex flex-col items-center gap-2 w-32 hover:-translate-y-1 transition-transform cursor-pointer">
+                  <span className="material-symbols-outlined text-[32px] text-ink" data-icon="print">print</span>
+                  <span className="font-label-semibold text-ink">Cetak</span>
+                </div>
+                <div className="bg-surface p-4 rounded border border-border-subtle shadow-sm flex flex-col items-center gap-2 w-32 hover:-translate-y-1 transition-transform cursor-pointer">
+                  <span className="material-symbols-outlined text-[32px] text-ink" data-icon="picture_as_pdf">picture_as_pdf</span>
+                  <span className="font-label-semibold text-ink">PDF</span>
+                </div>
+                <div className="bg-surface p-4 rounded border border-border-subtle shadow-sm flex flex-col items-center gap-2 w-32 hover:-translate-y-1 transition-transform cursor-pointer">
+                  <span className="material-symbols-outlined text-[32px] text-ink" data-icon="link">link</span>
+                  <span className="font-label-semibold text-ink">Tautan</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        
+        <section className="bg-ink text-white py-24 px-margin-mobile md:px-margin-desktop">
+          <div className="max-w-container-max mx-auto flex flex-col items-center text-center gap-12">
+            <h2 className="font-h1 text-h1 max-w-2xl">AI menyusun draft. Guru melihat alasannya.</h2>
+            
+            <div className="bg-surface rounded-lg p-6 md:p-8 max-w-3xl w-full text-left shadow-2xl relative">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-burgundy to-transparent opacity-50"></div>
+              <div className="flex justify-between items-start border-b border-border-subtle pb-4 mb-4">
+                <div className="flex items-center gap-3">
+                  <span className="bg-surface-container text-ink font-bold w-8 h-8 flex items-center justify-center rounded">Q3</span>
+                  <p className="font-body-default text-ink">Apa faktor utama penyebab terjadinya erosi pada lereng gundul?</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <p className="font-label-semibold text-secondary mb-2 uppercase text-[10px] tracking-wider">Opsi Jawaban</p>
+                  <div className="space-y-2">
+                    <div className="p-2 border border-green-200 bg-green-50 rounded flex items-center justify-between">
+                      <span className="font-body-sm text-ink">A. Tidak adanya akar pohon penahan air.</span> 
+                      <span className="material-symbols-outlined text-[16px] text-green-600" data-icon="check_circle">check_circle</span>
+                    </div>
+                    <div className="p-2 border border-border-subtle rounded"><span className="font-body-sm text-secondary">B. Curah hujan yang rendah.</span></div>
+                    <div className="p-2 border border-border-subtle rounded"><span className="font-body-sm text-secondary">C. Jenis tanah liat yang keras.</span></div>
+                  </div>
+                </div>
+                <div className="bg-surface-container-low p-4 rounded border border-border-subtle">
+                  <div className="flex justify-between items-center mb-2">
+                    <p className="font-label-semibold text-ink flex items-center gap-1">
+                      <span className="material-symbols-outlined text-[16px]" data-icon="find_in_page">find_in_page</span> Sumber Kutipan
+                    </p>
+                    <button className="text-burgundy font-caption hover:underline">Lihat Dokumen</button>
+                  </div>
+                  <p className="font-body-sm text-secondary italic border-l-2 border-border-strong pl-3 py-1">&quot;...erosi paling sering terjadi pada lereng yang telah ditebang habis. Tanpa adanya sistem perakaran pohon yang kuat untuk mengikat tanah dan menyerap air hujan, lapisan atas tanah sangat mudah terbawa arus air...&quot;</p>
+                  <p className="font-caption text-secondary mt-2 text-right">- IPA Kelas 6, Hal 72</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        
+        <section className="py-32 px-margin-mobile md:px-margin-desktop text-center bg-paper">
+          <div className="max-w-2xl mx-auto flex flex-col items-center gap-6">
+            <h2 className="font-display-xl-mobile md:font-display-xl text-ink">Mulai dari satu lembar.</h2>
+            <p className="font-body-lead text-secondary mb-4">Bergabung dengan pendidik yang bekerja lebih cermat.</p>
+            <a className="font-label-semibold text-label-semibold bg-burgundy text-white px-8 py-4 rounded h-[56px] flex items-center justify-center transition-colors hover:bg-primary shadow-sm text-[16px]" href="#">Buat lembar gratis</a>
+          </div>
+        </section>
+      </main>
+      
+      <footer className="w-full py-unit-12 bg-paper border-t border-border-strong">
+        <div className="px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
+          <div className="flex flex-col md:flex-row justify-between items-start gap-unit-12">
+            <div className="flex flex-col gap-unit-6">
+              <div className="h-unit-8 w-unit-8">
+                <img alt="lembar logo" className="h-full w-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAp9K9UpBGq9yeOy6I3PxGbePnCwa9H_U_j13dh3aLeDE7Xpey3plk3vcS9Qm8hePmA36hgFgFfqWaBE7DynvVBU8-VkN_84GcCwNalagl0xQUsI3GKLwX68vtO6wsj4EvslKJ-3n56fnKadcVUAqkIbbxmdeREsfROoHsp6ZJd0-vRRdU6adFbLVPTzh7F3x0BZtxH4aiwxdXGaNXGw5ysRu6VhS0JZ_ZhU1BVqmeFqlb-8GFKPXzzQZVuRC-vsTSmCY6Agq3p5A" />
+              </div>
+              <p className="font-caption text-caption text-secondary max-w-[240px]">© 2024 lembar. Dirancang untuk keahlian pendidik.</p>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-2 gap-x-unit-12 gap-y-unit-8">
+              <div className="flex flex-col gap-unit-4">
+                <span className="font-label-semibold text-ink">Layanan</span>
+                <div className="flex flex-col gap-unit-2">
+                  <a className="font-caption text-caption text-secondary hover:text-burgundy transition-colors" href="#">Produk</a>
+                  <a className="font-caption text-caption text-secondary hover:text-burgundy transition-colors" href="/untuk-sekolah">Untuk Sekolah</a>
+                  <a className="font-caption text-caption text-secondary hover:text-burgundy transition-colors" href="/harga">Harga</a>
+                </div>
+              </div>
+              <div className="flex flex-col gap-unit-4">
+                <span className="font-label-semibold text-ink">Perusahaan</span>
+                <div className="flex flex-col gap-unit-2">
+                  <a className="font-caption text-caption text-secondary hover:text-burgundy transition-colors" href="#">Tentang Kami</a>
+                  <a className="font-caption text-caption text-secondary hover:text-burgundy transition-colors" href="#">Pusat Bantuan</a>
+                  <a className="font-caption text-caption text-secondary hover:text-burgundy transition-colors" href="#">Kebijakan Privasi</a>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-
-      <section id="cara-kerja" className="how" aria-labelledby="how-heading">
-        <RevealText>
-          <div className="section-heading">
-            <p className="eyebrow">{content.how.eyebrow}</p>
-            <h2 id="how-heading" className="section-heading__title">
-              {content.how.title}
-            </h2>
-          </div>
-        </RevealText>
-
-        <div className="how__panels">
-          {content.how.panels.map((panel, index) => {
-            const Icon = panelIcons[index];
-            return (
-              <div
-                key={panel.eyebrow}
-                ref={panelsRefs[index]}
-                id={`cara-kerja-step-${index + 1}`}
-                style={{ scrollMarginTop: '130px' }}
-              >
-                <RevealSection
-                  className={`editorial ${index % 2 === 1 ? 'editorial--reverse' : ''}`.trim()}
-                  delay={index * 0.05}
-                >
-                <div className="editorial__copy">
-                  <span className="icon-accent" aria-hidden="true">
-                    <Icon size={24} variant="Linear" />
-                  </span>
-                  <p className="eyebrow">{panel.eyebrow}</p>
-                  <h3 className="editorial__title">{panel.title}</h3>
-                  <p className="editorial__body">{panel.body}</p>
-                </div>
-                <div className="editorial__visual" aria-label={panel.title}>
-                  {panel.visual === 'generate' ? <Panel1Visual /> : null}
-                  {panel.visual === 'review' ? <Panel2Visual /> : null}
-                  {panel.visual === 'export' ? <Panel3Visual /> : null}
-                </div>
-              </RevealSection>
-            </div>
-          );
-        })}
-      </div>
-      </section>
-
-      <section className="trust" aria-labelledby="trust-heading">
-        <div className="trust__inner">
-          <div className="trust__header">
-            <h2 id="trust-heading" className="trust__headline">
-              {content.trust.title}
-            </h2>
-          </div>
-
-          <div className="trust__grid">
-            <RevealMedia className="trust-question-card" delay={0.05}>
-              <div className="trust-question-card__header">
-                <span className="trust-question-card__tag">Q3 · Pilihan Ganda</span>
-                <span className="badge badge--success">{content.trust.specimen.status}</span>
-              </div>
-              <p className="trust-question-card__text">{content.trust.specimen.question}</p>
-              <div className="trust-question-card__options">
-                <div className="trust-option trust-option--active">
-                  <span>A. Tidak adanya akar pohon penahan air</span>
-                  <span className="trust-option__arrow" aria-hidden="true">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                      <line x1="5" y1="12" x2="19" y2="12"></line>
-                      <polyline points="12 5 19 12 12 19"></polyline>
-                    </svg>
-                  </span>
-                </div>
-                <div className="trust-option">
-                  <span>B. Curah hujan yang rendah.</span>
-                </div>
-                <div className="trust-option">
-                  <span>C. Jenis tanah liat yang keras.</span>
-                </div>
-              </div>
-            </RevealMedia>
-
-            <RevealMedia className="trust-source-card" delay={0.2}>
-              <div className="trust-source-card__header">
-                <span className="trust-source-card__title">Sumber Kutipan</span>
-                <a href="#dokumen" className="trust-source-card__link">
-                  {content.trust.link}
-                </a>
-              </div>
-              <div className="trust-source-card__body">
-                <p className="trust-source-card__quote">
-                  "…erosi paling sering terjadi pada lereng yang tidak ditumbuhi habis. Tanpa adanya sistem perakaran pohon yang kuat untuk mengikat tanah dan menyerap air hujan, lapisan atas tanah sangat mudah terbawa arus air…"
-                </p>
-                <span className="trust-source-card__ref">- {content.trust.specimen.source}</span>
-              </div>
-            </RevealMedia>
-          </div>
-        </div>
-      </section>
-
-      <section id="harga" className="final-cta" aria-labelledby="final-cta-heading">
-        <RevealText>
-          <div className="final-cta__inner">
-            <p className="eyebrow">{content.final.eyebrow}</p>
-            <h2 id="final-cta-heading" className="final-cta__title">
-              {content.final.title}
-            </h2>
-            <p className="final-cta__sub">{content.final.body}</p>
-            <div className="final-cta__actions">
-              <Button
-                ctaId={content.final.cta}
-                href={getMarketingCta(content.final.cta).href}
-                label={getMarketingCta(content.final.cta).label}
-                size="lg"
-              />
-              <a className="text-link" href="#untuk-sekolah">
-                {content.final.schoolLink} →
-              </a>
-            </div>
-          </div>
-        </RevealText>
-      </section>
+      </footer>
     </>
   );
 }

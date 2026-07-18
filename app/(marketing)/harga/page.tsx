@@ -1,112 +1,199 @@
-import { ArrowRight, TickCircle } from 'iconsax-react';
-import Button from '../../components/marketing/Button';
-import { RevealSection, RevealText } from '../../components/marketing/Reveal';
-import { pricingContent, type PricingPlan } from '@/src/lib/marketing/pricing';
-import { getMarketingCta } from '@/src/lib/marketing/ctas';
-
-function PlanCard({ plan }: { plan: PricingPlan }) {
-  const cta = getMarketingCta(plan.cta);
-  return (
-    <RevealSection
-      className={`plan ${plan.popular ? 'plan--popular' : ''}`.trim()}
-      delay={plan.popular ? 0.05 : 0}
-    >
-      {plan.popular ? <span className="plan__ribbon">{plan.popular}</span> : null}
-      <h3 className="plan__name">{plan.name}</h3>
-      <p className="plan__description">{plan.description}</p>
-      <div className="plan__price">
-        <span
-          className={`plan__price-value ${plan.popular ? 'plan__price-value--accent' : ''}`.trim()}
-        >
-          {plan.price}
-        </span>
-        <span className="plan__price-cadence">{plan.cadence}</span>
-      </div>
-      <ul className="plan__features">
-        {plan.features.map((feature) => (
-          <li key={feature}>
-            <TickCircle size={20} variant="Linear" aria-hidden="true" />
-            <span>{feature}</span>
-          </li>
-        ))}
-      </ul>
-      <Button
-        ctaId={cta.id}
-        href={cta.href}
-        label={cta.label}
-        variant={plan.popular ? 'primary' : 'secondary'}
-        className="plan__cta"
-      />
-    </RevealSection>
-  );
-}
-
-export default function PricingPage() {
-  const content = pricingContent;
-  const finalPrimary = getMarketingCta(content.final.primaryCta);
-  const finalSecondary = getMarketingCta(content.final.secondaryCta);
-
+export default function HargaPage() {
   return (
     <>
-      <RevealSection className="pricing-hero">
-        <span className="pricing-hero__badge">{content.hero.badge}</span>
-        <h1 className="pricing-hero__title">{content.hero.title}</h1>
-        <p className="pricing-hero__body">{content.hero.body}</p>
-      </RevealSection>
-
-      <section className="pricing-grid" aria-label="Paket harga">
-        <div className="pricing-grid__inner">
-          {content.plans.map((plan) => (
-            <PlanCard key={plan.id} plan={plan} />
-          ))}
-        </div>
-        <RevealText className="pricing-grid__transparency">
-          <div className="transparency">
-            <span className="transparency__title">{content.transparency.title}</span>
-            <p className="transparency__body">{content.transparency.body}</p>
+      <nav className="w-full sticky top-0 z-50 bg-background border-b border-border-subtle">
+        <div className="flex justify-between items-center h-unit-16 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
+          <div className="flex items-center h-unit-8 w-unit-8">
+            <img alt="lembar logo" className="h-full w-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCARfxfBB_WCV4WkF3OmtcsQ2wj08axCXGcgeT6O0XjgoJEsYbwdhfrDY6LT9_hD6Ha3-fKvXLgwfRsmvSQfFMGrLeehUD6JPilFLCz_yaNCRRbGsiPubCWMNLjmWIwixhYEcDuOS19zunQgfMZaRVLV2E7z1rP0J1u2xL3lPobcaGM6wHEapPu5cgRculgnypYd6I2icHwZ2UfAYZHVQwU_PQzgMKNUIgs1E0cCLgbzY9Usw9QPnAaBFOP1LD5NWhRek4SekbZVQ" />
           </div>
-        </RevealText>
-      </section>
-
-      <section className="pricing-faq" aria-labelledby="pricing-faq-heading">
-        <div className="pricing-faq__grid">
-          <RevealText className="pricing-faq__intro">
-            <h2 id="pricing-faq-heading" className="pricing-faq__title">
-              {content.faq.title}
-            </h2>
-            <p className="pricing-faq__body">{content.faq.body}</p>
-            <a className="pricing-faq__link" href="#bantuan">
-              {content.faq.link}
-              <ArrowRight size={16} variant="Linear" aria-hidden="true" />
-            </a>
-          </RevealText>
-          <div className="pricing-faq__list">
-            {content.faq.items.map((item, index) => (
-              <RevealSection key={item.question} className="pricing-faq__item" delay={index * 0.05}>
-                <h3 className="pricing-faq__question">{item.question}</h3>
-                <p className="pricing-faq__answer">{item.answer}</p>
-              </RevealSection>
-            ))}
+          <div className="hidden md:flex items-center gap-unit-8">
+            <a className="text-secondary font-body-default hover:text-burgundy transition-colors duration-200" href="/">Produk</a>
+            <a className="text-secondary font-body-default hover:text-burgundy transition-colors duration-200" href="/untuk-sekolah">Untuk Sekolah</a>
+            <a className="text-burgundy font-bold font-body-default active-nav-indicator border-b-2 border-burgundy pb-1" href="/harga">Harga</a>
+          </div>
+          <div className="flex items-center gap-unit-4">
+            <button className="text-secondary font-label-semibold px-unit-4 py-unit-2 hover:text-burgundy transition-colors">Masuk</button>
+            <button className="bg-burgundy text-on-primary font-label-semibold h-[44px] px-unit-6 rounded-lg hover:brightness-110 transition-all">Coba Gratis</button>
           </div>
         </div>
-      </section>
+      </nav>
+      
+      <main className="min-h-screen">
+        <header className="py-unit-16 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto text-center">
+          <div className="inline-block px-unit-3 py-unit-1 bg-secondary-fixed text-on-secondary-fixed-variant rounded-full font-label-semibold text-caption mb-unit-6">
+            Pricing Plans
+          </div>
+          <h1 className="font-h1 text-h1 text-ink mb-unit-4 max-w-[800px] mx-auto">
+            Pilih paket yang sesuai untuk kebutuhan mengajar Anda.
+          </h1>
+          <p className="font-body-lead text-body-lead text-secondary max-w-reading-max mx-auto">
+            Solusi cerdas untuk pembuatan asesmen berkualitas tinggi, dirancang untuk efisiensi dan ketelitian pendidik.
+          </p>
+        </header>
 
-      <RevealSection className="pricing-final" aria-labelledby="pricing-final-heading">
-        <div className="pricing-final__inner">
-          <h2 id="pricing-final-heading" className="pricing-final__title">
-            {content.final.title}
-          </h2>
-          <div className="pricing-final__actions">
-            <Button ctaId={finalPrimary.id} href={finalPrimary.href} label={finalPrimary.label} />
-            <Button
-              ctaId={finalSecondary.id}
-              href={finalSecondary.href}
-              label={finalSecondary.label}
-              variant="secondary"
-            />
+        <section className="pb-unit-16 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-unit-6 max-w-container-max mx-auto">
+            <div className="bento-card bg-surface border border-border-strong rounded-xl p-unit-6 flex flex-col page-shadow hover:-translate-y-2 hover:shadow-xl transition-all duration-300 group cursor-pointer">
+              <div className="mb-unit-6">
+                <h3 className="font-h3 text-h3 text-ink mb-unit-1">Coba Gratis</h3>
+                <p className="text-secondary text-body-sm">Untuk mencoba fitur dasar kami.</p>
+              </div>
+              <div className="mb-unit-8">
+                <span className="text-h2 font-h2 text-ink">Rp0</span>
+                <span className="text-secondary text-body-sm block mt-unit-1">Gratis selamanya</span>
+              </div>
+              <div className="space-y-unit-4 mb-unit-12 flex-grow">
+                <div className="flex items-start gap-unit-3"><span className="material-symbols-outlined text-burgundy" style={{ fontVariationSettings: "'wght' 600" }}>check_circle</span><span className="text-body-default text-ink">2 paket asesmen lengkap</span></div>
+                <div className="flex items-start gap-unit-3"><span className="material-symbols-outlined text-burgundy" style={{ fontVariationSettings: "'wght' 600" }}>check_circle</span><span className="text-body-default text-ink">Batas ekspor terbatas</span></div>
+                <div className="flex items-start gap-unit-3"><span className="material-symbols-outlined text-burgundy" style={{ fontVariationSettings: "'wght' 600" }}>check_circle</span><span className="text-body-default text-ink">Tanpa kartu kredit</span></div>
+              </div>
+              <button className="w-full border-2 border-burgundy text-burgundy font-label-semibold h-[44px] rounded-lg group-hover:bg-burgundy group-hover:text-white active:scale-95 transition-all duration-300">Mulai Gratis</button>
+            </div>
+
+            <div className="bento-card bg-paper border-2 border-burgundy/50 rounded-xl p-unit-6 flex flex-col relative overflow-hidden page-shadow hover:-translate-y-3 hover:shadow-2xl hover:shadow-burgundy/20 hover:border-burgundy transition-all duration-300 group cursor-pointer z-10">
+              <div className="absolute top-0 right-0 bg-burgundy text-on-primary px-unit-4 py-unit-1 text-caption font-label-semibold rounded-bl-xl shadow-md">
+                <span className="flex items-center gap-2">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                  </span>
+                  PALING POPULER
+                </span>
+              </div>
+              <div className="mb-unit-6">
+                <h3 className="font-h3 text-h3 text-ink mb-unit-1">Guru Pro</h3>
+                <p className="text-secondary text-body-sm">Produktivitas maksimal untuk pengajar.</p>
+              </div>
+              <div className="mb-unit-8">
+                <span className="text-h2 font-h2 text-burgundy">Rp49.000</span>
+                <span className="text-secondary text-body-sm block mt-unit-1">per bulan</span>
+              </div>
+              <div className="space-y-unit-4 mb-unit-12 flex-grow">
+                <div className="flex items-start gap-unit-3">
+                  <span className="material-symbols-outlined text-burgundy" style={{ fontVariationSettings: "'wght' 600" }}>check_circle</span>
+                  <span className="text-body-default text-ink">Kuota 20 paket/bulan</span>
+                </div>
+                <div className="flex items-start gap-unit-3">
+                  <span className="material-symbols-outlined text-burgundy" style={{ fontVariationSettings: "'wght' 600" }}>check_circle</span>
+                  <span className="text-body-default text-ink">History tak terbatas</span>
+                </div>
+                <div className="flex items-start gap-unit-3">
+                  <span className="material-symbols-outlined text-burgundy" style={{ fontVariationSettings: "'wght' 600" }}>check_circle</span>
+                  <span className="text-body-default text-ink">Template pribadi &amp; Bank soal privat</span>
+                </div>
+                <div className="flex items-start gap-unit-3">
+                  <span className="material-symbols-outlined text-burgundy" style={{ fontVariationSettings: "'wght' 600" }}>check_circle</span>
+                  <span className="text-body-default text-ink">Ekspor DOCX &amp; PDF</span>
+                </div>
+              </div>
+              <button className="w-full bg-burgundy text-on-primary font-label-semibold h-[44px] rounded-lg group-hover:brightness-110 group-hover:shadow-lg group-hover:shadow-burgundy/40 active:scale-95 transition-all duration-300">Langganan Sekarang</button>
+            </div>
+
+            <div className="bento-card bg-surface border border-border-strong rounded-xl p-unit-6 flex flex-col page-shadow hover:-translate-y-2 hover:shadow-xl transition-all duration-300 group cursor-pointer">
+              <div className="mb-unit-6">
+                <h3 className="font-h3 text-h3 text-ink mb-unit-1">Sekolah &amp; Institusi</h3>
+                <p className="text-secondary text-body-sm">Kolaborasi tim dan kontrol institusi.</p>
+              </div>
+              <div className="mb-unit-8">
+                <span className="text-h2 font-h2 text-ink">Hubungi Kami</span>
+                <span className="text-secondary text-body-sm block mt-unit-1">Harga kustom sesuai kebutuhan</span>
+              </div>
+              <div className="space-y-unit-4 mb-unit-12 flex-grow">
+                <div className="flex items-start gap-unit-3"><span className="material-symbols-outlined text-burgundy" style={{ fontVariationSettings: "'wght' 600" }}>check_circle</span><span className="text-body-default text-ink">Shared quota seluruh guru</span></div>
+                <div className="flex items-start gap-unit-3"><span className="material-symbols-outlined text-burgundy" style={{ fontVariationSettings: "'wght' 600" }}>check_circle</span><span className="text-body-default text-ink">Admin dashboard &amp; analitik</span></div>
+                <div className="flex items-start gap-unit-3"><span className="material-symbols-outlined text-burgundy" style={{ fontVariationSettings: "'wght' 600" }}>check_circle</span><span className="text-body-default text-ink">Bank soal sekolah</span></div>
+                <div className="flex items-start gap-unit-3"><span className="material-symbols-outlined text-burgundy" style={{ fontVariationSettings: "'wght' 600" }}>check_circle</span><span className="text-body-default text-ink">Onboarding &amp; support khusus</span></div>
+                <div className="flex items-start gap-unit-3"><span className="material-symbols-outlined text-burgundy" style={{ fontVariationSettings: "'wght' 600" }}>check_circle</span><span className="text-body-default text-ink">Branding sekolah pada output</span></div>
+              </div>
+              <button className="w-full border-2 border-burgundy text-burgundy font-label-semibold h-[44px] rounded-lg group-hover:bg-burgundy group-hover:text-white active:scale-95 transition-all duration-300">Daftar Pilot</button>
+            </div>
+          </div>
+
+          <div className="mt-unit-12 max-w-reading-max mx-auto text-center p-unit-6 rounded-xl border border-border-subtle bg-paper">
+            <div className="flex items-center justify-center gap-unit-2 text-burgundy mb-unit-2">
+              <span className="material-symbols-outlined">info</span>
+              <span className="font-label-semibold">Catatan Transparansi</span>
+            </div>
+            <p className="text-body-default text-secondary">Tidak ada biaya tersembunyi. Kuota hanya terpotong untuk generasi soal yang berhasil. Kami menghargai integritas akademik dan transparansi biaya bagi setiap sekolah.</p>
+          </div>
+        </section>
+
+        <section className="py-unit-16 bg-paper">
+          <div className="px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-unit-12">
+              <div className="md:col-span-1">
+                <h2 className="font-h2 text-h2 text-ink mb-unit-4">Pertanyaan Seputar Tagihan</h2>
+                <p className="text-body-default text-secondary mb-unit-6">
+                  Informasi lebih detail mengenai bagaimana kami mengelola kuota dan pembayaran Anda.
+                </p>
+                <a className="text-burgundy font-label-semibold flex items-center gap-unit-1 group" href="#">
+                  Pusat Bantuan Lengkap
+                  <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform text-burgundy">check_circle</span>
+                </a>
+              </div>
+              <div className="md:col-span-2 space-y-unit-6">
+                <div className="p-unit-6 border border-border-subtle rounded-lg bg-surface">
+                  <h4 className="font-label-semibold text-ink mb-unit-2">Bagaimana sistem pemotongan kuota bekerja?</h4>
+                  <p className="text-body-sm text-secondary">Kuota hanya akan berkurang saat sistem AI berhasil memberikan draft soal yang dapat diedit. Jika terjadi kegagalan teknis saat proses generasi, kuota Anda tidak akan berkurang.</p>
+                </div>
+                <div className="p-unit-6 border border-border-subtle rounded-lg bg-surface">
+                  <h4 className="font-label-semibold text-ink mb-unit-2">Apakah ada batasan jumlah guru untuk paket Institusi?</h4>
+                  <p className="text-body-sm text-secondary">Tidak ada batas minimum atau maksimum yang kaku. Kami menyesuaikan paket berdasarkan jumlah lisensi aktif yang dibutuhkan oleh sekolah Anda agar lebih efisien secara biaya.</p>
+                </div>
+                <div className="p-unit-6 border border-border-subtle rounded-lg bg-surface">
+                  <h4 className="font-label-semibold text-ink mb-unit-2">Bisakah saya melakukan upgrade di tengah periode?</h4>
+                  <p className="text-body-sm text-secondary">Tentu. Anda dapat meningkatkan kuota atau berpindah ke paket tim kapan saja. Selisih biaya akan dihitung secara pro-rata agar tetap adil bagi Anda.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="py-unit-16 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
+          <div className="relative bg-ink rounded-2xl p-unit-12 overflow-hidden text-center">
+            <div className="absolute inset-0 opacity-10 pointer-events-none">
+              <div className="absolute top-0 left-0 w-64 h-64 bg-burgundy rounded-full blur-[100px] -translate-x-1/2 -translate-y-1/2"></div>
+              <div className="absolute bottom-0 right-0 w-96 h-96 bg-burgundy rounded-full blur-[120px] translate-x-1/2 translate-y-1/2"></div>
+            </div>
+            <h2 className="font-h1 text-h1 text-white mb-unit-6 relative z-10">Siap untuk mulai merancang asesmen lebih baik?</h2>
+            <div className="flex flex-col md:flex-row items-center justify-center gap-unit-4 relative z-10">
+              <button className="bg-burgundy text-white px-unit-12 h-[52px] rounded-lg font-label-semibold text-body-lead hover:brightness-110 transition-all">Daftar Sekarang</button>
+              <button className="border border-surface-variant text-white px-unit-12 h-[52px] rounded-lg font-label-semibold text-body-lead hover:bg-white/10 transition-all">Jadwalkan Demo</button>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer className="w-full py-unit-12 bg-paper border-t border-border-strong">
+        <div className="px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
+          <div className="flex flex-col md:flex-row justify-between items-start gap-unit-12">
+            <div className="flex flex-col gap-unit-6">
+              <div className="h-unit-8 w-unit-8">
+                <img alt="lembar logo" className="h-full w-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCARfxfBB_WCV4WkF3OmtcsQ2wj08axCXGcgeT6O0XjgoJEsYbwdhfrDY6LT9_hD6Ha3-fKvXLgwfRsmvSQfFMGrLeehUD6JPilFLCz_yaNCRRbGsiPubCWMNLjmWIwixhYEcDuOS19zunQgfMZaRVLV2E7z1rP0J1u2xL3lPobcaGM6wHEapPu5cgRculgnypYd6I2icHwZ2UfAYZHVQwU_PQzgMKNUIgs1E0cCLgbzY9Usw9QPnAaBFOP1LD5NWhRek4SekbZVQ" />
+              </div>
+              <p className="font-caption text-caption text-secondary max-w-[240px]">© 2024 lembar. Dirancang untuk keahlian pendidik.</p>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-2 gap-x-unit-12 gap-y-unit-8">
+              <div className="flex flex-col gap-unit-4">
+                <span className="font-label-semibold text-ink">Layanan</span>
+                <div className="flex flex-col gap-unit-2">
+                  <a className="font-caption text-caption text-secondary hover:text-burgundy transition-colors" href="/">Produk</a>
+                  <a className="font-caption text-caption text-secondary hover:text-burgundy transition-colors" href="/untuk-sekolah">Untuk Sekolah</a>
+                  <a className="font-caption text-caption text-secondary hover:text-burgundy transition-colors" href="/harga">Harga</a>
+                </div>
+              </div>
+              <div className="flex flex-col gap-unit-4">
+                <span className="font-label-semibold text-ink">Perusahaan</span>
+                <div className="flex flex-col gap-unit-2">
+                  <a className="font-caption text-caption text-secondary hover:text-burgundy transition-colors" href="#">Tentang Kami</a>
+                  <a className="font-caption text-caption text-secondary hover:text-burgundy transition-colors" href="#">Pusat Bantuan</a>
+                  <a className="font-caption text-caption text-secondary hover:text-burgundy transition-colors" href="#">Kebijakan Privasi</a>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </RevealSection>
+      </footer>
     </>
   );
 }

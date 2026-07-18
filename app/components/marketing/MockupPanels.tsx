@@ -6,6 +6,7 @@ import {
   Book1,
   DocumentDownload,
   DocumentText,
+  DocumentUpload,
   Link1,
   TickCircle,
 } from 'iconsax-react';
@@ -22,7 +23,7 @@ export function Panel1Visual() {
       y: 0,
       transition: {
         duration: 0.6,
-        ease: EASE,
+        ease: EASE as any,
         staggerChildren: 0.12,
       },
     },
@@ -33,7 +34,7 @@ export function Panel1Visual() {
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.5, ease: EASE },
+      transition: { duration: 0.5, ease: EASE as any },
     },
   };
 
@@ -46,14 +47,14 @@ export function Panel1Visual() {
         </div>
         <div className="source-panel__grid">
           <div className="source-card">
-            <DocumentDownload size={24} variant="Linear" className="source-card__icon" />
+            <DocumentUpload size={24} variant="Linear" className="source-card__icon" />
             <span className="source-card__label">Unggah PDF</span>
           </div>
           <div className="source-card source-card--active">
             <Book1 size={24} variant="Linear" className="source-card__icon" />
             <div className="source-card__details">
-              <span className="source-card__label">Buku Siswa B. Indo Kls 5</span>
-              <span className="source-card__sub">Kementerian Pendidikan</span>
+              <span className="source-card__label">Buku Siswa B.Indo Kls 6</span>
+              <span className="source-card__sub">Terpilih (Bab 3-4)</span>
             </div>
             <span className="source-card__dot" />
           </div>
@@ -87,7 +88,7 @@ export function Panel1Visual() {
           whileHover={{ y: -4, boxShadow: '0 8px 24px rgba(23,23,23,0.06)' }}
         >
           <div className="source-card__icon-wrapper source-card__icon-wrapper--pdf">
-            <DocumentDownload size={22} variant="Linear" />
+            <DocumentUpload size={22} variant="Linear" />
           </div>
           <span className="source-card__label">Unggah PDF</span>
         </motion.div>
@@ -100,8 +101,8 @@ export function Panel1Visual() {
             <Book1 size={22} variant="Linear" />
           </div>
           <div className="source-card__details">
-            <span className="source-card__label">Buku Siswa B. Indo Kls 5</span>
-            <span className="source-card__sub">Kementerian Pendidikan</span>
+            <span className="source-card__label">Buku Siswa B.Indo Kls 6</span>
+            <span className="source-card__sub">Terpilih (Bab 3-4)</span>
           </div>
           <span className="source-card__dot" />
         </motion.div>
@@ -120,7 +121,7 @@ export function Panel2Visual() {
       y: 0,
       transition: {
         duration: 0.6,
-        ease: EASE,
+        ease: EASE as any,
         staggerChildren: 0.15,
       },
     },
@@ -131,7 +132,7 @@ export function Panel2Visual() {
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.5, ease: EASE },
+      transition: { duration: 0.5, ease: EASE as any },
     },
   };
 
@@ -140,7 +141,7 @@ export function Panel2Visual() {
     visible: {
       scale: 1,
       opacity: 1,
-      transition: { delay: 0.6, type: 'spring', stiffness: 200, damping: 12 },
+      transition: { delay: 0.6, type: 'spring' as const, stiffness: 200, damping: 12 },
     },
   };
 
@@ -166,20 +167,21 @@ export function Panel2Visual() {
         </div>
         <div className="review-panel-mock__content">
           <div className="review-card">
-            <div className="review-card__header">
-              <span className="review-card__tag">02 · Pilihan Ganda</span>
+            <div className="review-card__header-row">
+              <span className="review-card__number">2</span>
+              <span className="review-card__badge-c3">C3 - Aplikasi</span>
             </div>
             <p className="review-card__question">
-              Apa gagasan utama dari teks bacaan pada Halaman 45?
+              Apa kesimpulan utama dari teks bacaan pada halaman 45?
             </p>
             <div className="review-card__options">
               <div className="review-option review-option--active">
                 <TickCircle size={16} variant="Bold" className="review-option__check" />
-                <span>1. Pahlawan nasional berjuang tanpa pamrih. (kunci)</span>
+                <span>A. Pahlawan nasional berjuang tanpa pamrih. (Kunci)</span>
               </div>
               <div className="review-option">
                 <span className="review-option__bullet" />
-                <span>2. Sejarah kemerdekaan sangat panjang.</span>
+                <span>B. Sejarah kemerdekaan sangat panjang.</span>
               </div>
             </div>
           </div>
@@ -206,11 +208,12 @@ export function Panel2Visual() {
       </div>
       <div className="review-panel-mock__content">
         <motion.div className="review-card" variants={itemVariants}>
-          <div className="review-card__header">
-            <span className="review-card__tag">02 · Pilihan Ganda</span>
+          <div className="review-card__header-row">
+            <span className="review-card__number">2</span>
+            <span className="review-card__badge-c3">C3 - Aplikasi</span>
           </div>
           <p className="review-card__question">
-            Apa gagasan utama dari teks bacaan pada Halaman 45?
+            Apa kesimpulan utama dari teks bacaan pada halaman 45?
           </p>
           <div className="review-card__options">
             <motion.div
@@ -220,11 +223,11 @@ export function Panel2Visual() {
               <motion.div variants={checkmarkVariants}>
                 <TickCircle size={16} variant="Bold" className="review-option__check" />
               </motion.div>
-              <span>1. Pahlawan nasional berjuang tanpa pamrih. <span className="key-badge">(kunci)</span></span>
+              <span>A. Pahlawan nasional berjuang tanpa pamrih. <span className="key-badge">(Kunci)</span></span>
             </motion.div>
             <motion.div className="review-option" variants={itemVariants}>
               <span className="review-option__bullet" />
-              <span>2. Sejarah kemerdekaan sangat panjang.</span>
+              <span>B. Sejarah kemerdekaan sangat panjang.</span>
             </motion.div>
           </div>
         </motion.div>
@@ -252,70 +255,74 @@ export function Panel3Visual() {
       opacity: 1,
       scale: 1,
       y: 0,
-      transition: { type: 'spring', stiffness: 260, damping: 20 },
+      transition: { type: 'spring' as const, stiffness: 260, damping: 20 },
     },
   };
 
   if (reduce) {
     return (
-      <div className="export-panel-mock">
-        <div className="export-panel-mock__card">
-          <DocumentText size={28} variant="Linear" className="export-panel-mock__icon" />
-          <span className="export-panel-mock__label">Cetak</span>
-        </div>
-        <div className="export-panel-mock__card">
-          <DocumentDownload size={28} variant="Linear" className="export-panel-mock__icon" />
-          <span className="export-panel-mock__label">PDF</span>
-        </div>
-        <div className="export-panel-mock__card">
-          <Link1 size={28} variant="Linear" className="export-panel-mock__icon" />
-          <span className="export-panel-mock__label">Tautan</span>
+      <div className="export-panel-container">
+        <div className="export-panel-mock">
+          <div className="export-panel-mock__card">
+            <DocumentText size={28} variant="Linear" className="export-panel-mock__icon" />
+            <span className="export-panel-mock__label">Cetak</span>
+          </div>
+          <div className="export-panel-mock__card">
+            <DocumentDownload size={28} variant="Linear" className="export-panel-mock__icon" />
+            <span className="export-panel-mock__label">PDF</span>
+          </div>
+          <div className="export-panel-mock__card">
+            <Link1 size={28} variant="Linear" className="export-panel-mock__icon" />
+            <span className="export-panel-mock__label">Tautan</span>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <motion.div
-      className="export-panel-mock"
-      variants={containerVariants}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, amount: 0.2 }}
-    >
+    <div className="export-panel-container">
       <motion.div
-        className="export-panel-mock__card"
-        variants={itemVariants}
-        whileHover={{ scale: 1.05, y: -6, boxShadow: '0 12px 28px rgba(23,23,23,0.06)' }}
-        whileTap={{ scale: 0.98 }}
+        className="export-panel-mock"
+        variants={containerVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
       >
-        <div className="export-panel-mock__icon-wrapper export-panel-mock__icon-wrapper--print">
-          <DocumentText size={28} variant="Linear" />
-        </div>
-        <span className="export-panel-mock__label">Cetak</span>
+        <motion.div
+          className="export-panel-mock__card"
+          variants={itemVariants}
+          whileHover={{ scale: 1.05, y: -6, boxShadow: '0 12px 28px rgba(23,23,23,0.06)' }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <div className="export-panel-mock__icon-wrapper export-panel-mock__icon-wrapper--print">
+            <DocumentText size={28} variant="Linear" />
+          </div>
+          <span className="export-panel-mock__label">Cetak</span>
+        </motion.div>
+        <motion.div
+          className="export-panel-mock__card"
+          variants={itemVariants}
+          whileHover={{ scale: 1.05, y: -6, boxShadow: '0 12px 28px rgba(23,23,23,0.06)' }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <div className="export-panel-mock__icon-wrapper export-panel-mock__icon-wrapper--download">
+            <DocumentDownload size={28} variant="Linear" />
+          </div>
+          <span className="export-panel-mock__label">PDF</span>
+        </motion.div>
+        <motion.div
+          className="export-panel-mock__card"
+          variants={itemVariants}
+          whileHover={{ scale: 1.05, y: -6, boxShadow: '0 12px 28px rgba(23,23,23,0.06)' }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <div className="export-panel-mock__icon-wrapper export-panel-mock__icon-wrapper--link">
+            <Link1 size={28} variant="Linear" />
+          </div>
+          <span className="export-panel-mock__label">Tautan</span>
+        </motion.div>
       </motion.div>
-      <motion.div
-        className="export-panel-mock__card"
-        variants={itemVariants}
-        whileHover={{ scale: 1.05, y: -6, boxShadow: '0 12px 28px rgba(23,23,23,0.06)' }}
-        whileTap={{ scale: 0.98 }}
-      >
-        <div className="export-panel-mock__icon-wrapper export-panel-mock__icon-wrapper--download">
-          <DocumentDownload size={28} variant="Linear" />
-        </div>
-        <span className="export-panel-mock__label">PDF</span>
-      </motion.div>
-      <motion.div
-        className="export-panel-mock__card"
-        variants={itemVariants}
-        whileHover={{ scale: 1.05, y: -6, boxShadow: '0 12px 28px rgba(23,23,23,0.06)' }}
-        whileTap={{ scale: 0.98 }}
-      >
-        <div className="export-panel-mock__icon-wrapper export-panel-mock__icon-wrapper--link">
-          <Link1 size={28} variant="Linear" />
-        </div>
-        <span className="export-panel-mock__label">Tautan</span>
-      </motion.div>
-    </motion.div>
+    </div>
   );
 }

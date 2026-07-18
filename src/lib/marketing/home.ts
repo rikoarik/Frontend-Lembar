@@ -52,7 +52,7 @@ export const homeContent: HomeContent = {
   hero: {
     eyebrow: 'WORKSPACE ASESMEN UNTUK GURU',
     title: 'Dari materi menjadi lembar ujian yang siap ditinjau.',
-    body: 'Susun draft dari Buku Siswa atau PDF Anda, periksa sumbernya, lalu cetak, download, atau bagikan.',
+    body: 'Susun draft soal dari Buku Siswa atau PDF Anda, periksa sumbernya, lalu cetak, download, atau bagikan.',
     meta: 'Guru tetap meninjau · Sumber terlihat · Siap cetak',
     primaryCta: 'create-free',
     secondaryCta: 'see-example',
@@ -62,18 +62,18 @@ export const homeContent: HomeContent = {
     draft: 'Draft',
     settings: ['Bahasa Indonesia · Kelas 5', 'Gagasan Utama · 20 soal'],
     documentTitle: 'Penilaian Akhir Semester',
-    duration: 'Bahasa Indonesia · Kelas 5',
+    duration: 'Bahasa Indonesia - Kelas 6',
     questions: [
       {
-        no: '01',
-        text: 'Setiap pagi, Budi selalu menyempatkan diri untuk membaca berita terbaru. Ia merasa bahwa dengan mengetahui perkembangan dunia, ia bisa lebih siap menghadapi tantangan. Kebiasaan ini sering ia lakukan sejak duduk di bangku sekolah dasar.\n\nGagasan utama paragraf di atas adalah …',
+        no: '1',
+        text: 'Setiap pagi, Budi selalu menyempatkan diri untuk membaca berita terkini. Ia merasa bahwa dengan mengetahui perkembangan dunia, ia bisa lebih siap menghadapi tantangan. Kebiasaan ini sudah ia tanamkan sejak duduk di bangku sekolah dasar.\n\nIde pokok paragraf di atas adalah...',
         answers: [
           'A. Budi suka membaca berita pagi hari.',
           'B. Kebiasaan membaca berita membuat Budi siap menghadapi tantangan.',
           'C. Budi belajar membaca sejak sekolah dasar.',
           'D. Berita pagi penting untuk perkembangan dunia.',
         ],
-        source: 'Rujukan: Buku Siswa B. Indo Kls 5, Hlm 72',
+        source: 'Buku Siswa Hal 45',
         status: 'Siap',
       },
     ],

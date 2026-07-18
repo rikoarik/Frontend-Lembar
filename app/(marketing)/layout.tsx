@@ -1,20 +1,15 @@
 import type { ReactNode } from 'react';
-import MarketingNavbar from '../components/marketing/MarketingNavbar';
-import MarketingFooter from '../components/marketing/MarketingFooter';
 import MotionProviders from '../components/marketing/MotionProviders';
 import Container from '../components/marketing/Container';
+import AnnouncementBanner from '../components/marketing/AnnouncementBanner';
 
 export default function MarketingLayout({ children }: { children: ReactNode }) {
   return (
     <MotionProviders>
-      <a className="skip-link" href="#main">
-        Lewati ke konten
-      </a>
-      <MarketingNavbar />
+      <AnnouncementBanner />
       <main id="main">
-        <Container className="marketing-page">{children}</Container>
+        {children}
       </main>
-      <MarketingFooter />
     </MotionProviders>
   );
 }

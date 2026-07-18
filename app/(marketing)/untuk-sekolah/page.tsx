@@ -1,174 +1,246 @@
-import { Book1, People, ReceiptItem, ShieldTick } from 'iconsax-react';
-import Button from '../../components/marketing/Button';
-import { RevealSection, RevealText, RevealMedia } from '../../components/marketing/Reveal';
-import { schoolContent } from '@/src/lib/marketing/school';
-import { getMarketingCta } from '@/src/lib/marketing/ctas';
+'use client';
 
-const featureIcon = {
-  people: People,
-  bank: Book1,
-  template: ReceiptItem,
-  audit: ShieldTick,
-} as const;
-
-export default function SchoolPage() {
-  const content = schoolContent;
-  const heroCta = getMarketingCta(content.hero.cta);
-  const finalCta = getMarketingCta(content.final.cta);
-
+export default function UntukSekolahPage() {
   return (
     <>
-      <RevealSection className="school-hero">
-        <div className="school-hero__copy">
-          <RevealText>
-            <h1 className="school-hero__title">{content.hero.title}</h1>
-          </RevealText>
-          <RevealText delay={0.05}>
-            <p className="school-hero__body">{content.hero.body}</p>
-          </RevealText>
-          <RevealText delay={0.1}>
-            <div className="school-hero__cta">
-              <Button ctaId={heroCta.id} href={heroCta.href} label={heroCta.label} />
-            </div>
-          </RevealText>
+      <nav className="w-full sticky top-0 z-50 glass-nav border-b border-border-subtle dark:border-outline-variant">
+        <div className="flex justify-between items-center h-unit-16 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
+          <div className="h-8 w-8 flex-shrink-0">
+            <img alt="lembar logo" className="h-full w-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAp9K9UpBGq9yeOy6I3PxGbePnCwa9H_U_j13dh3aLeDE7Xpey3plk3vcS9Qm8hePmA36hgFgFfqWaBE7DynvVBU8-VkN_84GcCwNalagl0xQUsI3GKLwX68vtO6wsj4EvslKJ-3n56fnKadcVUAqkIbbxmdeREsfROoHsp6ZJd0-vRRdU6adFbLVPTzh7F3x0BZtxH4aiwxdXGaNXGw5ysRu6VhS0JZ_ZhU1BVqmeFqlb-8GFKPXzzQZVuRC-vsTSmCY6Agq3p5A" />
+          </div>
+          <div className="hidden md:flex items-center gap-unit-8">
+            <a className="text-secondary hover:text-burgundy transition-colors duration-200" href="/">Produk</a>
+            <a className="text-burgundy font-bold border-b-2 border-burgundy pb-unit-1 transition-colors duration-200" href="/untuk-sekolah">Untuk Sekolah</a>
+            <a className="text-secondary hover:text-burgundy transition-colors duration-200" href="/harga">Harga</a>
+          </div>
+          <div className="flex items-center gap-unit-4">
+            <button className="text-ink font-label-semibold px-unit-4 py-unit-2 hover:opacity-80 transition-opacity">Masuk</button>
+            <button className="bg-burgundy text-on-primary px-unit-6 py-unit-3 rounded font-label-semibold hover:opacity-90 transition-opacity">Coba Gratis</button>
+          </div>
         </div>
+      </nav>
 
-        <RevealMedia className="school-hero__visual" delay={0.08}>
-          <div className="dashboard">
-            <div className="dashboard__head">
-              <div className="dashboard__brand">
-                <span className="dashboard__brand-mark" aria-hidden="true">
-                  L
-                </span>
+      <main>
+        <section className="pt-unit-16 pb-unit-16 px-margin-mobile md:px-margin-desktop bg-paper overflow-hidden">
+          <div className="max-w-container-max mx-auto grid grid-cols-1 lg:grid-cols-12 gap-unit-12 items-center">
+            <div className="lg:col-span-6">
+              <h1 className="font-h1 text-h1 text-ink mb-unit-6 leading-tight">Workspace Organisasi untuk Institusi Sekolah</h1>
+              <p className="font-body-lead text-body-lead text-secondary mb-unit-8 max-w-lg">
+                Sentralisasi pembuatan soal, manajemen akun guru, dan berbagi kuota AI dalam satu dasbor yang aman. Memastikan kualitas standar asesmen di seluruh departemen.
+              </p>
+              <div className="flex flex-wrap gap-unit-4">
+                <button className="bg-burgundy text-on-primary px-unit-8 py-unit-4 rounded font-label-semibold text-body-default shadow-sm hover:opacity-90 transition-all">Diskusikan kebutuhan sekolah</button>
+              </div>
+            </div>
+            <div className="lg:col-span-6 relative">
+              <div 
+                className="paper-card rounded-lg p-unit-6 w-full transform rotate-1 transition-transform duration-500" 
+                style={{ transform: 'translateY(0px) rotate(1deg)' }}
+                onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-4px) rotate(0deg)'}
+                onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0px) rotate(1deg)'}
+              >
+                <div className="flex items-center justify-between border-b border-border-subtle pb-unit-4 mb-unit-4">
+                  <div className="flex items-center gap-unit-3">
+                    <div className="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center">
+                      <span className="material-symbols-outlined text-secondary text-sm">school</span>
+                    </div>
+                    <div>
+                      <p className="font-label-semibold text-caption text-secondary uppercase tracking-wider">Dashboard Sekolah</p>
+                      <p className="font-h3 text-h3 text-ink">SMA Nusantara Raya</p>
+                    </div>
+                  </div>
+                  <div className="bg-surface-container px-unit-3 py-unit-1 rounded text-caption font-label-semibold text-burgundy">
+                    Aktif: 42 Guru
+                  </div>
+                </div>
+                <div className="space-y-unit-4">
+                  <div className="flex gap-unit-4">
+                    <div className="flex-1 p-unit-3 border border-border-subtle rounded-lg bg-background">
+                      <p className="text-caption text-secondary">Kuota AI Terpakai</p>
+                      <div className="mt-unit-2 h-2 bg-surface-container-highest rounded-full overflow-hidden">
+                        <div className="bg-burgundy h-full w-[65%]"></div>
+                      </div>
+                      <p className="text-caption font-label-semibold mt-unit-1">6,500 / 10,000 unit</p>
+                    </div>
+                    <div className="flex-1 p-unit-3 border border-border-subtle rounded-lg bg-background">
+                      <p className="text-caption text-secondary">Total Bank Soal</p>
+                      <p className="font-h3 text-h3 text-ink mt-unit-1">1,248 <span className="text-caption text-secondary font-normal">soal</span></p>
+                    </div>
+                  </div>
+                  <div className="p-unit-3 border border-border-subtle rounded-lg">
+                    <p className="text-caption font-label-semibold text-secondary mb-unit-2">Aktivitas Terkini</p>
+                    <div className="space-y-unit-2">
+                      <div className="flex items-center justify-between text-caption border-b border-border-subtle py-unit-1">
+                        <span className="text-ink">Bu Rina (Matematika) mengekspor 40 soal</span>
+                        <span className="text-secondary">2 menit lalu</span>
+                      </div>
+                      <div className="flex items-center justify-between text-caption border-b border-border-subtle py-unit-1">
+                        <span className="text-ink">Pak Budi menambahkan Template UAS Ganjil</span>
+                        <span className="text-secondary">1 jam lalu</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="py-unit-16 px-margin-mobile md:px-margin-desktop bg-white">
+          <div className="max-w-container-max mx-auto">
+            <div className="text-center mb-unit-12">
+              <span className="text-burgundy font-label-semibold uppercase tracking-widest text-caption">Fitur Enterprise</span>
+              <h2 className="font-h2 text-h2 text-ink mt-unit-2">Kendali Penuh di Tangan Pendidik</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-unit-6">
+              <div className="p-unit-8 border border-border-subtle rounded-xl hover:border-burgundy transition-colors group">
+                <div className="w-12 h-12 rounded bg-surface-container flex items-center justify-center mb-unit-6 group-hover:bg-burgundy group-hover:text-white transition-colors">
+                  <span className="material-symbols-outlined">group</span>
+                </div>
+                <h3 className="font-h3 text-h3 text-ink mb-unit-3">Manajemen Akun &amp; Kuota</h3>
+                <p className="text-secondary text-body-sm">Tambahkan atau hapus akses guru dengan mudah. Alokasikan kuota AI sesuai kebutuhan mata pelajaran.</p>
+              </div>
+              <div className="p-unit-8 border border-border-subtle rounded-xl hover:border-burgundy transition-colors group">
+                <div className="w-12 h-12 rounded bg-surface-container flex items-center justify-center mb-unit-6 group-hover:bg-burgundy group-hover:text-white transition-colors">
+                  <span className="material-symbols-outlined">database</span>
+                </div>
+                <h3 className="font-h3 text-h3 text-ink mb-unit-3">Bank Soal Internal</h3>
+                <p className="text-secondary text-body-sm">Simpan aset intelektual sekolah dalam repositori pribadi yang terenkripsi dan hanya dapat diakses staf internal.</p>
+              </div>
+              <div className="p-unit-8 border border-border-subtle rounded-xl hover:border-burgundy transition-colors group">
+                <div className="w-12 h-12 rounded bg-surface-container flex items-center justify-center mb-unit-6 group-hover:bg-burgundy group-hover:text-white transition-colors">
+                  <span className="material-symbols-outlined">brand_family</span>
+                </div>
+                <h3 className="font-h3 text-h3 text-ink mb-unit-3">Template Bersama</h3>
+                <p className="text-secondary text-body-sm">Samakan format header, font, dan branding ujian untuk seluruh kelas guna menjaga kredibilitas sekolah.</p>
+              </div>
+              <div className="p-unit-8 border border-border-subtle rounded-xl hover:border-burgundy transition-colors group">
+                <div className="w-12 h-12 rounded bg-surface-container flex items-center justify-center mb-unit-6 group-hover:bg-burgundy group-hover:text-white transition-colors">
+                  <span className="material-symbols-outlined">history_edu</span>
+                </div>
+                <h3 className="font-h3 text-h3 text-ink mb-unit-3">Audit Trail</h3>
+                <p className="text-secondary text-body-sm">Pantau log aktivitas pembuatan dan ekspor soal secara transparan untuk meminimalisir kebocoran data.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="py-unit-16 px-margin-mobile md:px-margin-desktop bg-paper">
+          <div className="max-w-container-max mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-unit-6">
+              <div className="lg:col-span-8 h-[400px] rounded-2xl overflow-hidden paper-card relative">
+                <div className="absolute inset-0 bg-gradient-to-br from-transparent to-black/5 z-10 pointer-events-none"></div>
+                <div className="p-unit-8 relative z-20">
+                  <span className="bg-burgundy/10 text-burgundy px-unit-3 py-unit-1 rounded font-label-semibold text-caption">Visual Insight</span>
+                  <h3 className="font-h2 text-h2 text-ink mt-unit-4 max-w-sm">Pantau Progress Asesmen Secara Real-time</h3>
+                </div>
+                <div className="absolute bottom-0 right-0 w-[65%] h-[60%] bg-white rounded-tl-3xl border-t border-l border-border-subtle p-unit-4 shadow-xl">
+                  <div className="flex gap-unit-3 h-full">
+                    <div className="flex-1 bg-surface-container rounded-lg p-unit-2 flex flex-col justify-end">
+                      <div className="h-[80%] w-full bg-burgundy rounded-t opacity-40"></div>
+                      <div className="h-[20%] w-full bg-burgundy rounded-b"></div>
+                      <p className="text-caption font-label-semibold mt-unit-1 text-center scale-90">Matematika</p>
+                    </div>
+                    <div className="flex-1 bg-surface-container rounded-lg p-unit-2 flex flex-col justify-end">
+                      <div className="h-[40%] w-full bg-burgundy rounded-t opacity-40"></div>
+                      <div className="h-[60%] w-full bg-burgundy rounded-b"></div>
+                      <p className="text-caption font-label-semibold mt-unit-1 text-center scale-90">B. Inggris</p>
+                    </div>
+                    <div className="flex-1 bg-surface-container rounded-lg p-unit-2 flex flex-col justify-end">
+                      <div className="h-[90%] w-full bg-burgundy rounded-t opacity-40"></div>
+                      <div className="h-[10%] w-full bg-burgundy rounded-b"></div>
+                      <p className="text-caption font-label-semibold mt-unit-1 text-center scale-90">Fisika</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="lg:col-span-4 h-[400px] bg-ink rounded-2xl p-unit-8 flex flex-col justify-between text-white overflow-hidden relative group">
+                <div className="relative z-10">
+                  <h3 className="font-h3 text-h3 mb-unit-4">Keamanan Data Prioritas Utama</h3>
+                  <p className="text-surface-variant text-body-sm">Enkripsi tingkat bank untuk setiap butir soal yang dibuat. Data sekolah Anda tetap menjadi milik sekolah Anda.</p>
+                </div>
+                <div className="relative z-10 flex items-center gap-unit-2 text-secondary-fixed">
+                  <span className="material-symbols-outlined text-burgundy">verified_user</span>
+                  <span className="text-caption font-label-semibold">ISO 27001 Certified Infrastructure</span>
+                </div>
+                <div className="absolute -bottom-20 -right-20 w-64 h-64 border border-white/10 rounded-full group-hover:scale-110 transition-transform duration-700"></div>
+                <div className="absolute -bottom-10 -right-10 w-48 h-48 border border-white/5 rounded-full group-hover:scale-125 transition-transform duration-700"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="py-unit-16 px-margin-mobile md:px-margin-desktop bg-white border-y border-border-subtle">
+          <div className="max-w-reading-max mx-auto text-center">
+            <h2 className="font-h2 text-h2 text-ink mb-unit-6">Program Sekolah (Pilot)</h2>
+            <div className="space-y-unit-8 text-left">
+              <div className="flex gap-unit-6">
+                <div className="flex-shrink-0 w-8 h-8 rounded-full border border-burgundy flex items-center justify-center text-burgundy font-bold">1</div>
                 <div>
-                  <span className="dashboard__eyebrow">{content.dashboard.eyebrow}</span>
-                  <span className="dashboard__school">{content.dashboard.school}</span>
+                  <h4 className="font-label-semibold text-body-default text-ink">Konsultasi Kebutuhan</h4>
+                  <p className="text-secondary text-body-sm mt-unit-1">Tim kami akan membantu memetakan kebutuhan jumlah guru dan volume asesmen bulanan sekolah Anda.</p>
                 </div>
               </div>
-              <span className="dashboard__active">{content.dashboard.active}</span>
-            </div>
-            <div className="dashboard__metrics">
-              <div className="metric">
-                <span className="metric__label">{content.dashboard.quotaLabel}</span>
-                <div className="metric__bar">
-                  <div className="metric__bar-fill" />
-                </div>
-                <span className="metric__value">{content.dashboard.quota}</span>
-              </div>
-              <div className="metric">
-                <span className="metric__label">{content.dashboard.bankLabel}</span>
-                <span className="metric__big">
-                  <strong>1,248</strong>
-                  <span>{content.dashboard.bank.replace(/^1,248\s/, '')}</span>
-                </span>
-              </div>
-            </div>
-            <div className="dashboard__activity">
-              <span className="metric__label">{content.dashboard.activityLabel}</span>
-              <ul>
-                {content.dashboard.activities.map((activity) => (
-                  <li key={activity}>
-                    <span>{activity.split(' · ')[0]}</span>
-                    <span className="dashboard__activity-time">{activity.split(' · ')[1]}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </RevealMedia>
-      </RevealSection>
-
-      <RevealSection className="school-features" aria-labelledby="school-features-heading">
-        <RevealText>
-          <div className="section-heading section-heading--center">
-            <p className="eyebrow">{content.features.eyebrow}</p>
-            <h2 id="school-features-heading" className="section-heading__title">
-              {content.features.title}
-            </h2>
-          </div>
-        </RevealText>
-        <div className="school-features__grid">
-          {content.features.items.map((feature, index) => {
-            const Icon = featureIcon[feature.icon];
-            return (
-              <RevealSection key={feature.title} className="school-feature" delay={index * 0.04}>
-                <span className="school-feature__icon" aria-hidden="true">
-                  <Icon size={20} variant="Linear" />
-                </span>
-                <h3 className="school-feature__title">{feature.title}</h3>
-                <p className="school-feature__body">{feature.body}</p>
-              </RevealSection>
-            );
-          })}
-        </div>
-      </RevealSection>
-
-      <section className="school-insight" aria-labelledby="school-insight-heading">
-        <div className="school-insight__grid">
-          <RevealMedia className="school-insight__panel">
-            <span className="eyebrow">{content.insight.eyebrow}</span>
-            <h3 id="school-insight-heading" className="school-insight__title">
-              {content.insight.title}
-            </h3>
-            <div className="school-insight__bars">
-              {content.insight.subjects.map((subject, index) => (
-                <div
-                  key={subject}
-                  className="school-insight__bar"
-                  data-variant={index % 3}
-                  style={{ '--bar-height': `${60 + ((index * 18) % 40)}%` } as React.CSSProperties}
-                >
-                  <span>{subject}</span>
-                </div>
-              ))}
-            </div>
-          </RevealMedia>
-
-          <RevealText className="school-insight__security" delay={0.05}>
-            <h3 className="school-insight__security-title">{content.insight.securityTitle}</h3>
-            <p className="school-insight__security-body">{content.insight.securityBody}</p>
-            <div className="school-insight__security-meta">
-              <ShieldTick size={16} variant="Linear" aria-hidden="true" />
-              <span>{content.insight.securityMeta}</span>
-            </div>
-          </RevealText>
-        </div>
-      </section>
-
-      <RevealSection className="school-pilot" aria-labelledby="school-pilot-heading">
-        <RevealText>
-          <div className="section-heading section-heading--center">
-            <h2 id="school-pilot-heading" className="section-heading__title">
-              {content.pilot.title}
-            </h2>
-          </div>
-        </RevealText>
-        <ol className="school-pilot__steps">
-          {content.pilot.steps.map((step, index) => (
-            <li key={step.no} className="school-pilot__step">
-              <RevealSection delay={index * 0.05}>
-                <span className="school-pilot__no">{step.no}</span>
+              <div className="flex gap-unit-6">
+                <div className="flex-shrink-0 w-8 h-8 rounded-full border border-burgundy flex items-center justify-center text-burgundy font-bold">2</div>
                 <div>
-                  <h3 className="school-pilot__step-title">{step.title}</h3>
-                  <p className="school-pilot__step-body">{step.body}</p>
+                  <h4 className="font-label-semibold text-body-default text-ink">Onboarding &amp; Pelatihan</h4>
+                  <p className="text-secondary text-body-sm mt-unit-1">Sesi workshop eksklusif untuk guru agar mahir menggunakan asisten AI lembar dalam hitungan menit.</p>
                 </div>
-              </RevealSection>
-            </li>
-          ))}
-        </ol>
-      </RevealSection>
-
-      <RevealSection className="school-final" aria-labelledby="school-final-heading">
-        <div className="school-final__inner">
-          <div>
-            <h2 id="school-final-heading" className="school-final__title">
-              {content.final.title}
-            </h2>
-            <p className="school-final__body">{content.final.body}</p>
+              </div>
+              <div className="flex gap-unit-6">
+                <div className="flex-shrink-0 w-8 h-8 rounded-full border border-burgundy flex items-center justify-center text-burgundy font-bold">3</div>
+                <div>
+                  <h4 className="font-label-semibold text-body-default text-ink">Implementasi Bertahap</h4>
+                  <p className="text-secondary text-body-sm mt-unit-1">Mulai dengan satu departemen atau jenjang kelas sebelum diperluas ke seluruh institusi.</p>
+                </div>
+              </div>
+            </div>
           </div>
-          <Button ctaId={finalCta.id} href={finalCta.href} label={finalCta.label} />
+        </section>
+
+        <section className="py-unit-16 px-margin-mobile md:px-margin-desktop bg-paper relative overflow-hidden">
+          <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#171717 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
+          <div className="max-w-container-max mx-auto paper-card rounded-2xl p-unit-12 flex flex-col md:flex-row items-center justify-between gap-unit-8 relative z-10">
+            <div className="text-center md:text-left">
+              <h2 className="font-h2 text-h2 text-ink mb-unit-2">Siap untuk digitalisasi asesmen sekolah?</h2>
+              <p className="text-secondary text-body-default">Bergabunglah dengan puluhan institusi yang telah meningkatkan efisiensi guru hingga 70%.</p>
+            </div>
+            <button className="bg-burgundy text-on-primary px-unit-12 py-unit-4 rounded font-label-semibold text-body-lead hover:shadow-lg transition-all transform active:scale-95 whitespace-nowrap">
+              Diskusikan kebutuhan sekolah
+            </button>
+          </div>
+        </section>
+      </main>
+
+      <footer className="w-full py-unit-12 border-t border-border-strong dark:border-outline bg-paper dark:bg-surface-container-low">
+        <div className="flex flex-col md:flex-row justify-between items-start gap-unit-12 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
+          <div className="flex flex-col gap-unit-6">
+            <div className="h-unit-8 w-unit-8">
+              <img alt="lembar logo" className="h-full w-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAp9K9UpBGq9yeOy6I3PxGbePnCwa9H_U_j13dh3aLeDE7Xpey3plk3vcS9Qm8hePmA36hgFgFfqWaBE7DynvVBU8-VkN_84GcCwNalagl0xQUsI3GKLwX68vtO6wsj4EvslKJ-3n56fnKadcVUAqkIbbxmdeREsfROoHsp6ZJd0-vRRdU6adFbLVPTzh7F3x0BZtxH4aiwxdXGaNXGw5ysRu6VhS0JZ_ZhU1BVqmeFqlb-8GFKPXzzQZVuRC-vsTSmCY6Agq3p5A" />
+            </div>
+            <p className="font-caption text-caption text-secondary max-w-[240px]">© 2024 lembar. Dirancang untuk keahlian pendidik.</p>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-2 gap-x-unit-12 gap-y-unit-8">
+            <div className="flex flex-col gap-unit-4">
+              <span className="font-label-semibold text-ink">Layanan</span>
+              <div className="flex flex-col gap-unit-2">
+                <a className="font-caption text-caption text-secondary hover:text-burgundy transition-colors" href="#">Produk</a>
+                <a className="font-caption text-caption text-secondary hover:text-burgundy transition-colors" href="/untuk-sekolah">Untuk Sekolah</a>
+                <a className="font-caption text-caption text-secondary hover:text-burgundy transition-colors" href="/harga">Harga</a>
+              </div>
+            </div>
+            <div className="flex flex-col gap-unit-4">
+              <span className="font-label-semibold text-ink">Perusahaan</span>
+              <div className="flex flex-col gap-unit-2">
+                <a className="font-caption text-caption text-secondary hover:text-burgundy transition-colors" href="#">Tentang Kami</a>
+                <a className="font-caption text-caption text-secondary hover:text-burgundy transition-colors" href="#">Pusat Bantuan</a>
+                <a className="font-caption text-caption text-secondary hover:text-burgundy transition-colors" href="#">Kebijakan Privasi</a>
+              </div>
+            </div>
+          </div>
         </div>
-      </RevealSection>
+      </footer>
     </>
   );
 }

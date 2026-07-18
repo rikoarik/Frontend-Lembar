@@ -19,7 +19,7 @@ export default function MarketingNavbar() {
       <div className="nav__inner">
         <Link className="nav__brand" href="/" aria-label="lembar — beranda">
           <Logo variant="mark" className="nav__mark" alt="" priority />
-          <span className="nav__wordmark">lembar</span>
+          <span className="nav__wordmark sr-only">lembar</span>
         </Link>
 
         <nav aria-label="Bagian" className="nav__links">

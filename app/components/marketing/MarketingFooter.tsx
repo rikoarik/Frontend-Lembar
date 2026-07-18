@@ -6,8 +6,7 @@ export default function MarketingFooter() {
     <footer className="footer" aria-label="Footer">
       <div className="footer__inner page">
         <div className="footer__brand-block">
-          <Logo variant="mark" className="footer__wordmark" alt={marketingFooter.brand} />
-          <span className="footer__brand-text">{marketingFooter.brand}</span>
+          <Logo variant="mark" className="footer__wordmark" alt={marketingFooter.tagline} />
           <p className="footer__tagline">
             {marketingFooter.tagline} {marketingFooter.copyright}
           </p>
