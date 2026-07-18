@@ -135,11 +135,11 @@ export default function UntukSekolahPage() {
                 
                 <div className="p-unit-8 relative z-20">
                   <span className="bg-burgundy/10 text-burgundy px-unit-3 py-unit-1 rounded-full font-label-semibold text-caption border border-burgundy/20">Visual Insight</span>
-                  <h3 className="font-h2 text-h2 text-ink mt-unit-4 max-w-[280px]">Pantau Progress Asesmen Secara Real-time</h3>
+                  <h3 className="font-h2 text-h2 text-ink mt-unit-4 max-w-[85%] sm:max-w-[40%]">Pantau Progress Asesmen Secara Real-time</h3>
                 </div>
                 
                 {/* macOS Window Widget */}
-                <div className="absolute -bottom-4 -right-4 w-[65%] h-[58%] bg-white rounded-t-xl border border-border-strong shadow-[0_20px_50px_rgba(0,0,0,0.12)] group-hover:-translate-y-4 group-hover:-translate-x-4 transition-transform duration-700 ease-out flex flex-col z-30 overflow-hidden">
+                <div className="absolute -bottom-4 -right-4 w-[85%] sm:w-[55%] h-[55%] sm:h-[75%] bg-white rounded-t-xl border border-border-strong shadow-[0_20px_50px_rgba(0,0,0,0.12)] group-hover:-translate-y-4 group-hover:-translate-x-4 transition-transform duration-700 ease-out flex flex-col z-30 overflow-hidden">
                   {/* macOS Title Bar */}
                   <div className="flex items-center justify-between px-4 py-3 bg-paper border-b border-border-subtle select-none">
                     <div className="flex gap-1.5">
