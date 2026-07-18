@@ -212,7 +212,7 @@ export default function UntukSekolahPage() {
                 </div>
 
                 {/* Extra Floating Badge (Aktivitas Guru) */}
-                <div className="absolute top-1/3 right-[10%] bg-white p-unit-3 rounded-xl border border-border-strong shadow-lg z-40 hidden sm:flex items-center gap-3 group-hover:-translate-y-8 transition-transform duration-500 ease-out">
+                <div className="absolute top-unit-8 right-unit-8 bg-white p-unit-3 rounded-xl border border-border-strong shadow-lg z-40 hidden sm:flex items-center gap-3 group-hover:-translate-y-2 transition-transform duration-500 ease-out">
                   <div className="w-8 h-8 rounded-full bg-burgundy/10 text-burgundy flex items-center justify-center font-bold text-sm">B</div>
                   <div>
                     <p className="text-caption font-bold text-ink leading-tight">Pak Budi (Fisika)</p>
