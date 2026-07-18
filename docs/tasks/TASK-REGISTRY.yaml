@@ -50,11 +50,18 @@ tasks:
     repository: both
     sprint: X0
     title: Accept bootstrap stack and contract baseline
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [O0-01]
     decisions: [D-014, D-015, D-016, D-017, D-018, D-020]
     outcome: Owner-approved Gate A recorded without implementation.
     evidence: [decision register update, contradiction scan]
+    accepted_at: "2026-07-19"
+    accepted_by: owner-override-autopilot
+    evidence_notes:
+      - "Frontend baseline accepted at origin/main@299fd95."
+      - "D-014 and D-015 are recorded Accepted in docs/product/DECISIONS.md and match the Next.js App Router + strict TypeScript implementation."
+      - "OpenAPI baseline parses as 3.1.0 with 21 paths; API-consuming frontend tasks remain parked until backend-owned artifacts are compatible."
+      - "D-016, D-018, and D-020 remain backend/output-stage decisions outside this frontend execution; no backend repo modification performed."
 
   - id: F0-01
     repository: Frontend-Lembar
