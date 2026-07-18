@@ -8,7 +8,8 @@ export default function AnnouncementBanner() {
   useEffect(() => {
     const isDismissed = localStorage.getItem('announcement_dismissed');
     if (!isDismissed) {
-      setIsVisible(true);
+      const timer = setTimeout(() => setIsVisible(true), 0);
+      return () => clearTimeout(timer);
     }
   }, []);
 

@@ -128,29 +128,95 @@ export default function UntukSekolahPage() {
         <section className="py-unit-16 px-margin-mobile md:px-margin-desktop bg-paper">
           <div className="max-w-container-max mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-unit-6">
-              <div className="lg:col-span-8 h-[400px] rounded-2xl overflow-hidden paper-card relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-transparent to-black/5 z-10 pointer-events-none"></div>
+              <div className="lg:col-span-8 h-[400px] rounded-2xl overflow-hidden bg-surface border border-border-strong relative group page-shadow">
+                {/* Subtle Grid Background Pattern */}
+                <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px] pointer-events-none"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-burgundy/5 via-transparent to-burgundy/5 z-10 pointer-events-none"></div>
+                
                 <div className="p-unit-8 relative z-20">
-                  <span className="bg-burgundy/10 text-burgundy px-unit-3 py-unit-1 rounded font-label-semibold text-caption">Visual Insight</span>
-                  <h3 className="font-h2 text-h2 text-ink mt-unit-4 max-w-sm">Pantau Progress Asesmen Secara Real-time</h3>
+                  <span className="bg-burgundy/10 text-burgundy px-unit-3 py-unit-1 rounded-full font-label-semibold text-caption border border-burgundy/20">Visual Insight</span>
+                  <h3 className="font-h2 text-h2 text-ink mt-unit-4 max-w-[280px]">Pantau Progress Asesmen Secara Real-time</h3>
                 </div>
-                <div className="absolute bottom-0 right-0 w-[65%] h-[60%] bg-white rounded-tl-3xl border-t border-l border-border-subtle p-unit-4 shadow-xl">
-                  <div className="flex gap-unit-3 h-full">
-                    <div className="flex-1 bg-surface-container rounded-lg p-unit-2 flex flex-col justify-end">
-                      <div className="h-[80%] w-full bg-burgundy rounded-t opacity-40"></div>
-                      <div className="h-[20%] w-full bg-burgundy rounded-b"></div>
-                      <p className="text-caption font-label-semibold mt-unit-1 text-center scale-90">Matematika</p>
+                
+                {/* macOS Window Widget */}
+                <div className="absolute -bottom-4 -right-4 w-[65%] h-[58%] bg-white rounded-t-xl border border-border-strong shadow-[0_20px_50px_rgba(0,0,0,0.12)] group-hover:-translate-y-4 group-hover:-translate-x-4 transition-transform duration-700 ease-out flex flex-col z-30 overflow-hidden">
+                  {/* macOS Title Bar */}
+                  <div className="flex items-center justify-between px-4 py-3 bg-paper border-b border-border-subtle select-none">
+                    <div className="flex gap-1.5">
+                      <span className="w-3 h-3 rounded-full bg-red-400"></span>
+                      <span className="w-3 h-3 rounded-full bg-yellow-400"></span>
+                      <span className="w-3 h-3 rounded-full bg-green-400"></span>
                     </div>
-                    <div className="flex-1 bg-surface-container rounded-lg p-unit-2 flex flex-col justify-end">
-                      <div className="h-[40%] w-full bg-burgundy rounded-t opacity-40"></div>
-                      <div className="h-[60%] w-full bg-burgundy rounded-b"></div>
-                      <p className="text-caption font-label-semibold mt-unit-1 text-center scale-90">B. Inggris</p>
+                    <div className="text-[11px] font-label-semibold text-secondary flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-[14px]">speed</span>
+                      dashboard_kelas_10.xlsx
                     </div>
-                    <div className="flex-1 bg-surface-container rounded-lg p-unit-2 flex flex-col justify-end">
-                      <div className="h-[90%] w-full bg-burgundy rounded-t opacity-40"></div>
-                      <div className="h-[10%] w-full bg-burgundy rounded-b"></div>
-                      <p className="text-caption font-label-semibold mt-unit-1 text-center scale-90">Fisika</p>
+                    <div className="w-12"></div> {/* Spacer to center the title */}
+                  </div>
+
+                  {/* Widget Content */}
+                  <div className="flex-grow p-unit-6 flex gap-unit-6">
+                    {/* Left Mini Stats */}
+                    <div className="hidden sm:flex flex-col gap-unit-3 w-1/3 border-r border-border-subtle pr-unit-4">
+                      <div className="bg-paper p-unit-3 rounded-lg border border-border-subtle">
+                        <span className="text-[10px] text-secondary font-label-semibold uppercase tracking-wider block">Total Soal</span>
+                        <span className="font-h3 text-h3 text-ink">60 <span className="text-caption text-secondary font-normal">Butir</span></span>
+                      </div>
+                      <div className="bg-paper p-unit-3 rounded-lg border border-border-subtle">
+                        <span className="text-[10px] text-secondary font-label-semibold uppercase tracking-wider block">Rata-rata Progress</span>
+                        <span className="font-h3 text-h3 text-green-700">73%</span>
+                      </div>
                     </div>
+
+                    {/* Right Chart Area */}
+                    <div className="flex-grow flex flex-col h-full justify-between">
+                      {/* Chart Grid Lines & Bars */}
+                      <div className="relative flex-grow flex gap-unit-4 items-end pb-unit-2 min-h-[120px]">
+                        {/* Grid Y-Lines */}
+                        <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
+                          <div className="w-full border-t border-dashed border-border-subtle/50 h-0"></div>
+                          <div className="w-full border-t border-dashed border-border-subtle/50 h-0"></div>
+                          <div className="w-full border-t border-dashed border-border-subtle/50 h-0"></div>
+                          <div className="w-full border-t border-dashed border-border-subtle/50 h-0"></div>
+                        </div>
+
+                        {/* Bar Matematika */}
+                        <div className="flex-1 flex flex-col justify-end group/bar h-full relative cursor-crosshair z-10">
+                          <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-ink text-white text-xs py-1 px-2 rounded opacity-0 group-hover/bar:opacity-100 group-hover/bar:-translate-y-1 transition-all duration-300 pointer-events-none z-20 whitespace-nowrap shadow-md">85% • 17/20 Soal</div>
+                          <div className="w-full bg-surface-container rounded-t-full h-full relative overflow-hidden">
+                            <div className="absolute bottom-0 w-full h-[85%] bg-gradient-to-t from-burgundy via-burgundy/80 to-rose-500 rounded-t-full group-hover/bar:opacity-90 transition-all duration-300"></div>
+                          </div>
+                          <p className="text-caption font-label-semibold mt-unit-2 text-center text-secondary">MTK</p>
+                        </div>
+
+                        {/* Bar B. Inggris */}
+                        <div className="flex-1 flex flex-col justify-end group/bar h-full relative cursor-crosshair z-10">
+                          <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-ink text-white text-xs py-1 px-2 rounded opacity-0 group-hover/bar:opacity-100 group-hover/bar:-translate-y-1 transition-all duration-300 pointer-events-none z-20 whitespace-nowrap shadow-md">42% • 8/20 Soal</div>
+                          <div className="w-full bg-surface-container rounded-t-full h-full relative overflow-hidden">
+                            <div className="absolute bottom-0 w-full h-[42%] bg-gradient-to-t from-burgundy via-burgundy/80 to-rose-500 rounded-t-full group-hover/bar:opacity-90 transition-all duration-300"></div>
+                          </div>
+                          <p className="text-caption font-label-semibold mt-unit-2 text-center text-secondary">ING</p>
+                        </div>
+
+                        {/* Bar Fisika */}
+                        <div className="flex-1 flex flex-col justify-end group/bar h-full relative cursor-crosshair z-10">
+                          <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-ink text-white text-xs py-1 px-2 rounded opacity-0 group-hover/bar:opacity-100 group-hover/bar:-translate-y-1 transition-all duration-300 pointer-events-none z-20 whitespace-nowrap shadow-md">92% • 18/20 Soal</div>
+                          <div className="w-full bg-surface-container rounded-t-full h-full relative overflow-hidden">
+                            <div className="absolute bottom-0 w-full h-[92%] bg-gradient-to-t from-burgundy via-burgundy/80 to-rose-500 rounded-t-full group-hover/bar:opacity-90 transition-all duration-300"></div>
+                          </div>
+                          <p className="text-caption font-label-semibold mt-unit-2 text-center text-secondary">FIS</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Extra Floating Badge (Aktivitas Guru) */}
+                <div className="absolute top-1/3 right-[10%] bg-white p-unit-3 rounded-xl border border-border-strong shadow-lg z-40 hidden sm:flex items-center gap-3 group-hover:-translate-y-8 transition-transform duration-500 ease-out">
+                  <div className="w-8 h-8 rounded-full bg-burgundy/10 text-burgundy flex items-center justify-center font-bold text-sm">B</div>
+                  <div>
+                    <p className="text-caption font-bold text-ink leading-tight">Pak Budi (Fisika)</p>
+                    <p className="text-[10px] text-secondary">Mengekspor 18 Soal ke PDF</p>
                   </div>
                 </div>
               </div>
