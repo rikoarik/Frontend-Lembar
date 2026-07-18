@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
 import {
   Book1,
   DocumentDownload,
@@ -68,6 +69,35 @@ export default function HomePage() {
   };
 
 
+  const previewContainerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.15,
+        delayChildren: 0.1,
+      },
+    },
+  };
+
+  const previewItemVariants = {
+    hidden: { opacity: 0, y: 15 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const },
+    },
+  };
+
+  const badgeVariants = {
+    hidden: { opacity: 0, scale: 0.5 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: { type: 'spring' as const, stiffness: 200, damping: 10, delay: 0.8 },
+    },
+  };
+
   return (
     <>
       <RevealSection className="hero" id="produk">
@@ -99,7 +129,15 @@ export default function HomePage() {
         </div>
 
         <RevealMedia className="hero__preview" delay={0.08}>
-          <div className="preview" id="contoh-hasil" aria-label="Contoh kerja Generate Lembar">
+          <motion.div
+            className="preview"
+            id="contoh-hasil"
+            aria-label="Contoh kerja Generate Lembar"
+            variants={previewContainerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.2 }}
+          >
             <div className="preview__topbar">
               <div className="preview__brand">
                 <span className="preview__brand-mark" aria-hidden="true">
@@ -126,11 +164,15 @@ export default function HomePage() {
               </div>
 
               {content.preview.questions.map((question) => (
-                <article key={question.no} className="question">
+                <motion.article
+                  key={question.no}
+                  className="question"
+                  variants={previewItemVariants}
+                >
                   <span className="question__index">{question.no}</span>
                   <div className="question__body">
                     <span className="question__no">Soal {question.no.replace(/^0+/, '')}</span>
-                    <span className="question__text">{question.text}</span>
+                    <span className="question__text" style={{ whiteSpace: 'pre-line' }}>{question.text}</span>
                     <ul className="question__answers">
                       {question.answers.map((answer, index) => (
                         <li key={answer}>
@@ -143,18 +185,21 @@ export default function HomePage() {
                     </ul>
                     <p className="question__source">{question.source}</p>
                   </div>
-                  <span
-                    className={`badge ${
-                      question.status === 'Siap' ? 'badge--success' : 'badge--warning'
-                    }`}
+                  <motion.span
+                    className={`badge badge--success`}
+                    variants={badgeVariants}
                   >
                     {question.status}
-                  </span>
-                </article>
+                  </motion.span>
+                </motion.article>
               ))}
             </div>
 
-            <div className="preview__outputs" aria-label="Pilihan hasil akhir">
+            <motion.div
+              className="preview__outputs"
+              aria-label="Pilihan hasil akhir"
+              variants={previewItemVariants}
+            >
               {content.preview.outputs.map((output, index) => (
                 <span
                   key={output}
@@ -172,8 +217,8 @@ export default function HomePage() {
                   {output}
                 </span>
               ))}
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </RevealMedia>
       </RevealSection>
 
@@ -242,42 +287,53 @@ export default function HomePage() {
 
       <section className="trust" aria-labelledby="trust-heading">
         <div className="trust__inner">
-          <RevealText className="trust__copy">
-            <span className="trust__icon" aria-hidden="true">
-              <ShieldTick size={28} variant="Linear" />
-            </span>
-            <p className="eyebrow eyebrow--dark">{content.trust.eyebrow}</p>
+          <div className="trust__header">
             <h2 id="trust-heading" className="trust__headline">
               {content.trust.title}
             </h2>
-            <p className="trust__body">{content.trust.body}</p>
-            <a className="trust__link" href="#dokumen">
-              {content.trust.link} →
-            </a>
-          </RevealText>
+          </div>
 
-          <RevealMedia className="trust__specimen" delay={0.06}>
-            <div className="trust__specimen-head">
-              <span>{content.trust.specimen.no}</span>
-              <span className="status status--ready">{content.trust.specimen.status}</span>
-            </div>
-            <p className="trust__question">{content.trust.specimen.question}</p>
-            <p className="trust__answer">{content.trust.specimen.answer}</p>
-            <div className="trust__reason">
-              <TickCircle size={18} variant="Linear" aria-hidden="true" />
-              <div>
-                <span className="trust__reason-title">Alasan</span>
-                <span className="trust__reason-body">{content.trust.specimen.reason}</span>
+          <div className="trust__grid">
+            <RevealMedia className="trust-question-card" delay={0.05}>
+              <div className="trust-question-card__header">
+                <span className="trust-question-card__tag">Q3 · Pilihan Ganda</span>
+                <span className="badge badge--success">{content.trust.specimen.status}</span>
               </div>
-            </div>
-            <div className="trust__reason">
-              <Book1 size={18} variant="Linear" aria-hidden="true" />
-              <div>
-                <span className="trust__reason-title">Sumber</span>
-                <span className="trust__reason-body">{content.trust.specimen.source}</span>
+              <p className="trust-question-card__text">{content.trust.specimen.question}</p>
+              <div className="trust-question-card__options">
+                <div className="trust-option trust-option--active">
+                  <span>A. Tidak adanya akar pohon penahan air</span>
+                  <span className="trust-option__arrow" aria-hidden="true">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="5" y1="12" x2="19" y2="12"></line>
+                      <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                  </span>
+                </div>
+                <div className="trust-option">
+                  <span>B. Curah hujan yang rendah.</span>
+                </div>
+                <div className="trust-option">
+                  <span>C. Jenis tanah liat yang keras.</span>
+                </div>
               </div>
-            </div>
-          </RevealMedia>
+            </RevealMedia>
+
+            <RevealMedia className="trust-source-card" delay={0.2}>
+              <div className="trust-source-card__header">
+                <span className="trust-source-card__title">Sumber Kutipan</span>
+                <a href="#dokumen" className="trust-source-card__link">
+                  {content.trust.link}
+                </a>
+              </div>
+              <div className="trust-source-card__body">
+                <p className="trust-source-card__quote">
+                  "…erosi paling sering terjadi pada lereng yang tidak ditumbuhi habis. Tanpa adanya sistem perakaran pohon yang kuat untuk mengikat tanah dan menyerap air hujan, lapisan atas tanah sangat mudah terbawa arus air…"
+                </p>
+                <span className="trust-source-card__ref">- {content.trust.specimen.source}</span>
+              </div>
+            </RevealMedia>
+          </div>
         </div>
       </section>
 
