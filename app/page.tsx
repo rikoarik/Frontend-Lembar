@@ -1,26 +1,26 @@
 import Link from 'next/link';
+import Reveal from './components/Reveal';
 
-type PreviewQuestion = {
-  no: string;
-  stem: string;
-  options: string[];
-};
-
-const previewQuestions: PreviewQuestion[] = [
+const workflow = [
   {
-    no: 'Soal 1',
-    stem: 'Pecahan yang senilai dengan 2/4 adalah …',
-    options: ['1/2', '2/6', '3/8', '4/5'],
+    no: '01',
+    title: 'Generate Lembar',
+    body: 'Pilih materi, kelas, dan jenis lembar. Sistem menyiapkan draf terstruktur dengan kisi-kisi dan tingkat kesulitan.',
   },
   {
-    no: 'Soal 2',
-    stem: 'Bangun datar yang memiliki empat sisi sama panjang adalah …',
-    options: ['Persegi panjang', 'Segitiga', 'Persegi', 'Lingkaran'],
+    no: '02',
+    title: 'Review & Koreksi',
+    body: 'Setiap soal dapat Anda terima, sunting, atau minta ulang drafnya. Sumber tetap terlihat di samping soal.',
   },
   {
-    no: 'Soal 3',
-    stem: 'Hasil dari 0,25 × 40 adalah …',
-    options: ['8', '10', '12', '20'],
+    no: '03',
+    title: 'Export PDF, Cetak, atau Tautan',
+    body: 'Hasil akhir dicetak langsung atau diunduh sebagai PDF A4. Buat tautan terbatas untuk dibagikan.',
+  },
+  {
+    no: '04',
+    title: 'Bank Soal',
+    body: 'Simpan soal tepercaya Anda sebagai arsip pribadi. Versi, sumber, dan revisi rapi untuk lintas tahun ajaran.',
   },
 ];
 
@@ -52,195 +52,290 @@ export default function Home() {
           </Link>
 
           <nav aria-label="Bagian" className="nav__links">
-            <a href="#cara-kerja">Cara Kerja</a>
-            <a href="#untuk-guru">Untuk Guru</a>
+            <a href="#produk">Produk</a>
             <a href="#untuk-sekolah">Untuk Sekolah</a>
             <a href="#harga">Harga</a>
           </nav>
 
           <div className="nav__cta">
-            <a className="btn btn--quiet" href="#masuk">
-              Masuk
-            </a>
-            <a className="btn btn--primary" href="#coba-gratis">
-              Coba Gratis
-            </a>
+            <Link className="btn btn--primary" href="#coba-gratis">
+              Mulai
+            </Link>
           </div>
         </div>
       </header>
 
       <main id="main" className="page">
         <section className="hero" aria-labelledby="hero-heading">
-          <p className="hero__eyebrow">Workspace asesmen untuk guru Indonesia</p>
-          <h1 id="hero-heading" className="hero__heading">
-            Buat lembar soal siap cetak dalam hitungan menit — draf AI, tinjauan guru, hasil akhir.
-          </h1>
-          <p className="hero__sub">
-            Dirancang untuk guru dan sekolah di Indonesia: draf terstruktur dari materi Anda, sumber
-            jelas, kunci dan pembahasan opsional, hasil akhir siap cetak atau diunduh sebagai PDF.
-          </p>
-          <div className="hero__cta">
-            <a className="btn btn--primary btn--lg" href="#coba-gratis">
-              Coba gratis
-            </a>
-            <a className="btn btn--quiet btn--lg" href="#untuk-sekolah">
-              Untuk sekolah
-            </a>
-          </div>
-          <p className="hero__meta">
-            Bahasa Indonesia · Privat secara bawaan · Guru tetap meninjau
-          </p>
-        </section>
-
-        <section className="preview" aria-label="Contoh tampilan lembar dan panel tinjauan">
-          <div className="preview__sheet" role="figure" aria-label="Lembar soal contoh">
-            <div className="preview__sheet-head">
-              <span className="preview__sheet-title">Lembar Soal — Matematika Kelas 5</span>
-              <span className="preview__sheet-meta">20 soal · 60 menit</span>
+          <Reveal className="hero__copy">
+            <p className="hero__eyebrow">Workspace asesmen untuk guru Indonesia</p>
+            <h1 id="hero-heading" className="hero__heading">
+              Buat lembar soal siap cetak dalam hitungan menit — draf AI, tinjauan guru, hasil
+              akhir.
+            </h1>
+            <p className="hero__sub">
+              Dirancang untuk guru dan sekolah di Indonesia: draf terstruktur dari materi Anda,
+              sumber yang terlihat jelas, kunci dan pembahasan opsional, hasil akhir yang siap cetak
+              atau diunduh sebagai PDF.
+            </p>
+            <div className="hero__cta">
+              <Link className="btn btn--primary btn--lg" href="#coba-gratis">
+                Coba gratis
+              </Link>
+              <Link className="btn btn--quiet btn--lg" href="#untuk-sekolah">
+                Untuk sekolah
+              </Link>
             </div>
-            <ol className="preview__list">
-              {previewQuestions.map((q) => (
-                <li key={q.no} className="preview__item">
-                  <div className="preview__item-head">
-                    <span className="preview__no">{q.no}</span>
-                    <span className="preview__stem">{q.stem}</span>
+            <p className="hero__meta">
+              Bahasa Indonesia · Privat secara bawaan · Guru tetap meninjau
+            </p>
+          </Reveal>
+
+          <Reveal className="hero__preview" delay={0.08}>
+            <div className="preview" aria-label="Contoh kerja Generate Lembar">
+              <div className="preview__panel">
+                <div className="preview__head">
+                  <span className="preview__title">Generate Lembar</span>
+                  <span className="preview__pill">Draf</span>
+                </div>
+
+                <ul className="preview__controls" aria-label="Pengaturan lembar">
+                  <li>
+                    <span className="preview__label">Kelas</span>
+                    <span className="preview__value">V (SD)</span>
+                  </li>
+                  <li>
+                    <span className="preview__label">Mata pelajaran</span>
+                    <span className="preview__value">Matematika</span>
+                  </li>
+                  <li>
+                    <span className="preview__label">Materi</span>
+                    <span className="preview__value">Pecahan senilai</span>
+                  </li>
+                  <li>
+                    <span className="preview__label">Jenis lembar</span>
+                    <span className="preview__value">Pilihan ganda · 20 soal</span>
+                  </li>
+                </ul>
+
+                <div className="preview__sheet">
+                  <div className="preview__sheet-head">
+                    <span className="preview__sheet-title">Lembar Soal · Kelas V</span>
+                    <span className="preview__sheet-meta">20 soal · 60 menit</span>
                   </div>
-                  <ul className="preview__options">
-                    {q.options.map((option, i) => (
-                      <li key={option}>
-                        <span className="preview__bullet">{String.fromCharCode(65 + i)}</span>
-                        <span>{option}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </li>
-              ))}
-            </ol>
-            <p className="preview__note">Contoh tampilan · bukan soal ujian riil.</p>
-          </div>
+                  <ol className="preview__list">
+                    <li className="preview__item preview__item--review">
+                      <div className="preview__rail" aria-hidden="true" />
+                      <div className="preview__body">
+                        <span className="preview__no">Soal 1</span>
+                        <span className="preview__stem">
+                          Pecahan yang senilai dengan 2/4 adalah …
+                        </span>
+                        <ul className="preview__options">
+                          <li>
+                            <span className="preview__bullet">A</span>1/2
+                          </li>
+                          <li>
+                            <span className="preview__bullet">B</span>2/6
+                          </li>
+                          <li>
+                            <span className="preview__bullet">C</span>3/8
+                          </li>
+                          <li>
+                            <span className="preview__bullet">D</span>4/5
+                          </li>
+                        </ul>
+                      </div>
+                      <span className="badge badge--success">Final</span>
+                    </li>
+                    <li className="preview__item preview__item--review">
+                      <div className="preview__rail" aria-hidden="true" />
+                      <div className="preview__body">
+                        <span className="preview__no">Soal 2</span>
+                        <span className="preview__stem">
+                          Bangun datar yang memiliki empat sisi sama panjang adalah …
+                        </span>
+                        <ul className="preview__options">
+                          <li>
+                            <span className="preview__bullet">A</span>Persegi panjang
+                          </li>
+                          <li>
+                            <span className="preview__bullet">B</span>Segitiga
+                          </li>
+                          <li>
+                            <span className="preview__bullet">C</span>Persegi
+                          </li>
+                          <li>
+                            <span className="preview__bullet">D</span>Lingkaran
+                          </li>
+                        </ul>
+                      </div>
+                      <span className="badge badge--warning">Tinjau</span>
+                    </li>
+                  </ol>
+                </div>
 
-          <aside className="preview__panel" aria-label="Panel tinjauan dan sumber">
-            <div className="preview__panel-section">
-              <h2 className="preview__panel-title">Status draf</h2>
-              <ul className="preview__status">
-                <li>
-                  <span className="badge badge--success">Final</span>
-                  <span className="preview__status-text">16 soal siap dipakai</span>
-                </li>
-                <li>
-                  <span className="badge badge--warning">Tinjau</span>
-                  <span className="preview__status-text">3 soal butuh keputusan</span>
-                </li>
-                <li>
-                  <span className="badge badge--muted">Draf</span>
-                  <span className="preview__status-text">1 soal belum disetujui</span>
-                </li>
-              </ul>
+                <div className="preview__outputs" aria-label="Pilihan hasil akhir">
+                  <span className="chip chip--solid">PDF A4</span>
+                  <span className="chip">Cetak</span>
+                  <span className="chip">Tautan</span>
+                </div>
+                <p className="preview__note">Contoh tampilan · bukan soal ujian riil.</p>
+              </div>
             </div>
+          </Reveal>
+        </section>
 
-            <div className="preview__panel-section">
-              <h2 className="preview__panel-title">Sumber</h2>
-              <ul className="preview__sources">
-                <li>
-                  <span className="preview__source-name">Buku Matematika SD 5 · Hal. 42–48</span>
-                  <span className="preview__source-meta">2 kutipan · v2024</span>
-                </li>
-                <li>
-                  <span className="preview__source-name">Capaian Pembelajaran · Fase C</span>
-                  <span className="preview__source-meta">Kurikulum Merdeka</span>
-                </li>
-              </ul>
+        <section id="produk" className="workflow" aria-labelledby="workflow-heading">
+          <Reveal>
+            <div className="section__head section__head--center">
+              <p className="section__eyebrow">Alur kerja</p>
+              <h2 id="workflow-heading" className="section__title">
+                Empat tahap yang menjaga Anda tetap memegang kendali.
+              </h2>
+              <p className="section__lede">
+                Setiap tahap memberi ruang untuk menerima, menolak, atau mengubah sebelum hasil
+                final dicetak atau dibagikan.
+              </p>
             </div>
-          </aside>
-        </section>
+          </Reveal>
 
-        <section id="cara-kerja" className="tiles" aria-labelledby="cara-kerja-heading">
-          <div className="section__head">
-            <h2 id="cara-kerja-heading" className="section__title">
-              Tiga alur yang menjaga Anda tetap memegang kendali.
-            </h2>
-            <p className="section__lede">
-              Setiap tahap memberi Anda ruang untuk menerima, menolak, atau mengubah.
-            </p>
-          </div>
-          <div className="tiles__grid">
-            <article className="tile">
-              <span className="tile__no">01</span>
-              <h3 className="tile__title">Generate Lembar</h3>
-              <p className="tile__body">
-                Pilih materi dan konteks kelas. Sistem menyiapkan draf terstruktur dengan kisi-kisi,
-                tingkat kesulitan, dan ringkasan yang bisa Anda tinjau.
-              </p>
-            </article>
-            <article className="tile">
-              <span className="tile__no">02</span>
-              <h3 className="tile__title">Bank Soal</h3>
-              <p className="tile__body">
-                Simpan soal tepercaya Anda sebagai arsip pribadi. Versi, sumber, dan revisi tetap
-                rapi untuk dipakai lintas kelas dan tahun ajaran.
-              </p>
-            </article>
-            <article className="tile">
-              <span className="tile__no">03</span>
-              <h3 className="tile__title">Riwayat &amp; Export</h3>
-              <p className="tile__body">
-                Lacak setiap lembar dari draf hingga final. Hasil akhir dapat dicetak langsung atau
-                diunduh sebagai PDF A4 yang siap dibagikan.
-              </p>
-            </article>
+          <div className="workflow__grid">
+            {workflow.map((step, i) => (
+              <Reveal key={step.no} delay={0.04 * i}>
+                <article className="step">
+                  <span className="step__no">{step.no}</span>
+                  <h3 className="step__title">{step.title}</h3>
+                  <p className="step__body">{step.body}</p>
+                </article>
+              </Reveal>
+            ))}
           </div>
         </section>
 
-        <section className="split" aria-label="Untuk guru dan untuk sekolah">
-          <article id="untuk-guru" className="split__col">
-            <p className="split__eyebrow">Untuk Guru</p>
-            <h2 className="split__title">Mulai dari satu kelas, kelola semuanya tanpa ribet.</h2>
-            <ul className="split__list">
-              <li>Workspace pribadi, rapi, dan siap pakai setiap pagi.</li>
-              <li>Reuse draf antar kelas dan tahun ajaran.</li>
-              <li>Privasi materi Anda adalah bawaan, bukan add-on.</li>
-            </ul>
-          </article>
-          <article id="untuk-sekolah" className="split__col">
-            <p className="split__eyebrow">Untuk Sekolah</p>
-            <h2 className="split__title">Satu dasbor untuk admin, bank soal untuk guru.</h2>
-            <ul className="split__list">
-              <li>Anggota, kursi, dan kuota terlihat tanpa drama.</li>
-              <li>Template dan bank internal yang tetap milik sekolah.</li>
-              <li>Tanpa mengekspos isi workspace pribadi tiap guru.</li>
-            </ul>
-          </article>
+        <section className="audience" aria-labelledby="audience-heading">
+          <Reveal>
+            <div className="section__head">
+              <p className="section__eyebrow">Untuk siapa</p>
+              <h2 id="audience-heading" className="section__title">
+                Satu produk, dua cara pakai yang jelas.
+              </h2>
+            </div>
+          </Reveal>
+
+          <div className="audience__grid">
+            <Reveal>
+              <article id="untuk-sekolah" className="audience__card">
+                <p className="audience__eyebrow">Untuk Sekolah</p>
+                <h3 className="audience__title">
+                  Dasbor admin, bank soal internal, dan kursi yang terlihat.
+                </h3>
+                <ul className="audience__list">
+                  <li>Anggota, kursi, dan kuota dalam satu tampilan.</li>
+                  <li>Template dan bank soal yang tetap milik sekolah.</li>
+                  <li>Isi workspace pribadi tiap guru tidak diekspos.</li>
+                </ul>
+                <Link className="audience__link" href="#coba-gratis">
+                  Hubungi untuk uji coba →
+                </Link>
+              </article>
+            </Reveal>
+            <Reveal delay={0.06}>
+              <article className="audience__card">
+                <p className="audience__eyebrow">Untuk Guru Individual</p>
+                <h3 className="audience__title">
+                  Mulai dari satu kelas, kelola semuanya tanpa ribet.
+                </h3>
+                <ul className="audience__list">
+                  <li>Workspace pribadi, rapi, dan siap dipakai setiap pagi.</li>
+                  <li>Reuse draf antar kelas dan tahun ajaran.</li>
+                  <li>Privasi materi Anda adalah bawaan, bukan add-on.</li>
+                </ul>
+                <Link className="audience__link" href="#coba-gratis">
+                  Buat workspace gratis →
+                </Link>
+              </article>
+            </Reveal>
+          </div>
         </section>
 
-        <section id="harga" className="pricing" aria-labelledby="harga-heading">
-          <div className="section__head">
-            <h2 id="harga-heading" className="section__title">
-              Paket dan harga
-            </h2>
-            <p className="section__lede">
-              Struktur paket sedang kami finalkan. Detail nominal akan diumumkan setelah uji coba
-              dengan guru dan sekolah.
-            </p>
+        <section className="trust" aria-labelledby="trust-heading">
+          <Reveal>
+            <div className="section__head">
+              <p className="section__eyebrow">Prinsip</p>
+              <h2 id="trust-heading" className="section__title">
+                Tiga janji yang tidak kami langgar.
+              </h2>
+            </div>
+          </Reveal>
+          <div className="trust__grid">
+            <Reveal>
+              <article className="trust__card">
+                <span className="trust__no">01</span>
+                <h3 className="trust__title">Selaras Kurikulum Merdeka</h3>
+                <p className="trust__body">
+                  Pengaturan kelas dan mata pelajaran mengikuti Capaian Pembelajaran Fase C.
+                </p>
+              </article>
+            </Reveal>
+            <Reveal delay={0.05}>
+              <article className="trust__card">
+                <span className="trust__no">02</span>
+                <h3 className="trust__title">Sumber terlihat, bukan disembunyikan</h3>
+                <p className="trust__body">
+                  Setiap soal menunjuk ke bagian materi atau dokumen yang dipakai sebagai rujukan.
+                </p>
+              </article>
+            </Reveal>
+            <Reveal delay={0.1}>
+              <article className="trust__card">
+                <span className="trust__no">03</span>
+                <h3 className="trust__title">Tinjauan guru sebelum final</h3>
+                <p className="trust__body">
+                  Hasil akhir hanya keluar setelah guru menyetujui tiap butir yang akan dipakai.
+                </p>
+              </article>
+            </Reveal>
           </div>
-          <p className="pricing__placeholder">Segera diumumkan</p>
-          <p className="pricing__note">
-            Tertarik untuk uji coba sekolah? <a href="#untuk-sekolah">Hubungi kami</a>.
-          </p>
+        </section>
+
+        <section id="harga" className="cta" aria-labelledby="cta-heading">
+          <Reveal>
+            <div className="cta__inner">
+              <h2 id="cta-heading" className="cta__title">
+                Mulai dari satu lembar.
+              </h2>
+              <p className="cta__sub">
+                Coba gratis untuk guru individual. Untuk sekolah, paket dan harga diumumkan setelah
+                uji coba terbatas.
+              </p>
+              <div className="cta__actions">
+                <Link className="btn btn--primary btn--lg" href="#coba-gratis">
+                  Coba gratis
+                </Link>
+                <Link className="btn btn--quiet btn--lg" href="#untuk-sekolah">
+                  Untuk sekolah
+                </Link>
+              </div>
+            </div>
+          </Reveal>
         </section>
       </main>
 
       <footer className="footer" aria-label="Footer">
         <div className="footer__inner">
-          <p className="footer__brand">lembar</p>
-          <p className="footer__tagline">
-            Workspace asesmen untuk guru Indonesia. Privat secara bawaan.
-          </p>
+          <div>
+            <p className="footer__brand">lembar</p>
+            <p className="footer__tagline">
+              Workspace asesmen untuk guru Indonesia. Privat secara bawaan.
+            </p>
+          </div>
           <a className="footer__link" href="#untuk-sekolah">
             Untuk sekolah
           </a>
           <p className="footer__meta">
-            © {new Date().getFullYear()} lembar. Nama dan materi adalah placeholder, bukan data
-            pelanggan.
+            © {new Date().getFullYear()} lembar. Nama dan materi pada contoh adalah placeholder,
+            bukan data pelanggan.
           </p>
         </div>
       </footer>
