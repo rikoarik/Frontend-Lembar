@@ -163,37 +163,6 @@ export default function HargaPage() {
           </div>
         </section>
       </main>
-
-      <footer className="w-full py-unit-12 bg-paper border-t border-border-strong">
-        <div className="px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-start gap-unit-12">
-            <div className="flex flex-col gap-unit-6">
-              <div className="h-unit-8 w-unit-8">
-                <img alt="lembar logo" className="h-full w-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCARfxfBB_WCV4WkF3OmtcsQ2wj08axCXGcgeT6O0XjgoJEsYbwdhfrDY6LT9_hD6Ha3-fKvXLgwfRsmvSQfFMGrLeehUD6JPilFLCz_yaNCRRbGsiPubCWMNLjmWIwixhYEcDuOS19zunQgfMZaRVLV2E7z1rP0J1u2xL3lPobcaGM6wHEapPu5cgRculgnypYd6I2icHwZ2UfAYZHVQwU_PQzgMKNUIgs1E0cCLgbzY9Usw9QPnAaBFOP1LD5NWhRek4SekbZVQ" />
-              </div>
-              <p className="font-caption text-caption text-secondary max-w-[240px]">© 2024 lembar. Dirancang untuk keahlian pendidik.</p>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-2 gap-x-unit-12 gap-y-unit-8">
-              <div className="flex flex-col gap-unit-4">
-                <span className="font-label-semibold text-ink">Layanan</span>
-                <div className="flex flex-col gap-unit-2">
-                  <a className="font-caption text-caption text-secondary hover:text-burgundy transition-colors" href="/">Produk</a>
-                  <a className="font-caption text-caption text-secondary hover:text-burgundy transition-colors" href="/untuk-sekolah">Untuk Sekolah</a>
-                  <a className="font-caption text-caption text-secondary hover:text-burgundy transition-colors" href="/harga">Harga</a>
-                </div>
-              </div>
-              <div className="flex flex-col gap-unit-4">
-                <span className="font-label-semibold text-ink">Perusahaan</span>
-                <div className="flex flex-col gap-unit-2">
-                  <a className="font-caption text-caption text-secondary hover:text-burgundy transition-colors" href="#">Tentang Kami</a>
-                  <a className="font-caption text-caption text-secondary hover:text-burgundy transition-colors" href="#">Pusat Bantuan</a>
-                  <a className="font-caption text-caption text-secondary hover:text-burgundy transition-colors" href="#">Kebijakan Privasi</a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </footer>
     </>
   );
 }
