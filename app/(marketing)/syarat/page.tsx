@@ -1,46 +1,72 @@
 import SubPageNavbar from '@/app/components/marketing/SubPageNavbar';
+import Link from 'next/link';
 
 export default function SyaratPage() {
   return (
     <>
       <SubPageNavbar />
       <main>
-        <section className="py-unit-16 px-margin-mobile md:px-margin-desktop bg-paper">
+        <section className="pt-unit-6 pb-unit-16 px-margin-mobile md:px-margin-desktop bg-paper">
           <div className="max-w-container-max mx-auto">
-            <span className="bg-burgundy/10 text-burgundy px-unit-3 py-unit-1 rounded-full font-label-semibold text-caption border border-burgundy/20">Legal</span>
-            <h1 className="font-display-xl-mobile md:font-display-xl text-ink mt-unit-4 mb-unit-6 max-w-2xl">Syarat & Ketentuan</h1>
-            <p className="text-secondary text-body-sm">Terakhir diperbarui: 1 Januari 2024</p>
+            <Link href="/" className="inline-flex items-center gap-1.5 text-secondary hover:text-burgundy text-caption transition-colors mb-unit-8 group">
+              <span className="material-symbols-outlined text-[16px] group-hover:-translate-x-0.5 transition-transform">arrow_back</span>
+              Beranda
+            </Link>
+
+            <div className="max-w-2xl">
+              <h1 className="font-display-xl-mobile md:font-display-xl text-ink leading-[1.1] mb-unit-3">
+                Syarat & Ketentuan
+              </h1>
+              <p className="text-secondary text-body-sm">Terakhir diperbarui: 18 Juli 2026</p>
+            </div>
           </div>
         </section>
 
         <section className="py-unit-16 px-margin-mobile md:px-margin-desktop bg-surface">
           <div className="max-w-3xl mx-auto">
-            <div className="flex flex-col gap-unit-8">
+            <article className="flex flex-col gap-unit-10">
               <div>
-                <h2 className="font-h3 text-h3 text-ink mb-unit-3">1. Penerimaan Ketentuan</h2>
-                <p className="text-secondary text-body-sm leading-relaxed">Dengan mengakses dan menggunakan platform lembar, Anda menyetujui untuk terikat oleh Syarat & Ketentuan ini. Jika Anda tidak menyetujui ketentuan ini, harap jangan menggunakan layanan kami.</p>
+                <h2 className="font-h3 text-h3 text-ink mb-unit-3">1. Penerimaan ketentuan</h2>
+                <p className="text-secondary text-body-sm leading-[1.8]">
+                  Dengan mengakses dan menggunakan platform lembar, Anda menyetujui untuk terikat oleh syarat ini. Jika Anda mewakili institusi pendidikan, Anda menyatakan memiliki wewenang untuk mengikat institusi tersebut.
+                </p>
               </div>
+
               <div>
-                <h2 className="font-h3 text-h3 text-ink mb-unit-3">2. Akun Pengguna</h2>
-                <p className="text-secondary text-body-sm leading-relaxed">Anda bertanggung jawab untuk menjaga kerahasiaan akun dan kata sandi Anda. Anda setuju untuk segera memberitahu kami jika terjadi penggunaan yang tidak sah atas akun Anda.</p>
+                <h2 className="font-h3 text-h3 text-ink mb-unit-3">2. Akun pengguna</h2>
+                <p className="text-secondary text-body-sm leading-[1.8]">
+                  Anda bertanggung jawab menjaga kerahasiaan kredensial akun Anda. Satu akun untuk satu pengguna — berbagi akun tidak diperkenankan. Segera hubungi kami jika terjadi akses tidak sah.
+                </p>
               </div>
+
               <div>
-                <h2 className="font-h3 text-h3 text-ink mb-unit-3">3. Penggunaan Layanan</h2>
-                <p className="text-secondary text-body-sm leading-relaxed">Layanan lembar hanya boleh digunakan untuk tujuan pendidikan yang sah. Dilarang menggunakan platform untuk membuat konten yang melanggar hukum, menyesatkan, atau merugikan pihak lain.</p>
+                <h2 className="font-h3 text-h3 text-ink mb-unit-3">3. Penggunaan yang diizinkan</h2>
+                <p className="text-secondary text-body-sm leading-[1.8]">
+                  Layanan lembar hanya boleh digunakan untuk tujuan pendidikan yang sah. Dilarang keras: membuat konten yang melanggar hukum, melakukan reverse-engineering platform, atau menggunakan API secara berlebihan di luar batas wajar.
+                </p>
               </div>
+
               <div>
-                <h2 className="font-h3 text-h3 text-ink mb-unit-3">4. Hak Kekayaan Intelektual</h2>
-                <p className="text-secondary text-body-sm leading-relaxed">Soal yang Anda buat melalui lembar tetap menjadi hak kekayaan intelektual Anda atau institusi Anda. Kami tidak mengklaim kepemilikan atas konten yang dibuat oleh pengguna.</p>
+                <h2 className="font-h3 text-h3 text-ink mb-unit-3">4. Kepemilikan konten</h2>
+                <p className="text-secondary text-body-sm leading-[1.8]">
+                  Soal yang Anda buat melalui lembar <strong className="text-ink">tetap 100% milik Anda</strong> atau institusi Anda. Kami tidak mengklaim kepemilikan atas konten buatan pengguna. Anda memberikan kami lisensi terbatas hanya untuk menyimpan dan menampilkan konten tersebut dalam platform.
+                </p>
               </div>
+
               <div>
-                <h2 className="font-h3 text-h3 text-ink mb-unit-3">5. Pembatasan Tanggung Jawab</h2>
-                <p className="text-secondary text-body-sm leading-relaxed">lembar disediakan &quot;sebagaimana adanya&quot;. Kami berupaya sebaik mungkin untuk menjaga ketersediaan dan keakuratan layanan, namun tidak menjamin bahwa layanan akan selalu bebas dari gangguan atau kesalahan.</p>
+                <h2 className="font-h3 text-h3 text-ink mb-unit-3">5. Ketersediaan layanan</h2>
+                <p className="text-secondary text-body-sm leading-[1.8]">
+                  Kami menargetkan uptime 99.9% dan melakukan maintenance terjadwal di luar jam kerja. Namun, kami tidak menjamin layanan akan selalu bebas gangguan. Notifikasi maintenance akan dikirim minimal 24 jam sebelumnya.
+                </p>
               </div>
+
               <div>
-                <h2 className="font-h3 text-h3 text-ink mb-unit-3">6. Perubahan Ketentuan</h2>
-                <p className="text-secondary text-body-sm leading-relaxed">Kami berhak mengubah Syarat & Ketentuan ini sewaktu-waktu. Perubahan akan diberitahukan melalui email atau notifikasi di platform. Penggunaan berkelanjutan setelah perubahan berarti Anda menyetujui ketentuan yang diperbarui.</p>
+                <h2 className="font-h3 text-h3 text-ink mb-unit-3">6. Perubahan ketentuan</h2>
+                <p className="text-secondary text-body-sm leading-[1.8]">
+                  Perubahan material akan diberitahukan via email minimal 30 hari sebelum berlaku. Untuk perubahan minor (typo, klarifikasi), kami akan memperbarui tanggal &quot;Terakhir diperbarui&quot; di halaman ini.
+                </p>
               </div>
-            </div>
+            </article>
           </div>
         </section>
       </main>

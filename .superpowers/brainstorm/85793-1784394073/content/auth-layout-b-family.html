@@ -1,0 +1,91 @@
+<style>
+  .showcase { display:grid; gap:22px; }
+  .desktop-row { display:grid; grid-template-columns:1.15fr .85fr; gap:18px; }
+  .flow-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
+  .frame { overflow:hidden; border:1px solid #d8d0c5; border-radius:14px; background:#fffcf7; box-shadow:0 8px 24px rgb(23 23 23 / .06); font-family:Inter,ui-sans-serif,system-ui; color:#171717; }
+  .frame-label { padding:9px 12px; border-bottom:1px solid #e8e1d7; background:#fff; color:#625d55; font-size:10px; font-weight:700; }
+  .topbar { height:44px; display:flex; align-items:center; justify-content:space-between; padding:0 16px; border-bottom:1px solid #d8d0c5; background:#fffcf7; font-size:9px; }
+  .brand { display:flex; align-items:center; gap:7px; font-weight:800; font-size:13px; }
+  .mark { width:12px; height:17px; border-left:4px solid #a3202b; border-bottom:4px solid #171717; }
+  .muted { color:#625d55; }
+  .split { min-height:385px; display:grid; grid-template-columns:43% 57%; }
+  .story { background:#171717; color:#fffcf7; padding:34px 26px; display:flex; flex-direction:column; justify-content:space-between; }
+  .eyebrow { color:#e8a8ae; font-size:8px; font-weight:800; letter-spacing:.09em; text-transform:uppercase; }
+  .story h3 { font-size:22px; line-height:1.12; letter-spacing:-.025em; margin:11px 0; }
+  .story p { color:#cbc4ba; font-size:9px; line-height:1.6; margin:0; }
+  .proof { border-top:1px solid #3a3733; padding-top:13px; font-size:8px; line-height:1.55; color:#aba39a; }
+  .form-pane { display:flex; align-items:center; justify-content:center; padding:30px 28px; background:#f7f3ec; }
+  .form { width:100%; max-width:300px; }
+  .form h3 { font-size:20px; letter-spacing:-.02em; margin:0 0 6px; }
+  .form > p { font-size:9px; line-height:1.5; margin:0 0 16px; color:#625d55; }
+  .field { margin-bottom:9px; }
+  .field label { display:block; font-size:8px; font-weight:750; margin:0 0 4px; }
+  .input { height:32px; display:flex; align-items:center; padding:0 9px; border:1px solid #b9afa2; border-radius:7px; background:#fff; color:#726c63; font-size:8px; }
+  .button { height:34px; display:flex; align-items:center; justify-content:center; border-radius:7px; background:#a3202b; color:#fff; font-size:9px; font-weight:800; margin-top:11px; }
+  .text-link { font-size:8px; color:#a3202b; font-weight:750; }
+  .form-foot { display:flex; justify-content:space-between; margin-top:10px; font-size:8px; color:#625d55; }
+  .mini-frame { min-height:268px; }
+  .mini-body { padding:20px 18px; }
+  .mini-body h4 { font-size:14px; margin:0 0 5px; }
+  .mini-body p { font-size:8px; line-height:1.5; color:#625d55; margin:0 0 13px; }
+  .notice { border:1px solid #d8d0c5; border-radius:7px; padding:9px; background:#fff; font-size:8px; line-height:1.45; margin-bottom:10px; }
+  .notice.warning { background:#fff0cf; border-color:#e9cf91; color:#704500; }
+  .notice.danger { background:#fae5e8; border-color:#e1acb3; color:#7c1725; }
+  .notice.success { background:#e4f2ea; border-color:#a4cbb5; color:#155c3d; }
+  .mobile-shell { display:flex; justify-content:center; padding:18px; background:#e9e3da; }
+  .mobile { width:255px; height:470px; border:6px solid #171717; border-radius:24px; overflow:hidden; background:#f7f3ec; box-shadow:0 12px 30px rgb(23 23 23 / .16); }
+  .mobile .topbar { height:48px; padding:0 13px; }
+  .mobile-form { padding:30px 17px; }
+  .mobile-form h3 { font-size:20px; margin:0 0 7px; }
+  .mobile-form p { color:#625d55; font-size:9px; line-height:1.55; margin:0 0 20px; }
+  .mobile-note { margin-top:18px; padding-top:14px; border-top:1px solid #d8d0c5; font-size:8px; color:#625d55; line-height:1.5; }
+  .section-title { margin:0 0 10px; font-size:14px; }
+  .caption { color:#625d55; font-size:11px; line-height:1.5; margin:-4px 0 12px; }
+  .decision { border:1px solid #d8d0c5; border-radius:12px; background:#fff; padding:16px 18px; }
+  .decision ul { margin:8px 0 0 18px; color:#625d55; font-size:11px; line-height:1.65; }
+  @media(max-width:1000px){ .desktop-row,.flow-grid{grid-template-columns:1fr}.split{grid-template-columns:1fr}.story{display:none}.form-pane{min-height:380px}.mobile{width:280px} }
+</style>
+
+<h2>Arah B diterapkan ke seluruh identity flow</h2>
+<p class="subtitle">Desktop memakai editorial split. Mobile menghapus sisi cerita agar fokus form, aksesibilitas, dan ruang vertikal tetap terjaga.</p>
+
+<div class="showcase">
+  <div class="desktop-row">
+    <div>
+      <h3 class="section-title">Masuk — desktop</h3>
+      <div class="frame">
+        <div class="frame-label">1280 px · editorial split</div>
+        <div class="topbar"><div class="brand"><span class="mark"></span>lembar</div><span class="muted">Kembali ke beranda</span></div>
+        <div class="split">
+          <aside class="story"><div><div class="eyebrow">Ruang kerja guru</div><h3>Dari materi ke lembar siap ditinjau.</h3><p>Buat draft, periksa setiap soal, lalu finalkan dengan kendali Anda.</p></div><div class="proof">Konten Anda tetap private secara default.<br>AI membantu membuat draft — guru tetap memfinalkan.</div></aside>
+          <main class="form-pane"><div class="form"><h3>Masuk ke lembar</h3><p>Lanjutkan pekerjaan Anda dari ruang kerja terakhir.</p><div class="field"><label>Username, email, atau nomor telepon</label><div class="input">Masukkan identitas akun</div></div><div class="field"><label>Kata sandi</label><div class="input">••••••••••••</div></div><div class="text-link">Lupa kata sandi?</div><div class="button">Masuk</div><div class="form-foot"><span>Belum punya akun?</span><span class="text-link">Daftar gratis</span></div></div></main>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <h3 class="section-title">Daftar — mobile</h3>
+      <div class="frame mobile-shell">
+        <div class="mobile">
+          <div class="topbar"><div class="brand"><span class="mark"></span>lembar</div><span class="muted">Tutup</span></div>
+          <div class="mobile-form form"><h3>Buat akun lembar</h3><p>Siapkan ruang kerja pribadi untuk membuat lembar pertama.</p><div class="field"><label>Username</label><div class="input">contoh: bu-rina</div></div><div class="field"><label>Email</label><div class="input">nama@email.com</div></div><div class="field"><label>Nomor telepon</label><div class="input">+62 812 3456 7890</div></div><div class="field"><label>Kata sandi</label><div class="input">Minimal 12 karakter</div></div><div class="button">Buat akun</div><div class="mobile-note">Dengan membuat akun, Anda menyetujui Syarat Penggunaan dan Kebijakan Privasi.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <h3 class="section-title">Recovery & invitation states</h3>
+    <p class="caption">State yang membutuhkan tindakan tetap inline; tidak mengandalkan toast atau warna saja.</p>
+    <div class="flow-grid">
+      <div class="frame mini-frame"><div class="frame-label">Lupa kata sandi · sukses generik</div><div class="mini-body"><h4>Periksa instruksi pemulihan</h4><p>Jika akun ditemukan, kami akan mengirimkan langkah berikutnya melalui metode pemulihan yang tersedia.</p><div class="notice success"><strong>Permintaan diterima.</strong><br>Respons tetap sama meskipun akun tidak ditemukan.</div><span class="text-link">Kembali ke halaman masuk</span></div></div>
+      <div class="frame mini-frame"><div class="frame-label">Reset · token invalid</div><div class="mini-body"><h4>Tautan tidak dapat digunakan</h4><p>Tautan mungkin sudah kedaluwarsa, pernah digunakan, atau tidak valid.</p><div class="notice danger"><strong>Tautan pemulihan tidak valid.</strong><br>Minta tautan baru untuk melanjutkan.</div><div class="button">Minta tautan baru</div></div></div>
+      <div class="frame mini-frame"><div class="frame-label">Undangan sekolah · expired</div><div class="mini-body"><h4>Undangan telah kedaluwarsa</h4><p>Demi keamanan, undangan hanya berlaku dalam waktu terbatas.</p><div class="notice warning"><strong>Undangan tidak lagi aktif.</strong><br>Hubungi admin sekolah untuk meminta undangan baru.</div><span class="text-link">Kembali ke beranda</span></div></div>
+    </div>
+  </div>
+
+  <div class="decision">
+    <strong>Aturan visual yang akan dikunci</strong>
+    <ul><li>Editorial panel hanya desktop/tablet lebar; form tunggal pada mobile.</li><li>Satu CTA primer per halaman, link sekunder tidak bersaing.</li><li>Logo, Paper/Ink/Lembar Red, Inter, border, radius, dan spacing mengikuti design system.</li><li>Tidak ada ilustrasi AI, gradient, glassmorphism, testimonial, atau klaim tanpa bukti.</li></ul>
+  </div>
+</div>

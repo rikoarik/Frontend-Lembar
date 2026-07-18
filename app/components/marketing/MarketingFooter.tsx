@@ -80,7 +80,7 @@ export default function MarketingFooter() {
         {/* Bottom Section */}
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-unit-8">
           <p className="font-caption text-caption text-secondary text-center sm:text-left">
-            © 2024 lembar. Dirancang untuk keahlian pendidik.
+            © 2026 lembar. Dirancang untuk keahlian pendidik.
           </p>
           <div className="flex items-center gap-1.5 text-secondary font-caption text-caption">
             <span>Dibuat dengan</span>
