@@ -39,3 +39,6 @@ pnpm-debug.log*
 
 # design tooling
 .impeccable/
+
+# figma evidence is intentionally tracked
+!.figma-evidence/

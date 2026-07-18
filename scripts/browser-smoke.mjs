@@ -1,14 +1,45 @@
 import { spawn } from 'node:child_process';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdirSync } from 'node:fs';
 import { createServer } from 'node:net';
-import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { resolve } from 'node:path';
+import { chromium } from 'playwright';
 
 const chrome = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
-const viewports = [
-  { name: 'desktop', width: 1280, height: 800 },
-  { name: 'mobile', width: 390, height: 844 },
+const evidenceDir = resolve('.figma-evidence');
+mkdirSync(evidenceDir, { recursive: true });
+
+const routes = [
+  {
+    name: 'home',
+    path: '/',
+    file: 'landing-local-desktop.png',
+    heading: 'Dari materi menjadi lembar ujian yang siap ditinjau.',
+    proofTitles: ['Pilih materi', 'Tinjau draft', 'Gunakan hasil'],
+    finalButtons: ['Buat lembar gratis'],
+    activeNavLabel: 'Produk',
+  },
+  {
+    name: 'school',
+    path: '/untuk-sekolah',
+    file: 'untuk-sekolah-local-desktop.png',
+    heading: 'Workspace Organisasi untuk Institusi Sekolah',
+    finalButtons: ['Diskusikan kebutuhan sekolah'],
+    activeNavLabel: 'Untuk Sekolah',
+  },
+  {
+    name: 'pricing',
+    path: '/harga',
+    file: 'harga-local-desktop.png',
+    heading: 'Pilih paket yang sesuai untuk kebutuhan mengajar Anda.',
+    finalButtons: ['Daftar Sekarang'],
+    activeNavLabel: 'Harga',
+  },
 ];
+
+const mobileRoutes = routes.map((route) => ({
+  ...route,
+  file: route.file.replace('-desktop.png', '-390.png'),
+}));
 
 function getFreePort() {
   return new Promise((resolvePort, reject) => {
@@ -27,7 +58,7 @@ function getFreePort() {
 }
 
 const appPort = await getFreePort();
-const appUrl = `http://127.0.0.1:${appPort}/`;
+const appUrl = `http://127.0.0.1:${appPort}`;
 
 function wait(ms) {
   return new Promise((resolvePromise) => setTimeout(resolvePromise, ms));
@@ -46,144 +77,93 @@ async function waitForHttp(url, attempts = 60) {
   throw new Error(`Server did not become ready: ${url}`);
 }
 
-async function waitForJson(url, attempts = 40) {
-  for (let attempt = 0; attempt < attempts; attempt += 1) {
-    try {
-      const response = await fetch(url);
-      if (response.ok) return response.json();
-    } catch {
-      // Chrome is still starting.
-    }
-    await wait(100);
-  }
-  throw new Error(`Chrome DevTools did not become ready: ${url}`);
-}
-
-function connectCdp(url) {
-  return new Promise((resolvePromise, reject) => {
-    const socket = new WebSocket(url);
-    const pending = new Map();
-    let id = 0;
-
-    socket.addEventListener('open', () => {
-      resolvePromise({
-        call(method, params = {}) {
-          id += 1;
-          const currentId = id;
-          socket.send(JSON.stringify({ id: currentId, method, params }));
-          return new Promise((resolveCall, rejectCall) => {
-            pending.set(currentId, { resolve: resolveCall, reject: rejectCall });
-          });
-        },
-        close: () => socket.close(),
-      });
-    });
-
-    socket.addEventListener('message', (event) => {
-      const message = JSON.parse(event.data);
-      if (!message.id || !pending.has(message.id)) return;
-      const request = pending.get(message.id);
-      pending.delete(message.id);
-      if (message.error) request.reject(new Error(message.error.message));
-      else request.resolve(message.result);
-    });
-
-    socket.addEventListener('error', () => reject(new Error('Chrome DevTools connection failed')));
+async function smokeViewport(browser, viewport, routeList) {
+  const context = await browser.newContext({
+    viewport: { width: viewport.width, height: viewport.height },
+    reducedMotion: 'reduce',
   });
-}
-
-async function smokeViewport(viewport) {
-  const debugPort = await getFreePort();
-  const profile = mkdtempSync(join(tmpdir(), `lembar-${viewport.name}-`));
-  const browser = spawn(
-    chrome,
-    [
-      '--headless=new',
-      '--disable-gpu',
-      '--no-first-run',
-      `--remote-debugging-port=${debugPort}`,
-      `--user-data-dir=${profile}`,
-      `--window-size=${viewport.width},${viewport.height}`,
-      'about:blank',
-    ],
-    { stdio: 'ignore' },
-  );
+  const page = await context.newPage();
 
   try {
-    const pages = await waitForJson(`http://127.0.0.1:${debugPort}/json/list`);
-    const page = pages.find((candidate) => candidate.type === 'page');
-    if (!page) throw new Error('Chrome did not expose a page target');
+    for (const route of routeList) {
+      await page.goto(`${appUrl}${route.path}`, { waitUntil: 'networkidle' });
 
-    const cdp = await connectCdp(page.webSocketDebuggerUrl);
-    try {
-      await cdp.call('Emulation.setDeviceMetricsOverride', {
-        width: viewport.width,
-        height: viewport.height,
-        deviceScaleFactor: 1,
-        mobile: viewport.name === 'mobile',
-      });
-      await cdp.call('Page.navigate', { url: appUrl });
+      const result = await page.evaluate((expected) => {
+        const html = document.documentElement;
+        const body = document.body;
+        const logo = document.querySelector('.nav__mark');
+        const proofTitles = Array.from(document.querySelectorAll('.proof__title')).map((node) =>
+          node.textContent.trim(),
+        );
+        const trust = document.querySelector('.trust__inner');
+        const finalButtons = Array.from(
+          document.querySelectorAll('.final-cta a, .pricing-final a, .school-final a'),
+        ).map((node) => node.textContent.trim());
+        const activeLink = document.querySelector('.nav__link--active');
+        return {
+          wordmark: document.querySelector('.nav__wordmark')?.textContent?.trim(),
+          heading: document.querySelector('h1')?.textContent?.trim(),
+          lang: html.lang,
+          innerWidth: window.innerWidth,
+          clientWidth: html.clientWidth,
+          scrollWidth: Math.max(html.scrollWidth, body.scrollWidth),
+          iconsaxSvgs: document.querySelectorAll('svg[viewBox="0 0 24 24"]').length,
+          logoNaturalWidth: logo?.naturalWidth ?? 0,
+          proofTitles,
+          trustPresent: Boolean(trust),
+          trustBg: trust ? getComputedStyle(trust).backgroundColor : null,
+          finalButtons,
+          activeNavLabel: activeLink?.textContent?.trim(),
+        };
+      }, route.heading);
 
-      for (let attempt = 0; attempt < 40; attempt += 1) {
-        const ready = await cdp.call('Runtime.evaluate', {
-          expression: "document.readyState === 'complete'",
-          returnByValue: true,
-        });
-        if (ready.result.value) break;
-        await wait(100);
-      }
+      const screenshotPath = resolve(evidenceDir, route.file);
+      await page.screenshot({ path: screenshotPath, fullPage: true });
 
-      const evaluated = await cdp.call('Runtime.evaluate', {
-        expression: `(() => {
-          const html = document.documentElement;
-          const body = document.body;
-          return {
-            wordmark: document.querySelector('.nav__wordmark')?.textContent?.trim(),
-            heading: document.querySelector('h1')?.textContent?.trim(),
-            lang: html.lang,
-            innerWidth: window.innerWidth,
-            clientWidth: html.clientWidth,
-            scrollWidth: Math.max(html.scrollWidth, body.scrollWidth),
-            iconsaxSvgs: document.querySelectorAll('.icon-accent svg').length,
-          };
-        })()`,
-        returnByValue: true,
-      });
-      const result = evaluated.result.value;
       const overflow = result.scrollWidth > result.innerWidth;
-      const report = { viewport: viewport.name, ...result, overflow };
+      const report = {
+        route: route.name,
+        viewport: viewport.name,
+        screenshot: screenshotPath,
+        ...result,
+        overflow,
+      };
       console.log(JSON.stringify(report));
 
-      if (result.wordmark !== 'lembar')
-        throw new Error(`${viewport.name}: lowercase wordmark missing`);
-      if (
-        result.heading !==
-        'Buat lembar soal siap cetak dalam hitungan menit — draf AI, tinjauan guru, hasil akhir.'
-      ) {
-        throw new Error(`${viewport.name}: Indonesian hero heading missing`);
-      }
-      if (result.lang !== 'id') throw new Error(`${viewport.name}: html lang must be id`);
-      if (result.innerWidth !== viewport.width) {
+      if (result.wordmark !== 'lembar') throw new Error(`${route.name}: wordmark missing`);
+      if (result.heading !== route.heading)
+        throw new Error(`${route.name}: heading mismatch (${result.heading})`);
+      if (result.lang !== 'id') throw new Error(`${route.name}: html lang must be id`);
+      if (result.innerWidth !== viewport.width)
+        throw new Error(`${route.name}: viewport width ${result.innerWidth} !== ${viewport.width}`);
+      if (overflow)
+        throw new Error(`${route.name}: overflow ${result.scrollWidth} > ${result.innerWidth}`);
+      if (result.logoNaturalWidth <= 0)
+        throw new Error(`${route.name}: logo naturalWidth must be > 0`);
+      if (result.activeNavLabel !== route.activeNavLabel) {
         throw new Error(
-          `${viewport.name}: expected width ${viewport.width}, got ${result.innerWidth}`,
+          `${route.name}: expected active nav "${route.activeNavLabel}", got "${result.activeNavLabel}"`,
         );
       }
-      if (overflow) {
-        throw new Error(
-          `${viewport.name}: horizontal overflow ${result.scrollWidth}px > ${result.innerWidth}px`,
-        );
+      if (route.proofTitles) {
+        for (const expected of route.proofTitles) {
+          if (!result.proofTitles.includes(expected))
+            throw new Error(`${route.name}: proof missing "${expected}"`);
+        }
       }
-      if (result.iconsaxSvgs < 9) {
-        throw new Error(
-          `${viewport.name}: expected at least 9 iconsax icons in .icon-accent, got ${result.iconsaxSvgs}`,
-        );
+      if (route.name === 'home') {
+        if (!result.trustPresent) throw new Error('home: trust block missing');
+        if (!result.trustBg || !/rgb\(23, *23, *23\)|rgba\(23, *23, *23/.test(result.trustBg)) {
+          throw new Error(`home: trust background must be ink #171717, got ${result.trustBg}`);
+        }
       }
-    } finally {
-      cdp.close();
+      for (const expected of route.finalButtons) {
+        if (!result.finalButtons.some((label) => label.includes(expected)))
+          throw new Error(`${route.name}: final CTA missing "${expected}"`);
+      }
     }
   } finally {
-    browser.kill('SIGTERM');
-    rmSync(profile, { recursive: true, force: true });
+    await context.close();
   }
 }
 
@@ -199,14 +179,18 @@ server.stderr.on('data', (chunk) => {
   serverOutput += chunk;
 });
 
+let browser;
 try {
   const response = await waitForHttp(appUrl);
   console.log(JSON.stringify({ httpStatus: response.status, url: appUrl }));
-  for (const viewport of viewports) await smokeViewport(viewport);
-  console.log('Browser smoke passed at desktop and 390px.');
+  browser = await chromium.launch({ executablePath: chrome, headless: true });
+  await smokeViewport(browser, { name: 'desktop', width: 1280, height: 800 }, routes);
+  await smokeViewport(browser, { name: 'mobile', width: 390, height: 844 }, mobileRoutes);
+  console.log('Playwright browser smoke passed for all routes at desktop and 390px.');
 } catch (error) {
   console.error(serverOutput.trim());
   throw error;
 } finally {
+  if (browser) await browser.close();
   server.kill('SIGTERM');
 }
