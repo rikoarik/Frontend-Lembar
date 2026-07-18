@@ -52,7 +52,7 @@ export const homeContent: HomeContent = {
   hero: {
     eyebrow: 'WORKSPACE ASESMEN UNTUK GURU',
     title: 'Dari materi menjadi lembar ujian yang siap ditinjau.',
-    body: 'Susun draft soal dari Buku Siswa atau PDF Anda, periksa sumbernya, lalu cetak, download, atau bagikan.',
+    body: 'Susun draft dari Buku Siswa atau PDF Anda, periksa sumbernya, lalu cetak, download, atau bagikan.',
     meta: 'Guru tetap meninjau · Sumber terlihat · Siap cetak',
     primaryCta: 'create-free',
     secondaryCta: 'see-example',
@@ -60,26 +60,24 @@ export const homeContent: HomeContent = {
   preview: {
     title: 'Generate Lembar',
     draft: 'Draft',
-    settings: ['Matematika · Kelas V', 'Pecahan senilai · 20 soal'],
-    documentTitle: 'Lembar Soal · Matematika · Kelas V',
-    duration: '60 menit',
+    settings: ['Bahasa Indonesia · Kelas 5', 'Gagasan Utama · 20 soal'],
+    documentTitle: 'Penilaian Akhir Semester',
+    duration: 'Bahasa Indonesia · Kelas 5',
     questions: [
       {
         no: '01',
-        text: 'Pecahan yang senilai dengan 2/4 adalah …',
-        answers: ['A. 1/2', 'B. 2/6', 'C. 3/8', 'D. 4/5'],
-        source: 'Sumber · Buku Matematika Kelas V · hlm. 42',
+        text: 'Setiap pagi, Budi selalu menyempatkan diri untuk membaca berita terbaru. Ia merasa bahwa dengan mengetahui perkembangan dunia, ia bisa lebih siap menghadapi tantangan. Kebiasaan ini sering ia lakukan sejak duduk di bangku sekolah dasar.\n\nGagasan utama paragraf di atas adalah …',
+        answers: [
+          'A. Budi suka membaca berita pagi hari.',
+          'B. Kebiasaan membaca berita membuat Budi siap menghadapi tantangan.',
+          'C. Budi belajar membaca sejak sekolah dasar.',
+          'D. Berita pagi penting untuk perkembangan dunia.',
+        ],
+        source: 'Rujukan: Buku Siswa B. Indo Kls 5, Hlm 72',
         status: 'Siap',
       },
-      {
-        no: '02',
-        text: 'Bangun datar yang memiliki empat sisi sama panjang adalah …',
-        answers: ['A. Persegi panjang', 'B. Segitiga', 'C. Persegi', 'D. Lingkaran'],
-        source: 'Sumber · Buku Matematika Kelas V · hlm. 58',
-        status: 'Tinjau',
-      },
     ],
-    outputs: ['PDF', 'Cetak', 'Tautan'],
+    outputs: ['Cetak', 'PDF', 'Tautan'],
   },
   proof: [
     {
@@ -104,20 +102,20 @@ export const homeContent: HomeContent = {
     panels: [
       {
         eyebrow: 'Cara kerja · 01',
-        title: 'Draft terstruktur dari materi nyata',
-        body: 'Generate Lembar mengubah materi pilihan Anda menjadi kisi-kisi dan draf soal per butir. Setiap butir menunjuk ke bagian materi yang dipakai sebagai rujukan.',
+        title: 'Pilih sumber yang Anda percaya.',
+        body: 'Unggah PDF materi Anda sendiri, atau pilih dari kurasi Buku Siswa resmi. Lembar hanya akan menyusun pertanyaan berdasarkan teks yang Anda berikan, meminimalisir halusinasi.',
         visual: 'generate',
       },
       {
         eyebrow: 'Cara kerja · 02',
-        title: 'Tinjauan butir per butir',
-        body: 'Review & Koreksi menampilkan setiap soal dalam panel terpisah. Sumber, tingkat kesulitan, dan status tinjauan terlihat tanpa berpindah halaman.',
+        title: 'Tinjau sebelum digunakan.',
+        body: 'Guru tetap memegang kendali. Periksa tingkat kognitif, sesuaikan kunci jawaban, dan pastikan setiap butir soal selaras dengan standar kurikulum Anda.',
         visual: 'review',
       },
       {
         eyebrow: 'Cara kerja · 03',
-        title: 'Cetak, PDF, atau tautan terbatas',
-        body: 'Hasil akhir dapat dicetak langsung, diunduh sebagai PDF A4, atau dibagikan sebagai tautan yang Anda tentukan masa aktifnya.',
+        title: 'Gunakan sesuai kebutuhan.',
+        body: 'Format siap pakai. Cetak langsung untuk ujian kelas, unduh sebagai PDF untuk arsip, atau bagikan tautan untuk dikerjakan secara digital.',
         visual: 'export',
       },
     ],
@@ -130,10 +128,10 @@ export const homeContent: HomeContent = {
     specimen: {
       no: 'Q3',
       status: 'Terverifikasi',
-      question: 'Pecahan yang senilai dengan 2/4 adalah …',
-      answer: 'A. 1/2',
-      reason: 'Pembilang dan penyebut dibagi dengan bilangan yang sama.',
-      source: 'Buku Matematika Kelas V · halaman 42',
+      question: 'Apa faktor utama penyebab terjadinya erosi pada lereng gundul?',
+      answer: 'A. Tidak adanya akar pohon penahan air',
+      reason: 'Tanpa adanya sistem perakaran pohon yang kuat untuk mengikat tanah dan menyerap air, lapisan atas tanah sangat mudah terbawa arus air.',
+      source: 'IPA Kelas 5, Hlm 72',
     },
   },
   final: {
@@ -144,3 +142,4 @@ export const homeContent: HomeContent = {
     schoolLink: 'Untuk sekolah',
   },
 };
+
