@@ -1,28 +1,30 @@
-const DEFAULT_API_BASE_URL = '/v1';
-
-function safeApiOrigin(value) {
-  if (!value || value.startsWith('/')) return DEFAULT_API_BASE_URL;
+function apiOrigin(value) {
+  if (!value || value.startsWith('/')) return null;
   try {
     return new URL(value).origin;
   } catch {
-    return DEFAULT_API_BASE_URL;
+    return null;
   }
 }
 
 const isDev = process.env.NODE_ENV === 'development';
-const connectSrc = safeApiOrigin(process.env.NEXT_PUBLIC_API_BASE_URL);
+const connectSrc = ["connect-src 'self'", apiOrigin(process.env.NEXT_PUBLIC_API_BASE_URL)]
+  .filter(Boolean)
+  .join(' ');
 
+// ponytail: Next App Router still needs inline bootstrap/runtime script allowance here.
+// Upgrade path: move to nonce/hash-based CSP once the app owns a full nonce pipeline.
 const csp = [
   "default-src 'self'",
   "base-uri 'self'",
   "frame-ancestors 'none'",
   "form-action 'self'",
   "object-src 'none'",
-  `script-src 'self'${isDev ? " 'unsafe-inline' 'unsafe-eval'" : ''}`,
-  "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob:",
-  "font-src 'self' data:",
-  `connect-src 'self' ${connectSrc}`,
+  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''}`,
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  "img-src 'self' data: blob: https://lh3.googleusercontent.com",
+  "font-src 'self' data: https://fonts.gstatic.com",
+  connectSrc,
   'upgrade-insecure-requests',
 ].join('; ');
 
