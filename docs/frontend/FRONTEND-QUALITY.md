@@ -92,6 +92,40 @@ Never capture prompt, question text, source content, token, signed URL, cookie, 
 8. Playwright smoke/e2e.
 9. Upload only sanitized test artifacts.
 
+The CI workflow is defined in `.github/workflows/ci.yml` and runs the gates listed below.
+Playwright smoke is gated on the static-and-build job so flaky browser runs do not hide
+real failures.
+
+### Local-equivalent commands
+
+Run each gate locally with the script under `scripts/gates/`. They mirror what CI executes
+so a failing CI job is reproducible on a developer machine.
+
+```bash
+./scripts/gates/install.sh        # pnpm install --frozen-lockfile (npm ci fallback)
+./scripts/gates/lint.sh           # pnpm run lint
+./scripts/gates/typecheck.sh      # pnpm run typecheck
+./scripts/gates/format-check.sh   # pnpm run format:check
+./scripts/gates/test.sh           # pnpm run test  (vitest run)
+./scripts/gates/build.sh          # pnpm run build (next build)
+./scripts/gates/secret-scan.sh    # gitleaks detect (skips if gitleaks absent)
+./scripts/gates/playwright-smoke.sh   # pnpm exec playwright test
+```
+
+Vitest is configured via `vitest.config.ts` (jsdom, globals, `vitest.setup.ts`, excludes
+`scripts/gates/**` so Playwright specs are not picked up by unit tests).
+
+Playwright is configured via `playwright.config.ts`:
+
+- Two projects: `desktop` (1280×800) and `mobile` (390×844).
+- Single spec: `scripts/gates/playwright-smoke.spec.ts`.
+- Routes covered: `/`, `/untuk-sekolah`, `/harga`.
+- For each route × viewport, the spec asserts: `lembar` wordmark, `html[lang="id"]`,
+  `h1` heading, primary CTA, no horizontal overflow, and captures a full-page screenshot
+  to `docs/frontend/screenshots/<route>.<project>.png`.
+- `webServer` runs `next build && next start -p 3100` so smoke hits a production server,
+  matching the contract that Playwright must not be run against a `next dev` server.
+
 ## Release checklist
 
 - Pinned backend contract version recorded.
