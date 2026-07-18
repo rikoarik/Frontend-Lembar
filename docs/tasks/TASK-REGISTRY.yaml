@@ -33,11 +33,18 @@ tasks:
     repository: planning
     sprint: O0
     title: Distribute v1.2 documentation snapshots
-    status: READY
+    status: ACCEPTED
     depends_on: []
     decisions: []
     outcome: Safe docs manifests and snapshots in both repositories; no code changes.
     evidence: [repo inspection, copy/conflict manifest, link/YAML/OpenAPI validation]
+    accepted_at: "2026-07-19"
+    accepted_by: owner-override-autopilot
+    evidence_notes:
+      - "YAML parsed: docs/tasks/TASK-REGISTRY.yaml and docs/contracts/openapi-baseline.yaml."
+      - "Required docs present: AGENTS.md, CLAUDE.md, task registry, lean workflow, handoff template, frontend README, landing/CMS specs, decisions."
+      - "Markdown relative link scan found 0 broken local links."
+      - "OpenAPI baseline parsed as 3.1.0 with 21 paths."
 
   - id: X0-01
     repository: both
