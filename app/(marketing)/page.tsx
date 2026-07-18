@@ -1,3 +1,6 @@
+'use client';
+
+import { useState, useEffect, useRef } from 'react';
 import {
   Book1,
   DocumentDownload,
@@ -20,6 +23,50 @@ export default function HomePage() {
   const primary = getMarketingCta(content.hero.primaryCta);
   const secondary = getMarketingCta(content.hero.secondaryCta);
 
+  const panel0Ref = useRef<HTMLDivElement>(null);
+  const panel1Ref = useRef<HTMLDivElement>(null);
+  const panel2Ref = useRef<HTMLDivElement>(null);
+  
+  const panelsRefs = [panel0Ref, panel1Ref, panel2Ref];
+  const [activeStep, setActiveStep] = useState<number>(0);
+
+  useEffect(() => {
+    const observerOptions = {
+      root: null,
+      rootMargin: '-30% 0px -50% 0px',
+      threshold: 0,
+    };
+
+    const handleIntersection = (entries: IntersectionObserverEntry[]) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const index = panelsRefs.findIndex((ref) => ref.current === entry.target);
+          if (index !== -1) {
+            setActiveStep(index);
+          }
+        }
+      });
+    };
+
+    const observer = new IntersectionObserver(handleIntersection, observerOptions);
+
+    panelsRefs.forEach((ref) => {
+      if (ref.current) observer.observe(ref.current);
+    });
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  const scrollToPanel = (index: number) => {
+    const targetRef = panelsRefs[index];
+    if (targetRef.current) {
+      targetRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+
   return (
     <>
       <RevealSection className="hero" id="produk">
@@ -27,13 +74,13 @@ export default function HomePage() {
           <RevealText>
             <p className="eyebrow">{content.hero.eyebrow}</p>
           </RevealText>
-          <RevealText delay={0.05}>
+          <RevealText delay={0.04}>
             <h1 className="hero__heading">{content.hero.title}</h1>
           </RevealText>
-          <RevealText delay={0.1}>
+          <RevealText delay={0.08}>
             <p className="hero__sub">{content.hero.body}</p>
           </RevealText>
-          <RevealText delay={0.15}>
+          <RevealText delay={0.12}>
             <div className="hero__cta">
               <Button ctaId={primary.id} href={primary.href} label={primary.label} size="lg" />
               <Button
@@ -45,12 +92,12 @@ export default function HomePage() {
               />
             </div>
           </RevealText>
-          <RevealText delay={0.2}>
+          <RevealText delay={0.16}>
             <p className="hero__meta">{content.hero.meta}</p>
           </RevealText>
         </div>
 
-        <RevealMedia className="hero__preview" delay={0.1}>
+        <RevealMedia className="hero__preview" delay={0.08}>
           <div className="preview" id="contoh-hasil" aria-label="Contoh kerja Generate Lembar">
             <div className="preview__topbar">
               <div className="preview__brand">
@@ -129,22 +176,24 @@ export default function HomePage() {
         </RevealMedia>
       </RevealSection>
 
-      <RevealSection className="proof" aria-labelledby="proof-heading">
+      <div className="proof" aria-labelledby="proof-heading">
         <h2 id="proof-heading" className="sr-only">
           Alur kerja lembar
         </h2>
         <div className="proof__inner">
-          {content.proof.map((step) => (
-            <article key={step.no} className="proof__step">
+          {content.proof.map((step, index) => (
+            <button
+              key={step.no}
+              className={`proof__step-btn ${activeStep === index ? 'proof__step-btn--active' : ''}`}
+              onClick={() => scrollToPanel(index)}
+              aria-label={`Scroll ke langkah ${step.title}`}
+            >
               <span className="proof__no">{step.no}</span>
-              <div>
-                <h3 className="proof__title">{step.title}</h3>
-                <p className="proof__body">{step.body}</p>
-              </div>
-            </article>
+              <span className="proof__title">{step.title}</span>
+            </button>
           ))}
         </div>
-      </RevealSection>
+      </div>
 
       <section id="cara-kerja" className="how" aria-labelledby="how-heading">
         <RevealText>
@@ -160,11 +209,16 @@ export default function HomePage() {
           {content.how.panels.map((panel, index) => {
             const Icon = panelIcons[index];
             return (
-              <RevealSection
+              <div
                 key={panel.eyebrow}
-                className={`editorial ${index % 2 === 1 ? 'editorial--reverse' : ''}`.trim()}
-                delay={index * 0.05}
+                ref={panelsRefs[index]}
+                id={`cara-kerja-step-${index + 1}`}
+                style={{ scrollMarginTop: '130px' }}
               >
+                <RevealSection
+                  className={`editorial ${index % 2 === 1 ? 'editorial--reverse' : ''}`.trim()}
+                  delay={index * 0.05}
+                >
                 <div className="editorial__copy">
                   <span className="icon-accent" aria-hidden="true">
                     <Icon size={24} variant="Linear" />
@@ -225,9 +279,10 @@ export default function HomePage() {
                   ) : null}
                 </div>
               </RevealSection>
-            );
-          })}
-        </div>
+            </div>
+          );
+        })}
+      </div>
       </section>
 
       <section className="trust" aria-labelledby="trust-heading">
