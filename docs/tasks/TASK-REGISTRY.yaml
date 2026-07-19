@@ -40,8 +40,26 @@ rules:
   backend_repository_modifications: forbidden
   api_endpoint_invention: forbidden
   execution_target: COMPLETE_LEMBAR_WEB_V1
+  execution_mode: continuous_until_complete
+  automatic_resume: true
+  continue_without_owner_between_tasks: true
   marketing_visual_baseline: origin/main@299fd95d2d232e87ca972d52daa89a24458b967e
   shutdown_checkpoint_mode: true
+
+execution_notes:
+  latest_owner_directive:
+    recorded_at: '2026-07-19T11:11:00+07:00'
+    summary: 'Continue COMPLETE LEMBAR WEB V1 automatically across tasks, checkpoints, orchestrator restarts, and host restarts until all applicable frontend scope is implemented and verified.'
+    required_behaviors:
+      - 'Do not stop after current sprint/phase/merge/handoff; auto-start next eligible frontend task.'
+      - 'Checkpoint and push meaningful progress at least every 10–15 minutes while unpushed changes exist.'
+      - 'Preserve existing workers/branches when recoverable; use fresh workers only for new tasks or dead workers.'
+      - 'Do not silently reduce scope to MVP placeholders or static mockups.'
+      - 'Record blockers, evidence, branch, commit SHA, and exact resume action in TASK-REGISTRY.yaml.'
+    current_resume_focus:
+      - 'F1-04 correction cycle: make /kontak submit succeed in mock/preview without backend dependency.'
+      - 'F2-03 correction cycle: remove /app shell prefetch 404s by stubbing or deferring unavailable routes.'
+      - 'Then rerun runtime verification and continue next eligible frontend task automatically.'
 
 tasks:
   - id: O0-01
