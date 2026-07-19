@@ -1457,17 +1457,22 @@ tasks:
     repository: Frontend-Lembar
     sprint: R0
     title: Resume dev promotion only after CI incident is green
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [R0-03]
-    decisions: []
-    outcome: Do not promote ao/frontend-integration to dev while required CI checks fail; resume normal integration-to-dev promotion only after R0-03 evidence is green.
+    decisions: ['promote-after-ci-green-29682017858']
+    outcome: ao/frontend-integration promoted to dev as merge commit 6ebb761 only after required CI jobs were green on combined integration state.
     acceptance:
       - All required frontend CI jobs pass on ao/frontend-integration.
       - TASK-REGISTRY.yaml records run references and local command evidence.
       - Normal merge to dev happens only after green CI.
+      - dev HEAD pushed to origin/dev.
     verification:
       - gh run list --branch ao/frontend-integration --workflow ci --limit 1
-    evidence: [green-ci-before-dev-promotion]
+      - gh run view 29682017858 --json status,conclusion,jobs
+    evidence:
+      - 'CI run 29681773677 on b7e7ccf: success (static-and-build + playwright smoke).'
+      - 'CI run 29682017858 on c30ff40: success (combined integration state green before dev merge).'
+      - 'dev merge commit 6ebb761 promoted and pushed: origin/dev at 6ebb761.'
 
   - id: R0-05
     repository: Frontend-Lembar
