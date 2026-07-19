@@ -1,6 +1,6 @@
 # Release Gate Report
 
-Generated: 2026-07-19T03:56:37.146Z
+Generated: 2026-07-19T03:58:41.632Z
 
 **Summary:** 14 pass, 1 fail, 0 skip
 
@@ -65,24 +65,24 @@ Summary: exit 0
 Summary: exit 0
 
 ```
-> vitest run
-
-
- RUN  v2.1.8 /Users/macbookm2/.ao/data/worktrees/frontend-lembar/frontend-lembar-10
-
+ ✓ scripts/__tests__/secret-scan.test.ts (3 tests) 223ms
+ ✓ app/components/ui/__tests__/visual-fixtures.test.tsx (3 tests) 122ms
+ ✓ app/components/ui/__tests__/primitives.test.tsx (7 tests) 340ms
+ ✓ app/__tests__/marketing.test.tsx (3 tests) 236ms
  ✓ src/lib/runtime/__tests__/env.test.ts (8 tests) 6ms
- ✓ src/features/auth/validation/__tests__/auth-validation.test.ts (7 tests) 5ms
- ✓ scripts/__tests__/secret-scan.test.ts (3 tests) 202ms
- ✓ app/components/ui/__tests__/visual-fixtures.test.tsx (3 tests) 100ms
- ✓ app/components/ui/__tests__/primitives.test.tsx (7 tests) 239ms
- ✓ app/__tests__/marketing.test.tsx (3 tests) 166ms
  ✓ src/services/auth/__tests__/errorMapping.test.ts (20 tests) 3ms
- ✓ app/__tests__/auth.test.tsx (4 tests) 557ms
+ ✓ src/features/workspace/__tests__/workspaceContext.test.tsx (2 tests) 83ms
+ ✓ app/__tests__/lead-form.test.tsx (4 tests) 924ms
+   ✓ school lead form > submits successfully with phone instead of email without revealing contact existence 368ms
+   ✓ school lead form > surfaces rate-limit copy (HTTP 429) without exposing internals 302ms
+ ✓ app/(app)/__tests__/shell-states.test.tsx (4 tests) 52ms
+ ✓ app/__tests__/auth.test.tsx (4 tests) 628ms
+   ✓ auth pages render > register page surfaces mismatch error on confirmation 321ms
 
- Test Files  8 passed (8)
-      Tests  55 passed (55)
-   Start at  10:56:20
-   Duration  2.38s (transform 546ms, setup 662ms, collect 2.26s, tests 1.28s, environment 4.15s, prepare 642ms)
+ Test Files  11 passed (11)
+      Tests  65 passed (65)
+   Start at  10:58:22
+   Duration  2.55s (transform 598ms, setup 974ms, collect 2.97s, tests 2.63s, environment 5.53s, prepare 763ms)
 
 [33mThe CJS build of Vite's Node API is deprecated. See https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.[39m
 ```
@@ -119,26 +119,26 @@ Summary: exit 0
 Summary: exit 1
 
 ```
-[warn] app/(marketing)/bantuan/page.tsx
-[warn] app/(marketing)/faq/page.tsx
-[warn] app/(marketing)/harga/page.tsx
-[warn] app/(marketing)/keamanan-data/page.tsx
-[warn] app/(marketing)/kontak/page.tsx
-[warn] app/(marketing)/layout.tsx
-[warn] app/(marketing)/page.tsx
-[warn] app/(marketing)/privasi/page.tsx
-[warn] app/(marketing)/syarat/page.tsx
-[warn] app/(marketing)/tentang/page.tsx
-[warn] app/(marketing)/untuk-sekolah/page.tsx
+[warn] app/components/app/LeftRail.tsx
+[warn] app/components/app/ShellStates.tsx
+[warn] app/components/app/TopBar.tsx
+[warn] app/components/app/WorkspaceSwitcher.tsx
 [warn] app/components/marketing/AnnouncementBanner.tsx
 [warn] app/components/marketing/MarketingFooter.tsx
 [warn] app/components/marketing/MarketingSubPageLayout.tsx
 [warn] app/components/marketing/MockupPanels.tsx
 [warn] app/components/marketing/SubPageNavbar.tsx
 [warn] app/layout.tsx
+[warn] docs/frontend/release-gate-report.md
 [warn] pnpm-lock.yaml
 [warn] public/mockServiceWorker.js
-[warn] Code style issues found in 38 files. Run Prettier with --write to fix.
+[warn] src/features/leads/SchoolLeadForm.tsx
+[warn] src/features/workspace/workspaceContext.tsx
+[warn] src/mocks/handlers/leads.ts
+[warn] src/services/leads/errorMapping.ts
+[warn] src/services/leads/leadsMutations.ts
+[warn] src/types/leads.ts
+[warn] Code style issues found in 54 files. Run Prettier with --write to fix.
 ```
 
 ### axe-core load — PASS
