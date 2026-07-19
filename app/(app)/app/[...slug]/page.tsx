@@ -1,14 +1,6 @@
 import { notFound } from 'next/navigation';
 import { ShellPlaceholder } from '@/app/components/app/ShellStates';
-
-const SHELL_PLACEHOLDER_ROUTES = new Map([
-  ['riwayat', 'Riwayat'],
-  ['bank-soal', 'Bank Soal'],
-  ['template', 'Template'],
-  ['generate', 'Generate lembar'],
-  ['profil', 'Profil'],
-  ['plan', 'Paket & kuota'],
-]);
+import { SHELL_PLACEHOLDER_ROUTES } from '@/app/(app)/app/[...slug]/routes';
 
 export default async function AppPlaceholderPage({
   params,
@@ -17,7 +9,7 @@ export default async function AppPlaceholderPage({
 }) {
   const { slug = [] } = await params;
   const route = slug.join('/');
-  const title = SHELL_PLACEHOLDER_ROUTES.get(route);
+  const title = SHELL_PLACEHOLDER_ROUTES[route as keyof typeof SHELL_PLACEHOLDER_ROUTES];
 
   if (!title) notFound();
 
