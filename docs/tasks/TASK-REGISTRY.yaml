@@ -70,8 +70,9 @@ execution_notes:
       - 'Do not ask the owner to run /compact; allow automatic compaction and rehydrate from repository state.'
       - 'Issue internal START gates automatically for eligible frontend tasks after dependency and ownership checks.'
     current_resume_focus:
-      - 'Registry gap audit identified 10 new bounded frontend-only tasks missing from source-of-truth (F0-08, F1-08..F1-11, F2-06..F2-08, F6-12..F6-13). All inserted as READY (not blocked on backend).'
-      - 'Start first READY task automatically, verify, promote to integration, run CI, promote to dev, then continue next eligible READY task without owner handoff.'
+      - 'F1-08 ACCEPTED; F1-09 ACCEPTED (shared MarketingNavbar via MarketingLayout; page-local navs removed from /harga and /untuk-sekolah).'
+      - 'Next READY frontend-only: F1-10 invitation UI, F1-11 share viewer, F0-08 print foundation, F2-06/07/08 settings, F6-12/13 shell placeholders.'
+      - 'Auto-start next READY, verify, promote integration → dev, continue without owner handoff until complete Frontend V1 on dev.'
   context_management:
     source_of_truth:
       - TASK-REGISTRY.yaml
@@ -120,14 +121,14 @@ execution_notes:
       - 'Never force-push or rewrite shared branch history for main, dev, ao/frontend-integration, or task branches.'
       - 'Do not promote ao/frontend-integration to dev while incomplete, placeholder, experimental, or unverified work remains.'
     current_state:
-      recorded_at: '2026-07-19T17:37:00+07:00'
+      recorded_at: '2026-07-19T19:50:00+07:00'
       main_commit: '299fd95d2d232e87ca972d52daa89a24458b967e'
       dev_commit: '921e5bb0a88faccb52145d4c028e964d385c9cf5'
       dev_status: 'exists-and-active-from-promotion'
       integration_branch: ao/frontend-integration
-      integration_commit: 'f9865d01367fecddd9b00e16bc963c39da9d1b03'
+      integration_commit: 'c5cc700b761c966dd61ee398b79b0b27621c6ae8'
       promotion_gate: 'Integration CI all-green; promotion to dev is orchestrator-owned per current owner directive.'
-      next_branch_action: 'Continue integrating new READY tasks; promote to dev after combined CI green.'
+      next_branch_action: 'ACCEPT F1-09 complete; push integration; promote to dev after CI green; start next READY (F1-10 or F0-08/F2-06/F6-12).'
 
 tasks:
   - id: O0-01
@@ -636,7 +637,7 @@ tasks:
     repository: Frontend-Lembar
     sprint: F1
     title: Shared marketing shell (header + footer)
-    status: READY
+    status: ACCEPTED
     depends_on: [F0-04, F1-03]
     decisions: []
     outcome: Single shared marketing header/nav/CTA and footer renders consistently across /, /harga, /untuk-sekolah, /faq, /bantuan, /tentang, /keamanan-data, /privasi, /syarat without per-route drift.
@@ -652,8 +653,16 @@ tasks:
       - pnpm run lint
       - pnpm run typecheck
       - pnpm run build
+    evidence:
+      - 'MarketingLayout mounts MarketingNavbar + MarketingFooter for all (marketing) routes.'
+      - 'Deleted SubPageNavbar; removed landing inline sticky header; stripped page-local <nav> from /harga and /untuk-sekolah.'
+      - 'MarketingSubPageLayout no longer re-renders navbar; legal pages inherit shared shell.'
+      - '16 test files / 75 tests PASS; lint 0 errors; typecheck PASS; build PASS (23 routes).'
+    accepted_at: '2026-07-19'
+    accepted_by: orchestrator-self-review
     evidence_notes:
       - 'Registry gap audit 2026-07-19: F1-01/F1-02 acceptance notes record shared footer cross-route consistency as unresolved.'
+      - 'F1-09 completed 2026-07-19 on ao/frontend-integration: single MarketingNavbar via layout inheritance; dual-nav on /harga and /untuk-sekolah removed.'
 
   - id: F1-10
     repository: Frontend-Lembar

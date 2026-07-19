@@ -7,8 +7,7 @@ export const metadata: Metadata = {
     'Kebijakan privasi lembar — data yang dikumpulkan, penggunaan, perlindungan, hak pengguna, dan perubahan kebijakan.',
   openGraph: {
     title: 'Kebijakan Privasi - lembar',
-    description:
-      'Pelajari bagaimana lembar melindungi data pribadi Anda sesuai UU PDP Indonesia.',
+    description: 'Pelajari bagaimana lembar melindungi data pribadi Anda sesuai UU PDP Indonesia.',
   },
 };
 
