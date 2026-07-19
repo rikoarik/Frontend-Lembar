@@ -34,57 +34,7 @@ export const metadata: Metadata = {
 export default function HargaPage() {
   return (
     <>
-      <nav className="w-full sticky top-0 z-50 bg-background border-b border-border-subtle">
-        <div className="flex justify-between items-center h-unit-16 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
-          <Link
-            aria-label="lembar beranda"
-            className="flex items-center h-unit-8 w-unit-8"
-            href="/"
-          >
-            <img
-              alt="lembar logo"
-              className="h-full w-full object-contain"
-              src="/lembar/logo-mark.png"
-            />
-          </Link>
-          <div className="hidden md:flex items-center gap-unit-8">
-            <a
-              className="text-secondary font-body-default hover:text-burgundy transition-colors duration-200"
-              href="/"
-            >
-              Produk
-            </a>
-            <a
-              className="text-secondary font-body-default hover:text-burgundy transition-colors duration-200"
-              href="/untuk-sekolah"
-            >
-              Untuk Sekolah
-            </a>
-            <a
-              className="text-burgundy font-bold font-body-default active-nav-indicator border-b-2 border-burgundy pb-1"
-              href="/harga"
-            >
-              Harga
-            </a>
-          </div>
-          <div className="flex items-center gap-unit-4">
-            <Link
-              className="text-secondary font-label-semibold px-unit-4 py-unit-2 hover:text-burgundy transition-colors"
-              href="/masuk"
-            >
-              Masuk
-            </Link>
-            <Link
-              className="bg-burgundy text-on-primary font-label-semibold h-[44px] px-unit-6 rounded-lg hover:brightness-110 transition-all flex items-center"
-              href="/daftar"
-            >
-              Coba Gratis
-            </Link>
-          </div>
-        </div>
-      </nav>
-
-      <main className="min-h-screen">
+      <div className="min-h-screen">
         <header className="py-unit-16 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto text-center">
           <div className="inline-block px-unit-3 py-unit-1 bg-secondary-fixed text-on-secondary-fixed-variant rounded-full font-label-semibold text-caption mb-unit-6">
             Pricing Plans
@@ -376,7 +326,7 @@ export default function HargaPage() {
             </div>
           </div>
         </section>
-      </main>
+      </div>
     </>
   );
 }

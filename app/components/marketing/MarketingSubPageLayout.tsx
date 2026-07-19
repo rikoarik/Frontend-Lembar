@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react';
-import SubPageNavbar from './SubPageNavbar';
 import Link from 'next/link';
 
 interface MarketingSubPageLayoutProps {
@@ -21,7 +20,6 @@ export default function MarketingSubPageLayout({
 }: MarketingSubPageLayoutProps) {
   return (
     <>
-      <SubPageNavbar />
       <main>
         {/* Reusable Hero Section */}
         <section className="pt-unit-6 pb-unit-16 px-margin-mobile md:px-margin-desktop bg-paper">
