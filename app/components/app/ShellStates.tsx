@@ -81,3 +81,18 @@ export function ShellForbidden() {
     </Panel>
   );
 }
+
+export function ShellPlaceholder({ title, description }: { title: string; description: string }) {
+  return (
+    <Panel title={title} description={description} className="max-w-reading-max">
+      <div className="flex flex-col gap-3">
+        <p className="text-body-default text-brand-ink-muted">
+          Sementara itu, gunakan dashboard untuk membuat atau membuka lembar yang sudah tersedia.
+        </p>
+        <Link href="/app" className="inline-flex min-h-[var(--control-md)] w-fit items-center rounded-md bg-brand-accent px-4 text-body-default font-medium text-white">
+          Kembali ke dashboard
+        </Link>
+      </div>
+    </Panel>
+  );
+}

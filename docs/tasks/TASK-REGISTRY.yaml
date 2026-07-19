@@ -522,7 +522,7 @@ tasks:
     depends_on: [F0-04, F2-01, B1-02]
     decisions: []
     outcome: Responsive role-aware shell with safe cache-clearing workspace switch.
-    evidence: [cross-workspace-cache-test, 390, keyboard]
+    evidence: [cross-workspace-cache-test, shell-route-prefetch-200, 390, keyboard]
 
   - id: F2-04
     repository: Frontend-Lembar
