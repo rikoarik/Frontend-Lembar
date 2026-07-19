@@ -48,8 +48,18 @@ rules:
 
 execution_notes:
   latest_owner_directive:
-    recorded_at: '2026-07-19T11:18:00+07:00'
-    summary: 'Continue COMPLETE LEMBAR WEB V1 automatically across tasks, checkpoints, orchestrator restarts, host restarts, and context compaction until all applicable frontend scope is implemented and verified.'
+    recorded_at: '2026-07-19T17:37:00+07:00'
+    summary: 'DEFER OWNER REVIEW UNTIL COMPLETE FRONTEND V1 IS LANDED ON DEV. Orchestrator reviews, accepts, corrects, verifies, promotes to dev autonomously. Final owner review only when all applicable FE V1 scope lands on dev.'
+    source: 'OWNER_DIRECTIVE — DEFER OWNER REVIEW UNTIL COMPLETE FRONTEND V1 IS LANDED ON DEV (2026-07-19 mid-conversation)'
+    decision_rules:
+      - 'Orchestrator performs review on behalf of owner using accepted repo documents and Figma as authority.'
+      - 'Only five exception categories require owner input before final completion: genuine material contradiction in accepted sources, material product/permission/pricing/privacy/architecture choice, destructive/irreversible action, production deployment/secrets/paid resource, irreconcilable backend contract after focused retries.'
+      - 'Ordinary UI states, design decisions, merges, sprints, verification, and promotion decisions are orchestrator-owned and do not require owner approval.'
+    merge_policy:
+      - 'task branch → ao/frontend-integration → dev → owner final review → main (only after separate release authorization)'
+      - 'Promote to dev only after combined CI is green on integration.'
+      - 'Never merge to main automatically.'
+    final_review_trigger: 'All applicable Frontend-Lembar V1 responsibility landed on dev and passing required checks.'
     required_behaviors:
       - 'Do not stop after current sprint/phase/merge/handoff; auto-start next eligible frontend task.'
       - 'Checkpoint and push meaningful progress at least every 10–15 minutes while unpushed changes exist.'
@@ -60,10 +70,8 @@ execution_notes:
       - 'Do not ask the owner to run /compact; allow automatic compaction and rehydrate from repository state.'
       - 'Issue internal START gates automatically for eligible frontend tasks after dependency and ownership checks.'
     current_resume_focus:
-      - 'F1-04 correction cycle: make /kontak submit succeed in mock/preview without backend dependency.'
-      - 'F2-03 correction cycle: remove /app shell prefetch 404s by stubbing or deferring unavailable routes.'
-      - 'Registry gap analysis: add any missing COMPLETE LEMBAR WEB V1 frontend tasks without touching runtime files.'
-      - 'Then rerun runtime verification, persist evidence, and continue next eligible frontend task automatically.'
+      - 'Registry gap audit identified 10 new bounded frontend-only tasks missing from source-of-truth (F0-08, F1-08..F1-11, F2-06..F2-08, F6-12..F6-13). All inserted as READY (not blocked on backend).'
+      - 'Start first READY task automatically, verify, promote to integration, run CI, promote to dev, then continue next eligible READY task without owner handoff.'
   context_management:
     source_of_truth:
       - TASK-REGISTRY.yaml
@@ -112,12 +120,14 @@ execution_notes:
       - 'Never force-push or rewrite shared branch history for main, dev, ao/frontend-integration, or task branches.'
       - 'Do not promote ao/frontend-integration to dev while incomplete, placeholder, experimental, or unverified work remains.'
     current_state:
-      recorded_at: '2026-07-19T11:28:00+07:00'
+      recorded_at: '2026-07-19T17:37:00+07:00'
       main_commit: '299fd95d2d232e87ca972d52daa89a24458b967e'
-      dev_status: 'missing-before-policy-application'
-      integration_status: 'exists-and-active-as-verification-lane'
-      promotion_gate: 'Hold ao/frontend-integration below dev until repository-level verification and task acceptance are satisfied.'
-      next_branch_action: 'Create and push dev from origin/main, then continue fixing remaining ao/frontend-integration gates before any promotion to dev.'
+      dev_commit: '921e5bb0a88faccb52145d4c028e964d385c9cf5'
+      dev_status: 'exists-and-active-from-promotion'
+      integration_branch: ao/frontend-integration
+      integration_commit: 'f9865d01367fecddd9b00e16bc963c39da9d1b03'
+      promotion_gate: 'Integration CI all-green; promotion to dev is orchestrator-owned per current owner directive.'
+      next_branch_action: 'Continue integrating new READY tasks; promote to dev after combined CI green.'
 
 tasks:
   - id: O0-01
@@ -347,6 +357,31 @@ tasks:
     outcome: Pinned backend artifact deterministically generates a typed frontend client.
     evidence: [generation-drift-check, unknown-error-enum-test]
 
+  - id: F0-08
+    repository: Frontend-Lembar
+    sprint: F0
+    title: Print preview A4 foundation
+    status: READY
+    depends_on: [F0-04]
+    decisions: [D-020]
+    outcome: A4 print-preview foundation follows PRINT-PDF-SPEC geometry and package ordering without claiming a second browser-only final renderer.
+    evidence: [print-css-fixture, a4-geometry, reduced-motion, 390-1280]
+    owns:
+      routes: []
+      features: [print-preview-shell, a4-css-tokens, output-package-preview]
+      components: [A4PreviewFrame, OutputPackagePreview]
+    acceptance:
+      - Preview frame uses ISO A4 physical dimensions, approved margins, and readable print typography.
+      - Copy clearly labels draft preview as approximate and preserves the canonical artifact rule for final print/download.
+      - Package order supports student sheet, answer sheet, key, and explanation without exposing teacher-only pages in student share contexts.
+    verification:
+      - pnpm run lint
+      - pnpm run typecheck
+      - pnpm run test
+      - pnpm run build
+    evidence_notes:
+      - 'Registry gap audit on 2026-07-19 found PRINT-PDF-SPEC.md had no bounded frontend foundation task outside blocked F5-01.'
+
   - id: F1-01
     repository: Frontend-Lembar
     sprint: F1
@@ -567,6 +602,109 @@ tasks:
       - 'CI run 29682684635 green on integration commit 51bc106 before dev promotion.'
       - 'Promoted to dev as merge commit 4ecb471.'
 
+  - id: F1-08
+    repository: Frontend-Lembar
+    sprint: F1
+    title: Public legal pages on canonical routes
+    status: ACCEPTED
+    depends_on: [F1-07]
+    decisions: []
+    outcome: Canonical /privasi and /syarat routes render approved legal content, metadata, responsive states, and footer linkage to consent surfaces.
+    owns:
+      routes: [/privasi, /syarat]
+      features: [public-legal-content, consent-link-audit]
+      components: [LegalPageLayout, LegalRichText]
+    acceptance:
+      - Routes already exist; content, metadata, responsive 390/768/1280 confirmed.
+      - Footer and consent surfaces link to both canonical routes from all public pages.
+      - No invented policy text — approved static content or CMS-backed.
+    verification:
+      - pnpm run lint
+      - pnpm run typecheck
+      - pnpm run test
+      - pnpm run build
+    evidence:
+      - '/privasi renders Kebijakan Privasi content via MarketingSubPageLayout, footer links to /privasi and /syarat. Per-route metadata added.'
+      - '16 test files, 75 tests PASS; lint 0 errors; typecheck PASS; build PASS.'
+      - 'app/__tests__/legal-canonical-pages.test.tsx: 4 tests asserting page render + named metadata export PASS.'
+    accepted_at: '2026-07-19'
+    accepted_by: orchestrator-self-review
+    evidence_notes:
+      - 'Registry gap audit on 2026-07-19 identified missing metadata and test coverage. Added: export const metadata on both pages + legal-canonical-pages test. All gates green on ao/frontend-integration.'
+
+  - id: F1-09
+    repository: Frontend-Lembar
+    sprint: F1
+    title: Shared marketing shell (header + footer)
+    status: READY
+    depends_on: [F0-04, F1-03]
+    decisions: []
+    outcome: Single shared marketing header/nav/CTA and footer renders consistently across /, /harga, /untuk-sekolah, /faq, /bantuan, /tentang, /keamanan-data, /privasi, /syarat without per-route drift.
+    owns:
+      features: [shared-marketing-header, shared-marketing-footer, marketing-nav-cta]
+      components: [MarketingHeader, MarketingFooter, MarketingNav]
+    acceptance:
+      - All marketing routes render the same nav, CTA, and footer via layout inheritance.
+      - Copy uses the same CTA labels, legal links, and contact links; no per-route drift or duplicate/divergent elements.
+      - Responsive behavior (390 menu, scroll header) and keyboard nav work identically across all pages.
+      - F1-01/F1-02 acceptance noted failed pixel parity; this task does not redesign Figma-approved visuals.
+    verification:
+      - pnpm run lint
+      - pnpm run typecheck
+      - pnpm run build
+    evidence_notes:
+      - 'Registry gap audit 2026-07-19: F1-01/F1-02 acceptance notes record shared footer cross-route consistency as unresolved.'
+
+  - id: F1-10
+    repository: Frontend-Lembar
+    sprint: F1
+    title: Invitation activation UI
+    status: READY
+    depends_on: [F1-07]
+    decisions: []
+    outcome: /undangan/[token] school-activation screen with accept, expired, invalid, used states without exposing workspace content or leaking enumeration.
+    owns:
+      routes: ['/undangan/[token]']
+      features: [school-invitation-activation]
+      components: [InvitationAcceptForm, InvitationExpired, InvitationInvalid]
+    acceptance:
+      - Valid invitation shows workspace/role info and accept CTA.
+      - Expired/invalid/used invitations show safe copy without enumerating workspace existence.
+      - Acceptance flow works with mock data until B1-01 lands.
+      - Keyboard, focus, 390/1280, reduced-motion.
+    verification:
+      - pnpm run lint
+      - pnpm run typecheck
+      - pnpm run test
+      - pnpm run build
+    evidence_notes:
+      - 'Registry gap audit 2026-07-19: SCREEN-INVENTORY lists /undangan/:token with no bounded frontend task; route app/(auth)/undangan/[token]/page.tsx exists but F2-01 identity coverage treats it as blocked on B1-01.'
+
+  - id: F1-11
+    repository: Frontend-Lembar
+    sprint: F1
+    title: Controlled read-only share viewer
+    status: READY
+    depends_on: [F1-07]
+    decisions: []
+    outcome: /bagikan/[token] public read-only viewer renders assessment package (student sheet, answer key, explanation) with no-index, revoked/expired states, and no workspace leakage.
+    owns:
+      routes: ['/bagikan/[token]']
+      features: [public-share-viewer]
+      components: [ShareViewer, ShareRevoked, ShareExpired, SharePasscodeGate]
+    acceptance:
+      - Valid token shows selected output package with teacher-only key pages excluded from student share context.
+      - Revoked/expired tokens show explanatory safe copy without leaking assessment metadata.
+      - No workspace, account, source, or analytics leakage from URL, metadata, or error copy.
+      - no-index meta, 390/1280 responsive, keyboard-accessible view.
+    verification:
+      - pnpm run lint
+      - pnpm run typecheck
+      - pnpm run test
+      - pnpm run build
+    evidence_notes:
+      - 'Registry gap audit 2026-07-19: SCREEN-INVENTORY lists /bagikan/:token with no bounded frontend task. F5-02 covers share-link creation only; viewer screen is unbounded.'
+
   - id: F2-01
     repository: Frontend-Lembar
     sprint: F2
@@ -632,6 +770,78 @@ tasks:
     decisions: []
     outcome: End-to-end session and tenant context verified across deployed test services.
     evidence: [login-recovery-switch-logout-e2e]
+
+  - id: F2-06
+    repository: Frontend-Lembar
+    sprint: F2
+    title: Profile settings screen
+    status: READY
+    depends_on: [F2-03]
+    decisions: []
+    outcome: /app/pengaturan/profil renders display-name, account security, password change entry, and log-out-everywhere surface with loading/error/saved states and mock fixtures until B1-01 lands.
+    owns:
+      routes: [/app/pengaturan/profil]
+      features: [profile-settings, password-change-entry, log-out-everywhere]
+      components: [ProfileScreen, DisplayNameForm, SecuritySection, PasswordChangeGate]
+    acceptance:
+      - Existing /app/* placeholder resolves; profile form includes name field, display name, password change link, and log-out-everywhere CTA.
+      - Loading, saved, error states; 390/1280 responsive; keyboard accessible.
+      - Mocks safely until B1-01 auth endpoints land.
+    verification:
+      - pnpm run lint
+      - pnpm run typecheck
+      - pnpm run test
+      - pnpm run build
+    evidence_notes:
+      - 'Registry gap audit 2026-07-19: SCREEN-INVENTORY / TRACEABILITY-MATRIX list /app/pengaturan/profil as P0 with no bounded frontend task beyond F2-03 shell placeholder.'
+
+  - id: F2-07
+    repository: Frontend-Lembar
+    sprint: F2
+    title: Workspace switcher settings screen
+    status: READY
+    depends_on: [F2-03]
+    decisions: []
+    outcome: /app/pengaturan/workspace lists memberships, roles, active-indicator, leave-workspace action, and unsaved-work guard; mocks until B1-02.
+    owns:
+      routes: [/app/pengaturan/workspace]
+      features: [workspace-switch-settings, membership-list, leave-workspace]
+      components: [WorkspaceSettingsScreen, MembershipCard, LeaveWorkspaceConfirm]
+    acceptance:
+      - Memberships listed with role label and active indicator.
+      - Switch and leave actions trigger unsaved-work guard when relevant.
+      - 390/1280 responsive, keyboard accessible, safe copy for personal workspace.
+    verification:
+      - pnpm run lint
+      - pnpm run typecheck
+      - pnpm run test
+      - pnpm run build
+    evidence_notes:
+      - 'Registry gap audit 2026-07-19: SCREEN-INVENTORY lists /app/pengaturan/workspace as P0/P1 with no bounded task beyond F2-03 shell placeholder.'
+
+  - id: F2-08
+    repository: Frontend-Lembar
+    sprint: F2
+    title: Plan and usage settings screen
+    status: READY
+    depends_on: [F2-03]
+    decisions: [D-009]
+    outcome: /app/pengaturan/langganan renders provider-neutral plan/usage/blocked/grace states per D-009/F6-01 with safe text fallback; mocks until B6-01 entitlement API lands.
+    owns:
+      routes: [/app/pengaturan/langganan]
+      features: [plan-usage-view, upgrade-support-cta]
+      components: [PlanUsageScreen, EntitlementSummary, UsageMeter]
+    acceptance:
+      - Shows plan label, remaining usage, upgrade/adjustment CTA without fabricated prices or quotas.
+      - Blocked/expired/grace states render safe explanation with support/hint actions.
+      - 390/1280 responsive, keyboard accessible, no copy about specific nominal prices or tiers not accepted via D-009.
+    verification:
+      - pnpm run lint
+      - pnpm run typecheck
+      - pnpm run test
+      - pnpm run build
+    evidence_notes:
+      - 'Registry gap audit 2026-07-19: SCREEN-INVENTORY lists /app/pengaturan/langganan as P0 shell with no bounded task beyond F2-03 shell placeholder. F6-01 covers the general entitlement UI but has no bounded /app/pengaturan/langganan entry.'
 
   - id: F3-01
     repository: Frontend-Lembar
@@ -933,6 +1143,74 @@ tasks:
       - npm run build
       - npm run dev
     evidence: [permission-matrix, audit-drawer, no-content-access, responsive]
+
+  - id: F6-12
+    repository: Frontend-Lembar
+    sprint: F6
+    title: Superadmin shell placeholders
+    status: READY
+    depends_on: [F2-03]
+    decisions: []
+    outcome: /ops, /ops/accounts, /ops/schools, /ops/catalog, /ops/prompts, /ops/jobs, /ops/quality, /ops/audit, /ops/billing, and /ops/flags resolve to bounded least-privilege placeholder screens instead of 404.
+    owns:
+      routes:
+        [
+          /ops,
+          /ops/accounts,
+          /ops/schools,
+          /ops/catalog,
+          /ops/prompts,
+          /ops/jobs,
+          /ops/quality,
+          /ops/audit,
+          /ops/billing,
+          /ops/flags,
+        ]
+      features: [ops-shell-placeholders]
+      components: [OpsPlaceholderScreen, OpsSectionIndex]
+    acceptance:
+      - Every route from SCREEN-INVENTORY resolves with safe superadmin placeholder content.
+      - No teacher/school content leakage; copy states platform-only, least-privilege intent.
+      - 390/1280 responsive, keyboard accessible, no horizontal overflow.
+    verification:
+      - pnpm run lint
+      - pnpm run typecheck
+      - pnpm run test
+      - pnpm run build
+    evidence_notes:
+      - 'Registry gap audit 2026-07-19: SCREEN-INVENTORY lists multiple /ops routes not covered by existing placeholder allowlist or bounded task; F6-03 only names minimum operations UI abstractly.'
+
+  - id: F6-13
+    repository: Frontend-Lembar
+    sprint: F6
+    title: School admin shell placeholders
+    status: READY
+    depends_on: [F2-03]
+    decisions: []
+    outcome: /school, /school/guru, /school/guru/undang, /school/penggunaan, /school/pengaturan, and /school/audit resolve to bounded role-aware placeholder screens instead of 404.
+    owns:
+      routes:
+        [
+          /school,
+          /school/guru,
+          /school/guru/undang,
+          /school/penggunaan,
+          /school/pengaturan,
+          /school/audit,
+        ]
+      features: [school-admin-shell-placeholders]
+      components: [SchoolPlaceholderScreen, SchoolSectionIndex]
+    acceptance:
+      - Every school-admin route from SCREEN-INVENTORY resolves with safe school-admin placeholder content.
+      - Copy distinguishes school-admin aggregate views from teacher personal workspace.
+      - 390/1280 responsive, keyboard accessible, no horizontal overflow.
+    verification:
+      - pnpm run lint
+      - pnpm run typecheck
+      - pnpm run test
+      - pnpm run build
+    evidence_notes:
+      - 'Registry gap audit 2026-07-19: SCREEN-INVENTORY lists multiple /school routes not covered by existing placeholder allowlist or bounded task; F6-02 is too broad and blocked on backend contracts.'
 
   - id: B0-01
     repository: Backend-Lembar
