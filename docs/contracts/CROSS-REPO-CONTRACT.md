@@ -8,7 +8,7 @@
 | Visual system and interaction                | Frontend                                     | Product + BE for constraints    |
 | REST paths, payloads, errors, auth semantics | Backend                                      | Frontend + future mobile        |
 | OpenAPI source                               | Backend                                      | Frontend CI/codegen             |
-| Marketing content schema/public projection  | Backend                                      | Frontend renderer/runtime guard |
+| Marketing content schema/public projection   | Backend                                      | Frontend renderer/runtime guard |
 | Marketing layout/component registry          | Frontend                                     | Backend publish compatibility   |
 | Database schema/migrations                   | Backend                                      | Backend only                    |
 | AI prompt/model/provider                     | Backend                                      | Frontend sees neutral job state |

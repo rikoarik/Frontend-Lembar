@@ -12,7 +12,7 @@ owns published content, authoring state, permissions, versions, and audit.
 - app/(marketing)/page.tsx: Produk.
 - app/(marketing)/untuk-sekolah/page.tsx.
 - app/(marketing)/harga/page.tsx.
-- app/(ops)/ops/content/*: authenticated superadmin authoring UI.
+- app/(ops)/ops/content/\*: authenticated superadmin authoring UI.
 
 Use a shared component registry, never component names delivered from the network:
 

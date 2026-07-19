@@ -78,20 +78,20 @@ Do not use `final-final-2` or agent-generated random names.
 
 Populate exact node IDs after Figma audit; do not invent them.
 
-| Route/component | Desktop node | Mobile node | Required states | Status |
-| --- | --- | --- | --- | --- |
-| `/` landing | TBD | TBD | default, menu open | Needs mapping |
-| `/untuk-sekolah` | TBD | TBD | default, lead success/error | Needs mapping |
-| `/harga` | TBD | TBD | price unresolved/resolved, FAQ open | Needs mapping |
-| `/masuk` | TBD | TBD | default, invalid, loading | Missing |
-| `/app` dashboard | TBD | TBD | new, populated, error | Needs mapping |
-| `/app/generate` | TBD | TBD | pristine, upload, valid, errors | Partial prototype |
-| job progress | TBD | TBD | all terminal/retry states | Missing |
-| review | TBD | TBD | quick, detail, conflict, flags | Missing |
-| output | TBD | TBD | render, ready, share, expired | Missing |
-| history/bank/template | TBD | TBD | empty/populated/error | Missing |
-| school admin | TBD | TBD | empty/populated/invite | Missing |
-| superadmin | TBD | N/A/limited | operational states | Missing |
+| Route/component       | Desktop node | Mobile node | Required states                     | Status            |
+| --------------------- | ------------ | ----------- | ----------------------------------- | ----------------- |
+| `/` landing           | TBD          | TBD         | default, menu open                  | Needs mapping     |
+| `/untuk-sekolah`      | TBD          | TBD         | default, lead success/error         | Needs mapping     |
+| `/harga`              | TBD          | TBD         | price unresolved/resolved, FAQ open | Needs mapping     |
+| `/masuk`              | TBD          | TBD         | default, invalid, loading           | Missing           |
+| `/app` dashboard      | TBD          | TBD         | new, populated, error               | Needs mapping     |
+| `/app/generate`       | TBD          | TBD         | pristine, upload, valid, errors     | Partial prototype |
+| job progress          | TBD          | TBD         | all terminal/retry states           | Missing           |
+| review                | TBD          | TBD         | quick, detail, conflict, flags      | Missing           |
+| output                | TBD          | TBD         | render, ready, share, expired       | Missing           |
+| history/bank/template | TBD          | TBD         | empty/populated/error               | Missing           |
+| school admin          | TBD          | TBD         | empty/populated/invite              | Missing           |
+| superadmin            | TBD          | N/A/limited | operational states                  | Missing           |
 
 ## Design token sync
 

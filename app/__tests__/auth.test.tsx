@@ -83,9 +83,7 @@ beforeEach(() => {
 describe('auth pages render', () => {
   it('login page renders heading and form fields', () => {
     render(<LoginPage />);
-    expect(
-      screen.getByRole('heading', { level: 1, name: /Masuk ke lembar/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1, name: /Masuk ke lembar/i })).toBeInTheDocument();
     expect(screen.getByLabelText(/Username, email, atau nomor telepon/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/^Kata sandi/i)).toBeInTheDocument();
   });
@@ -110,9 +108,7 @@ describe('auth pages render', () => {
     await user.type(screen.getByLabelText(/^Kata sandi$/i), 'Lengkap1234!');
     await user.type(screen.getByLabelText(/^Konfirmasi kata sandi$/i), 'BedaLagi1234!');
     await user.click(screen.getByRole('button', { name: /Buat akun/i }));
-    expect(
-      await screen.findByText(/Konfirmasi kata sandi tidak cocok/i),
-    ).toBeInTheDocument();
+    expect(await screen.findByText(/Konfirmasi kata sandi tidak cocok/i)).toBeInTheDocument();
   });
 
   it('reset password page shows success notice with valid token', async () => {

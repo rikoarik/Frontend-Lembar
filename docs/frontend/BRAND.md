@@ -58,16 +58,16 @@ alas hitam—dipasangkan dengan wordmark lowercase hitam.
 
 ## Core palette
 
-| Token | Value | Use |
-| --- | --- | --- |
-| Paper | `#F7F3EC` | marketing/app background |
-| Surface | `#FFFCF7` | card/panel |
-| Ink | `#171717` | primary text/black logo segment |
-| Muted ink | `#625D55` | secondary text |
-| Line | `#D8D0C5` | borders/dividers |
-| Lembar red | `#A3202B` | logo/accent/primary action |
-| Red hover | `#851925` | primary hover |
-| Red soft | `#F5E4E5` | selected/notice background |
+| Token      | Value     | Use                             |
+| ---------- | --------- | ------------------------------- |
+| Paper      | `#F7F3EC` | marketing/app background        |
+| Surface    | `#FFFCF7` | card/panel                      |
+| Ink        | `#171717` | primary text/black logo segment |
+| Muted ink  | `#625D55` | secondary text                  |
+| Line       | `#D8D0C5` | borders/dividers                |
+| Lembar red | `#A3202B` | logo/accent/primary action      |
+| Red hover  | `#851925` | primary hover                   |
+| Red soft   | `#F5E4E5` | selected/notice background      |
 
 Semantic colors hidup di `DESIGN-SYSTEM.md`; logo hanya memakai Ink, Lembar red, white, atau
 monochrome.
@@ -117,4 +117,3 @@ Sebelum F1 landing:
 - visual regression snapshots pada 16, 24, 32, dan header size.
 
 `references/visual/logo-concept.png` adalah eksplorasi, bukan production asset.
-

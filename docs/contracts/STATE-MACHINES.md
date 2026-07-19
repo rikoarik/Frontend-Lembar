@@ -25,13 +25,13 @@ return/remain draft with actionable failure.
 
 Allowed commands:
 
-| State | Commands |
-| --- | --- |
-| draft | update config, attach source, start generation, archive |
-| generating | read, request cancel if supported |
-| review | edit/review/regenerate/delete question, finalize, archive |
-| final | export, share, duplicate/new draft version, archive |
-| archived | restore if policy, purge request |
+| State      | Commands                                                  |
+| ---------- | --------------------------------------------------------- |
+| draft      | update config, attach source, start generation, archive   |
+| generating | read, request cancel if supported                         |
+| review     | edit/review/regenerate/delete question, finalize, archive |
+| final      | export, share, duplicate/new draft version, archive       |
+| archived   | restore if policy, purge request                          |
 
 ## Assessment version and question review
 

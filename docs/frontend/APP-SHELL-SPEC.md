@@ -134,4 +134,3 @@ Maximum five items and link to history. Desktop table/mobile list. Actions refle
 - Metrics match backend definitions.
 - 390 px supports all actions without overflow.
 - Account/logout menu is keyboard and screen-reader usable.
-
