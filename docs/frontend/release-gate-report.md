@@ -1,8 +1,8 @@
 # Release Gate Report
 
-Generated: 2026-07-19T03:58:41.632Z
+Generated: 2026-07-19T09:47:20.663Z
 
-**Summary:** 14 pass, 1 fail, 0 skip
+**Summary:** 15 pass, 0 fail, 0 skip
 
 | Check                            | Status | Summary                                   |
 | -------------------------------- | ------ | ----------------------------------------- |
@@ -10,7 +10,7 @@ Generated: 2026-07-19T03:58:41.632Z
 | lint                             | PASS   | exit 0                                    |
 | test                             | PASS   | exit 0                                    |
 | build                            | PASS   | exit 0                                    |
-| format:check                     | FAIL   | exit 1                                    |
+| format:check                     | PASS   | exit 0                                    |
 | axe-core load                    | PASS   | axe-core 4.10.3 loaded from cdn           |
 | console guard — home             | PASS   | no console errors                         |
 | prefers-reduced-motion — home    | PASS   | all animations halted                     |
@@ -38,26 +38,26 @@ Summary: exit 0
 Summary: exit 0
 
 ```
-
-/Users/macbookm2/.ao/data/worktrees/frontend-lembar/frontend-lembar-10/app/(marketing)/page.tsx
-  43:15  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
-
-/Users/macbookm2/.ao/data/worktrees/frontend-lembar/frontend-lembar-10/app/(marketing)/untuk-sekolah/page.tsx
-  11:13  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
-  14:13  warning  Do not use an `<a>` element to navigate to `/`. Use `<Link />` from `next/link` instead. See: https://nextjs.org/docs/messages/no-html-link-for-pages                                                                                                                                    @next/next/no-html-link-for-pages
-
-/Users/macbookm2/.ao/data/worktrees/frontend-lembar/frontend-lembar-10/app/components/marketing/MarketingFooter.tsx
-  17:17  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
-  37:15  warning  Do not use an `<a>` element to navigate to `/`. Use `<Link />` from `next/link` instead. See: https://nextjs.org/docs/messages/no-html-link-for-pages                                                                                                                                    @next/next/no-html-link-for-pages
-
-/Users/macbookm2/.ao/data/worktrees/frontend-lembar/frontend-lembar-10/app/components/marketing/SubPageNavbar.tsx
-  19:11  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
-
-/Users/macbookm2/.ao/data/worktrees/frontend-lembar/frontend-lembar-10/public/mockServiceWorker.js
-  1:1  warning  Unused eslint-disable directive (no problems were reported)
-
-✖ 9 problems (0 errors, 9 warnings)
-  0 errors and 1 warning potentially fixable with the `--fix` option.
+[0m[4m/Users/macbookm2/.ao/data/worktrees/frontend-lembar/orchestrator/frontend-lem-orchestrator/app/(marketing)/page.tsx[24m[0m
+[0m  [2m41:15[22m  [33mwarning[39m  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  [2m@next/next/no-img-element[22m[0m
+[0m[0m
+[0m[4m/Users/macbookm2/.ao/data/worktrees/frontend-lembar/orchestrator/frontend-lem-orchestrator/app/(marketing)/untuk-sekolah/page.tsx[24m[0m
+[0m  [2m11:13[22m  [33mwarning[39m  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  [2m@next/next/no-img-element[22m[0m
+[0m  [2m18:13[22m  [33mwarning[39m  Do not use an `<a>` element to navigate to `/`. Use `<Link />` from `next/link` instead. See: https://nextjs.org/docs/messages/no-html-link-for-pages                                                                                                                                    [2m@next/next/no-html-link-for-pages[22m[0m
+[0m[0m
+[0m[4m/Users/macbookm2/.ao/data/worktrees/frontend-lembar/orchestrator/frontend-lem-orchestrator/app/components/marketing/MarketingFooter.tsx[24m[0m
+[0m  [2m16:17[22m  [33mwarning[39m  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  [2m@next/next/no-img-element[22m[0m
+[0m  [2m37:15[22m  [33mwarning[39m  Do not use an `<a>` element to navigate to `/`. Use `<Link />` from `next/link` instead. See: https://nextjs.org/docs/messages/no-html-link-for-pages                                                                                                                                    [2m@next/next/no-html-link-for-pages[22m[0m
+[0m[0m
+[0m[4m/Users/macbookm2/.ao/data/worktrees/frontend-lembar/orchestrator/frontend-lem-orchestrator/app/components/marketing/SubPageNavbar.tsx[24m[0m
+[0m  [2m19:11[22m  [33mwarning[39m  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  [2m@next/next/no-img-element[22m[0m
+[0m[0m
+[0m[4m/Users/macbookm2/.ao/data/worktrees/frontend-lembar/orchestrator/frontend-lem-orchestrator/public/mockServiceWorker.js[24m[0m
+[0m  [2m1:1[22m  [33mwarning[39m  Unused eslint-disable directive (no problems were reported)[0m
+[0m[0m
+[0m[33m[1m✖ 14 problems (0 errors, 14 warnings)[22m[39m[0m
+[0m[33m[1m[22m[39m[33m[1m  0 errors and 1 warning potentially fixable with the `--fix` option.[22m[39m[0m
+[0m[33m[1m[22m[39m[0m
 ```
 
 ### test — PASS
@@ -65,24 +65,24 @@ Summary: exit 0
 Summary: exit 0
 
 ```
- ✓ scripts/__tests__/secret-scan.test.ts (3 tests) 223ms
- ✓ app/components/ui/__tests__/visual-fixtures.test.tsx (3 tests) 122ms
- ✓ app/components/ui/__tests__/primitives.test.tsx (7 tests) 340ms
- ✓ app/__tests__/marketing.test.tsx (3 tests) 236ms
- ✓ src/lib/runtime/__tests__/env.test.ts (8 tests) 6ms
- ✓ src/services/auth/__tests__/errorMapping.test.ts (20 tests) 3ms
- ✓ src/features/workspace/__tests__/workspaceContext.test.tsx (2 tests) 83ms
- ✓ app/__tests__/lead-form.test.tsx (4 tests) 924ms
-   ✓ school lead form > submits successfully with phone instead of email without revealing contact existence 368ms
-   ✓ school lead form > surfaces rate-limit copy (HTTP 429) without exposing internals 302ms
- ✓ app/(app)/__tests__/shell-states.test.tsx (4 tests) 52ms
- ✓ app/__tests__/auth.test.tsx (4 tests) 628ms
-   ✓ auth pages render > register page surfaces mismatch error on confirmation 321ms
+ [32m✓[39m app/components/ui/__tests__/primitives.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[33m 330[2mms[22m[39m
+ [32m✓[39m app/__tests__/marketing.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[90m 280[2mms[22m[39m
+ [32m✓[39m src/lib/runtime/__tests__/env.test.ts [2m([22m[2m8 tests[22m[2m)[22m[90m 5[2mms[22m[39m
+ [32m✓[39m src/services/auth/__tests__/errorMapping.test.ts [2m([22m[2m20 tests[22m[2m)[22m[90m 14[2mms[22m[39m
+ [32m✓[39m src/features/workspace/__tests__/workspaceContext.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[90m 129[2mms[22m[39m
+ [32m✓[39m app/__tests__/lead-form.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[33m 947[2mms[22m[39m
+   [33m[2m✓[22m[39m school lead form[2m > [22msubmits successfully with phone instead of email without revealing contact existence [33m366[2mms[22m[39m
+   [33m[2m✓[22m[39m school lead form[2m > [22msurfaces rate-limit copy (HTTP 429) without exposing internals [33m370[2mms[22m[39m
+ [32m✓[39m app/__tests__/lead-route.test.ts [2m([22m[2m2 tests[22m[2m)[22m[90m 38[2mms[22m[39m
+ [32m✓[39m app/(app)/__tests__/shell-routes.test.ts [2m([22m[2m1 test[22m[2m)[22m[90m 1[2mms[22m[39m
+ [32m✓[39m app/(app)/__tests__/shell-states.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[90m 50[2mms[22m[39m
+ [32m✓[39m app/__tests__/auth.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[33m 778[2mms[22m[39m
+   [33m[2m✓[22m[39m auth pages render[2m > [22mregister page surfaces mismatch error on confirmation [33m436[2mms[22m[39m
 
- Test Files  11 passed (11)
-      Tests  65 passed (65)
-   Start at  10:58:22
-   Duration  2.55s (transform 598ms, setup 974ms, collect 2.97s, tests 2.63s, environment 5.53s, prepare 763ms)
+[2m Test Files [22m [1m[32m13 passed[39m[22m[90m (13)[39m
+[2m      Tests [22m [1m[32m68 passed[39m[22m[90m (68)[39m
+[2m   Start at [22m 16:47:02
+[2m   Duration [22m 2.68s[2m (transform 638ms, setup 1.43s, collect 2.97s, tests 2.93s, environment 5.97s, prepare 934ms)[22m
 
 [33mThe CJS build of Vite's Node API is deprecated. See https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.[39m
 ```
@@ -92,7 +92,6 @@ Summary: exit 0
 Summary: exit 0
 
 ```
-├ ○ /bantuan
 ├ ○ /daftar
 ├ ○ /faq
 ├ ○ /harga
@@ -107,38 +106,24 @@ Summary: exit 0
 ├ ○ /syarat
 ├ ○ /tentang
 ├ ƒ /undangan/[token]
-└ ○ /untuk-sekolah
+├ ○ /untuk-sekolah
+└ ƒ /v1/leads/school
 
 
 ○  (Static)   prerendered as static content
 ƒ  (Dynamic)  server-rendered on demand
 ```
 
-### format:check — FAIL
+### format:check — PASS
 
-Summary: exit 1
+Summary: exit 0
 
 ```
-[warn] app/components/app/LeftRail.tsx
-[warn] app/components/app/ShellStates.tsx
-[warn] app/components/app/TopBar.tsx
-[warn] app/components/app/WorkspaceSwitcher.tsx
-[warn] app/components/marketing/AnnouncementBanner.tsx
-[warn] app/components/marketing/MarketingFooter.tsx
-[warn] app/components/marketing/MarketingSubPageLayout.tsx
-[warn] app/components/marketing/MockupPanels.tsx
-[warn] app/components/marketing/SubPageNavbar.tsx
-[warn] app/layout.tsx
-[warn] docs/frontend/release-gate-report.md
-[warn] pnpm-lock.yaml
-[warn] public/mockServiceWorker.js
-[warn] src/features/leads/SchoolLeadForm.tsx
-[warn] src/features/workspace/workspaceContext.tsx
-[warn] src/mocks/handlers/leads.ts
-[warn] src/services/leads/errorMapping.ts
-[warn] src/services/leads/leadsMutations.ts
-[warn] src/types/leads.ts
-[warn] Code style issues found in 54 files. Run Prettier with --write to fix.
+> frontend-lembar@0.1.0 format:check
+> prettier --check .
+
+Checking formatting...
+All matched files use Prettier code style!
 ```
 
 ### axe-core load — PASS
