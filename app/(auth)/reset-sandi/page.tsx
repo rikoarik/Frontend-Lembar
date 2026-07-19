@@ -119,11 +119,7 @@ function ResetPasswordInner() {
               onChange={setConfirm}
               autoComplete="new-password"
             />
-            <SubmitButton
-              label="Simpan kata sandi"
-              busyLabel="Menyimpan…"
-              busy={submit.busy}
-            />
+            <SubmitButton label="Simpan kata sandi" busyLabel="Menyimpan…" busy={submit.busy} />
           </form>
         )}
       </AuthFormShell>

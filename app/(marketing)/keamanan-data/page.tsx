@@ -20,13 +20,20 @@ export default function KeamananDataPage() {
                 </div>
                 <h2 className="font-h2 text-h2 text-ink mb-unit-3">Enkripsi End-to-End</h2>
                 <p className="text-secondary text-body-default leading-relaxed max-w-md">
-                  TLS 1.3 saat transit, AES-256 saat tersimpan. Tidak ada pihak ketiga — termasuk kami — yang bisa mengintip isi soal Anda.
+                  TLS 1.3 saat transit, AES-256 saat tersimpan. Tidak ada pihak ketiga — termasuk
+                  kami — yang bisa mengintip isi soal Anda.
                 </p>
               </div>
               <div className="flex gap-4 mt-unit-8">
-                <span className="bg-surface px-3 py-1.5 rounded text-caption text-secondary border border-border-subtle">TLS 1.3</span>
-                <span className="bg-surface px-3 py-1.5 rounded text-caption text-secondary border border-border-subtle">AES-256</span>
-                <span className="bg-surface px-3 py-1.5 rounded text-caption text-secondary border border-border-subtle">Zero-knowledge</span>
+                <span className="bg-surface px-3 py-1.5 rounded text-caption text-secondary border border-border-subtle">
+                  TLS 1.3
+                </span>
+                <span className="bg-surface px-3 py-1.5 rounded text-caption text-secondary border border-border-subtle">
+                  AES-256
+                </span>
+                <span className="bg-surface px-3 py-1.5 rounded text-caption text-secondary border border-border-subtle">
+                  Zero-knowledge
+                </span>
               </div>
             </div>
 
@@ -35,19 +42,22 @@ export default function KeamananDataPage() {
               <div className="rounded-2xl bg-paper border border-border-strong p-unit-8 flex-1">
                 <h3 className="font-h3 text-h3 text-ink mb-unit-2">Kontrol Akses Berlapis</h3>
                 <p className="text-secondary text-body-sm leading-relaxed">
-                  Admin sekolah menentukan siapa yang boleh melihat, mengedit, dan mengekspor soal. Guru hanya melihat kelasnya sendiri.
+                  Admin sekolah menentukan siapa yang boleh melihat, mengedit, dan mengekspor soal.
+                  Guru hanya melihat kelasnya sendiri.
                 </p>
               </div>
               <div className="rounded-2xl bg-paper border border-border-strong p-unit-8 flex-1">
                 <h3 className="font-h3 text-h3 text-ink mb-unit-2">Audit Trail</h3>
                 <p className="text-secondary text-body-sm leading-relaxed">
-                  Setiap aksi tercatat: siapa membuat, siapa mengedit, kapan diunduh. Tidak ada perubahan yang hilang.
+                  Setiap aksi tercatat: siapa membuat, siapa mengedit, kapan diunduh. Tidak ada
+                  perubahan yang hilang.
                 </p>
               </div>
               <div className="rounded-2xl bg-paper border border-border-strong p-unit-8 flex-1">
                 <h3 className="font-h3 text-h3 text-ink mb-unit-2">Infrastruktur Tersertifikasi</h3>
                 <p className="text-secondary text-body-sm leading-relaxed">
-                  Berjalan di infrastruktur ISO 27001 & SOC 2 Type II. Sesuai regulasi perlindungan data Indonesia.
+                  Berjalan di infrastruktur ISO 27001 & SOC 2 Type II. Sesuai regulasi perlindungan
+                  data Indonesia.
                 </p>
               </div>
             </div>

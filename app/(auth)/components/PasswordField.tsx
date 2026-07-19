@@ -2,10 +2,7 @@
 
 import { Eye, EyeSlash } from 'iconsax-react';
 import { useId, useState } from 'react';
-import {
-  PASSWORD_MIN,
-  passwordRules,
-} from '@/src/features/auth/validation/auth-validation';
+import { PASSWORD_MIN, passwordRules } from '@/src/features/auth/validation/auth-validation';
 
 type PasswordFieldProps = {
   value: string;
@@ -38,10 +35,7 @@ export default function PasswordField({
 
   return (
     <div className="flex flex-col gap-1.5">
-      <label
-        htmlFor={inputId}
-        className="font-caption text-caption font-medium text-ink"
-      >
+      <label htmlFor={inputId} className="font-caption text-caption font-medium text-ink">
         {label}
       </label>
       <div className="relative">
@@ -89,11 +83,7 @@ export default function PasswordField({
         </ul>
       ) : null}
       {error ? (
-        <p
-          id={errorId}
-          role="alert"
-          className="font-caption text-caption text-burgundy"
-        >
+        <p id={errorId} role="alert" className="font-caption text-caption text-burgundy">
           {error}
         </p>
       ) : null}

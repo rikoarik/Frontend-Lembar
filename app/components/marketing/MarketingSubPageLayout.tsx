@@ -26,8 +26,13 @@ export default function MarketingSubPageLayout({
         {/* Reusable Hero Section */}
         <section className="pt-unit-6 pb-unit-16 px-margin-mobile md:px-margin-desktop bg-paper">
           <div className="max-w-container-max mx-auto">
-            <Link href="/" className="inline-flex items-center gap-1.5 text-secondary hover:text-burgundy text-caption transition-colors mb-unit-8 group">
-              <span className="material-symbols-outlined text-[16px] group-hover:-translate-x-0.5 transition-transform">arrow_back</span>
+            <Link
+              href="/"
+              className="inline-flex items-center gap-1.5 text-secondary hover:text-burgundy text-caption transition-colors mb-unit-8 group"
+            >
+              <span className="material-symbols-outlined text-[16px] group-hover:-translate-x-0.5 transition-transform">
+                arrow_back
+              </span>
               Beranda
             </Link>
 
@@ -67,9 +72,7 @@ export default function MarketingSubPageLayout({
                   </p>
                 )}
                 {updateDate && (
-                  <p className="text-secondary text-body-sm mt-unit-2">
-                    {updateDate}
-                  </p>
+                  <p className="text-secondary text-body-sm mt-unit-2">{updateDate}</p>
                 )}
               </div>
             )}
