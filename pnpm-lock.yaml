@@ -13,6 +13,9 @@ importers:
       '@fontsource/manrope':
         specifier: 5.2.8
         version: 5.2.8
+      '@fontsource/material-symbols':
+        specifier: 5.2.29
+        version: 5.2.29
       framer-motion:
         specifier: 12.42.2
         version: 12.42.2(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -610,6 +613,9 @@ packages:
       {
         integrity: sha512-gJHJmcuUk7qWcNCfcAri/DJQtXtBYqi9yKratr4jXhSo0I3xUtNNKI+igQIcw5c+m95g0vounk8ZnX/kb8o0TA==,
       }
+
+  '@fontsource/material-symbols@5.2.29':
+    resolution: {integrity: sha512-T2IvjwEtc+1VT60QVUgxJjjdlgESb3IayPN1Apsl+dDFzU5lDoZ3VcGng1dOsBXKg7rbFr9EhF8ltlAVpTD9nQ==}
 
   '@humanfs/core@0.19.2':
     resolution:
@@ -5244,6 +5250,8 @@ snapshots:
   '@fontsource/inter@5.2.8': {}
 
   '@fontsource/manrope@5.2.8': {}
+
+  '@fontsource/material-symbols@5.2.29': {}
 
   '@humanfs/core@0.19.2':
     dependencies:

@@ -22,7 +22,7 @@ const csp = [
   "object-src 'none'",
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''}`,
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-  "img-src 'self' data: blob: https://lh3.googleusercontent.com",
+  "img-src 'self' data: blob: https://lh3.googleusercontent.com https://raw.githubusercontent.com",
   "font-src 'self' data: https://fonts.gstatic.com",
   connectSrc,
   'upgrade-insecure-requests',

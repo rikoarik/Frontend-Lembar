@@ -38,7 +38,7 @@ export default function HargaPage() {
       <nav className="w-full sticky top-0 z-50 bg-background border-b border-border-subtle">
         <div className="flex justify-between items-center h-unit-16 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
           <div className="flex items-center h-unit-8 w-unit-8">
-            <img alt="lembar logo" className="h-full w-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCARfxfBB_WCV4WkF3OmtcsQ2wj08axCXGcgeT6O0XjgoJEsYbwdhfrDY6LT9_hD6Ha3-fKvXLgwfRsmvSQfFMGrLeehUD6JPilFLCz_yaNCRRbGsiPubCWMNLjmWIwixhYEcDuOS19zunQgfMZaRVLV2E7z1rP0J1u2xL3lPobcaGM6wHEapPu5cgRculgnypYd6I2icHwZ2UfAYZHVQwU_PQzgMKNUIgs1E0cCLgbzY9Usw9QPnAaBFOP1LD5NWhRek4SekbZVQ" />
+            <img alt="lembar logo" className="h-full w-full object-contain" src="/lembar/logo-mark.png" />
           </div>
           <div className="hidden md:flex items-center gap-unit-8">
             <a className="text-secondary font-body-default hover:text-burgundy transition-colors duration-200" href="/">Produk</a>
@@ -88,7 +88,7 @@ export default function HargaPage() {
               <div className="absolute top-0 right-0 bg-burgundy text-on-primary px-unit-4 py-unit-1 text-caption font-label-semibold rounded-bl-xl shadow-md">
                 <span className="flex items-center gap-2">
                   <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                    <span className="absolute inline-flex h-full w-full rounded-full bg-white opacity-75 motion-safe:animate-ping motion-reduce:animate-none"></span>
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
                   </span>
                   PALING POPULER

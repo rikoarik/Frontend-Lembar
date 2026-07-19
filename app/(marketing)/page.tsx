@@ -40,7 +40,7 @@ export default function LandingPage() {
         <div className="flex justify-between items-center h-unit-16 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
           <Link href="/" className="flex items-center gap-4" aria-label="lembar — beranda">
             <div className="flex items-center h-unit-8 w-unit-8">
-              <img alt="" className="h-full w-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAp9K9UpBGq9yeOy6I3PxGbePnCwa9H_U_j13dh3aLeDE7Xpey3plk3vcS9Qm8hePmA36hgFgFfqWaBE7DynvVBU8-VkN_84GcCwNalagl0xQUsI3GKLwX68vtO6wsj4EvslKJ-3n56fnKadcVUAqkIbbxmdeREsfROoHsp6ZJd0-vRRdU6adFbLVPTzh7F3x0BZtxH4aiwxdXGaNXGw5ysRu6VhS0JZ_ZhU1BVqmeFqlb-8GFKPXzzQZVuRC-vsTSmCY6Agq3p5A" />
+              <img alt="" className="h-full w-full object-contain" src="https://raw.githubusercontent.com/rikoarik/Frontend-Lembar/ao/frontend-integration/public/lembar/logo-mark.png" />
             </div>
           </Link>
           <nav className="hidden md:flex items-center gap-8" aria-label="Navigasi utama">

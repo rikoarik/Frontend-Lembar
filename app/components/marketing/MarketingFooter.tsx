@@ -1,24 +1,28 @@
 'use client';
 
+import { useReducedMotion } from 'framer-motion';
+
 export default function MarketingFooter() {
+  const reduce = useReducedMotion();
+
   return (
     <footer className="w-full bg-paper border-t border-border-strong pt-unit-16 pb-unit-8 select-none">
       <div className="px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-y-unit-12 gap-x-unit-8 pb-unit-12 border-b border-border-subtle">
-          
+
           {/* Brand Column */}
           <div className="md:col-span-4 flex flex-col gap-unit-6">
             <div className="flex items-center gap-2">
               <div className="h-unit-8 w-unit-8 flex-shrink-0">
-                <img 
-                  alt="lembar logo" 
-                  className="h-full w-full object-contain" 
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuCARfxfBB_WCV4WkF3OmtcsQ2wj08axCXGcgeT6O0XjgoJEsYbwdhfrDY6LT9_hD6Ha3-fKvXLgwfRsmvSQfFMGrLeehUD6JPilFLCz_yaNCRRbGsiPubCWMNLjmWIwixhYEcDuOS19zunQgfMZaRVLV2E7z1rP0J1u2xL3lPobcaGM6wHEapPu5cgRculgnypYd6I2icHwZ2UfAYZHVQwU_PQzgMKNUIgs1E0cCLgbzY9Usw9QPnAaBFOP1LD5NWhRek4SekbZVQ" 
+                <img
+                  alt="lembar logo"
+                  className="h-full w-full object-contain"
+                  src="/lembar/logo-mark.png"
                 />
               </div>
               <span className="font-h3 text-h3 text-ink font-bold tracking-tight">lembar</span>
             </div>
-            
+
             <p className="font-caption text-caption text-secondary max-w-[300px] leading-relaxed">
               Platform pembuatan asesmen pintar berbasis AI yang dirancang khusus untuk meningkatkan produktivitas dan kualitas pengajaran pendidik di Indonesia.
             </p>
@@ -84,7 +88,7 @@ export default function MarketingFooter() {
           </p>
           <div className="flex items-center gap-1.5 text-secondary font-caption text-caption">
             <span>Dibuat dengan</span>
-            <span className="material-symbols-outlined text-red-500 text-[16px] animate-pulse" style={{ fontVariationSettings: "'FILL' 1" }}>favorite</span>
+            <span className={`material-symbols-outlined text-red-500 text-[16px] ${reduce ? '' : 'animate-pulse'}`} style={{ fontVariationSettings: "'FILL' 1" }}>favorite</span>
             <span>untuk Guru Indonesia</span>
           </div>
         </div>

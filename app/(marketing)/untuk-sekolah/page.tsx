@@ -8,7 +8,7 @@ export default function UntukSekolahPage() {
       <nav className="w-full sticky top-0 z-50 glass-nav border-b border-border-subtle dark:border-outline-variant">
         <div className="flex justify-between items-center h-unit-16 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
           <div className="h-8 w-8 flex-shrink-0">
-            <img alt="lembar logo" className="h-full w-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAp9K9UpBGq9yeOy6I3PxGbePnCwa9H_U_j13dh3aLeDE7Xpey3plk3vcS9Qm8hePmA36hgFgFfqWaBE7DynvVBU8-VkN_84GcCwNalagl0xQUsI3GKLwX68vtO6wsj4EvslKJ-3n56fnKadcVUAqkIbbxmdeREsfROoHsp6ZJd0-vRRdU6adFbLVPTzh7F3x0BZtxH4aiwxdXGaNXGw5ysRu6VhS0JZ_ZhU1BVqmeFqlb-8GFKPXzzQZVuRC-vsTSmCY6Agq3p5A" />
+            <img alt="lembar logo" className="h-full w-full object-contain" src="/lembar/logo-mark.png" />
           </div>
           <div className="hidden md:flex items-center gap-unit-8">
             <a className="text-secondary hover:text-burgundy transition-colors duration-200" href="/">Produk</a>
