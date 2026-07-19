@@ -1390,6 +1390,25 @@ tasks:
       - 'CI run 29673660212: Format check failed on public/mockServiceWorker.js.'
       - 'CI steps before failure: Install, Typecheck, and Lint passed; Unit/component tests, Production build, Secret scan, and Playwright smoke were skipped.'
 
+  - id: R0-02a
+    repository: Frontend-Lembar
+    sprint: R0
+    title: Push generated-artifact format repair to ao/frontend-integration
+    status: ACCEPTED
+    decisions: ['ci-run-29681528228']
+    depends_on: [R0-02]
+    outcome: Repair was committed as c831f29, pushed, and CI run 29681528228 returned success for typecheck/lint/format/test/build.
+    affected_workflow: ci
+    affected_command: 'gh run view 29681528228 --json status,conclusion,jobs'
+    acceptance:
+      - 'Format repair commit c831f29 promoted to ao/frontend-integration.'
+      - 'Lint, typecheck, format, tests, and production build succeeded on ci run 29681528228.'
+    verification:
+      - 'gh run view 29681528228 --json status,conclusion,jobs'
+    evidence:
+      - 'CI run 29681528228 on c831f29: static-and-build PASS (Typecheck, Lint, Format, Tests, Build all success).'
+      - 'Playwright smoke failed on CI run 29681528228: 6 failed (duplicate home CTA strict-mode + missing brand aria-label on /harga and /untuk-sekolah).'
+
   - id: R0-02
     repository: Frontend-Lembar
     sprint: R0
@@ -1414,7 +1433,7 @@ tasks:
     repository: Frontend-Lembar
     sprint: R0
     title: Verify complete frontend CI gate after format repair
-    status: IN_PROGRESS
+    status: ACCEPTED
     depends_on: [R0-02]
     decisions: []
     affected_workflow: ci
@@ -1454,7 +1473,7 @@ tasks:
     repository: Frontend-Lembar
     sprint: R0
     title: Repair Playwright smoke assertions for marketing routes
-    status: IN_PROGRESS
+    status: ACCEPTED
     depends_on: [R0-03]
     decisions: []
     owns:
