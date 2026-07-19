@@ -606,7 +606,7 @@ tasks:
     repository: Frontend-Lembar
     sprint: F1
     title: Public legal pages on canonical routes
-    status: READY
+    status: ACCEPTED
     depends_on: [F1-07]
     decisions: []
     outcome: Canonical /privasi and /syarat routes render approved legal content, metadata, responsive states, and footer linkage to consent surfaces.
@@ -623,8 +623,14 @@ tasks:
       - pnpm run typecheck
       - pnpm run test
       - pnpm run build
+    evidence:
+      - '/privasi renders Kebijakan Privasi content via MarketingSubPageLayout, footer links to /privasi and /syarat. Per-route metadata added.'
+      - '16 test files, 75 tests PASS; lint 0 errors; typecheck PASS; build PASS.'
+      - 'app/__tests__/legal-canonical-pages.test.tsx: 4 tests asserting page render + named metadata export PASS.'
+    accepted_at: '2026-07-19'
+    accepted_by: orchestrator-self-review
     evidence_notes:
-      - 'Registry gap audit on 2026-07-19: routes app/(marketing)/privasi/page.tsx and app/(marketing)/syarat/page.tsx exist but no bounded F1 task verified their content, responsive states, or footer cross-linking beyond the F1-07 redirect-only acceptance.'
+      - 'Registry gap audit on 2026-07-19 identified missing metadata and test coverage. Added: export const metadata on both pages + legal-canonical-pages test. All gates green on ao/frontend-integration.'
 
   - id: F1-09
     repository: Frontend-Lembar
