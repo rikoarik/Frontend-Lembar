@@ -76,9 +76,9 @@ Harga adalah keputusan owner yang masih terbuka. Sampai diputuskan:
 | Mengubah catalog kurikulum               |             —             |               —               | ✓ dengan workflow publish |
 | Mengelola model/prompt aktif             |             —             |               —               |     ✓, gated rollout      |
 | Melihat konten marketing published       |             ✓             |               ✓               |             ✓             |
-| Melihat preview/draft marketing           |             —             |               —               |         ✓ audited         |
-| Membuat/mengubah draft marketing          |             —             |               —               |         ✓ audited         |
-| Publish/unpublish/restore marketing       |             —             |               —               | ✓ step-up + audit trail   |
+| Melihat preview/draft marketing          |             —             |               —               |         ✓ audited         |
+| Membuat/mengubah draft marketing         |             —             |               —               |         ✓ audited         |
+| Publish/unpublish/restore marketing      |             —             |               —               |  ✓ step-up + audit trail  |
 
 ## Batas permission CMS
 

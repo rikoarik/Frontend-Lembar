@@ -210,4 +210,3 @@ must say so.
 - Revoked share link stops access.
 - 390 px journey works without horizontal overflow.
 - No secret/content leakage in URL, logs, analytics, or error copy.
-

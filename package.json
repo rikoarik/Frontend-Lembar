@@ -21,6 +21,7 @@
   "dependencies": {
     "@fontsource/inter": "5.2.8",
     "@fontsource/manrope": "5.2.8",
+    "@fontsource/material-symbols": "5.2.29",
     "framer-motion": "12.42.2",
     "iconsax-react": "0.0.8",
     "lenis": "^1.3.25",

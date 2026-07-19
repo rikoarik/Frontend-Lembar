@@ -2,22 +2,115 @@
 @tailwind components;
 @tailwind utilities;
 
+/* F0-04 design tokens. Source of truth: docs/frontend/DESIGN-SYSTEM.md §"Color tokens".
+   These mirror the Tailwind brand/* tokens in tailwind.config.js so non-Tailwind code
+   (legacy CSS in marketing routes, inline styles, third-party libs) can consume the same
+   values. Do not hardcode hex in component CSS — extend this map. */
+:root {
+  --color-paper: #f7f3ec;
+  --color-surface: #fffcf7;
+  --color-surface-raised: #ffffff;
+  --color-ink: #171717;
+  --color-ink-muted: #625d55;
+  --color-ink-subtle: #726c63;
+  --color-line: #d8d0c5;
+  --color-line-strong: #b9afa2;
+  --color-accent: #a3202b;
+  --color-accent-hover: #851925;
+  --color-accent-soft: #f5e4e5;
+  --color-focus: #1d4ed8;
+  --color-success: #176b45;
+  --color-success-soft: #e4f2ea;
+  --color-warning: #8a5400;
+  --color-warning-soft: #fff0cf;
+  --color-danger: #9f1d2d;
+  --color-danger-soft: #fae5e8;
+  --color-info: #245a82;
+  --color-info-soft: #e3eff7;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-round: 999px;
+
+  --shadow-sm: 0 1px 2px rgb(23 23 23 / 0.06);
+  --shadow-md: 0 10px 30px rgb(23 23 23 / 0.08);
+
+  /* z-index scale (DESIGN-SYSTEM.md §"Elevation/layers") */
+  --z-base: 0;
+  --z-sticky: 10;
+  --z-popover: 30;
+  --z-modal: 50;
+  --z-toast: 70;
+
+  /* Control heights */
+  --control-sm: 36px;
+  --control-md: 40px;
+  --control-lg: 44px;
+
+  /* Motion (DESIGN-SYSTEM.md §"Motion") */
+  --motion-fast: 120ms;
+  --motion-base: 180ms;
+  --motion-slow: 240ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+}
+
 @layer base {
   body {
     background-color: theme('colors.paper');
     color: theme('colors.ink');
     -webkit-font-smoothing: antialiased;
   }
+
+  /* Visible keyboard focus ring (DESIGN-SYSTEM.md §"Accessibility"). */
+  :focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Respect prefers-reduced-motion globally.
+     Use `animation: none` so the gate's getComputedStyle(animationDuration)
+     resolves to 0 and the running-animation counter returns to zero. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0ms !important;
+      animation-delay: 0ms !important;
+      animation-iteration-count: 1 !important;
+      animation-name: none !important;
+      transition-duration: 0ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }
 
 @layer components {
   .material-symbols-outlined {
-    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    font-family: 'Material Symbols', sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+    font-variation-settings:
+      'FILL' 0,
+      'wght' 400,
+      'GRAD' 0,
+      'opsz' 24;
   }
   .paper-card {
-    background-color: #FFFFFF;
-    border: 1px solid #DEDED8;
-    box-shadow: 0 3px 3px rgba(0,0,0,0.04);
+    background-color: #ffffff;
+    border: 1px solid #deded8;
+    box-shadow: 0 3px 3px rgba(0, 0, 0, 0.04);
   }
   .glass-nav {
     backdrop-filter: blur(8px);
@@ -33,6 +126,6 @@
     left: 0;
     width: 100%;
     height: 2px;
-    background-color: #A1262F;
+    background-color: #a1262f;
   }
 }

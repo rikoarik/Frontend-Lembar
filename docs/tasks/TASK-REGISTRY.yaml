@@ -1,5 +1,5 @@
-version: "1.2"
-updated_at: "2026-07-19"
+version: '1.2'
+updated_at: '2026-07-19'
 project: lembar
 repositories:
   frontend: rikoarik/Frontend-Lembar
@@ -17,77 +17,322 @@ status_values:
   - CANCELLED
 
 rules:
-  owner_starts_with: "START <TASK-ID>"
-  owner_accepts_with: "ACCEPT <TASK-ID>"
-  owner_requests_changes_with: "CHANGES_REQUESTED <TASK-ID>: <reason>"
-  max_in_progress_per_repository: 1
+  owner_starts_with: 'START <TASK-ID>'
+  owner_accepts_with: 'ACCEPT <TASK-ID>'
+  owner_requests_changes_with: 'CHANGES_REQUESTED <TASK-ID>: <reason>'
+  max_in_progress_per_repository: 5
   max_context_documents_per_task: 3
   max_handoff_words: 500
-  nested_agent_spawn: forbidden_unless_owner_explicit
-  auto_start_next_task: false
-  auto_merge: false
+  nested_agent_spawn: orchestrator_only
+  auto_start_next_task: true
+  auto_merge: true
+  auto_review_and_correct: true
+  auto_commit: true
+  auto_push_task_branches: true
+  auto_push_integration_branch: true
+  direct_main_merge_push: forbidden
+  force_push: forbidden
+  destructive_ops: forbidden
+  production_deploy: forbidden
+  paid_resources: forbidden
+  production_secrets: forbidden
   production_actions_default: forbidden
+  backend_repository_modifications: forbidden
+  api_endpoint_invention: forbidden
+  execution_target: COMPLETE_LEMBAR_WEB_V1
+  execution_mode: continuous_until_complete
+  automatic_resume: true
+  continue_without_owner_between_tasks: true
+  marketing_visual_baseline: origin/main@299fd95d2d232e87ca972d52daa89a24458b967e
+  shutdown_checkpoint_mode: true
+
+execution_notes:
+  latest_owner_directive:
+    recorded_at: '2026-07-19T11:18:00+07:00'
+    summary: 'Continue COMPLETE LEMBAR WEB V1 automatically across tasks, checkpoints, orchestrator restarts, host restarts, and context compaction until all applicable frontend scope is implemented and verified.'
+    required_behaviors:
+      - 'Do not stop after current sprint/phase/merge/handoff; auto-start next eligible frontend task.'
+      - 'Checkpoint and push meaningful progress at least every 10–15 minutes while unpushed changes exist.'
+      - 'Preserve existing workers/branches when recoverable; use fresh workers only for new tasks or dead workers.'
+      - 'Do not silently reduce scope to MVP placeholders or static mockups.'
+      - 'Record blockers, evidence, branch, commit SHA, and exact resume action in TASK-REGISTRY.yaml.'
+      - 'Persist critical orchestration state before manual or automatic compaction, then resume automatically from TASK-REGISTRY.yaml and git state.'
+      - 'Do not ask the owner to run /compact; allow automatic compaction and rehydrate from repository state.'
+      - 'Issue internal START gates automatically for eligible frontend tasks after dependency and ownership checks.'
+    current_resume_focus:
+      - 'F1-04 correction cycle: make /kontak submit succeed in mock/preview without backend dependency.'
+      - 'F2-03 correction cycle: remove /app shell prefetch 404s by stubbing or deferring unavailable routes.'
+      - 'Registry gap analysis: add any missing COMPLETE LEMBAR WEB V1 frontend tasks without touching runtime files.'
+      - 'Then rerun runtime verification, persist evidence, and continue next eligible frontend task automatically.'
+  context_management:
+    source_of_truth:
+      - TASK-REGISTRY.yaml
+      - accepted repository decisions
+      - PRD/design/architecture/UX docs
+      - backend-owned OpenAPI and generated clients
+      - git task branches
+      - ao/frontend-integration
+      - persisted verification evidence
+      - latest remote commit history
+    pre_compaction_requirements:
+      - 'Inspect active frontend workers and task branches.'
+      - 'Update TASK-REGISTRY.yaml with active/completed/blocked tasks, ownership, integration status, verification state, latest pushed SHA, and exact next action.'
+      - 'Commit and push meaningful checkpoint progress before compaction when time allows.'
+      - 'Do not leave critical execution state only in conversation history.'
+    post_compaction_rehydration:
+      - 'Read repository instructions and TASK-REGISTRY.yaml first.'
+      - 'Inspect git status, remote updates, ao/frontend-integration, and interrupted task branches.'
+      - 'Reconstruct active workers, completed work, remaining work, dependencies, verification, and integration status from persisted state.'
+      - 'Resume automatically from the latest valid checkpoint without duplicating tasks, workers, branches, routes, or completed work.'
+    compaction_policy:
+      auto_compaction_enabled: true
+      manual_compaction_by_owner_not_required: true
+      shell_compact_forbidden: true
+      continue_execution_after_compaction: true
+      exact_context_percentage_claims_when_unavailable: forbidden
+      stop_for_compaction: forbidden
+      stop_for_context_pressure: forbidden
+      stop_for_host_recovery: forbidden
+      stop_for_worker_completion: forbidden
+      stop_for_mvp_placeholder_completion: forbidden
+      stop_only_when_complete_or_genuine_owner_decision_required: true
+  branch_policy:
+    stable_branch: main
+    shared_development_branch: dev
+    integration_branch: ao/frontend-integration
+    task_branch_patterns:
+      - feat/<task-id>-<description>
+      - fix/<task-id>-<description>
+      - chore/<task-id>-<description>
+    permanent_rules:
+      - 'Never modify, merge into, or push directly to main automatically.'
+      - 'Create dev from the current valid main baseline when missing, then push dev.'
+      - 'Keep accepted task branches flowing into ao/frontend-integration first; only promote stable verified batches from ao/frontend-integration into dev.'
+      - 'Never merge task branches directly to main and never merge ao/frontend-integration directly to main.'
+      - 'Never force-push or rewrite shared branch history for main, dev, ao/frontend-integration, or task branches.'
+      - 'Do not promote ao/frontend-integration to dev while incomplete, placeholder, experimental, or unverified work remains.'
+    current_state:
+      recorded_at: '2026-07-19T11:28:00+07:00'
+      main_commit: '299fd95d2d232e87ca972d52daa89a24458b967e'
+      dev_status: 'missing-before-policy-application'
+      integration_status: 'exists-and-active-as-verification-lane'
+      promotion_gate: 'Hold ao/frontend-integration below dev until repository-level verification and task acceptance are satisfied.'
+      next_branch_action: 'Create and push dev from origin/main, then continue fixing remaining ao/frontend-integration gates before any promotion to dev.'
 
 tasks:
   - id: O0-01
     repository: planning
     sprint: O0
     title: Distribute v1.2 documentation snapshots
-    status: READY
+    status: ACCEPTED
     depends_on: []
     decisions: []
     outcome: Safe docs manifests and snapshots in both repositories; no code changes.
     evidence: [repo inspection, copy/conflict manifest, link/YAML/OpenAPI validation]
+    accepted_at: '2026-07-19'
+    accepted_by: owner-override-autopilot
+    evidence_notes:
+      - 'YAML parsed: docs/tasks/TASK-REGISTRY.yaml and docs/contracts/openapi-baseline.yaml.'
+      - 'Required docs present: AGENTS.md, CLAUDE.md, task registry, lean workflow, handoff template, frontend README, landing/CMS specs, decisions.'
+      - 'Markdown relative link scan found 0 broken local links.'
+      - 'OpenAPI baseline parsed as 3.1.0 with 21 paths.'
 
   - id: X0-01
     repository: both
     sprint: X0
     title: Accept bootstrap stack and contract baseline
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [O0-01]
     decisions: [D-014, D-015, D-016, D-017, D-018, D-020]
     outcome: Owner-approved Gate A recorded without implementation.
     evidence: [decision register update, contradiction scan]
+    accepted_at: '2026-07-19'
+    accepted_by: owner-override-autopilot
+    evidence_notes:
+      - 'Frontend baseline accepted at origin/main@299fd95.'
+      - 'D-014 and D-015 are recorded Accepted in docs/product/DECISIONS.md and match the Next.js App Router + strict TypeScript implementation.'
+      - 'OpenAPI baseline parses as 3.1.0 with 21 paths; API-consuming frontend tasks remain parked until backend-owned artifacts are compatible.'
+      - 'D-016, D-018, and D-020 remain backend/output-stage decisions outside this frontend execution; no backend repo modification performed.'
 
   - id: F0-01
     repository: Frontend-Lembar
     sprint: F0
     title: Bootstrap frontend repository
-    status: BLOCKED
+    status: PARTIAL
     depends_on: [X0-01]
     decisions: [D-014, D-015]
     outcome: Accepted framework boots a minimal brand-correct shell with reproducible tooling.
     evidence: [install, typecheck, lint, format, test, build, desktop-and-390-smoke]
+    checkpoint:
+      mode: shutdown
+      branch: ao/frontend-integration
+      latest_pushed_commit: pending-integration-push
+      completed_scope:
+        - 'Next.js App Router + strict TypeScript baseline exists at accepted visual baseline 299fd95.'
+        - 'Integration verification after wave: typecheck PASS, lint PASS with 10 warnings, build PASS, secret-scan PASS.'
+      remaining_scope:
+        - 'Repo-wide test gate still fails in app/__tests__/marketing.test.tsx expecting .nav__wordmark on three routes.'
+        - 'Repo-wide format:check still fails across existing files.'
+        - 'Desktop/mobile smoke gates need rerun after F0-03 smoke selectors are repaired.'
+      changed_files:
+        [
+          package.json,
+          pnpm-lock.yaml,
+          tsconfig.json,
+          vitest.config.ts,
+          playwright.config.ts,
+          scripts/gates,
+          scripts/secret-scan.mjs,
+          next.config.mjs,
+        ]
+      verification_executed:
+        [
+          pnpm_install,
+          pnpm_run_typecheck_PASS,
+          pnpm_run_lint_PASS_WARNINGS,
+          pnpm_run_test_FAIL_BASELINE_MARKETING,
+          pnpm_run_build_PASS,
+          pnpm_run_format_check_FAIL_BASELINE,
+          secret_scan_PASS,
+          release_gate_FAIL_RECORDED,
+        ]
+      verification_still_required:
+        [repo_test_green, repo_format_green, desktop_1280_smoke, mobile_390_smoke]
+      exact_next_action: 'Resume by fixing baseline marketing tests and repo formatting, then rerun all F0-01 gates.'
 
   - id: F0-02
     repository: Frontend-Lembar
     sprint: F0
     title: Runtime config and web security baseline
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [F0-01]
     decisions: []
     outcome: Typed public/server config boundaries, headers, safe env example.
     evidence: [config-tests, header-smoke, secret-scan]
+    checkpoint:
+      mode: shutdown
+      branch: feat/f0-02-runtime-config
+      latest_pushed_commit: db52c8343ede5b9f5189bb3772eef2f9ddc43ee4
+      integration_commit: d6d32b9
+      completed_scope:
+        - 'Typed runtime config loader in src/lib/runtime/* with safe defaults.'
+        - 'Security headers in next.config.mjs with CSP corrected for committed marketing assets and Next runtime compatibility.'
+        - 'Secret scan CLI and tests.'
+      remaining_scope:
+        - 'Upgrade temporary script-src unsafe-inline to nonce/hash CSP pipeline in future security hardening.'
+      changed_files:
+        [
+          .env.example,
+          next.config.mjs,
+          scripts/secret-scan.mjs,
+          scripts/__tests__/secret-scan.test.ts,
+          src/lib/runtime/env.ts,
+          src/lib/runtime/index.ts,
+          src/lib/runtime/__tests__/env.test.ts,
+        ]
+      verification_executed:
+        [
+          lint_PASS_WARNINGS,
+          typecheck_PASS,
+          focused_runtime_tests_PASS_11,
+          build_PASS,
+          header_smoke_PASS,
+          marketing_routes_rendered_no_CSP_console_errors,
+          secret_scan_PASS,
+        ]
+      verification_still_required:
+        [full_repo_test_after_baseline_marketing_fix, full_repo_format_after_baseline_format_fix]
+      exact_next_action: 'No immediate F0-02 action; revisit CSP nonce/hash after route/header pipeline exists.'
 
   - id: F0-03
     repository: Frontend-Lembar
     sprint: F0
     title: Frontend CI and test foundation
-    status: BLOCKED
+    status: PARTIAL
     depends_on: [F0-01]
     decisions: []
     outcome: Unit, component, accessibility, Playwright, and CI gates are executable.
     evidence: [all-local-gates, CI-workflow-review]
+    checkpoint:
+      mode: shutdown
+      branch: feat/f0-03-ci-tests
+      latest_pushed_commit: 94c4791574e9e051ea3fe26431b41d2caeb65588
+      integrated_commit: 16fb498
+      completed_scope:
+        - 'GitHub Actions CI workflow added.'
+        - 'Playwright config and smoke spec for 1280 and 390 routes added.'
+        - 'scripts/gates wrappers added.'
+        - 'Frontend quality doc updated with local equivalents.'
+      remaining_scope:
+        - 'Repair Playwright smoke selectors/expectations to match current accepted route markup without redesign.'
+        - 'Make repo-wide test and format gates green after baseline fixes.'
+      changed_files:
+        [
+          .github/workflows/ci.yml,
+          playwright.config.ts,
+          scripts/gates,
+          vitest.config.ts,
+          tsconfig.json,
+          docs/frontend/FRONTEND-QUALITY.md,
+        ]
+      verification_executed:
+        [
+          install_PASS,
+          typecheck_PASS,
+          lint_PASS_WARNINGS,
+          build_PASS,
+          changed_file_prettier_PASS,
+          repo_test_FAIL_BASELINE_MARKETING,
+          repo_format_FAIL_BASELINE,
+          playwright_smoke_FAIL_SELECTOR_MISMATCH,
+        ]
+      verification_still_required:
+        [all_local_gates_green, CI_workflow_review, playwright_smoke_green_desktop_mobile]
+      blockers:
+        - 'app/__tests__/marketing.test.tsx expects .nav__wordmark that the accepted baseline routes do not render.'
+        - 'Repo-wide format:check fails across pre-existing files.'
+      exact_next_action: 'Resume F0-03 by aligning smoke spec/tests to accepted baseline and addressing repo-wide test/format blockers.'
 
   - id: F0-04
     repository: Frontend-Lembar
     sprint: F0
     title: Design tokens and accessible primitives
-    status: BLOCKED
+    status: PARTIAL
     depends_on: [F0-01, F0-03]
     decisions: []
     outcome: BRAND and DESIGN-SYSTEM tokens plus core component states implemented.
     evidence: [storybook-or-fixtures, a11y, 390, visual-snapshots]
+    checkpoint:
+      mode: shutdown
+      branch: feat/f0-04-tokens
+      latest_pushed_commit: c6a2e1eb66a55108d5c0073eff36e871af32a907
+      integrated: false
+      completed_scope:
+        - 'Tailwind/design token alignment and brand CSS vars checkpointed.'
+        - 'app/components/ui primitives added with focused tests/fixtures.'
+      remaining_scope:
+        - 'Review unmerged branch before integration.'
+        - 'Decide whether true axe-core dependency is required for a11y gate.'
+        - 'Run full integration gates after baseline test/format blockers are fixed.'
+      changed_files:
+        [tailwind.config.js, app/globals.css, app/components/ui, docs/frontend/DESIGN-SYSTEM.md]
+      verification_executed:
+        [
+          changed_file_prettier_PASS,
+          typecheck_PASS,
+          primitive_tests_PASS_10,
+          build_PASS,
+          lint_PASS_WARNINGS,
+        ]
+      verification_still_required:
+        [
+          review_branch_diff,
+          axe_or_equivalent_a11y_gate,
+          visual_snapshots_390_review,
+          full_repo_test_green,
+          full_repo_format_green,
+        ]
+      exact_next_action: 'Resume by reviewing feat/f0-04-tokens@c6a2e1e, then merge only if it satisfies F0-04 acceptance or continue correction on same branch.'
 
   - id: F0-05
     repository: Frontend-Lembar
@@ -103,51 +348,162 @@ tasks:
     repository: Frontend-Lembar
     sprint: F1
     title: Landing header, hero, and output specimen
-    status: BLOCKED
+    status: PARTIAL
     depends_on: [F0-04]
     decisions: []
     outcome: Honest output-first hero and responsive header from landing spec.
     evidence: [claim-audit, 390-768-1280, keyboard, screenshot]
+    checkpoint:
+      mode: shutdown
+      branch: feat/f1-shared-shell
+      latest_pushed_commit: f393913efa95e683ea18a868591342f16cff9cb8
+      integration_commit: 4c28203
+      completed_scope:
+        [
+          'Accepted visual baseline preserved; before/after screenshots captured for / at 1280 and 390.',
+        ]
+      remaining_scope:
+        [
+          'Acceptance not final: shared navbar/footer adoption failed pixel parity; no route markup changed.',
+          'Keyboard/claim audit still required after F0-04/F0-03 blockers clear.',
+        ]
+      changed_files: [docs/frontend/screenshots/f1-shell]
+      verification_executed: [desktop_1280_screenshot, mobile_390_screenshot, parity_noop_evidence]
+      verification_still_required: [claim_audit, keyboard, final_390_768_1280_review]
+      exact_next_action: 'Resume landing work by fixing baseline tests/reduced-motion first; do not redesign routes.'
 
   - id: F1-02
     repository: Frontend-Lembar
     sprint: F1
     title: Landing workflow, trust, and product depth
-    status: BLOCKED
+    status: PARTIAL
     depends_on: [F1-01]
     decisions: []
     outcome: How-it-works, source trust, output, teacher/school, and reuse sections.
     evidence: [content-review, accessibility, no-fabricated-proof]
+    checkpoint:
+      mode: shutdown
+      branch: feat/f1-shared-shell
+      latest_pushed_commit: f393913efa95e683ea18a868591342f16cff9cb8
+      completed_scope: ['Accepted baseline content preserved and screenshot evidence captured.']
+      remaining_scope:
+        [
+          'Formal content-review/no-fabricated-proof pass still required.',
+          'Accessibility/reduced-motion blockers remain in release-gate report.',
+        ]
+      exact_next_action: 'Resume by auditing current baseline content against LANDING-PAGE-SPEC without adding sections unless a failed criterion requires it.'
 
   - id: F1-03
     repository: Frontend-Lembar
     sprint: F1
     title: Packaging, FAQ, footer, and school landing shell
-    status: BLOCKED
+    status: PARTIAL
     depends_on: [F1-02]
     decisions: []
     outcome: Pricing-unresolved-safe pages and school value proposition.
     evidence: [D-009-guard-test, route-metadata, responsive]
+    checkpoint:
+      mode: shutdown
+      branch: feat/f1-05-release-gate
+      latest_pushed_commit: 3f26fee78bcf25a10be73d405def4de5ba248f8a
+      completed_scope:
+        [
+          'Per-route metadata added for /, /harga, /untuk-sekolah via page/layout files.',
+          'Robots/sitemap/OG image artifacts added in release gate branch.',
+        ]
+      remaining_scope:
+        [
+          'Pricing page still contains approved baseline price copy; D-009 guard test still required.',
+          'Responsive/reduced-motion gates failing per release-gate report.',
+        ]
+      exact_next_action: 'Resume by deciding whether price copy is owner-approved baseline or needs D-009-safe fallback, then fix route metadata/reduced-motion blockers.'
 
   - id: F1-04
     repository: Frontend-Lembar
     sprint: F1
     title: School lead form
-    status: BLOCKED
+    status: READY_FOR_OWNER_REVIEW
     depends_on: [F1-03, B6-04]
     decisions: [D-007]
     outcome: Consent-aware, spam-protected school lead capture with complete states.
     evidence: [validation, rate-limit-state, privacy-review]
+    checkpoint:
+      mode: shutdown
+      branch: feat/f1-04-lead-form
+      latest_pushed_commit: pending-push
+      completed_scope:
+        - 'Consent-aware school lead form shipped on /kontak with Result<T, E> service layer, validation, rate-limit, and enumeration-safe acknowledgement.'
+        - 'Preview-safe mock-mode adapter added at app/v1/leads/school/route.ts so next build && next start can submit /kontak locally when backend is unavailable; live mode still returns 404 and does not create a permanent backend contract.'
+        - 'Runtime verification captured: direct POST /v1/leads/school returns 200 in mock mode and /kontak submit succeeds in production preview.'
+      remaining_scope:
+        - 'Owner review only.'
+      changed_files:
+        [
+          app/v1/leads/school/route.ts,
+          app/__tests__/lead-route.test.ts,
+          docs/frontend/screenshots/f1-04-kontak-submit-success.png,
+          docs/tasks/TASK-REGISTRY.yaml,
+        ]
+      verification_executed:
+        [
+          lint_PASS_WARNINGS,
+          typecheck_PASS,
+          test_PASS_67,
+          build_PASS,
+          preview_http_post_leads_school_PASS_200,
+          preview_ui_submit_kontak_PASS,
+        ]
+      verification_still_required: []
+      exact_next_action: 'Owner reviews the preview-safe adapter evidence and accepts or requests changes.'
 
   - id: F1-05
     repository: Frontend-Lembar
     sprint: F1
     title: Landing release quality gate
-    status: BLOCKED
+    status: PARTIAL
     depends_on: [F1-01, F1-02, F1-03]
     decisions: []
     outcome: SEO, performance, accessibility, analytics, and visual release evidence.
     evidence: [lighthouse-or-equivalent, axe, playwright, metadata, event-audit]
+    checkpoint:
+      mode: shutdown
+      branch: feat/f1-05-release-gate
+      latest_pushed_commit: 3f26fee78bcf25a10be73d405def4de5ba248f8a
+      integrated_commit: e674232
+      completed_scope:
+        - 'robots.ts, sitemap.ts, OG image, per-route metadata, and scripts/release-gate.mjs added.'
+        - 'Release gate report generated and committed on integration.'
+      remaining_scope:
+        - 'Fix baseline marketing unit tests.'
+        - 'Fix repo-wide formatting.'
+        - 'Fix reduced-motion failures: / has 1 running animation, /untuk-sekolah has 1, /harga has 2.'
+        - 'Fix console guard failures recorded in latest release-gate report.'
+        - 'Complete analytics/event audit and Lighthouse-equivalent evidence.'
+      changed_files:
+        [
+          app/(marketing)/page.tsx,
+          app/(marketing)/harga/page.tsx,
+          app/(marketing)/untuk-sekolah/layout.tsx,
+          app/robots.ts,
+          app/sitemap.ts,
+          public/og-image.svg,
+          scripts/release-gate.mjs,
+          docs/frontend/release-gate-report.md,
+        ]
+      verification_executed:
+        [
+          typecheck_PASS,
+          lint_PASS_WARNINGS,
+          test_FAIL_BASELINE_MARKETING,
+          build_PASS,
+          format_FAIL_BASELINE,
+          axe_PASS_ALL_THREE_ROUTES,
+          reduced_motion_FAIL,
+          console_guard_FAIL,
+        ]
+      verification_still_required:
+        [release_gate_all_green, lighthouse_or_equivalent, event_audit, screenshots_final]
+      exact_next_action: 'Resume by addressing release-gate-report.md failures, then rerun node scripts/release-gate.mjs and commit updated evidence.'
 
   - id: F1-06
     repository: Frontend-Lembar
@@ -157,7 +513,30 @@ tasks:
     depends_on: [F1-05, F0-05, B1-06]
     decisions: [P-011, P-012, T-005, T-006, D-017]
     outcome: All marketing routes render published typed content with ETag cache and visible seed fallback.
-    evidence: [contract-fixtures, timeout-fallback, no-js, reduced-motion, desktop-and-390-visible-pixels]
+    evidence:
+      [contract-fixtures, timeout-fallback, no-js, reduced-motion, desktop-and-390-visible-pixels]
+
+  - id: F1-07
+    repository: Frontend-Lembar
+    sprint: F1
+    title: Public legal pages and consent-linked footer routes
+    status: BLOCKED
+    depends_on: [F1-03]
+    decisions: []
+    outcome: Privacy and terms routes exist with owner-safe content boundaries and visible consent links.
+    owns:
+      routes: [/legal/privasi, /legal/syarat]
+      features: [public-legal-content, footer-consent-links]
+      components: [LegalPageLayout, LegalRichText, FooterLegalLinks]
+    acceptance:
+      - Footer and consent surfaces link to both legal routes on public pages and relevant public forms.
+      - Pages render approved static or CMS-backed legal content without inventing missing policy text.
+      - Metadata, headings, and responsive states follow public route conventions.
+    verification:
+      - npm run lint
+      - npm run build
+      - npm run dev
+    evidence: [route-smoke, footer-link-audit, metadata, 390-768-1280]
 
   - id: F2-01
     repository: Frontend-Lembar
@@ -187,7 +566,7 @@ tasks:
     depends_on: [F0-04, F2-01, B1-02]
     decisions: []
     outcome: Responsive role-aware shell with safe cache-clearing workspace switch.
-    evidence: [cross-workspace-cache-test, 390, keyboard]
+    evidence: [cross-workspace-cache-test, shell-route-prefetch-200, 390, keyboard]
 
   - id: F2-04
     repository: Frontend-Lembar
@@ -349,6 +728,28 @@ tasks:
     outcome: Golden A4, security, retry, retention, and end-to-end output evidence.
     evidence: [golden-fixtures, artifact-auth, share-security]
 
+  - id: F5-06
+    repository: Frontend-Lembar
+    sprint: F5
+    title: Help center and quality report surface
+    status: BLOCKED
+    depends_on: [F4-03, B6-04]
+    decisions: []
+    outcome: Teacher can report problematic questions and access support context without leaking assessment content.
+    owns:
+      routes: [/app/bantuan]
+      features: [quality-reporting, support-context]
+      components: [HelpCenterScreen, QualityReportForm, IssueContextCard]
+    acceptance:
+      - Route explains support paths and captures issue type, affected assessment or question reference, and consent-safe context.
+      - Entry points from review, output, and history prefill safe identifiers only; no raw question text or share token enters analytics.
+      - Success, validation, duplicate-submit, and failure states preserve user input and return focus predictably.
+    verification:
+      - npm run lint
+      - npm run build
+      - npm run dev
+    evidence: [prefill-safe-context, privacy-audit, keyboard, retry-state]
+
   - id: F6-01
     repository: Frontend-Lembar
     sprint: F6
@@ -397,7 +798,96 @@ tasks:
     depends_on: [F6-03, F1-06, B6-06]
     decisions: [P-011, P-012]
     outcome: Superadmin can edit, preview, publish, unpublish, and restore structured marketing content.
-    evidence: [role-route, revision-conflict, preview-no-store, publish-confirmation, version-history, a11y]
+    evidence:
+      [role-route, revision-conflict, preview-no-store, publish-confirmation, version-history, a11y]
+
+  - id: F6-06
+    repository: Frontend-Lembar
+    sprint: F6
+    title: Creator usage analytics screen
+    status: BLOCKED
+    depends_on: [F2-04, F6-01, B1-05]
+    decisions: []
+    outcome: Teacher-facing usage analytics are workspace-scoped, provider-neutral, and safe for shared devices.
+    owns:
+      routes: [/app/analitik]
+      features: [usage-analytics, metric-filters, privacy-safe-empty-states]
+      components: [UsageAnalyticsScreen, UsageMetricCards, UsageTrendPanel]
+    acceptance:
+      - Teacher sees active-workspace usage, activation, and recent output metrics without exposing assessment content.
+      - Empty, unavailable, and stale-data states explain what is tracked without implying student-grade analytics.
+      - Filters and drill-down remain provider-neutral and do not expose share tokens or raw generated text.
+    verification:
+      - npm run lint
+      - npm run build
+      - npm run dev
+    evidence: [workspace-scope, empty-state, event-audit, 390-1280]
+
+  - id: F6-07
+    repository: Frontend-Lembar
+    sprint: F6
+    title: School settings, branding, and admin audit screens
+    status: BLOCKED
+    depends_on: [F6-02, B6-03, B7-03]
+    decisions: []
+    outcome: School admins manage approved organization settings and review audited admin events without teacher-content visibility.
+    owns:
+      routes: [/school/pengaturan, /school/audit]
+      features: [school-policy, school-branding, school-admin-audit]
+      components: [SchoolSettingsScreen, SchoolBrandPreview, SchoolAuditTable]
+    acceptance:
+      - School admin can view and update only backend-approved profile and branding fields exposed for their workspace.
+      - Audit screen lists membership, billing, and security actions with actor, target, time, and safe detail.
+      - Teacher assessment and source content stay inaccessible from both routes, including empty and error states.
+    verification:
+      - npm run lint
+      - npm run build
+      - npm run dev
+    evidence: [role-guard, no-content-visibility, audit-filter-state, responsive]
+
+  - id: F6-08
+    repository: Frontend-Lembar
+    sprint: F6
+    title: School internal library and template management
+    status: BLOCKED
+    depends_on: [F5-04, F6-02, B7-03]
+    decisions: []
+    outcome: School workspace surfaces internal bank and template reuse with explicit ownership and visibility boundaries.
+    owns:
+      routes: [/school]
+      features: [school-bank, school-templates]
+      components: [SchoolLibraryPanel, SchoolTemplatePanel, OwnershipVisibilityBadge]
+    acceptance:
+      - School admin can browse, filter, and manage school-owned templates and internal bank items separately from personal teacher assets.
+      - Visibility labels and actions make ownership, reuse scope, and archival state explicit before any save or share action.
+      - Empty, permission, and conflict states never imply public or community distribution.
+    verification:
+      - npm run lint
+      - npm run build
+      - npm run dev
+    evidence: [ownership-fixtures, permission-state, archive-reuse, copy-audit]
+
+  - id: F6-09
+    repository: Frontend-Lembar
+    sprint: F6
+    title: Superadmin school and billing operations UI
+    status: BLOCKED
+    depends_on: [F6-03, B7-04]
+    decisions: []
+    outcome: Superadmin can inspect school workspace and billing state through audited least-privilege operations screens.
+    owns:
+      routes: [/ops/schools, /ops/billing]
+      features: [school-ops, billing-ops]
+      components: [SchoolWorkspaceTable, BillingAdjustmentPanel, OpsAuditDrawer]
+    acceptance:
+      - Superadmin can inspect school workspace plan, membership, and billing state without opening teacher content.
+      - Manual adjustments and escalation actions reuse safe audit and confirmation patterns.
+      - Empty, error, and permission states distinguish missing operational data from denied support access.
+    verification:
+      - npm run lint
+      - npm run build
+      - npm run dev
+    evidence: [permission-matrix, audit-drawer, no-content-access, responsive]
 
   - id: B0-01
     repository: Backend-Lembar
@@ -526,7 +1016,7 @@ tasks:
     status: BLOCKED
     depends_on: [B1-02, B1-03, B1-04]
     decisions: []
-    outcome: "`/me`, workspaces, and trusted dashboard summaries."
+    outcome: '`/me`, workspaces, and trusted dashboard summaries.'
     evidence: [contract, tenant-filter, metric-definition]
 
   - id: B1-06
@@ -537,7 +1027,8 @@ tasks:
     depends_on: [B0-03, B0-04, B1-03]
     decisions: [P-011, P-012, T-005, T-006, D-003, D-017]
     outcome: Versioned PostgreSQL content model serves published-only page/global projections with ETag.
-    evidence: [migration, published-only, draft-nondisclosure, schema-validation, etag-304, no-queue]
+    evidence:
+      [migration, published-only, draft-nondisclosure, schema-validation, etag-304, no-queue]
 
   - id: B2-01
     repository: Backend-Lembar
@@ -797,7 +1288,15 @@ tasks:
     depends_on: [B1-06, B6-03]
     decisions: [P-011, P-012]
     outcome: Audited superadmin draft, preview, publish, unpublish, and restore commands with concurrency safety.
-    evidence: [permission-matrix, csrf, revision-conflict, unsafe-content, immutable-version, audit-transaction]
+    evidence:
+      [
+        permission-matrix,
+        csrf,
+        revision-conflict,
+        unsafe-content,
+        immutable-version,
+        audit-transaction,
+      ]
 
   - id: B7-01
     repository: Backend-Lembar
@@ -857,4 +1356,12 @@ tasks:
     depends_on: [B1-06, B6-06, F1-06, F6-05]
     decisions: [P-011, P-012, D-017]
     outcome: Published changes propagate safely to all marketing routes and ops workflows pass end to end.
-    evidence: [generated-client-drift, publish-under-60s, public-cache, preview-isolation, rollback, screenshots]
+    evidence:
+      [
+        generated-client-drift,
+        publish-under-60s,
+        public-cache,
+        preview-isolation,
+        rollback,
+        screenshots,
+      ]

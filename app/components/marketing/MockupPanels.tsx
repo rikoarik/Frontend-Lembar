@@ -223,7 +223,10 @@ export function Panel2Visual() {
               <motion.div variants={checkmarkVariants}>
                 <TickCircle size={16} variant="Bold" className="review-option__check" />
               </motion.div>
-              <span>A. Pahlawan nasional berjuang tanpa pamrih. <span className="key-badge">(Kunci)</span></span>
+              <span>
+                A. Pahlawan nasional berjuang tanpa pamrih.{' '}
+                <span className="key-badge">(Kunci)</span>
+              </span>
             </motion.div>
             <motion.div className="review-option" variants={itemVariants}>
               <span className="review-option__bullet" />

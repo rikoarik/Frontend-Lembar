@@ -1,64 +1,79 @@
-'use client';
-
 import MarketingSubPageLayout from '@/app/components/marketing/MarketingSubPageLayout';
+import SchoolLeadForm from '@/src/features/leads/SchoolLeadForm';
 
 export default function KontakPage() {
   return (
     <MarketingSubPageLayout
-      title="Ada yang bisa kami bantu?"
-      description="Mau tanya soal produk, butuh demo khusus, atau sekadar ngobrol — tim kami bisa dihubungi kapan saja di jam kerja."
-      badge="Kontak"
+      title="Bicarakan kebutuhan sekolah Anda."
+      description="Untuk institusi sekolah, kirim data singkat agar tim lembar dapat meninjau kebutuhan dan mengatur percakapan yang tepat."
+      badge="Kontak Sekolah"
+      asymmetric
     >
-      <section className="py-unit-16 px-margin-mobile md:px-margin-desktop bg-surface">
-        <div className="max-w-container-max mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-unit-12 items-start">
-            <div className="lg:col-span-6 flex flex-col gap-unit-8">
-              <h2 className="font-h2 text-h2 text-ink">Informasi Kontak</h2>
-              <div className="flex flex-col gap-unit-6">
+      <section className="bg-surface px-margin-mobile py-unit-16 md:px-margin-desktop">
+        <div className="mx-auto max-w-container-max">
+          <div className="grid grid-cols-1 items-start gap-unit-12 lg:grid-cols-12">
+            <div className="flex flex-col gap-unit-8 lg:col-span-5">
+              <div className="flex flex-col gap-unit-4">
+                <h2 className="font-h2 text-h2 text-ink">Rute tindak lanjut</h2>
+                <p className="max-w-reading-max font-body-default text-body-default leading-relaxed text-secondary">
+                  Kami memakai formulir ini untuk memahami konteks sekolah, bukan untuk membuat akun
+                  otomatis. Jangan masukkan data siswa atau dokumen internal.
+                </p>
+              </div>
+              <div className="flex flex-col gap-unit-5 border-y border-border-subtle py-unit-6">
                 <div className="flex items-start gap-unit-4">
-                  <span className="material-symbols-outlined text-burgundy text-[24px] mt-0.5" style={{ fontVariationSettings: "'FILL' 1" }}>mail</span>
+                  <span
+                    className="material-symbols-outlined mt-0.5 text-[22px] text-burgundy"
+                    aria-hidden="true"
+                  >
+                    fact_check
+                  </span>
                   <div>
-                    <span className="font-label-semibold text-ink block">Email</span>
-                    <span className="text-secondary text-body-sm">halo@lembar.id</span>
+                    <h3 className="font-label-semibold text-body-sm text-ink">
+                      Data ditinjau manual
+                    </h3>
+                    <p className="font-body-sm text-body-sm text-secondary">
+                      Tim memeriksa kebutuhan sekolah sebelum menghubungi Anda.
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-unit-4">
-                  <span className="material-symbols-outlined text-burgundy text-[24px] mt-0.5" style={{ fontVariationSettings: "'FILL' 1" }}>call</span>
+                  <span
+                    className="material-symbols-outlined mt-0.5 text-[22px] text-burgundy"
+                    aria-hidden="true"
+                  >
+                    privacy_tip
+                  </span>
                   <div>
-                    <span className="font-label-semibold text-ink block">Telepon</span>
-                    <span className="text-secondary text-body-sm">+62 21 1234 5678</span>
+                    <h3 className="font-label-semibold text-body-sm text-ink">
+                      Tidak perlu data sensitif
+                    </h3>
+                    <p className="font-body-sm text-body-sm text-secondary">
+                      Cukup isi kontak kerja dan ringkasan kebutuhan.
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-unit-4">
-                  <span className="material-symbols-outlined text-burgundy text-[24px] mt-0.5" style={{ fontVariationSettings: "'FILL' 1" }}>schedule</span>
+                  <span
+                    className="material-symbols-outlined mt-0.5 text-[22px] text-burgundy"
+                    aria-hidden="true"
+                  >
+                    schedule
+                  </span>
                   <div>
-                    <span className="font-label-semibold text-ink block">Jam Kerja</span>
-                    <span className="text-secondary text-body-sm">Senin – Jumat, 08.00 – 17.00 WIB</span>
+                    <h3 className="font-label-semibold text-body-sm text-ink">
+                      Tindak lanjut 1–2 hari kerja
+                    </h3>
+                    <p className="font-body-sm text-body-sm text-secondary">
+                      Jika sesuai, kami akan mengatur percakapan lanjutan.
+                    </p>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Contact form */}
-            <div className="lg:col-span-5 lg:col-start-8">
-              <form onSubmit={(e) => e.preventDefault()} className="bg-paper border border-border-strong rounded-2xl p-unit-8 flex flex-col gap-unit-4">
-                <h2 className="font-h3 text-h3 text-ink mb-unit-2">Kirim pesan</h2>
-                <div>
-                  <label htmlFor="contact-name" className="font-label-semibold text-caption text-ink block mb-1">Nama</label>
-                  <input id="contact-name" type="text" placeholder="Nama lengkap Anda" className="w-full bg-surface border border-border-strong rounded-lg px-4 py-3 text-body-sm focus:outline-none focus:border-burgundy focus:ring-1 focus:ring-burgundy transition-all" />
-                </div>
-                <div>
-                  <label htmlFor="contact-email" className="font-label-semibold text-caption text-ink block mb-1">Email</label>
-                  <input id="contact-email" type="email" placeholder="email@sekolah.sch.id" className="w-full bg-surface border border-border-strong rounded-lg px-4 py-3 text-body-sm focus:outline-none focus:border-burgundy focus:ring-1 focus:ring-burgundy transition-all" />
-                </div>
-                <div>
-                  <label htmlFor="contact-message" className="font-label-semibold text-caption text-ink block mb-1">Pesan</label>
-                  <textarea id="contact-message" rows={4} placeholder="Apa yang ingin Anda sampaikan?" className="w-full bg-surface border border-border-strong rounded-lg px-4 py-3 text-body-sm focus:outline-none focus:border-burgundy focus:ring-1 focus:ring-burgundy transition-all resize-none" />
-                </div>
-                <button type="submit" className="bg-burgundy text-on-primary font-label-semibold h-[48px] rounded-lg text-body-default hover:brightness-110 active:scale-[0.98] transition-all mt-unit-2">
-                  Kirim Pesan
-                </button>
-              </form>
+            <div className="lg:col-span-6 lg:col-start-7">
+              <SchoolLeadForm />
             </div>
           </div>
         </div>

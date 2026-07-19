@@ -1,12 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import {
-  AUTH_ERROR_CODES,
-  type AuthErrorCode,
-} from '@/src/services/auth/authErrors';
-import {
-  mapEnvelopeToAuthError,
-  recoveryRequestCopy,
-} from '@/src/services/auth/errorMapping';
+import { AUTH_ERROR_CODES, type AuthErrorCode } from '@/src/services/auth/authErrors';
+import { mapEnvelopeToAuthError, recoveryRequestCopy } from '@/src/services/auth/errorMapping';
 
 describe('errorMapping', () => {
   it.each(AUTH_ERROR_CODES)('maps known code %s to non-empty Indonesian copy', (code) => {

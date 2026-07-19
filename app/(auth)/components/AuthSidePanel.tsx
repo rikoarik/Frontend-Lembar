@@ -31,9 +31,7 @@ export default function AuthSidePanel({
       </Link>
 
       <div className="my-auto flex max-w-[32rem] flex-col gap-unit-6 py-unit-16">
-        <p className="font-label-semibold text-label-semibold text-on-primary/70">
-          {eyebrow}
-        </p>
+        <p className="font-label-semibold text-label-semibold text-on-primary/70">{eyebrow}</p>
         <h2 className="text-balance font-h1 text-h1 leading-tight text-white">{title}</h2>
         {description ? (
           <p className="max-w-[58ch] text-pretty font-body-lead text-body-lead text-on-primary/80">

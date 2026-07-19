@@ -1,0 +1,90 @@
+name: ci
+
+on:
+  push:
+    branches: [main, ao/frontend-integration, feat/**]
+  pull_request:
+    branches: [main, ao/frontend-integration]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  static-and-build:
+    name: lint • typecheck • format • test • build
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install (frozen lockfile)
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm run typecheck
+
+      - name: Lint
+        run: pnpm run lint
+
+      - name: Format check
+        run: pnpm run format:check
+
+      - name: Unit/component tests
+        run: pnpm run test
+
+      - name: Production build
+        run: pnpm run build
+
+      - name: Secret scan (optional)
+        if: hashFiles('.github/secret-scan/**') != ''
+        run: ./scripts/gates/secret-scan.sh
+        continue-on-error: true
+
+  playwright-smoke:
+    name: playwright smoke
+    runs-on: ubuntu-latest
+    needs: static-and-build
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install (frozen lockfile)
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Playwright smoke
+        run: ./scripts/gates/playwright-smoke.sh
+
+      - name: Upload smoke screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-smoke-screenshots
+          path: docs/frontend/screenshots
+          if-no-files-found: ignore
+          retention-days: 7

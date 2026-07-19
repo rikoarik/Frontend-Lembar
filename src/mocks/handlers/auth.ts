@@ -48,14 +48,17 @@ function successPayload(): AuthSuccessPayload {
 const SESSION_COOKIE = 'lembar_session=demo; Path=/; SameSite=Strict; HttpOnly';
 
 export const authHandlers = [
-  http.post<never, { identifier: string; password: string }>('/v1/auth/login', async ({ request }) => {
-    await delay(150);
-    const body = (await request.json()) as { identifier?: string; password?: string };
-    if (body.identifier === 'demo' && body.password === 'demo1234') {
-      return ok(successPayload(), { 'Set-Cookie': SESSION_COOKIE });
-    }
-    return fail('INVALID_CREDENTIALS', 'Username/email/phone dan kata sandi tidak cocok.', 401);
-  }),
+  http.post<never, { identifier: string; password: string }>(
+    '/v1/auth/login',
+    async ({ request }) => {
+      await delay(150);
+      const body = (await request.json()) as { identifier?: string; password?: string };
+      if (body.identifier === 'demo' && body.password === 'demo1234') {
+        return ok(successPayload(), { 'Set-Cookie': SESSION_COOKIE });
+      }
+      return fail('INVALID_CREDENTIALS', 'Username/email/phone dan kata sandi tidak cocok.', 401);
+    },
+  ),
 
   http.post<never, { username: string; email: string; phone: string; password: string }>(
     '/v1/auth/register',
@@ -118,24 +121,24 @@ export const authHandlers = [
     return ok(body);
   }),
 
-  http.post<{ token: string }, { username: string; email: string; phone: string; password: string }>(
-    '/v1/auth/invitations/:token/accept',
-    async ({ request, params }) => {
-      await delay(200);
-      const token = String(params.token);
-      if (token !== 'demo-aktif') {
-        return fail('INVITATION_INVALID', 'Undangan tidak lagi aktif.', 410);
-      }
-      const body = (await request.json()) as {
-        username?: string;
-        email?: string;
-        phone?: string;
-        password?: string;
-      };
-      if (!body.username || !body.email || !body.phone || !body.password) {
-        return fail('VALIDATION_FAILED', 'Lengkapi semua isian.', 400);
-      }
-      return ok(successPayload(), { 'Set-Cookie': SESSION_COOKIE });
-    },
-  ),
+  http.post<
+    { token: string },
+    { username: string; email: string; phone: string; password: string }
+  >('/v1/auth/invitations/:token/accept', async ({ request, params }) => {
+    await delay(200);
+    const token = String(params.token);
+    if (token !== 'demo-aktif') {
+      return fail('INVITATION_INVALID', 'Undangan tidak lagi aktif.', 410);
+    }
+    const body = (await request.json()) as {
+      username?: string;
+      email?: string;
+      phone?: string;
+      password?: string;
+    };
+    if (!body.username || !body.email || !body.phone || !body.password) {
+      return fail('VALIDATION_FAILED', 'Lengkapi semua isian.', 400);
+    }
+    return ok(successPayload(), { 'Set-Cookie': SESSION_COOKIE });
+  }),
 ];

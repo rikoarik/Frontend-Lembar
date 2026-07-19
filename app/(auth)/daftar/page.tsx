@@ -18,10 +18,8 @@ import { useAuthSubmit } from '@/src/features/auth/state/useAuthSubmit';
 
 type FieldKey = 'username' | 'email' | 'phone' | 'password' | 'confirmPassword';
 
-const fieldError = (
-  errors: Record<string, string[]>,
-  key: FieldKey,
-): string | undefined => errors[key]?.[0];
+const fieldError = (errors: Record<string, string[]>, key: FieldKey): string | undefined =>
+  errors[key]?.[0];
 
 export default function RegisterPage() {
   const [username, setUsername] = useState('');
@@ -173,11 +171,7 @@ export default function RegisterPage() {
             autoComplete="new-password"
             showRules={false}
           />
-          <SubmitButton
-            label="Buat akun"
-            busyLabel="Membuat akun…"
-            busy={submit.busy}
-          />
+          <SubmitButton label="Buat akun" busyLabel="Membuat akun…" busy={submit.busy} />
           <p className="font-body-sm text-body-sm text-secondary">
             Sudah punya akun?{' '}
             <Link href="/masuk" className="text-burgundy hover:underline">

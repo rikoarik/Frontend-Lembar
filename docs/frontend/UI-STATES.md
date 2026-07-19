@@ -4,20 +4,20 @@ Every screen must implement relevant states below before it is considered comple
 
 ## Global state model
 
-| State | UI behavior | User action | Logging |
-| --- | --- | --- | --- |
-| Initial loading | skeleton matching final geometry | wait/navigation allowed | timing only |
-| Refreshing | retain stale safe data + subtle progress | continue reading | no content |
-| Empty | explain why and next action | primary CTA | empty reason enum |
-| Validation error | field + summary, preserve input | correct field | error code only |
-| Recoverable server error | clear message/request ID | retry | request/error ID |
-| Offline | keep local form if safe | retry when online | client connectivity |
-| Permission denied | explain workspace/role | switch workspace/contact admin | no resource detail |
-| Not found | safe generic state | back/history | request ID |
-| Conflict | show stale/new state choices | reload/copy changes | conflict code |
-| Rate limited | show retry time | retry later | rate bucket ID |
-| Entitlement blocked | show usage and options | view plan/contact admin | entitlement code |
-| Maintenance | readonly/temporary unavailable | retry/status | maintenance ID |
+| State                    | UI behavior                              | User action                    | Logging             |
+| ------------------------ | ---------------------------------------- | ------------------------------ | ------------------- |
+| Initial loading          | skeleton matching final geometry         | wait/navigation allowed        | timing only         |
+| Refreshing               | retain stale safe data + subtle progress | continue reading               | no content          |
+| Empty                    | explain why and next action              | primary CTA                    | empty reason enum   |
+| Validation error         | field + summary, preserve input          | correct field                  | error code only     |
+| Recoverable server error | clear message/request ID                 | retry                          | request/error ID    |
+| Offline                  | keep local form if safe                  | retry when online              | client connectivity |
+| Permission denied        | explain workspace/role                   | switch workspace/contact admin | no resource detail  |
+| Not found                | safe generic state                       | back/history                   | request ID          |
+| Conflict                 | show stale/new state choices             | reload/copy changes            | conflict code       |
+| Rate limited             | show retry time                          | retry later                    | rate bucket ID      |
+| Entitlement blocked      | show usage and options                   | view plan/contact admin        | entitlement code    |
+| Maintenance              | readonly/temporary unavailable           | retry/status                   | maintenance ID      |
 
 ## Generate form states
 
@@ -32,17 +32,17 @@ Every screen must implement relevant states below before it is considered comple
 
 ## Job states
 
-| State | Headline | Actions |
-| --- | --- | --- |
-| queued | `Draft Anda masuk antrean` | leave safely |
-| preparing | `Menyiapkan materi` | view configuration |
-| generating | `Menyusun soal` | leave safely |
-| validating | `Memeriksa kualitas draft` | leave safely |
-| completed | `Draft siap ditinjau` | review |
-| partially_failed | `Sebagian draft perlu dilengkapi` | review result/retry missing |
-| failed_retryable | `Draft belum berhasil dibuat` | retry with same config |
-| failed_terminal | `Materi atau konfigurasi perlu diperbaiki` | edit configuration |
-| cancelled | `Pembuatan dibatalkan` | duplicate/restart |
+| State            | Headline                                   | Actions                     |
+| ---------------- | ------------------------------------------ | --------------------------- |
+| queued           | `Draft Anda masuk antrean`                 | leave safely                |
+| preparing        | `Menyiapkan materi`                        | view configuration          |
+| generating       | `Menyusun soal`                            | leave safely                |
+| validating       | `Memeriksa kualitas draft`                 | leave safely                |
+| completed        | `Draft siap ditinjau`                      | review                      |
+| partially_failed | `Sebagian draft perlu dilengkapi`          | review result/retry missing |
+| failed_retryable | `Draft belum berhasil dibuat`              | retry with same config      |
+| failed_terminal  | `Materi atau konfigurasi perlu diperbaiki` | edit configuration          |
+| cancelled        | `Pembuatan dibatalkan`                     | duplicate/restart           |
 
 Do not promise seconds remaining unless derived from reliable data. Page reload resumes by job
 ID; closing browser does not cancel server work.
@@ -109,4 +109,3 @@ Test fixtures include:
 - Toast is mirrored in accessible status.
 - Modal open focuses title/first control; close returns trigger.
 - Route navigation sets focus to main heading.
-

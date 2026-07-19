@@ -38,37 +38,37 @@ paths:
       operationId: getHealth
       security: []
       responses:
-        "200":
+        '200':
           description: Service is healthy
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/HealthResponse"
-        "400":
-          $ref: "#/components/responses/ValidationError"
+                $ref: '#/components/schemas/HealthResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
   /v1/me:
     get:
       summary: Read the current account and workspace options
       tags: [Identity]
       operationId: getCurrentAccount
       responses:
-        "200":
+        '200':
           description: Current account and available workspaces
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/MeResponse"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+                $ref: '#/components/schemas/MeResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
   /v1/catalog/grades:
     get:
       summary: List available grades
       tags: [Catalog]
       operationId: listGrades
       parameters:
-        - $ref: "#/components/parameters/WorkspaceId"
+        - $ref: '#/components/parameters/WorkspaceId'
       responses:
-        "200":
+        '200':
           description: Available grades
           content:
             application/json:
@@ -79,16 +79,16 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: "#/components/schemas/CatalogOption"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+                      $ref: '#/components/schemas/CatalogOption'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
   /v1/catalog/subjects:
     get:
       summary: List subjects for a grade and curriculum version
       tags: [Catalog]
       operationId: listSubjects
       parameters:
-        - $ref: "#/components/parameters/WorkspaceId"
+        - $ref: '#/components/parameters/WorkspaceId'
         - in: query
           name: gradeId
           required: true
@@ -98,7 +98,7 @@ paths:
           required: false
           schema: { type: string }
       responses:
-        "200":
+        '200':
           description: Available subjects
           content:
             application/json:
@@ -109,16 +109,16 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: "#/components/schemas/CatalogOption"
-        "400":
-          $ref: "#/components/responses/ValidationError"
+                      $ref: '#/components/schemas/CatalogOption'
+        '400':
+          $ref: '#/components/responses/ValidationError'
   /v1/catalog/materials:
     get:
       summary: List materials for the selected catalog context
       tags: [Catalog]
       operationId: listMaterials
       parameters:
-        - $ref: "#/components/parameters/WorkspaceId"
+        - $ref: '#/components/parameters/WorkspaceId'
         - in: query
           name: gradeId
           required: true
@@ -132,7 +132,7 @@ paths:
           required: true
           schema: { type: string }
       responses:
-        "200":
+        '200':
           description: Available materials
           content:
             application/json:
@@ -143,18 +143,18 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: "#/components/schemas/CatalogOption"
-        "400":
-          $ref: "#/components/responses/ValidationError"
+                      $ref: '#/components/schemas/CatalogOption'
+        '400':
+          $ref: '#/components/responses/ValidationError'
   /v1/sources/upload-intents:
     post:
       summary: Create a private PDF upload intent
       tags: [Sources]
       operationId: createSourceUploadIntent
       parameters:
-        - $ref: "#/components/parameters/WorkspaceId"
-        - $ref: "#/components/parameters/IdempotencyKey"
-        - $ref: "#/components/parameters/CsrfToken"
+        - $ref: '#/components/parameters/WorkspaceId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/CsrfToken'
       requestBody:
         required: true
         content:
@@ -167,65 +167,65 @@ paths:
                 contentType: { type: string, const: application/pdf }
                 sizeBytes: { type: integer, minimum: 1 }
       responses:
-        "201":
+        '201':
           description: Upload intent created
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UploadIntentResponse"
-        "400":
-          $ref: "#/components/responses/ValidationError"
+                $ref: '#/components/schemas/UploadIntentResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
   /v1/sources/{sourceId}:
     get:
       summary: Read source processing state
       tags: [Sources]
       operationId: getSource
       parameters:
-        - $ref: "#/components/parameters/WorkspaceId"
-        - $ref: "#/components/parameters/SourceId"
+        - $ref: '#/components/parameters/WorkspaceId'
+        - $ref: '#/components/parameters/SourceId'
       responses:
-        "200":
+        '200':
           description: Source state
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SourceResponse"
-        "404":
-          $ref: "#/components/responses/NotFound"
+                $ref: '#/components/schemas/SourceResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
   /v1/assessments:
     get:
       summary: List assessments in the active workspace
       tags: [Assessments]
       operationId: listAssessments
       parameters:
-        - $ref: "#/components/parameters/WorkspaceId"
-        - $ref: "#/components/parameters/Cursor"
-        - $ref: "#/components/parameters/Limit"
+        - $ref: '#/components/parameters/WorkspaceId'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
       responses:
-        "200":
+        '200':
           description: Assessment page
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AssessmentPage"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+                $ref: '#/components/schemas/AssessmentPage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
     post:
       summary: Create an assessment draft and generation job
       tags: [Assessments]
       operationId: createAssessment
       parameters:
-        - $ref: "#/components/parameters/WorkspaceId"
-        - $ref: "#/components/parameters/IdempotencyKey"
-        - $ref: "#/components/parameters/CsrfToken"
+        - $ref: '#/components/parameters/WorkspaceId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/CsrfToken'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateAssessmentRequest"
+              $ref: '#/components/schemas/CreateAssessmentRequest'
       responses:
-        "201":
+        '201':
           description: Draft and generation job created
           content:
             application/json:
@@ -239,57 +239,57 @@ paths:
                     properties:
                       assessmentId: { type: string }
                       jobId: { type: string }
-                      status: { $ref: "#/components/schemas/JobStatus" }
-        "400":
-          $ref: "#/components/responses/ValidationError"
-        "409":
-          $ref: "#/components/responses/Conflict"
+                      status: { $ref: '#/components/schemas/JobStatus' }
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '409':
+          $ref: '#/components/responses/Conflict'
   /v1/assessments/{assessmentId}:
     get:
       summary: Read an assessment
       tags: [Assessments]
       operationId: getAssessment
       parameters:
-        - $ref: "#/components/parameters/WorkspaceId"
-        - $ref: "#/components/parameters/AssessmentId"
+        - $ref: '#/components/parameters/WorkspaceId'
+        - $ref: '#/components/parameters/AssessmentId'
       responses:
-        "200":
+        '200':
           description: Assessment detail
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AssessmentResponse"
-        "404":
-          $ref: "#/components/responses/NotFound"
+                $ref: '#/components/schemas/AssessmentResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
   /v1/assessments/{assessmentId}/finalize:
     post:
       summary: Finalize the reviewed assessment version
       tags: [Assessments]
       operationId: finalizeAssessment
       parameters:
-        - $ref: "#/components/parameters/WorkspaceId"
-        - $ref: "#/components/parameters/AssessmentId"
-        - $ref: "#/components/parameters/IdempotencyKey"
-        - $ref: "#/components/parameters/CsrfToken"
+        - $ref: '#/components/parameters/WorkspaceId'
+        - $ref: '#/components/parameters/AssessmentId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/CsrfToken'
       responses:
-        "200":
+        '200':
           description: Final version created
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AssessmentResponse"
-        "409":
-          $ref: "#/components/responses/Conflict"
+                $ref: '#/components/schemas/AssessmentResponse'
+        '409':
+          $ref: '#/components/responses/Conflict'
   /v1/assessments/{assessmentId}/exports:
     post:
       summary: Create an export job for a final assessment
       tags: [Outputs]
       operationId: createAssessmentExport
       parameters:
-        - $ref: "#/components/parameters/WorkspaceId"
-        - $ref: "#/components/parameters/AssessmentId"
-        - $ref: "#/components/parameters/IdempotencyKey"
-        - $ref: "#/components/parameters/CsrfToken"
+        - $ref: '#/components/parameters/WorkspaceId'
+        - $ref: '#/components/parameters/AssessmentId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/CsrfToken'
       requestBody:
         required: true
         content:
@@ -302,7 +302,7 @@ paths:
                 includeAnswerKey: { type: boolean, default: true }
                 includeExplanation: { type: boolean, default: false }
       responses:
-        "202":
+        '202':
           description: Export job accepted
           content:
             application/json:
@@ -315,26 +315,26 @@ paths:
                     required: [jobId, status]
                     properties:
                       jobId: { type: string }
-                      status: { $ref: "#/components/schemas/JobStatus" }
-        "409":
-          $ref: "#/components/responses/Conflict"
+                      status: { $ref: '#/components/schemas/JobStatus' }
+        '409':
+          $ref: '#/components/responses/Conflict'
   /v1/jobs/{jobId}:
     get:
       summary: Read asynchronous job state
       tags: [Jobs]
       operationId: getJob
       parameters:
-        - $ref: "#/components/parameters/WorkspaceId"
-        - $ref: "#/components/parameters/JobId"
+        - $ref: '#/components/parameters/WorkspaceId'
+        - $ref: '#/components/parameters/JobId'
       responses:
-        "200":
+        '200':
           description: Job state
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/JobResponse"
-        "404":
-          $ref: "#/components/responses/NotFound"
+                $ref: '#/components/schemas/JobResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
   /v1/public/marketing/global:
     get:
       summary: Read published global marketing content
@@ -346,7 +346,7 @@ paths:
           name: locale
           schema: { type: string, default: id-ID }
       responses:
-        "200":
+        '200':
           description: Published navigation, footer, CTA, and default SEO
           headers:
             ETag: { schema: { type: string } }
@@ -354,11 +354,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/MarketingGlobalResponse"
-        "304":
+                $ref: '#/components/schemas/MarketingGlobalResponse'
+        '304':
           description: Cached representation is current
-        "404":
-          $ref: "#/components/responses/NotFound"
+        '404':
+          $ref: '#/components/responses/NotFound'
   /v1/public/marketing/pages/{slug}:
     get:
       summary: Read a published marketing page
@@ -366,12 +366,12 @@ paths:
       operationId: getPublishedMarketingPage
       security: []
       parameters:
-        - $ref: "#/components/parameters/MarketingSlug"
+        - $ref: '#/components/parameters/MarketingSlug'
         - in: query
           name: locale
           schema: { type: string, default: id-ID }
       responses:
-        "200":
+        '200':
           description: Published structured page
           headers:
             ETag: { schema: { type: string } }
@@ -379,18 +379,18 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/MarketingPageResponse"
-        "304":
+                $ref: '#/components/schemas/MarketingPageResponse'
+        '304':
           description: Cached representation is current
-        "404":
-          $ref: "#/components/responses/NotFound"
+        '404':
+          $ref: '#/components/responses/NotFound'
   /v1/ops/marketing/pages:
     get:
       summary: List marketing pages and authoring state
       tags: [MarketingOps]
       operationId: listMarketingPagesForOps
       responses:
-        "200":
+        '200':
           description: Page and version summaries
           content:
             application/json:
@@ -400,136 +400,136 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: { $ref: "#/components/schemas/MarketingPageSummary" }
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "403":
-          $ref: "#/components/responses/Forbidden"
+                    items: { $ref: '#/components/schemas/MarketingPageSummary' }
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
   /v1/ops/marketing/pages/{slug}:
     get:
       summary: Read marketing page authoring state
       tags: [MarketingOps]
       operationId: getMarketingPageForOps
       parameters:
-        - $ref: "#/components/parameters/MarketingSlug"
+        - $ref: '#/components/parameters/MarketingSlug'
       responses:
-        "200":
+        '200':
           description: Current draft, published version, and version summaries
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/MarketingOpsPageResponse" }
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "404":
-          $ref: "#/components/responses/NotFound"
+              schema: { $ref: '#/components/schemas/MarketingOpsPageResponse' }
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
   /v1/ops/marketing/pages/{slug}/draft:
     put:
       summary: Save a structured marketing page draft
       tags: [MarketingOps]
       operationId: saveMarketingPageDraft
       parameters:
-        - $ref: "#/components/parameters/MarketingSlug"
-        - $ref: "#/components/parameters/IfMatch"
-        - $ref: "#/components/parameters/CsrfToken"
+        - $ref: '#/components/parameters/MarketingSlug'
+        - $ref: '#/components/parameters/IfMatch'
+        - $ref: '#/components/parameters/CsrfToken'
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: "#/components/schemas/SaveMarketingDraftRequest" }
+            schema: { $ref: '#/components/schemas/SaveMarketingDraftRequest' }
       responses:
-        "200":
+        '200':
           description: Draft saved with a new revision
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/MarketingOpsPageResponse" }
-        "400":
-          $ref: "#/components/responses/ValidationError"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "409":
-          $ref: "#/components/responses/Conflict"
+              schema: { $ref: '#/components/schemas/MarketingOpsPageResponse' }
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
   /v1/ops/marketing/pages/{slug}/preview:
     get:
       summary: Read authenticated no-store draft preview
       tags: [MarketingOps]
       operationId: previewMarketingPageDraft
       parameters:
-        - $ref: "#/components/parameters/MarketingSlug"
+        - $ref: '#/components/parameters/MarketingSlug'
       responses:
-        "200":
+        '200':
           description: Draft projection for the shared frontend renderer
           headers:
             Cache-Control:
               schema: { type: string, const: no-store }
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/MarketingPageResponse" }
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "404":
-          $ref: "#/components/responses/NotFound"
+              schema: { $ref: '#/components/schemas/MarketingPageResponse' }
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
   /v1/ops/marketing/pages/{slug}/publish:
     post:
       summary: Publish the current validated draft
       tags: [MarketingOps]
       operationId: publishMarketingPageDraft
       parameters:
-        - $ref: "#/components/parameters/MarketingSlug"
-        - $ref: "#/components/parameters/IfMatch"
-        - $ref: "#/components/parameters/CsrfToken"
+        - $ref: '#/components/parameters/MarketingSlug'
+        - $ref: '#/components/parameters/IfMatch'
+        - $ref: '#/components/parameters/CsrfToken'
       responses:
-        "200":
+        '200':
           description: Immutable version published
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/MarketingOpsPageResponse" }
-        "400":
-          $ref: "#/components/responses/ValidationError"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "409":
-          $ref: "#/components/responses/Conflict"
+              schema: { $ref: '#/components/schemas/MarketingOpsPageResponse' }
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
   /v1/ops/marketing/pages/{slug}/unpublish:
     post:
       summary: Remove the current page from public delivery
       tags: [MarketingOps]
       operationId: unpublishMarketingPage
       parameters:
-        - $ref: "#/components/parameters/MarketingSlug"
-        - $ref: "#/components/parameters/IfMatch"
-        - $ref: "#/components/parameters/CsrfToken"
+        - $ref: '#/components/parameters/MarketingSlug'
+        - $ref: '#/components/parameters/IfMatch'
+        - $ref: '#/components/parameters/CsrfToken'
       responses:
-        "200":
+        '200':
           description: Public pointer cleared with audit
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/MarketingOpsPageResponse" }
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "409":
-          $ref: "#/components/responses/Conflict"
+              schema: { $ref: '#/components/schemas/MarketingOpsPageResponse' }
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
   /v1/ops/marketing/pages/{slug}/versions/{version}/restore:
     post:
       summary: Copy a historical version into a new draft
       tags: [MarketingOps]
       operationId: restoreMarketingPageVersion
       parameters:
-        - $ref: "#/components/parameters/MarketingSlug"
+        - $ref: '#/components/parameters/MarketingSlug'
         - in: path
           name: version
           required: true
           schema: { type: integer, minimum: 1 }
-        - $ref: "#/components/parameters/CsrfToken"
+        - $ref: '#/components/parameters/CsrfToken'
       responses:
-        "201":
+        '201':
           description: New draft created from the selected version
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/MarketingOpsPageResponse" }
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "404":
-          $ref: "#/components/responses/NotFound"
+              schema: { $ref: '#/components/schemas/MarketingOpsPageResponse' }
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
 components:
   securitySchemes:
     sessionCookie:
@@ -594,27 +594,27 @@ components:
       description: Authentication required
       content:
         application/json:
-          schema: { $ref: "#/components/schemas/ErrorResponse" }
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
     Forbidden:
       description: Authenticated actor lacks the required platform role
       content:
         application/json:
-          schema: { $ref: "#/components/schemas/ErrorResponse" }
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
     NotFound:
       description: Resource not found or not visible
       content:
         application/json:
-          schema: { $ref: "#/components/schemas/ErrorResponse" }
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
     ValidationError:
       description: Invalid input
       content:
         application/json:
-          schema: { $ref: "#/components/schemas/ErrorResponse" }
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
     Conflict:
       description: Version, state, or idempotency conflict
       content:
         application/json:
-          schema: { $ref: "#/components/schemas/ErrorResponse" }
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
   schemas:
     HealthResponse:
       type: object
@@ -664,7 +664,7 @@ components:
                 displayName: { type: string }
             workspaces:
               type: array
-              items: { $ref: "#/components/schemas/WorkspaceSummary" }
+              items: { $ref: '#/components/schemas/WorkspaceSummary' }
     CatalogOption:
       type: object
       required: [id, label, status]
@@ -693,14 +693,10 @@ components:
           properties:
             id: { type: string }
             type: { type: string, enum: [catalog, pdf] }
-            status:
-              {
-                type: string,
-                enum: [uploading, processing, ready, failed, deleted],
-              }
+            status: { type: string, enum: [uploading, processing, ready, failed, deleted] }
             fileName: { type: string }
-            pageCount: { type: [integer, "null"] }
-            failureCode: { type: [string, "null"] }
+            pageCount: { type: [integer, 'null'] }
+            failureCode: { type: [string, 'null'] }
     CreateAssessmentRequest:
       type: object
       required:
@@ -714,8 +710,7 @@ components:
         - questionCount
         - reviewMode
       properties:
-        sourceMode:
-          { type: string, enum: [catalog, own_pdf, catalog_and_own_pdf] }
+        sourceMode: { type: string, enum: [catalog, own_pdf, catalog_and_own_pdf] }
         sourceIds:
           type: array
           items: { type: string }
@@ -726,8 +721,7 @@ components:
           type: array
           minItems: 1
           items: { type: string }
-        assessmentType:
-          { type: string, enum: [practice, daily, midterm, final, tka] }
+        assessmentType: { type: string, enum: [practice, daily, midterm, final, tka] }
         difficulty: { type: string, enum: [easy, medium, hard, mixed] }
         questionCount: { type: integer, minimum: 5, maximum: 50, default: 20 }
         reviewMode: { type: string, enum: [quick, detail] }
@@ -739,8 +733,7 @@ components:
       properties:
         id: { type: string }
         title: { type: string }
-        status:
-          { type: string, enum: [draft, generating, review, final, archived] }
+        status: { type: string, enum: [draft, generating, review, final, archived] }
         gradeLabel: { type: string }
         subjectLabel: { type: string }
         updatedAt: { type: string, format: date-time }
@@ -750,12 +743,12 @@ components:
       properties:
         data:
           type: array
-          items: { $ref: "#/components/schemas/AssessmentSummary" }
+          items: { $ref: '#/components/schemas/AssessmentSummary' }
         page:
           type: object
           required: [hasMore]
           properties:
-            nextCursor: { type: [string, "null"] }
+            nextCursor: { type: [string, 'null'] }
             hasMore: { type: boolean }
     AssessmentResponse:
       type: object
@@ -763,7 +756,7 @@ components:
       properties:
         data:
           allOf:
-            - $ref: "#/components/schemas/AssessmentSummary"
+            - $ref: '#/components/schemas/AssessmentSummary'
             - type: object
               required: [questionCount, reviewedCount]
               properties:
@@ -791,16 +784,12 @@ components:
           required: [id, kind, status, stage, createdAt, updatedAt]
           properties:
             id: { type: string }
-            kind:
-              {
-                type: string,
-                enum: [source_ingestion, assessment_generation, export],
-              }
-            status: { $ref: "#/components/schemas/JobStatus" }
+            kind: { type: string, enum: [source_ingestion, assessment_generation, export] }
+            status: { $ref: '#/components/schemas/JobStatus' }
             stage: { type: string }
-            progressCurrent: { type: [integer, "null"] }
-            progressTotal: { type: [integer, "null"] }
-            failureCode: { type: [string, "null"] }
+            progressCurrent: { type: [integer, 'null'] }
+            progressTotal: { type: [integer, 'null'] }
+            failureCode: { type: [string, 'null'] }
             createdAt: { type: string, format: date-time }
             updatedAt: { type: string, format: date-time }
     MarketingCta:
@@ -817,7 +806,7 @@ components:
         trackingKey: { type: string, minLength: 1, maxLength: 100 }
         enabled: { type: boolean }
         external: { type: boolean, default: false }
-        accessibleLabel: { type: [string, "null"], maxLength: 160 }
+        accessibleLabel: { type: [string, 'null'], maxLength: 160 }
     MarketingBlockItem:
       type: object
       additionalProperties: false
@@ -825,9 +814,9 @@ components:
       properties:
         id: { type: string }
         title: { type: string, maxLength: 200 }
-        body: { type: [string, "null"], maxLength: 2000 }
-        mediaAssetId: { type: [string, "null"] }
-        cta: { oneOf: [{ $ref: "#/components/schemas/MarketingCta" }, { type: "null" }] }
+        body: { type: [string, 'null'], maxLength: 2000 }
+        mediaAssetId: { type: [string, 'null'] }
+        cta: { oneOf: [{ $ref: '#/components/schemas/MarketingCta' }, { type: 'null' }] }
     MarketingBlock:
       type: object
       additionalProperties: false
@@ -837,19 +826,19 @@ components:
         type:
           type: string
           enum: [hero, product_proof, workflow, audience, trust, pricing, faq, final_cta]
-        eyebrow: { type: [string, "null"], maxLength: 120 }
-        heading: { type: [string, "null"], maxLength: 300 }
-        body: { type: [string, "null"], maxLength: 4000 }
+        eyebrow: { type: [string, 'null'], maxLength: 120 }
+        heading: { type: [string, 'null'], maxLength: 300 }
+        body: { type: [string, 'null'], maxLength: 4000 }
         theme: { type: string, enum: [light, dark, accent], default: light }
-        mediaAssetId: { type: [string, "null"] }
+        mediaAssetId: { type: [string, 'null'] }
         ctas:
           type: array
           maxItems: 4
-          items: { $ref: "#/components/schemas/MarketingCta" }
+          items: { $ref: '#/components/schemas/MarketingCta' }
         items:
           type: array
           maxItems: 20
-          items: { $ref: "#/components/schemas/MarketingBlockItem" }
+          items: { $ref: '#/components/schemas/MarketingBlockItem' }
     MarketingSeo:
       type: object
       additionalProperties: false
@@ -857,7 +846,7 @@ components:
       properties:
         title: { type: string, minLength: 1, maxLength: 70 }
         description: { type: string, minLength: 1, maxLength: 180 }
-        imageAssetId: { type: [string, "null"] }
+        imageAssetId: { type: [string, 'null'] }
         noIndex: { type: boolean, default: false }
     MarketingPageDocument:
       type: object
@@ -872,13 +861,13 @@ components:
           type: array
           minItems: 1
           maxItems: 20
-          items: { $ref: "#/components/schemas/MarketingBlock" }
-        seo: { $ref: "#/components/schemas/MarketingSeo" }
+          items: { $ref: '#/components/schemas/MarketingBlock' }
+        seo: { $ref: '#/components/schemas/MarketingSeo' }
     MarketingPageResponse:
       type: object
       required: [data]
       properties:
-        data: { $ref: "#/components/schemas/MarketingPageDocument" }
+        data: { $ref: '#/components/schemas/MarketingPageDocument' }
     MarketingGlobalResponse:
       type: object
       required: [data]
@@ -891,13 +880,13 @@ components:
             version: { type: integer, minimum: 1 }
             navigation:
               type: array
-              items: { $ref: "#/components/schemas/MarketingBlockItem" }
+              items: { $ref: '#/components/schemas/MarketingBlockItem' }
             footer:
               type: array
-              items: { $ref: "#/components/schemas/MarketingBlockItem" }
+              items: { $ref: '#/components/schemas/MarketingBlockItem' }
             ctas:
               type: array
-              items: { $ref: "#/components/schemas/MarketingCta" }
+              items: { $ref: '#/components/schemas/MarketingCta' }
     MarketingPageSummary:
       type: object
       required: [slug, locale, state, revision]
@@ -906,7 +895,7 @@ components:
         locale: { type: string }
         state: { type: string, enum: [draft, published, unpublished] }
         revision: { type: integer, minimum: 0 }
-        publishedVersion: { type: [integer, "null"] }
+        publishedVersion: { type: [integer, 'null'] }
         updatedAt: { type: string, format: date-time }
     MarketingOpsPageResponse:
       type: object
@@ -916,14 +905,14 @@ components:
           type: object
           required: [summary, draft, versions]
           properties:
-            summary: { $ref: "#/components/schemas/MarketingPageSummary" }
+            summary: { $ref: '#/components/schemas/MarketingPageSummary' }
             draft:
               oneOf:
-                - $ref: "#/components/schemas/MarketingPageDocument"
-                - type: "null"
+                - $ref: '#/components/schemas/MarketingPageDocument'
+                - type: 'null'
             versions:
               type: array
-              items: { $ref: "#/components/schemas/MarketingPageSummary" }
+              items: { $ref: '#/components/schemas/MarketingPageSummary' }
     SaveMarketingDraftRequest:
       type: object
       additionalProperties: false
@@ -934,7 +923,7 @@ components:
           type: array
           minItems: 1
           maxItems: 20
-          items: { $ref: "#/components/schemas/MarketingBlock" }
-        seo: { $ref: "#/components/schemas/MarketingSeo" }
+          items: { $ref: '#/components/schemas/MarketingBlock' }
+        seo: { $ref: '#/components/schemas/MarketingSeo' }
 security:
   - sessionCookie: []
