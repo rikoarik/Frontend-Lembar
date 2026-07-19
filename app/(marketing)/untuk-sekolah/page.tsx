@@ -7,13 +7,13 @@ export default function UntukSekolahPage() {
     <>
       <nav className="w-full sticky top-0 z-50 glass-nav border-b border-border-subtle dark:border-outline-variant">
         <div className="flex justify-between items-center h-unit-16 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
-          <div className="h-8 w-8 flex-shrink-0">
+          <Link aria-label="lembar beranda" className="h-8 w-8 flex-shrink-0" href="/">
             <img
               alt="lembar logo"
               className="h-full w-full object-contain"
               src="/lembar/logo-mark.png"
             />
-          </div>
+          </Link>
           <div className="hidden md:flex items-center gap-unit-8">
             <a
               className="text-secondary hover:text-burgundy transition-colors duration-200"
