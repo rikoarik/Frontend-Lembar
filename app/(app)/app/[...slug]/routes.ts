@@ -8,6 +8,8 @@ export const SHELL_PLACEHOLDER_ROUTES = {
   generate: 'Generate lembar',
   profil: 'Profil',
   plan: 'Paket & kuota',
+  'pengaturan/workspace': 'Workspace',
+  'pengaturan/langganan': 'Paket & kuota',
   kelas: 'Kelas',
   analitik: 'Analitik',
 } as const;

@@ -9,11 +9,12 @@ const NAVIGABLE_SHELL_ROUTES = [
   '/app/generate',
   '/app/riwayat',
   '/app/template',
-  '/app/profil',
   '/app/plan',
   '/app/bank-soal',
   '/app/kelas',
   '/app/analitik',
+  '/app/pengaturan/langganan',
+  '/app/pengaturan/workspace',
 ];
 
 describe('app shell navigation route coverage', () => {
