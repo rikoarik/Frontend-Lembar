@@ -346,11 +346,39 @@ tasks:
     repository: Frontend-Lembar
     sprint: F1
     title: School lead form
-    status: BLOCKED
+    status: READY_FOR_OWNER_REVIEW
     depends_on: [F1-03, B6-04]
     decisions: [D-007]
     outcome: Consent-aware, spam-protected school lead capture with complete states.
     evidence: [validation, rate-limit-state, privacy-review]
+    checkpoint:
+      mode: shutdown
+      branch: feat/f1-04-lead-form
+      latest_pushed_commit: pending-push
+      completed_scope:
+        - 'Consent-aware school lead form shipped on /kontak with Result<T, E> service layer, validation, rate-limit, and enumeration-safe acknowledgement.'
+        - 'Preview-safe mock-mode adapter added at app/v1/leads/school/route.ts so next build && next start can submit /kontak locally when backend is unavailable; live mode still returns 404 and does not create a permanent backend contract.'
+        - 'Runtime verification captured: direct POST /v1/leads/school returns 200 in mock mode and /kontak submit succeeds in production preview.'
+      remaining_scope:
+        - 'Owner review only.'
+      changed_files:
+        [
+          app/v1/leads/school/route.ts,
+          app/__tests__/lead-route.test.ts,
+          docs/frontend/screenshots/f1-04-kontak-submit-success.png,
+          docs/tasks/TASK-REGISTRY.yaml,
+        ]
+      verification_executed:
+        [
+          lint_PASS_WARNINGS,
+          typecheck_PASS,
+          test_PASS_67,
+          build_PASS,
+          preview_http_post_leads_school_PASS_200,
+          preview_ui_submit_kontak_PASS,
+        ]
+      verification_still_required: []
+      exact_next_action: 'Owner reviews the preview-safe adapter evidence and accepts or requests changes.'
 
   - id: F1-05
     repository: Frontend-Lembar
