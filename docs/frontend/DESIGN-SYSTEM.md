@@ -57,22 +57,28 @@ component implementation must recheck actual foreground/background and state com
 Font stack:
 
 ```css
-font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
-  "Segoe UI", sans-serif;
+font-family:
+  Inter,
+  ui-sans-serif,
+  system-ui,
+  -apple-system,
+  BlinkMacSystemFont,
+  'Segoe UI',
+  sans-serif;
 ```
 
-| Style | Size/line | Weight | Use |
-| --- | --- | --- | --- |
-| Display | 56/60 | 650 | desktop landing hero only |
-| H1 | 40/46 | 650 | page marketing |
-| H2 | 32/38 | 650 | section |
-| H3 | 24/30 | 620 | panel title |
-| App H1 | 28/34 | 650 | app page title |
-| Body large | 18/28 | 400 | hero/supporting text |
-| Body | 16/24 | 400 | default |
-| Body small | 14/20 | 400 | secondary UI |
-| Label | 13/18 | 600 | form/table label |
-| Meta | 12/16 | 500 | timestamp/status metadata |
+| Style      | Size/line | Weight | Use                       |
+| ---------- | --------- | ------ | ------------------------- |
+| Display    | 56/60     | 650    | desktop landing hero only |
+| H1         | 40/46     | 650    | page marketing            |
+| H2         | 32/38     | 650    | section                   |
+| H3         | 24/30     | 620    | panel title               |
+| App H1     | 28/34     | 650    | app page title            |
+| Body large | 18/28     | 400    | hero/supporting text      |
+| Body       | 16/24     | 400    | default                   |
+| Body small | 14/20     | 400    | secondary UI              |
+| Label      | 13/18     | 600    | form/table label          |
+| Meta       | 12/16     | 500    | timestamp/status metadata |
 
 Mobile display 40/44 and H1 32/38. Body never below 14 px; print uses separate spec.
 
@@ -221,3 +227,23 @@ Every component must demonstrate:
 - long Indonesian copy;
 - visual regression fixture;
 - token-only color/spacing unless documented exception.
+
+## Audit notes
+
+- F0-04 (2026-07-19): added app-shell primitive baseline in `app/components/ui/*`:
+  `Button`, `Field`/`TextField`, `ChoiceCard`, `StatusBadge`, and `Panel`.
+- F0-04 verification currently uses Vitest + Testing Library semantic assertions, plus 390 px
+  DOM snapshot fixtures for one `Button` and one `TextField` surface.
+- ponytail: upgrade the semantic assertions to `axe-core` once the repo accepts the additional
+  test dependency or provides a shared accessibility test helper.
+- New primitive code should prefer `brand-*` tokens in Tailwind and the mirrored `--color-*`
+  CSS variables in `app/globals.css`; legacy marketing token aliases remain for compatibility.
+- `Field` is intentionally a wrapper primitive (not a monolithic form system) so existing auth
+  forms can adopt it incrementally without rewriting control logic.
+- `Panel` stays border-first by default; shadow is opt-in (`elevated`) for popover/modal-like
+  surfaces only.
+- `StatusBadge` labels are fixed to `Draft`, `Diproses`, `Perlu ditinjau`, `Final`, `Gagal`, and
+  `Kedaluwarsa` per the accepted state vocabulary.
+
+ponytail: visual fixtures are DOM snapshots at 390 px, not browser image diffs. Upgrade to
+Playwright image snapshots when the repo adopts a stable screenshot baseline harness.
