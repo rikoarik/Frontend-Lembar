@@ -404,19 +404,32 @@ tasks:
     evidence: [D-009-guard-test, route-metadata, responsive]
     checkpoint:
       mode: shutdown
-      branch: feat/f1-05-release-gate
-      latest_pushed_commit: 3f26fee78bcf25a10be73d405def4de5ba248f8a
+      branch: ao/frontend-lembar-16/f1-03-faq-harga
+      latest_pushed_commit: pending-push
+      base_branch: ao/frontend-integration
       completed_scope:
         [
-          'Per-route metadata added for /, /harga, /untuk-sekolah via page/layout files.',
-          'Robots/sitemap/OG image artifacts added in release gate branch.',
+          'app/(marketing)/faq/page.tsx rewritten to use MarketingSubPageLayout with 9 FAQ entries in Indonesian, aligned to UX-FLOWS + LANDING-PAGE-SPEC and without fabricated pricing/security claims.',
+          'app/(marketing)/harga/page.tsx rewritten as a neutral placeholder page using MarketingSubPageLayout, three package concept cards without nominals, a pricing FAQ section, and preserved final CTA.',
+          'app/__tests__/marketing.test.tsx updated to assert the FAQ/harga placeholder contract and the absence of Rp nominals, AES-256, ISO 27001, PALING POPULER, and Catatan Transparansi.',
+          'Missing dependency @fontsource/material-symbols added because app/layout.tsx already imported 400/600/700 CSS weights on ao/frontend-integration tip, which blocked build before these route changes could be verified.',
         ]
       remaining_scope:
         [
-          'Pricing page still contains approved baseline price copy; D-009 guard test still required.',
-          'Responsive/reduced-motion gates failing per release-gate report.',
+          'pnpm format:check still fails across 72 unrelated existing files; not changed in this task.',
+          'pnpm test:smoke still fails on pre-existing home-route smoke assertions expecting nav__wordmark/logo selectors that do not exist on ao/frontend-integration tip.',
+          'Owner review still required for the exact neutral FAQ copy and for future D-009 price decisions before any nominal pricing is shown.',
         ]
-      exact_next_action: 'Resume by deciding whether price copy is owner-approved baseline or needs D-009-safe fallback, then fix route metadata/reduced-motion blockers.'
+      verification_executed:
+        [
+          'pnpm_install_PASS',
+          'pnpm_typecheck_PASS',
+          'pnpm_lint_PASS_WARNINGS_BASELINE',
+          'pnpm_test_PASS_68',
+          'pnpm_build_PASS',
+          'pnpm_test_smoke_FAIL_BASELINE_NAV_WORDMARK',
+        ]
+      exact_next_action: 'Owner reviews the neutral FAQ/harga placeholder copy, then a follow-up task can repair the baseline smoke selectors or navbar contract before F1-03/F1-05 move forward.'
 
   - id: F1-04
     repository: Frontend-Lembar
