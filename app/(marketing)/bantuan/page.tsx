@@ -1,5 +1,28 @@
-import MarketingSubPageLayout from '@/app/components/marketing/MarketingSubPageLayout';
+import type { Metadata } from 'next';
 import Link from 'next/link';
+import MarketingSubPageLayout from '@/app/components/marketing/MarketingSubPageLayout';
+
+export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://lembar.id'),
+  title: 'Pusat Bantuan — lembar',
+  description:
+    'Mulai dari sini: panduan singkat, kanal dukungan, dan kontak tim lembar untuk guru dan sekolah.',
+  alternates: { canonical: '/bantuan' },
+  openGraph: {
+    title: 'Pusat Bantuan — lembar',
+    description: 'Panduan singkat dan kontak tim dukungan lembar.',
+    url: '/bantuan',
+    siteName: 'lembar',
+    locale: 'id_ID',
+    type: 'website',
+    images: ['/og-image.svg'],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Pusat Bantuan — lembar',
+    description: 'Panduan singkat dan kontak tim dukungan lembar.',
+  },
+};
 
 export default function BantuanPage() {
   return (
@@ -10,9 +33,7 @@ export default function BantuanPage() {
     >
       <section className="py-unit-12 px-margin-mobile md:px-margin-desktop bg-surface">
         <div className="max-w-container-max mx-auto">
-          {/* Guide cards — varied sizes, not 3 equal boxes */}
           <div className="grid grid-cols-1 md:grid-cols-12 gap-unit-4">
-            {/* Big card */}
             <div className="md:col-span-7 rounded-2xl bg-burgundy text-on-primary p-unit-10 flex flex-col justify-between min-h-[280px]">
               <div>
                 <span className="text-on-primary/60 text-caption font-label-semibold tracking-wider uppercase">
@@ -22,52 +43,83 @@ export default function BantuanPage() {
                   Buat asesmen pertama Anda
                 </h2>
                 <p className="text-on-primary/80 text-body-default leading-relaxed max-w-md">
-                  Daftar, pilih mata pelajaran, masukkan topik — AI kami menyusun draft soal dalam
-                  hitungan detik. Tinggal review dan sesuaikan.
+                  Daftar, pilih mata pelajaran, masukkan topik — AI membantu menyusun draft soal
+                  yang bisa Anda revisi dan ekspor. Tinggal tinjau dan sesuaikan.
                 </p>
               </div>
-              <span className="text-on-primary/40 text-[64px] font-bold leading-none mt-unit-4 self-end">
-                →
-              </span>
+              <Link
+                href="/daftar"
+                className="self-start mt-unit-8 bg-on-primary text-ink px-unit-6 py-unit-3 rounded-lg font-label-semibold text-caption hover:brightness-95 transition-all"
+              >
+                Buat akun
+              </Link>
             </div>
 
-            {/* Stacked cards */}
             <div className="md:col-span-5 flex flex-col gap-unit-4">
-              <div className="rounded-2xl bg-paper border border-border-strong p-unit-8 flex-1">
+              <article className="rounded-2xl bg-paper border border-border-strong p-unit-8 flex-1">
                 <span className="text-burgundy text-caption font-label-semibold tracking-wider uppercase">
                   AI Tips
                 </span>
                 <h3 className="font-h3 text-h3 text-ink mt-unit-2 mb-unit-2">
-                  Prompt yang menghasilkan soal bagus
+                  Prompt yang menghasilkan draft lebih baik
                 </h3>
                 <p className="text-secondary text-body-sm leading-relaxed">
-                  Semakin spesifik topik dan level taksonomi yang Anda berikan, semakin tajam soal
-                  yang dihasilkan AI.
+                  Semakin spesifik topik dan tingkat kelas yang Anda berikan, semakin relevan draft
+                  awal yang dibantu AI hasilkan. Tinjau sebelum memfinalkan.
                 </p>
-              </div>
-              <div className="rounded-2xl bg-paper border border-border-strong p-unit-8 flex-1">
+              </article>
+              <article className="rounded-2xl bg-paper border border-border-strong p-unit-8 flex-1">
                 <span className="text-burgundy text-caption font-label-semibold tracking-wider uppercase">
                   Kolaborasi
                 </span>
                 <h3 className="font-h3 text-h3 text-ink mt-unit-2 mb-unit-2">Undang tim Anda</h3>
                 <p className="text-secondary text-body-sm leading-relaxed">
-                  Ajak guru lain ke workspace sekolah. Atur peran, bagikan bank soal, dan review
+                  Ajak guru lain ke workspace sekolah. Atur peran, bagikan bank soal, dan tinjau
                   bersama.
                 </p>
-              </div>
+              </article>
             </div>
           </div>
 
-          {/* CTA */}
-          <div className="mt-unit-16 text-center">
-            <p className="text-secondary text-body-default mb-unit-4">Masih butuh bantuan?</p>
-            <Link
-              href="/kontak"
-              className="inline-flex items-center gap-2 bg-burgundy text-on-primary px-unit-8 py-unit-4 rounded-lg font-label-semibold text-body-default hover:brightness-110 active:scale-[0.98] transition-all"
-            >
-              Hubungi Tim Kami
-              <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
-            </Link>
+          <div
+            role="status"
+            aria-live="polite"
+            className="mt-unit-12 grid grid-cols-1 md:grid-cols-2 gap-unit-4"
+          >
+            <article className="rounded-2xl bg-paper border border-border-strong p-unit-8 flex flex-col gap-unit-3">
+              <span className="font-label-semibold text-ink text-body-sm">
+                Tidak menemukan jawaban?
+              </span>
+              <p className="text-secondary text-body-sm leading-relaxed">
+                Lihat{' '}
+                <Link className="text-burgundy hover:underline" href="/faq">
+                  Pertanyaan Umum
+                </Link>{' '}
+                atau hubungi tim kami. Sertakan konteks singkat (peran, mata pelajaran, langkah yang
+                dilakukan) agar kami bisa merespons lebih cepat.
+              </p>
+              <Link
+                href="/kontak"
+                className="inline-flex items-center gap-2 bg-burgundy text-on-primary px-unit-6 py-unit-3 rounded-lg font-label-semibold text-caption hover:brightness-110 active:scale-[0.98] transition-all self-start"
+              >
+                Hubungi Tim
+                <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+              </Link>
+            </article>
+
+            <article className="rounded-2xl bg-paper border border-border-strong p-unit-8 flex flex-col gap-unit-3">
+              <span className="font-label-semibold text-ink text-body-sm">Gangguan sementara?</span>
+              <p className="text-secondary text-body-sm leading-relaxed">
+                Halaman ini dapat dibuka kapan saja sebagai titik awal. Jika platform sedang tidak
+                dapat dijangkau, kontak tim akan tetap menerima pesan setelah layanan pulih.
+              </p>
+              <a
+                href="mailto:halo@lembar.id"
+                className="font-label-semibold text-burgundy hover:underline self-start"
+              >
+                halo@lembar.id
+              </a>
+            </article>
           </div>
         </div>
       </section>

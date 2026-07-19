@@ -520,23 +520,54 @@ tasks:
     repository: Frontend-Lembar
     sprint: F1
     title: Public legal pages and consent-linked footer routes
-    status: BLOCKED
+    status: READY_FOR_OWNER_REVIEW
     depends_on: [F1-03]
     decisions: []
     outcome: Privacy and terms routes exist with owner-safe content boundaries and visible consent links.
     owns:
-      routes: [/legal/privasi, /legal/syarat]
-      features: [public-legal-content, footer-consent-links]
-      components: [LegalPageLayout, LegalRichText, FooterLegalLinks]
+      routes: [/privasi, /syarat, /keamanan-data, /bantuan, /faq]
+      features: [public-legal-content, footer-consent-links, public-help-content]
+      components: [LegalPageLayout, LegalRichText, FooterLegalLinks, PublicHelpLayout]
     acceptance:
-      - Footer and consent surfaces link to both legal routes on public pages and relevant public forms.
-      - Pages render approved static or CMS-backed legal content without inventing missing policy text.
-      - Metadata, headings, and responsive states follow public route conventions.
+      - Footer and consent surfaces link to legal routes on public pages and relevant public forms.
+      - Pages render approved static legal content without inventing missing policy text.
+      - Public help center and FAQ surfaces are present with metadata, headings, and responsive conventions.
+      - No fabricated compliance, certification, or pricing claims; copy anchors to verifiable product behavior.
     verification:
       - npm run lint
       - npm run build
       - npm run dev
     evidence: [route-smoke, footer-link-audit, metadata, 390-768-1280]
+    checkpoint:
+      mode: handoff
+      branch: ao/frontend-lembar-15/legal-help
+      latest_pushed_commit: pending-push
+      completed_scope:
+        - 'Per-route metadata added to /privasi, /syarat, /keamanan-data, /bantuan, /faq (title, description, canonical, OG/Twitter).'
+        - 'Fabricated compliance/pricing/certification claims removed from legal and help copy; wording aligned to verifiable product behavior.'
+        - 'role=status aria-live=polite announcement blocks added to surface page intent and offline-contact paths.'
+        - 'Lint/typecheck/format/test/build all pass; production build emits the five routes as static pages.'
+        - 'Production server smoke: /privasi /syarat /keamanan-data /bantuan /faq return 200, render expected H1, zero console and page errors.'
+      remaining_scope:
+        - 'Owner review only. No fabricated claims introduced; legal copy awaits legal-team signoff before public launch (out of repo scope).'
+      changed_files:
+        [
+          app/(marketing)/privasi/page.tsx,
+          app/(marketing)/syarat/page.tsx,
+          app/(marketing)/keamanan-data/page.tsx,
+          app/(marketing)/bantuan/page.tsx,
+          app/(marketing)/faq/page.tsx,
+          docs/tasks/TASK-REGISTRY.yaml,
+        ]
+      verification_executed:
+        [
+          typecheck_PASS,
+          lint_PASS_WARNINGS,
+          format:check_PASS,
+          test_PASS_68_of_68,
+          build_PASS,
+          route_smoke_5_of_5_OK,
+        ]
 
   - id: F2-01
     repository: Frontend-Lembar
