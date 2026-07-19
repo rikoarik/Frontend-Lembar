@@ -5,53 +5,7 @@ import Link from 'next/link';
 export default function UntukSekolahPage() {
   return (
     <>
-      <nav className="w-full sticky top-0 z-50 glass-nav border-b border-border-subtle dark:border-outline-variant">
-        <div className="flex justify-between items-center h-unit-16 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
-          <Link aria-label="lembar beranda" className="h-8 w-8 flex-shrink-0" href="/">
-            <img
-              alt="lembar logo"
-              className="h-full w-full object-contain"
-              src="/lembar/logo-mark.png"
-            />
-          </Link>
-          <div className="hidden md:flex items-center gap-unit-8">
-            <a
-              className="text-secondary hover:text-burgundy transition-colors duration-200"
-              href="/"
-            >
-              Produk
-            </a>
-            <a
-              className="text-burgundy font-bold border-b-2 border-burgundy pb-unit-1 transition-colors duration-200"
-              href="/untuk-sekolah"
-            >
-              Untuk Sekolah
-            </a>
-            <a
-              className="text-secondary hover:text-burgundy transition-colors duration-200"
-              href="/harga"
-            >
-              Harga
-            </a>
-          </div>
-          <div className="flex items-center gap-unit-4">
-            <Link
-              className="text-ink font-label-semibold px-unit-4 py-unit-2 hover:opacity-80 transition-opacity"
-              href="/masuk"
-            >
-              Masuk
-            </Link>
-            <Link
-              className="bg-burgundy text-on-primary px-unit-6 py-unit-3 rounded font-label-semibold hover:opacity-90 transition-opacity"
-              href="/daftar"
-            >
-              Coba Gratis
-            </Link>
-          </div>
-        </div>
-      </nav>
-
-      <main>
+      <div>
         <section className="pt-unit-16 pb-unit-16 px-margin-mobile md:px-margin-desktop bg-paper overflow-hidden">
           <div className="max-w-container-max mx-auto grid grid-cols-1 lg:grid-cols-12 gap-unit-12 items-center">
             <div className="lg:col-span-6">
@@ -412,7 +366,7 @@ export default function UntukSekolahPage() {
             </Link>
           </div>
         </section>
-      </main>
+      </div>
     </>
   );
 }

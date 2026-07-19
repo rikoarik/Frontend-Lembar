@@ -34,54 +34,6 @@ export const metadata: Metadata = {
 export default function LandingPage() {
   return (
     <>
-      <header className="bg-background dark:bg-background font-body-default text-body-default w-full sticky top-0 z-50 border-b border-border-subtle dark:border-outline-variant transition-colors duration-200">
-        <div className="flex justify-between items-center h-unit-16 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
-          <Link href="/" className="flex items-center gap-4" aria-label="lembar — beranda">
-            <div className="flex items-center h-unit-8 w-unit-8">
-              <img
-                alt=""
-                className="h-full w-full object-contain"
-                src="https://raw.githubusercontent.com/rikoarik/Frontend-Lembar/ao/frontend-integration/public/lembar/logo-mark.png"
-              />
-            </div>
-          </Link>
-          <nav className="hidden md:flex items-center gap-8" aria-label="Navigasi utama">
-            <Link
-              className="font-body-default hover:text-burgundy transition-colors duration-200 text-burgundy font-bold active-nav-indicator border-b-2 border-burgundy pb-1"
-              href="/"
-            >
-              Produk
-            </Link>
-            <Link
-              className="text-secondary font-body-default hover:text-burgundy transition-colors duration-200"
-              href="/untuk-sekolah"
-            >
-              Untuk Sekolah
-            </Link>
-            <Link
-              className="font-body-default text-secondary hover:text-burgundy transition-colors duration-200"
-              href="/harga"
-            >
-              Harga
-            </Link>
-          </nav>
-          <div className="flex items-center gap-4">
-            <Link
-              className="text-secondary font-label-semibold px-unit-4 py-unit-2 hover:text-burgundy transition-colors"
-              href="/masuk"
-            >
-              Masuk
-            </Link>
-            <Link
-              className="bg-burgundy text-on-primary font-label-semibold h-[44px] px-unit-6 rounded-lg hover:brightness-110 transition-all flex items-center"
-              href="/daftar"
-            >
-              Coba Gratis
-            </Link>
-          </div>
-        </div>
-      </header>
-
       <main className="flex-grow">
         <section className="py-24 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto overflow-hidden">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-center">

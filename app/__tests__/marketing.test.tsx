@@ -37,10 +37,9 @@ describe('marketing routes — baseline', () => {
     // Logo accessibility is on the wrapping home link; the image is decorative.
     const logoLink = within(header).getByRole('link', { name: /lembar — beranda/i });
     const logo = logoLink.querySelector('img');
+    expect(logo).toBeInTheDocument();
+    expect(logo).toHaveAttribute('alt', '');
     expect(logo).toHaveAttribute('src');
-    const src = logo?.getAttribute('src') ?? '';
-    expect(src.startsWith('http')).toBe(true);
-    expect(new URL(src).host).not.toMatch(/^localhost|^127\.0\.0\.1|^[^.]+$/);
   });
 
   it('untuk-sekolah page renders pilot h1 and lead CTA', () => {

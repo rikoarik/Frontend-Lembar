@@ -1,4 +1,15 @@
+import type { Metadata } from 'next';
 import MarketingSubPageLayout from '@/app/components/marketing/MarketingSubPageLayout';
+
+export const metadata: Metadata = {
+  title: 'Kebijakan Privasi - lembar',
+  description:
+    'Kebijakan privasi lembar — data yang dikumpulkan, penggunaan, perlindungan, hak pengguna, dan perubahan kebijakan.',
+  openGraph: {
+    title: 'Kebijakan Privasi - lembar',
+    description: 'Pelajari bagaimana lembar melindungi data pribadi Anda sesuai UU PDP Indonesia.',
+  },
+};
 
 export default function PrivasiPage() {
   return (

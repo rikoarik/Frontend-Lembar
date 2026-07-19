@@ -1,4 +1,15 @@
+import type { Metadata } from 'next';
 import MarketingSubPageLayout from '@/app/components/marketing/MarketingSubPageLayout';
+
+export const metadata: Metadata = {
+  title: 'Syarat & Ketentuan - lembar',
+  description:
+    'Syarat dan ketentuan penggunaan platform lembar — akun, penggunaan yang diizinkan, kepemilikan konten, dan ketersediaan layanan.',
+  openGraph: {
+    title: 'Syarat & Ketentuan - lembar',
+    description: 'Ketentuan penggunaan platform lembar untuk guru dan institusi pendidikan.',
+  },
+};
 
 export default function SyaratPage() {
   return (
