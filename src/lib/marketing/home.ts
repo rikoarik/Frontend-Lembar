@@ -130,7 +130,8 @@ export const homeContent: HomeContent = {
       status: 'Terverifikasi',
       question: 'Apa faktor utama penyebab terjadinya erosi pada lereng gundul?',
       answer: 'A. Tidak adanya akar pohon penahan air',
-      reason: 'Tanpa adanya sistem perakaran pohon yang kuat untuk mengikat tanah dan menyerap air, lapisan atas tanah sangat mudah terbawa arus air.',
+      reason:
+        'Tanpa adanya sistem perakaran pohon yang kuat untuk mengikat tanah dan menyerap air, lapisan atas tanah sangat mudah terbawa arus air.',
       source: 'IPA Kelas 5, Hlm 72',
     },
   },
@@ -142,4 +143,3 @@ export const homeContent: HomeContent = {
     schoolLink: 'Untuk sekolah',
   },
 };
-

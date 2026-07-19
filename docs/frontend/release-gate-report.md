@@ -4,23 +4,23 @@ Generated: 2026-07-18T20:22:26.091Z
 
 **Summary:** 7 pass, 8 fail, 0 skip
 
-| Check | Status | Summary |
-| --- | --- | --- |
-| typecheck | PASS | exit 0 |
-| lint | PASS | exit 0 |
-| test | FAIL | exit 1 |
-| build | PASS | exit 0 |
-| format:check | FAIL | exit 1 |
-| axe-core load | PASS | axe-core 4.10.3 loaded from cdn |
-| console guard — home | FAIL | 2 console error(s) |
-| prefers-reduced-motion — home | FAIL | 1 animation(s) still running |
-| axe-core — home | PASS | 0 total violation(s) (0 critical/serious) |
-| console guard — school | FAIL | 1 console error(s) |
-| prefers-reduced-motion — school | FAIL | 1 animation(s) still running |
-| axe-core — school | PASS | 0 total violation(s) (0 critical/serious) |
-| console guard — pricing | FAIL | 1 console error(s) |
-| prefers-reduced-motion — pricing | FAIL | 2 animation(s) still running |
-| axe-core — pricing | PASS | 0 total violation(s) (0 critical/serious) |
+| Check                            | Status | Summary                                   |
+| -------------------------------- | ------ | ----------------------------------------- |
+| typecheck                        | PASS   | exit 0                                    |
+| lint                             | PASS   | exit 0                                    |
+| test                             | FAIL   | exit 1                                    |
+| build                            | PASS   | exit 0                                    |
+| format:check                     | FAIL   | exit 1                                    |
+| axe-core load                    | PASS   | axe-core 4.10.3 loaded from cdn           |
+| console guard — home             | FAIL   | 2 console error(s)                        |
+| prefers-reduced-motion — home    | FAIL   | 1 animation(s) still running              |
+| axe-core — home                  | PASS   | 0 total violation(s) (0 critical/serious) |
+| console guard — school           | FAIL   | 1 console error(s)                        |
+| prefers-reduced-motion — school  | FAIL   | 1 animation(s) still running              |
+| axe-core — school                | PASS   | 0 total violation(s) (0 critical/serious) |
+| console guard — pricing          | FAIL   | 1 console error(s)                        |
+| prefers-reduced-motion — pricing | FAIL   | 2 animation(s) still running              |
+| axe-core — pricing               | PASS   | 0 total violation(s) (0 critical/serious) |
 
 ## Detail
 

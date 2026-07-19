@@ -8,26 +8,22 @@ type ErrorCopy = {
 
 const COPY: Record<AuthErrorCode, ErrorCopy> = {
   INVALID_CREDENTIALS: {
-    safeMessage:
-      'Username, email, atau nomor telepon dan kata sandi tidak cocok.',
+    safeMessage: 'Username, email, atau nomor telepon dan kata sandi tidak cocok.',
     hint: 'Coba lagi atau pulihkan kata sandi.',
     retryable: false,
   },
   RATE_LIMITED: {
-    safeMessage:
-      'Terlalu banyak percobaan. Coba lagi dalam beberapa saat.',
+    safeMessage: 'Terlalu banyak percobaan. Coba lagi dalam beberapa saat.',
     hint: 'Permintaan akan dibuka kembali otomatis.',
     retryable: true,
   },
   ACCOUNT_LOCKED: {
-    safeMessage:
-      'Akun Anda dikunci sementara untuk keamanan. Coba lagi nanti.',
+    safeMessage: 'Akun Anda dikunci sementara untuk keamanan. Coba lagi nanti.',
     hint: 'Jika merasa ini keliru, hubungi bantuan.',
     retryable: true,
   },
   ACCOUNT_NOT_VERIFIED: {
-    safeMessage:
-      'Akun Anda belum aktif. Cek email untuk langkah verifikasi.',
+    safeMessage: 'Akun Anda belum aktif. Cek email untuk langkah verifikasi.',
     hint: 'Tidak menemukan pesan? Periksa folder spam atau kirim ulang.',
     retryable: false,
   },
@@ -97,8 +93,7 @@ export type AuthErrorEnvelope = {
 const KNOWN_CODES = new Set<string>(Object.keys(COPY));
 
 const genericRecoveryCopy: ErrorCopy = {
-  safeMessage:
-    'Jika akun ditemukan, kami akan mengirimkan langkah berikutnya.',
+  safeMessage: 'Jika akun ditemukan, kami akan mengirimkan langkah berikutnya.',
   retryable: false,
 };
 
@@ -112,10 +107,11 @@ export function mapEnvelopeToAuthError(
   fallback?: Partial<AuthError>,
 ): AuthError {
   const rawCode = envelope?.code ?? '';
-  const code: AuthErrorCode = (
-    KNOWN_CODES.has(rawCode) ? rawCode : 'UNKNOWN'
-  ) as AuthErrorCode;
-  const copy = fallback?.retryable === undefined ? COPY[code] : { ...COPY[code], retryable: fallback.retryable };
+  const code: AuthErrorCode = (KNOWN_CODES.has(rawCode) ? rawCode : 'UNKNOWN') as AuthErrorCode;
+  const copy =
+    fallback?.retryable === undefined
+      ? COPY[code]
+      : { ...COPY[code], retryable: fallback.retryable };
   return {
     code,
     httpStatus,

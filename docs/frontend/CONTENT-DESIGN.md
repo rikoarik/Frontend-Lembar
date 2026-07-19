@@ -23,19 +23,19 @@ about automation without technical jargon.
 
 ## Product vocabulary
 
-| Use | Meaning | Avoid |
-| --- | --- | --- |
-| Lembar | assessment document aggregate | quiz when print exam is meant |
-| Draft | editable AI-assisted version | hasil final |
-| Final | immutable reviewed version | selesai when state is ambiguous |
-| Soal | question/item | konten AI |
-| Sumber materi | catalog/PDF grounding | knowledge base in teacher UI |
-| Tinjau | teacher review | approve AI blindly |
-| Buat ulang | regenerate selected item | refresh magic |
-| Riwayat | saved assessments | archive unless archived state |
-| Bank Soal | private saved items | Bank Publik in MVP |
-| Template | saved generation configuration | preset AI |
-| Penggunaan | allowance/usage | token/credit unless approved term |
+| Use           | Meaning                        | Avoid                             |
+| ------------- | ------------------------------ | --------------------------------- |
+| Lembar        | assessment document aggregate  | quiz when print exam is meant     |
+| Draft         | editable AI-assisted version   | hasil final                       |
+| Final         | immutable reviewed version     | selesai when state is ambiguous   |
+| Soal          | question/item                  | konten AI                         |
+| Sumber materi | catalog/PDF grounding          | knowledge base in teacher UI      |
+| Tinjau        | teacher review                 | approve AI blindly                |
+| Buat ulang    | regenerate selected item       | refresh magic                     |
+| Riwayat       | saved assessments              | archive unless archived state     |
+| Bank Soal     | private saved items            | Bank Publik in MVP                |
+| Template      | saved generation configuration | preset AI                         |
+| Penggunaan    | allowance/usage                | token/credit unless approved term |
 
 ## AI language
 
@@ -78,18 +78,18 @@ Descriptions use one sentence; do not restate label.
 
 ## Status labels
 
-| Internal | UI label |
-| --- | --- |
-| draft | Draft |
-| queued | Dalam antrean |
-| processing | Diproses |
-| review | Perlu ditinjau |
-| final | Final |
+| Internal         | UI label         |
+| ---------------- | ---------------- |
+| draft            | Draft            |
+| queued           | Dalam antrean    |
+| processing       | Diproses         |
+| review           | Perlu ditinjau   |
+| final            | Final            |
 | partially_failed | Sebagian selesai |
-| failed | Gagal diproses |
-| archived | Diarsipkan |
-| expired | Kedaluwarsa |
-| revoked | Dicabut |
+| failed           | Gagal diproses   |
+| archived         | Diarsipkan       |
+| expired          | Kedaluwarsa      |
+| revoked          | Dicabut          |
 
 ## Error formula
 
@@ -97,27 +97,27 @@ Descriptions use one sentence; do not restate label.
 
 Examples:
 
-| Context | Copy direction |
-| --- | --- |
-| Invalid PDF | `PDF ini belum dapat dipakai. Pilih file PDF yang tidak terkunci dan berada dalam batas ukuran.` |
-| Source extraction | `Teks pada PDF belum cukup terbaca. Draft belum dibuat dan penggunaan Anda tidak berkurang. Coba PDF lain.` |
-| Generation retryable | `Draft belum berhasil dibuat. Konfigurasi Anda tersimpan dan dapat dicoba lagi.` |
-| Save conflict | `Versi ini berubah di tempat lain. Salin perubahan Anda atau muat versi terbaru sebelum melanjutkan.` |
-| Permission | `Anda tidak memiliki akses ke lembar ini di workspace aktif.` |
-| Share expired | `Tautan ini sudah tidak tersedia. Minta pemilik lembar membuat tautan baru.` |
-| Rate limit | `Terlalu banyak percobaan. Coba lagi setelah {time}.` |
+| Context              | Copy direction                                                                                              |
+| -------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Invalid PDF          | `PDF ini belum dapat dipakai. Pilih file PDF yang tidak terkunci dan berada dalam batas ukuran.`            |
+| Source extraction    | `Teks pada PDF belum cukup terbaca. Draft belum dibuat dan penggunaan Anda tidak berkurang. Coba PDF lain.` |
+| Generation retryable | `Draft belum berhasil dibuat. Konfigurasi Anda tersimpan dan dapat dicoba lagi.`                            |
+| Save conflict        | `Versi ini berubah di tempat lain. Salin perubahan Anda atau muat versi terbaru sebelum melanjutkan.`       |
+| Permission           | `Anda tidak memiliki akses ke lembar ini di workspace aktif.`                                               |
+| Share expired        | `Tautan ini sudah tidak tersedia. Minta pemilik lembar membuat tautan baru.`                                |
+| Rate limit           | `Terlalu banyak percobaan. Coba lagi setelah {time}.`                                                       |
 
 Never expose stack trace, provider response, storage key, account existence, or secret.
 
 ## Empty states
 
-| Screen | Headline | Action |
-| --- | --- | --- |
-| Dashboard new | `Belum ada lembar` | `Buat lembar pertama` |
-| History filtered | `Tidak ada hasil untuk filter ini` | `Hapus filter` |
-| Bank | `Belum ada soal tersimpan` | explain save from review |
-| Template | `Belum ada template` | create from generation config |
-| School teachers | `Belum ada guru di workspace ini` | `Undang guru` |
+| Screen           | Headline                           | Action                        |
+| ---------------- | ---------------------------------- | ----------------------------- |
+| Dashboard new    | `Belum ada lembar`                 | `Buat lembar pertama`         |
+| History filtered | `Tidak ada hasil untuk filter ini` | `Hapus filter`                |
+| Bank             | `Belum ada soal tersimpan`         | explain save from review      |
+| Template         | `Belum ada template`               | create from generation config |
+| School teachers  | `Belum ada guru di workspace ini`  | `Undang guru`                 |
 
 Empty state does not need illustration unless it improves comprehension.
 

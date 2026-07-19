@@ -158,4 +158,3 @@ Compare page count, clipping, overflow, missing glyphs, section boundaries, and 
 - Identical input and renderer version produce deterministic hash/page count or documented
   nondeterminism.
 - Failure does not alter final assessment and can be safely retried.
-

@@ -3,9 +3,7 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { err, ok, type Result } from '@/src/types/result';
 import type { AuthError } from '@/src/services/auth/authErrors';
-import {
-  mapEnvelopeToAuthError,
-} from '@/src/services/auth/errorMapping';
+import { mapEnvelopeToAuthError } from '@/src/services/auth/errorMapping';
 
 type UseAuthSubmitOptions<TInput> = {
   submit: (input: TInput, idempotencyKey: string) => Promise<Result<unknown, AuthError>>;

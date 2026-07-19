@@ -88,11 +88,7 @@ export function validateRegister(input: {
 }): ValidationResult {
   const failures: ValidationFailure[] = [];
   if (!USERNAME_PATTERN.test(input.username.trim())) {
-    push(
-      failures,
-      'username',
-      'Gunakan 3–24 karakter, huruf, angka, titik, atau underscore.',
-    );
+    push(failures, 'username', 'Gunakan 3–24 karakter, huruf, angka, titik, atau underscore.');
   }
   if (!EMAIL_PATTERN.test(input.email.trim())) {
     push(failures, 'email', 'Format email tidak valid.');
@@ -101,9 +97,7 @@ export function validateRegister(input: {
     push(
       failures,
       'phone',
-      input.phone.trim().length === 0
-        ? 'Masukkan nomor telepon.'
-        : 'Nomor telepon tidak valid.',
+      input.phone.trim().length === 0 ? 'Masukkan nomor telepon.' : 'Nomor telepon tidak valid.',
     );
   }
   const passwordError = passwordFailure(input.password);
@@ -113,9 +107,7 @@ export function validateRegister(input: {
   return failures.length > 0 ? failed(failures) : empty();
 }
 
-export function validateRecoveryRequest(input: {
-  identifier: string;
-}): ValidationResult {
+export function validateRecoveryRequest(input: { identifier: string }): ValidationResult {
   const failures: ValidationFailure[] = [];
   const identifier = input.identifier.trim();
   if (identifier.length === 0) {

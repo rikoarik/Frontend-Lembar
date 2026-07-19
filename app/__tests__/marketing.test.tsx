@@ -72,9 +72,15 @@ describe('marketing routes — baseline', () => {
     // Plan names are h3 inside each bento-card; use heading role.
     const planCards = document.querySelectorAll('.bento-card');
     expect(planCards.length).toBe(3);
-    expect(within(planCards[0] as HTMLElement).getByRole('heading', { name: 'Coba Gratis' })).toBeInTheDocument();
-    expect(within(planCards[1] as HTMLElement).getByRole('heading', { name: 'Guru Pro' })).toBeInTheDocument();
-    expect(within(planCards[2] as HTMLElement).getByRole('heading', { name: 'Sekolah & Institusi' })).toBeInTheDocument();
+    expect(
+      within(planCards[0] as HTMLElement).getByRole('heading', { name: 'Coba Gratis' }),
+    ).toBeInTheDocument();
+    expect(
+      within(planCards[1] as HTMLElement).getByRole('heading', { name: 'Guru Pro' }),
+    ).toBeInTheDocument();
+    expect(
+      within(planCards[2] as HTMLElement).getByRole('heading', { name: 'Sekolah & Institusi' }),
+    ).toBeInTheDocument();
 
     expect(screen.getByText('Catatan Transparansi')).toBeInTheDocument();
     expect(screen.getByText('Pertanyaan Seputar Tagihan')).toBeInTheDocument();

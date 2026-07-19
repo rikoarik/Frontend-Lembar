@@ -34,9 +34,15 @@ describe('loadPublicRuntimeConfig', () => {
   });
 
   it('parses NEXT_PUBLIC_ANALYTICS_ENABLED correctly', () => {
-    expect(loadPublicRuntimeConfig({ NEXT_PUBLIC_ANALYTICS_ENABLED: 'true' }).analyticsEnabled).toBe(true);
-    expect(loadPublicRuntimeConfig({ NEXT_PUBLIC_ANALYTICS_ENABLED: 'false' }).analyticsEnabled).toBe(false);
-    expect(loadPublicRuntimeConfig({ NEXT_PUBLIC_ANALYTICS_ENABLED: 'maybe' }).analyticsEnabled).toBe(false);
+    expect(
+      loadPublicRuntimeConfig({ NEXT_PUBLIC_ANALYTICS_ENABLED: 'true' }).analyticsEnabled,
+    ).toBe(true);
+    expect(
+      loadPublicRuntimeConfig({ NEXT_PUBLIC_ANALYTICS_ENABLED: 'false' }).analyticsEnabled,
+    ).toBe(false);
+    expect(
+      loadPublicRuntimeConfig({ NEXT_PUBLIC_ANALYTICS_ENABLED: 'maybe' }).analyticsEnabled,
+    ).toBe(false);
   });
 });
 

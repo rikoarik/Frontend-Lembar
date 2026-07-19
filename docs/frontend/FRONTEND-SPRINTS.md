@@ -4,23 +4,23 @@ Sprints adalah queue, bukan izin auto-start. Hanya satu task frontend `in_progre
 
 ## F0 — Repository foundation
 
-| Task  | Outcome                                                            | Depends on             |
-| ----- | ------------------------------------------------------------------ | ---------------------- |
+| Task  | Outcome                                                           | Depends on             |
+| ----- | ----------------------------------------------------------------- | ---------------------- |
 | F0-01 | Bootstrap accepted frontend/TS stack, pnpm, CI, health/home shell | D-014/D-015 accepted   |
-| F0-02 | Env boundary, config validation, security headers baseline         | F0-01 accepted         |
-| F0-03 | Test stack: Vitest/RTL/MSW/Playwright/a11y smoke                   | F0-01 accepted         |
-| F0-04 | Implement design tokens and accessible component baseline          | DESIGN-SYSTEM accepted |
-| F0-05 | OpenAPI codegen PoC against baseline artifact                      | BE contract available  |
+| F0-02 | Env boundary, config validation, security headers baseline        | F0-01 accepted         |
+| F0-03 | Test stack: Vitest/RTL/MSW/Playwright/a11y smoke                  | F0-01 accepted         |
+| F0-04 | Implement design tokens and accessible component baseline         | DESIGN-SYSTEM accepted |
+| F0-05 | OpenAPI codegen PoC against baseline artifact                     | BE contract available  |
 
 ## F1 — Landing and acquisition
 
-| Task  | Outcome                                                  |
-| ----- | -------------------------------------------------------- |
-| F1-01 | Header, hero, real product specimen, responsive baseline |
-| F1-02 | How it works, trust, outputs, teacher/school sections    |
-| F1-03 | Pricing placeholder, FAQ, policy/footer                  |
-| F1-04 | School lead form integration and states                  |
-| F1-05 | Performance, SEO, a11y, analytics, visual QA             |
+| Task  | Outcome                                                                |
+| ----- | ---------------------------------------------------------------------- |
+| F1-01 | Header, hero, real product specimen, responsive baseline               |
+| F1-02 | How it works, trust, outputs, teacher/school sections                  |
+| F1-03 | Pricing placeholder, FAQ, policy/footer                                |
+| F1-04 | School lead form integration and states                                |
+| F1-05 | Performance, SEO, a11y, analytics, visual QA                           |
 | F1-06 | Published CMS renderer, ETag cache, typed fallback, visible-content QA |
 
 ## F2 — Identity, workspace, dashboard

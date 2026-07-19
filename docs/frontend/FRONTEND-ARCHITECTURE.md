@@ -14,19 +14,19 @@
 This table is a recommendation. Framework/language rows become binding only after D-014/D-015
 are `Accepted`; individual libraries still require the task that introduces them.
 
-| Area              | Direction                                                          |
-| ----------------- | ------------------------------------------------------------------ |
-| Runtime/framework | Proposed stable Node LTS + stable Next.js App Router; D-015        |
-| Language          | Proposed TypeScript strict; D-014                                  |
-| Package manager   | pnpm                                                               |
-| Styling           | Tailwind CSS + CSS variables/design tokens                         |
-| Primitives        | Accessible headless primitives; wrapper milik `lembar`             |
-| Forms             | React Hook Form + Zod untuk UX validation                          |
-| Server data       | Generated OpenAPI client + TanStack Query untuk interactive cache  |
-| Local UI state    | React state; state machine/reducer hanya untuk flow kompleks       |
-| Test              | Vitest, Testing Library, MSW, Playwright                           |
-| Visual/a11y       | Playwright screenshots + axe checks pada flow kritis               |
-| Analytics         | Provider adapter; event contract tanpa konten sensitif             |
+| Area              | Direction                                                         |
+| ----------------- | ----------------------------------------------------------------- |
+| Runtime/framework | Proposed stable Node LTS + stable Next.js App Router; D-015       |
+| Language          | Proposed TypeScript strict; D-014                                 |
+| Package manager   | pnpm                                                              |
+| Styling           | Tailwind CSS + CSS variables/design tokens                        |
+| Primitives        | Accessible headless primitives; wrapper milik `lembar`            |
+| Forms             | React Hook Form + Zod untuk UX validation                         |
+| Server data       | Generated OpenAPI client + TanStack Query untuk interactive cache |
+| Local UI state    | React state; state machine/reducer hanya untuk flow kompleks      |
+| Test              | Vitest, Testing Library, MSW, Playwright                          |
+| Visual/a11y       | Playwright screenshots + axe checks pada flow kritis              |
+| Analytics         | Provider adapter; event contract tanpa konten sensitif            |
 
 Dependency major version dikunci pada bootstrap melalui lockfile. Agent tidak memilih canary
 atau mengganti framework tanpa task/ADR.

@@ -92,4 +92,3 @@ Security containment may disable a capability immediately. Follow with:
 - restore/removal plan.
 
 Do not silently return a different response shape during emergency.
-
