@@ -615,7 +615,10 @@ packages:
       }
 
   '@fontsource/material-symbols@5.2.29':
-    resolution: {integrity: sha512-T2IvjwEtc+1VT60QVUgxJjjdlgESb3IayPN1Apsl+dDFzU5lDoZ3VcGng1dOsBXKg7rbFr9EhF8ltlAVpTD9nQ==}
+    resolution:
+      {
+        integrity: sha512-T2IvjwEtc+1VT60QVUgxJjjdlgESb3IayPN1Apsl+dDFzU5lDoZ3VcGng1dOsBXKg7rbFr9EhF8ltlAVpTD9nQ==,
+      }
 
   '@humanfs/core@0.19.2':
     resolution:

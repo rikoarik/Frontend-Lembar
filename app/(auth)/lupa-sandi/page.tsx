@@ -72,9 +72,7 @@ export default function ForgotPasswordPage() {
         ) : (
           <form onSubmit={onSubmit} className="flex flex-col gap-5" noValidate>
             <FormStatus tone="alert" message={submit.error?.safeMessage} />
-            {localError ? (
-              <Notice tone="warning">{localError}</Notice>
-            ) : null}
+            {localError ? <Notice tone="warning">{localError}</Notice> : null}
             <IdentityInput
               value={identifier}
               onChange={setIdentifier}
@@ -82,11 +80,7 @@ export default function ForgotPasswordPage() {
               autoFocus
               required
             />
-            <SubmitButton
-              label="Kirim tautan pemulihan"
-              busyLabel="Mengirim…"
-              busy={submit.busy}
-            />
+            <SubmitButton label="Kirim tautan pemulihan" busyLabel="Mengirim…" busy={submit.busy} />
           </form>
         )}
       </AuthFormShell>

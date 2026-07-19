@@ -1,11 +1,6 @@
 import { NextResponse } from 'next/server';
 
-const ALLOWED_ROLES = new Set([
-  'kepala_sekolah',
-  'guru',
-  'kurikulum',
-  'lainnya',
-]);
+const ALLOWED_ROLES = new Set(['kepala_sekolah', 'guru', 'kurikulum', 'lainnya']);
 
 type LeadPayload = {
   name?: string;
@@ -37,9 +32,7 @@ function fail(
     {
       status,
       headers:
-        retryAfterSeconds === undefined
-          ? undefined
-          : { 'Retry-After': String(retryAfterSeconds) },
+        retryAfterSeconds === undefined ? undefined : { 'Retry-After': String(retryAfterSeconds) },
     },
   );
 }
@@ -62,15 +55,9 @@ export async function POST(request: Request) {
     const fieldErrors: Record<string, string[]> = {};
     if (!name) fieldErrors.name = ['Nama wajib diisi.'];
     if (!school) fieldErrors.school = ['Sekolah wajib diisi.'];
-    if (!email && !phone)
-      fieldErrors.contact = ['Masukkan email atau nomor telepon kerja.'];
+    if (!email && !phone) fieldErrors.contact = ['Masukkan email atau nomor telepon kerja.'];
     if (!consent) fieldErrors.consent = ['Persetujuan wajib dicentang.'];
-    return fail(
-      'VALIDATION_FAILED',
-      'Periksa kembali isian formulir.',
-      400,
-      fieldErrors,
-    );
+    return fail('VALIDATION_FAILED', 'Periksa kembali isian formulir.', 400, fieldErrors);
   }
 
   if (!ALLOWED_ROLES.has(role)) {
@@ -80,12 +67,9 @@ export async function POST(request: Request) {
   }
 
   if (!Number.isFinite(teacherCount) || teacherCount <= 0) {
-    return fail(
-      'VALIDATION_FAILED',
-      'Perkiraan jumlah guru tidak valid.',
-      400,
-      { teacherCount: ['Perkiraan jumlah guru tidak valid.'] },
-    );
+    return fail('VALIDATION_FAILED', 'Perkiraan jumlah guru tidak valid.', 400, {
+      teacherCount: ['Perkiraan jumlah guru tidak valid.'],
+    });
   }
 
   if (email === 'rate-limited@sekolah.id' || phone === '0000000000') {

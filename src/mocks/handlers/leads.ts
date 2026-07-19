@@ -30,9 +30,7 @@ function fail(
       message,
       fieldErrors,
       retryable:
-        code === 'RATE_LIMITED' ||
-        code === 'MAINTENANCE_MODE' ||
-        code === 'SERVICE_UNAVAILABLE',
+        code === 'RATE_LIMITED' || code === 'MAINTENANCE_MODE' || code === 'SERVICE_UNAVAILABLE',
     },
   };
   const headers: Record<string, string> = {};
@@ -53,12 +51,7 @@ type LeadPayload = {
   consent?: boolean;
 };
 
-const ALLOWED_ROLES = new Set([
-  'kepala_sekolah',
-  'guru',
-  'kurikulum',
-  'lainnya',
-]);
+const ALLOWED_ROLES = new Set(['kepala_sekolah', 'guru', 'kurikulum', 'lainnya']);
 
 // MSW handler for the school lead submission. Documents the local payload shape
 // and the rate-limit / validation responses expected by the FE.
@@ -94,43 +87,25 @@ export const leadHandlers = [
       const fieldErrors: Record<string, string[]> = {};
       if (!name) fieldErrors.name = ['Nama wajib diisi.'];
       if (!school) fieldErrors.school = ['Sekolah wajib diisi.'];
-      if (!email && !phone)
-        fieldErrors.contact = ['Masukkan email atau nomor telepon kerja.'];
+      if (!email && !phone) fieldErrors.contact = ['Masukkan email atau nomor telepon kerja.'];
       if (!consent) fieldErrors.consent = ['Persetujuan wajib dicentang.'];
-      return fail(
-        'VALIDATION_FAILED',
-        'Periksa kembali isian formulir.',
-        400,
-        fieldErrors,
-      );
+      return fail('VALIDATION_FAILED', 'Periksa kembali isian formulir.', 400, fieldErrors);
     }
 
     if (!ALLOWED_ROLES.has(role)) {
-      return fail(
-        'VALIDATION_FAILED',
-        'Peran tidak dikenali.',
-        400,
-        { role: ['Pilih peran yang tersedia.'] },
-      );
+      return fail('VALIDATION_FAILED', 'Peran tidak dikenali.', 400, {
+        role: ['Pilih peran yang tersedia.'],
+      });
     }
 
     if (!Number.isFinite(teacherCount) || teacherCount <= 0) {
-      return fail(
-        'VALIDATION_FAILED',
-        'Perkiraan jumlah guru tidak valid.',
-        400,
-        { teacherCount: ['Perkiraan jumlah guru tidak valid.'] },
-      );
+      return fail('VALIDATION_FAILED', 'Perkiraan jumlah guru tidak valid.', 400, {
+        teacherCount: ['Perkiraan jumlah guru tidak valid.'],
+      });
     }
 
     if (email === 'rate-limited@sekolah.id' || phone === '0000000000') {
-      return fail(
-        'RATE_LIMITED',
-        'Terlalu banyak permintaan.',
-        429,
-        undefined,
-        60,
-      );
+      return fail('RATE_LIMITED', 'Terlalu banyak permintaan.', 429, undefined, 60);
     }
 
     return ok({

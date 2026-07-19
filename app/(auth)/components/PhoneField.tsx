@@ -50,7 +50,12 @@ function formatForCountry(value: string, country: CountryDial): string {
       [a, b, c].filter(Boolean).join(' '),
     );
   }
-  if (country.code === 'SG' || country.code === 'JP' || country.code === 'KR' || country.code === 'TL') {
+  if (
+    country.code === 'SG' ||
+    country.code === 'JP' ||
+    country.code === 'KR' ||
+    country.code === 'TL'
+  ) {
     return digits.replace(/(\d{3,4})(\d{4})?(\d+)?/, (_match, a, b, c) =>
       [a, b, c].filter(Boolean).join(' '),
     );
@@ -61,9 +66,7 @@ function formatForCountry(value: string, country: CountryDial): string {
     );
   }
   if (country.code === 'GB') {
-    return digits.replace(/(\d{4})(\d+)?/, (_match, a, b) =>
-      [a, b].filter(Boolean).join(' '),
-    );
+    return digits.replace(/(\d{4})(\d+)?/, (_match, a, b) => [a, b].filter(Boolean).join(' '));
   }
   return digits;
 }
@@ -92,9 +95,7 @@ export default function PhoneField({
   const inputId = `${reactId}-input`;
   const selectId = `${reactId}-country`;
   const errorId = error ? `${reactId}-error` : undefined;
-  const [country, setCountry] = useState(() =>
-    findCountry(defaultCountry ?? DEFAULT_COUNTRY.code),
-  );
+  const [country, setCountry] = useState(() => findCountry(defaultCountry ?? DEFAULT_COUNTRY.code));
 
   const visibleValue = formatForCountry(localDigits(value, country), country);
 

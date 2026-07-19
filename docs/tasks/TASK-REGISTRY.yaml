@@ -148,9 +148,9 @@ tasks:
       completed_scope:
         - 'Next.js App Router + strict TypeScript baseline exists at accepted visual baseline 299fd95.'
         - 'Integration verification after wave: typecheck PASS, lint PASS with 10 warnings, build PASS, secret-scan PASS.'
+        - 'Repo-wide Prettier blocker cleared on ao/frontend-lembar-14/format-blocker with formatting-only changes; pnpm run format:check PASS on 2026-07-19.'
       remaining_scope:
         - 'Repo-wide test gate still fails in app/__tests__/marketing.test.tsx expecting .nav__wordmark on three routes.'
-        - 'Repo-wide format:check still fails across existing files.'
         - 'Desktop/mobile smoke gates need rerun after F0-03 smoke selectors are repaired.'
       changed_files:
         [
@@ -171,12 +171,12 @@ tasks:
           pnpm_run_test_FAIL_BASELINE_MARKETING,
           pnpm_run_build_PASS,
           pnpm_run_format_check_FAIL_BASELINE,
+          pnpm_run_format_PASS_2026_07_19,
           secret_scan_PASS,
           release_gate_FAIL_RECORDED,
         ]
-      verification_still_required:
-        [repo_test_green, repo_format_green, desktop_1280_smoke, mobile_390_smoke]
-      exact_next_action: 'Resume by fixing baseline marketing tests and repo formatting, then rerun all F0-01 gates.'
+      verification_still_required: [repo_test_green, desktop_1280_smoke, mobile_390_smoke]
+      exact_next_action: 'Resume by fixing baseline marketing tests, then rerun remaining F0-01 gates.'
 
   - id: F0-02
     repository: Frontend-Lembar
@@ -243,7 +243,7 @@ tasks:
         - 'Frontend quality doc updated with local equivalents.'
       remaining_scope:
         - 'Repair Playwright smoke selectors/expectations to match current accepted route markup without redesign.'
-        - 'Make repo-wide test and format gates green after baseline fixes.'
+        - 'Make repo-wide test gate green after baseline fixes.'
       changed_files:
         [
           .github/workflows/ci.yml,
@@ -262,14 +262,14 @@ tasks:
           changed_file_prettier_PASS,
           repo_test_FAIL_BASELINE_MARKETING,
           repo_format_FAIL_BASELINE,
+          repo_format_PASS_2026_07_19,
           playwright_smoke_FAIL_SELECTOR_MISMATCH,
         ]
       verification_still_required:
         [all_local_gates_green, CI_workflow_review, playwright_smoke_green_desktop_mobile]
       blockers:
         - 'app/__tests__/marketing.test.tsx expects .nav__wordmark that the accepted baseline routes do not render.'
-        - 'Repo-wide format:check fails across pre-existing files.'
-      exact_next_action: 'Resume F0-03 by aligning smoke spec/tests to accepted baseline and addressing repo-wide test/format blockers.'
+      exact_next_action: 'Resume F0-03 by aligning smoke spec/tests to accepted baseline and addressing the remaining repo-wide test blocker.'
 
   - id: F0-04
     repository: Frontend-Lembar
@@ -453,7 +453,6 @@ tasks:
         - 'Release gate report generated and committed on integration.'
       remaining_scope:
         - 'Fix baseline marketing unit tests.'
-        - 'Fix repo-wide formatting.'
         - 'Fix reduced-motion failures: / has 1 running animation, /untuk-sekolah has 1, /harga has 2.'
         - 'Fix console guard failures recorded in latest release-gate report.'
         - 'Complete analytics/event audit and Lighthouse-equivalent evidence.'
@@ -475,13 +474,14 @@ tasks:
           test_FAIL_BASELINE_MARKETING,
           build_PASS,
           format_FAIL_BASELINE,
+          format_PASS_2026_07_19,
           axe_PASS_ALL_THREE_ROUTES,
           reduced_motion_FAIL,
           console_guard_FAIL,
         ]
       verification_still_required:
         [release_gate_all_green, lighthouse_or_equivalent, event_audit, screenshots_final]
-      exact_next_action: 'Resume by addressing release-gate-report.md failures, then rerun node scripts/release-gate.mjs and commit updated evidence.'
+      exact_next_action: 'Resume by addressing release-gate-report.md failures except formatting, then rerun node scripts/release-gate.mjs and commit updated evidence.'
 
   - id: F1-06
     repository: Frontend-Lembar

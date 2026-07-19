@@ -99,11 +99,7 @@ export default function LoginPage() {
               Lupa kata sandi?
             </Link>
           </div>
-          <SubmitButton
-            label="Masuk"
-            busyLabel="Memverifikasi…"
-            busy={submit.busy}
-          />
+          <SubmitButton label="Masuk" busyLabel="Memverifikasi…" busy={submit.busy} />
         </form>
       </AuthFormShell>
     </AuthShell>

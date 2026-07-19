@@ -57,7 +57,12 @@ export function AppShell({ children }: AppShellProps) {
         </div>
 
         {mobileNavOpen ? (
-          <div className="fixed inset-0 z-[var(--z-modal)] md:hidden" role="dialog" aria-modal="true" aria-label="Navigasi aplikasi">
+          <div
+            className="fixed inset-0 z-[var(--z-modal)] md:hidden"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Navigasi aplikasi"
+          >
             <button
               type="button"
               className="absolute inset-0 bg-brand-ink/20"

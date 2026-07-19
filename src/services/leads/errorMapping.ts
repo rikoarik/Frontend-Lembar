@@ -53,9 +53,7 @@ export function mapEnvelopeToLeadError(
   fallback?: Partial<LeadError>,
 ): LeadError {
   const rawCode = envelope?.code ?? '';
-  const code: LeadErrorCode = (
-    KNOWN_CODES.has(rawCode) ? rawCode : 'UNKNOWN'
-  ) as LeadErrorCode;
+  const code: LeadErrorCode = (KNOWN_CODES.has(rawCode) ? rawCode : 'UNKNOWN') as LeadErrorCode;
   const copy =
     fallback?.retryable === undefined
       ? COPY[code]

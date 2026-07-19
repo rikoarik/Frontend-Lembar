@@ -25,10 +25,11 @@ export default function AnnouncementBanner() {
       <div className="flex items-center gap-2 pr-8 text-sm font-body-sm">
         <span className="material-symbols-outlined text-[16px]">campaign</span>
         <span>
-          <strong>Pengumuman:</strong> Selamat datang di lembar! Uji coba gratis kini tersedia untuk institusi pendidikan.
+          <strong>Pengumuman:</strong> Selamat datang di lembar! Uji coba gratis kini tersedia untuk
+          institusi pendidikan.
         </span>
       </div>
-      <button 
+      <button
         onClick={handleClose}
         className="absolute right-4 top-1/2 -translate-y-1/2 p-1 hover:bg-white/20 rounded-full transition-colors flex items-center justify-center"
         aria-label="Tutup pengumuman"

@@ -19,7 +19,10 @@ export default function AuthFormShell({
   foot,
 }: AuthFormShellProps) {
   return (
-    <main id="main" className="mx-auto flex min-h-screen w-full max-w-reading-max flex-col gap-6 px-margin-mobile py-unit-8 md:px-10 md:py-unit-12">
+    <main
+      id="main"
+      className="mx-auto flex min-h-screen w-full max-w-reading-max flex-col gap-6 px-margin-mobile py-unit-8 md:px-10 md:py-unit-12"
+    >
       <Link
         href="/"
         className="font-caption text-caption font-medium text-secondary hover:text-burgundy"

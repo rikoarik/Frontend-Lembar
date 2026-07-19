@@ -4,23 +4,23 @@ Generated: 2026-07-19T03:58:41.632Z
 
 **Summary:** 14 pass, 1 fail, 0 skip
 
-| Check | Status | Summary |
-| --- | --- | --- |
-| typecheck | PASS | exit 0 |
-| lint | PASS | exit 0 |
-| test | PASS | exit 0 |
-| build | PASS | exit 0 |
-| format:check | FAIL | exit 1 |
-| axe-core load | PASS | axe-core 4.10.3 loaded from cdn |
-| console guard — home | PASS | no console errors |
-| prefers-reduced-motion — home | PASS | all animations halted |
-| axe-core — home | PASS | 0 total violation(s) (0 critical/serious) |
-| console guard — school | PASS | no console errors |
-| prefers-reduced-motion — school | PASS | all animations halted |
-| axe-core — school | PASS | 0 total violation(s) (0 critical/serious) |
-| console guard — pricing | PASS | no console errors |
-| prefers-reduced-motion — pricing | PASS | all animations halted |
-| axe-core — pricing | PASS | 0 total violation(s) (0 critical/serious) |
+| Check                            | Status | Summary                                   |
+| -------------------------------- | ------ | ----------------------------------------- |
+| typecheck                        | PASS   | exit 0                                    |
+| lint                             | PASS   | exit 0                                    |
+| test                             | PASS   | exit 0                                    |
+| build                            | PASS   | exit 0                                    |
+| format:check                     | FAIL   | exit 1                                    |
+| axe-core load                    | PASS   | axe-core 4.10.3 loaded from cdn           |
+| console guard — home             | PASS   | no console errors                         |
+| prefers-reduced-motion — home    | PASS   | all animations halted                     |
+| axe-core — home                  | PASS   | 0 total violation(s) (0 critical/serious) |
+| console guard — school           | PASS   | no console errors                         |
+| prefers-reduced-motion — school  | PASS   | all animations halted                     |
+| axe-core — school                | PASS   | 0 total violation(s) (0 critical/serious) |
+| console guard — pricing          | PASS   | no console errors                         |
+| prefers-reduced-motion — pricing | PASS   | all animations halted                     |
+| axe-core — pricing               | PASS   | 0 total violation(s) (0 critical/serious) |
 
 ## Detail
 
