@@ -159,6 +159,28 @@ tasks:
     outcome: All marketing routes render published typed content with ETag cache and visible seed fallback.
     evidence: [contract-fixtures, timeout-fallback, no-js, reduced-motion, desktop-and-390-visible-pixels]
 
+  - id: F1-07
+    repository: Frontend-Lembar
+    sprint: F1
+    title: Public legal pages and consent-linked footer routes
+    status: BLOCKED
+    depends_on: [F1-03]
+    decisions: []
+    outcome: Privacy and terms routes exist with owner-safe content boundaries and visible consent links.
+    owns:
+      routes: [/legal/privasi, /legal/syarat]
+      features: [public-legal-content, footer-consent-links]
+      components: [LegalPageLayout, LegalRichText, FooterLegalLinks]
+    acceptance:
+      - Footer and consent surfaces link to both legal routes on public pages and relevant public forms.
+      - Pages render approved static or CMS-backed legal content without inventing missing policy text.
+      - Metadata, headings, and responsive states follow public route conventions.
+    verification:
+      - npm run lint
+      - npm run build
+      - npm run dev
+    evidence: [route-smoke, footer-link-audit, metadata, 390-768-1280]
+
   - id: F2-01
     repository: Frontend-Lembar
     sprint: F2
@@ -349,6 +371,28 @@ tasks:
     outcome: Golden A4, security, retry, retention, and end-to-end output evidence.
     evidence: [golden-fixtures, artifact-auth, share-security]
 
+  - id: F5-06
+    repository: Frontend-Lembar
+    sprint: F5
+    title: Help center and quality report surface
+    status: BLOCKED
+    depends_on: [F4-03, B6-04]
+    decisions: []
+    outcome: Teacher can report problematic questions and access support context without leaking assessment content.
+    owns:
+      routes: [/app/bantuan]
+      features: [quality-reporting, support-context]
+      components: [HelpCenterScreen, QualityReportForm, IssueContextCard]
+    acceptance:
+      - Route explains support paths and captures issue type, affected assessment or question reference, and consent-safe context.
+      - Entry points from review, output, and history prefill safe identifiers only; no raw question text or share token enters analytics.
+      - Success, validation, duplicate-submit, and failure states preserve user input and return focus predictably.
+    verification:
+      - npm run lint
+      - npm run build
+      - npm run dev
+    evidence: [prefill-safe-context, privacy-audit, keyboard, retry-state]
+
   - id: F6-01
     repository: Frontend-Lembar
     sprint: F6
@@ -398,6 +442,94 @@ tasks:
     decisions: [P-011, P-012]
     outcome: Superadmin can edit, preview, publish, unpublish, and restore structured marketing content.
     evidence: [role-route, revision-conflict, preview-no-store, publish-confirmation, version-history, a11y]
+
+  - id: F6-06
+    repository: Frontend-Lembar
+    sprint: F6
+    title: Creator usage analytics screen
+    status: BLOCKED
+    depends_on: [F2-04, F6-01, B1-05]
+    decisions: []
+    outcome: Teacher-facing usage analytics are workspace-scoped, provider-neutral, and safe for shared devices.
+    owns:
+      routes: [/app/analitik]
+      features: [usage-analytics, metric-filters, privacy-safe-empty-states]
+      components: [UsageAnalyticsScreen, UsageMetricCards, UsageTrendPanel]
+    acceptance:
+      - Teacher sees active-workspace usage, activation, and recent output metrics without exposing assessment content.
+      - Empty, unavailable, and stale-data states explain what is tracked without implying student-grade analytics.
+      - Filters and drill-down remain provider-neutral and do not expose share tokens or raw generated text.
+    verification:
+      - npm run lint
+      - npm run build
+      - npm run dev
+    evidence: [workspace-scope, empty-state, event-audit, 390-1280]
+
+  - id: F6-07
+    repository: Frontend-Lembar
+    sprint: F6
+    title: School settings, branding, and admin audit screens
+    status: BLOCKED
+    depends_on: [F6-02, B6-03, B7-03]
+    decisions: []
+    outcome: School admins manage approved organization settings and review audited admin events without teacher-content visibility.
+    owns:
+      routes: [/school/pengaturan, /school/audit]
+      features: [school-policy, school-branding, school-admin-audit]
+      components: [SchoolSettingsScreen, SchoolBrandPreview, SchoolAuditTable]
+    acceptance:
+      - School admin can view and update only backend-approved profile and branding fields exposed for their workspace.
+      - Audit screen lists membership, billing, and security actions with actor, target, time, and safe detail.
+      - Teacher assessment and source content stay inaccessible from both routes, including empty and error states.
+    verification:
+      - npm run lint
+      - npm run build
+      - npm run dev
+    evidence: [role-guard, no-content-visibility, audit-filter-state, responsive]
+
+  - id: F6-08
+    repository: Frontend-Lembar
+    sprint: F6
+    title: School internal library and template management
+    status: BLOCKED
+    depends_on: [F5-04, F6-02, B7-03]
+    decisions: []
+    outcome: School workspace surfaces internal bank and template reuse with explicit ownership and visibility boundaries.
+    owns:
+      routes: [/school]
+      features: [school-bank, school-templates]
+      components: [SchoolLibraryPanel, SchoolTemplatePanel, OwnershipVisibilityBadge]
+    acceptance:
+      - School admin can browse, filter, and manage school-owned templates and internal bank items separately from personal teacher assets.
+      - Visibility labels and actions make ownership, reuse scope, and archival state explicit before any save or share action.
+      - Empty, permission, and conflict states never imply public or community distribution.
+    verification:
+      - npm run lint
+      - npm run build
+      - npm run dev
+    evidence: [ownership-fixtures, permission-state, archive-reuse, copy-audit]
+
+  - id: F6-09
+    repository: Frontend-Lembar
+    sprint: F6
+    title: Superadmin school and billing operations UI
+    status: BLOCKED
+    depends_on: [F6-03, B7-04]
+    decisions: []
+    outcome: Superadmin can inspect school workspace and billing state through audited least-privilege operations screens.
+    owns:
+      routes: [/ops/schools, /ops/billing]
+      features: [school-ops, billing-ops]
+      components: [SchoolWorkspaceTable, BillingAdjustmentPanel, OpsAuditDrawer]
+    acceptance:
+      - Superadmin can inspect school workspace plan, membership, and billing state without opening teacher content.
+      - Manual adjustments and escalation actions reuse safe audit and confirmation patterns.
+      - Empty, error, and permission states distinguish missing operational data from denied support access.
+    verification:
+      - npm run lint
+      - npm run build
+      - npm run dev
+    evidence: [permission-matrix, audit-drawer, no-content-access, responsive]
 
   - id: B0-01
     repository: Backend-Lembar
