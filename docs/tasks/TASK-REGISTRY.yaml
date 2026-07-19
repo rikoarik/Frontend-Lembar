@@ -460,25 +460,26 @@ tasks:
     repository: Frontend-Lembar
     sprint: F1
     title: Landing release quality gate
-    status: PARTIAL
+    status: ACCEPTED
     depends_on: [F1-01, F1-02, F1-03]
     decisions: []
-    outcome: SEO, performance, accessibility, analytics, and visual release evidence.
-    evidence: [lighthouse-or-equivalent, axe, playwright, metadata, event-audit]
+    outcome: SEO, accessibility, reduced-motion, console, metadata, and release-gate evidence are green for the marketing routes.
+    evidence:
+      - release-gate-report
+      - axe-all-three-routes
+      - reduced-motion-all-halted
+      - console-guard-clean
+      - metadata-routes
     checkpoint:
-      mode: shutdown
-      branch: feat/f1-05-release-gate
-      latest_pushed_commit: 3f26fee78bcf25a10be73d405def4de5ba248f8a
-      integrated_commit: e674232
+      mode: continuous
+      branch: fix/f1-05-release-gate-resume
+      latest_pushed_commit: pending-push
+      integrated_commit: pending-ci
       completed_scope:
         - 'robots.ts, sitemap.ts, OG image, per-route metadata, and scripts/release-gate.mjs added.'
-        - 'Release gate report generated and committed on integration.'
-      remaining_scope:
-        - 'Fix baseline marketing unit tests.'
-        - 'Fix repo-wide formatting.'
-        - 'Fix reduced-motion failures: / has 1 running animation, /untuk-sekolah has 1, /harga has 2.'
-        - 'Fix console guard failures recorded in latest release-gate report.'
-        - 'Complete analytics/event audit and Lighthouse-equivalent evidence.'
+        - 'Fresh release gate report generated at docs/frontend/release-gate-report.md.'
+        - 'node scripts/release-gate.mjs returned 15 pass, 0 fail, 0 skip on 2026-07-19.'
+      remaining_scope: []
       changed_files:
         [
           app/(marketing)/page.tsx,
@@ -492,18 +493,18 @@ tasks:
         ]
       verification_executed:
         [
+          release_gate_PASS_15,
           typecheck_PASS,
           lint_PASS_WARNINGS,
-          test_FAIL_BASELINE_MARKETING,
+          test_PASS_68,
           build_PASS,
-          format_FAIL_BASELINE,
+          format_PASS,
           axe_PASS_ALL_THREE_ROUTES,
-          reduced_motion_FAIL,
-          console_guard_FAIL,
+          reduced_motion_PASS_ALL_THREE_ROUTES,
+          console_guard_PASS_ALL_THREE_ROUTES,
         ]
-      verification_still_required:
-        [release_gate_all_green, lighthouse_or_equivalent, event_audit, screenshots_final]
-      exact_next_action: 'Resume by addressing release-gate-report.md failures, then rerun node scripts/release-gate.mjs and commit updated evidence.'
+      verification_still_required: [ci-on-integration]
+      exact_next_action: 'Commit refreshed release-gate report and registry state, push to ao/frontend-integration, wait for CI, then promote to dev if green.'
 
   - id: F1-06
     repository: Frontend-Lembar
