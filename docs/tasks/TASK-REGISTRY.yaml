@@ -48,18 +48,54 @@ rules:
 
 execution_notes:
   latest_owner_directive:
-    recorded_at: '2026-07-19T11:11:00+07:00'
-    summary: 'Continue COMPLETE LEMBAR WEB V1 automatically across tasks, checkpoints, orchestrator restarts, and host restarts until all applicable frontend scope is implemented and verified.'
+    recorded_at: '2026-07-19T11:18:00+07:00'
+    summary: 'Continue COMPLETE LEMBAR WEB V1 automatically across tasks, checkpoints, orchestrator restarts, host restarts, and context compaction until all applicable frontend scope is implemented and verified.'
     required_behaviors:
       - 'Do not stop after current sprint/phase/merge/handoff; auto-start next eligible frontend task.'
       - 'Checkpoint and push meaningful progress at least every 10–15 minutes while unpushed changes exist.'
       - 'Preserve existing workers/branches when recoverable; use fresh workers only for new tasks or dead workers.'
       - 'Do not silently reduce scope to MVP placeholders or static mockups.'
       - 'Record blockers, evidence, branch, commit SHA, and exact resume action in TASK-REGISTRY.yaml.'
+      - 'Persist critical orchestration state before manual or automatic compaction, then resume automatically from TASK-REGISTRY.yaml and git state.'
+      - 'Do not ask the owner to run /compact; allow automatic compaction and rehydrate from repository state.'
+      - 'Issue internal START gates automatically for eligible frontend tasks after dependency and ownership checks.'
     current_resume_focus:
       - 'F1-04 correction cycle: make /kontak submit succeed in mock/preview without backend dependency.'
       - 'F2-03 correction cycle: remove /app shell prefetch 404s by stubbing or deferring unavailable routes.'
-      - 'Then rerun runtime verification and continue next eligible frontend task automatically.'
+      - 'Registry gap analysis: add any missing COMPLETE LEMBAR WEB V1 frontend tasks without touching runtime files.'
+      - 'Then rerun runtime verification, persist evidence, and continue next eligible frontend task automatically.'
+  context_management:
+    source_of_truth:
+      - TASK-REGISTRY.yaml
+      - accepted repository decisions
+      - PRD/design/architecture/UX docs
+      - backend-owned OpenAPI and generated clients
+      - git task branches
+      - ao/frontend-integration
+      - persisted verification evidence
+      - latest remote commit history
+    pre_compaction_requirements:
+      - 'Inspect active frontend workers and task branches.'
+      - 'Update TASK-REGISTRY.yaml with active/completed/blocked tasks, ownership, integration status, verification state, latest pushed SHA, and exact next action.'
+      - 'Commit and push meaningful checkpoint progress before compaction when time allows.'
+      - 'Do not leave critical execution state only in conversation history.'
+    post_compaction_rehydration:
+      - 'Read repository instructions and TASK-REGISTRY.yaml first.'
+      - 'Inspect git status, remote updates, ao/frontend-integration, and interrupted task branches.'
+      - 'Reconstruct active workers, completed work, remaining work, dependencies, verification, and integration status from persisted state.'
+      - 'Resume automatically from the latest valid checkpoint without duplicating tasks, workers, branches, routes, or completed work.'
+    compaction_policy:
+      auto_compaction_enabled: true
+      manual_compaction_by_owner_not_required: true
+      shell_compact_forbidden: true
+      continue_execution_after_compaction: true
+      exact_context_percentage_claims_when_unavailable: forbidden
+      stop_for_compaction: forbidden
+      stop_for_context_pressure: forbidden
+      stop_for_host_recovery: forbidden
+      stop_for_worker_completion: forbidden
+      stop_for_mvp_placeholder_completion: forbidden
+      stop_only_when_complete_or_genuine_owner_decision_required: true
 
 tasks:
   - id: O0-01
