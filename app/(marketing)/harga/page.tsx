@@ -36,13 +36,17 @@ export default function HargaPage() {
     <>
       <nav className="w-full sticky top-0 z-50 bg-background border-b border-border-subtle">
         <div className="flex justify-between items-center h-unit-16 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
-          <div className="flex items-center h-unit-8 w-unit-8">
+          <Link
+            aria-label="lembar beranda"
+            className="flex items-center h-unit-8 w-unit-8"
+            href="/"
+          >
             <img
               alt="lembar logo"
               className="h-full w-full object-contain"
               src="/lembar/logo-mark.png"
             />
-          </div>
+          </Link>
           <div className="hidden md:flex items-center gap-unit-8">
             <a
               className="text-secondary font-body-default hover:text-burgundy transition-colors duration-200"

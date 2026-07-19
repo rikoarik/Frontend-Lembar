@@ -7,3 +7,4 @@ public/mockServiceWorker.js
 coverage/
 dist/
 build/
+test-results/

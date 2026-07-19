@@ -1449,3 +1449,38 @@ tasks:
     verification:
       - gh run list --branch ao/frontend-integration --workflow ci --limit 1
     evidence: [green-ci-before-dev-promotion]
+
+  - id: R0-05
+    repository: Frontend-Lembar
+    sprint: R0
+    title: Repair Playwright smoke assertions for marketing routes
+    status: IN_PROGRESS
+    depends_on: [R0-03]
+    decisions: []
+    owns:
+      files:
+        - scripts/gates/playwright-smoke.spec.ts
+        - app/(marketing)/harga/page.tsx
+        - app/(marketing)/untuk-sekolah/page.tsx
+        - .prettierignore
+      configuration: [playwright, accessibility]
+    affected_workflow: ci
+    affected_command: './scripts/gates/playwright-smoke.sh'
+    root_cause_hypothesis: CI static-and-build passed on c831f29, but playwright smoke failed because /harga and /untuk-sekolah inline nav marks did not expose the expected lembar beranda accessible label, while home contained two visible Buat lembar gratis links that triggered Playwright strict-mode violation.
+    acceptance:
+      - Marketing smoke keeps checking brand navigation, H1, CTA visibility, html lang=id, and horizontal overflow for desktop and mobile.
+      - /harga and /untuk-sekolah expose a labeled brand link back to beranda.
+      - Playwright smoke passes locally before push.
+      - Required GitHub Actions ci jobs pass on ao/frontend-integration after push.
+    verification:
+      - pnpm run typecheck
+      - pnpm run lint
+      - pnpm run format:check
+      - pnpm run test
+      - pnpm run build
+      - './scripts/gates/playwright-smoke.sh'
+      - gh run view <run-id> --json status,conclusion,jobs,url,headSha
+    evidence:
+      - 'CI run 29681528228: static-and-build passed; playwright smoke failed on duplicate home CTA strict-mode and missing lembar beranda label on /harga and /untuk-sekolah.'
+      - 'Local PASS: pnpm run typecheck, pnpm run lint (14 warnings, 0 errors), pnpm run format:check, pnpm run test (13 files, 68 tests), pnpm run build, ./scripts/gates/playwright-smoke.sh (6 passed).'
+      - ci-run-url

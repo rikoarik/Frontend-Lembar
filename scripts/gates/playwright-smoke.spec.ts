@@ -32,7 +32,7 @@ for (const route of ROUTES) {
 
     await expect(page.getByLabel(/lembar.*beranda/i)).toBeVisible();
     await expect(page.getByRole('heading', { level: 1 })).toContainText(route.heading);
-    await expect(page.getByRole('link', { name: route.cta })).toBeVisible();
+    await expect(page.getByRole('link', { name: route.cta }).first()).toBeVisible();
 
     const lang = await page.evaluate(() => document.documentElement.lang);
     expect(lang).toBe('id');
