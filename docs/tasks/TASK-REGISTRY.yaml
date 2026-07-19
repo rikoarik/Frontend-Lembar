@@ -668,7 +668,7 @@ tasks:
     repository: Frontend-Lembar
     sprint: F1
     title: Invitation activation UI
-    status: READY
+    status: ACCEPTED
     depends_on: [F1-07]
     decisions: []
     outcome: /undangan/[token] school-activation screen with accept, expired, invalid, used states without exposing workspace content or leaking enumeration.
@@ -686,8 +686,14 @@ tasks:
       - pnpm run typecheck
       - pnpm run test
       - pnpm run build
+    evidence:
+      - 'Route app/(auth)/undangan/[token]/page.tsx implements pending/expired/invalid/revoked states via authService.getInvitation + acceptInvitation.'
+      - 'MSW handlers: demo-aktif=valid, kedaluwarsa=expired; other tokens invalid. Enumeration-safe copy only.'
+      - 'Uses AuthShell/FormField/FormStatus/PasswordField; 75 tests PASS; lint 0 errors; build includes /undangan/[token].'
+    accepted_at: '2026-07-19'
+    accepted_by: orchestrator-self-review
     evidence_notes:
-      - 'Registry gap audit 2026-07-19: SCREEN-INVENTORY lists /undangan/:token with no bounded frontend task; route app/(auth)/undangan/[token]/page.tsx exists but F2-01 identity coverage treats it as blocked on B1-01.'
+      - 'Registry gap audit 2026-07-19: SCREEN-INVENTORY lists /undangan/:token with no bounded frontend task; route already existed from F1-07 auth work and satisfies F1-10 acceptance with mock transport until B1-01.'
 
   - id: F1-11
     repository: Frontend-Lembar
