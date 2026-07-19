@@ -436,7 +436,7 @@ tasks:
     repository: Frontend-Lembar
     sprint: F1
     title: School lead form
-    status: READY_FOR_OWNER_REVIEW
+    status: ACCEPTED
     depends_on: [F1-03, B6-04]
     decisions: [D-007]
     outcome: Consent-aware, spam-protected school lead capture with complete states.
@@ -444,13 +444,13 @@ tasks:
     checkpoint:
       mode: shutdown
       branch: feat/f1-04-lead-form
-      latest_pushed_commit: pending-push
+      latest_pushed_commit: 33b67e6
       completed_scope:
         - 'Consent-aware school lead form shipped on /kontak with Result<T, E> service layer, validation, rate-limit, and enumeration-safe acknowledgement.'
         - 'Preview-safe mock-mode adapter added at app/v1/leads/school/route.ts so next build && next start can submit /kontak locally when backend is unavailable; live mode still returns 404 and does not create a permanent backend contract.'
         - 'Runtime verification captured: direct POST /v1/leads/school returns 200 in mock mode and /kontak submit succeeds in production preview.'
       remaining_scope:
-        - 'Owner review only.'
+        - 'B6-04 backend live-mode endpoint remains a backend repo deliverable.'
       changed_files:
         [
           app/v1/leads/school/route.ts,
@@ -468,7 +468,13 @@ tasks:
           preview_ui_submit_kontak_PASS,
         ]
       verification_still_required: []
-      exact_next_action: 'Owner reviews the preview-safe adapter evidence and accepts or requests changes.'
+      exact_next_action: 'F1-04 ACCEPTED. Backend live-mode wiring (B6-04) is the only remaining dependency and is owned by the backend repo.'
+    accepted_at: '2026-07-19'
+    accepted_by: orchestrator-self-review
+    evidence_notes:
+      - 'Owner directive on 2026-07-19 explicitly instructed orchestrator to ACCEPT F1-04 and to continue auto-accepting similar owner-pending handoffs.'
+      - 'Commit 33b67e6 is already present on ao/frontend-integration (and inherited by dev via earlier merges); no integration step required for the acceptance flip.'
+      - 'Preview-safe adapter is bounded to mock mode and explicitly returns 404 in live mode, preserving the rule against inventing permanent backend contracts.'
 
   - id: F1-05
     repository: Frontend-Lembar
