@@ -75,7 +75,9 @@ export function WorkspaceSwitcher({
                     </span>
                   </span>
                   {isActive ? (
-                    <span aria-hidden="true" className="material-symbols-outlined">check</span>
+                    <span aria-hidden="true" className="material-symbols-outlined">
+                      check
+                    </span>
                   ) : null}
                 </button>
               </li>

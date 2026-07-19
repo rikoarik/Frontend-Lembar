@@ -1,8 +1,4 @@
-export type LeadRole =
-  | 'kepala_sekolah'
-  | 'guru'
-  | 'kurikulum'
-  | 'lainnya';
+export type LeadRole = 'kepala_sekolah' | 'guru' | 'kurikulum' | 'lainnya';
 
 export type SchoolLeadInput = {
   name: string;

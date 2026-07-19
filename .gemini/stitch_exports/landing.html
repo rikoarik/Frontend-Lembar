@@ -1,369 +1,665 @@
-<!DOCTYPE html><html class="light" lang="en" style=""><head>
-<meta charset="utf-8">
-<meta content="width=device-width, initial-scale=1.0" name="viewport">
-<title>lembar - Workspace asesmen untuk guru</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
-<script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    "colors": {
-                        "surface-container": "#efeee9",
-                        "burgundy": "#A1262F",
-                        "on-background": "#1b1c19",
-                        "primary-fixed": "#ffdad8",
-                        "on-tertiary-container": "#cdcbc5",
-                        "primary-container": "#a1262f",
-                        "on-tertiary-fixed": "#1c1c18",
-                        "error-container": "#ffdad6",
-                        "outline": "#8c706f",
-                        "on-primary-fixed": "#410007",
-                        "tertiary-fixed": "#e5e2dc",
-                        "on-error-container": "#93000a",
-                        "surface-bright": "#fbf9f4",
-                        "on-primary": "#ffffff",
-                        "on-primary-fixed-variant": "#8c1522",
-                        "on-tertiary": "#ffffff",
-                        "secondary": "#5f5e5e",
-                        "tertiary-fixed-dim": "#c9c6c1",
-                        "inverse-primary": "#ffb3b1",
-                        "paper": "#F7F4EE",
-                        "secondary-container": "#e2dfde",
-                        "primary-fixed-dim": "#ffb3b1",
-                        "border-subtle": "#DEDED8",
-                        "primary": "#80091b",
-                        "on-surface": "#1b1c19",
-                        "on-tertiary-fixed-variant": "#474743",
-                        "surface-container-highest": "#e4e2dd",
-                        "tertiary-container": "#575651",
-                        "on-primary-container": "#ffb9b7",
-                        "secondary-fixed": "#e5e2e1",
-                        "surface-dim": "#dbdad5",
-                        "surface-container-lowest": "#ffffff",
-                        "border-strong": "#C7C7C0",
-                        "on-error": "#ffffff",
-                        "on-secondary": "#ffffff",
-                        "inverse-on-surface": "#f2f1eb",
-                        "surface": "#FFFFFF",
-                        "secondary-fixed-dim": "#c8c6c5",
-                        "on-secondary-fixed": "#1c1b1b",
-                        "surface-container-low": "#f5f3ee",
-                        "on-surface-variant": "#584140",
-                        "surface-container-high": "#eae8e3",
-                        "surface-variant": "#e4e2dd",
-                        "on-secondary-container": "#636262",
-                        "inverse-surface": "#30312d",
-                        "surface-tint": "#ad2f37",
-                        "ink": "#171717",
-                        "tertiary": "#3f3f3b",
-                        "error": "#ba1a1a",
-                        "background": "#fbf9f4",
-                        "on-secondary-fixed-variant": "#474746",
-                        "outline-variant": "#e0bfbd"
-                    },
-                    "borderRadius": {
-                        "DEFAULT": "0.25rem",
-                        "lg": "0.5rem",
-                        "xl": "0.75rem",
-                        "full": "9999px"
-                    },
-                    "spacing": {
-                        "base": "4px",
-                        "unit-12": "48px",
-                        "unit-2": "8px",
-                        "margin-desktop": "80px",
-                        "container-max": "1280px",
-                        "gutter": "24px",
-                        "unit-4": "16px",
-                        "margin-mobile": "16px",
-                        "unit-8": "32px",
-                        "unit-3": "12px",
-                        "reading-max": "720px",
-                        "unit-6": "24px",
-                        "unit-16": "64px",
-                        "unit-1": "4px"
-                    },
-                    "fontFamily": {
-                        "h1": ["Manrope"],
-                        "display-xl": ["Manrope"],
-                        "body-default": ["Inter"],
-                        "label-semibold": ["Inter"],
-                        "body-lead": ["Inter"],
-                        "display-xl-mobile": ["Manrope"],
-                        "h3": ["Manrope"],
-                        "caption": ["Inter"],
-                        "h2": ["Manrope"],
-                        "body-sm": ["Inter"]
-                    },
-                    "fontSize": {
-                        "h1": ["40px", { "lineHeight": "48px", "fontWeight": "700" }],
-                        "display-xl": ["64px", { "lineHeight": "72px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
-                        "body-default": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
-                        "label-semibold": ["13px", { "lineHeight": "18px", "fontWeight": "600" }],
-                        "body-lead": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
-                        "display-xl-mobile": ["44px", { "lineHeight": "48px", "fontWeight": "700" }],
-                        "h3": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
-                        "caption": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
-                        "h2": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
-                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }]
-                    }
-                }
-            }
-        }
+<!doctype html>
+<html class="light" lang="en" style="">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>lembar - Workspace asesmen untuk guru</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              'surface-container': '#efeee9',
+              burgundy: '#A1262F',
+              'on-background': '#1b1c19',
+              'primary-fixed': '#ffdad8',
+              'on-tertiary-container': '#cdcbc5',
+              'primary-container': '#a1262f',
+              'on-tertiary-fixed': '#1c1c18',
+              'error-container': '#ffdad6',
+              outline: '#8c706f',
+              'on-primary-fixed': '#410007',
+              'tertiary-fixed': '#e5e2dc',
+              'on-error-container': '#93000a',
+              'surface-bright': '#fbf9f4',
+              'on-primary': '#ffffff',
+              'on-primary-fixed-variant': '#8c1522',
+              'on-tertiary': '#ffffff',
+              secondary: '#5f5e5e',
+              'tertiary-fixed-dim': '#c9c6c1',
+              'inverse-primary': '#ffb3b1',
+              paper: '#F7F4EE',
+              'secondary-container': '#e2dfde',
+              'primary-fixed-dim': '#ffb3b1',
+              'border-subtle': '#DEDED8',
+              primary: '#80091b',
+              'on-surface': '#1b1c19',
+              'on-tertiary-fixed-variant': '#474743',
+              'surface-container-highest': '#e4e2dd',
+              'tertiary-container': '#575651',
+              'on-primary-container': '#ffb9b7',
+              'secondary-fixed': '#e5e2e1',
+              'surface-dim': '#dbdad5',
+              'surface-container-lowest': '#ffffff',
+              'border-strong': '#C7C7C0',
+              'on-error': '#ffffff',
+              'on-secondary': '#ffffff',
+              'inverse-on-surface': '#f2f1eb',
+              surface: '#FFFFFF',
+              'secondary-fixed-dim': '#c8c6c5',
+              'on-secondary-fixed': '#1c1b1b',
+              'surface-container-low': '#f5f3ee',
+              'on-surface-variant': '#584140',
+              'surface-container-high': '#eae8e3',
+              'surface-variant': '#e4e2dd',
+              'on-secondary-container': '#636262',
+              'inverse-surface': '#30312d',
+              'surface-tint': '#ad2f37',
+              ink: '#171717',
+              tertiary: '#3f3f3b',
+              error: '#ba1a1a',
+              background: '#fbf9f4',
+              'on-secondary-fixed-variant': '#474746',
+              'outline-variant': '#e0bfbd',
+            },
+            borderRadius: {
+              DEFAULT: '0.25rem',
+              lg: '0.5rem',
+              xl: '0.75rem',
+              full: '9999px',
+            },
+            spacing: {
+              base: '4px',
+              'unit-12': '48px',
+              'unit-2': '8px',
+              'margin-desktop': '80px',
+              'container-max': '1280px',
+              gutter: '24px',
+              'unit-4': '16px',
+              'margin-mobile': '16px',
+              'unit-8': '32px',
+              'unit-3': '12px',
+              'reading-max': '720px',
+              'unit-6': '24px',
+              'unit-16': '64px',
+              'unit-1': '4px',
+            },
+            fontFamily: {
+              h1: ['Manrope'],
+              'display-xl': ['Manrope'],
+              'body-default': ['Inter'],
+              'label-semibold': ['Inter'],
+              'body-lead': ['Inter'],
+              'display-xl-mobile': ['Manrope'],
+              h3: ['Manrope'],
+              caption: ['Inter'],
+              h2: ['Manrope'],
+              'body-sm': ['Inter'],
+            },
+            fontSize: {
+              h1: ['40px', { lineHeight: '48px', fontWeight: '700' }],
+              'display-xl': [
+                '64px',
+                { lineHeight: '72px', letterSpacing: '-0.02em', fontWeight: '700' },
+              ],
+              'body-default': ['16px', { lineHeight: '24px', fontWeight: '400' }],
+              'label-semibold': ['13px', { lineHeight: '18px', fontWeight: '600' }],
+              'body-lead': ['18px', { lineHeight: '28px', fontWeight: '400' }],
+              'display-xl-mobile': ['44px', { lineHeight: '48px', fontWeight: '700' }],
+              h3: ['24px', { lineHeight: '32px', fontWeight: '600' }],
+              caption: ['12px', { lineHeight: '16px', fontWeight: '500' }],
+              h2: ['32px', { lineHeight: '40px', fontWeight: '700' }],
+              'body-sm': ['14px', { lineHeight: '20px', fontWeight: '400' }],
+            },
+          },
+        },
+      };
     </script>
-<style>
-        body { background-color: theme('colors.paper'); color: theme('colors.ink'); }
+    <style>
+      body {
+        background-color: theme('colors.paper');
+        color: theme('colors.ink');
+      }
     </style>
-</head>
-<body class="antialiased min-h-screen flex flex-col font-body-default text-body-default bg-paper">
-<!-- Section 1: Header -->
-<header class="bg-background dark:bg-background font-body-default text-body-default w-full sticky top-0 z-50 border-b border-border-subtle dark:border-outline-variant transition-colors duration-200">
-<div class="flex justify-between items-center h-unit-16 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
-<div class="flex items-center gap-4">
-<div class="flex items-center h-unit-8 w-unit-8"><img alt="lembar logo" class="h-full w-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAp9K9UpBGq9yeOy6I3PxGbePnCwa9H_U_j13dh3aLeDE7Xpey3plk3vcS9Qm8hePmA36hgFgFfqWaBE7DynvVBU8-VkN_84GcCwNalagl0xQUsI3GKLwX68vtO6wsj4EvslKJ-3n56fnKadcVUAqkIbbxmdeREsfROoHsp6ZJd0-vRRdU6adFbLVPTzh7F3x0BZtxH4aiwxdXGaNXGw5ysRu6VhS0JZ_ZhU1BVqmeFqlb-8GFKPXzzQZVuRC-vsTSmCY6Agq3p5A"></div>
-</div>
-<nav class="hidden md:flex items-center gap-8"><a class="font-body-default hover:text-burgundy transition-colors duration-200 text-burgundy font-bold active-nav-indicator border-b-2 border-burgundy pb-1" href="#">Produk</a><a class="text-secondary font-body-default hover:text-burgundy transition-colors duration-200" href="#">Untuk Sekolah</a><a class="font-body-default text-secondary" href="#">Harga</a></nav>
-<div class="flex items-center gap-4"><button class="text-secondary font-label-semibold px-unit-4 py-unit-2 hover:text-burgundy transition-colors">Masuk</button><button class="bg-burgundy text-on-primary font-label-semibold h-[44px] px-unit-6 rounded-lg hover:brightness-110 transition-all">Coba Gratis</button></div>
-</div>
-</header>
-<!-- Main Content -->
-<main class="flex-grow">
-<!-- Section 2: Hero Section -->
-<section class="py-24 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto overflow-hidden">
-<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-center">
-<div class="lg:col-span-5 flex flex-col gap-6 relative z-10">
-<span class="font-label-semibold text-label-semibold text-secondary uppercase tracking-wider">Workspace asesmen untuk guru</span>
-<h1 class="font-display-xl-mobile md:font-display-xl text-display-xl-mobile md:text-display-xl text-ink leading-tight">
-                        Dari materi menjadi lembar ujian yang siap ditinjau.
-                    </h1>
-<p class="font-body-lead text-body-lead text-secondary max-w-md">
-                        Susun draft soal dari Buku Siswa atau PDF Anda, periksa sumbernya, lalu cetak, download, atau bagikan.
+  </head>
+  <body class="antialiased min-h-screen flex flex-col font-body-default text-body-default bg-paper">
+    <!-- Section 1: Header -->
+    <header
+      class="bg-background dark:bg-background font-body-default text-body-default w-full sticky top-0 z-50 border-b border-border-subtle dark:border-outline-variant transition-colors duration-200"
+    >
+      <div
+        class="flex justify-between items-center h-unit-16 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto"
+      >
+        <div class="flex items-center gap-4">
+          <div class="flex items-center h-unit-8 w-unit-8">
+            <img
+              alt="lembar logo"
+              class="h-full w-full object-contain"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuAp9K9UpBGq9yeOy6I3PxGbePnCwa9H_U_j13dh3aLeDE7Xpey3plk3vcS9Qm8hePmA36hgFgFfqWaBE7DynvVBU8-VkN_84GcCwNalagl0xQUsI3GKLwX68vtO6wsj4EvslKJ-3n56fnKadcVUAqkIbbxmdeREsfROoHsp6ZJd0-vRRdU6adFbLVPTzh7F3x0BZtxH4aiwxdXGaNXGw5ysRu6VhS0JZ_ZhU1BVqmeFqlb-8GFKPXzzQZVuRC-vsTSmCY6Agq3p5A"
+            />
+          </div>
+        </div>
+        <nav class="hidden md:flex items-center gap-8">
+          <a
+            class="font-body-default hover:text-burgundy transition-colors duration-200 text-burgundy font-bold active-nav-indicator border-b-2 border-burgundy pb-1"
+            href="#"
+            >Produk</a
+          ><a
+            class="text-secondary font-body-default hover:text-burgundy transition-colors duration-200"
+            href="#"
+            >Untuk Sekolah</a
+          ><a class="font-body-default text-secondary" href="#">Harga</a>
+        </nav>
+        <div class="flex items-center gap-4">
+          <button
+            class="text-secondary font-label-semibold px-unit-4 py-unit-2 hover:text-burgundy transition-colors"
+          >
+            Masuk</button
+          ><button
+            class="bg-burgundy text-on-primary font-label-semibold h-[44px] px-unit-6 rounded-lg hover:brightness-110 transition-all"
+          >
+            Coba Gratis
+          </button>
+        </div>
+      </div>
+    </header>
+    <!-- Main Content -->
+    <main class="flex-grow">
+      <!-- Section 2: Hero Section -->
+      <section
+        class="py-24 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto overflow-hidden"
+      >
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-center">
+          <div class="lg:col-span-5 flex flex-col gap-6 relative z-10">
+            <span
+              class="font-label-semibold text-label-semibold text-secondary uppercase tracking-wider"
+              >Workspace asesmen untuk guru</span
+            >
+            <h1
+              class="font-display-xl-mobile md:font-display-xl text-display-xl-mobile md:text-display-xl text-ink leading-tight"
+            >
+              Dari materi menjadi lembar ujian yang siap ditinjau.
+            </h1>
+            <p class="font-body-lead text-body-lead text-secondary max-w-md">
+              Susun draft soal dari Buku Siswa atau PDF Anda, periksa sumbernya, lalu cetak,
+              download, atau bagikan.
+            </p>
+            <div class="flex flex-wrap gap-4 mt-4">
+              <a
+                class="font-label-semibold text-label-semibold bg-burgundy text-white px-6 py-3 rounded h-[44px] flex items-center justify-center transition-colors hover:bg-primary shadow-sm"
+                href="#"
+                >Buat lembar gratis</a
+              >
+              <a
+                class="font-label-semibold text-label-semibold text-ink border border-ink px-6 py-3 rounded h-[44px] flex items-center justify-center transition-colors hover:bg-surface-container-highest"
+                href="#"
+                >Lihat contoh hasil</a
+              >
+            </div>
+          </div>
+          <div class="lg:col-span-7 relative mt-12 lg:mt-0 flex justify-center lg:justify-end">
+            <!-- Decorative abstract shape behind paper -->
+            <div
+              class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-surface-container rounded-full blur-3xl opacity-50 z-0"
+            ></div>
+            <!-- Paper Specimen -->
+            <div
+              class="bg-surface border border-border-subtle p-8 md:p-12 shadow-[0_4px_24px_rgba(0,0,0,0.06)] rounded-DEFAULT w-full max-w-lg relative z-10 rotate-1 hover:rotate-0 transition-transform duration-500 ease-out origin-bottom-right"
+            >
+              <!-- Top Annotation -->
+              <div
+                class="absolute -top-4 -right-4 bg-surface border border-border-strong px-3 py-1.5 rounded-full shadow-sm flex items-center gap-2"
+              >
+                <span
+                  class="material-symbols-outlined text-[16px] text-green-600"
+                  data-icon="check_circle"
+                  >check_circle</span
+                >
+                <span class="font-caption text-caption text-ink"
+                  >20 soal, Sumber terlihat, Siap cetak</span
+                >
+              </div>
+              <!-- Paper Content Simulation -->
+              <div class="border-b border-border-subtle pb-6 mb-6">
+                <h3 class="font-h3 text-h3 text-ink mb-2">Penilaian Akhir Semester</h3>
+                <p class="font-caption text-caption text-secondary">Bahasa Indonesia - Kelas 6</p>
+              </div>
+              <div class="space-y-6">
+                <!-- Question 1 -->
+                <div class="flex gap-4">
+                  <span class="font-label-semibold text-label-semibold text-ink">1.</span>
+                  <div>
+                    <p class="font-body-default text-body-default text-ink mb-3">
+                      Bacalah paragraf berikut dengan saksama!<br /><br />Setiap pagi, Budi selalu
+                      menyempatkan diri untuk membaca berita terkini. Ia merasa bahwa dengan
+                      mengetahui perkembangan dunia, ia bisa lebih siap menghadapi tantangan.
+                      Kebiasaan ini sudah ia tanamkan sejak duduk di bangku sekolah dasar.
                     </p>
-<div class="flex flex-wrap gap-4 mt-4">
-<a class="font-label-semibold text-label-semibold bg-burgundy text-white px-6 py-3 rounded h-[44px] flex items-center justify-center transition-colors hover:bg-primary shadow-sm" href="#">Buat lembar gratis</a>
-<a class="font-label-semibold text-label-semibold text-ink border border-ink px-6 py-3 rounded h-[44px] flex items-center justify-center transition-colors hover:bg-surface-container-highest" href="#">Lihat contoh hasil</a>
-</div>
-</div>
-<div class="lg:col-span-7 relative mt-12 lg:mt-0 flex justify-center lg:justify-end">
-<!-- Decorative abstract shape behind paper -->
-<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-surface-container rounded-full blur-3xl opacity-50 z-0"></div>
-<!-- Paper Specimen -->
-<div class="bg-surface border border-border-subtle p-8 md:p-12 shadow-[0_4px_24px_rgba(0,0,0,0.06)] rounded-DEFAULT w-full max-w-lg relative z-10 rotate-1 hover:rotate-0 transition-transform duration-500 ease-out origin-bottom-right">
-<!-- Top Annotation -->
-<div class="absolute -top-4 -right-4 bg-surface border border-border-strong px-3 py-1.5 rounded-full shadow-sm flex items-center gap-2">
-<span class="material-symbols-outlined text-[16px] text-green-600" data-icon="check_circle">check_circle</span>
-<span class="font-caption text-caption text-ink">20 soal, Sumber terlihat, Siap cetak</span>
-</div>
-<!-- Paper Content Simulation -->
-<div class="border-b border-border-subtle pb-6 mb-6">
-<h3 class="font-h3 text-h3 text-ink mb-2">Penilaian Akhir Semester</h3>
-<p class="font-caption text-caption text-secondary">Bahasa Indonesia - Kelas 6</p>
-</div>
-<div class="space-y-6">
-<!-- Question 1 -->
-<div class="flex gap-4">
-<span class="font-label-semibold text-label-semibold text-ink">1.</span>
-<div>
-<p class="font-body-default text-body-default text-ink mb-3">Bacalah paragraf berikut dengan saksama!<br><br>Setiap pagi, Budi selalu menyempatkan diri untuk membaca berita terkini. Ia merasa bahwa dengan mengetahui perkembangan dunia, ia bisa lebih siap menghadapi tantangan. Kebiasaan ini sudah ia tanamkan sejak duduk di bangku sekolah dasar.</p>
-<p class="font-label-semibold text-label-semibold text-ink mb-2">Ide pokok paragraf di atas adalah...</p>
-<div class="space-y-2 pl-2">
-<div class="flex gap-2 items-start"><span class="font-label-semibold text-ink">A.</span><span class="font-body-sm text-ink">Budi suka membaca berita pagi hari.</span></div>
-<div class="flex gap-2 items-start"><span class="font-label-semibold text-ink">B.</span><span class="font-body-sm text-ink">Kebiasaan membaca berita membuat Budi siap menghadapi tantangan.</span></div>
-<div class="flex gap-2 items-start"><span class="font-label-semibold text-ink">C.</span><span class="font-body-sm text-ink">Budi belajar membaca sejak sekolah dasar.</span></div>
-<div class="flex gap-2 items-start"><span class="font-label-semibold text-ink">D.</span><span class="font-body-sm text-ink">Berita pagi penting untuk perkembangan dunia.</span></div>
-</div>
-<!-- Source Chip -->
-<div class="mt-3 inline-flex items-center gap-1 bg-surface-container-low px-2 py-1 rounded-DEFAULT border border-border-subtle">
-<span class="material-symbols-outlined text-[12px] text-secondary" data-icon="menu_book">menu_book</span>
-<span class="font-caption text-caption text-secondary">Buku Siswa Hal 45</span>
-</div>
-</div>
-</div>
-</div>
-<!-- Gradient fade for bottom -->
-<div class="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-surface to-transparent rounded-b-DEFAULT"></div>
-</div>
-</div>
-</div>
-</section>
-<!-- Section 3: Product Proof Strip -->
-<section class="border-y border-border-subtle bg-surface-bright py-8">
-<div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
-<div class="flex flex-col md:flex-row items-center justify-between gap-8">
-<!-- Step 1 -->
-<div class="flex items-center gap-4 flex-1">
-<div class="w-10 h-10 rounded-full border border-border-strong flex items-center justify-center font-label-semibold text-secondary shrink-0">01</div>
-<span class="font-body-default text-ink font-medium">Pilih materi</span>
-</div>
-<!-- Connector -->
-<div class="hidden md:block flex-1 h-[1px] bg-border-subtle"></div>
-<!-- Step 2 -->
-<div class="flex items-center gap-4 flex-1">
-<div class="w-10 h-10 rounded-full border border-border-strong flex items-center justify-center font-label-semibold text-secondary shrink-0">02</div>
-<span class="font-body-default text-ink font-medium">Tinjau draft</span>
-</div>
-<!-- Connector -->
-<div class="hidden md:block flex-1 h-[1px] bg-border-subtle"></div>
-<!-- Step 3 -->
-<div class="flex items-center gap-4 flex-1">
-<div class="w-10 h-10 rounded-full border border-border-strong flex items-center justify-center font-label-semibold text-secondary shrink-0">03</div>
-<span class="font-body-default text-ink font-medium">Gunakan hasil</span>
-</div>
-</div>
-</div>
-</section>
-<!-- Section 4: How it Works (Editorial Panels) -->
-<section class="py-32 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto space-y-32">
-<!-- Panel 1 -->
-<div class="grid grid-cols-1 md:grid-cols-12 gap-gutter items-center">
-<div class="md:col-span-5 flex flex-col gap-4">
-<h2 class="font-h1 text-h1 text-ink">Pilih sumber yang Anda percaya.</h2>
-<p class="font-body-lead text-body-lead text-secondary">Unggah PDF materi Anda sendiri, atau pilih dari kurasi Buku Siswa resmi. Lembar hanya akan menyusun pertanyaan berdasarkan teks yang Anda berikan, meminimalisir halusinasi.</p>
-</div>
-<div class="md:col-span-7 bg-surface border border-border-subtle p-8 rounded-lg shadow-sm">
-<div class="flex flex-col gap-4">
-<div class="flex items-center justify-between border-b border-border-subtle pb-4">
-<span class="font-label-semibold text-ink">Sumber Materi</span>
-<button class="text-burgundy font-label-semibold flex items-center gap-1"><span class="material-symbols-outlined text-[16px]" data-icon="add">add</span> Tambah</button>
-</div>
-<div class="grid grid-cols-2 gap-4">
-<div class="border border-border-strong p-4 rounded bg-surface-container-low flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-surface-container transition-colors">
-<span class="material-symbols-outlined text-[24px] text-secondary" data-icon="upload_file">upload_file</span>
-<span class="font-caption text-secondary">Unggah PDF</span>
-</div>
-<div class="border border-border-strong p-4 rounded bg-surface flex flex-col gap-2 relative overflow-hidden">
-<div class="absolute top-2 right-2 w-2 h-2 bg-green-500 rounded-full"></div>
-<span class="material-symbols-outlined text-[24px] text-ink" data-icon="menu_book">menu_book</span>
-<span class="font-caption text-ink font-medium truncate">Buku Siswa B.Indo Kls 6</span>
-<span class="text-[10px] text-secondary">Terpilih (Bab 3-4)</span>
-</div>
-</div>
-</div>
-</div>
-</div>
-<!-- Panel 2 -->
-<div class="grid grid-cols-1 md:grid-cols-12 gap-gutter items-center">
-<div class="md:col-span-7 order-2 md:order-1">
-<div class="bg-surface border border-border-subtle rounded-lg shadow-sm overflow-hidden">
-<!-- UI Header -->
-<div class="bg-surface-container-low border-b border-border-subtle px-4 py-3 flex justify-between items-center">
-<div class="flex items-center gap-2">
-<span class="w-3 h-3 rounded-full bg-red-400"></span>
-<span class="w-3 h-3 rounded-full bg-amber-400"></span>
-<span class="w-3 h-3 rounded-full bg-green-400"></span>
-</div>
-<span class="font-caption text-secondary">Tinjauan Draft</span>
-</div>
-<div class="p-6 flex flex-col gap-4">
-<!-- Question Card -->
-<div class="border border-border-strong rounded p-4 relative group">
-<div class="absolute -left-3 top-4 w-6 h-6 bg-surface border border-border-strong rounded-full flex items-center justify-center font-caption text-ink shadow-sm">2</div>
-<div class="flex justify-between items-start mb-2">
-<div class="flex gap-2">
-<span class="inline-flex items-center px-2 py-1 rounded text-[10px] font-semibold bg-surface-container text-secondary">C3 - Aplikasi</span>
-</div>
-<div class="opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
-<button class="text-secondary hover:text-ink"><span class="material-symbols-outlined text-[16px]" data-icon="edit">edit</span></button>
-<button class="text-secondary hover:text-ink"><span class="material-symbols-outlined text-[16px]" data-icon="delete">delete</span></button>
-</div>
-</div>
-<p class="font-body-default text-ink mb-3">Apa kesimpulan utama dari teks bacaan pada halaman 45?</p>
-<div class="space-y-1">
-<div class="flex items-center gap-2 bg-green-50/50 p-1 rounded border border-green-200"><span class="material-symbols-outlined text-[14px] text-green-600" data-icon="check">check</span> <span class="font-body-sm text-ink">A. Pahlawan nasional berjuang tanpa pamrih. (Kunci)</span></div>
-<div class="flex items-center gap-2 p-1"><span class="w-[14px]"></span> <span class="font-body-sm text-secondary">B. Sejarah kemerdekaan sangat panjang.</span></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="md:col-span-5 order-1 md:order-2 flex flex-col gap-4 pl-0 md:pl-8">
-<h2 class="font-h1 text-h1 text-ink">Tinjau sebelum digunakan.</h2>
-<p class="font-body-lead text-body-lead text-secondary">Guru tetap memegang kendali. Periksa tingkat kognitif, sesuaikan kunci jawaban, dan pastikan setiap butir soal selaras dengan standar kurikulum Anda.</p>
-</div>
-</div>
-<!-- Panel 3 -->
-<div class="grid grid-cols-1 md:grid-cols-12 gap-gutter items-center">
-<div class="md:col-span-5 flex flex-col gap-4">
-<h2 class="font-h1 text-h1 text-ink">Gunakan sesuai kebutuhan.</h2>
-<p class="font-body-lead text-body-lead text-secondary">Format siap pakai. Cetak langsung untuk ujian kelas, unduh sebagai PDF untuk arsip, atau bagikan tautan untuk dikerjakan secara digital.</p>
-</div>
-<div class="md:col-span-7">
-<!-- See Section 6 for full output view, here a smaller teaser -->
-<div class="bg-surface-container p-8 rounded-lg flex gap-4 justify-center">
-<div class="bg-surface p-4 rounded border border-border-subtle shadow-sm flex flex-col items-center gap-2 w-32 hover:-translate-y-1 transition-transform cursor-pointer">
-<span class="material-symbols-outlined text-[32px] text-ink" data-icon="print">print</span>
-<span class="font-label-semibold text-ink">Cetak</span>
-</div>
-<div class="bg-surface p-4 rounded border border-border-subtle shadow-sm flex flex-col items-center gap-2 w-32 hover:-translate-y-1 transition-transform cursor-pointer">
-<span class="material-symbols-outlined text-[32px] text-ink" data-icon="picture_as_pdf">picture_as_pdf</span>
-<span class="font-label-semibold text-ink">PDF</span>
-</div>
-<div class="bg-surface p-4 rounded border border-border-subtle shadow-sm flex flex-col items-center gap-2 w-32 hover:-translate-y-1 transition-transform cursor-pointer">
-<span class="material-symbols-outlined text-[32px] text-ink" data-icon="link">link</span>
-<span class="font-label-semibold text-ink">Tautan</span>
-</div>
-</div>
-</div>
-</div>
-</section>
-<!-- Section 5: Review & Source (Trust Section) -->
-<section class="bg-ink text-white py-24 px-margin-mobile md:px-margin-desktop">
-<div class="max-w-container-max mx-auto flex flex-col items-center text-center gap-12">
-<h2 class="font-h1 text-h1 max-w-2xl">AI menyusun draft. Guru melihat alasannya.</h2>
-<!-- Trust Specimen -->
-<div class="bg-surface rounded-lg p-6 md:p-8 max-w-3xl w-full text-left shadow-2xl relative">
-<!-- Subtle highlight on top edge -->
-<div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-burgundy to-transparent opacity-50"></div>
-<div class="flex justify-between items-start border-b border-border-subtle pb-4 mb-4">
-<div class="flex items-center gap-3">
-<span class="bg-surface-container text-ink font-bold w-8 h-8 flex items-center justify-center rounded">Q3</span>
-<p class="font-body-default text-ink">Apa faktor utama penyebab terjadinya erosi pada lereng gundul?</p>
-</div>
-</div>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-<div>
-<p class="font-label-semibold text-secondary mb-2 uppercase text-[10px] tracking-wider">Opsi Jawaban</p>
-<div class="space-y-2">
-<div class="p-2 border border-green-200 bg-green-50 rounded flex items-center justify-between"><span class="font-body-sm text-ink">A. Tidak adanya akar pohon penahan air.</span> <span class="material-symbols-outlined text-[16px] text-green-600" data-icon="check_circle">check_circle</span></div>
-<div class="p-2 border border-border-subtle rounded"><span class="font-body-sm text-secondary">B. Curah hujan yang rendah.</span></div>
-<div class="p-2 border border-border-subtle rounded"><span class="font-body-sm text-secondary">C. Jenis tanah liat yang keras.</span></div>
-</div>
-</div>
-<div class="bg-surface-container-low p-4 rounded border border-border-subtle">
-<div class="flex justify-between items-center mb-2">
-<p class="font-label-semibold text-ink flex items-center gap-1"><span class="material-symbols-outlined text-[16px]" data-icon="find_in_page">find_in_page</span> Sumber Kutipan</p>
-<button class="text-burgundy font-caption hover:underline">Lihat Dokumen</button>
-</div>
-<p class="font-body-sm text-secondary italic border-l-2 border-border-strong pl-3 py-1">"...erosi paling sering terjadi pada lereng yang telah ditebang habis. Tanpa adanya sistem perakaran pohon yang kuat untuk mengikat tanah dan menyerap air hujan, lapisan atas tanah sangat mudah terbawa arus air..."</p>
-<p class="font-caption text-secondary mt-2 text-right">- IPA Kelas 6, Hal 72</p>
-</div>
-</div>
-</div>
-</div>
-</section>
-<!-- Section 7: Final CTA -->
-<section class="py-32 px-margin-mobile md:px-margin-desktop text-center bg-paper">
-<div class="max-w-2xl mx-auto flex flex-col items-center gap-6">
-<h2 class="font-display-xl-mobile md:font-display-xl text-ink">Mulai dari satu lembar.</h2>
-<p class="font-body-lead text-secondary mb-4">Bergabung dengan pendidik yang bekerja lebih cermat.</p>
-<a class="font-label-semibold text-label-semibold bg-burgundy text-white px-8 py-4 rounded h-[56px] flex items-center justify-center transition-colors hover:bg-primary shadow-sm text-[16px]" href="#">Buat lembar gratis</a>
-</div>
-</section>
-</main>
-<!-- Footer -->
-<footer class="w-full py-unit-12 bg-paper border-t border-border-strong"><div class="px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto"><div class="flex flex-col md:flex-row justify-between items-start gap-unit-12"><div class="flex flex-col gap-unit-6"><div class="h-unit-8 w-unit-8"><img alt="lembar logo" class="h-full w-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAp9K9UpBGq9yeOy6I3PxGbePnCwa9H_U_j13dh3aLeDE7Xpey3plk3vcS9Qm8hePmA36hgFgFfqWaBE7DynvVBU8-VkN_84GcCwNalagl0xQUsI3GKLwX68vtO6wsj4EvslKJ-3n56fnKadcVUAqkIbbxmdeREsfROoHsp6ZJd0-vRRdU6adFbLVPTzh7F3x0BZtxH4aiwxdXGaNXGw5ysRu6VhS0JZ_ZhU1BVqmeFqlb-8GFKPXzzQZVuRC-vsTSmCY6Agq3p5A"></div><p class="font-caption text-caption text-secondary max-w-[240px]">© 2024 lembar. Dirancang untuk keahlian pendidik.</p></div><div class="grid grid-cols-2 md:grid-cols-2 gap-x-unit-12 gap-y-unit-8"><div class="flex flex-col gap-unit-4"><span class="font-label-semibold text-ink">Layanan</span><div class="flex flex-col gap-unit-2"><a class="font-caption text-caption text-secondary hover:text-burgundy transition-colors" href="#">Produk</a><a class="font-caption text-caption text-secondary hover:text-burgundy transition-colors" href="#">Untuk Sekolah</a><a class="font-caption text-caption text-secondary hover:text-burgundy transition-colors" href="#">Harga</a></div></div><div class="flex flex-col gap-unit-4"><span class="font-label-semibold text-ink">Perusahaan</span><div class="flex flex-col gap-unit-2"><a class="font-caption text-caption text-secondary hover:text-burgundy transition-colors" href="#">Tentang Kami</a><a class="font-caption text-caption text-secondary hover:text-burgundy transition-colors" href="#">Pusat Bantuan</a><a class="font-caption text-caption text-secondary hover:text-burgundy transition-colors" href="#">Kebijakan Privasi</a></div></div></div></div></div></footer>
-
-
-
-
-
-
-
-
-
-
-</body></html>
+                    <p class="font-label-semibold text-label-semibold text-ink mb-2">
+                      Ide pokok paragraf di atas adalah...
+                    </p>
+                    <div class="space-y-2 pl-2">
+                      <div class="flex gap-2 items-start">
+                        <span class="font-label-semibold text-ink">A.</span
+                        ><span class="font-body-sm text-ink"
+                          >Budi suka membaca berita pagi hari.</span
+                        >
+                      </div>
+                      <div class="flex gap-2 items-start">
+                        <span class="font-label-semibold text-ink">B.</span
+                        ><span class="font-body-sm text-ink"
+                          >Kebiasaan membaca berita membuat Budi siap menghadapi tantangan.</span
+                        >
+                      </div>
+                      <div class="flex gap-2 items-start">
+                        <span class="font-label-semibold text-ink">C.</span
+                        ><span class="font-body-sm text-ink"
+                          >Budi belajar membaca sejak sekolah dasar.</span
+                        >
+                      </div>
+                      <div class="flex gap-2 items-start">
+                        <span class="font-label-semibold text-ink">D.</span
+                        ><span class="font-body-sm text-ink"
+                          >Berita pagi penting untuk perkembangan dunia.</span
+                        >
+                      </div>
+                    </div>
+                    <!-- Source Chip -->
+                    <div
+                      class="mt-3 inline-flex items-center gap-1 bg-surface-container-low px-2 py-1 rounded-DEFAULT border border-border-subtle"
+                    >
+                      <span
+                        class="material-symbols-outlined text-[12px] text-secondary"
+                        data-icon="menu_book"
+                        >menu_book</span
+                      >
+                      <span class="font-caption text-caption text-secondary"
+                        >Buku Siswa Hal 45</span
+                      >
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- Gradient fade for bottom -->
+              <div
+                class="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-surface to-transparent rounded-b-DEFAULT"
+              ></div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- Section 3: Product Proof Strip -->
+      <section class="border-y border-border-subtle bg-surface-bright py-8">
+        <div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
+          <div class="flex flex-col md:flex-row items-center justify-between gap-8">
+            <!-- Step 1 -->
+            <div class="flex items-center gap-4 flex-1">
+              <div
+                class="w-10 h-10 rounded-full border border-border-strong flex items-center justify-center font-label-semibold text-secondary shrink-0"
+              >
+                01
+              </div>
+              <span class="font-body-default text-ink font-medium">Pilih materi</span>
+            </div>
+            <!-- Connector -->
+            <div class="hidden md:block flex-1 h-[1px] bg-border-subtle"></div>
+            <!-- Step 2 -->
+            <div class="flex items-center gap-4 flex-1">
+              <div
+                class="w-10 h-10 rounded-full border border-border-strong flex items-center justify-center font-label-semibold text-secondary shrink-0"
+              >
+                02
+              </div>
+              <span class="font-body-default text-ink font-medium">Tinjau draft</span>
+            </div>
+            <!-- Connector -->
+            <div class="hidden md:block flex-1 h-[1px] bg-border-subtle"></div>
+            <!-- Step 3 -->
+            <div class="flex items-center gap-4 flex-1">
+              <div
+                class="w-10 h-10 rounded-full border border-border-strong flex items-center justify-center font-label-semibold text-secondary shrink-0"
+              >
+                03
+              </div>
+              <span class="font-body-default text-ink font-medium">Gunakan hasil</span>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- Section 4: How it Works (Editorial Panels) -->
+      <section
+        class="py-32 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto space-y-32"
+      >
+        <!-- Panel 1 -->
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-gutter items-center">
+          <div class="md:col-span-5 flex flex-col gap-4">
+            <h2 class="font-h1 text-h1 text-ink">Pilih sumber yang Anda percaya.</h2>
+            <p class="font-body-lead text-body-lead text-secondary">
+              Unggah PDF materi Anda sendiri, atau pilih dari kurasi Buku Siswa resmi. Lembar hanya
+              akan menyusun pertanyaan berdasarkan teks yang Anda berikan, meminimalisir halusinasi.
+            </p>
+          </div>
+          <div
+            class="md:col-span-7 bg-surface border border-border-subtle p-8 rounded-lg shadow-sm"
+          >
+            <div class="flex flex-col gap-4">
+              <div class="flex items-center justify-between border-b border-border-subtle pb-4">
+                <span class="font-label-semibold text-ink">Sumber Materi</span>
+                <button class="text-burgundy font-label-semibold flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[16px]" data-icon="add">add</span>
+                  Tambah
+                </button>
+              </div>
+              <div class="grid grid-cols-2 gap-4">
+                <div
+                  class="border border-border-strong p-4 rounded bg-surface-container-low flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-surface-container transition-colors"
+                >
+                  <span
+                    class="material-symbols-outlined text-[24px] text-secondary"
+                    data-icon="upload_file"
+                    >upload_file</span
+                  >
+                  <span class="font-caption text-secondary">Unggah PDF</span>
+                </div>
+                <div
+                  class="border border-border-strong p-4 rounded bg-surface flex flex-col gap-2 relative overflow-hidden"
+                >
+                  <div class="absolute top-2 right-2 w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span class="material-symbols-outlined text-[24px] text-ink" data-icon="menu_book"
+                    >menu_book</span
+                  >
+                  <span class="font-caption text-ink font-medium truncate"
+                    >Buku Siswa B.Indo Kls 6</span
+                  >
+                  <span class="text-[10px] text-secondary">Terpilih (Bab 3-4)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Panel 2 -->
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-gutter items-center">
+          <div class="md:col-span-7 order-2 md:order-1">
+            <div
+              class="bg-surface border border-border-subtle rounded-lg shadow-sm overflow-hidden"
+            >
+              <!-- UI Header -->
+              <div
+                class="bg-surface-container-low border-b border-border-subtle px-4 py-3 flex justify-between items-center"
+              >
+                <div class="flex items-center gap-2">
+                  <span class="w-3 h-3 rounded-full bg-red-400"></span>
+                  <span class="w-3 h-3 rounded-full bg-amber-400"></span>
+                  <span class="w-3 h-3 rounded-full bg-green-400"></span>
+                </div>
+                <span class="font-caption text-secondary">Tinjauan Draft</span>
+              </div>
+              <div class="p-6 flex flex-col gap-4">
+                <!-- Question Card -->
+                <div class="border border-border-strong rounded p-4 relative group">
+                  <div
+                    class="absolute -left-3 top-4 w-6 h-6 bg-surface border border-border-strong rounded-full flex items-center justify-center font-caption text-ink shadow-sm"
+                  >
+                    2
+                  </div>
+                  <div class="flex justify-between items-start mb-2">
+                    <div class="flex gap-2">
+                      <span
+                        class="inline-flex items-center px-2 py-1 rounded text-[10px] font-semibold bg-surface-container text-secondary"
+                        >C3 - Aplikasi</span
+                      >
+                    </div>
+                    <div class="opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+                      <button class="text-secondary hover:text-ink">
+                        <span class="material-symbols-outlined text-[16px]" data-icon="edit"
+                          >edit</span
+                        >
+                      </button>
+                      <button class="text-secondary hover:text-ink">
+                        <span class="material-symbols-outlined text-[16px]" data-icon="delete"
+                          >delete</span
+                        >
+                      </button>
+                    </div>
+                  </div>
+                  <p class="font-body-default text-ink mb-3">
+                    Apa kesimpulan utama dari teks bacaan pada halaman 45?
+                  </p>
+                  <div class="space-y-1">
+                    <div
+                      class="flex items-center gap-2 bg-green-50/50 p-1 rounded border border-green-200"
+                    >
+                      <span
+                        class="material-symbols-outlined text-[14px] text-green-600"
+                        data-icon="check"
+                        >check</span
+                      >
+                      <span class="font-body-sm text-ink"
+                        >A. Pahlawan nasional berjuang tanpa pamrih. (Kunci)</span
+                      >
+                    </div>
+                    <div class="flex items-center gap-2 p-1">
+                      <span class="w-[14px]"></span>
+                      <span class="font-body-sm text-secondary"
+                        >B. Sejarah kemerdekaan sangat panjang.</span
+                      >
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="md:col-span-5 order-1 md:order-2 flex flex-col gap-4 pl-0 md:pl-8">
+            <h2 class="font-h1 text-h1 text-ink">Tinjau sebelum digunakan.</h2>
+            <p class="font-body-lead text-body-lead text-secondary">
+              Guru tetap memegang kendali. Periksa tingkat kognitif, sesuaikan kunci jawaban, dan
+              pastikan setiap butir soal selaras dengan standar kurikulum Anda.
+            </p>
+          </div>
+        </div>
+        <!-- Panel 3 -->
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-gutter items-center">
+          <div class="md:col-span-5 flex flex-col gap-4">
+            <h2 class="font-h1 text-h1 text-ink">Gunakan sesuai kebutuhan.</h2>
+            <p class="font-body-lead text-body-lead text-secondary">
+              Format siap pakai. Cetak langsung untuk ujian kelas, unduh sebagai PDF untuk arsip,
+              atau bagikan tautan untuk dikerjakan secara digital.
+            </p>
+          </div>
+          <div class="md:col-span-7">
+            <!-- See Section 6 for full output view, here a smaller teaser -->
+            <div class="bg-surface-container p-8 rounded-lg flex gap-4 justify-center">
+              <div
+                class="bg-surface p-4 rounded border border-border-subtle shadow-sm flex flex-col items-center gap-2 w-32 hover:-translate-y-1 transition-transform cursor-pointer"
+              >
+                <span class="material-symbols-outlined text-[32px] text-ink" data-icon="print"
+                  >print</span
+                >
+                <span class="font-label-semibold text-ink">Cetak</span>
+              </div>
+              <div
+                class="bg-surface p-4 rounded border border-border-subtle shadow-sm flex flex-col items-center gap-2 w-32 hover:-translate-y-1 transition-transform cursor-pointer"
+              >
+                <span
+                  class="material-symbols-outlined text-[32px] text-ink"
+                  data-icon="picture_as_pdf"
+                  >picture_as_pdf</span
+                >
+                <span class="font-label-semibold text-ink">PDF</span>
+              </div>
+              <div
+                class="bg-surface p-4 rounded border border-border-subtle shadow-sm flex flex-col items-center gap-2 w-32 hover:-translate-y-1 transition-transform cursor-pointer"
+              >
+                <span class="material-symbols-outlined text-[32px] text-ink" data-icon="link"
+                  >link</span
+                >
+                <span class="font-label-semibold text-ink">Tautan</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- Section 5: Review & Source (Trust Section) -->
+      <section class="bg-ink text-white py-24 px-margin-mobile md:px-margin-desktop">
+        <div class="max-w-container-max mx-auto flex flex-col items-center text-center gap-12">
+          <h2 class="font-h1 text-h1 max-w-2xl">AI menyusun draft. Guru melihat alasannya.</h2>
+          <!-- Trust Specimen -->
+          <div
+            class="bg-surface rounded-lg p-6 md:p-8 max-w-3xl w-full text-left shadow-2xl relative"
+          >
+            <!-- Subtle highlight on top edge -->
+            <div
+              class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-burgundy to-transparent opacity-50"
+            ></div>
+            <div class="flex justify-between items-start border-b border-border-subtle pb-4 mb-4">
+              <div class="flex items-center gap-3">
+                <span
+                  class="bg-surface-container text-ink font-bold w-8 h-8 flex items-center justify-center rounded"
+                  >Q3</span
+                >
+                <p class="font-body-default text-ink">
+                  Apa faktor utama penyebab terjadinya erosi pada lereng gundul?
+                </p>
+              </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <p
+                  class="font-label-semibold text-secondary mb-2 uppercase text-[10px] tracking-wider"
+                >
+                  Opsi Jawaban
+                </p>
+                <div class="space-y-2">
+                  <div
+                    class="p-2 border border-green-200 bg-green-50 rounded flex items-center justify-between"
+                  >
+                    <span class="font-body-sm text-ink"
+                      >A. Tidak adanya akar pohon penahan air.</span
+                    >
+                    <span
+                      class="material-symbols-outlined text-[16px] text-green-600"
+                      data-icon="check_circle"
+                      >check_circle</span
+                    >
+                  </div>
+                  <div class="p-2 border border-border-subtle rounded">
+                    <span class="font-body-sm text-secondary">B. Curah hujan yang rendah.</span>
+                  </div>
+                  <div class="p-2 border border-border-subtle rounded">
+                    <span class="font-body-sm text-secondary">C. Jenis tanah liat yang keras.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="bg-surface-container-low p-4 rounded border border-border-subtle">
+                <div class="flex justify-between items-center mb-2">
+                  <p class="font-label-semibold text-ink flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[16px]" data-icon="find_in_page"
+                      >find_in_page</span
+                    >
+                    Sumber Kutipan
+                  </p>
+                  <button class="text-burgundy font-caption hover:underline">Lihat Dokumen</button>
+                </div>
+                <p
+                  class="font-body-sm text-secondary italic border-l-2 border-border-strong pl-3 py-1"
+                >
+                  "...erosi paling sering terjadi pada lereng yang telah ditebang habis. Tanpa
+                  adanya sistem perakaran pohon yang kuat untuk mengikat tanah dan menyerap air
+                  hujan, lapisan atas tanah sangat mudah terbawa arus air..."
+                </p>
+                <p class="font-caption text-secondary mt-2 text-right">- IPA Kelas 6, Hal 72</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- Section 7: Final CTA -->
+      <section class="py-32 px-margin-mobile md:px-margin-desktop text-center bg-paper">
+        <div class="max-w-2xl mx-auto flex flex-col items-center gap-6">
+          <h2 class="font-display-xl-mobile md:font-display-xl text-ink">
+            Mulai dari satu lembar.
+          </h2>
+          <p class="font-body-lead text-secondary mb-4">
+            Bergabung dengan pendidik yang bekerja lebih cermat.
+          </p>
+          <a
+            class="font-label-semibold text-label-semibold bg-burgundy text-white px-8 py-4 rounded h-[56px] flex items-center justify-center transition-colors hover:bg-primary shadow-sm text-[16px]"
+            href="#"
+            >Buat lembar gratis</a
+          >
+        </div>
+      </section>
+    </main>
+    <!-- Footer -->
+    <footer class="w-full py-unit-12 bg-paper border-t border-border-strong">
+      <div class="px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
+        <div class="flex flex-col md:flex-row justify-between items-start gap-unit-12">
+          <div class="flex flex-col gap-unit-6">
+            <div class="h-unit-8 w-unit-8">
+              <img
+                alt="lembar logo"
+                class="h-full w-full object-contain"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAp9K9UpBGq9yeOy6I3PxGbePnCwa9H_U_j13dh3aLeDE7Xpey3plk3vcS9Qm8hePmA36hgFgFfqWaBE7DynvVBU8-VkN_84GcCwNalagl0xQUsI3GKLwX68vtO6wsj4EvslKJ-3n56fnKadcVUAqkIbbxmdeREsfROoHsp6ZJd0-vRRdU6adFbLVPTzh7F3x0BZtxH4aiwxdXGaNXGw5ysRu6VhS0JZ_ZhU1BVqmeFqlb-8GFKPXzzQZVuRC-vsTSmCY6Agq3p5A"
+              />
+            </div>
+            <p class="font-caption text-caption text-secondary max-w-[240px]">
+              © 2024 lembar. Dirancang untuk keahlian pendidik.
+            </p>
+          </div>
+          <div class="grid grid-cols-2 md:grid-cols-2 gap-x-unit-12 gap-y-unit-8">
+            <div class="flex flex-col gap-unit-4">
+              <span class="font-label-semibold text-ink">Layanan</span>
+              <div class="flex flex-col gap-unit-2">
+                <a
+                  class="font-caption text-caption text-secondary hover:text-burgundy transition-colors"
+                  href="#"
+                  >Produk</a
+                ><a
+                  class="font-caption text-caption text-secondary hover:text-burgundy transition-colors"
+                  href="#"
+                  >Untuk Sekolah</a
+                ><a
+                  class="font-caption text-caption text-secondary hover:text-burgundy transition-colors"
+                  href="#"
+                  >Harga</a
+                >
+              </div>
+            </div>
+            <div class="flex flex-col gap-unit-4">
+              <span class="font-label-semibold text-ink">Perusahaan</span>
+              <div class="flex flex-col gap-unit-2">
+                <a
+                  class="font-caption text-caption text-secondary hover:text-burgundy transition-colors"
+                  href="#"
+                  >Tentang Kami</a
+                ><a
+                  class="font-caption text-caption text-secondary hover:text-burgundy transition-colors"
+                  href="#"
+                  >Pusat Bantuan</a
+                ><a
+                  class="font-caption text-caption text-secondary hover:text-burgundy transition-colors"
+                  href="#"
+                  >Kebijakan Privasi</a
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

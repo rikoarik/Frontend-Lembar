@@ -20,7 +20,14 @@ const leadsLookup: Record<
       typeof teacherCountRaw === 'number' ? teacherCountRaw : Number(teacherCountRaw);
     const contact = String(body.email ?? body.phone ?? '').trim();
     const consent = body.consent === true;
-    if (!name || !school || !contact || !consent || !Number.isFinite(teacherCount) || teacherCount <= 0) {
+    if (
+      !name ||
+      !school ||
+      !contact ||
+      !consent ||
+      !Number.isFinite(teacherCount) ||
+      teacherCount <= 0
+    ) {
       return {
         ok: false,
         status: 400,
@@ -87,12 +94,8 @@ describe('school lead form', () => {
     expect(screen.getByLabelText(/^Peran$/)).toBeInTheDocument();
     expect(screen.getByLabelText(/Perkiraan jumlah guru/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Tujuan/i)).toBeInTheDocument();
-    expect(
-      screen.getByLabelText(/saya menyetujui pemrosesan data/i),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole('button', { name: /Kirim permintaan/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByLabelText(/saya menyetujui pemrosesan data/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Kirim permintaan/i })).toBeInTheDocument();
   });
 
   it('shows inline validation when required fields missing', async () => {
@@ -102,15 +105,9 @@ describe('school lead form', () => {
     expect(await screen.findByText(/Nama wajib diisi/i)).toBeInTheDocument();
     expect(screen.getByText(/Sekolah wajib diisi/i)).toBeInTheDocument();
     expect(screen.getByText(/Masukkan email atau nomor telepon/i)).toBeInTheDocument();
-    expect(
-      screen.getByText(/Pilih peran Anda di sekolah/i),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(/Perkiraan jumlah guru tidak valid/i),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(/Persetujuan wajib dicentang/i),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Pilih peran Anda di sekolah/i)).toBeInTheDocument();
+    expect(screen.getByText(/Perkiraan jumlah guru tidak valid/i)).toBeInTheDocument();
+    expect(screen.getByText(/Persetujuan wajib dicentang/i)).toBeInTheDocument();
   });
 
   it('submits successfully with phone instead of email without revealing contact existence', async () => {

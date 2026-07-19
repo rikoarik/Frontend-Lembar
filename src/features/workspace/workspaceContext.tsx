@@ -47,7 +47,9 @@ function labelFor(workspace: Workspace): string {
 
 export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
   const [activeWorkspaceId, setActiveWorkspaceId] = useState(DEMO_WORKSPACES[0].id);
-  const [announcement, setAnnouncement] = useState(`Workspace aktif: ${labelFor(DEMO_WORKSPACES[0])}`);
+  const [announcement, setAnnouncement] = useState(
+    `Workspace aktif: ${labelFor(DEMO_WORKSPACES[0])}`,
+  );
   const cacheRef = useRef(new Map<string, CacheEntry>());
 
   const activeWorkspace =

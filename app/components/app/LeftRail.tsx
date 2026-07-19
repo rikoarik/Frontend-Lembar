@@ -56,7 +56,9 @@ export function LeftRail({
         href="/app"
         className="mb-2 inline-flex items-center gap-2 rounded-md px-2 py-2 text-body-default font-semibold text-brand-ink hover:bg-brand-paper"
       >
-        <span aria-hidden="true" className="material-symbols-outlined">layers</span>
+        <span aria-hidden="true" className="material-symbols-outlined">
+          layers
+        </span>
         lembar
         {activeWorkspaceKind === 'school' ? (
           <span className="ml-auto rounded-full border border-brand-line bg-brand-paper px-2 py-0.5 text-caption text-brand-ink-muted">
@@ -89,7 +91,9 @@ export function LeftRail({
                     isActive ? 'bg-brand-accent' : 'bg-transparent',
                   ].join(' ')}
                 />
-                <span aria-hidden="true" className="material-symbols-outlined">{item.icon}</span>
+                <span aria-hidden="true" className="material-symbols-outlined">
+                  {item.icon}
+                </span>
                 <span>{item.label}</span>
               </Link>
             </li>
@@ -97,9 +101,7 @@ export function LeftRail({
         })}
       </ul>
 
-      <div className="mt-auto flex flex-col gap-2 pt-4">
-        {workspaceSwitcher}
-      </div>
+      <div className="mt-auto flex flex-col gap-2 pt-4">{workspaceSwitcher}</div>
     </nav>
   );
 }

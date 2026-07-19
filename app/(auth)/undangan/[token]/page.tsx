@@ -20,16 +20,10 @@ import { err, type Result } from '@/src/types/result';
 
 type FieldKey = 'username' | 'email' | 'phone' | 'password';
 
-const fieldError = (
-  errors: Record<string, string[]>,
-  key: FieldKey,
-): string | undefined => errors[key]?.[0];
+const fieldError = (errors: Record<string, string[]>, key: FieldKey): string | undefined =>
+  errors[key]?.[0];
 
-export default function InvitationPage({
-  params,
-}: {
-  params: Promise<{ token: string }>;
-}) {
+export default function InvitationPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = use(params);
   const [preview, setPreview] = useState<InvitationPreview | null>(null);
   const [loadError, setLoadError] = useState<AuthError | null>(null);

@@ -20,10 +20,11 @@ export const metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="id">
-      <body suppressHydrationWarning className="antialiased min-h-screen flex flex-col font-body-default text-body-default bg-paper text-on-background selection:bg-primary-fixed selection:text-on-primary-fixed">
-        <LenisProvider>
-          {children}
-        </LenisProvider>
+      <body
+        suppressHydrationWarning
+        className="antialiased min-h-screen flex flex-col font-body-default text-body-default bg-paper text-on-background selection:bg-primary-fixed selection:text-on-primary-fixed"
+      >
+        <LenisProvider>{children}</LenisProvider>
       </body>
     </html>
   );

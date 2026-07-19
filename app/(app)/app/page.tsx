@@ -51,17 +51,32 @@ export default function AppDashboardPage() {
 
         <Panel title="Aksi inti" description="Satu langkah ke alur kerja utama.">
           <div className="flex flex-col gap-2">
-            <a className="rounded-md border border-brand-line px-3 py-3 hover:bg-brand-paper" href="/app/generate">
+            <a
+              className="rounded-md border border-brand-line px-3 py-3 hover:bg-brand-paper"
+              href="/app/generate"
+            >
               <div className="font-semibold text-brand-ink">Generate lembar</div>
-              <div className="text-body-sm text-brand-ink-muted">Mulai draft baru dari materi dan konfigurasi aktif.</div>
+              <div className="text-body-sm text-brand-ink-muted">
+                Mulai draft baru dari materi dan konfigurasi aktif.
+              </div>
             </a>
-            <a className="rounded-md border border-brand-line px-3 py-3 hover:bg-brand-paper" href="/app/riwayat">
+            <a
+              className="rounded-md border border-brand-line px-3 py-3 hover:bg-brand-paper"
+              href="/app/riwayat"
+            >
               <div className="font-semibold text-brand-ink">Riwayat</div>
-              <div className="text-body-sm text-brand-ink-muted">Buka ulang, cetak, atau gandakan lembar yang sudah ada.</div>
+              <div className="text-body-sm text-brand-ink-muted">
+                Buka ulang, cetak, atau gandakan lembar yang sudah ada.
+              </div>
             </a>
-            <a className="rounded-md border border-brand-line px-3 py-3 hover:bg-brand-paper" href="/app/template">
+            <a
+              className="rounded-md border border-brand-line px-3 py-3 hover:bg-brand-paper"
+              href="/app/template"
+            >
               <div className="font-semibold text-brand-ink">Template</div>
-              <div className="text-body-sm text-brand-ink-muted">Jalankan ulang konfigurasi yang sering dipakai.</div>
+              <div className="text-body-sm text-brand-ink-muted">
+                Jalankan ulang konfigurasi yang sering dipakai.
+              </div>
             </a>
           </div>
         </Panel>
@@ -70,14 +85,22 @@ export default function AppDashboardPage() {
       <Panel title="Terakhir dibuka" description="Lima item terakhir dari workspace aktif.">
         <ul className="flex flex-col gap-2" role="list">
           {recentItems.map((item) => (
-            <li key={item.id} className="flex flex-col gap-2 rounded-md border border-brand-line bg-brand-surface-raised px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
+            <li
+              key={item.id}
+              className="flex flex-col gap-2 rounded-md border border-brand-line bg-brand-surface-raised px-3 py-3 sm:flex-row sm:items-center sm:justify-between"
+            >
               <div className="min-w-0">
                 <p className="truncate font-semibold text-brand-ink">{item.title}</p>
-                <p className="text-body-sm text-brand-ink-muted">{item.subject} · Diperbarui {item.updatedAt}</p>
+                <p className="text-body-sm text-brand-ink-muted">
+                  {item.subject} · Diperbarui {item.updatedAt}
+                </p>
               </div>
               <div className="flex items-center gap-3">
                 <StatusBadge label={item.status} />
-                <a href="/app/riwayat" className="text-body-sm text-brand-accent underline underline-offset-4">
+                <a
+                  href="/app/riwayat"
+                  className="text-body-sm text-brand-accent underline underline-offset-4"
+                >
                   Buka
                 </a>
               </div>

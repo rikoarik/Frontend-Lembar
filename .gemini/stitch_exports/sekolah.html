@@ -1,381 +1,621 @@
-<!DOCTYPE html><html lang="id" style=""><head>
-<meta charset="utf-8">
-<meta content="width=device-width, initial-scale=1.0" name="viewport">
-<title>lembar | Untuk Sekolah</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@600;700;800&amp;display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
-<script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    "colors": {
-                        "secondary-fixed": "#e5e2e1",
-                        "border-strong": "#C7C7C0",
-                        "surface-container-low": "#f5f3ee",
-                        "tertiary-fixed-dim": "#c9c6c1",
-                        "tertiary-container": "#575651",
-                        "on-error-container": "#93000a",
-                        "secondary": "#5f5e5e",
-                        "on-primary": "#ffffff",
-                        "surface-variant": "#e4e2dd",
-                        "border-subtle": "#DEDED8",
-                        "surface-container-highest": "#e4e2dd",
-                        "ink": "#171717",
-                        "on-secondary": "#ffffff",
-                        "primary-fixed": "#ffdad8",
-                        "surface-container-lowest": "#ffffff",
-                        "surface": "#FFFFFF",
-                        "inverse-on-surface": "#f2f1eb",
-                        "on-error": "#ffffff",
-                        "surface-tint": "#ad2f37",
-                        "on-secondary-fixed-variant": "#474746",
-                        "outline-variant": "#e0bfbd",
-                        "on-primary-container": "#ffb9b7",
-                        "on-secondary-container": "#636262",
-                        "secondary-fixed-dim": "#c8c6c5",
-                        "on-tertiary-fixed": "#1c1c18",
-                        "on-background": "#1b1c19",
-                        "on-surface-variant": "#584140",
-                        "background": "#fbf9f4",
-                        "on-primary-fixed": "#410007",
-                        "surface-bright": "#fbf9f4",
-                        "primary-fixed-dim": "#ffb3b1",
-                        "surface-dim": "#dbdad5",
-                        "surface-container-high": "#eae8e3",
-                        "inverse-primary": "#ffb3b1",
-                        "primary": "#80091b",
-                        "error-container": "#ffdad6",
-                        "on-tertiary-fixed-variant": "#474743",
-                        "on-tertiary": "#ffffff",
-                        "surface-container": "#efeee9",
-                        "primary-container": "#a1262f",
-                        "on-surface": "#1b1c19",
-                        "burgundy": "#A1262F",
-                        "secondary-container": "#e2dfde",
-                        "paper": "#F7F4EE",
-                        "outline": "#8c706f",
-                        "tertiary-fixed": "#e5e2dc",
-                        "error": "#ba1a1a",
-                        "on-secondary-fixed": "#1c1b1b",
-                        "tertiary": "#3f3f3b",
-                        "inverse-surface": "#30312d",
-                        "on-primary-fixed-variant": "#8c1522",
-                        "on-tertiary-container": "#cdcbc5"
-                    },
-                    "borderRadius": {
-                        "DEFAULT": "0.25rem",
-                        "lg": "0.5rem",
-                        "xl": "0.75rem",
-                        "full": "9999px"
-                    },
-                    "spacing": {
-                        "unit-8": "32px",
-                        "reading-max": "720px",
-                        "margin-desktop": "80px",
-                        "unit-1": "4px",
-                        "base": "4px",
-                        "gutter": "24px",
-                        "unit-6": "24px",
-                        "unit-16": "64px",
-                        "margin-mobile": "16px",
-                        "unit-3": "12px",
-                        "unit-12": "48px",
-                        "unit-4": "16px",
-                        "unit-2": "8px",
-                        "container-max": "1280px"
-                    },
-                    "fontFamily": {
-                        "display-xl": ["Manrope"],
-                        "body-default": ["Inter"],
-                        "body-sm": ["Inter"],
-                        "display-xl-mobile": ["Manrope"],
-                        "label-semibold": ["Inter"],
-                        "body-lead": ["Inter"],
-                        "h2": ["Manrope"],
-                        "h3": ["Manrope"],
-                        "caption": ["Inter"],
-                        "h1": ["Manrope"]
-                    },
-                    "fontSize": {
-                        "display-xl": ["64px", {"lineHeight": "72px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
-                        "body-default": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
-                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
-                        "display-xl-mobile": ["44px", {"lineHeight": "48px", "fontWeight": "700"}],
-                        "label-semibold": ["13px", {"lineHeight": "18px", "fontWeight": "600"}],
-                        "body-lead": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
-                        "h2": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
-                        "h3": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
-                        "caption": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
-                        "h1": ["40px", {"lineHeight": "48px", "fontWeight": "700"}]
-                    }
-                },
+<!doctype html>
+<html lang="id" style="">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>lembar | Untuk Sekolah</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@600;700;800&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              'secondary-fixed': '#e5e2e1',
+              'border-strong': '#C7C7C0',
+              'surface-container-low': '#f5f3ee',
+              'tertiary-fixed-dim': '#c9c6c1',
+              'tertiary-container': '#575651',
+              'on-error-container': '#93000a',
+              secondary: '#5f5e5e',
+              'on-primary': '#ffffff',
+              'surface-variant': '#e4e2dd',
+              'border-subtle': '#DEDED8',
+              'surface-container-highest': '#e4e2dd',
+              ink: '#171717',
+              'on-secondary': '#ffffff',
+              'primary-fixed': '#ffdad8',
+              'surface-container-lowest': '#ffffff',
+              surface: '#FFFFFF',
+              'inverse-on-surface': '#f2f1eb',
+              'on-error': '#ffffff',
+              'surface-tint': '#ad2f37',
+              'on-secondary-fixed-variant': '#474746',
+              'outline-variant': '#e0bfbd',
+              'on-primary-container': '#ffb9b7',
+              'on-secondary-container': '#636262',
+              'secondary-fixed-dim': '#c8c6c5',
+              'on-tertiary-fixed': '#1c1c18',
+              'on-background': '#1b1c19',
+              'on-surface-variant': '#584140',
+              background: '#fbf9f4',
+              'on-primary-fixed': '#410007',
+              'surface-bright': '#fbf9f4',
+              'primary-fixed-dim': '#ffb3b1',
+              'surface-dim': '#dbdad5',
+              'surface-container-high': '#eae8e3',
+              'inverse-primary': '#ffb3b1',
+              primary: '#80091b',
+              'error-container': '#ffdad6',
+              'on-tertiary-fixed-variant': '#474743',
+              'on-tertiary': '#ffffff',
+              'surface-container': '#efeee9',
+              'primary-container': '#a1262f',
+              'on-surface': '#1b1c19',
+              burgundy: '#A1262F',
+              'secondary-container': '#e2dfde',
+              paper: '#F7F4EE',
+              outline: '#8c706f',
+              'tertiary-fixed': '#e5e2dc',
+              error: '#ba1a1a',
+              'on-secondary-fixed': '#1c1b1b',
+              tertiary: '#3f3f3b',
+              'inverse-surface': '#30312d',
+              'on-primary-fixed-variant': '#8c1522',
+              'on-tertiary-container': '#cdcbc5',
             },
-        }
+            borderRadius: {
+              DEFAULT: '0.25rem',
+              lg: '0.5rem',
+              xl: '0.75rem',
+              full: '9999px',
+            },
+            spacing: {
+              'unit-8': '32px',
+              'reading-max': '720px',
+              'margin-desktop': '80px',
+              'unit-1': '4px',
+              base: '4px',
+              gutter: '24px',
+              'unit-6': '24px',
+              'unit-16': '64px',
+              'margin-mobile': '16px',
+              'unit-3': '12px',
+              'unit-12': '48px',
+              'unit-4': '16px',
+              'unit-2': '8px',
+              'container-max': '1280px',
+            },
+            fontFamily: {
+              'display-xl': ['Manrope'],
+              'body-default': ['Inter'],
+              'body-sm': ['Inter'],
+              'display-xl-mobile': ['Manrope'],
+              'label-semibold': ['Inter'],
+              'body-lead': ['Inter'],
+              h2: ['Manrope'],
+              h3: ['Manrope'],
+              caption: ['Inter'],
+              h1: ['Manrope'],
+            },
+            fontSize: {
+              'display-xl': [
+                '64px',
+                { lineHeight: '72px', letterSpacing: '-0.02em', fontWeight: '700' },
+              ],
+              'body-default': ['16px', { lineHeight: '24px', fontWeight: '400' }],
+              'body-sm': ['14px', { lineHeight: '20px', fontWeight: '400' }],
+              'display-xl-mobile': ['44px', { lineHeight: '48px', fontWeight: '700' }],
+              'label-semibold': ['13px', { lineHeight: '18px', fontWeight: '600' }],
+              'body-lead': ['18px', { lineHeight: '28px', fontWeight: '400' }],
+              h2: ['32px', { lineHeight: '40px', fontWeight: '700' }],
+              h3: ['24px', { lineHeight: '32px', fontWeight: '600' }],
+              caption: ['12px', { lineHeight: '16px', fontWeight: '500' }],
+              h1: ['40px', { lineHeight: '48px', fontWeight: '700' }],
+            },
+          },
+        },
+      };
     </script>
-<style>
-        body {
-            background-color: #fbf9f4;
-            color: #171717;
-            -webkit-font-smoothing: antialiased;
-        }
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-        .paper-card {
-            background-color: #FFFFFF;
-            border: 1px solid #DEDED8;
-            box-shadow: 0 3px 3px rgba(0,0,0,0.04);
-        }
-        .glass-nav {
-            backdrop-filter: blur(8px);
-            background-color: rgba(251, 249, 244, 0.8);
-        }
-        .nav-underline {
-            position: relative;
-        }
-        .nav-underline.active::after {
-            content: '';
-            position: absolute;
-            bottom: -4px;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background-color: #A1262F;
-        }
+    <style>
+      body {
+        background-color: #fbf9f4;
+        color: #171717;
+        -webkit-font-smoothing: antialiased;
+      }
+      .material-symbols-outlined {
+        font-variation-settings:
+          'FILL' 0,
+          'wght' 400,
+          'GRAD' 0,
+          'opsz' 24;
+      }
+      .paper-card {
+        background-color: #ffffff;
+        border: 1px solid #deded8;
+        box-shadow: 0 3px 3px rgba(0, 0, 0, 0.04);
+      }
+      .glass-nav {
+        backdrop-filter: blur(8px);
+        background-color: rgba(251, 249, 244, 0.8);
+      }
+      .nav-underline {
+        position: relative;
+      }
+      .nav-underline.active::after {
+        content: '';
+        position: absolute;
+        bottom: -4px;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background-color: #a1262f;
+      }
     </style>
-</head>
-<body class="font-body-default text-body-default">
-<!-- TopNavBar -->
-<nav class="w-full sticky top-0 z-50 glass-nav border-b border-border-subtle dark:border-outline-variant">
-<div class="flex justify-between items-center h-unit-16 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
-<div class="h-8 w-8 flex-shrink-0"><img alt="lembar logo" class="h-full w-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAp9K9UpBGq9yeOy6I3PxGbePnCwa9H_U_j13dh3aLeDE7Xpey3plk3vcS9Qm8hePmA36hgFgFfqWaBE7DynvVBU8-VkN_84GcCwNalagl0xQUsI3GKLwX68vtO6wsj4EvslKJ-3n56fnKadcVUAqkIbbxmdeREsfROoHsp6ZJd0-vRRdU6adFbLVPTzh7F3x0BZtxH4aiwxdXGaNXGw5ysRu6VhS0JZ_ZhU1BVqmeFqlb-8GFKPXzzQZVuRC-vsTSmCY6Agq3p5A"></div>
-<div class="hidden md:flex items-center gap-unit-8">
-<a class="text-secondary hover:text-burgundy transition-colors duration-200" href="#">Produk</a>
-<a class="text-burgundy font-bold border-b-2 border-burgundy pb-unit-1 transition-colors duration-200" href="#">Untuk Sekolah</a>
-<a class="text-secondary hover:text-burgundy transition-colors duration-200" href="#">Harga</a>
-</div>
-<div class="flex items-center gap-unit-4">
-<button class="text-ink font-label-semibold px-unit-4 py-unit-2 hover:opacity-80 transition-opacity">Masuk</button>
-<button class="bg-burgundy text-on-primary px-unit-6 py-unit-3 rounded font-label-semibold hover:opacity-90 transition-opacity">Coba Gratis</button>
-</div>
-</div>
-</nav>
-<main>
-<!-- Hero Section -->
-<section class="pt-unit-16 pb-unit-16 px-margin-mobile md:px-margin-desktop bg-paper overflow-hidden">
-<div class="max-w-container-max mx-auto grid grid-cols-1 lg:grid-cols-12 gap-unit-12 items-center">
-<div class="lg:col-span-6">
-<h1 class="font-h1 text-h1 text-ink mb-unit-6 leading-tight">Workspace Organisasi untuk Institusi Sekolah</h1>
-<p class="font-body-lead text-body-lead text-secondary mb-unit-8 max-w-lg">
-                        Sentralisasi pembuatan soal, manajemen akun guru, dan berbagi kuota AI dalam satu dasbor yang aman. Memastikan kualitas standar asesmen di seluruh departemen.
+  </head>
+  <body class="font-body-default text-body-default">
+    <!-- TopNavBar -->
+    <nav
+      class="w-full sticky top-0 z-50 glass-nav border-b border-border-subtle dark:border-outline-variant"
+    >
+      <div
+        class="flex justify-between items-center h-unit-16 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto"
+      >
+        <div class="h-8 w-8 flex-shrink-0">
+          <img
+            alt="lembar logo"
+            class="h-full w-full object-contain"
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAp9K9UpBGq9yeOy6I3PxGbePnCwa9H_U_j13dh3aLeDE7Xpey3plk3vcS9Qm8hePmA36hgFgFfqWaBE7DynvVBU8-VkN_84GcCwNalagl0xQUsI3GKLwX68vtO6wsj4EvslKJ-3n56fnKadcVUAqkIbbxmdeREsfROoHsp6ZJd0-vRRdU6adFbLVPTzh7F3x0BZtxH4aiwxdXGaNXGw5ysRu6VhS0JZ_ZhU1BVqmeFqlb-8GFKPXzzQZVuRC-vsTSmCY6Agq3p5A"
+          />
+        </div>
+        <div class="hidden md:flex items-center gap-unit-8">
+          <a class="text-secondary hover:text-burgundy transition-colors duration-200" href="#"
+            >Produk</a
+          >
+          <a
+            class="text-burgundy font-bold border-b-2 border-burgundy pb-unit-1 transition-colors duration-200"
+            href="#"
+            >Untuk Sekolah</a
+          >
+          <a class="text-secondary hover:text-burgundy transition-colors duration-200" href="#"
+            >Harga</a
+          >
+        </div>
+        <div class="flex items-center gap-unit-4">
+          <button
+            class="text-ink font-label-semibold px-unit-4 py-unit-2 hover:opacity-80 transition-opacity"
+          >
+            Masuk
+          </button>
+          <button
+            class="bg-burgundy text-on-primary px-unit-6 py-unit-3 rounded font-label-semibold hover:opacity-90 transition-opacity"
+          >
+            Coba Gratis
+          </button>
+        </div>
+      </div>
+    </nav>
+    <main>
+      <!-- Hero Section -->
+      <section
+        class="pt-unit-16 pb-unit-16 px-margin-mobile md:px-margin-desktop bg-paper overflow-hidden"
+      >
+        <div
+          class="max-w-container-max mx-auto grid grid-cols-1 lg:grid-cols-12 gap-unit-12 items-center"
+        >
+          <div class="lg:col-span-6">
+            <h1 class="font-h1 text-h1 text-ink mb-unit-6 leading-tight">
+              Workspace Organisasi untuk Institusi Sekolah
+            </h1>
+            <p class="font-body-lead text-body-lead text-secondary mb-unit-8 max-w-lg">
+              Sentralisasi pembuatan soal, manajemen akun guru, dan berbagi kuota AI dalam satu
+              dasbor yang aman. Memastikan kualitas standar asesmen di seluruh departemen.
+            </p>
+            <div class="flex flex-wrap gap-unit-4">
+              <button
+                class="bg-burgundy text-on-primary px-unit-8 py-unit-4 rounded font-label-semibold text-body-default shadow-sm hover:opacity-90 transition-all"
+              >
+                Diskusikan kebutuhan sekolah
+              </button>
+            </div>
+          </div>
+          <div class="lg:col-span-6 relative">
+            <!-- Dashboard Mockup -->
+            <div
+              class="paper-card rounded-lg p-unit-6 w-full transform rotate-1 hover:rotate-0 transition-transform duration-500"
+              style="transform: translateY(0px) rotate(1deg)"
+            >
+              <div
+                class="flex items-center justify-between border-b border-border-subtle pb-unit-4 mb-unit-4"
+              >
+                <div class="flex items-center gap-unit-3">
+                  <div
+                    class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center"
+                  >
+                    <span class="material-symbols-outlined text-secondary text-sm">school</span>
+                  </div>
+                  <div>
+                    <p
+                      class="font-label-semibold text-caption text-secondary uppercase tracking-wider"
+                    >
+                      Dashboard Sekolah
                     </p>
-<div class="flex flex-wrap gap-unit-4">
-<button class="bg-burgundy text-on-primary px-unit-8 py-unit-4 rounded font-label-semibold text-body-default shadow-sm hover:opacity-90 transition-all">Diskusikan kebutuhan sekolah</button>
-</div>
-</div>
-<div class="lg:col-span-6 relative">
-<!-- Dashboard Mockup -->
-<div class="paper-card rounded-lg p-unit-6 w-full transform rotate-1 hover:rotate-0 transition-transform duration-500" style="transform: translateY(0px) rotate(1deg);">
-<div class="flex items-center justify-between border-b border-border-subtle pb-unit-4 mb-unit-4">
-<div class="flex items-center gap-unit-3">
-<div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center">
-<span class="material-symbols-outlined text-secondary text-sm">school</span>
-</div>
-<div>
-<p class="font-label-semibold text-caption text-secondary uppercase tracking-wider">Dashboard Sekolah</p>
-<p class="font-h3 text-h3 text-ink">SMA Nusantara Raya</p>
-</div>
-</div>
-<div class="bg-surface-container px-unit-3 py-unit-1 rounded text-caption font-label-semibold text-burgundy">
-                                Aktif: 42 Guru
-                            </div>
-</div>
-<div class="space-y-unit-4">
-<div class="flex gap-unit-4">
-<div class="flex-1 p-unit-3 border border-border-subtle rounded-lg bg-background">
-<p class="text-caption text-secondary">Kuota AI Terpakai</p>
-<div class="mt-unit-2 h-2 bg-surface-container-highest rounded-full overflow-hidden">
-<div class="bg-burgundy h-full w-[65%]"></div>
-</div>
-<p class="text-caption font-label-semibold mt-unit-1">6,500 / 10,000 unit</p>
-</div>
-<div class="flex-1 p-unit-3 border border-border-subtle rounded-lg bg-background">
-<p class="text-caption text-secondary">Total Bank Soal</p>
-<p class="font-h3 text-h3 text-ink mt-unit-1">1,248 <span class="text-caption text-secondary font-normal">soal</span></p>
-</div>
-</div>
-<div class="p-unit-3 border border-border-subtle rounded-lg">
-<p class="text-caption font-label-semibold text-secondary mb-unit-2">Aktivitas Terkini</p>
-<div class="space-y-unit-2">
-<div class="flex items-center justify-between text-caption border-b border-border-subtle py-unit-1">
-<span class="text-ink">Bu Rina (Matematika) mengekspor 40 soal</span>
-<span class="text-secondary">2 menit lalu</span>
-</div>
-<div class="flex items-center justify-between text-caption border-b border-border-subtle py-unit-1">
-<span class="text-ink">Pak Budi menambahkan Template UAS Ganjil</span>
-<span class="text-secondary">1 jam lalu</span>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-</section>
-<!-- Value Props Section -->
-<section class="py-unit-16 px-margin-mobile md:px-margin-desktop bg-white">
-<div class="max-w-container-max mx-auto">
-<div class="text-center mb-unit-12">
-<span class="text-burgundy font-label-semibold uppercase tracking-widest text-caption">Fitur Enterprise</span>
-<h2 class="font-h2 text-h2 text-ink mt-unit-2">Kendali Penuh di Tangan Pendidik</h2>
-</div>
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-unit-6">
-<!-- Prop 1 -->
-<div class="p-unit-8 border border-border-subtle rounded-xl hover:border-burgundy transition-colors group">
-<div class="w-12 h-12 rounded bg-surface-container flex items-center justify-center mb-unit-6 group-hover:bg-burgundy group-hover:text-white transition-colors">
-<span class="material-symbols-outlined">group</span>
-</div>
-<h3 class="font-h3 text-h3 text-ink mb-unit-3">Manajemen Akun &amp; Kuota</h3>
-<p class="text-secondary text-body-sm">Tambahkan atau hapus akses guru dengan mudah. Alokasikan kuota AI sesuai kebutuhan mata pelajaran.</p>
-</div>
-<!-- Prop 2 -->
-<div class="p-unit-8 border border-border-subtle rounded-xl hover:border-burgundy transition-colors group">
-<div class="w-12 h-12 rounded bg-surface-container flex items-center justify-center mb-unit-6 group-hover:bg-burgundy group-hover:text-white transition-colors">
-<span class="material-symbols-outlined">database</span>
-</div>
-<h3 class="font-h3 text-h3 text-ink mb-unit-3">Bank Soal Internal</h3>
-<p class="text-secondary text-body-sm">Simpan aset intelektual sekolah dalam repositori pribadi yang terenkripsi dan hanya dapat diakses staf internal.</p>
-</div>
-<!-- Prop 3 -->
-<div class="p-unit-8 border border-border-subtle rounded-xl hover:border-burgundy transition-colors group">
-<div class="w-12 h-12 rounded bg-surface-container flex items-center justify-center mb-unit-6 group-hover:bg-burgundy group-hover:text-white transition-colors">
-<span class="material-symbols-outlined">brand_family</span>
-</div>
-<h3 class="font-h3 text-h3 text-ink mb-unit-3">Template Bersama</h3>
-<p class="text-secondary text-body-sm">Samakan format header, font, dan branding ujian untuk seluruh kelas guna menjaga kredibilitas sekolah.</p>
-</div>
-<!-- Prop 4 -->
-<div class="p-unit-8 border border-border-subtle rounded-xl hover:border-burgundy transition-colors group">
-<div class="w-12 h-12 rounded bg-surface-container flex items-center justify-center mb-unit-6 group-hover:bg-burgundy group-hover:text-white transition-colors">
-<span class="material-symbols-outlined">history_edu</span>
-</div>
-<h3 class="font-h3 text-h3 text-ink mb-unit-3">Audit Trail</h3>
-<p class="text-secondary text-body-sm">Pantau log aktivitas pembuatan dan ekspor soal secara transparan untuk meminimalisir kebocoran data.</p>
-</div>
-</div>
-</div>
-</section>
-<!-- Product Image Section (Bento Grid Style) -->
-<section class="py-unit-16 px-margin-mobile md:px-margin-desktop bg-paper">
-<div class="max-w-container-max mx-auto">
-<div class="grid grid-cols-1 lg:grid-cols-12 gap-unit-6">
-<!-- Left Column: Visual Insight -->
-<div class="lg:col-span-8 h-[400px] rounded-2xl overflow-hidden paper-card relative">
-<div class="absolute inset-0 bg-gradient-to-br from-transparent to-black/5 z-10 pointer-events-none"></div>
-<div class="p-unit-8 relative z-20">
-<span class="bg-burgundy/10 text-burgundy px-unit-3 py-unit-1 rounded font-label-semibold text-caption">Visual Insight</span>
-<h3 class="font-h2 text-h2 text-ink mt-unit-4 max-w-sm">Pantau Progress Asesmen Secara Real-time</h3>
-</div>
-<div class="absolute bottom-0 right-0 w-[65%] h-[60%] bg-white rounded-tl-3xl border-t border-l border-border-subtle p-unit-4 shadow-xl">
-<div class="flex gap-unit-3 h-full">
-<div class="flex-1 bg-surface-container rounded-lg p-unit-2 flex flex-col justify-end">
-<div class="h-[80%] w-full bg-burgundy rounded-t opacity-40"></div>
-<div class="h-[20%] w-full bg-burgundy rounded-b"></div>
-<p class="text-caption font-label-semibold mt-unit-1 text-center scale-90">Matematika</p>
-</div>
-<div class="flex-1 bg-surface-container rounded-lg p-unit-2 flex flex-col justify-end">
-<div class="h-[40%] w-full bg-burgundy rounded-t opacity-40"></div>
-<div class="h-[60%] w-full bg-burgundy rounded-b"></div>
-<p class="text-caption font-label-semibold mt-unit-1 text-center scale-90">B. Inggris</p>
-</div>
-<div class="flex-1 bg-surface-container rounded-lg p-unit-2 flex flex-col justify-end">
-<div class="h-[90%] w-full bg-burgundy rounded-t opacity-40"></div>
-<div class="h-[10%] w-full bg-burgundy rounded-b"></div>
-<p class="text-caption font-label-semibold mt-unit-1 text-center scale-90">Fisika</p>
-</div>
-</div>
-</div>
-</div>
-<!-- Right Column: Keamanan Data -->
-<div class="lg:col-span-4 h-[400px] bg-ink rounded-2xl p-unit-8 flex flex-col justify-between text-white overflow-hidden relative group">
-<div class="relative z-10">
-<h3 class="font-h3 text-h3 mb-unit-4">Keamanan Data Prioritas Utama</h3>
-<p class="text-surface-variant text-body-sm">Enkripsi tingkat bank untuk setiap butir soal yang dibuat. Data sekolah Anda tetap menjadi milik sekolah Anda.</p>
-</div>
-<div class="relative z-10 flex items-center gap-unit-2 text-secondary-fixed">
-<span class="material-symbols-outlined text-burgundy">verified_user</span>
-<span class="text-caption font-label-semibold">ISO 27001 Certified Infrastructure</span>
-</div>
-<!-- Abstract Decorative Element -->
-<div class="absolute -bottom-20 -right-20 w-64 h-64 border border-white/10 rounded-full group-hover:scale-110 transition-transform duration-700"></div>
-<div class="absolute -bottom-10 -right-10 w-48 h-48 border border-white/5 rounded-full group-hover:scale-125 transition-transform duration-700"></div>
-</div>
-</div>
-</div>
-</section>
-<!-- Pilot Program Section -->
-<section class="py-unit-16 px-margin-mobile md:px-margin-desktop bg-white border-y border-border-subtle">
-<div class="max-w-reading-max mx-auto text-center">
-<h2 class="font-h2 text-h2 text-ink mb-unit-6">Program Sekolah (Pilot)</h2>
-<div class="space-y-unit-8 text-left">
-<div class="flex gap-unit-6">
-<div class="flex-shrink-0 w-8 h-8 rounded-full border border-burgundy flex items-center justify-center text-burgundy font-bold">1</div>
-<div>
-<h4 class="font-label-semibold text-body-default text-ink">Konsultasi Kebutuhan</h4>
-<p class="text-secondary text-body-sm mt-unit-1">Tim kami akan membantu memetakan kebutuhan jumlah guru dan volume asesmen bulanan sekolah Anda.</p>
-</div>
-</div>
-<div class="flex gap-unit-6">
-<div class="flex-shrink-0 w-8 h-8 rounded-full border border-burgundy flex items-center justify-center text-burgundy font-bold">2</div>
-<div>
-<h4 class="font-label-semibold text-body-default text-ink">Onboarding &amp; Pelatihan</h4>
-<p class="text-secondary text-body-sm mt-unit-1">Sesi workshop eksklusif untuk guru agar mahir menggunakan asisten AI lembar dalam hitungan menit.</p>
-</div>
-</div>
-<div class="flex gap-unit-6">
-<div class="flex-shrink-0 w-8 h-8 rounded-full border border-burgundy flex items-center justify-center text-burgundy font-bold">3</div>
-<div>
-<h4 class="font-label-semibold text-body-default text-ink">Implementasi Bertahap</h4>
-<p class="text-secondary text-body-sm mt-unit-1">Mulai dengan satu departemen atau jenjang kelas sebelum diperluas ke seluruh institusi.</p>
-</div>
-</div>
-</div>
-</div>
-</section>
-<!-- CTA Section -->
-<section class="py-unit-16 px-margin-mobile md:px-margin-desktop bg-paper relative overflow-hidden">
-<!-- Subtle Background Pattern -->
-<div class="absolute inset-0 opacity-[0.03] pointer-events-none" style="background-image: radial-gradient(#171717 1px, transparent 1px); background-size: 24px 24px;"></div>
-<div class="max-w-container-max mx-auto paper-card rounded-2xl p-unit-12 flex flex-col md:flex-row items-center justify-between gap-unit-8 relative z-10">
-<div class="text-center md:text-left">
-<h2 class="font-h2 text-h2 text-ink mb-unit-2">Siap untuk digitalisasi asesmen sekolah?</h2>
-<p class="text-secondary text-body-default">Bergabunglah dengan puluhan institusi yang telah meningkatkan efisiensi guru hingga 70%.</p>
-</div>
-<button class="bg-burgundy text-on-primary px-unit-12 py-unit-4 rounded font-label-semibold text-body-lead hover:shadow-lg transition-all transform active:scale-95 whitespace-nowrap">
-                    Diskusikan kebutuhan sekolah
-                </button>
-</div>
-</section>
-</main>
-<!-- Footer -->
-<footer class="w-full py-unit-12 border-t border-border-strong dark:border-outline bg-paper dark:bg-surface-container-low"><div class="flex flex-col md:flex-row justify-between items-start gap-unit-12 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto"><div class="flex flex-col gap-unit-6"><div class="h-unit-8 w-unit-8"><img alt="lembar logo" class="h-full w-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAp9K9UpBGq9yeOy6I3PxGbePnCwa9H_U_j13dh3aLeDE7Xpey3plk3vcS9Qm8hePmA36hgFgFfqWaBE7DynvVBU8-VkN_84GcCwNalagl0xQUsI3GKLwX68vtO6wsj4EvslKJ-3n56fnKadcVUAqkIbbxmdeREsfROoHsp6ZJd0-vRRdU6adFbLVPTzh7F3x0BZtxH4aiwxdXGaNXGw5ysRu6VhS0JZ_ZhU1BVqmeFqlb-8GFKPXzzQZVuRC-vsTSmCY6Agq3p5A"></div><p class="font-caption text-caption text-secondary max-w-[240px]">© 2024 lembar. Dirancang untuk keahlian pendidik.</p></div><div class="grid grid-cols-2 md:grid-cols-2 gap-x-unit-12 gap-y-unit-8"><div class="flex flex-col gap-unit-4"><span class="font-label-semibold text-ink">Layanan</span><div class="flex flex-col gap-unit-2"><a class="font-caption text-caption text-secondary hover:text-burgundy transition-colors" href="#">Produk</a><a class="font-caption text-caption text-secondary hover:text-burgundy transition-colors" href="#">Untuk Sekolah</a><a class="font-caption text-caption text-secondary hover:text-burgundy transition-colors" href="#">Harga</a></div></div><div class="flex flex-col gap-unit-4"><span class="font-label-semibold text-ink">Perusahaan</span><div class="flex flex-col gap-unit-2"><a class="font-caption text-caption text-secondary hover:text-burgundy transition-colors" href="#">Tentang Kami</a><a class="font-caption text-caption text-secondary hover:text-burgundy transition-colors" href="#">Pusat Bantuan</a><a class="font-caption text-caption text-secondary hover:text-burgundy transition-colors" href="#">Kebijakan Privasi</a></div></div></div></div></footer>
-<script>
-        // Micro-interaction for the dashboard mockup
-        document.addEventListener('DOMContentLoaded', () => {
-            const card = document.querySelector('.paper-card');
-            if (card) {
-                card.addEventListener('mouseenter', () => {
-                    card.style.transform = 'translateY(-4px) rotate(0deg)';
-                });
-                card.addEventListener('mouseleave', () => {
-                    card.style.transform = 'translateY(0) rotate(1deg)';
-                });
-            }
-        });
+                    <p class="font-h3 text-h3 text-ink">SMA Nusantara Raya</p>
+                  </div>
+                </div>
+                <div
+                  class="bg-surface-container px-unit-3 py-unit-1 rounded text-caption font-label-semibold text-burgundy"
+                >
+                  Aktif: 42 Guru
+                </div>
+              </div>
+              <div class="space-y-unit-4">
+                <div class="flex gap-unit-4">
+                  <div class="flex-1 p-unit-3 border border-border-subtle rounded-lg bg-background">
+                    <p class="text-caption text-secondary">Kuota AI Terpakai</p>
+                    <div
+                      class="mt-unit-2 h-2 bg-surface-container-highest rounded-full overflow-hidden"
+                    >
+                      <div class="bg-burgundy h-full w-[65%]"></div>
+                    </div>
+                    <p class="text-caption font-label-semibold mt-unit-1">6,500 / 10,000 unit</p>
+                  </div>
+                  <div class="flex-1 p-unit-3 border border-border-subtle rounded-lg bg-background">
+                    <p class="text-caption text-secondary">Total Bank Soal</p>
+                    <p class="font-h3 text-h3 text-ink mt-unit-1">
+                      1,248 <span class="text-caption text-secondary font-normal">soal</span>
+                    </p>
+                  </div>
+                </div>
+                <div class="p-unit-3 border border-border-subtle rounded-lg">
+                  <p class="text-caption font-label-semibold text-secondary mb-unit-2">
+                    Aktivitas Terkini
+                  </p>
+                  <div class="space-y-unit-2">
+                    <div
+                      class="flex items-center justify-between text-caption border-b border-border-subtle py-unit-1"
+                    >
+                      <span class="text-ink">Bu Rina (Matematika) mengekspor 40 soal</span>
+                      <span class="text-secondary">2 menit lalu</span>
+                    </div>
+                    <div
+                      class="flex items-center justify-between text-caption border-b border-border-subtle py-unit-1"
+                    >
+                      <span class="text-ink">Pak Budi menambahkan Template UAS Ganjil</span>
+                      <span class="text-secondary">1 jam lalu</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- Value Props Section -->
+      <section class="py-unit-16 px-margin-mobile md:px-margin-desktop bg-white">
+        <div class="max-w-container-max mx-auto">
+          <div class="text-center mb-unit-12">
+            <span class="text-burgundy font-label-semibold uppercase tracking-widest text-caption"
+              >Fitur Enterprise</span
+            >
+            <h2 class="font-h2 text-h2 text-ink mt-unit-2">Kendali Penuh di Tangan Pendidik</h2>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-unit-6">
+            <!-- Prop 1 -->
+            <div
+              class="p-unit-8 border border-border-subtle rounded-xl hover:border-burgundy transition-colors group"
+            >
+              <div
+                class="w-12 h-12 rounded bg-surface-container flex items-center justify-center mb-unit-6 group-hover:bg-burgundy group-hover:text-white transition-colors"
+              >
+                <span class="material-symbols-outlined">group</span>
+              </div>
+              <h3 class="font-h3 text-h3 text-ink mb-unit-3">Manajemen Akun &amp; Kuota</h3>
+              <p class="text-secondary text-body-sm">
+                Tambahkan atau hapus akses guru dengan mudah. Alokasikan kuota AI sesuai kebutuhan
+                mata pelajaran.
+              </p>
+            </div>
+            <!-- Prop 2 -->
+            <div
+              class="p-unit-8 border border-border-subtle rounded-xl hover:border-burgundy transition-colors group"
+            >
+              <div
+                class="w-12 h-12 rounded bg-surface-container flex items-center justify-center mb-unit-6 group-hover:bg-burgundy group-hover:text-white transition-colors"
+              >
+                <span class="material-symbols-outlined">database</span>
+              </div>
+              <h3 class="font-h3 text-h3 text-ink mb-unit-3">Bank Soal Internal</h3>
+              <p class="text-secondary text-body-sm">
+                Simpan aset intelektual sekolah dalam repositori pribadi yang terenkripsi dan hanya
+                dapat diakses staf internal.
+              </p>
+            </div>
+            <!-- Prop 3 -->
+            <div
+              class="p-unit-8 border border-border-subtle rounded-xl hover:border-burgundy transition-colors group"
+            >
+              <div
+                class="w-12 h-12 rounded bg-surface-container flex items-center justify-center mb-unit-6 group-hover:bg-burgundy group-hover:text-white transition-colors"
+              >
+                <span class="material-symbols-outlined">brand_family</span>
+              </div>
+              <h3 class="font-h3 text-h3 text-ink mb-unit-3">Template Bersama</h3>
+              <p class="text-secondary text-body-sm">
+                Samakan format header, font, dan branding ujian untuk seluruh kelas guna menjaga
+                kredibilitas sekolah.
+              </p>
+            </div>
+            <!-- Prop 4 -->
+            <div
+              class="p-unit-8 border border-border-subtle rounded-xl hover:border-burgundy transition-colors group"
+            >
+              <div
+                class="w-12 h-12 rounded bg-surface-container flex items-center justify-center mb-unit-6 group-hover:bg-burgundy group-hover:text-white transition-colors"
+              >
+                <span class="material-symbols-outlined">history_edu</span>
+              </div>
+              <h3 class="font-h3 text-h3 text-ink mb-unit-3">Audit Trail</h3>
+              <p class="text-secondary text-body-sm">
+                Pantau log aktivitas pembuatan dan ekspor soal secara transparan untuk meminimalisir
+                kebocoran data.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- Product Image Section (Bento Grid Style) -->
+      <section class="py-unit-16 px-margin-mobile md:px-margin-desktop bg-paper">
+        <div class="max-w-container-max mx-auto">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-unit-6">
+            <!-- Left Column: Visual Insight -->
+            <div class="lg:col-span-8 h-[400px] rounded-2xl overflow-hidden paper-card relative">
+              <div
+                class="absolute inset-0 bg-gradient-to-br from-transparent to-black/5 z-10 pointer-events-none"
+              ></div>
+              <div class="p-unit-8 relative z-20">
+                <span
+                  class="bg-burgundy/10 text-burgundy px-unit-3 py-unit-1 rounded font-label-semibold text-caption"
+                  >Visual Insight</span
+                >
+                <h3 class="font-h2 text-h2 text-ink mt-unit-4 max-w-sm">
+                  Pantau Progress Asesmen Secara Real-time
+                </h3>
+              </div>
+              <div
+                class="absolute bottom-0 right-0 w-[65%] h-[60%] bg-white rounded-tl-3xl border-t border-l border-border-subtle p-unit-4 shadow-xl"
+              >
+                <div class="flex gap-unit-3 h-full">
+                  <div
+                    class="flex-1 bg-surface-container rounded-lg p-unit-2 flex flex-col justify-end"
+                  >
+                    <div class="h-[80%] w-full bg-burgundy rounded-t opacity-40"></div>
+                    <div class="h-[20%] w-full bg-burgundy rounded-b"></div>
+                    <p class="text-caption font-label-semibold mt-unit-1 text-center scale-90">
+                      Matematika
+                    </p>
+                  </div>
+                  <div
+                    class="flex-1 bg-surface-container rounded-lg p-unit-2 flex flex-col justify-end"
+                  >
+                    <div class="h-[40%] w-full bg-burgundy rounded-t opacity-40"></div>
+                    <div class="h-[60%] w-full bg-burgundy rounded-b"></div>
+                    <p class="text-caption font-label-semibold mt-unit-1 text-center scale-90">
+                      B. Inggris
+                    </p>
+                  </div>
+                  <div
+                    class="flex-1 bg-surface-container rounded-lg p-unit-2 flex flex-col justify-end"
+                  >
+                    <div class="h-[90%] w-full bg-burgundy rounded-t opacity-40"></div>
+                    <div class="h-[10%] w-full bg-burgundy rounded-b"></div>
+                    <p class="text-caption font-label-semibold mt-unit-1 text-center scale-90">
+                      Fisika
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Right Column: Keamanan Data -->
+            <div
+              class="lg:col-span-4 h-[400px] bg-ink rounded-2xl p-unit-8 flex flex-col justify-between text-white overflow-hidden relative group"
+            >
+              <div class="relative z-10">
+                <h3 class="font-h3 text-h3 mb-unit-4">Keamanan Data Prioritas Utama</h3>
+                <p class="text-surface-variant text-body-sm">
+                  Enkripsi tingkat bank untuk setiap butir soal yang dibuat. Data sekolah Anda tetap
+                  menjadi milik sekolah Anda.
+                </p>
+              </div>
+              <div class="relative z-10 flex items-center gap-unit-2 text-secondary-fixed">
+                <span class="material-symbols-outlined text-burgundy">verified_user</span>
+                <span class="text-caption font-label-semibold"
+                  >ISO 27001 Certified Infrastructure</span
+                >
+              </div>
+              <!-- Abstract Decorative Element -->
+              <div
+                class="absolute -bottom-20 -right-20 w-64 h-64 border border-white/10 rounded-full group-hover:scale-110 transition-transform duration-700"
+              ></div>
+              <div
+                class="absolute -bottom-10 -right-10 w-48 h-48 border border-white/5 rounded-full group-hover:scale-125 transition-transform duration-700"
+              ></div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- Pilot Program Section -->
+      <section
+        class="py-unit-16 px-margin-mobile md:px-margin-desktop bg-white border-y border-border-subtle"
+      >
+        <div class="max-w-reading-max mx-auto text-center">
+          <h2 class="font-h2 text-h2 text-ink mb-unit-6">Program Sekolah (Pilot)</h2>
+          <div class="space-y-unit-8 text-left">
+            <div class="flex gap-unit-6">
+              <div
+                class="flex-shrink-0 w-8 h-8 rounded-full border border-burgundy flex items-center justify-center text-burgundy font-bold"
+              >
+                1
+              </div>
+              <div>
+                <h4 class="font-label-semibold text-body-default text-ink">Konsultasi Kebutuhan</h4>
+                <p class="text-secondary text-body-sm mt-unit-1">
+                  Tim kami akan membantu memetakan kebutuhan jumlah guru dan volume asesmen bulanan
+                  sekolah Anda.
+                </p>
+              </div>
+            </div>
+            <div class="flex gap-unit-6">
+              <div
+                class="flex-shrink-0 w-8 h-8 rounded-full border border-burgundy flex items-center justify-center text-burgundy font-bold"
+              >
+                2
+              </div>
+              <div>
+                <h4 class="font-label-semibold text-body-default text-ink">
+                  Onboarding &amp; Pelatihan
+                </h4>
+                <p class="text-secondary text-body-sm mt-unit-1">
+                  Sesi workshop eksklusif untuk guru agar mahir menggunakan asisten AI lembar dalam
+                  hitungan menit.
+                </p>
+              </div>
+            </div>
+            <div class="flex gap-unit-6">
+              <div
+                class="flex-shrink-0 w-8 h-8 rounded-full border border-burgundy flex items-center justify-center text-burgundy font-bold"
+              >
+                3
+              </div>
+              <div>
+                <h4 class="font-label-semibold text-body-default text-ink">
+                  Implementasi Bertahap
+                </h4>
+                <p class="text-secondary text-body-sm mt-unit-1">
+                  Mulai dengan satu departemen atau jenjang kelas sebelum diperluas ke seluruh
+                  institusi.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- CTA Section -->
+      <section
+        class="py-unit-16 px-margin-mobile md:px-margin-desktop bg-paper relative overflow-hidden"
+      >
+        <!-- Subtle Background Pattern -->
+        <div
+          class="absolute inset-0 opacity-[0.03] pointer-events-none"
+          style="
+            background-image: radial-gradient(#171717 1px, transparent 1px);
+            background-size: 24px 24px;
+          "
+        ></div>
+        <div
+          class="max-w-container-max mx-auto paper-card rounded-2xl p-unit-12 flex flex-col md:flex-row items-center justify-between gap-unit-8 relative z-10"
+        >
+          <div class="text-center md:text-left">
+            <h2 class="font-h2 text-h2 text-ink mb-unit-2">
+              Siap untuk digitalisasi asesmen sekolah?
+            </h2>
+            <p class="text-secondary text-body-default">
+              Bergabunglah dengan puluhan institusi yang telah meningkatkan efisiensi guru hingga
+              70%.
+            </p>
+          </div>
+          <button
+            class="bg-burgundy text-on-primary px-unit-12 py-unit-4 rounded font-label-semibold text-body-lead hover:shadow-lg transition-all transform active:scale-95 whitespace-nowrap"
+          >
+            Diskusikan kebutuhan sekolah
+          </button>
+        </div>
+      </section>
+    </main>
+    <!-- Footer -->
+    <footer
+      class="w-full py-unit-12 border-t border-border-strong dark:border-outline bg-paper dark:bg-surface-container-low"
+    >
+      <div
+        class="flex flex-col md:flex-row justify-between items-start gap-unit-12 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto"
+      >
+        <div class="flex flex-col gap-unit-6">
+          <div class="h-unit-8 w-unit-8">
+            <img
+              alt="lembar logo"
+              class="h-full w-full object-contain"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuAp9K9UpBGq9yeOy6I3PxGbePnCwa9H_U_j13dh3aLeDE7Xpey3plk3vcS9Qm8hePmA36hgFgFfqWaBE7DynvVBU8-VkN_84GcCwNalagl0xQUsI3GKLwX68vtO6wsj4EvslKJ-3n56fnKadcVUAqkIbbxmdeREsfROoHsp6ZJd0-vRRdU6adFbLVPTzh7F3x0BZtxH4aiwxdXGaNXGw5ysRu6VhS0JZ_ZhU1BVqmeFqlb-8GFKPXzzQZVuRC-vsTSmCY6Agq3p5A"
+            />
+          </div>
+          <p class="font-caption text-caption text-secondary max-w-[240px]">
+            © 2024 lembar. Dirancang untuk keahlian pendidik.
+          </p>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-2 gap-x-unit-12 gap-y-unit-8">
+          <div class="flex flex-col gap-unit-4">
+            <span class="font-label-semibold text-ink">Layanan</span>
+            <div class="flex flex-col gap-unit-2">
+              <a
+                class="font-caption text-caption text-secondary hover:text-burgundy transition-colors"
+                href="#"
+                >Produk</a
+              ><a
+                class="font-caption text-caption text-secondary hover:text-burgundy transition-colors"
+                href="#"
+                >Untuk Sekolah</a
+              ><a
+                class="font-caption text-caption text-secondary hover:text-burgundy transition-colors"
+                href="#"
+                >Harga</a
+              >
+            </div>
+          </div>
+          <div class="flex flex-col gap-unit-4">
+            <span class="font-label-semibold text-ink">Perusahaan</span>
+            <div class="flex flex-col gap-unit-2">
+              <a
+                class="font-caption text-caption text-secondary hover:text-burgundy transition-colors"
+                href="#"
+                >Tentang Kami</a
+              ><a
+                class="font-caption text-caption text-secondary hover:text-burgundy transition-colors"
+                href="#"
+                >Pusat Bantuan</a
+              ><a
+                class="font-caption text-caption text-secondary hover:text-burgundy transition-colors"
+                href="#"
+                >Kebijakan Privasi</a
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+    <script>
+      // Micro-interaction for the dashboard mockup
+      document.addEventListener('DOMContentLoaded', () => {
+        const card = document.querySelector('.paper-card');
+        if (card) {
+          card.addEventListener('mouseenter', () => {
+            card.style.transform = 'translateY(-4px) rotate(0deg)';
+          });
+          card.addEventListener('mouseleave', () => {
+            card.style.transform = 'translateY(0) rotate(1deg)';
+          });
+        }
+      });
     </script>
-
-
-</body></html>
+  </body>
+</html>

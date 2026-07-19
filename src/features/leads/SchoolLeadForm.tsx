@@ -51,13 +51,7 @@ function describedBy(...ids: Array<string | undefined>) {
   return ids.filter(Boolean).join(' ') || undefined;
 }
 
-function FormStatus({
-  message,
-  tone,
-}: {
-  message?: string;
-  tone: 'idle' | 'alert' | 'success';
-}) {
+function FormStatus({ message, tone }: { message?: string; tone: 'idle' | 'alert' | 'success' }) {
   if (!message) return null;
   const role = tone === 'alert' ? 'alert' : 'status';
   const className =
@@ -163,7 +157,11 @@ export default function SchoolLeadForm() {
           aria-describedby={describedBy(errors.name ? 'lead-name-error' : undefined)}
           disabled={submit.busy}
         />
-        {errors.name ? <p id="lead-name-error" className={errorClass}>{errors.name}</p> : null}
+        {errors.name ? (
+          <p id="lead-name-error" className={errorClass}>
+            {errors.name}
+          </p>
+        ) : null}
       </div>
 
       <fieldset className="flex flex-col gap-unit-3">
@@ -171,7 +169,11 @@ export default function SchoolLeadForm() {
         <p id="lead-contact-help" className={helpClass}>
           Isi email kerja atau nomor telepon kerja. Salah satu cukup.
         </p>
-        {errors.contact ? <p id="lead-contact-error" role="alert" className={errorClass}>{errors.contact}</p> : null}
+        {errors.contact ? (
+          <p id="lead-contact-error" role="alert" className={errorClass}>
+            {errors.contact}
+          </p>
+        ) : null}
         <div className="grid grid-cols-1 gap-unit-4 sm:grid-cols-2">
           <div className="flex flex-col gap-unit-2">
             <label htmlFor="lead-email" className={labelClass}>
@@ -192,7 +194,11 @@ export default function SchoolLeadForm() {
               )}
               disabled={submit.busy}
             />
-            {errors.email ? <p id="lead-email-error" className={errorClass}>{errors.email}</p> : null}
+            {errors.email ? (
+              <p id="lead-email-error" className={errorClass}>
+                {errors.email}
+              </p>
+            ) : null}
           </div>
           <div className="flex flex-col gap-unit-2">
             <label htmlFor="lead-phone" className={labelClass}>
@@ -214,7 +220,11 @@ export default function SchoolLeadForm() {
               )}
               disabled={submit.busy}
             />
-            {errors.phone ? <p id="lead-phone-error" className={errorClass}>{errors.phone}</p> : null}
+            {errors.phone ? (
+              <p id="lead-phone-error" className={errorClass}>
+                {errors.phone}
+              </p>
+            ) : null}
           </div>
         </div>
       </fieldset>
@@ -234,7 +244,11 @@ export default function SchoolLeadForm() {
             aria-describedby={describedBy(errors.school ? 'lead-school-error' : undefined)}
             disabled={submit.busy}
           />
-          {errors.school ? <p id="lead-school-error" className={errorClass}>{errors.school}</p> : null}
+          {errors.school ? (
+            <p id="lead-school-error" className={errorClass}>
+              {errors.school}
+            </p>
+          ) : null}
         </div>
 
         <div className="flex flex-col gap-unit-2">
@@ -256,7 +270,11 @@ export default function SchoolLeadForm() {
             <option value="kurikulum">Kurikulum</option>
             <option value="lainnya">Lainnya</option>
           </select>
-          {errors.role ? <p id="lead-role-error" className={errorClass}>{errors.role}</p> : null}
+          {errors.role ? (
+            <p id="lead-role-error" className={errorClass}>
+              {errors.role}
+            </p>
+          ) : null}
         </div>
 
         <div className="flex flex-col gap-unit-2">
@@ -277,7 +295,11 @@ export default function SchoolLeadForm() {
             )}
             disabled={submit.busy}
           />
-          {errors.teacherCount ? <p id="lead-teacher-count-error" className={errorClass}>{errors.teacherCount}</p> : null}
+          {errors.teacherCount ? (
+            <p id="lead-teacher-count-error" className={errorClass}>
+              {errors.teacherCount}
+            </p>
+          ) : null}
         </div>
       </div>
 
@@ -292,13 +314,20 @@ export default function SchoolLeadForm() {
           className={`${fieldClass} min-h-28 resize-y`}
           placeholder="Ceritakan kebutuhan sekolah secara singkat"
           aria-invalid={errors.goal ? true : undefined}
-          aria-describedby={describedBy('lead-goal-help', errors.goal ? 'lead-goal-error' : undefined)}
+          aria-describedby={describedBy(
+            'lead-goal-help',
+            errors.goal ? 'lead-goal-error' : undefined,
+          )}
           disabled={submit.busy}
         />
         <p id="lead-goal-help" className={helpClass}>
           Jangan tulis data siswa atau informasi sensitif.
         </p>
-        {errors.goal ? <p id="lead-goal-error" className={errorClass}>{errors.goal}</p> : null}
+        {errors.goal ? (
+          <p id="lead-goal-error" className={errorClass}>
+            {errors.goal}
+          </p>
+        ) : null}
       </div>
 
       <div className="flex items-start gap-unit-3 rounded-lg border border-border-subtle bg-surface px-unit-4 py-unit-3">
@@ -316,7 +345,11 @@ export default function SchoolLeadForm() {
           <label htmlFor="lead-consent" className="font-body-sm text-body-sm text-ink">
             Saya menyetujui pemrosesan data untuk menindaklanjuti permintaan sekolah.
           </label>
-          {errors.consent ? <p id="lead-consent-error" className={errorClass}>{errors.consent}</p> : null}
+          {errors.consent ? (
+            <p id="lead-consent-error" className={errorClass}>
+              {errors.consent}
+            </p>
+          ) : null}
         </div>
       </div>
 

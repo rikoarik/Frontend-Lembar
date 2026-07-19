@@ -18,9 +18,7 @@ const TONE: Record<Tone, string> = {
 export default function Notice({ tone = 'info', title, children }: NoticeProps) {
   return (
     <div className={`flex flex-col gap-1 rounded-lg border px-3 py-2 ${TONE[tone]}`}>
-      {title ? (
-        <strong className="font-label-semibold text-label-semibold">{title}</strong>
-      ) : null}
+      {title ? <strong className="font-label-semibold text-label-semibold">{title}</strong> : null}
       <p className="font-body-sm text-body-sm">{children}</p>
     </div>
   );

@@ -25,9 +25,7 @@ function buildHeaders(init: RequestInit): Headers {
   return headers;
 }
 
-async function parseEnvelope(
-  response: Response,
-): Promise<LeadErrorEnvelope | null> {
+async function parseEnvelope(response: Response): Promise<LeadErrorEnvelope | null> {
   try {
     const body = (await response.json()) as { error?: LeadErrorEnvelope };
     return body?.error ?? null;

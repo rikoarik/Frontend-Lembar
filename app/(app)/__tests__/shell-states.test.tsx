@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { ShellError, ShellForbidden, ShellLoading, ShellNotFound } from '@/app/components/app/ShellStates';
+import {
+  ShellError,
+  ShellForbidden,
+  ShellLoading,
+  ShellNotFound,
+} from '@/app/components/app/ShellStates';
 
 describe('Shell states', () => {
   it('renders loading skeleton with busy state', () => {

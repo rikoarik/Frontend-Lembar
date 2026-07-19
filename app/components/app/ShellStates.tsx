@@ -35,7 +35,10 @@ export function ShellError({ requestId }: { requestId?: string }) {
         </p>
         <div className="flex flex-wrap gap-3">
           <Button onClick={() => window.location.reload()}>Muat ulang</Button>
-          <Link href="/bantuan" className="inline-flex items-center text-body-default text-brand-accent underline underline-offset-4">
+          <Link
+            href="/bantuan"
+            className="inline-flex items-center text-body-default text-brand-accent underline underline-offset-4"
+          >
             Buka bantuan
           </Link>
         </div>
@@ -52,10 +55,16 @@ export function ShellNotFound() {
       className="max-w-reading-max"
     >
       <div className="flex flex-wrap gap-3">
-        <Link href="/app" className="inline-flex min-h-[var(--control-md)] items-center rounded-md bg-brand-accent px-4 text-body-default font-medium text-white">
+        <Link
+          href="/app"
+          className="inline-flex min-h-[var(--control-md)] items-center rounded-md bg-brand-accent px-4 text-body-default font-medium text-white"
+        >
           Kembali ke dashboard
         </Link>
-        <Link href="/app/riwayat" className="inline-flex min-h-[var(--control-md)] items-center rounded-md border border-brand-line px-4 text-body-default text-brand-ink">
+        <Link
+          href="/app/riwayat"
+          className="inline-flex min-h-[var(--control-md)] items-center rounded-md border border-brand-line px-4 text-body-default text-brand-ink"
+        >
           Buka riwayat
         </Link>
       </div>
@@ -71,10 +80,16 @@ export function ShellForbidden() {
       className="max-w-reading-max"
     >
       <div className="flex flex-wrap gap-3">
-        <Link href="/app" className="inline-flex min-h-[var(--control-md)] items-center rounded-md bg-brand-accent px-4 text-body-default font-medium text-white">
+        <Link
+          href="/app"
+          className="inline-flex min-h-[var(--control-md)] items-center rounded-md bg-brand-accent px-4 text-body-default font-medium text-white"
+        >
           Kembali ke dashboard
         </Link>
-        <Link href="/bantuan" className="inline-flex min-h-[var(--control-md)] items-center rounded-md border border-brand-line px-4 text-body-default text-brand-ink">
+        <Link
+          href="/bantuan"
+          className="inline-flex min-h-[var(--control-md)] items-center rounded-md border border-brand-line px-4 text-body-default text-brand-ink"
+        >
           Hubungi bantuan
         </Link>
       </div>
@@ -89,7 +104,10 @@ export function ShellPlaceholder({ title, description }: { title: string; descri
         <p className="text-body-default text-brand-ink-muted">
           Sementara itu, gunakan dashboard untuk membuat atau membuka lembar yang sudah tersedia.
         </p>
-        <Link href="/app" className="inline-flex min-h-[var(--control-md)] w-fit items-center rounded-md bg-brand-accent px-4 text-body-default font-medium text-white">
+        <Link
+          href="/app"
+          className="inline-flex min-h-[var(--control-md)] w-fit items-center rounded-md bg-brand-accent px-4 text-body-default font-medium text-white"
+        >
           Kembali ke dashboard
         </Link>
       </div>

@@ -1,86 +1,358 @@
 <style>
-  .auth-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; align-items:stretch; }
-  .auth-choice { border:1px solid #d8d0c5; border-radius:14px; overflow:hidden; background:#fff; cursor:pointer; transition:.18s ease; }
-  .auth-choice:hover { transform:translateY(-2px); box-shadow:0 12px 30px rgb(23 23 23 / .09); }
-  .auth-choice.selected { outline:3px solid #a3202b; outline-offset:2px; }
-  .auth-canvas { height:430px; background:#f7f3ec; color:#171717; position:relative; overflow:hidden; font-family:Inter,ui-sans-serif,system-ui; }
-  .auth-bar { height:50px; padding:0 17px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #d8d0c5; background:#fffcf7; font-size:10px; }
-  .brand { display:flex; align-items:center; gap:7px; font-weight:750; font-size:14px; }
-  .brand-mark { width:13px; height:18px; border-left:4px solid #a3202b; border-bottom:4px solid #171717; }
-  .mini-link { color:#625d55; }
-  .auth-main { height:380px; display:flex; align-items:center; justify-content:center; padding:22px; }
-  .auth-form { width:100%; max-width:275px; }
-  .auth-form h3 { font-size:21px; margin:0 0 7px; letter-spacing:-.02em; }
-  .auth-form p { font-size:10px; line-height:1.5; color:#625d55; margin:0 0 17px; }
-  .field { margin-bottom:10px; }
-  .field label { display:block; font-size:9px; font-weight:700; margin-bottom:5px; }
-  .input { height:33px; border:1px solid #b9afa2; background:#fff; border-radius:7px; display:flex; align-items:center; padding:0 10px; font-size:9px; color:#726c63; }
-  .primary { height:35px; width:100%; border-radius:7px; background:#a3202b; color:#fff; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:750; margin-top:12px; }
-  .foot { margin-top:13px; text-align:center; font-size:9px; color:#625d55; }
-  .foot b { color:#a3202b; }
-  .split-auth { display:grid; grid-template-columns:44% 56%; height:380px; }
-  .story { background:#171717; color:#fffcf7; padding:40px 26px; display:flex; flex-direction:column; justify-content:space-between; }
-  .story .eyebrow { color:#f3b6ba; font-size:8px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
-  .story h3 { font-size:20px; line-height:1.15; margin:12px 0; }
-  .story p { color:#c8c0b6; font-size:9px; line-height:1.55; }
-  .steps { display:flex; gap:6px; }
-  .steps span { width:20px; height:3px; background:#514d48; border-radius:2px; }
-  .steps span:first-child { background:#a3202b; }
-  .split-form { background:#fffcf7; display:flex; align-items:center; justify-content:center; padding:24px 20px; }
-  .paper-preview { position:absolute; inset:78px auto auto 18px; width:42%; height:285px; background:#fff; border:1px solid #d8d0c5; border-radius:4px; transform:rotate(-2deg); box-shadow:0 12px 28px rgb(23 23 23 / .10); padding:20px; }
-  .paper-line { height:5px; background:#e6e0d7; border-radius:2px; margin-bottom:8px; }
-  .paper-line.short { width:55%; background:#a3202b; }
-  .paper-line.mid { width:78%; }
-  .paper-dot { width:9px; height:9px; border:1px solid #b9afa2; border-radius:50%; display:inline-block; margin:7px 5px 7px 0; }
-  .offset-form { position:absolute; right:17px; top:73px; width:49%; background:#fffcf7; border:1px solid #d8d0c5; border-radius:12px; padding:22px; box-shadow:0 8px 24px rgb(23 23 23 / .08); }
-  .auth-meta { padding:14px 16px 16px; border-top:1px solid #ebe5dc; }
-  .auth-meta .tag { font-size:8px; font-weight:800; color:#a3202b; letter-spacing:.08em; }
-  .auth-meta h3 { font-size:16px; margin:5px 0 4px; }
-  .auth-meta p { font-size:10px; color:#625d55; line-height:1.45; margin:0; }
-  @media(max-width:1000px){ .auth-grid{grid-template-columns:1fr;} }
+  .auth-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+    align-items: stretch;
+  }
+  .auth-choice {
+    border: 1px solid #d8d0c5;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #fff;
+    cursor: pointer;
+    transition: 0.18s ease;
+  }
+  .auth-choice:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgb(23 23 23 / 0.09);
+  }
+  .auth-choice.selected {
+    outline: 3px solid #a3202b;
+    outline-offset: 2px;
+  }
+  .auth-canvas {
+    height: 430px;
+    background: #f7f3ec;
+    color: #171717;
+    position: relative;
+    overflow: hidden;
+    font-family: Inter, ui-sans-serif, system-ui;
+  }
+  .auth-bar {
+    height: 50px;
+    padding: 0 17px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #d8d0c5;
+    background: #fffcf7;
+    font-size: 10px;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-weight: 750;
+    font-size: 14px;
+  }
+  .brand-mark {
+    width: 13px;
+    height: 18px;
+    border-left: 4px solid #a3202b;
+    border-bottom: 4px solid #171717;
+  }
+  .mini-link {
+    color: #625d55;
+  }
+  .auth-main {
+    height: 380px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 22px;
+  }
+  .auth-form {
+    width: 100%;
+    max-width: 275px;
+  }
+  .auth-form h3 {
+    font-size: 21px;
+    margin: 0 0 7px;
+    letter-spacing: -0.02em;
+  }
+  .auth-form p {
+    font-size: 10px;
+    line-height: 1.5;
+    color: #625d55;
+    margin: 0 0 17px;
+  }
+  .field {
+    margin-bottom: 10px;
+  }
+  .field label {
+    display: block;
+    font-size: 9px;
+    font-weight: 700;
+    margin-bottom: 5px;
+  }
+  .input {
+    height: 33px;
+    border: 1px solid #b9afa2;
+    background: #fff;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    font-size: 9px;
+    color: #726c63;
+  }
+  .primary {
+    height: 35px;
+    width: 100%;
+    border-radius: 7px;
+    background: #a3202b;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 750;
+    margin-top: 12px;
+  }
+  .foot {
+    margin-top: 13px;
+    text-align: center;
+    font-size: 9px;
+    color: #625d55;
+  }
+  .foot b {
+    color: #a3202b;
+  }
+  .split-auth {
+    display: grid;
+    grid-template-columns: 44% 56%;
+    height: 380px;
+  }
+  .story {
+    background: #171717;
+    color: #fffcf7;
+    padding: 40px 26px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .story .eyebrow {
+    color: #f3b6ba;
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .story h3 {
+    font-size: 20px;
+    line-height: 1.15;
+    margin: 12px 0;
+  }
+  .story p {
+    color: #c8c0b6;
+    font-size: 9px;
+    line-height: 1.55;
+  }
+  .steps {
+    display: flex;
+    gap: 6px;
+  }
+  .steps span {
+    width: 20px;
+    height: 3px;
+    background: #514d48;
+    border-radius: 2px;
+  }
+  .steps span:first-child {
+    background: #a3202b;
+  }
+  .split-form {
+    background: #fffcf7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 20px;
+  }
+  .paper-preview {
+    position: absolute;
+    inset: 78px auto auto 18px;
+    width: 42%;
+    height: 285px;
+    background: #fff;
+    border: 1px solid #d8d0c5;
+    border-radius: 4px;
+    transform: rotate(-2deg);
+    box-shadow: 0 12px 28px rgb(23 23 23 / 0.1);
+    padding: 20px;
+  }
+  .paper-line {
+    height: 5px;
+    background: #e6e0d7;
+    border-radius: 2px;
+    margin-bottom: 8px;
+  }
+  .paper-line.short {
+    width: 55%;
+    background: #a3202b;
+  }
+  .paper-line.mid {
+    width: 78%;
+  }
+  .paper-dot {
+    width: 9px;
+    height: 9px;
+    border: 1px solid #b9afa2;
+    border-radius: 50%;
+    display: inline-block;
+    margin: 7px 5px 7px 0;
+  }
+  .offset-form {
+    position: absolute;
+    right: 17px;
+    top: 73px;
+    width: 49%;
+    background: #fffcf7;
+    border: 1px solid #d8d0c5;
+    border-radius: 12px;
+    padding: 22px;
+    box-shadow: 0 8px 24px rgb(23 23 23 / 0.08);
+  }
+  .auth-meta {
+    padding: 14px 16px 16px;
+    border-top: 1px solid #ebe5dc;
+  }
+  .auth-meta .tag {
+    font-size: 8px;
+    font-weight: 800;
+    color: #a3202b;
+    letter-spacing: 0.08em;
+  }
+  .auth-meta h3 {
+    font-size: 16px;
+    margin: 5px 0 4px;
+  }
+  .auth-meta p {
+    font-size: 10px;
+    color: #625d55;
+    line-height: 1.45;
+    margin: 0;
+  }
+  @media (max-width: 1000px) {
+    .auth-grid {
+      grid-template-columns: 1fr;
+    }
+  }
 </style>
 
 <h2>Pilih arah layout halaman identitas</h2>
-<p class="subtitle">Ketiganya memakai warna, tipografi, hierarchy tenang, dan copy Bahasa Indonesia dari sistem desain lembar. Klik satu opsi yang paling terasa tepat.</p>
+<p class="subtitle">
+  Ketiganya memakai warna, tipografi, hierarchy tenang, dan copy Bahasa Indonesia dari sistem desain
+  lembar. Klik satu opsi yang paling terasa tepat.
+</p>
 
 <div class="auth-grid">
   <div class="auth-choice" data-choice="a" onclick="toggleSelect(this)">
     <div class="auth-canvas">
-      <div class="auth-bar"><div class="brand"><span class="brand-mark"></span>lembar</div><span class="mini-link">Kembali ke beranda</span></div>
+      <div class="auth-bar">
+        <div class="brand"><span class="brand-mark"></span>lembar</div>
+        <span class="mini-link">Kembali ke beranda</span>
+      </div>
       <div class="auth-main">
         <div class="auth-form">
           <h3>Masuk ke lembar</h3>
           <p>Lanjutkan membuat, meninjau, dan menyiapkan lembar Anda.</p>
-          <div class="field"><label>Username, email, atau nomor telepon</label><div class="input">Masukkan identitas akun</div></div>
-          <div class="field"><label>Kata sandi</label><div class="input">••••••••••••</div></div>
+          <div class="field">
+            <label>Username, email, atau nomor telepon</label>
+            <div class="input">Masukkan identitas akun</div>
+          </div>
+          <div class="field">
+            <label>Kata sandi</label>
+            <div class="input">••••••••••••</div>
+          </div>
           <div class="primary">Masuk</div>
           <div class="foot">Belum punya akun? <b>Daftar gratis</b></div>
         </div>
       </div>
     </div>
-    <div class="auth-meta"><div class="tag">A · FOKUS</div><h3>Form terpusat</h3><p>Paling tenang dan ringan. Cocok untuk seluruh auth flow, terutama mobile.</p></div>
+    <div class="auth-meta">
+      <div class="tag">A · FOKUS</div>
+      <h3>Form terpusat</h3>
+      <p>Paling tenang dan ringan. Cocok untuk seluruh auth flow, terutama mobile.</p>
+    </div>
   </div>
 
   <div class="auth-choice" data-choice="b" onclick="toggleSelect(this)">
     <div class="auth-canvas">
-      <div class="auth-bar"><div class="brand"><span class="brand-mark"></span>lembar</div><span class="mini-link">Butuh bantuan?</span></div>
+      <div class="auth-bar">
+        <div class="brand"><span class="brand-mark"></span>lembar</div>
+        <span class="mini-link">Butuh bantuan?</span>
+      </div>
       <div class="split-auth">
         <div class="story">
-          <div><div class="eyebrow">Ruang kerja guru</div><h3>Dari materi ke lembar siap ditinjau.</h3><p>Buat draft, periksa setiap soal, lalu finalkan dengan kendali Anda.</p></div>
+          <div>
+            <div class="eyebrow">Ruang kerja guru</div>
+            <h3>Dari materi ke lembar siap ditinjau.</h3>
+            <p>Buat draft, periksa setiap soal, lalu finalkan dengan kendali Anda.</p>
+          </div>
           <div class="steps"><span></span><span></span><span></span></div>
         </div>
-        <div class="split-form"><div class="auth-form"><h3>Masuk ke lembar</h3><p>Gunakan akun yang sudah terdaftar.</p><div class="field"><label>Username, email, atau nomor telepon</label><div class="input">Masukkan identitas akun</div></div><div class="field"><label>Kata sandi</label><div class="input">••••••••••••</div></div><div class="primary">Masuk</div><div class="foot">Belum punya akun? <b>Daftar</b></div></div></div>
+        <div class="split-form">
+          <div class="auth-form">
+            <h3>Masuk ke lembar</h3>
+            <p>Gunakan akun yang sudah terdaftar.</p>
+            <div class="field">
+              <label>Username, email, atau nomor telepon</label>
+              <div class="input">Masukkan identitas akun</div>
+            </div>
+            <div class="field">
+              <label>Kata sandi</label>
+              <div class="input">••••••••••••</div>
+            </div>
+            <div class="primary">Masuk</div>
+            <div class="foot">Belum punya akun? <b>Daftar</b></div>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="auth-meta"><div class="tag">B · EDITORIAL</div><h3>Split story + form</h3><p>Brand lebih kuat di desktop; sisi cerita hilang di mobile agar form tetap fokus.</p></div>
+    <div class="auth-meta">
+      <div class="tag">B · EDITORIAL</div>
+      <h3>Split story + form</h3>
+      <p>Brand lebih kuat di desktop; sisi cerita hilang di mobile agar form tetap fokus.</p>
+    </div>
   </div>
 
   <div class="auth-choice" data-choice="c" onclick="toggleSelect(this)">
     <div class="auth-canvas">
-      <div class="auth-bar"><div class="brand"><span class="brand-mark"></span>lembar</div><span class="mini-link">Kembali ke beranda</span></div>
-      <div class="paper-preview"><div class="paper-line short"></div><div class="paper-line mid"></div><div class="paper-line"></div><br><div class="paper-line mid"></div><span class="paper-dot"></span><span class="paper-dot"></span><span class="paper-dot"></span><div class="paper-line"></div><div class="paper-line mid"></div></div>
-      <div class="offset-form auth-form"><h3>Masuk ke lembar</h3><p>Semua pekerjaan Anda tersimpan dalam satu ruang.</p><div class="field"><label>Username, email, atau nomor telepon</label><div class="input">Masukkan identitas akun</div></div><div class="field"><label>Kata sandi</label><div class="input">••••••••••••</div></div><div class="primary">Masuk</div><div class="foot">Belum punya akun? <b>Daftar</b></div></div>
+      <div class="auth-bar">
+        <div class="brand"><span class="brand-mark"></span>lembar</div>
+        <span class="mini-link">Kembali ke beranda</span>
+      </div>
+      <div class="paper-preview">
+        <div class="paper-line short"></div>
+        <div class="paper-line mid"></div>
+        <div class="paper-line"></div>
+        <br />
+        <div class="paper-line mid"></div>
+        <span class="paper-dot"></span><span class="paper-dot"></span
+        ><span class="paper-dot"></span>
+        <div class="paper-line"></div>
+        <div class="paper-line mid"></div>
+      </div>
+      <div class="offset-form auth-form">
+        <h3>Masuk ke lembar</h3>
+        <p>Semua pekerjaan Anda tersimpan dalam satu ruang.</p>
+        <div class="field">
+          <label>Username, email, atau nomor telepon</label>
+          <div class="input">Masukkan identitas akun</div>
+        </div>
+        <div class="field">
+          <label>Kata sandi</label>
+          <div class="input">••••••••••••</div>
+        </div>
+        <div class="primary">Masuk</div>
+        <div class="foot">Belum punya akun? <b>Daftar</b></div>
+      </div>
     </div>
-    <div class="auth-meta"><div class="tag">C · OUTPUT-FIRST</div><h3>Lembar sebagai bukti</h3><p>Memperkuat produk nyata, tetapi paling ramai dan perlu artwork responsif tambahan.</p></div>
+    <div class="auth-meta">
+      <div class="tag">C · OUTPUT-FIRST</div>
+      <h3>Lembar sebagai bukti</h3>
+      <p>Memperkuat produk nyata, tetapi paling ramai dan perlu artwork responsif tambahan.</p>
+    </div>
   </div>
 </div>

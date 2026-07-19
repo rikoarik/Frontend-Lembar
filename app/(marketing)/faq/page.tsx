@@ -39,10 +39,15 @@ export default function FAQPage() {
         <div className="max-w-3xl mx-auto flex flex-col gap-unit-4">
           <div className="flex flex-col gap-unit-3">
             {faqs.map((faq, i) => (
-              <details key={i} className="bg-paper border border-border-strong rounded-xl overflow-hidden group">
+              <details
+                key={i}
+                className="bg-paper border border-border-strong rounded-xl overflow-hidden group"
+              >
                 <summary className="flex items-center justify-between cursor-pointer px-unit-6 py-unit-5 font-label-semibold text-body-default text-ink hover:bg-surface-container transition-colors select-none">
                   {faq.q}
-                  <span className="material-symbols-outlined text-secondary text-[20px] group-open:rotate-180 transition-transform duration-200 flex-shrink-0 ml-4">expand_more</span>
+                  <span className="material-symbols-outlined text-secondary text-[20px] group-open:rotate-180 transition-transform duration-200 flex-shrink-0 ml-4">
+                    expand_more
+                  </span>
                 </summary>
                 <div className="px-unit-6 pb-unit-5 text-secondary text-body-sm leading-relaxed border-t border-border-subtle">
                   <p className="pt-unit-4">{faq.a}</p>
@@ -54,9 +59,14 @@ export default function FAQPage() {
           <div className="mt-unit-8 flex items-center gap-unit-6 p-unit-8 bg-paper border border-border-strong rounded-2xl">
             <div className="flex-1">
               <h3 className="font-h3 text-h3 text-ink mb-1">Belum terjawab?</h3>
-              <p className="text-secondary text-body-sm">Hubungi kami langsung — kami fast response.</p>
+              <p className="text-secondary text-body-sm">
+                Hubungi kami langsung — kami fast response.
+              </p>
             </div>
-            <Link href="/kontak" className="bg-burgundy text-on-primary px-unit-6 py-unit-3 rounded-lg font-label-semibold text-caption hover:brightness-110 active:scale-[0.98] transition-all whitespace-nowrap">
+            <Link
+              href="/kontak"
+              className="bg-burgundy text-on-primary px-unit-6 py-unit-3 rounded-lg font-label-semibold text-caption hover:brightness-110 active:scale-[0.98] transition-all whitespace-nowrap"
+            >
               Kontak
             </Link>
           </div>
