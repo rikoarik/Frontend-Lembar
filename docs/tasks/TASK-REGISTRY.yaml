@@ -96,6 +96,28 @@ execution_notes:
       stop_for_worker_completion: forbidden
       stop_for_mvp_placeholder_completion: forbidden
       stop_only_when_complete_or_genuine_owner_decision_required: true
+  branch_policy:
+    stable_branch: main
+    shared_development_branch: dev
+    integration_branch: ao/frontend-integration
+    task_branch_patterns:
+      - feat/<task-id>-<description>
+      - fix/<task-id>-<description>
+      - chore/<task-id>-<description>
+    permanent_rules:
+      - 'Never modify, merge into, or push directly to main automatically.'
+      - 'Create dev from the current valid main baseline when missing, then push dev.'
+      - 'Keep accepted task branches flowing into ao/frontend-integration first; only promote stable verified batches from ao/frontend-integration into dev.'
+      - 'Never merge task branches directly to main and never merge ao/frontend-integration directly to main.'
+      - 'Never force-push or rewrite shared branch history for main, dev, ao/frontend-integration, or task branches.'
+      - 'Do not promote ao/frontend-integration to dev while incomplete, placeholder, experimental, or unverified work remains.'
+    current_state:
+      recorded_at: '2026-07-19T11:28:00+07:00'
+      main_commit: '299fd95d2d232e87ca972d52daa89a24458b967e'
+      dev_status: 'missing-before-policy-application'
+      integration_status: 'exists-and-active-as-verification-lane'
+      promotion_gate: 'Hold ao/frontend-integration below dev until repository-level verification and task acceptance are satisfied.'
+      next_branch_action: 'Create and push dev from origin/main, then continue fixing remaining ao/frontend-integration gates before any promotion to dev.'
 
 tasks:
   - id: O0-01
