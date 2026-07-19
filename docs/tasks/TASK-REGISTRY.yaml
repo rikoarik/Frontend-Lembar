@@ -563,11 +563,27 @@ tasks:
     repository: Frontend-Lembar
     sprint: F2
     title: App shell and workspace switch
-    status: BLOCKED
+    status: PARTIAL
     depends_on: [F0-04, F2-01, B1-02]
     decisions: []
-    outcome: Responsive role-aware shell with safe cache-clearing workspace switch.
-    evidence: [cross-workspace-cache-test, shell-route-prefetch-200, 390, keyboard]
+    outcome: Shell placeholders cover every navigable role-aware /app route; cross-workspace cache and full screen states remain blocked on backend session/workspace contracts.
+    evidence:
+      - shell-route-coverage-test
+      - school-placeholder-verified-200
+      - shell-route-prefetch-200
+      - 390-no-overflow
+    checkpoint:
+      completed_scope:
+        - 'SHELL_PLACEHOLDER_ROUTES extracted to its own module under app/(app)/app/[...slug]/routes.ts.'
+        - 'kelas and analitik added so school-only LeftRail links resolve to a shell placeholder instead of 404.'
+        - 'shell-route-coverage test asserts every navigable /app link has a placeholder entry, preventing future drift.'
+        - 'Verified live: /app/kelas and /app/analitik return 200 with the placeholder shell and no horizontal overflow on desktop and mobile.'
+      verified_integration_commit: 77cdcd185275a604b73751aaf8eaf1f7be010634
+      verified_ci_run: 29682497438
+      promoted_dev_commit: 4f0d6ed
+      remaining_scope:
+        - 'Cross-workspace cache and full backend-dependent screen states remain blocked on B1-02.'
+    next_action: 'Owner-driven acceptance of placeholder coverage; further F2-03 work requires backend session/workspace contracts.'
 
   - id: F2-04
     repository: Frontend-Lembar
