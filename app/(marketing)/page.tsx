@@ -1,4 +1,37 @@
 import Link from 'next/link';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://lembar.id'),
+  title: 'lembar — buat, tinjau, dan finalkan lembar soal',
+  description:
+    'lembar adalah workspace asesmen untuk guru. Pilih materi, susun draft soal dengan bantuan AI, tinjau setiap butir, lalu cetak atau bagikan lembar yang siap dipakai.',
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    title: 'lembar — workspace asesmen untuk guru',
+    description:
+      'Buat draft soal, tinjau sumbernya, dan finalkan lembar yang siap cetak. Draft AI selalu ditinjau guru.',
+    url: '/',
+    siteName: 'lembar',
+    locale: 'id_ID',
+    type: 'website',
+    images: ['/og-image.svg'],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'lembar — workspace asesmen untuk guru',
+    description:
+      'Buat draft soal, tinjau sumbernya, dan finalkan lembar yang siap cetak.',
+    images: ['/og-image.svg'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+};
+
 
 export default function LandingPage() {
   return (
