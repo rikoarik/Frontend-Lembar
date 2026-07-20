@@ -20,8 +20,8 @@ export default function AppDashboardPage() {
 
   useEffect(() => {
     let cancelled = false;
-    setState({ status: 'loading' });
     const load = async () => {
+      setState({ status: 'loading' });
       const { data, error } = await apiClient.GET('/v1/dashboard/summary');
       if (cancelled) return;
       if (error || !data) {
