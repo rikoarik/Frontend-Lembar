@@ -87,6 +87,22 @@
   }
 }
 
+/* F0-08 Print/A4 tokens. Source: PRINT-PDF-SPEC.md §"Page geometry".
+   Physical units only — do not convert to px for print context.
+   These are consumed by A4PreviewFrame and print media queries. */
+:root {
+  --print-page-width: 210mm;
+  --print-page-height: 297mm;
+  --print-margin-top: 14mm;
+  --print-margin-right: 14mm;
+  --print-margin-bottom: 14mm;
+  --print-margin-left: 14mm;
+  --print-content-width: 182mm;
+  --print-content-height: 269mm;
+  --print-font-size: 10.5pt;
+  --print-line-height: 1.4;
+}
+
 @layer components {
   .material-symbols-outlined {
     font-family: 'Material Symbols', sans-serif;

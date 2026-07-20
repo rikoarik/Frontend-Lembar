@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import { fetchMarketingPage } from '@/src/lib/marketing/fetchMarketingPage';
+import { BlockRenderer } from '@/app/components/marketing/BlockRenderer';
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://lembar.id'),
@@ -31,7 +33,11 @@ export const metadata: Metadata = {
   },
 };
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const cmsDoc = await fetchMarketingPage('home');
+  if (cmsDoc) {
+    return <BlockRenderer blocks={cmsDoc.blocks} />;
+  }
   return (
     <>
       <main className="flex-grow">

@@ -17,6 +17,7 @@ type CacheEntry = {
 type WorkspaceContextValue = {
   activeWorkspace: Workspace;
   workspaces: Workspace[];
+  displayName: string;
   announcement: string;
   cacheScope: string;
   getCacheKey: (key: string) => string;
@@ -24,6 +25,7 @@ type WorkspaceContextValue = {
   switchWorkspace: (workspaceId: string) => boolean;
 };
 
+// Seed data used in tests and as fallback during development
 const DEMO_WORKSPACES: Workspace[] = [
   {
     id: 'ws_demo',
@@ -45,15 +47,37 @@ function labelFor(workspace: Workspace): string {
   return `${workspace.name} · ${workspace.kind === 'school' ? 'Sekolah' : 'Pribadi'}`;
 }
 
-export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
-  const [activeWorkspaceId, setActiveWorkspaceId] = useState(DEMO_WORKSPACES[0].id);
-  const [announcement, setAnnouncement] = useState(
-    `Workspace aktif: ${labelFor(DEMO_WORKSPACES[0])}`,
-  );
+type WorkspaceProviderProps = {
+  children: React.ReactNode;
+  /** Real workspaces from /v1/me. Falls back to DEMO_WORKSPACES when omitted. */
+  initialWorkspaces?: Workspace[];
+  /** ID of the active workspace from /v1/me. Falls back to first workspace when omitted. */
+  initialActiveId?: string;
+  /** Display name from /v1/me account.displayName. Falls back to 'Demo Guru'. */
+  initialDisplayName?: string;
+};
+
+export function WorkspaceProvider({
+  children,
+  initialWorkspaces,
+  initialActiveId,
+  initialDisplayName,
+}: WorkspaceProviderProps) {
+  const workspaceList = initialWorkspaces ?? DEMO_WORKSPACES;
+  const firstWorkspace = workspaceList[0];
+  const resolvedActiveId = initialActiveId ?? firstWorkspace?.id ?? '';
+
+  const [activeWorkspaceId, setActiveWorkspaceId] = useState(resolvedActiveId);
+  const [announcement, setAnnouncement] = useState(() => {
+    const ws = workspaceList.find((w) => w.id === resolvedActiveId) ?? firstWorkspace;
+    return ws ? `Workspace aktif: ${labelFor(ws)}` : '';
+  });
   const cacheRef = useRef(new Map<string, CacheEntry>());
 
   const activeWorkspace =
-    DEMO_WORKSPACES.find((workspace) => workspace.id === activeWorkspaceId) ?? DEMO_WORKSPACES[0];
+    workspaceList.find((workspace) => workspace.id === activeWorkspaceId) ??
+    firstWorkspace ??
+    DEMO_WORKSPACES[0];
 
   const clearCacheFor = useCallback((workspaceId: string) => {
     for (const [key, entry] of cacheRef.current) {
@@ -80,27 +104,28 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 
   const switchWorkspace = useCallback(
     (workspaceId: string) => {
-      const nextWorkspace = DEMO_WORKSPACES.find((workspace) => workspace.id === workspaceId);
+      const nextWorkspace = workspaceList.find((workspace) => workspace.id === workspaceId);
       if (!nextWorkspace || workspaceId === activeWorkspaceId) return false;
       clearCacheFor(activeWorkspaceId);
       setActiveWorkspaceId(workspaceId);
       setAnnouncement(`Workspace aktif: ${labelFor(nextWorkspace)}`);
       return true;
     },
-    [activeWorkspaceId, clearCacheFor],
+    [activeWorkspaceId, clearCacheFor, workspaceList],
   );
 
   const value = useMemo<WorkspaceContextValue>(
     () => ({
       activeWorkspace,
-      workspaces: DEMO_WORKSPACES,
+      workspaces: workspaceList,
+      displayName: initialDisplayName ?? 'Demo Guru',
       announcement,
       cacheScope: activeWorkspace.id,
       getCacheKey,
       registerCache,
       switchWorkspace,
     }),
-    [activeWorkspace, announcement, getCacheKey, registerCache, switchWorkspace],
+    [activeWorkspace, workspaceList, initialDisplayName, announcement, getCacheKey, registerCache, switchWorkspace],
   );
 
   return <WorkspaceContext.Provider value={value}>{children}</WorkspaceContext.Provider>;

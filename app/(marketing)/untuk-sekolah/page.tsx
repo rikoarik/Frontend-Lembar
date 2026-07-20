@@ -1,8 +1,13 @@
-'use client';
-
 import Link from 'next/link';
+import { fetchMarketingPage } from '@/src/lib/marketing/fetchMarketingPage';
+import { BlockRenderer } from '@/app/components/marketing/BlockRenderer';
+import { HoverCard } from './HoverCard';
 
-export default function UntukSekolahPage() {
+export default async function UntukSekolahPage() {
+  const cmsDoc = await fetchMarketingPage('untuk-sekolah');
+  if (cmsDoc) {
+    return <BlockRenderer blocks={cmsDoc.blocks} />;
+  }
   return (
     <>
       <div>
@@ -26,16 +31,7 @@ export default function UntukSekolahPage() {
               </div>
             </div>
             <div className="lg:col-span-6 relative">
-              <div
-                className="paper-card rounded-lg p-unit-6 w-full transform rotate-1 transition-transform duration-500"
-                style={{ transform: 'translateY(0px) rotate(1deg)' }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.transform = 'translateY(-4px) rotate(0deg)')
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.transform = 'translateY(0px) rotate(1deg)')
-                }
-              >
+              <HoverCard className="paper-card rounded-lg p-unit-6 w-full transform rotate-1 transition-transform duration-500">
                 <div className="flex items-center justify-between border-b border-border-subtle pb-unit-4 mb-unit-4">
                   <div className="flex items-center gap-unit-3">
                     <div className="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center">
@@ -88,7 +84,7 @@ export default function UntukSekolahPage() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </HoverCard>
             </div>
           </div>
         </section>

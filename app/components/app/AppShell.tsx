@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { LeftRail } from './LeftRail';
 import { TopBar } from './TopBar';
 import { WorkspaceSwitcher } from './WorkspaceSwitcher';
@@ -12,10 +12,8 @@ type AppShellProps = {
 };
 
 export function AppShell({ children }: AppShellProps) {
-  const { activeWorkspace, workspaces, switchWorkspace, announcement } = useWorkspace();
+  const { activeWorkspace, workspaces, switchWorkspace, announcement, displayName } = useWorkspace();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
-
-  const displayName = useMemo(() => 'Demo Guru', []);
 
   const switcher = (
     <WorkspaceSwitcher
