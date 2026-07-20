@@ -242,6 +242,56 @@ function EmptyState({
   );
 }
 
+function InsufficientState({
+  onReplace,
+  isBusy,
+}: {
+  onReplace: () => void;
+  isBusy: boolean;
+}) {
+  return (
+    <div
+      role="alert"
+      aria-live="assertive"
+      className="flex flex-col gap-4 rounded-lg border border-brand-warning/30 bg-brand-warning-soft p-4"
+    >
+      <div className="flex items-start gap-3">
+        <svg
+          className="mt-0.5 h-5 w-5 shrink-0 text-brand-warning"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          aria-hidden="true"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 9v2m0 4h.01M12 3l9.66 16.5H2.34L12 3z"
+          />
+        </svg>
+        <div className="flex-1">
+          <p className="text-body-sm font-medium text-brand-warning">
+            Konten tidak cukup
+          </p>
+          <p className="mt-1 text-body-sm text-brand-ink-muted">
+            Gunakan dokumen dengan lebih banyak teks.
+          </p>
+        </div>
+      </div>
+      <Button
+        variant="secondary"
+        size="sm"
+        onClick={onReplace}
+        disabled={isBusy}
+        className="self-start"
+      >
+        Unggah dokumen lain
+      </Button>
+    </div>
+  );
+}
+
 export function PrivatePdfSource({
   workspaceId,
   onSuccess,
@@ -347,6 +397,15 @@ export function PrivatePdfSource({
           pageCount={upload.sourceState.pageCount}
           onDelete={handleDeleteClick}
           isDeleting={upload.isDeleting}
+        />
+      );
+    }
+
+    if (upload.phase === 'insufficient') {
+      return (
+        <InsufficientState
+          onReplace={handleFileSelect}
+          isBusy={isBusy}
         />
       );
     }

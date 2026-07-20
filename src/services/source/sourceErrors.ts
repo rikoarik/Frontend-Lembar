@@ -15,7 +15,7 @@ const SAFE_MESSAGES: Record<string, string> = {
   UPLOAD_EXPIRED: 'Sesi unggah telah berakhir. Silakan coba lagi.',
   PROCESSING_FAILED: 'Pemrosesan dokumen gagal. Silakan coba lagi.',
   EXTRACTION_FAILED: 'Gagal mengekstrak konten dari dokumen.',
-  INSUFFICIENT_CONTENT: 'Dokumen tidak memiliki konten yang cukup untuk diproses.',
+  SOURCE_TEXT_INSUFFICIENT: 'Dokumen tidak memiliki konten yang cukup untuk diproses.',
   NETWORK_ERROR: 'Koneksi jaringan bermasalah. Periksa koneksi Anda dan coba lagi.',
   TIMEOUT: 'Permintaan habis waktu. Silakan coba lagi.',
   UNKNOWN: 'Terjadi kesalahan. Silakan coba lagi.',

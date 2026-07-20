@@ -6,7 +6,7 @@ import { sourceService } from '@/src/services/source/sourceService';
 import type { SourceError, SourceState, SourceUploadIntent } from '@/src/types/source';
 import { redactTokens } from '@/src/features/pdf-source/validation/pdf-validation';
 
-type UploadPhase = 'idle' | 'validating' | 'requesting' | 'uploading' | 'processing' | 'done';
+type UploadPhase = 'idle' | 'validating' | 'requesting' | 'uploading' | 'processing' | 'insufficient' | 'done';
 
 export type UsePdfSourceUploadOptions = {
   workspaceId: string;
@@ -147,18 +147,25 @@ export function usePdfSourceUpload(
         onSuccess?.(sourceResult.value);
       } else if (sourceResult.value.status === 'failed') {
         const failCode = sourceResult.value.failureCode ?? 'PROCESSING_FAILED';
-        const safeError: SourceError = {
-          code: failCode,
-          safeMessage: redactTokens(
-            failCode === 'INSUFFICIENT_CONTENT'
-              ? 'Dokumen tidak memiliki konten yang cukup untuk diproses.'
-              : 'Pemrosesan dokumen gagal. Silakan coba lagi.',
-          ),
-          retryable: failCode !== 'INSUFFICIENT_CONTENT',
-        };
-        setError(safeError);
-        setPhase('idle');
-        onError?.(safeError);
+        if (failCode === 'SOURCE_TEXT_INSUFFICIENT') {
+          setPhase('insufficient');
+          const insufficientError: SourceError = {
+            code: 'SOURCE_TEXT_INSUFFICIENT',
+            safeMessage: 'Dokumen tidak memiliki konten yang cukup untuk diproses.',
+            retryable: false,
+          };
+          setError(insufficientError);
+          onError?.(insufficientError);
+        } else {
+          const safeError: SourceError = {
+            code: failCode,
+            safeMessage: redactTokens('Pemrosesan dokumen gagal. Silakan coba lagi.'),
+            retryable: true,
+          };
+          setError(safeError);
+          setPhase('idle');
+          onError?.(safeError);
+        }
       }
     },
     [workspaceId, onSuccess, onError],
