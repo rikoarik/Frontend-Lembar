@@ -285,7 +285,6 @@ export default function GenerateForm() {
       // ponytail: actual submission via assessment create endpoint.
       // Add idempotency-key, X-CSRF-Token, POST /v1/assessments when integrating.
       // For now, alert the values so the flow is testable.
-      // eslint-disable-next-line no-alert
       alert(`Draft akan dibuat:\n${JSON.stringify(values, null, 2)}`);
     },
     [values],
