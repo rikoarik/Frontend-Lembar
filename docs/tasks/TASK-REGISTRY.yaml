@@ -890,11 +890,12 @@ tasks:
     repository: Frontend-Lembar
     sprint: F3
     title: Configuration composition and review modes
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [F3-01]
     decisions: []
     outcome: Difficulty composition, focus/example, quick/detail semantics without auto-final.
     evidence: [sum-validation, content-telemetry-audit]
+    accepted_ref: feat/F3-03-configuration-composition
 
   - id: F3-04
     repository: Frontend-Lembar
