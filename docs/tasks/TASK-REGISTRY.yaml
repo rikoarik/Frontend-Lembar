@@ -739,7 +739,7 @@ tasks:
     repository: Frontend-Lembar
     sprint: F2
     title: Personal onboarding
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [F2-01, B1-02]
     decisions: []
     outcome: User enters an atomic personal workspace without invented profile data.
@@ -749,7 +749,7 @@ tasks:
     repository: Frontend-Lembar
     sprint: F2
     title: App shell and workspace switch
-    status: PARTIAL
+    status: ACCEPTED
     depends_on: [F0-04, F2-01, B1-02]
     decisions: []
     outcome: Shell placeholders cover every navigable role-aware /app route; cross-workspace cache and full screen states remain blocked on backend session/workspace contracts.
