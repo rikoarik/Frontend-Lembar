@@ -775,7 +775,7 @@ tasks:
     repository: Frontend-Lembar
     sprint: F2
     title: Teacher dashboard
-    status: READY
+    status: ACCEPTED
     depends_on: [F2-03, B1-05]
     decisions: []
     outcome: New/populated/error dashboard with trusted summary and recent sheets.
