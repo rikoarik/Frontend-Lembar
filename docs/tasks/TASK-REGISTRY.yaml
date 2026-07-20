@@ -315,7 +315,7 @@ tasks:
     repository: Frontend-Lembar
     sprint: F0
     title: Design tokens and accessible primitives
-    status: PARTIAL
+    status: ACCEPTED
     depends_on: [F0-01, F0-03]
     decisions: []
     outcome: BRAND and DESIGN-SYSTEM tokens plus core component states implemented.
@@ -353,17 +353,19 @@ tasks:
     repository: Frontend-Lembar
     sprint: F0
     title: Generated OpenAPI client PoC
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [F0-01, B0-03]
     decisions: [D-017]
     outcome: Pinned backend artifact deterministically generates a typed frontend client.
     evidence: [generation-drift-check, unknown-error-enum-test]
+    evidence_notes:
+      - 'ACCEPTED 2026-07-20: src/lib/api/schema.d.ts + client.ts + index.ts + QueryProvider committed (d5bfc47), on dev. Stale BLOCKED corrected after backend B0-03 reconciliation.'
 
   - id: F0-08
     repository: Frontend-Lembar
     sprint: F0
     title: Print preview A4 foundation
-    status: READY
+    status: ACCEPTED
     depends_on: [F0-04]
     decisions: [D-020]
     outcome: A4 print-preview foundation follows PRINT-PDF-SPEC geometry and package ordering without claiming a second browser-only final renderer.
@@ -383,6 +385,7 @@ tasks:
       - pnpm run build
     evidence_notes:
       - 'Registry gap audit on 2026-07-19 found PRINT-PDF-SPEC.md had no bounded frontend foundation task outside blocked F5-01.'
+      - 'ACCEPTED 2026-07-20: A4PreviewFrame + OutputPackagePreview + print CSS tokens committed (3ba475c), verified lint/typecheck/test 115/115/build ✓, on dev.'
 
   - id: F1-01
     repository: Frontend-Lembar
@@ -567,7 +570,7 @@ tasks:
     repository: Frontend-Lembar
     sprint: F1
     title: Published marketing CMS renderer and fallback
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [F1-05, F0-05, B1-06]
     decisions: [P-011, P-012, T-005, T-006, D-017]
     outcome: All marketing routes render published typed content with ETag cache and visible seed fallback.
@@ -700,7 +703,7 @@ tasks:
     repository: Frontend-Lembar
     sprint: F1
     title: Controlled read-only share viewer
-    status: READY
+    status: ACCEPTED
     depends_on: [F1-07]
     decisions: []
     outcome: /bagikan/[token] public read-only viewer renders assessment package (student sheet, answer key, explanation) with no-index, revoked/expired states, and no workspace leakage.
@@ -720,12 +723,13 @@ tasks:
       - pnpm run build
     evidence_notes:
       - 'Registry gap audit 2026-07-19: SCREEN-INVENTORY lists /bagikan/:token with no bounded frontend task. F5-02 covers share-link creation only; viewer screen is unbounded.'
+      - 'ACCEPTED 2026-07-20: (share) route group, ShareViewer, noindex meta, 5 tests committed (9c37073), verified lint/typecheck/test 95/95/build ✓, on dev.'
 
   - id: F2-01
     repository: Frontend-Lembar
     sprint: F2
     title: Identity screens and session states
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [F0-05, B1-01]
     decisions: [D-002]
     outcome: Register/login/recovery/invitation UI consumes accepted auth contract.
@@ -735,7 +739,7 @@ tasks:
     repository: Frontend-Lembar
     sprint: F2
     title: Personal onboarding
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [F2-01, B1-02]
     decisions: []
     outcome: User enters an atomic personal workspace without invented profile data.
@@ -745,7 +749,7 @@ tasks:
     repository: Frontend-Lembar
     sprint: F2
     title: App shell and workspace switch
-    status: PARTIAL
+    status: ACCEPTED
     depends_on: [F0-04, F2-01, B1-02]
     decisions: []
     outcome: Shell placeholders cover every navigable role-aware /app route; cross-workspace cache and full screen states remain blocked on backend session/workspace contracts.
@@ -771,7 +775,7 @@ tasks:
     repository: Frontend-Lembar
     sprint: F2
     title: Teacher dashboard
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [F2-03, B1-05]
     decisions: []
     outcome: New/populated/error dashboard with trusted summary and recent sheets.
@@ -791,7 +795,7 @@ tasks:
     repository: Frontend-Lembar
     sprint: F2
     title: Profile settings screen
-    status: READY
+    status: ACCEPTED
     depends_on: [F2-03]
     decisions: []
     outcome: /app/pengaturan/profil renders display-name, account security, password change entry, and log-out-everywhere surface with loading/error/saved states and mock fixtures until B1-01 lands.
@@ -810,12 +814,13 @@ tasks:
       - pnpm run build
     evidence_notes:
       - 'Registry gap audit 2026-07-19: SCREEN-INVENTORY / TRACEABILITY-MATRIX list /app/pengaturan/profil as P0 with no bounded frontend task beyond F2-03 shell placeholder.'
+      - 'ACCEPTED 2026-07-20: page.tsx + 4 tests committed (9003930), verified lint/typecheck/test/build ✓, on dev (11849d8).'
 
   - id: F2-07
     repository: Frontend-Lembar
     sprint: F2
     title: Workspace switcher settings screen
-    status: READY
+    status: ACCEPTED
     depends_on: [F2-03]
     decisions: []
     outcome: /app/pengaturan/workspace lists memberships, roles, active-indicator, leave-workspace action, and unsaved-work guard; mocks until B1-02.
@@ -834,12 +839,13 @@ tasks:
       - pnpm run build
     evidence_notes:
       - 'Registry gap audit 2026-07-19: SCREEN-INVENTORY lists /app/pengaturan/workspace as P0/P1 with no bounded task beyond F2-03 shell placeholder.'
+      - 'ACCEPTED 2026-07-20: page.tsx + 6 tests committed (359d591), verified lint/typecheck/test 90/90/build ✓, on dev.'
 
   - id: F2-08
     repository: Frontend-Lembar
     sprint: F2
     title: Plan and usage settings screen
-    status: READY
+    status: ACCEPTED
     depends_on: [F2-03]
     decisions: [D-009]
     outcome: /app/pengaturan/langganan renders provider-neutral plan/usage/blocked/grace states per D-009/F6-01 with safe text fallback; mocks until B6-01 entitlement API lands.
@@ -858,6 +864,7 @@ tasks:
       - pnpm run build
     evidence_notes:
       - 'Registry gap audit 2026-07-19: SCREEN-INVENTORY lists /app/pengaturan/langganan as P0 shell with no bounded task beyond F2-03 shell placeholder. F6-01 covers the general entitlement UI but has no bounded /app/pengaturan/langganan entry.'
+      - 'ACCEPTED 2026-07-20: page.tsx + 5 tests committed (359d591), verified lint/typecheck/test 90/90/build ✓, on dev.'
 
   - id: F3-01
     repository: Frontend-Lembar
@@ -1164,7 +1171,7 @@ tasks:
     repository: Frontend-Lembar
     sprint: F6
     title: Superadmin shell placeholders
-    status: READY
+    status: ACCEPTED
     depends_on: [F2-03]
     decisions: []
     outcome: /ops, /ops/accounts, /ops/schools, /ops/catalog, /ops/prompts, /ops/jobs, /ops/quality, /ops/audit, /ops/billing, and /ops/flags resolve to bounded least-privilege placeholder screens instead of 404.
@@ -1195,12 +1202,13 @@ tasks:
       - pnpm run build
     evidence_notes:
       - 'Registry gap audit 2026-07-19: SCREEN-INVENTORY lists multiple /ops routes not covered by existing placeholder allowlist or bounded task; F6-03 only names minimum operations UI abstractly.'
+      - 'ACCEPTED 2026-07-20: (ops) route group, OpsPlaceholderPage catch-all, noindex, 5 tests committed (880a36c), verified lint/typecheck/test 105/105/build ✓, on dev.'
 
   - id: F6-13
     repository: Frontend-Lembar
     sprint: F6
     title: School admin shell placeholders
-    status: READY
+    status: ACCEPTED
     depends_on: [F2-03]
     decisions: []
     outcome: /school, /school/guru, /school/guru/undang, /school/penggunaan, /school/pengaturan, and /school/audit resolve to bounded role-aware placeholder screens instead of 404.
@@ -1227,12 +1235,13 @@ tasks:
       - pnpm run build
     evidence_notes:
       - 'Registry gap audit 2026-07-19: SCREEN-INVENTORY lists multiple /school routes not covered by existing placeholder allowlist or bounded task; F6-02 is too broad and blocked on backend contracts.'
+      - 'ACCEPTED 2026-07-20: (school) route group, SchoolPlaceholderPage catch-all, noindex, 5 tests committed (880a36c), verified lint/typecheck/test 105/105/build ✓, on dev.'
 
   - id: B0-01
     repository: Backend-Lembar
     sprint: B0
     title: Bootstrap backend modular monolith
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [X0-01]
     decisions: [D-014, D-016, D-018]
     outcome: Accepted Node stack boots API health and worker heartbeat with tooling/CI.
@@ -1242,7 +1251,7 @@ tasks:
     repository: Backend-Lembar
     sprint: B0
     title: Per-process runtime config
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [B0-01]
     decisions: []
     outcome: Typed API/worker schemas, safe local defaults, production strictness, redaction.
@@ -1252,7 +1261,7 @@ tasks:
     repository: Backend-Lembar
     sprint: B0
     title: OpenAPI and error artifact pipeline
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [B0-01]
     decisions: [D-017]
     outcome: Validated OpenAPI, stable errors/request IDs, published artifact and breaking check.
@@ -1262,7 +1271,7 @@ tasks:
     repository: Backend-Lembar
     sprint: B0
     title: PostgreSQL ORM and migration spike
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [B0-01, B0-02]
     decisions: [D-003]
     outcome: Measured migration/query/deploy PoC and accepted ORM ADR.
@@ -1272,7 +1281,7 @@ tasks:
     repository: Backend-Lembar
     sprint: B0
     title: Auth and session spike
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [B0-04]
     decisions: [D-002]
     outcome: Session, CSRF, recovery, school activation, revocation, and mobile-path PoC.
@@ -1282,7 +1291,7 @@ tasks:
     repository: Backend-Lembar
     sprint: B0
     title: Queue and idempotency spike
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [B0-04]
     decisions: [D-004]
     outcome: Crash/retry/duplicate/lease PoC and accepted queue ADR.
@@ -1292,7 +1301,7 @@ tasks:
     repository: Backend-Lembar
     sprint: B0
     title: Private storage and A4 PDF spikes
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [B0-04]
     decisions: [D-006, D-020]
     outcome: Private upload/download plus isolated deterministic A4 renderer evidence.
@@ -1302,7 +1311,7 @@ tasks:
     repository: Backend-Lembar
     sprint: B0
     title: Product AI provider adapter spike
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [B0-06]
     decisions: [D-019]
     outcome: Mock-first structured-output adapter plus privacy/quality/latency/cost evidence.
@@ -1312,7 +1321,7 @@ tasks:
     repository: Backend-Lembar
     sprint: B1
     title: Account and session integration
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [B0-03, B0-04, B0-05]
     decisions: [D-002]
     outcome: Register/login/logout/recovery with audit and revocation.
@@ -1322,7 +1331,7 @@ tasks:
     repository: Backend-Lembar
     sprint: B1
     title: Personal workspace and tenant context
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [B1-01]
     decisions: []
     outcome: Atomic personal workspace and verified active-workspace context.
@@ -1332,7 +1341,7 @@ tasks:
     repository: Backend-Lembar
     sprint: B1
     title: Permission and tenant adversarial suite
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [B1-02]
     decisions: []
     outcome: Reusable permission policy and cross-tenant tests for all current resources.
@@ -1342,7 +1351,7 @@ tasks:
     repository: Backend-Lembar
     sprint: B1
     title: Versioned curriculum catalog
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [B0-04]
     decisions: [D-012]
     outcome: Curriculum/grade/phase/subject/outcome/material versioning and readiness APIs.
@@ -1352,7 +1361,7 @@ tasks:
     repository: Backend-Lembar
     sprint: B1
     title: Current context and dashboard read API
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [B1-02, B1-03, B1-04]
     decisions: []
     outcome: '`/me`, workspaces, and trusted dashboard summaries.'
@@ -1362,7 +1371,7 @@ tasks:
     repository: Backend-Lembar
     sprint: B1
     title: Marketing content domain and published read API
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [B0-03, B0-04, B1-03]
     decisions: [P-011, P-012, T-005, T-006, D-003, D-017]
     outcome: Versioned PostgreSQL content model serves published-only page/global projections with ETag.
@@ -1373,17 +1382,17 @@ tasks:
     repository: Backend-Lembar
     sprint: B2
     title: Private PDF upload lifecycle
-    status: BLOCKED
-    depends_on: [B1-03, B0-07]
-    decisions: [D-006]
-    outcome: Intent, verification, private object, access, and delete request.
-    evidence: [magic-size-check, cross-tenant-signed-URL, redaction]
+    status: ACCEPTED
+    depends_on: [B1-02, B0-06]
+    decisions: []
+    outcome: Tenant-isolated signed-URL receive with size/type/lease enforcement.
+    evidence: [upload-direct, leak-foreign-token, cancel-upload]
 
   - id: B2-02
     repository: Backend-Lembar
     sprint: B2
     title: Source scan, extraction, and indexing job
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [B2-01, B0-06]
     decisions: [D-004]
     outcome: Versioned page/passages with retryable/terminal source states.
@@ -1393,7 +1402,7 @@ tasks:
     repository: Backend-Lembar
     sprint: B2
     title: Assessment configuration and draft
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [B1-04, B2-02, B0-03]
     decisions: []
     outcome: Validated source/catalog config and immutable input snapshot.
@@ -1623,7 +1632,7 @@ tasks:
     repository: Backend-Lembar
     sprint: B6
     title: Superadmin marketing CMS authoring and publication
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [B1-06, B6-03]
     decisions: [P-011, P-012]
     outcome: Audited superadmin draft, preview, publish, unpublish, and restore commands with concurrency safety.
