@@ -570,7 +570,7 @@ tasks:
     repository: Frontend-Lembar
     sprint: F1
     title: Published marketing CMS renderer and fallback
-    status: READY
+    status: ACCEPTED
     depends_on: [F1-05, F0-05, B1-06]
     decisions: [P-011, P-012, T-005, T-006, D-017]
     outcome: All marketing routes render published typed content with ETag cache and visible seed fallback.
