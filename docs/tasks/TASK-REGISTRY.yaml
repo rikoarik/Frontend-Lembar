@@ -363,7 +363,7 @@ tasks:
     repository: Frontend-Lembar
     sprint: F0
     title: Print preview A4 foundation
-    status: READY
+    status: ACCEPTED
     depends_on: [F0-04]
     decisions: [D-020]
     outcome: A4 print-preview foundation follows PRINT-PDF-SPEC geometry and package ordering without claiming a second browser-only final renderer.
@@ -383,6 +383,7 @@ tasks:
       - pnpm run build
     evidence_notes:
       - 'Registry gap audit on 2026-07-19 found PRINT-PDF-SPEC.md had no bounded frontend foundation task outside blocked F5-01.'
+      - 'ACCEPTED 2026-07-20: A4PreviewFrame + OutputPackagePreview + print CSS tokens committed (3ba475c), verified lint/typecheck/test 115/115/build ✓, on dev.'
 
   - id: F1-01
     repository: Frontend-Lembar
