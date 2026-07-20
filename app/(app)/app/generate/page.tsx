@@ -2,16 +2,13 @@
 
 import { Suspense } from 'react';
 import Link from 'next/link';
-import GenerateForm from '@/src/features/catalog/GenerateForm';
+import ConfigurationCompose from '@/src/features/generate/ConfigurationCompose';
 
 function GeneratePageFallback() {
   return (
     <div className="flex flex-col gap-4" aria-busy="true" aria-label="Memuat formulir">
       <div className="flex items-center gap-4">
-        <Link
-          href="/app"
-          className="text-body-sm text-brand-accent hover:text-brand-accent-hover"
-        >
+        <Link href="/app" className="text-body-sm text-brand-accent hover:text-brand-accent-hover">
           ← Kembali ke Dashboard
         </Link>
       </div>
@@ -39,7 +36,7 @@ export default function GeneratePage() {
       </div>
 
       <Suspense fallback={<GeneratePageFallback />}>
-        <GenerateForm />
+        <ConfigurationCompose />
       </Suspense>
     </div>
   );
