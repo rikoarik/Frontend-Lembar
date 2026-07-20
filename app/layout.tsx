@@ -10,6 +10,7 @@ import '@fontsource/material-symbols/700.css';
 import type { ReactNode } from 'react';
 import './globals.css';
 import LenisProvider from './components/marketing/LenisProvider';
+import { QueryProvider } from './components/QueryProvider';
 
 export const metadata = {
   title: 'lembar',
@@ -24,7 +25,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         suppressHydrationWarning
         className="antialiased min-h-screen flex flex-col font-body-default text-body-default bg-paper text-on-background selection:bg-primary-fixed selection:text-on-primary-fixed"
       >
-        <LenisProvider>{children}</LenisProvider>
+        <QueryProvider>
+          <LenisProvider>{children}</LenisProvider>
+        </QueryProvider>
       </body>
     </html>
   );

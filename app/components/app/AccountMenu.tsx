@@ -14,10 +14,10 @@ export function AccountMenu({ displayName, planLabel }: AccountMenuProps) {
         <span className="text-body-default font-semibold text-brand-ink">{displayName}</span>
         <span className="text-caption text-brand-ink-muted">{planLabel}</span>
       </div>
-      <Link href="/app/profil" className="rounded-md px-2 py-1 text-brand-ink hover:bg-brand-paper">
+      <Link href="/app/pengaturan/profil" className="rounded-md px-2 py-1 text-brand-ink hover:bg-brand-paper">
         Profil
       </Link>
-      <Link href="/app/plan" className="rounded-md px-2 py-1 text-brand-ink hover:bg-brand-paper">
+      <Link href="/app/pengaturan/langganan" className="rounded-md px-2 py-1 text-brand-ink hover:bg-brand-paper">
         Paket &amp; kuota
       </Link>
       <Link href="/bantuan" className="rounded-md px-2 py-1 text-brand-ink hover:bg-brand-paper">
