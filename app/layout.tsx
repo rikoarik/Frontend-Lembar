@@ -7,6 +7,7 @@ import '@fontsource/manrope/700.css';
 import type { ReactNode } from 'react';
 import './globals.css';
 import LenisProvider from './components/marketing/LenisProvider';
+import { QueryProvider } from './components/QueryProvider';
 
 export const metadata = {
   title: 'lembar',
@@ -21,9 +22,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
       </head>
       <body suppressHydrationWarning className="antialiased min-h-screen flex flex-col font-body-default text-body-default bg-paper text-on-background selection:bg-primary-fixed selection:text-on-primary-fixed">
-        <LenisProvider>
-          {children}
-        </LenisProvider>
+        <QueryProvider>
+          <LenisProvider>
+            {children}
+          </LenisProvider>
+        </QueryProvider>
       </body>
     </html>
   );
