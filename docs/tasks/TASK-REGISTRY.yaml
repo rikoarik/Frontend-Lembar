@@ -86,6 +86,7 @@ execution_notes:
     pre_compaction_requirements:
       - 'Inspect active frontend workers and task branches.'
       - 'Update TASK-REGISTRY.yaml with active/completed/blocked tasks, ownership, integration status, verification state, latest pushed SHA, and exact next action.'
+    dev_commit: d5bfc47
       - 'Commit and push meaningful checkpoint progress before compaction when time allows.'
       - 'Do not leave critical execution state only in conversation history.'
     post_compaction_rehydration:
