@@ -7,6 +7,7 @@ import { PrivatePdfSource } from '@/src/features/pdf-source';
 import { OutputSettings } from './OutputSettings';
 import { Button, Panel } from '@/app/components/ui';
 import { validateComposition, getMissingSourceHint, getMissingOutcomesHint } from './validation';
+import { useGenerateSubmit } from './state/useGenerateSubmit';
 import type { components } from '@/src/lib/api/schema';
 import type {
   CompositionState,
@@ -49,6 +50,12 @@ const REVIEW_MODE_OPTIONS: { value: ReviewMode; label: string; desc: string }[] 
   { value: 'detail', label: 'Detail', desc: 'Tinjau satu per satu' },
 ];
 
+const MIN_QUESTIONS = 1;
+const MAX_QUESTIONS = 200;
+
+const clampQuestionCount = (raw: number): number =>
+  Math.min(MAX_QUESTIONS, Math.max(MIN_QUESTIONS, raw || MIN_QUESTIONS));
+
 const LABELS: Record<CompositionFieldKey, string> = {
   sourceMode: 'Sumber materi',
   curriculumVersionId: 'Kurikulum',
@@ -64,11 +71,7 @@ const LABELS: Record<CompositionFieldKey, string> = {
   exampleQuestion: 'Contoh Soal',
 };
 
-export type ConfigurationComposeProps = {
-  onSubmit?: (values: CompositionValues) => void;
-};
-
-export default function ConfigurationCompose({ onSubmit }: ConfigurationComposeProps) {
+export default function ConfigurationCompose() {
   const { activeWorkspace } = useWorkspace();
   const workspaceId = activeWorkspace.id;
 
@@ -87,8 +90,108 @@ export default function ConfigurationCompose({ onSubmit }: ConfigurationComposeP
   const [initialLoadError, setInitialLoadError] = useState<string | null>(null);
 
   const [compositionError, setCompositionError] = useState<CompositionError | null>(null);
+  const [permissionState, setPermissionState] = useState(false);
+  const [successState, setSuccessState] = useState(false);
+
+  const loadGrades = useCallback(async () => {
+    setLoading((prev) => ({ ...prev, gradeId: true }));
+    setInitialLoadError(null);
+    const result = await catalogService.listGrades(workspaceId);
+    setLoading((prev) => ({ ...prev, gradeId: false }));
+    if (result.ok) {
+      setGrades(result.value);
+    } else {
+      if (result.error.code === 'RATE_LIMITED') {
+        setPermissionState(true);
+      } else {
+        setInitialLoadError(result.error.safeMessage);
+      }
+    }
+  }, [workspaceId]);
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      setLoading((prev) => ({ ...prev, gradeId: true }));
+      setInitialLoadError(null);
+      const result = await catalogService.listGrades(workspaceId);
+      if (cancelled) return;
+      setLoading((prev) => ({ ...prev, gradeId: false }));
+      if (result.ok) {
+        setGrades(result.value);
+      } else {
+        if (result.error.code === 'RATE_LIMITED') {
+          setPermissionState(true);
+        } else {
+          setInitialLoadError(result.error.safeMessage);
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [workspaceId]);
+
+  useEffect(() => {
+    if (!values.gradeId || !values.curriculumVersionId) return;
+    let cancelled = false;
+    void (async () => {
+      setLoading((prev) => ({ ...prev, subjectId: true }));
+      const result = await catalogService.listSubjects(
+        workspaceId,
+        values.gradeId,
+        values.curriculumVersionId,
+      );
+      if (cancelled) return;
+      setLoading((prev) => ({ ...prev, subjectId: false }));
+      if (result.ok) {
+        setSubjects(result.value);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [values.gradeId, values.curriculumVersionId, workspaceId]);
+
+  useEffect(() => {
+    if (!values.gradeId || !values.subjectId || !values.curriculumVersionId) return;
+    let cancelled = false;
+    void (async () => {
+      setLoading((prev) => ({ ...prev, materialIds: true }));
+      const result = await catalogService.listMaterials(
+        workspaceId,
+        values.gradeId,
+        values.subjectId,
+        values.curriculumVersionId,
+      );
+      if (cancelled) return;
+      setLoading((prev) => ({ ...prev, materialIds: false }));
+      if (result.ok) {
+        setMaterials(result.value);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [values.gradeId, values.subjectId, values.curriculumVersionId, workspaceId]);
+
+  const generateSubmit = useGenerateSubmit({
+    onSuccess: () => {
+      setSuccessState(true);
+    },
+    onPermissionError: () => {
+      setPermissionState(true);
+    },
+  });
+
+  const isAnyLoading = useMemo(
+    () => Object.values(loading).some(Boolean) || generateSubmit.busy,
+    [loading, generateSubmit.busy],
+  );
 
   const compositionState = useMemo((): CompositionState => {
+    if (permissionState) return 'permission';
+    if (successState) return 'success';
     if (compositionError) return 'error';
     if (submitted) {
       const validation = validateComposition(values);
@@ -102,61 +205,10 @@ export default function ConfigurationCompose({ onSubmit }: ConfigurationComposeP
       values.sourceId;
     if (hasAnyValue) return 'composing';
     return 'empty';
-  }, [values, submitted, compositionError]);
+  }, [values, submitted, compositionError, permissionState, successState]);
 
   const hasKatalog = values.sourceMode === 'katalog' || values.sourceMode === 'katalog+pdf';
   const hasPdf = values.sourceMode === 'pdf' || values.sourceMode === 'katalog+pdf';
-
-  useEffect(() => {
-    let cancelled = false;
-    catalogService.listGrades(workspaceId).then((result) => {
-      if (cancelled) return;
-      setLoading((prev) => ({ ...prev, gradeId: false }));
-      if (result.ok) {
-        setGrades(result.value);
-        setInitialLoadError(null);
-      } else {
-        setInitialLoadError(result.error.safeMessage);
-      }
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [workspaceId]);
-
-  useEffect(() => {
-    if (!values.gradeId || !values.curriculumVersionId) return;
-    let cancelled = false;
-    catalogService
-      .listSubjects(workspaceId, values.gradeId, values.curriculumVersionId)
-      .then((result) => {
-        if (cancelled) return;
-        setLoading((prev) => ({ ...prev, subjectId: false }));
-        if (result.ok) {
-          setSubjects(result.value);
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [values.gradeId, values.curriculumVersionId, workspaceId]);
-
-  useEffect(() => {
-    if (!values.gradeId || !values.subjectId || !values.curriculumVersionId) return;
-    let cancelled = false;
-    catalogService
-      .listMaterials(workspaceId, values.gradeId, values.subjectId, values.curriculumVersionId)
-      .then((result) => {
-        if (cancelled) return;
-        setLoading((prev) => ({ ...prev, materialIds: false }));
-        if (result.ok) {
-          setMaterials(result.value);
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [values.gradeId, values.subjectId, values.curriculumVersionId, workspaceId]);
 
   const update = useCallback(
     <K extends CompositionFieldKey>(key: K, value: CompositionValues[K]) => {
@@ -200,8 +252,14 @@ export default function ConfigurationCompose({ onSubmit }: ConfigurationComposeP
       if (compositionError) {
         setCompositionError(null);
       }
+      if (permissionState) {
+        setPermissionState(false);
+      }
+      if (successState) {
+        setSuccessState(false);
+      }
     },
-    [compositionError],
+    [compositionError, permissionState, successState],
   );
 
   const toggleMaterial = useCallback((materialId: string) => {
@@ -243,9 +301,9 @@ export default function ConfigurationCompose({ onSubmit }: ConfigurationComposeP
         return;
       }
       setLocalErrors({});
-      onSubmit?.(values);
+      void generateSubmit.submit(values, workspaceId);
     },
-    [values, onSubmit],
+    [values, workspaceId, generateSubmit],
   );
 
   const summaryItems = useMemo(() => {
@@ -278,16 +336,31 @@ export default function ConfigurationCompose({ onSubmit }: ConfigurationComposeP
     return items;
   }, [values, grades, subjects, materials]);
 
-  const readyCount = [
-    hasKatalog && values.gradeId,
-    hasKatalog && values.subjectId,
-    hasKatalog && values.materialIds.length > 0,
-    hasPdf && values.sourceId,
-    values.assessmentType,
-    values.difficulty,
-    values.reviewMode,
-  ].filter(Boolean).length;
-  const totalRequired = hasKatalog && hasPdf ? 7 : hasKatalog ? 6 : 4;
+  const readinessChecks: Array<{ ok: boolean }> = hasKatalog
+    ? [
+        { ok: Boolean(values.curriculumVersionId) },
+        { ok: Boolean(values.gradeId) },
+        { ok: Boolean(values.subjectId) },
+        { ok: values.materialIds.length > 0 },
+        ...(hasPdf ? [{ ok: Boolean(values.sourceId) }] : []),
+        { ok: Boolean(values.assessmentType) },
+        { ok: Boolean(values.difficulty) },
+        { ok: Boolean(values.reviewMode) },
+      ]
+    : hasPdf
+      ? [
+          { ok: Boolean(values.sourceId) },
+          { ok: Boolean(values.assessmentType) },
+          { ok: Boolean(values.difficulty) },
+          { ok: Boolean(values.reviewMode) },
+        ]
+      : [
+          { ok: Boolean(values.assessmentType) },
+          { ok: Boolean(values.difficulty) },
+          { ok: Boolean(values.reviewMode) },
+        ];
+  const readyCount = readinessChecks.filter((c) => c.ok).length;
+  const totalRequired = readinessChecks.length;
   const readinessLabel = `${readyCount}/${totalRequired}`;
 
   const fieldClass =
@@ -329,7 +402,10 @@ export default function ConfigurationCompose({ onSubmit }: ConfigurationComposeP
             <Button
               variant="secondary"
               size="sm"
-              onClick={() => setCompositionError(null)}
+              onClick={() => {
+                setCompositionError(null);
+                void loadGrades();
+              }}
               className="mt-3"
             >
               Coba lagi
@@ -348,6 +424,30 @@ export default function ConfigurationCompose({ onSubmit }: ConfigurationComposeP
           <p className="mt-1 text-body-sm text-brand-ink-muted">
             Anda telah mencapai batas lembar yang dapat dibuat. Hubungi admin atau tingkatkan paket
             Anda.
+          </p>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => {
+              setPermissionState(false);
+              void loadGrades();
+            }}
+            className="mt-3"
+          >
+            Coba lagi
+          </Button>
+        </div>
+      )}
+
+      {compositionState === 'success' && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="rounded-md border border-brand-accent/30 bg-brand-accent-soft p-4"
+        >
+          <p className="text-body-sm text-brand-accent font-medium">Konfigurasi diterima</p>
+          <p className="mt-1 text-body-sm text-brand-ink-muted">
+            Konfigurasi tersimpan. Lanjutkan ke langkah berikutnya untuk membuat draft.
           </p>
         </div>
       )}
@@ -376,7 +476,7 @@ export default function ConfigurationCompose({ onSubmit }: ConfigurationComposeP
           onSubmit={onSubmitForm}
           className="min-w-0 flex-1"
           noValidate
-          aria-busy={loading.gradeId ? true : undefined}
+          aria-busy={isAnyLoading ? true : undefined}
         >
           <div className="flex flex-col gap-8">
             <Panel title="Materi Ujian" description="Pilih sumber dan lingkup materi.">
@@ -456,9 +556,12 @@ export default function ConfigurationCompose({ onSubmit }: ConfigurationComposeP
                         Kelas <span className="text-brand-danger">*</span>
                       </label>
                       {initialLoadError ? (
-                        <p className={errorClass} role="alert">
-                          {initialLoadError}
-                        </p>
+                        <div className="flex flex-col gap-2" role="alert">
+                          <p className={errorClass}>{initialLoadError}</p>
+                          <Button variant="secondary" size="sm" onClick={() => void loadGrades()}>
+                            Coba lagi
+                          </Button>
+                        </div>
                       ) : (
                         <>
                           <select
@@ -497,7 +600,7 @@ export default function ConfigurationCompose({ onSubmit }: ConfigurationComposeP
                         value={values.subjectId}
                         onChange={(e) => update('subjectId', e.target.value)}
                         className={selectClass}
-                        disabled={!values.gradeId}
+                        disabled={!values.gradeId || loading.subjectId}
                         aria-invalid={localErrors.subjectId ? true : undefined}
                       >
                         <option value="">
@@ -650,12 +753,18 @@ export default function ConfigurationCompose({ onSubmit }: ConfigurationComposeP
                   <input
                     id="compose-questionCount"
                     type="number"
-                    min={1}
-                    max={200}
+                    min={MIN_QUESTIONS}
+                    max={MAX_QUESTIONS}
                     value={values.questionCount}
-                    onChange={(e) => update('questionCount', Math.max(1, Number(e.target.value)))}
+                    onChange={(e) =>
+                      update('questionCount', clampQuestionCount(Number(e.target.value)))
+                    }
+                    onBlur={(e) =>
+                      update('questionCount', clampQuestionCount(Number(e.target.value)))
+                    }
                     className={fieldClass}
                     aria-invalid={localErrors.questionCount ? true : undefined}
+                    aria-describedby="compose-questionCount-help"
                   />
                   <p className={helpClass} id="compose-questionCount-help">
                     Antara 1–200 soal
@@ -805,9 +914,15 @@ export default function ConfigurationCompose({ onSubmit }: ConfigurationComposeP
                 variant="primary"
                 size="lg"
                 className="w-full sm:w-auto"
-                disabled={compositionState === 'permission'}
+                disabled={
+                  compositionState === 'permission' ||
+                  compositionState === 'success' ||
+                  !!initialLoadError ||
+                  generateSubmit.busy
+                }
+                aria-busy={generateSubmit.busy ? true : undefined}
               >
-                Buat draft {values.questionCount} soal
+                {generateSubmit.busy ? 'Membuat draft…' : `Buat draft ${values.questionCount} soal`}
               </Button>
               <p className={helpClass}>
                 AI membuat draft sesuai konteks terpilih. Anda meninjau sebelum final.

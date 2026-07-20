@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ConfigurationCompose from '../ConfigurationCompose';
 import { WorkspaceProvider } from '@/src/features/workspace/workspaceContext';
-import { ok } from '@/src/types/result';
+import { ok, err } from '@/src/types/result';
 
 // ── Mock data ──
 
@@ -37,15 +37,23 @@ vi.mock('@/src/services/catalog/catalogService', () => ({
 }));
 
 vi.mock('@/src/features/pdf-source', () => ({
-  PrivatePdfSource: ({ onSuccess }: { onSuccess?: (d: unknown) => void }) => (
+  PrivatePdfSource: ({ onSuccess }: { onSuccess?: (d: string) => void }) => (
     <div data-testid="pdf-source">
-      <button onClick={() => onSuccess?.({ uploadId: 'test-up' })}>Ready</button>
+      <button onClick={() => onSuccess?.('src-test-01')}>Ready</button>
     </div>
   ),
 }));
 
 vi.mock('@/src/features/generate/OutputSettings', () => ({
   OutputSettings: () => <div data-testid="output-settings">Output Settings</div>,
+}));
+
+const mockSubmitConfiguration = vi.fn();
+
+vi.mock('@/src/services/generate/generateService', () => ({
+  generateService: {
+    submitConfiguration: (...args: unknown[]) => mockSubmitConfiguration(...args),
+  },
 }));
 
 // ── Wrapper ──
@@ -217,5 +225,88 @@ describe('ConfigurationCompose — 390px', () => {
     });
 
     expect(Math.round(maxRight)).toBeLessThanOrEqual(410);
+  });
+});
+
+// ── State: permission & success ──
+
+describe('ConfigurationCompose — permission state', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('shows permission banner when catalog returns RATE_LIMITED', async () => {
+    mockListGrades.mockResolvedValue(
+      err({
+        code: 'RATE_LIMITED',
+        safeMessage: 'Kuota habis',
+        retryable: true,
+      }),
+    );
+
+    render(<ConfigurationCompose />, { wrapper: Wrapper });
+
+    await waitFor(() => {
+      expect(screen.getByText('Kuota habis')).toBeInTheDocument();
+    });
+
+    // Submit button must be disabled in permission state
+    const submit = screen.getByRole('button', { name: /Buat draft/i });
+    expect(submit).toBeDisabled();
+
+    // Retry button should be present
+    expect(screen.getByRole('button', { name: /Coba lagi/i })).toBeInTheDocument();
+  });
+});
+
+describe('ConfigurationCompose — success state', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockListGrades.mockResolvedValue(ok(MOCK_GRADES));
+    mockListSubjects.mockResolvedValue(ok(MOCK_SUBJECTS));
+    mockListMaterials.mockResolvedValue(ok(MOCK_MATERIALS));
+    mockSubmitConfiguration.mockResolvedValue(ok({ status: 'accepted' }));
+  });
+
+  it('shows success banner after submit resolves successfully', async () => {
+    const user = userEvent.setup();
+    render(<ConfigurationCompose />, { wrapper: Wrapper });
+
+    // Fill in all required katalog fields
+    await waitFor(() => {
+      expect(getCurriculumSelect().options.length).toBeGreaterThan(1);
+    });
+    await user.selectOptions(getCurriculumSelect(), 'kurmer-2');
+
+    await waitFor(() => {
+      expect(getGradeSelect().options.length).toBeGreaterThan(1);
+    });
+    await user.selectOptions(getGradeSelect(), 'g-4');
+
+    await waitFor(() => {
+      expect(getSubjectSelect().options.length).toBeGreaterThan(1);
+    });
+    await user.selectOptions(getSubjectSelect(), 's-4');
+
+    await waitFor(() => {
+      expect(screen.getByText('Bilangan Cacah')).toBeInTheDocument();
+    });
+    await user.click(screen.getByLabelText('Bilangan Cacah'));
+
+    // Submit the form (katalog mode — sourceId not required)
+    const submit = screen.getByRole('button', { name: /Buat draft/i });
+    await user.click(submit);
+
+    await waitFor(() => {
+      expect(mockSubmitConfiguration).toHaveBeenCalledOnce();
+    });
+
+    // Success state banner should appear
+    await waitFor(() => {
+      expect(screen.getByText('Konfigurasi diterima')).toBeInTheDocument();
+    });
+
+    // Submit should be disabled in success state
+    expect(screen.getByRole('button', { name: /Buat draft/i })).toBeDisabled();
   });
 });
