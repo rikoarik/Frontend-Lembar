@@ -8,6 +8,8 @@ function apiOrigin(value) {
 }
 
 const isDev = process.env.NODE_ENV === 'development';
+const shouldUpgradeInsecureRequests =
+  process.env.VERCEL === '1' || process.env.NEXT_PUBLIC_APP_URL?.startsWith('https://');
 const connectSrc = ["connect-src 'self'", apiOrigin(process.env.NEXT_PUBLIC_API_BASE_URL)]
   .filter(Boolean)
   .join(' ');
@@ -25,8 +27,10 @@ const csp = [
   "img-src 'self' data: blob: https://lh3.googleusercontent.com https://raw.githubusercontent.com",
   "font-src 'self' data: https://fonts.gstatic.com",
   connectSrc,
-  'upgrade-insecure-requests',
-].join('; ');
+  shouldUpgradeInsecureRequests ? 'upgrade-insecure-requests' : null,
+]
+  .filter(Boolean)
+  .join('; ');
 
 const permissionsPolicy = [
   'camera=()',
