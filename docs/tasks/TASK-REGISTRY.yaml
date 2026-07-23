@@ -991,7 +991,7 @@ tasks:
     repository: Frontend-Lembar
     sprint: F5
     title: Private bank and templates
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [F4-03, B5-04]
     decisions: []
     outcome: Save trusted question snapshots and reusable configs, private by default.
