@@ -785,7 +785,7 @@ tasks:
     repository: Frontend-Lembar
     sprint: F2
     title: Identity and workspace integration gate
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [F2-01, F2-02, F2-03, F2-04, B1-05]
     decisions: []
     outcome: End-to-end session and tenant context verified across deployed test services.
@@ -911,7 +911,7 @@ tasks:
     repository: Frontend-Lembar
     sprint: F3
     title: Generate integration gate
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [F3-01, F3-02, F3-03, F3-04, B3-05]
     decisions: [D-013, D-019]
     outcome: Real pilot source-to-review draft journey meets quality and failure contracts.
@@ -951,7 +951,7 @@ tasks:
     repository: Frontend-Lembar
     sprint: F4
     title: Review usability and accessibility gate
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [F4-01, F4-02, F4-03, B4-05]
     decisions: []
     outcome: Moderated and automated review journey evidence.
@@ -971,7 +971,7 @@ tasks:
     repository: Frontend-Lembar
     sprint: F5
     title: Controlled share link and viewer
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [F5-01, B5-03]
     decisions: []
     outcome: Create/copy/expire/revoke and safe read-only viewer package.
@@ -1001,7 +1001,7 @@ tasks:
     repository: Frontend-Lembar
     sprint: F5
     title: Output and library integration gate
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [F5-01, F5-02, F5-03, F5-04, B5-05]
     decisions: []
     outcome: Golden A4, security, retry, retention, and end-to-end output evidence.
@@ -1011,7 +1011,7 @@ tasks:
     repository: Frontend-Lembar
     sprint: F5
     title: Help center and quality report surface
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [F4-03, B6-04]
     decisions: []
     outcome: Teacher can report problematic questions and access support context without leaking assessment content.
@@ -1033,7 +1033,7 @@ tasks:
     repository: Frontend-Lembar
     sprint: F6
     title: Entitlement and usage UI
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [B6-01]
     decisions: [D-009]
     outcome: Honest provider-neutral plan/usage/blocked states.
@@ -1043,7 +1043,7 @@ tasks:
     repository: Frontend-Lembar
     sprint: F6
     title: School admin
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [F2-03, B7-01, B7-02]
     decisions: []
     outcome: School overview, invite/activation, members, seats, and aggregate usage.
@@ -1053,7 +1053,7 @@ tasks:
     repository: Frontend-Lembar
     sprint: F6
     title: Superadmin minimum operations UI
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [B6-03]
     decisions: []
     outcome: Least-privilege audited catalog/job/account operations without broad content access.
@@ -1063,7 +1063,7 @@ tasks:
     repository: Frontend-Lembar
     sprint: F6
     title: Pilot hardening
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [F5-05, B6-04]
     decisions: []
     outcome: Real-device, accessibility, performance, support, and pilot feedback fixes.
@@ -1073,7 +1073,7 @@ tasks:
     repository: Frontend-Lembar
     sprint: F6
     title: Superadmin structured marketing CMS UI
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [F6-03, F1-06, B6-06]
     decisions: [P-011, P-012]
     outcome: Superadmin can edit, preview, publish, unpublish, and restore structured marketing content.
@@ -1084,7 +1084,7 @@ tasks:
     repository: Frontend-Lembar
     sprint: F6
     title: Creator usage analytics screen
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [F2-04, F6-01, B1-05]
     decisions: []
     outcome: Teacher-facing usage analytics are workspace-scoped, provider-neutral, and safe for shared devices.
@@ -1106,7 +1106,7 @@ tasks:
     repository: Frontend-Lembar
     sprint: F6
     title: School settings, branding, and admin audit screens
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [F6-02, B6-03, B7-03]
     decisions: []
     outcome: School admins manage approved organization settings and review audited admin events without teacher-content visibility.
@@ -1128,7 +1128,7 @@ tasks:
     repository: Frontend-Lembar
     sprint: F6
     title: School internal library and template management
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [F5-04, F6-02, B7-03]
     decisions: []
     outcome: School workspace surfaces internal bank and template reuse with explicit ownership and visibility boundaries.
@@ -1150,7 +1150,7 @@ tasks:
     repository: Frontend-Lembar
     sprint: F6
     title: Superadmin school and billing operations UI
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [F6-03, B7-04]
     decisions: []
     outcome: Superadmin can inspect school workspace and billing state through audited least-privilege operations screens.

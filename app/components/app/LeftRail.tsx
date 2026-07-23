@@ -17,11 +17,14 @@ const TEACHER_NAV = [
   { href: '/app/bank-soal', label: 'Bank Soal', icon: 'inventory_2' },
   { href: '/app/template', label: 'Template', icon: 'description' },
   { href: '/app/generate', label: 'Generate', icon: 'auto_awesome' },
+  { href: '/app/bantuan', label: 'Bantuan', icon: 'help' },
+  { href: '/app/gates', label: 'Gates', icon: 'verified' },
 ];
 
 const SCHOOL_ONLY_NAV = [
   { href: '/app/kelas', label: 'Kelas', icon: 'groups', entitlement: 'school_admin' },
   { href: '/app/analitik', label: 'Analitik', icon: 'monitoring', entitlement: 'school_admin' },
+  { href: '/school', label: 'Admin sekolah', icon: 'apartment', entitlement: 'school_admin' },
 ] as const;
 
 function roleAllows(activeRole: ActiveRole, entitlement: ActiveRole): boolean {
