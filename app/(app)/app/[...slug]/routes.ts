@@ -1,13 +1,10 @@
-// Owns the slug allowlist for the /app catch-all route. Slugs without an
-// entry resolve to a 404 shell state. New shell navigation entries must
-// add a placeholder here or the corresponding test will fail.
+// Owns the slug allowlist for the /app catch-all route. Dedicated pages must
+// NOT remain here once implemented. Remaining placeholders:
 export const SHELL_PLACEHOLDER_ROUTES = {
   profil: 'Profil',
   plan: 'Paket & kuota',
   'pengaturan/workspace': 'Workspace',
   'pengaturan/langganan': 'Paket & kuota',
-  kelas: 'Kelas',
-  analitik: 'Analitik',
 } as const;
 
 export type ShellPlaceholderSlug = keyof typeof SHELL_PLACEHOLDER_ROUTES;

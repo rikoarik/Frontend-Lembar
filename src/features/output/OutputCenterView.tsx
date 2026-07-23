@@ -7,6 +7,7 @@ import { assessmentService } from '@/src/services/assessments/assessmentService'
 import type { OutputPackage } from '@/src/features/review/types';
 import A4PreviewFrame from '@/app/components/print/A4PreviewFrame';
 import OutputPackagePreview from '@/app/components/print/OutputPackagePreview';
+import { ShareManager } from '@/src/features/share/ShareManager';
 
 export function OutputCenterView({ assessmentId }: { assessmentId: string }) {
   const [output, setOutput] = useState<OutputPackage | null>(null);
@@ -133,6 +134,11 @@ export function OutputCenterView({ assessmentId }: { assessmentId: string }) {
           </div>
         </div>
       </Panel>
+
+      <ShareManager
+        assessmentId={assessmentId}
+        title={`Output ${assessmentId}`}
+      />
 
       <Panel title="Pratinjau paket" description="Urutan paket: lembar siswa, kunci, pembahasan.">
         <div className="overflow-auto">
