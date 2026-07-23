@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { marketingNavigation, type MarketingNavItem } from '@/src/lib/marketing/navigation';
 import { getMarketingCta } from '@/src/lib/marketing/ctas';
 import ActiveNavIndicator from './ActiveNavIndicator';
@@ -14,6 +15,47 @@ function isActive(item: MarketingNavItem, pathname: string): boolean {
 
 export default function MarketingNavbar() {
   const pathname = usePathname() ?? '/';
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const menuId = useId();
+  const toggleRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  const closeMobile = useCallback(() => setMobileOpen(false), []);
+
+  // Close drawer when route changes.
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
+  // Escape closes the mobile menu and returns focus to the toggle.
+  useEffect(() => {
+    if (!mobileOpen) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setMobileOpen(false);
+        toggleRef.current?.focus();
+      }
+    };
+
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [mobileOpen]);
+
+  // Lock body scroll while the mobile menu is open.
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [mobileOpen]);
+
+  const loginCta = getMarketingCta('login');
+  const tryFreeCta = getMarketingCta('try-free');
+
   return (
     <header
       aria-label="Navigasi utama"
@@ -25,6 +67,7 @@ export default function MarketingNavbar() {
           href="/"
           aria-label="lembar — beranda"
           className="flex shrink-0 items-center gap-unit-2 text-brand-ink"
+          onClick={closeMobile}
         >
           <Logo variant="mark" alt="" priority />
           <span className="sr-only">lembar</span>
@@ -53,19 +96,79 @@ export default function MarketingNavbar() {
 
         <div className="flex shrink-0 items-center gap-unit-2">
           <Link
-            href={getMarketingCta('login').href}
-            className="hidden h-control-md items-center rounded-md px-unit-3 text-label-semibold text-brand-ink hover:text-brand-accent sm:inline-flex"
+            href={loginCta.href}
+            className="inline-flex h-control-md items-center rounded-md px-unit-2 text-label-semibold text-brand-ink hover:text-brand-accent sm:px-unit-3"
           >
-            {getMarketingCta('login').label}
+            {loginCta.label}
           </Link>
           <Link
-            href={getMarketingCta('try-free').href}
-            className="inline-flex h-control-md items-center rounded-md bg-brand-accent px-unit-4 text-label-semibold text-white hover:bg-brand-accent-hover"
+            href={tryFreeCta.href}
+            className="inline-flex h-control-md items-center rounded-md bg-brand-accent px-unit-3 text-label-semibold text-white hover:bg-brand-accent-hover sm:px-unit-4"
           >
-            {getMarketingCta('try-free').label}
+            {tryFreeCta.label}
           </Link>
+
+          <button
+            ref={toggleRef}
+            type="button"
+            className="inline-flex h-control-md w-control-md items-center justify-center rounded-md border border-brand-line text-brand-ink hover:bg-brand-paper focus-visible:outline-2 focus-visible:outline focus-visible:outline-brand-focus focus-visible:outline-offset-2 md:hidden"
+            aria-label={mobileOpen ? 'Tutup menu navigasi' : 'Buka menu navigasi'}
+            aria-expanded={mobileOpen}
+            aria-controls={menuId}
+            onClick={() => setMobileOpen((open) => !open)}
+          >
+            <span className="material-symbols-outlined" aria-hidden="true">
+              {mobileOpen ? 'close' : 'menu'}
+            </span>
+          </button>
         </div>
       </div>
+
+      {mobileOpen ? (
+        <div
+          id={menuId}
+          ref={panelRef}
+          className="border-t border-brand-line bg-brand-paper md:hidden"
+        >
+          <nav aria-label="Navigasi seluler" className="mx-auto flex max-w-container-max flex-col gap-1 px-margin-mobile py-unit-3">
+            {marketingNavigation.map((item) => {
+              const active = isActive(item, pathname);
+              return (
+                <Link
+                  key={item.id}
+                  href={item.href}
+                  aria-current={active ? 'page' : undefined}
+                  onClick={closeMobile}
+                  className={
+                    active
+                      ? 'inline-flex min-h-[var(--control-lg)] items-center rounded-md bg-brand-accent-soft px-unit-3 text-label-semibold text-brand-accent'
+                      : 'inline-flex min-h-[var(--control-lg)] items-center rounded-md px-unit-3 text-label-semibold text-brand-ink hover:bg-brand-paper'
+                  }
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+
+            <div className="my-unit-2 border-t border-brand-line" />
+
+            <Link
+              href={loginCta.href}
+              onClick={closeMobile}
+              className="inline-flex min-h-[var(--control-lg)] items-center rounded-md px-unit-3 text-label-semibold text-brand-ink hover:bg-brand-paper"
+            >
+              {loginCta.label}
+            </Link>
+            <Link
+              href={tryFreeCta.href}
+              onClick={closeMobile}
+              className="inline-flex min-h-[var(--control-lg)] items-center justify-center rounded-md bg-brand-accent px-unit-4 text-label-semibold text-white hover:bg-brand-accent-hover"
+            >
+              {tryFreeCta.label}
+            </Link>
+          </nav>
+        </div>
+      ) : null}
     </header>
   );
 }
