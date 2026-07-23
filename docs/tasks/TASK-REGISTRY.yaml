@@ -870,7 +870,7 @@ tasks:
     repository: Frontend-Lembar
     sprint: F3
     title: Catalog-dependent generate form
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [F2-03, F0-05, B1-04, B2-03]
     decisions: [D-012]
     outcome: Full generate configuration with dependent selectors and summary.
@@ -880,7 +880,7 @@ tasks:
     repository: Frontend-Lembar
     sprint: F3
     title: Private PDF source UI
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [F3-01, B2-01, B2-02]
     decisions: [D-006]
     outcome: Upload, processing, retry, insufficient, and deletion states.
@@ -901,7 +901,7 @@ tasks:
     repository: Frontend-Lembar
     sprint: F3
     title: Idempotent submit and job progress
-    status: BLOCKED
+    status: IN_PROGRESS
     depends_on: [F3-01, F3-02, B2-05]
     decisions: []
     outcome: One submit, reload-safe neutral progress, cancel/retry where allowed.
