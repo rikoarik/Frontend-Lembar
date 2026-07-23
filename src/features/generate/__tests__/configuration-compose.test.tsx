@@ -56,6 +56,18 @@ vi.mock('@/src/services/generate/generateService', () => ({
   },
 }));
 
+const mockPush = vi.fn();
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: mockPush,
+    replace: vi.fn(),
+    prefetch: vi.fn(),
+    back: vi.fn(),
+  }),
+  usePathname: () => '/app/generate',
+  useSearchParams: () => new URLSearchParams(),
+}));
+
 // ── Wrapper ──
 
 function Wrapper({ children }: { children: React.ReactNode }) {
@@ -265,7 +277,9 @@ describe('ConfigurationCompose — success state', () => {
     mockListGrades.mockResolvedValue(ok(MOCK_GRADES));
     mockListSubjects.mockResolvedValue(ok(MOCK_SUBJECTS));
     mockListMaterials.mockResolvedValue(ok(MOCK_MATERIALS));
-    mockSubmitConfiguration.mockResolvedValue(ok({ status: 'accepted' }));
+    mockSubmitConfiguration.mockResolvedValue(
+      ok({ status: 'accepted', jobId: 'job_test_01', compositionId: 'comp_test_01' }),
+    );
   });
 
   it('shows success banner after submit resolves successfully', async () => {
@@ -303,8 +317,9 @@ describe('ConfigurationCompose — success state', () => {
 
     // Success state banner should appear
     await waitFor(() => {
-      expect(screen.getByText('Konfigurasi diterima')).toBeInTheDocument();
+      expect(screen.getByText('Generate diterima')).toBeInTheDocument();
     });
+    expect(mockPush).toHaveBeenCalledWith(expect.stringMatching(/^\/app\/jobs\//));
 
     // Submit should be disabled in success state
     expect(screen.getByRole('button', { name: /Buat draft/i })).toBeDisabled();

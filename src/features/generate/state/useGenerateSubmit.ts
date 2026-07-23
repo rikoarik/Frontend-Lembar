@@ -4,11 +4,12 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 import { err, type Result } from '@/src/types/result';
 import { generateService } from '@/src/services/generate/generateService';
 import type { GenerateError } from '@/src/services/generate/generateErrors';
+import type { GenerateSubmitResult } from '@/src/services/generate/generateMutations';
 import { mapEnvelopeToGenerateError } from '@/src/services/generate/errorMapping';
 import type { CompositionValues } from '../types';
 
 export type UseGenerateSubmitOptions = {
-  onSuccess?: (result: unknown) => void;
+  onSuccess?: (result: GenerateSubmitResult) => void;
   onPermissionError?: () => void;
 };
 
@@ -18,7 +19,7 @@ export type UseGenerateSubmitApi = {
   submit: (
     values: CompositionValues,
     workspaceId: string,
-  ) => Promise<Result<unknown, GenerateError>>;
+  ) => Promise<Result<GenerateSubmitResult, GenerateError>>;
   reset: () => void;
 };
 

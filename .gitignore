@@ -42,3 +42,5 @@ pnpm-debug.log*
 
 # figma evidence is intentionally tracked
 !.figma-evidence/
+.vercel
+.env*

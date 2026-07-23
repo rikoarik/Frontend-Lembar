@@ -69,13 +69,15 @@ async function request<T>(
 
 export type GenerateSubmitResult = {
   status: 'accepted';
+  jobId: string;
+  assessmentId?: string;
   compositionId?: string;
 };
 
 export const generateMutations = {
   /*
-   * ponytail: stub transport until backend /v1/generate/submit endpoint is published.
-   * Replace request<T>() call with real fetch when the contract is final.
+   * Mock-first transport for F3-04. Backend contract may refine fields later;
+   * frontend only relies on accepted + jobId for progress routing.
    */
   async submitConfiguration(
     values: CompositionValues,

@@ -1,9 +1,11 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { catalogService } from '@/src/services/catalog/catalogService';
 import { useWorkspace } from '@/src/features/workspace/workspaceContext';
 import { PrivatePdfSource } from '@/src/features/pdf-source';
+import { writeActiveJob } from '@/src/features/jobs/activeJobStorage';
 import { OutputSettings } from './OutputSettings';
 import { Button, Panel } from '@/app/components/ui';
 import { validateComposition, getMissingSourceHint, getMissingOutcomesHint } from './validation';
@@ -72,6 +74,7 @@ const LABELS: Record<CompositionFieldKey, string> = {
 };
 
 export default function ConfigurationCompose() {
+  const router = useRouter();
   const { activeWorkspace } = useWorkspace();
   const workspaceId = activeWorkspace.id;
 
@@ -176,8 +179,17 @@ export default function ConfigurationCompose() {
   }, [values.gradeId, values.subjectId, values.curriculumVersionId, workspaceId]);
 
   const generateSubmit = useGenerateSubmit({
-    onSuccess: () => {
+    onSuccess: (result) => {
       setSuccessState(true);
+      if (result.jobId) {
+        writeActiveJob({
+          jobId: result.jobId,
+          workspaceId,
+          reviewMode: values.reviewMode,
+          savedAt: new Date().toISOString(),
+        });
+        router.push(`/app/jobs/${result.jobId}`);
+      }
     },
     onPermissionError: () => {
       setPermissionState(true);
@@ -445,9 +457,9 @@ export default function ConfigurationCompose() {
           aria-live="polite"
           className="rounded-md border border-brand-accent/30 bg-brand-accent-soft p-4"
         >
-          <p className="text-body-sm text-brand-accent font-medium">Konfigurasi diterima</p>
+          <p className="text-body-sm text-brand-accent font-medium">Generate diterima</p>
           <p className="mt-1 text-body-sm text-brand-ink-muted">
-            Konfigurasi tersimpan. Lanjutkan ke langkah berikutnya untuk membuat draft.
+            Sedang membuka halaman progres. Anda boleh meninggalkan halaman ini kapan saja.
           </p>
         </div>
       )}
