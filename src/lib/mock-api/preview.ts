@@ -85,7 +85,7 @@ export function mePayload() {
         name: 'SDN Contoh 01',
         type: 'school' as const,
         role: 'school_admin' as const,
-        permissions: ['assessment.create', 'assessment.read', 'school.manage'],
+        permissions: ['assessment.create', 'assessment.read', 'workspace.member.manage'],
       },
     ],
   };

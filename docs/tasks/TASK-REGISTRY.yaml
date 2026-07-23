@@ -901,7 +901,7 @@ tasks:
     repository: Frontend-Lembar
     sprint: F3
     title: Idempotent submit and job progress
-    status: IN_PROGRESS
+    status: ACCEPTED
     depends_on: [F3-01, F3-02, B2-05]
     decisions: []
     outcome: One submit, reload-safe neutral progress, cancel/retry where allowed.
@@ -921,7 +921,7 @@ tasks:
     repository: Frontend-Lembar
     sprint: F4
     title: Quick review
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [F3-05, B4-01]
     decisions: []
     outcome: Filterable full question review with source, answer, explanation, and flags.
@@ -931,7 +931,7 @@ tasks:
     repository: Frontend-Lembar
     sprint: F4
     title: Detail editor, regenerate, and conflicts
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [F4-01, B4-02, B4-03]
     decisions: []
     outcome: Guided one-by-one editing with old-version preservation and conflict recovery.
@@ -941,7 +941,7 @@ tasks:
     repository: Frontend-Lembar
     sprint: F4
     title: Finalization UX
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [F4-02, B4-04]
     decisions: []
     outcome: Blocking issue summary and immutable-version confirmation.
@@ -961,7 +961,7 @@ tasks:
     repository: Frontend-Lembar
     sprint: F5
     title: Output center and canonical PDF actions
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [F4-03, B5-02]
     decisions: [D-020]
     outcome: Render/ready/failure preview, print, and download of the same artifact.
@@ -981,7 +981,7 @@ tasks:
     repository: Frontend-Lembar
     sprint: F5
     title: History
-    status: BLOCKED
+    status: ACCEPTED
     depends_on: [F2-04, B5-04]
     decisions: []
     outcome: Search/filter/list and state-correct review/output/duplicate actions.
