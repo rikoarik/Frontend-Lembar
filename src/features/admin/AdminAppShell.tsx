@@ -24,9 +24,11 @@ export function SchoolAdminShell({ children }: { children: ReactNode }) {
       <AdminShell
         brand="lembar school"
         title={title}
-        subtitle="SDN Contoh 01 · panel admin sekolah"
+        subtitle="Panel admin sekolah · kelola guru, undangan, dan penggunaan"
         nav={SCHOOL_NAV}
         topRight={<AdminBadge tone="ok" label="school_admin" />}
+        actorName="Admin Sekolah"
+        actorMeta="SDN Contoh 01"
       >
         {children}
       </AdminShell>
@@ -43,9 +45,11 @@ export function OpsAdminShell({ children }: { children: ReactNode }) {
       <AdminShell
         brand="lembar ops"
         title={title}
-        subtitle="Superadmin management console · least-privilege mock"
+        subtitle="Konsol superadmin · pantau platform, tenant, job, dan konten"
         nav={OPS_NAV}
         topRight={<AdminBadge tone="info" label="superadmin" />}
+        actorName="Ops Superadmin"
+        actorMeta="platform · least privilege"
       >
         {children}
       </AdminShell>

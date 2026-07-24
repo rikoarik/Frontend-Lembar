@@ -163,47 +163,156 @@ export function AdminFilterChip({
   );
 }
 
+export function AdminPageHeader({
+  title,
+  description,
+  actions,
+  meta,
+}: {
+  title: string;
+  description?: string;
+  actions?: ReactNode;
+  meta?: ReactNode;
+}) {
+  return (
+    <div className="flex flex-col gap-3 rounded-xl border border-[#ddd4c8] bg-white px-4 py-4 shadow-[0_1px_0_rgba(23,23,23,0.03)] sm:flex-row sm:items-start sm:justify-between">
+      <div className="min-w-0">
+        <h2 className="text-[18px] font-semibold tracking-[-0.03em] text-[#171717]">{title}</h2>
+        {description ? (
+          <p className="mt-1 max-w-2xl text-[13px] leading-5 text-[#6d665d]">{description}</p>
+        ) : null}
+        {meta ? <div className="mt-2 flex flex-wrap items-center gap-2">{meta}</div> : null}
+      </div>
+      {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}
+    </div>
+  );
+}
+
+export function AdminEmptyState({
+  title = 'Tidak ada data.',
+  description,
+  action,
+  icon = 'inbox',
+}: {
+  title?: string;
+  description?: string;
+  action?: ReactNode;
+  icon?: string;
+}) {
+  return (
+    <div className="rounded-xl border border-dashed border-[#ddd4c8] bg-white px-6 py-14 text-center">
+      <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-[#f0ebe3] text-[#6d665d]">
+        <span className="material-symbols-outlined text-[22px]" aria-hidden>
+          {icon}
+        </span>
+      </div>
+      <p className="text-[14px] font-semibold text-[#171717]">{title}</p>
+      {description ? <p className="mx-auto mt-1 max-w-md text-[13px] text-[#6d665d]">{description}</p> : null}
+      {action ? <div className="mt-4 flex justify-center">{action}</div> : null}
+    </div>
+  );
+}
+
+export function AdminBulkBar({
+  count,
+  children,
+  onClear,
+}: {
+  count: number;
+  children: ReactNode;
+  onClear?: () => void;
+}) {
+  if (count <= 0) return null;
+  return (
+    <div className="flex flex-col gap-2 rounded-xl border border-[#171717] bg-[#171717] px-3 py-2.5 text-white sm:flex-row sm:items-center sm:justify-between">
+      <div className="text-[13px] font-medium">
+        <span className="font-semibold tabular-nums">{count}</span> dipilih
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        {children}
+        {onClear ? (
+          <button
+            type="button"
+            onClick={onClear}
+            className="rounded-lg px-2.5 py-1.5 text-[12px] font-semibold text-white/75 hover:bg-white/10 hover:text-white"
+          >
+            Bersihkan
+          </button>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
 export function AdminDataTable<T extends { id: string }>({
   columns,
   rows,
   emptyLabel = 'Tidak ada data.',
   emptyHint,
+  emptyAction,
   rowActions,
   density = 'comfortable',
+  footerNote = 'Data preview · staging',
+  selectable = false,
+  selectedIds = [],
+  onToggleRow,
+  onToggleAll,
 }: {
   columns: Array<AdminColumn<T>>;
   rows: T[];
   emptyLabel?: string;
   emptyHint?: string;
+  emptyAction?: ReactNode;
   rowActions?: (row: T) => ReactNode;
-  density?: 'compact' | 'comfortable';
+  density?: 'comfortable' | 'compact';
+  footerNote?: string;
+  selectable?: boolean;
+  selectedIds?: string[];
+  onToggleRow?: (id: string) => void;
+  onToggleAll?: (ids: string[]) => void;
 }) {
-  const cellY = density === 'compact' ? 'py-2.5' : 'py-3.5';
+  const cellY = density === 'compact' ? 'py-2' : 'py-3';
+  const allSelected = selectable && rows.length > 0 && rows.every((row) => selectedIds.includes(row.id));
+  const someSelected = selectable && rows.some((row) => selectedIds.includes(row.id)) && !allSelected;
 
   if (rows.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-[#ddd4c8] bg-white px-6 py-14 text-center">
-        <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-[#f7f3ec] text-[#6d665d] ring-1 ring-[#ddd4c8]">
-          <span className="material-symbols-outlined text-[20px]" aria-hidden>
-            inbox
-          </span>
-        </div>
-        <p className="text-[14px] font-medium text-[#171717]">{emptyLabel}</p>
-        {emptyHint ? <p className="mt-1 text-[13px] text-[#6d665d]">{emptyHint}</p> : null}
-      </div>
+      <AdminEmptyState
+        title={emptyLabel}
+        description={emptyHint}
+        action={emptyAction}
+        icon="filter_alt_off"
+      />
     );
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-[#ddd4c8] bg-white shadow-[0_1px_0_rgba(23,23,23,0.03),0_10px_30px_rgba(23,23,23,0.04)]">
+    <div className="overflow-hidden rounded-xl border border-[#ddd4c8] bg-white shadow-[0_1px_0_rgba(23,23,23,0.03)]">
       <div className="overflow-x-auto">
         <table className="min-w-full border-collapse text-left text-[13px]">
-          <thead className="sticky top-0 z-[1] border-b border-[#ddd4c8] bg-[#f3eee6]">
+          <thead className="bg-[#f3eee6] text-[11px] font-semibold uppercase tracking-[0.06em] text-[#6d665d]">
             <tr>
+              {selectable ? (
+                <th className="w-10 px-4 py-3">
+                  <input
+                    type="checkbox"
+                    aria-label="Pilih semua baris"
+                    checked={allSelected}
+                    ref={(el) => {
+                      if (el) el.indeterminate = someSelected;
+                    }}
+                    onChange={() => {
+                      if (!onToggleAll) return;
+                      onToggleAll(allSelected ? [] : rows.map((row) => row.id));
+                    }}
+                    className="h-4 w-4 rounded border-[#b9afa2] text-[#171717] focus:ring-[#171717]/30"
+                  />
+                </th>
+              ) : null}
               {columns.map((column) => (
                 <th
                   key={column.key}
-                  className={`px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.07em] text-[#7a736a] ${
+                  className={`px-4 py-3 ${
                     column.align === 'right'
                       ? 'text-right'
                       : column.align === 'center'
@@ -214,48 +323,58 @@ export function AdminDataTable<T extends { id: string }>({
                   {column.header}
                 </th>
               ))}
-              {rowActions ? (
-                <th className="px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-[0.07em] text-[#7a736a]">
-                  Aksi
-                </th>
-              ) : null}
+              {rowActions ? <th className="px-4 py-3 text-right">Aksi</th> : null}
             </tr>
           </thead>
           <tbody>
-            {rows.map((row, index) => (
-              <tr
-                key={row.id}
-                className={`border-t border-[#e7dfd4] transition-colors duration-[var(--motion-fast)] hover:bg-[#fff8ef] ${
-                  index % 2 === 1 ? 'bg-[#fbf7f1]' : 'bg-white'
-                }`}
-              >
-                {columns.map((column) => (
-                  <td
-                    key={column.key}
-                    className={`px-4 ${cellY} align-middle text-[#171717] ${
-                      column.align === 'right'
-                        ? 'text-right'
-                        : column.align === 'center'
-                          ? 'text-center'
-                          : 'text-left'
-                    } ${column.className ?? ''}`}
-                  >
-                    {column.render(row)}
-                  </td>
-                ))}
-                {rowActions ? (
-                  <td className={`px-4 ${cellY} align-middle`}>
-                    <div className="flex flex-wrap justify-end gap-1.5">{rowActions(row)}</div>
-                  </td>
-                ) : null}
-              </tr>
-            ))}
+            {rows.map((row) => {
+              const selected = selectedIds.includes(row.id);
+              return (
+                <tr
+                  key={row.id}
+                  className={`border-t border-[#eee6da] transition-colors hover:bg-[#fbf8f2] ${
+                    selected ? 'bg-[#f5efe6]' : ''
+                  }`}
+                >
+                  {selectable ? (
+                    <td className={`px-4 ${cellY} align-middle`}>
+                      <input
+                        type="checkbox"
+                        aria-label={`Pilih ${row.id}`}
+                        checked={selected}
+                        onChange={() => onToggleRow?.(row.id)}
+                        className="h-4 w-4 rounded border-[#b9afa2] text-[#171717] focus:ring-[#171717]/30"
+                      />
+                    </td>
+                  ) : null}
+                  {columns.map((column) => (
+                    <td
+                      key={column.key}
+                      className={`px-4 ${cellY} align-middle ${
+                        column.align === 'right'
+                          ? 'text-right'
+                          : column.align === 'center'
+                            ? 'text-center'
+                            : 'text-left'
+                      } ${column.className ?? ''}`}
+                    >
+                      {column.render(row)}
+                    </td>
+                  ))}
+                  {rowActions ? (
+                    <td className={`px-4 ${cellY} align-middle`}>
+                      <div className="flex flex-wrap justify-end gap-1.5">{rowActions(row)}</div>
+                    </td>
+                  ) : null}
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
       <div className="flex items-center justify-between border-t border-[#ddd4c8] bg-[#f3eee6] px-4 py-2.5 text-[12px] text-[#6d665d]">
         <span className="font-semibold text-[#171717]">{rows.length} baris</span>
-        <span>Mock data · non-production</span>
+        <span>{footerNote}</span>
       </div>
     </div>
   );
@@ -329,6 +448,8 @@ export function AdminShell({
   subtitle,
   nav,
   topRight,
+  actorName,
+  actorMeta,
   children,
 }: {
   brand: string;
@@ -336,6 +457,8 @@ export function AdminShell({
   subtitle?: string;
   nav: AdminNavItem[];
   topRight?: ReactNode;
+  actorName?: string;
+  actorMeta?: string;
   children: ReactNode;
 }) {
   const pathname = usePathname() ?? '/';
@@ -343,8 +466,8 @@ export function AdminShell({
   const [isPending, startTransition] = useTransition();
   const { toast, setToast } = useAdminPanel();
   const isOps = brand.includes('ops');
-  const roleLabel = isOps ? 'Ops Superadmin' : 'Admin Sekolah';
-  const roleMeta = isOps ? 'platform · least privilege' : 'SDN Contoh 01';
+  const resolvedActorName = actorName ?? (isOps ? 'Ops Superadmin' : 'Admin Sekolah');
+  const resolvedActorMeta = actorMeta ?? (isOps ? 'platform · least privilege' : 'SDN Contoh 01');
 
   const navigate = useCallback(
     (href: string) => {
@@ -432,12 +555,12 @@ export function AdminShell({
 
           <div className="border-t border-white/10 p-3">
             <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 p-3">
-              <AdminAvatar name={roleLabel} />
+              <AdminAvatar name={resolvedActorName} />
               <div className="min-w-0">
                 <div className="truncate text-[13px] font-semibold tracking-[-0.01em] text-white">
-                  {roleLabel}
+                  {resolvedActorName}
                 </div>
-                <div className="truncate text-[11px] text-white/50">{roleMeta}</div>
+                <div className="truncate text-[11px] text-white/50">{resolvedActorMeta}</div>
               </div>
             </div>
           </div>

@@ -1,10 +1,13 @@
 'use client';
 
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Button } from '@/app/components/ui';
 import {
   AdminAvatar,
+  AdminBulkBar,
   AdminDataTable,
+  AdminFilterChip,
+  AdminPageHeader,
   AdminPill,
   AdminStatCards,
   AdminToolbar,
@@ -72,30 +75,132 @@ type ContentRow = {
 
 const ACCOUNTS: AccountRow[] = [
   { id: 'acct_demo', displayName: 'Demo Guru', email: 'demo@lembar.id', role: 'teacher', status: 'aktif', school: '—' },
-  { id: 'acct_admin', displayName: 'Admin Sekolah', email: 'admin@sdncontoh.sch.id', role: 'school_admin', status: 'aktif', school: 'SDN Contoh 01' },
-  { id: 'acct_ops', displayName: 'Ops Superadmin', email: 'ops@lembar.id', role: 'superadmin', status: 'aktif', school: 'Platform' },
-  { id: 'acct_04', displayName: 'Guru Baru', email: 'baru@sekolah.sch.id', role: 'teacher', status: 'baru', school: 'SMP Harapan' },
-  { id: 'acct_05', displayName: 'Admin Grace', email: 'grace@sekolah.sch.id', role: 'school_admin', status: 'ditangguhkan', school: 'SMA Nusantara' },
+  {
+    id: 'acct_admin',
+    displayName: 'Admin Sekolah',
+    email: 'admin@sdncontoh.sch.id',
+    role: 'school_admin',
+    status: 'aktif',
+    school: 'SDN Contoh 01',
+  },
+  {
+    id: 'acct_ops',
+    displayName: 'Ops Superadmin',
+    email: 'ops@lembar.id',
+    role: 'superadmin',
+    status: 'aktif',
+    school: 'Platform',
+  },
+  {
+    id: 'acct_04',
+    displayName: 'Guru Baru',
+    email: 'baru@sekolah.sch.id',
+    role: 'teacher',
+    status: 'baru',
+    school: 'SMP Harapan',
+  },
+  {
+    id: 'acct_05',
+    displayName: 'Admin Grace',
+    email: 'grace@sekolah.sch.id',
+    role: 'school_admin',
+    status: 'ditangguhkan',
+    school: 'SMA Nusantara',
+  },
 ];
 
 const SCHOOLS: SchoolRow[] = [
-  { id: 'sch_01', name: 'SDN Contoh 01', plan: 'pilot', teachers: 24, usage: '312/500', owner: 'admin@sdncontoh.sch.id' },
-  { id: 'sch_02', name: 'SMP Harapan', plan: 'grace', teachers: 41, usage: '480/500', owner: 'admin@smpharapan.sch.id' },
-  { id: 'sch_03', name: 'SMA Nusantara', plan: 'blocked', teachers: 60, usage: '500/500', owner: 'admin@smanusantara.sch.id' },
-  { id: 'sch_04', name: 'SD Mawar', plan: 'active', teachers: 18, usage: '120/400', owner: 'admin@sdmawar.sch.id' },
+  {
+    id: 'sch_01',
+    name: 'SDN Contoh 01',
+    plan: 'pilot',
+    teachers: 24,
+    usage: '312/500',
+    owner: 'admin@sdncontoh.sch.id',
+  },
+  {
+    id: 'sch_02',
+    name: 'SMP Harapan',
+    plan: 'grace',
+    teachers: 41,
+    usage: '480/500',
+    owner: 'admin@smpharapan.sch.id',
+  },
+  {
+    id: 'sch_03',
+    name: 'SMA Nusantara',
+    plan: 'blocked',
+    teachers: 60,
+    usage: '500/500',
+    owner: 'admin@smanusantara.sch.id',
+  },
+  {
+    id: 'sch_04',
+    name: 'SD Mawar',
+    plan: 'active',
+    teachers: 18,
+    usage: '120/400',
+    owner: 'admin@sdmawar.sch.id',
+  },
 ];
 
 const JOBS: JobRow[] = [
-  { id: 'job_8f2a', type: 'generate', tenant: 'SDN Contoh 01', status: 'running', progress: '58%', updatedAt: '1 mnt lalu' },
-  { id: 'job_11bc', type: 'generate', tenant: 'SMP Harapan', status: 'queued', progress: '0%', updatedAt: '3 mnt lalu' },
-  { id: 'job_99aa', type: 'export', tenant: 'SMA Nusantara', status: 'failed', progress: '—', updatedAt: '12 mnt lalu' },
-  { id: 'job_22cd', type: 'generate', tenant: 'SD Mawar', status: 'succeeded', progress: '100%', updatedAt: '25 mnt lalu' },
+  {
+    id: 'job_8f2a',
+    type: 'generate',
+    tenant: 'SDN Contoh 01',
+    status: 'running',
+    progress: '58%',
+    updatedAt: '1 mnt lalu',
+  },
+  {
+    id: 'job_11bc',
+    type: 'generate',
+    tenant: 'SMP Harapan',
+    status: 'queued',
+    progress: '0%',
+    updatedAt: '3 mnt lalu',
+  },
+  {
+    id: 'job_99aa',
+    type: 'export',
+    tenant: 'SMA Nusantara',
+    status: 'failed',
+    progress: '—',
+    updatedAt: '12 mnt lalu',
+  },
+  {
+    id: 'job_22cd',
+    type: 'generate',
+    tenant: 'SD Mawar',
+    status: 'succeeded',
+    progress: '100%',
+    updatedAt: '25 mnt lalu',
+  },
 ];
 
 const QUALITY: QualityRow[] = [
-  { id: 'rep_a1', reason: 'kualitas_soal', status: 'open', reporter: 'guru.siti', createdAt: '2026-07-23' },
-  { id: 'rep_b2', reason: 'kunci_salah', status: 'triaged', reporter: 'guru.rina', createdAt: '2026-07-22' },
-  { id: 'rep_c3', reason: 'privasi', status: 'closed', reporter: 'guru.budi', createdAt: '2026-07-20' },
+  {
+    id: 'rep_a1',
+    reason: 'kualitas_soal',
+    status: 'open',
+    reporter: 'guru.siti',
+    createdAt: '2026-07-23',
+  },
+  {
+    id: 'rep_b2',
+    reason: 'kunci_salah',
+    status: 'triaged',
+    reporter: 'guru.rina',
+    createdAt: '2026-07-22',
+  },
+  {
+    id: 'rep_c3',
+    reason: 'privasi',
+    status: 'closed',
+    reporter: 'guru.budi',
+    createdAt: '2026-07-20',
+  },
 ];
 
 const BILLING: BillingRow[] = [
@@ -106,16 +211,46 @@ const BILLING: BillingRow[] = [
 ];
 
 const FLAGS: FlagRow[] = [
-  { id: 'f1', key: 'share.links', description: 'Controlled share links', enabled: true, scope: 'global' },
-  { id: 'f2', key: 'cms.marketing', description: 'Structured marketing CMS', enabled: true, scope: 'global' },
-  { id: 'f3', key: 'analytics.creator', description: 'Creator analytics screen', enabled: true, scope: 'pilot' },
-  { id: 'f4', key: 'ops.bulk_actions', description: 'Bulk tenant actions', enabled: false, scope: 'pilot' },
+  {
+    id: 'f1',
+    key: 'share.links',
+    description: 'Controlled share links',
+    enabled: true,
+    scope: 'global',
+  },
+  {
+    id: 'f2',
+    key: 'cms.marketing',
+    description: 'Structured marketing CMS',
+    enabled: true,
+    scope: 'global',
+  },
+  {
+    id: 'f3',
+    key: 'analytics.creator',
+    description: 'Creator analytics screen',
+    enabled: true,
+    scope: 'pilot',
+  },
+  {
+    id: 'f4',
+    key: 'ops.bulk_actions',
+    description: 'Bulk tenant actions',
+    enabled: false,
+    scope: 'pilot',
+  },
 ];
 
 const CONTENT: ContentRow[] = [
   { id: 'c1', slug: 'home', title: 'Beranda', status: 'published', updatedAt: '2026-07-20' },
   { id: 'c2', slug: 'harga', title: 'Harga', status: 'draft', updatedAt: '2026-07-23' },
-  { id: 'c3', slug: 'untuk-sekolah', title: 'Untuk Sekolah', status: 'published', updatedAt: '2026-07-18' },
+  {
+    id: 'c3',
+    slug: 'untuk-sekolah',
+    title: 'Untuk Sekolah',
+    status: 'published',
+    updatedAt: '2026-07-18',
+  },
 ];
 
 function planTone(plan: SchoolRow['plan']): 'ok' | 'warn' | 'bad' | 'info' | 'neutral' {
@@ -132,13 +267,45 @@ function jobTone(status: JobRow['status']): 'ok' | 'warn' | 'bad' | 'info' | 'ne
   return 'bad';
 }
 
+function accountStatusTone(status: AccountRow['status']): 'ok' | 'warn' | 'bad' | 'info' | 'neutral' {
+  if (status === 'aktif') return 'ok';
+  if (status === 'baru') return 'info';
+  return 'warn';
+}
+
+function billingTone(state: BillingRow['state']): 'ok' | 'warn' | 'bad' | 'info' | 'neutral' {
+  if (state === 'active') return 'ok';
+  if (state === 'grace') return 'warn';
+  if (state === 'blocked' || state === 'expired') return 'bad';
+  return 'neutral';
+}
+
+function qualityTone(status: QualityRow['status']): 'ok' | 'warn' | 'bad' | 'info' | 'neutral' {
+  if (status === 'open') return 'bad';
+  if (status === 'triaged') return 'warn';
+  return 'ok';
+}
+
 export function OpsConsoleView({ section = '' }: { section?: string }) {
   const key = section || '';
-  const { search, setSearch, setToast } = useAdminSectionState(key || 'ringkasan');
+  const {
+    search,
+    setSearch,
+    selectedIds,
+    setSelectedIds,
+    toggleSelectedId,
+    setToast,
+  } = useAdminSectionState(key || 'ringkasan');
+
   const [flags, setFlags] = useState(FLAGS);
-  const [filterRole, setFilterRole] = useState<'' | 'teacher' | 'school_admin' | 'superadmin'>('');
-  const [filterStatus, setFilterStatus] = useState<'' | 'aktif' | 'baru' | 'ditangguhkan'>('');
-  const [filterSekolah, setFilterSekolah] = useState('');
+  const [filterRole, setFilterRole] = useState<'' | AccountRow['role']>('');
+  const [filterStatus, setFilterStatus] = useState<'' | AccountRow['status']>('');
+  const [filterPlan, setFilterPlan] = useState<'' | SchoolRow['plan']>('');
+  const [filterJobStatus, setFilterJobStatus] = useState<'' | JobRow['status']>('');
+  const [filterQuality, setFilterQuality] = useState<'' | QualityRow['status']>('');
+  const [filterBilling, setFilterBilling] = useState<'' | BillingRow['state']>('');
+  const [filterContent, setFilterContent] = useState<'' | ContentRow['status']>('');
+
   const accounts = useMemo(() => {
     const q = search.trim().toLowerCase();
     return ACCOUNTS.filter((row) => {
@@ -150,68 +317,139 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
         row.school.toLowerCase().includes(q);
       const matchRole = filterRole === '' || row.role === filterRole;
       const matchStatus = filterStatus === '' || row.status === filterStatus;
-      const matchSekolah =
-        filterSekolah === '' || row.school.toLowerCase().includes(filterSekolah.toLowerCase());
-      return matchSearch && matchRole && matchStatus && matchSekolah;
+      return matchSearch && matchRole && matchStatus;
     });
-  }, [search, filterRole, filterStatus, filterSekolah]);
+  }, [search, filterRole, filterStatus]);
 
   const schools = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return SCHOOLS;
-    return SCHOOLS.filter(
-      (row) => row.name.toLowerCase().includes(q) || row.owner.toLowerCase().includes(q) || row.plan.includes(q),
-    );
-  }, [search]);
+    return SCHOOLS.filter((row) => {
+      const matchSearch =
+        !q ||
+        row.name.toLowerCase().includes(q) ||
+        row.owner.toLowerCase().includes(q) ||
+        row.plan.includes(q);
+      const matchPlan = filterPlan === '' || row.plan === filterPlan;
+      return matchSearch && matchPlan;
+    });
+  }, [search, filterPlan]);
 
   const jobs = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return JOBS;
-    return JOBS.filter(
-      (row) => row.id.includes(q) || row.tenant.toLowerCase().includes(q) || row.type.includes(q) || row.status.includes(q),
-    );
-  }, [search]);
+    return JOBS.filter((row) => {
+      const matchSearch =
+        !q ||
+        row.id.includes(q) ||
+        row.tenant.toLowerCase().includes(q) ||
+        row.type.includes(q) ||
+        row.status.includes(q);
+      const matchStatus = filterJobStatus === '' || row.status === filterJobStatus;
+      return matchSearch && matchStatus;
+    });
+  }, [search, filterJobStatus]);
 
   const quality = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return QUALITY;
-    return QUALITY.filter(
-      (row) => row.id.includes(q) || row.reason.includes(q) || row.reporter.includes(q) || row.status.includes(q),
-    );
-  }, [search]);
+    return QUALITY.filter((row) => {
+      const matchSearch =
+        !q ||
+        row.id.includes(q) ||
+        row.reason.includes(q) ||
+        row.reporter.includes(q) ||
+        row.status.includes(q);
+      const matchStatus = filterQuality === '' || row.status === filterQuality;
+      return matchSearch && matchStatus;
+    });
+  }, [search, filterQuality]);
 
   const billing = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return BILLING;
-    return BILLING.filter((row) => row.school.toLowerCase().includes(q) || row.state.includes(q));
-  }, [search]);
+    return BILLING.filter((row) => {
+      const matchSearch = !q || row.school.toLowerCase().includes(q) || row.state.includes(q);
+      const matchState = filterBilling === '' || row.state === filterBilling;
+      return matchSearch && matchState;
+    });
+  }, [search, filterBilling]);
 
   const content = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return CONTENT;
-    return CONTENT.filter((row) => row.slug.includes(q) || row.title.toLowerCase().includes(q) || row.status.includes(q));
-  }, [search]);
+    return CONTENT.filter((row) => {
+      const matchSearch =
+        !q || row.slug.includes(q) || row.title.toLowerCase().includes(q) || row.status.includes(q);
+      const matchStatus = filterContent === '' || row.status === filterContent;
+      return matchSearch && matchStatus;
+    });
+  }, [search, filterContent]);
+
+  const clearSelection = () => setSelectedIds([]);
 
   return (
     <div className="space-y-4">
       {key === '' ? (
         <>
+          <AdminPageHeader
+            title="Ringkasan platform"
+            description="Pantau kesehatan job, tenant berisiko, quality report, dan flag pilot dari satu tempat."
+            meta={
+              <>
+                <AdminPill tone="info">staging mock</AdminPill>
+                <AdminPill tone="ok">least privilege</AdminPill>
+              </>
+            }
+            actions={
+              <>
+                <Button size="sm" variant="secondary" onClick={() => setToast('Refresh ringkasan (mock).')}>
+                  Refresh
+                </Button>
+                <Button size="sm" onClick={() => setToast('Buka antrian job gagal.')}>
+                  Review job gagal
+                </Button>
+              </>
+            }
+          />
           <AdminStatCards
             items={[
-              { label: 'Job aktif', value: '3', hint: '1 gagal perlu retry', tone: 'info', delta: 'live' },
-              { label: 'Quality open', value: '2', hint: 'butuh triage', tone: 'warn', delta: 'P1' },
-              { label: 'Tenant pantau', value: '2', hint: 'grace/blocked', tone: 'bad', delta: '2' },
-              { label: 'Flag pilot', value: '2', hint: 'scope terbatas', tone: 'ok', delta: 'on' },
+              {
+                label: 'Job aktif',
+                value: '3',
+                hint: '1 gagal perlu retry',
+                tone: 'info',
+                delta: 'live',
+              },
+              {
+                label: 'Quality open',
+                value: '2',
+                hint: 'butuh triage',
+                tone: 'warn',
+                delta: 'P1',
+              },
+              {
+                label: 'Tenant pantau',
+                value: '2',
+                hint: 'grace/blocked',
+                tone: 'bad',
+                delta: '2',
+              },
+              {
+                label: 'Flag pilot',
+                value: '2',
+                hint: 'scope terbatas',
+                tone: 'ok',
+                delta: 'on',
+              },
             ]}
           />
           <div className="grid gap-4 xl:grid-cols-2">
             <div className="space-y-3 rounded-[var(--radius-lg)] border border-brand-line/80 bg-brand-surface-raised p-4 shadow-[var(--shadow-sm)]">
               <div className="flex items-center justify-between gap-2">
                 <h2 className="text-body-default font-semibold">Jobs terbaru</h2>
-                <a href="/ops/jobs" className="text-caption font-medium text-brand-accent hover:underline">Lihat semua</a>
+                <a href="/ops/jobs" className="text-caption font-medium text-brand-accent hover:underline">
+                  Lihat semua
+                </a>
               </div>
               <AdminDataTable
                 rows={JOBS.slice(0, 4)}
+                footerNote="Preview · staging"
                 columns={[
                   { key: 'id', header: 'Job', render: (row) => row.id },
                   { key: 'tenant', header: 'Tenant', render: (row) => row.tenant },
@@ -227,10 +465,15 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             <div className="space-y-3 rounded-[var(--radius-lg)] border border-brand-line/80 bg-brand-surface-raised p-4 shadow-[var(--shadow-sm)]">
               <div className="flex items-center justify-between gap-2">
                 <h2 className="text-body-default font-semibold">Tenant yang perlu perhatian</h2>
-                <a href="/ops/schools" className="text-caption font-medium text-brand-accent hover:underline">Lihat semua</a>
+                <a href="/ops/schools" className="text-caption font-medium text-brand-accent hover:underline">
+                  Lihat semua
+                </a>
               </div>
               <AdminDataTable
                 rows={SCHOOLS.filter((s) => s.plan === 'grace' || s.plan === 'blocked')}
+                footerNote="Preview · staging"
+                emptyLabel="Tidak ada tenant berisiko."
+                emptyHint="Semua sekolah dalam status aman."
                 columns={[
                   { key: 'name', header: 'Sekolah', render: (row) => row.name },
                   {
@@ -240,11 +483,6 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                   },
                   { key: 'usage', header: 'Usage', render: (row) => row.usage },
                 ]}
-                rowActions={(row) => (
-                  <Button size="sm" variant="secondary" onClick={() => setToast(`Buka tenant ${row.name}`)}>
-                    Review
-                  </Button>
-                )}
               />
             </div>
           </div>
@@ -253,97 +491,131 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
 
       {key === 'accounts' ? (
         <>
+          <AdminPageHeader
+            title="Akun platform"
+            description="Cari, filter, dan kelola akun guru, admin sekolah, serta superadmin."
+            meta={<AdminPill tone="info">{accounts.length} ditampilkan</AdminPill>}
+            actions={
+              <Button size="sm" onClick={() => setToast('Undang akun baru (mock).')}>
+                Undang akun
+              </Button>
+            }
+          />
           <AdminToolbar
             search={search}
             onSearchChange={setSearch}
-            searchPlaceholder="Cari akun, email, role, sekolah"
-            actions={<Button size="sm" variant="secondary" onClick={() => setToast('Export akun mock disiapkan.')}>Export CSV</Button>}
-          />
-          {/* Filter bar: Role, Status, Sekolah — auto-apply via onChange */}
-          <div className="flex flex-wrap gap-3 rounded-md border border-brand-line bg-brand-surface-raised px-3 py-2">
-            <label className="flex flex-col gap-1">
-              <span className="text-caption text-brand-ink-muted">Role</span>
-              <select
-                value={filterRole}
-                onChange={(e) => setFilterRole(e.target.value as typeof filterRole)}
-                className="rounded border border-brand-line bg-brand-paper px-2 py-1 text-body-sm text-brand-ink focus:outline-none focus:ring-2 focus:ring-brand-accent/30"
-              >
-                <option value="">Semua role</option>
-                <option value="teacher">teacher</option>
-                <option value="school_admin">school_admin</option>
-                <option value="superadmin">superadmin</option>
-              </select>
-            </label>
-            <label className="flex flex-col gap-1">
-              <span className="text-caption text-brand-ink-muted">Status</span>
-              <select
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value as typeof filterStatus)}
-                className="rounded border border-brand-line bg-brand-paper px-2 py-1 text-body-sm text-brand-ink focus:outline-none focus:ring-2 focus:ring-brand-accent/30"
-              >
-                <option value="">Semua status</option>
-                <option value="aktif">aktif</option>
-                <option value="baru">baru</option>
-                <option value="ditangguhkan">ditangguhkan</option>
-              </select>
-            </label>
-            <label className="flex flex-col gap-1">
-              <span className="text-caption text-brand-ink-muted">Sekolah</span>
-              <input
-                type="text"
-                value={filterSekolah}
-                onChange={(e) => setFilterSekolah(e.target.value)}
-                placeholder="Cari sekolah…"
-                className="rounded border border-brand-line bg-brand-paper px-2 py-1 text-body-sm text-brand-ink placeholder:text-brand-ink-muted focus:outline-none focus:ring-2 focus:ring-brand-accent/30"
-              />
-            </label>
-            {(filterRole !== '' || filterStatus !== '' || filterSekolah !== '') && (
-              <div className="flex items-end">
-                <button
-                  type="button"
-                  onClick={() => { setFilterRole(''); setFilterStatus(''); setFilterSekolah(''); }}
-                  className="rounded px-2 py-1 text-caption text-brand-ink-muted hover:bg-brand-paper hover:text-brand-ink"
+            searchPlaceholder="Cari nama / email / sekolah"
+            filters={
+              <>
+                <AdminFilterChip active={filterRole === ''} onClick={() => setFilterRole('')}>
+                  Semua role
+                </AdminFilterChip>
+                <AdminFilterChip
+                  active={filterRole === 'teacher'}
+                  onClick={() => setFilterRole('teacher')}
                 >
-                  Reset filter
-                </button>
-              </div>
-            )}
-          </div>
+                  teacher
+                </AdminFilterChip>
+                <AdminFilterChip
+                  active={filterRole === 'school_admin'}
+                  onClick={() => setFilterRole('school_admin')}
+                >
+                  school_admin
+                </AdminFilterChip>
+                <AdminFilterChip
+                  active={filterRole === 'superadmin'}
+                  onClick={() => setFilterRole('superadmin')}
+                >
+                  superadmin
+                </AdminFilterChip>
+                <AdminFilterChip active={filterStatus === ''} onClick={() => setFilterStatus('')}>
+                  Semua status
+                </AdminFilterChip>
+                <AdminFilterChip
+                  active={filterStatus === 'aktif'}
+                  onClick={() => setFilterStatus('aktif')}
+                >
+                  aktif
+                </AdminFilterChip>
+                <AdminFilterChip
+                  active={filterStatus === 'baru'}
+                  onClick={() => setFilterStatus('baru')}
+                >
+                  baru
+                </AdminFilterChip>
+                <AdminFilterChip
+                  active={filterStatus === 'ditangguhkan'}
+                  onClick={() => setFilterStatus('ditangguhkan')}
+                >
+                  ditangguhkan
+                </AdminFilterChip>
+              </>
+            }
+          />
+          <AdminBulkBar count={selectedIds.length} onClear={clearSelection}>
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => setToast(`Suspend ${selectedIds.length} akun (mock).`)}
+            >
+              Suspend
+            </Button>
+            <Button size="sm" onClick={() => setToast(`Kirim reset sandi ke ${selectedIds.length} akun.`)}>
+              Reset sandi
+            </Button>
+          </AdminBulkBar>
           <AdminDataTable
             rows={accounts}
+            selectable
+            selectedIds={selectedIds}
+            onToggleRow={toggleSelectedId}
+            onToggleAll={setSelectedIds}
+            emptyLabel="Tidak ada akun yang cocok."
+            emptyHint="Ubah filter atau kata kunci pencarian."
+            emptyAction={
+              <Button size="sm" variant="secondary" onClick={() => {
+                setSearch('');
+                setFilterRole('');
+                setFilterStatus('');
+              }}>
+                Reset filter
+              </Button>
+            }
             columns={[
               {
-                key: 'name',
-                header: 'Akun',
+                key: 'user',
+                header: 'Pengguna',
                 render: (row) => (
                   <div className="flex items-center gap-3">
                     <AdminAvatar name={row.displayName} />
                     <div className="min-w-0">
-                      <div className="truncate font-semibold tracking-[-0.01em]">{row.displayName}</div>
-                      <div className="truncate text-[12px] text-brand-ink-muted">{row.email}</div>
+                      <div className="font-semibold text-[#171717]">{row.displayName}</div>
+                      <div className="text-[12px] text-[#6d665d]">{row.email}</div>
                     </div>
                   </div>
                 ),
               },
-              { key: 'role', header: 'Role', render: (row) => <AdminPill>{row.role}</AdminPill> },
+              {
+                key: 'role',
+                header: 'Role',
+                render: (row) => <AdminPill tone={row.role === 'superadmin' ? 'info' : 'neutral'}>{row.role}</AdminPill>,
+              },
               {
                 key: 'status',
                 header: 'Status',
                 render: (row) => (
-                  <AdminPill tone={row.status === 'aktif' ? 'ok' : row.status === 'baru' ? 'info' : 'bad'}>
-                    {row.status}
-                  </AdminPill>
+                  <AdminPill tone={accountStatusTone(row.status)}>{row.status}</AdminPill>
                 ),
               },
               { key: 'school', header: 'Sekolah', render: (row) => row.school },
             ]}
             rowActions={(row) => (
               <>
-                <Button size="sm" variant="secondary" onClick={() => setToast(`Impersonate disabled mock: ${row.id}`)}>
+                <Button size="sm" variant="secondary" onClick={() => setToast(`Detail ${row.displayName}`)}>
                   Detail
                 </Button>
-                <Button size="sm" variant="danger" onClick={() => setToast(`Suspend mock: ${row.displayName}`)}>
-                  Suspend
+                <Button size="sm" onClick={() => setToast(`Impersonate ${row.email} (mock).`)}>
+                  Impersonate
                 </Button>
               </>
             )}
@@ -353,32 +625,56 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
 
       {key === 'schools' ? (
         <>
+          <AdminPageHeader
+            title="Sekolah / tenant"
+            description="Pantau status plan, usage, dan owner setiap tenant sekolah."
+            meta={<AdminPill tone="warn">{schools.filter((s) => s.plan !== 'active' && s.plan !== 'pilot').length} perlu perhatian</AdminPill>}
+            actions={
+              <Button size="sm" onClick={() => setToast('Tambah tenant sekolah (mock).')}>
+                Tambah sekolah
+              </Button>
+            }
+          />
           <AdminToolbar
             search={search}
             onSearchChange={setSearch}
-            searchPlaceholder="Cari sekolah / owner / status"
-            actions={<Button size="sm" onClick={() => setToast('Onboarding tenant mock dibuka.')}>Tambah tenant</Button>}
+            searchPlaceholder="Cari sekolah / owner / plan"
+            filters={
+              <>
+                {(['', 'pilot', 'active', 'grace', 'blocked'] as const).map((plan) => (
+                  <AdminFilterChip
+                    key={plan || 'all'}
+                    active={filterPlan === plan}
+                    onClick={() => setFilterPlan(plan)}
+                  >
+                    {plan || 'Semua plan'}
+                  </AdminFilterChip>
+                ))}
+              </>
+            }
           />
           <AdminDataTable
             rows={schools}
+            emptyLabel="Tidak ada sekolah yang cocok."
+            emptyHint="Coba hapus filter plan atau ubah kata kunci."
             columns={[
               { key: 'name', header: 'Sekolah', render: (row) => row.name },
               {
                 key: 'plan',
-                header: 'Paket',
+                header: 'Plan',
                 render: (row) => <AdminPill tone={planTone(row.plan)}>{row.plan}</AdminPill>,
               },
-              { key: 'teachers', header: 'Guru', render: (row) => row.teachers },
+              { key: 'teachers', header: 'Guru', render: (row) => String(row.teachers) },
               { key: 'usage', header: 'Usage', render: (row) => row.usage },
               { key: 'owner', header: 'Owner', render: (row) => row.owner },
             ]}
             rowActions={(row) => (
               <>
-                <Button size="sm" variant="secondary" onClick={() => setToast(`Billing ${row.name}`)}>
-                  Billing
+                <Button size="sm" variant="secondary" onClick={() => setToast(`Buka ${row.name}`)}>
+                  Buka
                 </Button>
-                <Button size="sm" variant="secondary" onClick={() => setToast(`Audit ${row.name}`)}>
-                  Audit
+                <Button size="sm" onClick={() => setToast(`Ubah plan ${row.name}`)}>
+                  Ubah plan
                 </Button>
               </>
             )}
@@ -386,47 +682,123 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
         </>
       ) : null}
 
-      {key === 'catalog' || key === 'prompts' ? (
-        <AdminDataTable
-          rows={
-            key === 'catalog'
-              ? [
-                  { id: 'cat1', name: 'Kurmer Fase C', status: 'published', version: 'v3' },
-                  { id: 'cat2', name: 'K13 SD', status: 'published', version: 'v2' },
-                  { id: 'cat3', name: 'Draft IPAS 2026', status: 'draft', version: 'v0.4' },
-                ]
-              : [
-                  { id: 'p1', name: 'prompt.generate.v3', status: 'aktif', version: 'v3' },
-                  { id: 'p2', name: 'prompt.review.critic.v2', status: 'aktif', version: 'v2' },
-                  { id: 'p3', name: 'prompt.export.layout.v1', status: 'draft', version: 'v1' },
-                ]
-          }
-          columns={[
-            { key: 'name', header: 'Nama', render: (row) => row.name },
-            {
-              key: 'status',
-              header: 'Status',
-              render: (row) => (
-                <AdminPill tone={row.status === 'published' || row.status === 'aktif' ? 'ok' : 'neutral'}>
-                  {row.status}
-                </AdminPill>
-              ),
-            },
-            { key: 'version', header: 'Versi', render: (row) => row.version },
-          ]}
-          rowActions={(row) => (
-            <Button size="sm" variant="secondary" onClick={() => setToast(`Kelola ${row.name}`)}>
-              Kelola
-            </Button>
-          )}
-        />
+      {key === 'catalog' ? (
+        <>
+          <AdminPageHeader
+            title="Katalog"
+            description="Kelola grade, mapel, dan material yang dipakai generator."
+            actions={
+              <Button size="sm" onClick={() => setToast('Sync katalog (mock).')}>
+                Sync katalog
+              </Button>
+            }
+          />
+          <AdminStatCards
+            items={[
+              { label: 'Grade', value: '12', hint: 'aktif', tone: 'ok' },
+              { label: 'Mapel', value: '28', hint: 'published', tone: 'info' },
+              { label: 'Material', value: '146', hint: 'siap pakai', tone: 'neutral' },
+              { label: 'Draft', value: '7', hint: 'perlu review', tone: 'warn' },
+            ]}
+          />
+          <AdminDataTable
+            rows={[
+              { id: 'cat_1', label: 'Kelas 7', type: 'grade', status: 'published' },
+              { id: 'cat_2', label: 'Matematika', type: 'subject', status: 'published' },
+              { id: 'cat_3', label: 'IPA', type: 'subject', status: 'draft' },
+              { id: 'cat_4', label: 'Buku paket tema 1', type: 'material', status: 'published' },
+            ]}
+            columns={[
+              { key: 'label', header: 'Item', render: (row) => row.label },
+              { key: 'type', header: 'Tipe', render: (row) => row.type },
+              {
+                key: 'status',
+                header: 'Status',
+                render: (row) => (
+                  <AdminPill tone={row.status === 'published' ? 'ok' : 'neutral'}>{row.status}</AdminPill>
+                ),
+              },
+            ]}
+            rowActions={(row) => (
+              <Button size="sm" variant="secondary" onClick={() => setToast(`Edit ${row.label}`)}>
+                Edit
+              </Button>
+            )}
+          />
+        </>
+      ) : null}
+
+      {key === 'prompts' ? (
+        <>
+          <AdminPageHeader
+            title="Prompt library"
+            description="Template prompt internal untuk generate, repair, dan quality check."
+            actions={
+              <Button size="sm" onClick={() => setToast('Buat prompt baru (mock).')}>
+                Prompt baru
+              </Button>
+            }
+          />
+          <AdminDataTable
+            rows={[
+              { id: 'p1', name: 'generate.v3', owner: 'ops', status: 'active' },
+              { id: 'p2', name: 'repair.schema', owner: 'eng', status: 'active' },
+              { id: 'p3', name: 'quality.guard', owner: 'ops', status: 'draft' },
+            ]}
+            columns={[
+              { key: 'name', header: 'Prompt', render: (row) => row.name },
+              { key: 'owner', header: 'Owner', render: (row) => row.owner },
+              {
+                key: 'status',
+                header: 'Status',
+                render: (row) => (
+                  <AdminPill tone={row.status === 'active' ? 'ok' : 'neutral'}>{row.status}</AdminPill>
+                ),
+              },
+            ]}
+            rowActions={(row) => (
+              <Button size="sm" variant="secondary" onClick={() => setToast(`Buka ${row.name}`)}>
+                Buka
+              </Button>
+            )}
+          />
+        </>
       ) : null}
 
       {key === 'jobs' ? (
         <>
-          <AdminToolbar search={search} onSearchChange={setSearch} searchPlaceholder="Cari job id / tenant / status" />
+          <AdminPageHeader
+            title="Jobs"
+            description="Pantau antrian generate/export lintas tenant dan retry job gagal."
+            meta={<AdminPill tone="bad">{jobs.filter((j) => j.status === 'failed').length} gagal</AdminPill>}
+            actions={
+              <Button size="sm" onClick={() => setToast('Retry semua failed (mock).')}>
+                Retry failed
+              </Button>
+            }
+          />
+          <AdminToolbar
+            search={search}
+            onSearchChange={setSearch}
+            searchPlaceholder="Cari job / tenant / status"
+            filters={
+              <>
+                {(['', 'running', 'queued', 'failed', 'succeeded'] as const).map((status) => (
+                  <AdminFilterChip
+                    key={status || 'all'}
+                    active={filterJobStatus === status}
+                    onClick={() => setFilterJobStatus(status)}
+                  >
+                    {status || 'Semua status'}
+                  </AdminFilterChip>
+                ))}
+              </>
+            }
+          />
           <AdminDataTable
             rows={jobs}
+            emptyLabel="Tidak ada job yang cocok."
+            emptyHint="Ubah filter status atau kata kunci."
             columns={[
               { key: 'id', header: 'Job', render: (row) => row.id },
               { key: 'type', header: 'Tipe', render: (row) => row.type },
@@ -441,8 +813,8 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             ]}
             rowActions={(row) => (
               <>
-                <Button size="sm" variant="secondary" onClick={() => setToast(`Inspect ${row.id}`)}>
-                  Inspect
+                <Button size="sm" variant="secondary" onClick={() => setToast(`Detail ${row.id}`)}>
+                  Detail
                 </Button>
                 {row.status === 'failed' ? (
                   <Button size="sm" onClick={() => setToast(`Retry ${row.id}`)}>
@@ -457,74 +829,136 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
 
       {key === 'quality' ? (
         <>
-          <AdminToolbar search={search} onSearchChange={setSearch} searchPlaceholder="Cari report / alasan / reporter" />
+          <AdminPageHeader
+            title="Quality reports"
+            description="Triage laporan kualitas soal, kunci, dan privasi dari pengguna."
+            meta={<AdminPill tone="warn">{quality.filter((q) => q.status !== 'closed').length} open/triaged</AdminPill>}
+          />
+          <AdminToolbar
+            search={search}
+            onSearchChange={setSearch}
+            searchPlaceholder="Cari report / reason / reporter"
+            filters={
+              <>
+                {(['', 'open', 'triaged', 'closed'] as const).map((status) => (
+                  <AdminFilterChip
+                    key={status || 'all'}
+                    active={filterQuality === status}
+                    onClick={() => setFilterQuality(status)}
+                  >
+                    {status || 'Semua status'}
+                  </AdminFilterChip>
+                ))}
+              </>
+            }
+          />
           <AdminDataTable
             rows={quality}
+            emptyLabel="Tidak ada report yang cocok."
             columns={[
               { key: 'id', header: 'Report', render: (row) => row.id },
-              { key: 'reason', header: 'Alasan', render: (row) => row.reason },
+              { key: 'reason', header: 'Reason', render: (row) => row.reason },
               {
                 key: 'status',
                 header: 'Status',
-                render: (row) => (
-                  <AdminPill tone={row.status === 'open' ? 'warn' : row.status === 'triaged' ? 'info' : 'ok'}>
-                    {row.status}
-                  </AdminPill>
-                ),
+                render: (row) => <AdminPill tone={qualityTone(row.status)}>{row.status}</AdminPill>,
               },
               { key: 'reporter', header: 'Reporter', render: (row) => row.reporter },
               { key: 'created', header: 'Dibuat', render: (row) => row.createdAt },
             ]}
             rowActions={(row) => (
-              <Button size="sm" variant="secondary" onClick={() => setToast(`Triage ${row.id}`)}>
-                Triage
-              </Button>
+              <>
+                <Button size="sm" variant="secondary" onClick={() => setToast(`Triage ${row.id}`)}>
+                  Triage
+                </Button>
+                <Button size="sm" onClick={() => setToast(`Tutup ${row.id}`)}>
+                  Tutup
+                </Button>
+              </>
             )}
           />
         </>
       ) : null}
 
       {key === 'audit' ? (
-        <AdminDataTable
-          rows={[
-            { id: 'au1', at: '2026-07-23 10:11', actor: 'ops.rina', action: 'publish catalog', target: 'Kurmer Fase C' },
-            { id: 'au2', at: '2026-07-22 16:40', actor: 'ops.budi', action: 'revoke share support', target: 'share_xx' },
-            { id: 'au3', at: '2026-07-21 09:02', actor: 'ops.rina', action: 'toggle flag', target: 'analytics.creator' },
-          ]}
-          columns={[
-            { key: 'at', header: 'Waktu', render: (row) => row.at },
-            { key: 'actor', header: 'Aktor', render: (row) => row.actor },
-            { key: 'action', header: 'Aksi', render: (row) => row.action },
-            { key: 'target', header: 'Target', render: (row) => row.target },
-          ]}
-        />
+        <>
+          <AdminPageHeader
+            title="Audit trail"
+            description="Jejak aksi superadmin untuk akuntabilitas platform."
+          />
+          <AdminDataTable
+            rows={[
+              {
+                id: 'aud_1',
+                actor: 'ops@lembar.id',
+                action: 'role.update',
+                target: 'admin@sdncontoh.sch.id',
+                at: '2026-07-24 10:12',
+              },
+              {
+                id: 'aud_2',
+                actor: 'ops@lembar.id',
+                action: 'tenant.plan_change',
+                target: 'SMP Harapan',
+                at: '2026-07-24 09:40',
+              },
+              {
+                id: 'aud_3',
+                actor: 'ops@lembar.id',
+                action: 'flag.toggle',
+                target: 'ops.bulk_actions',
+                at: '2026-07-23 18:05',
+              },
+            ]}
+            columns={[
+              { key: 'at', header: 'Waktu', render: (row) => row.at },
+              { key: 'actor', header: 'Actor', render: (row) => row.actor },
+              { key: 'action', header: 'Aksi', render: (row) => row.action },
+              { key: 'target', header: 'Target', render: (row) => row.target },
+            ]}
+            rowActions={(row) => (
+              <Button size="sm" variant="secondary" onClick={() => setToast(`Detail audit ${row.id}`)}>
+                Detail
+              </Button>
+            )}
+          />
+        </>
       ) : null}
 
       {key === 'billing' ? (
         <>
-          <AdminToolbar search={search} onSearchChange={setSearch} searchPlaceholder="Cari sekolah / state" />
+          <AdminPageHeader
+            title="Billing"
+            description="Pantau status langganan, seats, dan perpanjangan tenant."
+            meta={<AdminPill tone="warn">{billing.filter((b) => b.state !== 'active').length} non-active</AdminPill>}
+          />
+          <AdminToolbar
+            search={search}
+            onSearchChange={setSearch}
+            searchPlaceholder="Cari sekolah / state"
+            filters={
+              <>
+                {(['', 'active', 'grace', 'blocked', 'expired'] as const).map((state) => (
+                  <AdminFilterChip
+                    key={state || 'all'}
+                    active={filterBilling === state}
+                    onClick={() => setFilterBilling(state)}
+                  >
+                    {state || 'Semua state'}
+                  </AdminFilterChip>
+                ))}
+              </>
+            }
+          />
           <AdminDataTable
             rows={billing}
+            emptyLabel="Tidak ada data billing yang cocok."
             columns={[
               { key: 'school', header: 'Sekolah', render: (row) => row.school },
               {
                 key: 'state',
                 header: 'State',
-                render: (row) => (
-                  <AdminPill
-                    tone={
-                      row.state === 'active'
-                        ? 'ok'
-                        : row.state === 'grace'
-                          ? 'warn'
-                          : row.state === 'blocked'
-                            ? 'bad'
-                            : 'neutral'
-                    }
-                  >
-                    {row.state}
-                  </AdminPill>
-                ),
+                render: (row) => <AdminPill tone={billingTone(row.state)}>{row.state}</AdminPill>,
               },
               { key: 'seats', header: 'Seats', render: (row) => row.seats },
               { key: 'renew', header: 'Renew', render: (row) => row.renewsAt },
@@ -539,45 +973,77 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
       ) : null}
 
       {key === 'flags' ? (
-        <AdminDataTable
-          rows={flags}
-          columns={[
-            { key: 'key', header: 'Flag', render: (row) => row.key },
-            { key: 'desc', header: 'Deskripsi', render: (row) => row.description },
-            { key: 'scope', header: 'Scope', render: (row) => row.scope },
-            {
-              key: 'enabled',
-              header: 'State',
-              render: (row) => <AdminPill tone={row.enabled ? 'ok' : 'neutral'}>{row.enabled ? 'on' : 'off'}</AdminPill>,
-            },
-          ]}
-          rowActions={(row) => (
-            <Button
-              size="sm"
-              variant="secondary"
-              onClick={() => {
-                setFlags((prev) =>
-                  prev.map((item) => (item.id === row.id ? { ...item, enabled: !item.enabled } : item)),
-                );
-                setToast(`Flag ${row.key} diubah (mock).`);
-              }}
-            >
-              Toggle
-            </Button>
-          )}
-        />
+        <>
+          <AdminPageHeader
+            title="Feature flags"
+            description="Nyalakan/matikan fitur global atau pilot tanpa deploy."
+          />
+          <AdminDataTable
+            rows={flags}
+            columns={[
+              { key: 'key', header: 'Flag', render: (row) => row.key },
+              { key: 'desc', header: 'Deskripsi', render: (row) => row.description },
+              { key: 'scope', header: 'Scope', render: (row) => row.scope },
+              {
+                key: 'enabled',
+                header: 'State',
+                render: (row) => (
+                  <AdminPill tone={row.enabled ? 'ok' : 'neutral'}>{row.enabled ? 'on' : 'off'}</AdminPill>
+                ),
+              },
+            ]}
+            rowActions={(row) => (
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => {
+                  setFlags((prev) =>
+                    prev.map((item) =>
+                      item.id === row.id ? { ...item, enabled: !item.enabled } : item,
+                    ),
+                  );
+                  setToast(`Flag ${row.key} diubah (mock).`);
+                }}
+              >
+                Toggle
+              </Button>
+            )}
+          />
+        </>
       ) : null}
 
       {key === 'content' ? (
         <>
+          <AdminPageHeader
+            title="Marketing CMS"
+            description="Kelola draft dan publish halaman marketing publik."
+            actions={
+              <Button size="sm" onClick={() => setToast('Buat draft CMS mock.')}>
+                Draft baru
+              </Button>
+            }
+          />
           <AdminToolbar
             search={search}
             onSearchChange={setSearch}
             searchPlaceholder="Cari slug / judul / status"
-            actions={<Button size="sm" onClick={() => setToast('Buat draft CMS mock.')}>Draft baru</Button>}
+            filters={
+              <>
+                {(['', 'published', 'draft'] as const).map((status) => (
+                  <AdminFilterChip
+                    key={status || 'all'}
+                    active={filterContent === status}
+                    onClick={() => setFilterContent(status)}
+                  >
+                    {status || 'Semua status'}
+                  </AdminFilterChip>
+                ))}
+              </>
+            }
           />
           <AdminDataTable
             rows={content}
+            emptyLabel="Tidak ada konten yang cocok."
             columns={[
               { key: 'slug', header: 'Slug', render: (row) => row.slug },
               { key: 'title', header: 'Judul', render: (row) => row.title },
@@ -597,7 +1063,9 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                 </Button>
                 <Button
                   size="sm"
-                  onClick={() => setToast(`${row.status === 'published' ? 'Unpublish' : 'Publish'} ${row.slug}`)}
+                  onClick={() =>
+                    setToast(`${row.status === 'published' ? 'Unpublish' : 'Publish'} ${row.slug}`)
+                  }
                 >
                   {row.status === 'published' ? 'Unpublish' : 'Publish'}
                 </Button>
@@ -605,6 +1073,26 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             )}
           />
         </>
+      ) : null}
+
+      {key !== '' &&
+      ![
+        'accounts',
+        'schools',
+        'catalog',
+        'prompts',
+        'jobs',
+        'quality',
+        'audit',
+        'billing',
+        'flags',
+        'content',
+      ].includes(key) ? (
+        <AdminPageHeader
+          title={`Section ${key}`}
+          description="Halaman ini belum punya konten management. Pilih menu ops yang tersedia di sidebar."
+          meta={<AdminPill tone="warn">coming soon</AdminPill>}
+        />
       ) : null}
     </div>
   );
