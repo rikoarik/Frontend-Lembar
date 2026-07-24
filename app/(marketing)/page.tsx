@@ -2,6 +2,7 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import { fetchMarketingPage } from '@/src/lib/marketing/fetchMarketingPage';
 import { BlockRenderer } from '@/app/components/marketing/BlockRenderer';
+import JsonLd from '@/app/components/marketing/JsonLd';
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://lembar.id'),
@@ -47,13 +48,83 @@ export const metadata: Metadata = {
   },
 };
 
+const homeSchema = [
+  {
+    '@type': 'WebSite',
+    '@id': 'https://lembar.id/#website',
+    url: 'https://lembar.id',
+    name: 'lembar',
+    description: 'Generator soal otomatis berbasis AI untuk guru Indonesia.',
+    inLanguage: 'id',
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: {
+        '@type': 'EntryPoint',
+        urlTemplate: 'https://lembar.id/?q={search_term_string}',
+      },
+      'query-input': 'required name=search_term_string',
+    },
+  },
+  {
+    '@type': 'Organization',
+    '@id': 'https://lembar.id/#organization',
+    name: 'lembar',
+    url: 'https://lembar.id',
+    logo: {
+      '@type': 'ImageObject',
+      url: 'https://lembar.id/og-image.svg',
+    },
+    sameAs: [],
+  },
+  {
+    '@type': 'SoftwareApplication',
+    '@id': 'https://lembar.id/#app',
+    name: 'lembar',
+    url: 'https://lembar.id',
+    applicationCategory: 'EducationalApplication',
+    operatingSystem: 'Web',
+    offers: [
+      {
+        '@type': 'Offer',
+        name: 'Paket Gratis',
+        price: '0',
+        priceCurrency: 'IDR',
+        description: 'Akses dasar generator soal AI tanpa batas waktu.',
+      },
+      {
+        '@type': 'Offer',
+        name: 'Paket Pro',
+        price: '79000',
+        priceCurrency: 'IDR',
+        priceSpecification: {
+          '@type': 'UnitPriceSpecification',
+          price: '79000',
+          priceCurrency: 'IDR',
+          unitCode: 'MON',
+        },
+        description: 'AI tak terbatas, ekspor massal Word/PDF, prioritas support.',
+      },
+    ],
+    description:
+      'Platform pembuatan soal ujian otomatis berbasis AI untuk guru Indonesia. Mendukung Kurikulum Merdeka, K-13, dan format ANBK.',
+    inLanguage: 'id',
+    publisher: { '@id': 'https://lembar.id/#organization' },
+  },
+];
+
 export default async function LandingPage() {
   const cmsDoc = await fetchMarketingPage('home');
   if (cmsDoc) {
-    return <BlockRenderer blocks={cmsDoc.blocks} />;
+    return (
+      <>
+        <JsonLd schema={homeSchema} />
+        <BlockRenderer blocks={cmsDoc.blocks} />
+      </>
+    );
   }
   return (
     <>
+      <JsonLd schema={homeSchema} />
       <main className="flex-grow">
         <section className="py-24 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto overflow-hidden">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-center">
