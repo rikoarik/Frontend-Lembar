@@ -1,29 +1,32 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+import { useCallback, useTransition, type ReactNode } from 'react';
 import { Button, StatusBadge } from '@/app/components/ui';
 import type { StatusLabel } from '@/app/components/ui';
+import { useAdminPanel } from '@/src/features/admin/adminPanelState';
+import {
+  isAdminNavActive,
+  type AdminColumn,
+  type AdminNavItem,
+  type AdminTone,
+} from '@/src/features/admin/types';
 
-export type AdminColumn<T> = {
-  key: string;
-  header: string;
-  className?: string;
-  align?: 'left' | 'right' | 'center';
-  render: (row: T) => ReactNode;
-};
+export type { AdminColumn, AdminNavItem, AdminTone };
 
-const toneAccent: Record<'ok' | 'warn' | 'bad' | 'info' | 'neutral', string> = {
-  ok: 'from-brand-success/15 to-transparent',
-  warn: 'from-brand-warning/15 to-transparent',
-  bad: 'from-brand-danger/15 to-transparent',
-  info: 'from-brand-info/15 to-transparent',
-  neutral: 'from-brand-line/40 to-transparent',
+const toneAccent: Record<AdminTone, string> = {
+  ok: 'border-l-brand-success',
+  warn: 'border-l-brand-warning',
+  bad: 'border-l-brand-danger',
+  info: 'border-l-brand-info',
+  neutral: 'border-l-brand-line-strong',
 };
 
 export function AdminStatCards({
   items,
 }: {
-  items: Array<{ label: string; value: string; hint?: string; tone?: 'ok' | 'warn' | 'bad' | 'info' | 'neutral' }>;
+  items: Array<{ label: string; value: string; hint?: string; tone?: AdminTone }>;
 }) {
   return (
     <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -32,23 +35,13 @@ export function AdminStatCards({
         return (
           <div
             key={item.label}
-            className="relative overflow-hidden rounded-[var(--radius-lg)] border border-brand-line/80 bg-brand-surface-raised p-4 shadow-[var(--shadow-sm)]"
+            className={`rounded-md border border-brand-line border-l-4 bg-brand-surface-raised px-4 py-3 ${toneAccent[tone]}`}
           >
-            <div
-              aria-hidden
-              className={`pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-b ${toneAccent[tone]}`}
-            />
-            <div className="relative">
-              <div className="text-caption font-medium uppercase tracking-[0.06em] text-brand-ink-muted">
-                {item.label}
-              </div>
-              <div className="mt-2 text-[1.75rem] font-semibold leading-none tracking-tight text-brand-ink">
-                {item.value}
-              </div>
-              {item.hint ? (
-                <div className="mt-2 text-caption text-brand-ink-muted">{item.hint}</div>
-              ) : null}
+            <div className="text-caption font-medium uppercase tracking-[0.04em] text-brand-ink-muted">
+              {item.label}
             </div>
+            <div className="mt-2 text-h2 font-semibold leading-none text-brand-ink">{item.value}</div>
+            {item.hint ? <div className="mt-2 text-caption text-brand-ink-muted">{item.hint}</div> : null}
           </div>
         );
       })}
@@ -70,7 +63,7 @@ export function AdminToolbar({
   actions?: ReactNode;
 }) {
   return (
-    <div className="flex flex-col gap-3 rounded-[var(--radius-lg)] border border-brand-line/80 bg-brand-surface-raised p-3 shadow-[var(--shadow-sm)] lg:flex-row lg:items-center lg:justify-between">
+    <div className="flex flex-col gap-3 rounded-md border border-brand-line bg-brand-surface-raised p-3 lg:flex-row lg:items-center lg:justify-between">
       <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-center">
         <label className="relative min-w-0 flex-1">
           <span className="sr-only">Cari</span>
@@ -84,7 +77,7 @@ export function AdminToolbar({
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder={searchPlaceholder}
-            className="min-h-[var(--control-md)] w-full rounded-full border border-brand-line bg-brand-paper/60 py-2 pl-10 pr-3 text-body-sm text-brand-ink placeholder:text-brand-ink-subtle focus-visible:border-brand-line-strong"
+            className="min-h-[var(--control-md)] w-full rounded-md border border-brand-line bg-brand-paper/50 py-2 pl-10 pr-3 text-body-sm text-brand-ink placeholder:text-brand-ink-subtle"
           />
         </label>
         {filters ? <div className="flex flex-wrap items-center gap-2">{filters}</div> : null}
@@ -113,9 +106,9 @@ export function AdminDataTable<T extends { id: string }>({
 
   if (rows.length === 0) {
     return (
-      <div className="rounded-[var(--radius-lg)] border border-dashed border-brand-line bg-brand-surface-raised px-6 py-14 text-center shadow-[var(--shadow-sm)]">
-        <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-brand-paper text-brand-ink-muted">
-          <span className="material-symbols-outlined text-[22px]" aria-hidden>
+      <div className="rounded-md border border-dashed border-brand-line bg-brand-surface-raised px-6 py-12 text-center">
+        <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-md bg-brand-paper text-brand-ink-muted">
+          <span className="material-symbols-outlined text-[20px]" aria-hidden>
             inbox
           </span>
         </div>
@@ -126,15 +119,15 @@ export function AdminDataTable<T extends { id: string }>({
   }
 
   return (
-    <div className="overflow-hidden rounded-[var(--radius-lg)] border border-brand-line/80 bg-brand-surface-raised shadow-[var(--shadow-sm)]">
+    <div className="overflow-hidden rounded-md border border-brand-line bg-brand-surface-raised">
       <div className="overflow-x-auto">
         <table className="min-w-full border-collapse text-left text-body-sm">
-          <thead className="sticky top-0 z-[1] border-b border-brand-line bg-brand-paper/95 backdrop-blur">
+          <thead className="sticky top-0 z-[1] border-b border-brand-line bg-brand-paper">
             <tr>
               {columns.map((column) => (
                 <th
                   key={column.key}
-                  className={`px-4 py-3 text-caption font-semibold uppercase tracking-[0.05em] text-brand-ink-muted ${
+                  className={`px-4 py-3 text-caption font-semibold uppercase tracking-[0.04em] text-brand-ink-muted ${
                     column.align === 'right'
                       ? 'text-right'
                       : column.align === 'center'
@@ -146,7 +139,7 @@ export function AdminDataTable<T extends { id: string }>({
                 </th>
               ))}
               {rowActions ? (
-                <th className="px-4 py-3 text-right text-caption font-semibold uppercase tracking-[0.05em] text-brand-ink-muted">
+                <th className="px-4 py-3 text-right text-caption font-semibold uppercase tracking-[0.04em] text-brand-ink-muted">
                   Aksi
                 </th>
               ) : null}
@@ -156,8 +149,8 @@ export function AdminDataTable<T extends { id: string }>({
             {rows.map((row, index) => (
               <tr
                 key={row.id}
-                className={`border-t border-brand-line/70 transition-colors duration-[var(--motion-fast)] hover:bg-brand-accent-soft/35 ${
-                  index % 2 === 1 ? 'bg-brand-paper/35' : 'bg-transparent'
+                className={`border-t border-brand-line transition-colors duration-[var(--motion-fast)] hover:bg-brand-paper ${
+                  index % 2 === 1 ? 'bg-brand-paper/40' : ''
                 }`}
               >
                 {columns.map((column) => (
@@ -184,17 +177,15 @@ export function AdminDataTable<T extends { id: string }>({
           </tbody>
         </table>
       </div>
-      <div className="flex items-center justify-between border-t border-brand-line bg-brand-paper/60 px-4 py-2.5 text-caption text-brand-ink-muted">
+      <div className="flex items-center justify-between border-t border-brand-line bg-brand-paper/70 px-4 py-2 text-caption text-brand-ink-muted">
         <span>{rows.length} baris</span>
-        <span>Mock data · tidak live</span>
+        <span>Mock data</span>
       </div>
     </div>
   );
 }
 
-export function statusFromTone(
-  tone: 'ok' | 'warn' | 'bad' | 'info' | 'neutral',
-): StatusLabel {
+function statusFromTone(tone: AdminTone): StatusLabel {
   switch (tone) {
     case 'ok':
       return 'Final';
@@ -209,10 +200,27 @@ export function statusFromTone(
   }
 }
 
-function isNavActive(href: string, currentPath: string): boolean {
-  if (href === currentPath) return true;
-  if (href === '/school' || href === '/ops') return false;
-  return currentPath.startsWith(`${href}/`) || currentPath.startsWith(href);
+export function AdminBadge({ tone, label }: { tone: AdminTone; label: string }) {
+  return (
+    <span className="inline-flex items-center gap-2">
+      <StatusBadge label={statusFromTone(tone)} />
+      <span className="text-caption text-brand-ink-muted">{label}</span>
+    </span>
+  );
+}
+
+export function AdminContentLoading() {
+  return (
+    <div className="space-y-4" aria-busy="true" aria-live="polite" aria-label="Memuat konten">
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="h-24 animate-pulse rounded-md border border-brand-line bg-brand-paper" />
+        ))}
+      </div>
+      <div className="h-12 animate-pulse rounded-md border border-brand-line bg-brand-paper" />
+      <div className="h-72 animate-pulse rounded-md border border-brand-line bg-brand-paper" />
+    </div>
+  );
 }
 
 export function AdminShell({
@@ -220,58 +228,85 @@ export function AdminShell({
   title,
   subtitle,
   nav,
-  currentPath,
   topRight,
   children,
 }: {
   brand: string;
   title: string;
   subtitle?: string;
-  nav: Array<{ href: string; label: string; badge?: string; icon?: string }>;
-  currentPath: string;
+  nav: AdminNavItem[];
   topRight?: ReactNode;
   children: ReactNode;
 }) {
+  const pathname = usePathname() ?? '/';
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const { toast, setToast } = useAdminPanel();
   const roleLabel = brand.includes('ops') ? 'Superadmin' : 'School Admin';
 
+  const navigate = useCallback(
+    (href: string) => {
+      if (href === pathname) return;
+      startTransition(() => {
+        router.push(href);
+      });
+    },
+    [pathname, router],
+  );
+
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(163,32,43,0.06),_transparent_28%),linear-gradient(180deg,_#f3eee6_0%,_var(--color-paper)_42%,_#f7f3ec_100%)] text-brand-ink">
-      <div className="mx-auto flex min-h-screen max-w-[1480px]">
-        <aside className="sticky top-0 hidden h-screen w-[272px] shrink-0 flex-col border-r border-brand-line/80 bg-brand-surface-raised/95 backdrop-blur md:flex">
-          <div className="border-b border-brand-line/80 px-5 py-5">
+    <div className="min-h-screen bg-brand-paper text-brand-ink">
+      <a
+        href="#konten-admin"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[var(--z-toast)] focus:rounded-md focus:bg-brand-surface-raised focus:px-3 focus:py-2"
+      >
+        Lewati ke konten
+      </a>
+      <div className="mx-auto flex min-h-screen max-w-[1440px]">
+        <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-brand-line bg-brand-surface-raised md:flex">
+          <div className="border-b border-brand-line px-4 py-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-accent text-white shadow-[var(--shadow-sm)]">
-                <span className="material-symbols-outlined text-[20px]" aria-hidden>
+              <div className="flex h-9 w-9 items-center justify-center rounded-md bg-brand-accent text-white">
+                <span className="material-symbols-outlined text-[18px]" aria-hidden>
                   {brand.includes('ops') ? 'admin_panel_settings' : 'apartment'}
                 </span>
               </div>
               <div className="min-w-0">
-                <div className="truncate text-body-default font-semibold tracking-tight">{brand}</div>
-                <div className="text-caption text-brand-ink-muted">Management console</div>
+                <div className="truncate text-body-default font-semibold">{brand}</div>
+                <div className="text-caption text-brand-ink-muted">Management</div>
               </div>
             </div>
           </div>
 
           <nav aria-label="Navigasi panel" className="flex flex-1 flex-col gap-1 overflow-y-auto p-3">
-            <div className="px-2 pb-2 pt-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-brand-ink-subtle">
+            <div className="px-2 pb-2 pt-1 text-[11px] font-semibold uppercase tracking-[0.06em] text-brand-ink-subtle">
               Menu
             </div>
             {nav.map((item) => {
-              const active = isNavActive(item.href, currentPath);
+              const active = isAdminNavActive(item.href, pathname);
               return (
-                <a
+                <Link
                   key={item.href}
                   href={item.href}
-                  className={`group flex items-center justify-between rounded-xl px-3 py-2.5 text-body-sm transition-colors duration-[var(--motion-fast)] ${
+                  prefetch
+                  onClick={(event) => {
+                    // Keep shell mounted; only content transitions.
+                    if (!event.metaKey && !event.ctrlKey && !event.shiftKey && event.button === 0) {
+                      event.preventDefault();
+                      navigate(item.href);
+                    }
+                  }}
+                  className={`group flex items-center justify-between rounded-md px-3 py-2 text-body-sm transition-colors duration-[var(--motion-fast)] ${
                     active
-                      ? 'bg-brand-accent text-white shadow-[var(--shadow-sm)]'
+                      ? 'bg-brand-accent text-white'
                       : 'text-brand-ink hover:bg-brand-paper'
                   }`}
+                  aria-current={active ? 'page' : undefined}
                 >
                   <span className="flex min-w-0 items-center gap-2.5">
                     <span
                       className={`material-symbols-outlined text-[18px] ${
-                        active ? 'text-white/95' : 'text-brand-ink-muted group-hover:text-brand-ink'
+                        active ? 'text-white/95' : 'text-brand-ink-muted'
                       }`}
                       aria-hidden
                     >
@@ -288,35 +323,38 @@ export function AdminShell({
                       {item.badge}
                     </span>
                   ) : null}
-                </a>
+                </Link>
               );
             })}
           </nav>
 
-          <div className="mt-auto border-t border-brand-line/80 p-4">
-            <div className="rounded-xl border border-brand-line bg-brand-paper/70 p-3">
-              <div className="text-caption text-brand-ink-muted">Signed in as</div>
+          <div className="border-t border-brand-line p-4">
+            <div className="rounded-md border border-brand-line bg-brand-paper px-3 py-3">
+              <div className="text-caption text-brand-ink-muted">Masuk sebagai</div>
               <div className="mt-0.5 text-body-sm font-semibold">{roleLabel}</div>
-              <div className="mt-2 text-caption text-brand-ink-subtle">Mock session · non-production</div>
             </div>
           </div>
         </aside>
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-10 border-b border-brand-line/80 bg-brand-surface-raised/90 px-4 py-3 backdrop-blur md:px-6">
+          <header className="sticky top-0 z-10 border-b border-brand-line bg-brand-surface-raised px-4 py-3 md:px-6">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="min-w-0">
                 <div className="mb-1 flex items-center gap-2 text-caption text-brand-ink-muted">
                   <span>{brand}</span>
                   <span aria-hidden>/</span>
                   <span className="text-brand-ink">{title}</span>
+                  {isPending ? (
+                    <span className="inline-flex items-center gap-1 text-brand-info">
+                      <span className="material-symbols-outlined animate-spin text-[14px]" aria-hidden>
+                        progress_activity
+                      </span>
+                      memuat
+                    </span>
+                  ) : null}
                 </div>
-                <h1 className="truncate text-[1.45rem] font-semibold tracking-tight text-brand-ink">
-                  {title}
-                </h1>
-                {subtitle ? (
-                  <p className="mt-0.5 max-w-3xl text-body-sm text-brand-ink-muted">{subtitle}</p>
-                ) : null}
+                <h1 className="truncate text-h2 font-semibold tracking-tight text-brand-ink">{title}</h1>
+                {subtitle ? <p className="mt-0.5 text-body-sm text-brand-ink-muted">{subtitle}</p> : null}
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 {topRight}
@@ -334,15 +372,22 @@ export function AdminShell({
             </div>
           </header>
 
-          <div className="border-b border-brand-line/80 bg-brand-surface-raised/90 px-4 py-2 backdrop-blur md:hidden">
+          <div className="border-b border-brand-line bg-brand-surface-raised px-4 py-2 md:hidden">
             <nav aria-label="Navigasi panel mobile" className="flex gap-2 overflow-x-auto pb-1">
               {nav.map((item) => {
-                const active = isNavActive(item.href, currentPath);
+                const active = isAdminNavActive(item.href, pathname);
                 return (
-                  <a
+                  <Link
                     key={item.href}
                     href={item.href}
-                    className={`inline-flex min-h-[var(--control-sm)] shrink-0 items-center gap-1.5 rounded-full border px-3 text-body-sm ${
+                    prefetch
+                    onClick={(event) => {
+                      if (!event.metaKey && !event.ctrlKey && !event.shiftKey && event.button === 0) {
+                        event.preventDefault();
+                        navigate(item.href);
+                      }
+                    }}
+                    className={`inline-flex min-h-[var(--control-sm)] shrink-0 items-center gap-1.5 rounded-md border px-3 text-body-sm ${
                       active
                         ? 'border-brand-accent bg-brand-accent text-white'
                         : 'border-brand-line bg-brand-paper text-brand-ink'
@@ -352,59 +397,41 @@ export function AdminShell({
                       {item.icon || 'circle'}
                     </span>
                     {item.label}
-                  </a>
+                  </Link>
                 );
               })}
             </nav>
           </div>
 
-          <main id="main" className="flex-1 space-y-5 p-4 md:p-6">
-            {children}
+          <main id="konten-admin" className="relative flex-1 space-y-4 p-4 md:p-6">
+            {toast ? (
+              <div
+                className="flex items-start justify-between gap-3 rounded-md border border-brand-line bg-brand-accent-soft px-4 py-3 text-body-sm"
+                role="status"
+                aria-live="polite"
+              >
+                <span>{toast}</span>
+                <button
+                  type="button"
+                  className="text-caption font-medium text-brand-ink-muted hover:text-brand-ink"
+                  onClick={() => setToast(null)}
+                >
+                  Tutup
+                </button>
+              </div>
+            ) : null}
+
+            <div className={isPending ? 'pointer-events-none opacity-60' : ''}>
+              {isPending ? (
+                <div className="absolute inset-x-4 top-4 z-[1] md:inset-x-6 md:top-6">
+                  <AdminContentLoading />
+                </div>
+              ) : null}
+              <div className={isPending ? 'invisible' : ''}>{children}</div>
+            </div>
           </main>
         </div>
       </div>
     </div>
-  );
-}
-
-export function AdminBadge({
-  tone,
-  label,
-}: {
-  tone: 'ok' | 'warn' | 'bad' | 'info' | 'neutral';
-  label: string;
-}) {
-  return (
-    <span className="inline-flex items-center gap-2">
-      <StatusBadge label={statusFromTone(tone)} />
-      <span className="text-caption text-brand-ink-muted">{label}</span>
-    </span>
-  );
-}
-
-export function AdminSectionCard({
-  title,
-  description,
-  actions,
-  children,
-}: {
-  title: string;
-  description?: string;
-  actions?: ReactNode;
-  children: ReactNode;
-}) {
-  return (
-    <section className="overflow-hidden rounded-[var(--radius-lg)] border border-brand-line/80 bg-brand-surface-raised shadow-[var(--shadow-sm)]">
-      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-brand-line/70 px-4 py-3.5">
-        <div className="min-w-0">
-          <h2 className="text-body-default font-semibold text-brand-ink">{title}</h2>
-          {description ? (
-            <p className="mt-0.5 text-body-sm text-brand-ink-muted">{description}</p>
-          ) : null}
-        </div>
-        {actions ? <div className="flex flex-wrap gap-2">{actions}</div> : null}
-      </div>
-      <div className="p-4">{children}</div>
-    </section>
   );
 }

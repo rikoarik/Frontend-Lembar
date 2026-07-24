@@ -1,6 +1,8 @@
+'use client';
+
+import { OpsAdminShell } from '@/src/features/admin/AdminAppShell';
 import type { ReactNode } from 'react';
 
 export default function OpsLayout({ children }: { children: ReactNode }) {
-  // Management chrome is owned by OpsConsoleView for a real admin-panel feel.
-  return children;
+  return <OpsAdminShell>{children}</OpsAdminShell>;
 }
