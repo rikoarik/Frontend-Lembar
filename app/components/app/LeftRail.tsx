@@ -10,6 +10,8 @@ type LeftRailProps = {
   workspaceSwitcher?: React.ReactNode;
   accountMenu?: React.ReactNode;
   onNavigate?: () => void;
+  collapsed?: boolean;
+  onToggleCollapse?: () => void;
 };
 
 const PRIMARY_NAV = [
@@ -45,21 +47,26 @@ function NavLink({
   label,
   icon,
   active,
+  collapsed,
   onNavigate,
 }: {
   href: string;
   label: string;
   icon: string;
   active: boolean;
+  collapsed?: boolean;
   onNavigate?: () => void;
 }) {
   return (
     <Link
       href={href}
       onClick={onNavigate}
+      title={collapsed ? label : undefined}
+      aria-label={collapsed ? label : undefined}
       aria-current={active ? 'page' : undefined}
       className={[
-        'group flex min-h-10 items-center gap-3 rounded-lg px-3 text-[13px] font-medium transition-colors',
+        'group flex min-h-10 items-center rounded-lg text-[13px] font-medium transition-colors',
+        collapsed ? 'justify-center px-2' : 'gap-3 px-3',
         active
           ? 'bg-[#171717] text-white'
           : 'text-[#514b44] hover:bg-[#f0ebe3] hover:text-[#171717]',
@@ -74,24 +81,30 @@ function NavLink({
       >
         {icon}
       </span>
-      <span className="truncate">{label}</span>
+      {!collapsed && <span className="truncate">{label}</span>}
     </Link>
   );
 }
 
 function NavSection({
   label,
+  collapsed,
   children,
 }: {
   label?: string;
+  collapsed?: boolean;
   children: React.ReactNode;
 }) {
   return (
     <div className="flex flex-col gap-1">
       {label ? (
-        <div className="px-3 pb-1 pt-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#8a8379]">
-          {label}
-        </div>
+        collapsed ? (
+          <div className="my-1.5 border-t border-[#e6dfd4]" />
+        ) : (
+          <div className="px-3 pb-1 pt-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#8a8379]">
+            {label}
+          </div>
+        )
       ) : null}
       {children}
     </div>
@@ -104,6 +117,8 @@ export function LeftRail({
   workspaceSwitcher,
   accountMenu,
   onNavigate,
+  collapsed = false,
+  onToggleCollapse,
 }: LeftRailProps) {
   const pathname = usePathname() ?? '/app';
   const schoolItems = SCHOOL_ONLY_NAV.filter((item) => roleAllows(activeRole, item.entitlement));
@@ -114,32 +129,73 @@ export function LeftRail({
   return (
     <nav
       aria-label="Navigasi utama"
-      className="flex h-full w-[248px] shrink-0 flex-col overflow-hidden border-r border-[#e6dfd4] bg-[#fbf8f2]"
+      className={[
+        'flex h-full shrink-0 flex-col overflow-hidden border-r border-[#e6dfd4] bg-[#fbf8f2] transition-all duration-200 ease-in-out',
+        collapsed ? 'w-[68px]' : 'w-[248px]',
+      ].join(' ')}
     >
-      <div className="shrink-0 border-b border-[#e6dfd4] px-3 py-3">
-        <Link
-          href="/app"
-          onClick={onNavigate}
-          className="mb-3 inline-flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-[14px] font-semibold tracking-[-0.02em] text-[#171717] hover:bg-white"
-        >
-          <span
-            aria-hidden="true"
-            className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[#a3202b] text-white"
+      <div className="shrink-0 border-b border-[#e6dfd4] p-3">
+        <div className="mb-2 flex items-center justify-between gap-1">
+          <Link
+            href="/app"
+            onClick={onNavigate}
+            title="lembar"
+            className={[
+              'inline-flex items-center gap-2 rounded-lg py-1.5 text-[14px] font-semibold tracking-[-0.02em] text-[#171717] hover:bg-white min-w-0',
+              collapsed ? 'justify-center px-1' : 'px-2 w-full',
+            ].join(' ')}
           >
-            <span className="material-symbols-outlined text-[18px]">layers</span>
-          </span>
-          lembar
-          {activeWorkspaceKind === 'school' ? (
-            <span className="ml-auto rounded-full bg-white px-2 py-0.5 text-[11px] font-medium text-[#6d665d] ring-1 ring-[#e6dfd4]">
-              Sekolah
+            <span
+              aria-hidden="true"
+              className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#a3202b] text-white"
+            >
+              <span className="material-symbols-outlined text-[18px]">layers</span>
             </span>
+            {!collapsed && (
+              <>
+                <span className="truncate">lembar</span>
+                {activeWorkspaceKind === 'school' ? (
+                  <span className="ml-auto rounded-full bg-white px-2 py-0.5 text-[11px] font-medium text-[#6d665d] ring-1 ring-[#e6dfd4]">
+                    Sekolah
+                  </span>
+                ) : null}
+              </>
+            )}
+          </Link>
+          {onToggleCollapse && !collapsed ? (
+            <button
+              type="button"
+              onClick={onToggleCollapse}
+              aria-label="Ciutkan sidebar"
+              title="Ciutkan sidebar"
+              className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[#8a8379] hover:bg-white hover:text-[#171717] transition-colors"
+            >
+              <span aria-hidden="true" className="material-symbols-outlined text-[18px]">
+                menu_open
+              </span>
+            </button>
           ) : null}
-        </Link>
+        </div>
+
+        {collapsed && onToggleCollapse ? (
+          <button
+            type="button"
+            onClick={onToggleCollapse}
+            aria-label="Perluas sidebar"
+            title="Perluas sidebar"
+            className="mb-2 flex w-full items-center justify-center rounded-lg py-1.5 text-[#8a8379] hover:bg-white hover:text-[#171717] transition-colors"
+          >
+            <span aria-hidden="true" className="material-symbols-outlined text-[18px]">
+              side_navigation
+            </span>
+          </button>
+        ) : null}
+
         {workspaceSwitcher ? <div>{workspaceSwitcher}</div> : null}
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-2 py-3">
-        <NavSection>
+        <NavSection collapsed={collapsed}>
           {PRIMARY_NAV.map((item) => (
             <NavLink
               key={item.href}
@@ -147,12 +203,13 @@ export function LeftRail({
               label={item.label}
               icon={item.icon}
               active={isActive(item.href)}
+              collapsed={collapsed}
               onNavigate={onNavigate}
             />
           ))}
         </NavSection>
 
-        <NavSection label="Pustaka">
+        <NavSection label="Pustaka" collapsed={collapsed}>
           {LIBRARY_NAV.map((item) => (
             <NavLink
               key={item.href}
@@ -160,13 +217,14 @@ export function LeftRail({
               label={item.label}
               icon={item.icon}
               active={isActive(item.href)}
+              collapsed={collapsed}
               onNavigate={onNavigate}
             />
           ))}
         </NavSection>
 
         {schoolItems.length > 0 ? (
-          <NavSection label="Sekolah">
+          <NavSection label="Sekolah" collapsed={collapsed}>
             {schoolItems.map((item) => (
               <NavLink
                 key={item.href}
@@ -174,13 +232,14 @@ export function LeftRail({
                 label={item.label}
                 icon={item.icon}
                 active={isActive(item.href)}
+                collapsed={collapsed}
                 onNavigate={onNavigate}
               />
             ))}
           </NavSection>
         ) : null}
 
-        <NavSection label="Bantuan">
+        <NavSection label="Bantuan" collapsed={collapsed}>
           {SUPPORT_NAV.map((item) => (
             <NavLink
               key={item.href}
@@ -188,6 +247,7 @@ export function LeftRail({
               label={item.label}
               icon={item.icon}
               active={isActive(item.href)}
+              collapsed={collapsed}
               onNavigate={onNavigate}
             />
           ))}

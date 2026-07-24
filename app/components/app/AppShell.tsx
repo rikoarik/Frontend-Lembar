@@ -14,16 +14,20 @@ type AppShellProps = {
 export function AppShell({ children }: AppShellProps) {
   const { activeWorkspace, workspaces, switchWorkspace, announcement, displayName } = useWorkspace();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
 
   const switcher = (
     <WorkspaceSwitcher
       workspaces={workspaces}
       activeWorkspaceId={activeWorkspace.id}
       onSelect={switchWorkspace}
+      compact={collapsed}
     />
   );
 
-  const accountMenu = <AccountMenu displayName={displayName} planLabel="Paket Guru" />;
+  const accountMenu = (
+    <AccountMenu displayName={displayName} planLabel="Paket Guru" compact={collapsed} />
+  );
 
   return (
     <div className="flex h-dvh flex-col overflow-hidden bg-[#f3eee6] text-[#171717]">
@@ -51,6 +55,8 @@ export function AppShell({ children }: AppShellProps) {
             activeRole={activeWorkspace.activeRole}
             workspaceSwitcher={switcher}
             accountMenu={accountMenu}
+            collapsed={collapsed}
+            onToggleCollapse={() => setCollapsed((prev) => !prev)}
           />
         </div>
 

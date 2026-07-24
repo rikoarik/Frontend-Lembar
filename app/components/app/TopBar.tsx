@@ -50,10 +50,13 @@ export function TopBar({
             menu
           </span>
         </button>
-        <div className="min-w-0">
-          <div className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#8a8379]">
-            lembar
-          </div>
+        <div className="flex min-w-0 items-center gap-2.5">
+          <span
+            aria-hidden="true"
+            className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#a3202b] text-white"
+          >
+            <span className="material-symbols-outlined text-[16px]">layers</span>
+          </span>
           <h1 className="truncate text-[15px] font-semibold tracking-[-0.02em] text-[#171717]">
             {title}
           </h1>
@@ -62,13 +65,23 @@ export function TopBar({
 
       <div className="flex items-center gap-2">
         <Link
-          href="/app/generate"
-          className="hidden h-9 items-center gap-1.5 rounded-lg bg-[#a3202b] px-3 text-[13px] font-semibold text-white hover:bg-[#851925] sm:inline-flex"
+          href="/app/pengaturan/langganan"
+          className="hidden h-9 items-center gap-2 rounded-lg border border-[#e6dfd4] bg-white px-3 text-[12px] font-medium text-[#171717] hover:bg-[#f3eee6] sm:inline-flex"
+          aria-label="Kuota: 12 dari 50 lembar terpakai"
         >
-          <span aria-hidden="true" className="material-symbols-outlined text-[16px]">
-            auto_awesome
+          <span aria-hidden="true" className="material-symbols-outlined text-[16px] text-[#8a8379]">
+            data_usage
           </span>
-          Buat lembar
+          <span className="text-[#8a8379]">12/50</span>
+          <span
+            className="h-1.5 w-16 rounded-full bg-[#e6dfd4] overflow-hidden"
+            role="progressbar"
+            aria-valuenow={12}
+            aria-valuemin={0}
+            aria-valuemax={50}
+          >
+            <span className="block h-full w-[24%] rounded-full bg-[#a3202b]" />
+          </span>
         </Link>
         <button
           type="button"
@@ -81,15 +94,6 @@ export function TopBar({
           </span>
           <span className="truncate">{workspaceName}</span>
         </button>
-        <span
-          className="hidden h-9 items-center gap-1.5 rounded-lg border border-[#e6dfd4] bg-white px-2.5 text-[12px] font-medium text-[#171717] lg:inline-flex"
-          aria-label={`Pengguna aktif ${displayName}`}
-        >
-          <span aria-hidden="true" className="material-symbols-outlined text-[16px] text-[#8a8379]">
-            account_circle
-          </span>
-          <span className="max-w-[120px] truncate">{displayName}</span>
-        </span>
       </div>
     </header>
   );

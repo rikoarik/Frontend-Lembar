@@ -28,31 +28,47 @@ export function WorkspaceSwitcher({
   };
 
   return (
-    <div ref={wrapperRef} onBlur={handleBlur} className={['relative', compact ? 'w-full' : ''].join(' ')}>
+    <div ref={wrapperRef} onBlur={handleBlur} className="relative w-full">
       <button
         type="button"
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-labelledby={labelId}
         onClick={() => setOpen((prev) => !prev)}
-        className="flex w-full items-center justify-between gap-2 rounded-xl border border-[#e6dfd4] bg-white px-3 py-2.5 text-left hover:bg-[#f7f3ec]"
+        title={active?.name ?? 'Workspace'}
+        aria-label={`Workspace saat ini: ${active?.name}`}
+        className={[
+          'flex w-full items-center gap-2 rounded-xl border border-[#e6dfd4] bg-white hover:bg-[#f7f3ec]',
+          compact ? 'justify-center p-2' : 'justify-between px-3 py-2.5 text-left',
+        ].join(' ')}
       >
-        <span id={labelId} className="flex min-w-0 flex-col">
-          <span className="text-[11px] font-medium text-[#8a8379]">Workspace</span>
-          <span className="truncate text-[13px] font-semibold text-[#171717]">
-            {active?.name ?? 'Tanpa workspace'}
+        {compact ? (
+          <span aria-hidden="true" className="material-symbols-outlined text-[20px] text-[#8a8379]">
+            workspaces
           </span>
-        </span>
-        <span aria-hidden="true" className="material-symbols-outlined text-[18px] text-[#8a8379]">
-          {open ? 'expand_less' : 'expand_more'}
-        </span>
+        ) : (
+          <>
+            <span id={labelId} className="flex min-w-0 flex-col">
+              <span className="text-[11px] font-medium text-[#8a8379]">Workspace</span>
+              <span className="truncate text-[13px] font-semibold text-[#171717]">
+                {active?.name ?? 'Tanpa workspace'}
+              </span>
+            </span>
+            <span aria-hidden="true" className="material-symbols-outlined text-[18px] text-[#8a8379]">
+              {open ? 'expand_less' : 'expand_more'}
+            </span>
+          </>
+        )}
       </button>
 
       {open ? (
         <ul
           role="listbox"
           aria-label="Daftar workspace"
-          className="absolute left-0 right-0 top-full z-[var(--z-popover,50)] mt-1.5 overflow-hidden rounded-xl border border-[#e6dfd4] bg-white p-1.5 shadow-[0_12px_40px_rgba(23,23,23,0.12)]"
+          className={[
+            'absolute top-full z-[var(--z-popover,50)] mt-1.5 overflow-hidden rounded-xl border border-[#e6dfd4] bg-white p-1.5 shadow-[0_12px_40px_rgba(23,23,23,0.12)]',
+            compact ? 'left-0 w-56' : 'left-0 right-0',
+          ].join(' ')}
         >
           {workspaces.map((workspace) => {
             const isActive = workspace.id === activeWorkspaceId;

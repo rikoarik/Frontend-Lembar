@@ -6,9 +6,10 @@ import { useRef, useState } from 'react';
 type AccountMenuProps = {
   displayName: string;
   planLabel: string;
+  compact?: boolean;
 };
 
-export function AccountMenu({ displayName, planLabel }: AccountMenuProps) {
+export function AccountMenu({ displayName, planLabel, compact = false }: AccountMenuProps) {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -33,7 +34,12 @@ export function AccountMenu({ displayName, planLabel }: AccountMenuProps) {
   return (
     <div ref={wrapperRef} onBlur={handleBlur} className="relative w-full">
       {open ? (
-        <div className="absolute bottom-full left-0 right-0 z-[var(--z-popover,50)] mb-2 overflow-hidden rounded-xl border border-[#e6dfd4] bg-white shadow-[0_12px_40px_rgba(23,23,23,0.12)]">
+        <div
+          className={[
+            'absolute bottom-full z-[var(--z-popover,50)] mb-2 overflow-hidden rounded-xl border border-[#e6dfd4] bg-white shadow-[0_12px_40px_rgba(23,23,23,0.12)]',
+            compact ? 'left-0 w-56' : 'left-0 right-0',
+          ].join(' ')}
+        >
           <div className="border-b border-[#eee6da] px-3 py-3">
             <div className="truncate text-[13px] font-semibold text-[#171717]">{displayName}</div>
             <div className="truncate text-[12px] text-[#6d665d]">{planLabel}</div>
@@ -78,7 +84,11 @@ export function AccountMenu({ displayName, planLabel }: AccountMenuProps) {
         aria-haspopup="true"
         aria-expanded={open}
         aria-label={`Menu profil ${displayName}`}
-        className="flex w-full items-center gap-2.5 rounded-xl border border-[#e6dfd4] bg-white px-2.5 py-2 text-left hover:bg-[#f7f3ec]"
+        title={displayName}
+        className={[
+          'flex w-full items-center gap-2.5 rounded-xl border border-[#e6dfd4] bg-white hover:bg-[#f7f3ec]',
+          compact ? 'justify-center p-1.5' : 'px-2.5 py-2 text-left',
+        ].join(' ')}
       >
         <span
           aria-hidden="true"
@@ -91,15 +101,19 @@ export function AccountMenu({ displayName, planLabel }: AccountMenuProps) {
             .map((part) => part[0]?.toUpperCase() ?? '')
             .join('') || 'U'}
         </span>
-        <span className="flex min-w-0 flex-col">
-          <span className="truncate text-[13px] font-semibold leading-snug text-[#171717]">
-            {displayName}
-          </span>
-          <span className="truncate text-[11px] text-[#6d665d]">{planLabel}</span>
-        </span>
-        <span aria-hidden="true" className="material-symbols-outlined ml-auto text-[18px] text-[#8a8379]">
-          {open ? 'expand_more' : 'expand_less'}
-        </span>
+        {!compact && (
+          <>
+            <span className="flex min-w-0 flex-col">
+              <span className="truncate text-[13px] font-semibold leading-snug text-[#171717]">
+                {displayName}
+              </span>
+              <span className="truncate text-[11px] text-[#6d665d]">{planLabel}</span>
+            </span>
+            <span aria-hidden="true" className="material-symbols-outlined ml-auto text-[18px] text-[#8a8379]">
+              {open ? 'expand_more' : 'expand_less'}
+            </span>
+          </>
+        )}
       </button>
     </div>
   );
