@@ -33,12 +33,24 @@ export function mockFail(
   );
 }
 
-export function mockOk<T>(data: T, init?: { setSession?: boolean; status?: number }) {
+export function mockOk<T>(
+  data: T,
+  init?: { setSession?: boolean | string; status?: number; clearSession?: boolean },
+) {
   const response = NextResponse.json({ data }, { status: init?.status ?? 200 });
-  if (init?.setSession) {
+  if (init?.clearSession) {
     response.cookies.set({
       name: SESSION_COOKIE,
-      value: SESSION_VALUE,
+      value: '',
+      path: '/',
+      maxAge: 0,
+    });
+  }
+  if (init?.setSession) {
+    const value = typeof init.setSession === 'string' ? init.setSession : SESSION_VALUE;
+    response.cookies.set({
+      name: SESSION_COOKIE,
+      value,
       path: '/',
       sameSite: 'lax',
       httpOnly: true,
@@ -49,12 +61,19 @@ export function mockOk<T>(data: T, init?: { setSession?: boolean; status?: numbe
   return response;
 }
 
+export {
+  authSuccessFor as authSuccessPayloadFromAccount,
+  mePayloadFor as mePayloadFromAccount,
+} from './accounts';
+
+// Backward-compatible defaults for older routes/tests.
 export function authSuccessPayload() {
   return {
     accountId: 'acct_demo',
     workspaceId: 'ws_demo',
     workspaceKind: 'personal' as const,
     activeRole: 'teacher' as const,
+    homePath: '/app',
   };
 }
 

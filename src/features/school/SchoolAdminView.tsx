@@ -1,153 +1,542 @@
 'use client';
 
-import Link from 'next/link';
-import { Panel, Button, StatusBadge } from '@/app/components/ui';
+import { useMemo, useState } from 'react';
+import { Button } from '@/app/components/ui';
+import {
+  AdminBadge,
+  AdminDataTable,
+  AdminShell,
+  AdminStatCards,
+  AdminToolbar,
+} from '@/src/features/admin/AdminChrome';
 
-type SchoolSection =
-  | ''
-  | 'guru'
-  | 'guru/undang'
-  | 'penggunaan'
-  | 'pengaturan'
-  | 'audit'
-  | 'library';
+type TeacherRow = {
+  id: string;
+  name: string;
+  email: string;
+  role: 'Guru' | 'Kurikulum' | 'Admin sekolah';
+  status: 'Aktif' | 'Undangan' | 'Ditangguhkan';
+  lastActive: string;
+  sheetsFinal: number;
+};
 
-const NAV: Array<{ href: string; label: string; section: SchoolSection }> = [
-  { href: '/school', label: 'Ringkasan', section: '' },
-  { href: '/school/guru', label: 'Guru', section: 'guru' },
-  { href: '/school/guru/undang', label: 'Undang guru', section: 'guru/undang' },
-  { href: '/school/penggunaan', label: 'Penggunaan', section: 'penggunaan' },
-  { href: '/school/pengaturan', label: 'Pengaturan', section: 'pengaturan' },
-  { href: '/school/library', label: 'Library sekolah', section: 'library' },
-  { href: '/school/audit', label: 'Audit', section: 'audit' },
+type UsageRow = {
+  id: string;
+  teacher: string;
+  generated: number;
+  finalized: number;
+  shared: number;
+  period: string;
+};
+
+type AuditRow = {
+  id: string;
+  actor: string;
+  action: string;
+  target: string;
+  at: string;
+};
+
+type LibraryRow = {
+  id: string;
+  name: string;
+  kind: 'Template' | 'Bank soal';
+  owner: string;
+  updatedAt: string;
+  visibility: 'Internal' | 'Draft';
+};
+
+const TEACHERS: TeacherRow[] = [
+  {
+    id: 't1',
+    name: 'Siti Aminah',
+    email: 'siti@sdncontoh.sch.id',
+    role: 'Guru',
+    status: 'Aktif',
+    lastActive: '2026-07-23',
+    sheetsFinal: 12,
+  },
+  {
+    id: 't2',
+    name: 'Budi Santoso',
+    email: 'budi@sdncontoh.sch.id',
+    role: 'Guru',
+    status: 'Undangan',
+    lastActive: '—',
+    sheetsFinal: 0,
+  },
+  {
+    id: 't3',
+    name: 'Rina Kartika',
+    email: 'rina@sdncontoh.sch.id',
+    role: 'Kurikulum',
+    status: 'Aktif',
+    lastActive: '2026-07-22',
+    sheetsFinal: 19,
+  },
+  {
+    id: 't4',
+    name: 'Agus Pratama',
+    email: 'agus@sdncontoh.sch.id',
+    role: 'Guru',
+    status: 'Ditangguhkan',
+    lastActive: '2026-07-10',
+    sheetsFinal: 3,
+  },
+  {
+    id: 't5',
+    name: 'Dewi Lestari',
+    email: 'dewi@sdncontoh.sch.id',
+    role: 'Guru',
+    status: 'Aktif',
+    lastActive: '2026-07-24',
+    sheetsFinal: 8,
+  },
 ];
 
-const TEACHERS = [
-  { id: 't1', name: 'Siti Aminah', role: 'Guru', status: 'Aktif' },
-  { id: 't2', name: 'Budi Santoso', role: 'Guru', status: 'Undangan' },
-  { id: 't3', name: 'Rina Kartika', role: 'Kurikulum', status: 'Aktif' },
+const USAGE: UsageRow[] = [
+  { id: 'u1', teacher: 'Siti Aminah', generated: 24, finalized: 12, shared: 5, period: '30 hari' },
+  { id: 'u2', teacher: 'Rina Kartika', generated: 31, finalized: 19, shared: 8, period: '30 hari' },
+  { id: 'u3', teacher: 'Dewi Lestari', generated: 15, finalized: 8, shared: 2, period: '30 hari' },
+  { id: 'u4', teacher: 'Agus Pratama', generated: 7, finalized: 3, shared: 0, period: '30 hari' },
 ];
+
+const AUDIT: AuditRow[] = [
+  {
+    id: 'a1',
+    actor: 'admin.siti',
+    action: 'Undang guru',
+    target: 'budi@sdncontoh.sch.id',
+    at: '2026-07-23 09:12',
+  },
+  {
+    id: 'a2',
+    actor: 'admin.siti',
+    action: 'Ubah kuota workspace',
+    target: 'ws_school_demo',
+    at: '2026-07-22 14:40',
+  },
+  {
+    id: 'a3',
+    actor: 'admin.budi',
+    action: 'Aktifkan branding',
+    target: 'logo sekolah',
+    at: '2026-07-20 11:05',
+  },
+];
+
+const LIBRARY: LibraryRow[] = [
+  {
+    id: 'l1',
+    name: 'Template UTS Matematika',
+    kind: 'Template',
+    owner: 'Kurikulum',
+    updatedAt: '2026-07-18',
+    visibility: 'Internal',
+  },
+  {
+    id: 'l2',
+    name: 'Bank IPAS kelas 5',
+    kind: 'Bank soal',
+    owner: 'Rina Kartika',
+    updatedAt: '2026-07-21',
+    visibility: 'Internal',
+  },
+  {
+    id: 'l3',
+    name: 'Draft PTS Bahasa',
+    kind: 'Template',
+    owner: 'Siti Aminah',
+    updatedAt: '2026-07-23',
+    visibility: 'Draft',
+  },
+];
+
+const NAV = [
+  { href: '/school', label: 'Ringkasan' },
+  { href: '/school/guru', label: 'Guru', badge: String(TEACHERS.length) },
+  { href: '/school/guru/undang', label: 'Undang' },
+  { href: '/school/penggunaan', label: 'Penggunaan' },
+  { href: '/school/pengaturan', label: 'Pengaturan' },
+  { href: '/school/library', label: 'Library' },
+  { href: '/school/audit', label: 'Audit' },
+];
+
+function teacherTone(status: TeacherRow['status']): 'ok' | 'warn' | 'bad' | 'neutral' {
+  if (status === 'Aktif') return 'ok';
+  if (status === 'Undangan') return 'warn';
+  if (status === 'Ditangguhkan') return 'bad';
+  return 'neutral';
+}
 
 export function SchoolAdminView({ section = '' }: { section?: string }) {
-  const current = (section || '') as SchoolSection;
-  const title = NAV.find((item) => item.section === current)?.label ?? 'Admin Sekolah';
+  const current = section || '';
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | TeacherRow['status']>('all');
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteNote, setInviteNote] = useState('');
+  const [message, setMessage] = useState('');
+
+  const title =
+    NAV.find((item) => item.href === `/school${current ? `/${current}` : ''}`)?.label ??
+    (current === 'guru/undang'
+      ? 'Undang'
+      : current === 'guru'
+        ? 'Guru'
+        : current === 'penggunaan'
+          ? 'Penggunaan'
+          : current === 'pengaturan'
+            ? 'Pengaturan'
+            : current === 'library'
+              ? 'Library'
+              : current === 'audit'
+                ? 'Audit'
+                : 'Ringkasan');
+
+  const teachers = useMemo(() => {
+    return TEACHERS.filter((row) => {
+      if (statusFilter !== 'all' && row.status !== statusFilter) return false;
+      const q = search.trim().toLowerCase();
+      if (!q) return true;
+      return (
+        row.name.toLowerCase().includes(q) ||
+        row.email.toLowerCase().includes(q) ||
+        row.role.toLowerCase().includes(q)
+      );
+    });
+  }, [search, statusFilter]);
+
+  const usageRows = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return USAGE;
+    return USAGE.filter((row) => row.teacher.toLowerCase().includes(q));
+  }, [search]);
+
+  const auditRows = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return AUDIT;
+    return AUDIT.filter(
+      (row) =>
+        row.actor.toLowerCase().includes(q) ||
+        row.action.toLowerCase().includes(q) ||
+        row.target.toLowerCase().includes(q),
+    );
+  }, [search]);
+
+  const libraryRows = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return LIBRARY;
+    return LIBRARY.filter(
+      (row) =>
+        row.name.toLowerCase().includes(q) ||
+        row.kind.toLowerCase().includes(q) ||
+        row.owner.toLowerCase().includes(q),
+    );
+  }, [search]);
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-col gap-1">
-        <p className="text-caption text-brand-ink-muted">SDN Contoh 01 · mock school workspace</p>
-        <h1 className="text-h1 font-semibold text-brand-ink">{title}</h1>
-        <p className="text-body-sm text-brand-ink-muted">
-          Data agregat sekolah. Bukan workspace guru individual.
+    <AdminShell
+      brand="lembar school"
+      title={title}
+      subtitle="SDN Contoh 01 · panel admin sekolah (mock management)"
+      nav={NAV}
+      currentPath={`/school${current ? `/${current}` : ''}`}
+      topRight={<AdminBadge tone="ok" label="school_admin" />}
+    >
+      {message ? (
+        <p className="rounded-md border border-brand-line bg-brand-accent-soft px-3 py-2 text-body-sm" role="status">
+          {message}
         </p>
-      </div>
-
-      <nav aria-label="Navigasi school admin" className="flex flex-wrap gap-2">
-        {NAV.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={`inline-flex min-h-[var(--control-md)] items-center rounded-md border px-3 text-body-sm ${
-              item.section === current
-                ? 'border-brand-accent bg-brand-accent-soft text-brand-accent'
-                : 'border-brand-line text-brand-ink'
-            }`}
-          >
-            {item.label}
-          </Link>
-        ))}
-      </nav>
+      ) : null}
 
       {current === '' ? (
-        <div className="grid gap-3 sm:grid-cols-3">
-          <Panel title="Guru aktif"><p className="text-h2 font-semibold">24</p></Panel>
-          <Panel title="Kuota terpakai"><p className="text-h2 font-semibold">312 / 500</p></Panel>
-          <Panel title="Lembar final bulan ini"><p className="text-h2 font-semibold">48</p></Panel>
+        <>
+          <AdminStatCards
+            items={[
+              { label: 'Guru aktif', value: '24', hint: '3 undangan menunggu' },
+              { label: 'Kuota terpakai', value: '312 / 500', hint: '62% periode ini' },
+              { label: 'Lembar final', value: '48', hint: '30 hari terakhir' },
+              { label: 'Bagikan aktif', value: '17', hint: '2 akan kedaluwarsa' },
+            ]}
+          />
+          <AdminToolbar
+            search={search}
+            onSearchChange={setSearch}
+            searchPlaceholder="Cari guru untuk pratinjau cepat…"
+            actions={
+              <>
+                <Button size="sm" onClick={() => (window.location.href = '/school/guru/undang')}>
+                  Undang guru
+                </Button>
+                <Button size="sm" variant="secondary" onClick={() => (window.location.href = '/school/penggunaan')}>
+                  Lihat penggunaan
+                </Button>
+              </>
+            }
+          />
+          <AdminDataTable
+            rows={teachers.slice(0, 5)}
+            columns={[
+              { key: 'name', header: 'Guru', render: (row) => (
+                <div>
+                  <div className="font-semibold">{row.name}</div>
+                  <div className="text-caption text-brand-ink-muted">{row.email}</div>
+                </div>
+              ) },
+              { key: 'role', header: 'Peran', render: (row) => row.role },
+              {
+                key: 'status',
+                header: 'Status',
+                render: (row) => <AdminBadge tone={teacherTone(row.status)} label={row.status} />,
+              },
+              { key: 'final', header: 'Final', render: (row) => row.sheetsFinal },
+            ]}
+            rowActions={(row) => (
+              <>
+                <Button size="sm" variant="secondary" onClick={() => setMessage(`Detail mock: ${row.name}`)}>
+                  Detail
+                </Button>
+              </>
+            )}
+          />
+        </>
+      ) : null}
+
+      {current === 'guru' ? (
+        <>
+          <AdminStatCards
+            items={[
+              { label: 'Total guru', value: String(TEACHERS.length) },
+              { label: 'Aktif', value: String(TEACHERS.filter((t) => t.status === 'Aktif').length) },
+              { label: 'Undangan', value: String(TEACHERS.filter((t) => t.status === 'Undangan').length) },
+              { label: 'Ditangguhkan', value: String(TEACHERS.filter((t) => t.status === 'Ditangguhkan').length) },
+            ]}
+          />
+          <AdminToolbar
+            search={search}
+            onSearchChange={setSearch}
+            searchPlaceholder="Cari nama, email, atau peran"
+            filters={
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
+                className="min-h-[var(--control-md)] rounded-md border border-brand-line px-3 text-body-sm"
+              >
+                <option value="all">Semua status</option>
+                <option value="Aktif">Aktif</option>
+                <option value="Undangan">Undangan</option>
+                <option value="Ditangguhkan">Ditangguhkan</option>
+              </select>
+            }
+            actions={
+              <Button size="sm" onClick={() => (window.location.href = '/school/guru/undang')}>
+                Undang guru
+              </Button>
+            }
+          />
+          <AdminDataTable
+            rows={teachers}
+            emptyLabel="Tidak ada guru yang cocok dengan filter."
+            columns={[
+              {
+                key: 'name',
+                header: 'Guru',
+                render: (row) => (
+                  <div>
+                    <div className="font-semibold">{row.name}</div>
+                    <div className="text-caption text-brand-ink-muted">{row.email}</div>
+                  </div>
+                ),
+              },
+              { key: 'role', header: 'Peran', render: (row) => row.role },
+              {
+                key: 'status',
+                header: 'Status',
+                render: (row) => <AdminBadge tone={teacherTone(row.status)} label={row.status} />,
+              },
+              { key: 'last', header: 'Aktif terakhir', render: (row) => row.lastActive },
+              { key: 'final', header: 'Lembar final', render: (row) => row.sheetsFinal },
+            ]}
+            rowActions={(row) => (
+              <>
+                <Button size="sm" variant="secondary" onClick={() => setMessage(`Peran diubah (mock): ${row.name}`)}>
+                  Ubah peran
+                </Button>
+                <Button
+                  size="sm"
+                  variant={row.status === 'Ditangguhkan' ? 'primary' : 'danger'}
+                  onClick={() =>
+                    setMessage(
+                      row.status === 'Ditangguhkan'
+                        ? `Diaktifkan kembali (mock): ${row.name}`
+                        : `Ditangguhkan (mock): ${row.name}`,
+                    )
+                  }
+                >
+                  {row.status === 'Ditangguhkan' ? 'Aktifkan' : 'Tangguhkan'}
+                </Button>
+              </>
+            )}
+          />
+        </>
+      ) : null}
+
+      {current === 'guru/undang' ? (
+        <div className="grid gap-4 lg:grid-cols-[1.2fr_1fr]">
+          <form
+            className="space-y-3 rounded-lg border border-brand-line bg-brand-surface-raised p-4"
+            onSubmit={(e) => {
+              e.preventDefault();
+              setMessage(`Undangan mock dikirim ke ${inviteEmail || 'email kosong'}`);
+              setInviteEmail('');
+              setInviteNote('');
+            }}
+          >
+            <h2 className="text-h3 font-semibold">Undang guru baru</h2>
+            <p className="text-body-sm text-brand-ink-muted">
+              Undangan mock memakai token `/undangan/demo-aktif`. Tidak mengirim email sungguhan.
+            </p>
+            <label className="flex flex-col gap-1">
+              <span className="text-label-semibold">Email guru</span>
+              <input
+                required
+                type="email"
+                value={inviteEmail}
+                onChange={(e) => setInviteEmail(e.target.value)}
+                className="min-h-[var(--control-md)] rounded-md border border-brand-line px-3"
+                placeholder="guru@sekolah.sch.id"
+              />
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="text-label-semibold">Catatan internal</span>
+              <textarea
+                value={inviteNote}
+                onChange={(e) => setInviteNote(e.target.value)}
+                className="min-h-24 rounded-md border border-brand-line px-3 py-2"
+                placeholder="Kelas / mapel opsional"
+              />
+            </label>
+            <div className="flex flex-wrap gap-2">
+              <Button type="submit">Kirim undangan</Button>
+              <Button type="button" variant="secondary" onClick={() => (window.location.href = '/school/guru')}>
+                Kembali ke tabel guru
+              </Button>
+            </div>
+          </form>
+          <div className="rounded-lg border border-brand-line bg-brand-surface-raised p-4">
+            <h3 className="font-semibold">Antrian undangan</h3>
+            <AdminDataTable
+              rows={TEACHERS.filter((t) => t.status === 'Undangan')}
+              columns={[
+                { key: 'name', header: 'Nama', render: (row) => row.name },
+                { key: 'email', header: 'Email', render: (row) => row.email },
+              ]}
+              rowActions={(row) => (
+                <Button size="sm" variant="secondary" onClick={() => setMessage(`Undangan dikirim ulang: ${row.email}`)}>
+                  Kirim ulang
+                </Button>
+              )}
+            />
+          </div>
         </div>
       ) : null}
 
-      {current === 'guru' || current === 'guru/undang' ? (
-        <Panel
-          title={current === 'guru/undang' ? 'Undang guru' : 'Daftar guru'}
-          description="Aktivasi lewat undangan email/token mock."
-          actions={
-            current === 'guru' ? (
-              <Link
-                href="/school/guru/undang"
-                className="inline-flex min-h-[var(--control-md)] items-center rounded-md bg-brand-accent px-3 text-body-sm text-white"
-              >
-                Undang
-              </Link>
-            ) : null
-          }
-        >
-          {current === 'guru/undang' ? (
-            <form className="flex flex-col gap-3" onSubmit={(e) => e.preventDefault()}>
-              <label className="flex flex-col gap-1">
-                <span className="text-label-semibold">Email guru</span>
-                <input className="min-h-[var(--control-md)] rounded-md border border-brand-line px-3" placeholder="guru@sekolah.sch.id" />
-              </label>
-              <Button type="submit">Kirim undangan mock</Button>
-            </form>
-          ) : (
-            <ul className="flex flex-col gap-2">
-              {TEACHERS.map((teacher) => (
-                <li key={teacher.id} className="flex items-center justify-between rounded-md border border-brand-line px-3 py-2">
-                  <div>
-                    <p className="font-semibold">{teacher.name}</p>
-                    <p className="text-body-sm text-brand-ink-muted">{teacher.role}</p>
-                  </div>
-                  <StatusBadge label={teacher.status === 'Aktif' ? 'Final' : 'Draft'} />
-                </li>
-              ))}
-            </ul>
-          )}
-        </Panel>
-      ) : null}
-
       {current === 'penggunaan' ? (
-        <Panel title="Penggunaan kuota" description="Agregat mock 30 hari terakhir.">
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-md border border-brand-line px-3 py-3">
-              <p className="text-caption text-brand-ink-muted">Generate</p>
-              <p className="text-h3 font-semibold">312</p>
-            </div>
-            <div className="rounded-md border border-brand-line px-3 py-3">
-              <p className="text-caption text-brand-ink-muted">Finalisasi</p>
-              <p className="text-h3 font-semibold">148</p>
-            </div>
-          </div>
-        </Panel>
+        <>
+          <AdminStatCards
+            items={[
+              { label: 'Generate', value: '312' },
+              { label: 'Finalisasi', value: '148' },
+              { label: 'Share aktif', value: '17' },
+              { label: 'Rata-rata final/guru', value: '6.2' },
+            ]}
+          />
+          <AdminToolbar search={search} onSearchChange={setSearch} searchPlaceholder="Cari guru" />
+          <AdminDataTable
+            rows={usageRows}
+            columns={[
+              { key: 'teacher', header: 'Guru', render: (row) => row.teacher },
+              { key: 'gen', header: 'Generate', render: (row) => row.generated },
+              { key: 'fin', header: 'Final', render: (row) => row.finalized },
+              { key: 'share', header: 'Share', render: (row) => row.shared },
+              { key: 'period', header: 'Periode', render: (row) => row.period },
+            ]}
+          />
+        </>
       ) : null}
 
       {current === 'pengaturan' ? (
-        <Panel title="Pengaturan sekolah" description="Branding & kebijakan akses (mock).">
-          <ul className="list-disc space-y-1 pl-5 text-body-default">
-            <li>Nama tampilan: SDN Contoh 01</li>
-            <li>Domain undangan: sekolah.sch.id</li>
-            <li>Branding logo: belum diunggah</li>
-          </ul>
-        </Panel>
+        <div className="grid gap-4 lg:grid-cols-2">
+          <div className="space-y-3 rounded-lg border border-brand-line bg-brand-surface-raised p-4">
+            <h2 className="text-h3 font-semibold">Identitas sekolah</h2>
+            <label className="flex flex-col gap-1">
+              <span className="text-label-semibold">Nama tampilan</span>
+              <input defaultValue="SDN Contoh 01" className="min-h-[var(--control-md)] rounded-md border border-brand-line px-3" />
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="text-label-semibold">Domain undangan</span>
+              <input defaultValue="sdncontoh.sch.id" className="min-h-[var(--control-md)] rounded-md border border-brand-line px-3" />
+            </label>
+            <Button onClick={() => setMessage('Pengaturan sekolah disimpan (mock).')}>Simpan</Button>
+          </div>
+          <div className="space-y-3 rounded-lg border border-brand-line bg-brand-surface-raised p-4">
+            <h2 className="text-h3 font-semibold">Branding</h2>
+            <div className="rounded-md border border-dashed border-brand-line px-4 py-8 text-center text-body-sm text-brand-ink-muted">
+              Logo sekolah belum diunggah
+            </div>
+            <Button variant="secondary" onClick={() => setMessage('Upload logo mock diterima.')}>
+              Unggah logo
+            </Button>
+          </div>
+        </div>
       ) : null}
 
       {current === 'library' ? (
-        <Panel title="Library internal sekolah" description="Template & bank internal mock.">
-          <ul className="flex flex-col gap-2">
-            <li className="rounded-md border border-brand-line px-3 py-2">Template UTS Matematika · milik sekolah</li>
-            <li className="rounded-md border border-brand-line px-3 py-2">Bank IPAS kelas 5 · internal</li>
-          </ul>
-        </Panel>
+        <>
+          <AdminToolbar
+            search={search}
+            onSearchChange={setSearch}
+            searchPlaceholder="Cari template / bank internal"
+            actions={<Button size="sm" variant="secondary" onClick={() => setMessage('Buat item library mock.')}>Tambah item</Button>}
+          />
+          <AdminDataTable
+            rows={libraryRows}
+            columns={[
+              { key: 'name', header: 'Nama', render: (row) => row.name },
+              { key: 'kind', header: 'Jenis', render: (row) => row.kind },
+              { key: 'owner', header: 'Pemilik', render: (row) => row.owner },
+              {
+                key: 'vis',
+                header: 'Visibilitas',
+                render: (row) => (
+                  <AdminBadge tone={row.visibility === 'Internal' ? 'ok' : 'neutral'} label={row.visibility} />
+                ),
+              },
+              { key: 'updated', header: 'Diperbarui', render: (row) => row.updatedAt },
+            ]}
+            rowActions={(row) => (
+              <Button size="sm" variant="secondary" onClick={() => setMessage(`Buka ${row.name}`)}>
+                Kelola
+              </Button>
+            )}
+          />
+        </>
       ) : null}
 
       {current === 'audit' ? (
-        <Panel title="Audit admin" description="Peristiwa admin tanpa konten soal guru.">
-          <ul className="flex flex-col gap-2 text-body-sm">
-            <li>23 Jul 2026 · undang guru · admin.siti</li>
-            <li>22 Jul 2026 · ubah kuota workspace · admin.siti</li>
-            <li>20 Jul 2026 · aktifkan branding · admin.budi</li>
-          </ul>
-        </Panel>
+        <>
+          <AdminToolbar search={search} onSearchChange={setSearch} searchPlaceholder="Cari actor/aksi/target" />
+          <AdminDataTable
+            rows={auditRows}
+            columns={[
+              { key: 'at', header: 'Waktu', render: (row) => row.at },
+              { key: 'actor', header: 'Aktor', render: (row) => row.actor },
+              { key: 'action', header: 'Aksi', render: (row) => row.action },
+              { key: 'target', header: 'Target', render: (row) => row.target },
+            ]}
+          />
+        </>
       ) : null}
-    </div>
+    </AdminShell>
   );
 }
