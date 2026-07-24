@@ -118,17 +118,17 @@ const CONTENT: ContentRow[] = [
 ];
 
 const NAV = [
-  { href: '/ops', label: 'Ringkasan' },
-  { href: '/ops/accounts', label: 'Akun', badge: String(ACCOUNTS.length) },
-  { href: '/ops/schools', label: 'Sekolah', badge: String(SCHOOLS.length) },
-  { href: '/ops/catalog', label: 'Katalog' },
-  { href: '/ops/prompts', label: 'Prompt' },
-  { href: '/ops/jobs', label: 'Jobs', badge: '3' },
-  { href: '/ops/quality', label: 'Quality', badge: '2' },
-  { href: '/ops/audit', label: 'Audit' },
-  { href: '/ops/billing', label: 'Billing' },
-  { href: '/ops/flags', label: 'Flags' },
-  { href: '/ops/content', label: 'Marketing CMS' },
+  { href: '/ops', label: 'Ringkasan', icon: 'dashboard' },
+  { href: '/ops/accounts', label: 'Akun', badge: String(ACCOUNTS.length), icon: 'manage_accounts' },
+  { href: '/ops/schools', label: 'Sekolah', badge: String(SCHOOLS.length), icon: 'apartment' },
+  { href: '/ops/catalog', label: 'Katalog', icon: 'menu_book' },
+  { href: '/ops/prompts', label: 'Prompt', icon: 'terminal' },
+  { href: '/ops/jobs', label: 'Jobs', badge: '3', icon: 'work' },
+  { href: '/ops/quality', label: 'Quality', badge: '2', icon: 'verified' },
+  { href: '/ops/audit', label: 'Audit', icon: 'policy' },
+  { href: '/ops/billing', label: 'Billing', icon: 'payments' },
+  { href: '/ops/flags', label: 'Flags', icon: 'toggle_on' },
+  { href: '/ops/content', label: 'Marketing CMS', icon: 'web' },
 ];
 
 function planTone(plan: SchoolRow['plan']): 'ok' | 'warn' | 'bad' | 'info' | 'neutral' {
@@ -212,7 +212,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
       topRight={<AdminBadge tone="info" label="superadmin" />}
     >
       {message ? (
-        <p className="rounded-md border border-brand-line bg-brand-accent-soft px-3 py-2 text-body-sm" role="status">
+        <p className="rounded-xl border border-brand-accent/20 bg-brand-accent-soft px-4 py-3 text-body-sm text-brand-ink shadow-[var(--shadow-sm)]" role="status">
           {message}
         </p>
       ) : null}
@@ -221,15 +221,18 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
         <>
           <AdminStatCards
             items={[
-              { label: 'Job aktif', value: '3', hint: '1 gagal perlu retry' },
-              { label: 'Quality open', value: '2', hint: 'butuh triage' },
-              { label: 'Tenant pantau', value: '2', hint: 'grace/blocked' },
-              { label: 'Flag pilot', value: '2', hint: 'scope terbatas' },
+              { label: 'Job aktif', value: '3', hint: '1 gagal perlu retry', tone: 'info' },
+              { label: 'Quality open', value: '2', hint: 'butuh triage', tone: 'warn' },
+              { label: 'Tenant pantau', value: '2', hint: 'grace/blocked', tone: 'bad' },
+              { label: 'Flag pilot', value: '2', hint: 'scope terbatas', tone: 'ok' },
             ]}
           />
           <div className="grid gap-4 xl:grid-cols-2">
-            <div className="space-y-2">
-              <h2 className="text-h3 font-semibold">Jobs terbaru</h2>
+            <div className="space-y-3 rounded-[var(--radius-lg)] border border-brand-line/80 bg-brand-surface-raised p-4 shadow-[var(--shadow-sm)]">
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="text-body-default font-semibold">Jobs terbaru</h2>
+                <a href="/ops/jobs" className="text-caption font-medium text-brand-accent hover:underline">Lihat semua</a>
+              </div>
               <AdminDataTable
                 rows={JOBS.slice(0, 4)}
                 columns={[
@@ -244,8 +247,11 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                 ]}
               />
             </div>
-            <div className="space-y-2">
-              <h2 className="text-h3 font-semibold">Tenant yang perlu perhatian</h2>
+            <div className="space-y-3 rounded-[var(--radius-lg)] border border-brand-line/80 bg-brand-surface-raised p-4 shadow-[var(--shadow-sm)]">
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="text-body-default font-semibold">Tenant yang perlu perhatian</h2>
+                <a href="/ops/schools" className="text-caption font-medium text-brand-accent hover:underline">Lihat semua</a>
+              </div>
               <AdminDataTable
                 rows={SCHOOLS.filter((s) => s.plan === 'grace' || s.plan === 'blocked')}
                 columns={[
