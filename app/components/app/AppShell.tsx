@@ -28,7 +28,7 @@ export function AppShell({ children }: AppShellProps) {
   );
 
   return (
-    <div className="min-h-screen bg-brand-paper text-brand-ink">
+    <div className="flex h-dvh flex-col overflow-hidden bg-brand-paper text-brand-ink">
       <a
         href="#konten-utama"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[var(--z-toast)] focus:rounded-md focus:bg-brand-surface-raised focus:px-3 focus:py-2"
@@ -44,8 +44,9 @@ export function AppShell({ children }: AppShellProps) {
         onOpenSwitcher={() => setMobileNavOpen(true)}
         displayName={displayName}
       />
-      <div className="flex min-h-[calc(100vh-56px)]">
-        <div className="hidden md:block">
+      <div className="flex min-h-0 flex-1">
+        {/* Desktop sidebar: fixed height, independent from content scroll */}
+        <div className="hidden h-full shrink-0 md:block">
           <LeftRail
             activeWorkspaceKind={activeWorkspace.kind}
             activeRole={activeWorkspace.activeRole}
@@ -79,7 +80,10 @@ export function AppShell({ children }: AppShellProps) {
           </div>
         ) : null}
 
-        <main id="konten-utama" className="min-w-0 flex-1 px-4 py-4 md:px-6 md:py-6">
+        <main
+          id="konten-utama"
+          className="min-h-0 min-w-0 flex-1 overflow-y-auto px-4 py-4 md:px-6 md:py-6"
+        >
           {children}
         </main>
       </div>

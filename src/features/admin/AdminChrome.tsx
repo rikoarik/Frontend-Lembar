@@ -480,16 +480,16 @@ export function AdminShell({
   );
 
   return (
-    <div className="min-h-screen bg-[#efe8dc] text-[#171717]">
+    <div className="h-dvh overflow-hidden bg-[#efe8dc] text-[#171717]">
       <a
         href="#konten-admin"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[var(--z-toast)] focus:rounded-md focus:bg-white focus:px-3 focus:py-2"
       >
         Lewati ke konten
       </a>
-      <div className="mx-auto flex min-h-screen max-w-[1520px]">
-        {/* Dark rail for strong hierarchy (ops-console feel) */}
-        <aside className="sticky top-0 hidden h-screen w-[252px] shrink-0 flex-col bg-[#171717] text-white md:flex">
+      <div className="mx-auto flex h-full max-w-[1520px]">
+        {/* Fixed-height rail: never scrolls with page content */}
+        <aside className="hidden h-full w-[252px] shrink-0 flex-col bg-[#171717] text-white md:flex">
           <div className="border-b border-white/10 px-4 py-4">
             <div className="flex items-center gap-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-accent text-white">
@@ -504,7 +504,7 @@ export function AdminShell({
             </div>
           </div>
 
-          <nav aria-label="Navigasi panel" className="flex flex-1 flex-col gap-0.5 overflow-y-auto p-3">
+          <nav aria-label="Navigasi panel" className="flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto p-3">
             <div className="px-2.5 pb-2 pt-1 text-[10px] font-semibold uppercase tracking-[0.09em] text-white/40">
               Workspace
             </div>
@@ -566,8 +566,8 @@ export function AdminShell({
           </div>
         </aside>
 
-        <div className="flex min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-10 border-b border-[#ddd4c8] bg-[#f7f3ec]/95 px-4 py-3 backdrop-blur md:px-6">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+          <header className="shrink-0 border-b border-[#ddd4c8] bg-[#f7f3ec]/95 px-4 py-3 backdrop-blur md:px-6">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="min-w-0">
                 <div className="mb-1 flex flex-wrap items-center gap-2 text-[12px] text-[#6d665d]">
@@ -606,7 +606,7 @@ export function AdminShell({
             </div>
           </header>
 
-          <div className="border-b border-[#ddd4c8] bg-[#f7f3ec] px-4 py-2 md:hidden">
+          <div className="shrink-0 border-b border-[#ddd4c8] bg-[#f7f3ec] px-4 py-2 md:hidden">
             <nav aria-label="Navigasi panel mobile" className="flex gap-2 overflow-x-auto pb-1">
               {nav.map((item) => {
                 const active = isAdminNavActive(item.href, pathname);
@@ -637,7 +637,7 @@ export function AdminShell({
             </nav>
           </div>
 
-          <main id="konten-admin" className="relative flex-1 space-y-4 p-4 md:p-6">
+          <main id="konten-admin" className="relative min-h-0 flex-1 space-y-4 overflow-y-auto p-4 md:p-6">
             {toast ? (
               <div
                 className="flex items-start justify-between gap-3 rounded-xl border border-[#ddd4c8] bg-white px-4 py-3 text-[13px] shadow-[0_8px_24px_rgba(23,23,23,0.06)]"

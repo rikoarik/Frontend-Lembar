@@ -13,7 +13,6 @@ const DEDICATED = [
   '/app/template',
   '/app/analitik',
   '/app/bantuan',
-  '/app/gates',
   '/app/kelas',
 ];
 

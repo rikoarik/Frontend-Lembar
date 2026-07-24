@@ -21,7 +21,6 @@ const TEACHER_NAV = [
   { href: '/app/template', label: 'Template', icon: 'description' },
   { href: '/app/generate', label: 'Generate', icon: 'auto_awesome' },
   { href: '/app/bantuan', label: 'Bantuan', icon: 'help' },
-  { href: '/app/gates', label: 'Status Integrasi', icon: 'verified' },
 ];
 
 const SCHOOL_ONLY_NAV = [
@@ -57,7 +56,7 @@ export function LeftRail({
   return (
     <nav
       aria-label="Navigasi utama"
-      className="flex h-full w-64 shrink-0 flex-col gap-2 border-r border-brand-line bg-brand-surface-raised px-3 py-4"
+      className="flex h-full w-64 shrink-0 flex-col gap-2 overflow-hidden border-r border-brand-line bg-brand-surface-raised px-3 py-4"
     >
       {/* Logo lembar */}
       <Link
@@ -81,7 +80,7 @@ export function LeftRail({
       ) : null}
 
       {/* Nav items */}
-      <ul className="flex flex-col gap-1" role="list">
+      <ul className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto" role="list">
         {items.map((item) => {
           const isActive =
             item.href === '/app' ? pathname === '/app' : pathname.startsWith(item.href);
@@ -117,7 +116,7 @@ export function LeftRail({
 
       {/* Account menu — PERMANEN di bawah, popover overlay ke atas */}
       {accountMenu ? (
-        <div className="mt-auto pt-2">{accountMenu}</div>
+        <div className="mt-auto shrink-0 pt-2">{accountMenu}</div>
       ) : null}
     </nav>
   );
