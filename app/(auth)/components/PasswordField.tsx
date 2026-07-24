@@ -56,12 +56,13 @@ export default function PasswordField({
           aria-label={visible ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
           aria-pressed={visible}
           aria-controls={inputId}
-          className="absolute right-1.5 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded text-secondary transition-colors hover:bg-surface-container-low focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-burgundy/30"
+          tabIndex={-1}
+          className="absolute right-1.5 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded text-secondary transition-colors hover:bg-surface-container-low focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-burgundy/30"
         >
           {visible ? (
-            <EyeSlash size={18} variant="Outline" color="currentColor" />
-          ) : (
             <Eye size={18} variant="Outline" color="currentColor" />
+          ) : (
+            <EyeSlash size={18} variant="Outline" color="currentColor" />
           )}
         </button>
       </div>

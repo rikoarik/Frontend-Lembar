@@ -1,6 +1,6 @@
 'use client';
 
-import { useId, useState } from 'react';
+import { useId, useRef, useState } from 'react';
 import type { Workspace } from '@/src/features/workspace/workspaceContext';
 
 type WorkspaceSwitcherProps = {
@@ -18,10 +18,22 @@ export function WorkspaceSwitcher({
 }: WorkspaceSwitcherProps) {
   const [open, setOpen] = useState(false);
   const labelId = useId();
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const active = workspaces.find((workspace) => workspace.id === activeWorkspaceId);
 
+  // Tutup popover jika klik di luar
+  const handleBlur = (e: React.FocusEvent<HTMLDivElement>) => {
+    if (!wrapperRef.current?.contains(e.relatedTarget as Node)) {
+      setOpen(false);
+    }
+  };
+
   return (
-    <div className={compact ? 'w-full' : ''}>
+    <div
+      ref={wrapperRef}
+      onBlur={handleBlur}
+      className={['relative', compact ? 'w-full' : ''].join(' ')}
+    >
       <button
         type="button"
         aria-haspopup="listbox"
@@ -38,11 +50,13 @@ export function WorkspaceSwitcher({
           {open ? 'expand_less' : 'expand_more'}
         </span>
       </button>
+
+      {/* Popover overlay — muncul ke bawah (top-full), tidak menggeser konten */}
       {open ? (
         <ul
           role="listbox"
           aria-label="Daftar workspace"
-          className="mt-2 flex flex-col gap-1 rounded-md border border-brand-line bg-brand-surface-raised p-1 shadow-md"
+          className="absolute left-0 right-0 top-full z-[var(--z-popover,50)] mt-1 flex flex-col gap-1 rounded-md border border-brand-line bg-brand-surface-raised p-1 shadow-md"
         >
           {workspaces.map((workspace) => {
             const isActive = workspace.id === activeWorkspaceId;

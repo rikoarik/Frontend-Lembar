@@ -70,7 +70,7 @@ export function AdminStatCards({
             <div className="text-[12px] font-medium text-[#6d665d]">{item.label}</div>
             {item.tone ? <AdminDot tone={item.tone} /> : null}
           </div>
-          <div className="mt-3 text-[30px] font-semibold leading-none tracking-[-0.04em] text-[#171717]">
+          <div className="mt-3 text-[30px] font-semibold leading-normal tracking-[-0.04em] text-[#171717]">
             {item.value}
           </div>
           <div className="mt-3 flex flex-wrap items-center gap-2 text-[12px] text-[#6d665d]">
