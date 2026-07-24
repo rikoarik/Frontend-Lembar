@@ -23,29 +23,28 @@ export function AppShell({ children }: AppShellProps) {
     />
   );
 
-  const accountMenu = (
-    <AccountMenu displayName={displayName} planLabel="Paket Guru" />
-  );
+  const accountMenu = <AccountMenu displayName={displayName} planLabel="Paket Guru" />;
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden bg-brand-paper text-brand-ink">
+    <div className="flex h-dvh flex-col overflow-hidden bg-[#f3eee6] text-[#171717]">
       <a
         href="#konten-utama"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[var(--z-toast)] focus:rounded-md focus:bg-brand-surface-raised focus:px-3 focus:py-2"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[var(--z-toast)] focus:rounded-md focus:bg-white focus:px-3 focus:py-2"
       >
         Lewati ke konten utama
       </a>
       <div aria-live="polite" className="sr-only">
         {announcement}
       </div>
+
       <TopBar
         workspaceName={activeWorkspace.name}
         onOpenMobileNav={() => setMobileNavOpen(true)}
         onOpenSwitcher={() => setMobileNavOpen(true)}
         displayName={displayName}
       />
+
       <div className="flex min-h-0 flex-1">
-        {/* Desktop sidebar: fixed height, independent from content scroll */}
         <div className="hidden h-full shrink-0 md:block">
           <LeftRail
             activeWorkspaceKind={activeWorkspace.kind}
@@ -64,11 +63,11 @@ export function AppShell({ children }: AppShellProps) {
           >
             <button
               type="button"
-              className="absolute inset-0 bg-brand-ink/20"
+              className="absolute inset-0 bg-[#171717]/25"
               aria-label="Tutup navigasi"
               onClick={() => setMobileNavOpen(false)}
             />
-            <div className="absolute inset-y-0 left-0 w-[min(20rem,92vw)] bg-brand-surface-raised">
+            <div className="absolute inset-y-0 left-0 w-[min(18rem,90vw)] overflow-hidden bg-[#fbf8f2] shadow-xl">
               <LeftRail
                 activeWorkspaceKind={activeWorkspace.kind}
                 activeRole={activeWorkspace.activeRole}
