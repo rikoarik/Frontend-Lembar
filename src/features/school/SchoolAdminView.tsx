@@ -1,14 +1,14 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { Button } from '@/app/components/ui';
 import {
   AdminBadge,
   AdminDataTable,
-  AdminShell,
   AdminStatCards,
   AdminToolbar,
 } from '@/src/features/admin/AdminChrome';
+import { useAdminSectionState } from '@/src/features/admin/adminPanelState';
 
 type TeacherRow = {
   id: string;
@@ -152,16 +152,6 @@ const LIBRARY: LibraryRow[] = [
   },
 ];
 
-const NAV = [
-  { href: '/school', label: 'Ringkasan', icon: 'dashboard' },
-  { href: '/school/guru', label: 'Guru', badge: String(TEACHERS.length), icon: 'group' },
-  { href: '/school/guru/undang', label: 'Undang', icon: 'person_add' },
-  { href: '/school/penggunaan', label: 'Penggunaan', icon: 'monitoring' },
-  { href: '/school/pengaturan', label: 'Pengaturan', icon: 'settings' },
-  { href: '/school/library', label: 'Library', icon: 'inventory_2' },
-  { href: '/school/audit', label: 'Audit', icon: 'history' },
-];
-
 function teacherTone(status: TeacherRow['status']): 'ok' | 'warn' | 'bad' | 'neutral' {
   if (status === 'Aktif') return 'ok';
   if (status === 'Undangan') return 'warn';
@@ -171,27 +161,16 @@ function teacherTone(status: TeacherRow['status']): 'ok' | 'warn' | 'bad' | 'neu
 
 export function SchoolAdminView({ section = '' }: { section?: string }) {
   const current = section || '';
-  const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | TeacherRow['status']>('all');
-  const [inviteEmail, setInviteEmail] = useState('');
-  const [inviteNote, setInviteNote] = useState('');
-  const [message, setMessage] = useState('');
-
-  const title =
-    NAV.find((item) => item.href === `/school${current ? `/${current}` : ''}`)?.label ??
-    (current === 'guru/undang'
-      ? 'Undang'
-      : current === 'guru'
-        ? 'Guru'
-        : current === 'penggunaan'
-          ? 'Penggunaan'
-          : current === 'pengaturan'
-            ? 'Pengaturan'
-            : current === 'library'
-              ? 'Library'
-              : current === 'audit'
-                ? 'Audit'
-                : 'Ringkasan');
+  const {
+    search,
+    filter,
+    setSearch,
+    setFilter,
+    setToast,
+  } = useAdminSectionState(current || 'ringkasan');
+  const statusFilter = (filter as 'all' | TeacherRow['status']) || 'all';
+  // local form fields only (not panel-global)
+  // invite form is local ephemeral UI state via uncontrolled defaults + toast feedback
 
   const teachers = useMemo(() => {
     return TEACHERS.filter((row) => {
@@ -235,20 +214,7 @@ export function SchoolAdminView({ section = '' }: { section?: string }) {
   }, [search]);
 
   return (
-    <AdminShell
-      brand="lembar school"
-      title={title}
-      subtitle="SDN Contoh 01 · panel admin sekolah (mock management)"
-      nav={NAV}
-      currentPath={`/school${current ? `/${current}` : ''}`}
-      topRight={<AdminBadge tone="ok" label="school_admin" />}
-    >
-      {message ? (
-        <p className="rounded-xl border border-brand-accent/20 bg-brand-accent-soft px-4 py-3 text-body-sm text-brand-ink shadow-[var(--shadow-sm)]" role="status">
-          {message}
-        </p>
-      ) : null}
-
+    <div className="space-y-4">
       {current === '' ? (
         <>
           <AdminStatCards
@@ -293,7 +259,7 @@ export function SchoolAdminView({ section = '' }: { section?: string }) {
             ]}
             rowActions={(row) => (
               <>
-                <Button size="sm" variant="secondary" onClick={() => setMessage(`Detail mock: ${row.name}`)}>
+                <Button size="sm" variant="secondary" onClick={() => setToast(`Detail mock: ${row.name}`)}>
                   Detail
                 </Button>
               </>
@@ -319,7 +285,7 @@ export function SchoolAdminView({ section = '' }: { section?: string }) {
             filters={
               <select
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
+                onChange={(e) => setFilter(e.target.value as typeof statusFilter)}
                 className="min-h-[var(--control-md)] rounded-md border border-brand-line px-3 text-body-sm"
               >
                 <option value="all">Semua status</option>
@@ -359,14 +325,14 @@ export function SchoolAdminView({ section = '' }: { section?: string }) {
             ]}
             rowActions={(row) => (
               <>
-                <Button size="sm" variant="secondary" onClick={() => setMessage(`Peran diubah (mock): ${row.name}`)}>
+                <Button size="sm" variant="secondary" onClick={() => setToast(`Peran diubah (mock): ${row.name}`)}>
                   Ubah peran
                 </Button>
                 <Button
                   size="sm"
                   variant={row.status === 'Ditangguhkan' ? 'primary' : 'danger'}
                   onClick={() =>
-                    setMessage(
+                    setToast(
                       row.status === 'Ditangguhkan'
                         ? `Diaktifkan kembali (mock): ${row.name}`
                         : `Ditangguhkan (mock): ${row.name}`,
@@ -387,9 +353,10 @@ export function SchoolAdminView({ section = '' }: { section?: string }) {
             className="space-y-3 rounded-[var(--radius-lg)] border border-brand-line/80 bg-brand-surface-raised p-5 shadow-[var(--shadow-sm)]"
             onSubmit={(e) => {
               e.preventDefault();
-              setMessage(`Undangan mock dikirim ke ${inviteEmail || 'email kosong'}`);
-              setInviteEmail('');
-              setInviteNote('');
+              const fd = new FormData(e.currentTarget);
+              const email = String(fd.get('email') || '').trim();
+              setToast(`Undangan mock dikirim ke ${email || 'email kosong'}`);
+              e.currentTarget.reset();
             }}
           >
             <h2 className="text-h3 font-semibold">Undang guru baru</h2>
@@ -401,8 +368,7 @@ export function SchoolAdminView({ section = '' }: { section?: string }) {
               <input
                 required
                 type="email"
-                value={inviteEmail}
-                onChange={(e) => setInviteEmail(e.target.value)}
+                name="email" defaultValue=""
                 className="min-h-[var(--control-md)] rounded-md border border-brand-line px-3"
                 placeholder="guru@sekolah.sch.id"
               />
@@ -410,8 +376,7 @@ export function SchoolAdminView({ section = '' }: { section?: string }) {
             <label className="flex flex-col gap-1">
               <span className="text-label-semibold">Catatan internal</span>
               <textarea
-                value={inviteNote}
-                onChange={(e) => setInviteNote(e.target.value)}
+                name="note" defaultValue=""
                 className="min-h-24 rounded-md border border-brand-line px-3 py-2"
                 placeholder="Kelas / mapel opsional"
               />
@@ -432,7 +397,7 @@ export function SchoolAdminView({ section = '' }: { section?: string }) {
                 { key: 'email', header: 'Email', render: (row) => row.email },
               ]}
               rowActions={(row) => (
-                <Button size="sm" variant="secondary" onClick={() => setMessage(`Undangan dikirim ulang: ${row.email}`)}>
+                <Button size="sm" variant="secondary" onClick={() => setToast(`Undangan dikirim ulang: ${row.email}`)}>
                   Kirim ulang
                 </Button>
               )}
@@ -477,14 +442,14 @@ export function SchoolAdminView({ section = '' }: { section?: string }) {
               <span className="text-label-semibold">Domain undangan</span>
               <input defaultValue="sdncontoh.sch.id" className="min-h-[var(--control-md)] rounded-md border border-brand-line px-3" />
             </label>
-            <Button onClick={() => setMessage('Pengaturan sekolah disimpan (mock).')}>Simpan</Button>
+            <Button onClick={() => setToast('Pengaturan sekolah disimpan (mock).')}>Simpan</Button>
           </div>
           <div className="space-y-3 rounded-[var(--radius-lg)] border border-brand-line/80 bg-brand-surface-raised p-5 shadow-[var(--shadow-sm)]">
             <h2 className="text-h3 font-semibold">Branding</h2>
             <div className="rounded-md border border-dashed border-brand-line px-4 py-8 text-center text-body-sm text-brand-ink-muted">
               Logo sekolah belum diunggah
             </div>
-            <Button variant="secondary" onClick={() => setMessage('Upload logo mock diterima.')}>
+            <Button variant="secondary" onClick={() => setToast('Upload logo mock diterima.')}>
               Unggah logo
             </Button>
           </div>
@@ -497,7 +462,7 @@ export function SchoolAdminView({ section = '' }: { section?: string }) {
             search={search}
             onSearchChange={setSearch}
             searchPlaceholder="Cari template / bank internal"
-            actions={<Button size="sm" variant="secondary" onClick={() => setMessage('Buat item library mock.')}>Tambah item</Button>}
+            actions={<Button size="sm" variant="secondary" onClick={() => setToast('Buat item library mock.')}>Tambah item</Button>}
           />
           <AdminDataTable
             rows={libraryRows}
@@ -515,7 +480,7 @@ export function SchoolAdminView({ section = '' }: { section?: string }) {
               { key: 'updated', header: 'Diperbarui', render: (row) => row.updatedAt },
             ]}
             rowActions={(row) => (
-              <Button size="sm" variant="secondary" onClick={() => setMessage(`Buka ${row.name}`)}>
+              <Button size="sm" variant="secondary" onClick={() => setToast(`Buka ${row.name}`)}>
                 Kelola
               </Button>
             )}
@@ -537,6 +502,6 @@ export function SchoolAdminView({ section = '' }: { section?: string }) {
           />
         </>
       ) : null}
-    </AdminShell>
+    </div>
   );
 }

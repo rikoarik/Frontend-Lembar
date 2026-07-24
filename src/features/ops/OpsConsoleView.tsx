@@ -5,10 +5,10 @@ import { Button } from '@/app/components/ui';
 import {
   AdminBadge,
   AdminDataTable,
-  AdminShell,
   AdminStatCards,
   AdminToolbar,
 } from '@/src/features/admin/AdminChrome';
+import { useAdminSectionState } from '@/src/features/admin/adminPanelState';
 
 type AccountRow = {
   id: string;
@@ -117,20 +117,6 @@ const CONTENT: ContentRow[] = [
   { id: 'c3', slug: 'untuk-sekolah', title: 'Untuk Sekolah', status: 'published', updatedAt: '2026-07-18' },
 ];
 
-const NAV = [
-  { href: '/ops', label: 'Ringkasan', icon: 'dashboard' },
-  { href: '/ops/accounts', label: 'Akun', badge: String(ACCOUNTS.length), icon: 'manage_accounts' },
-  { href: '/ops/schools', label: 'Sekolah', badge: String(SCHOOLS.length), icon: 'apartment' },
-  { href: '/ops/catalog', label: 'Katalog', icon: 'menu_book' },
-  { href: '/ops/prompts', label: 'Prompt', icon: 'terminal' },
-  { href: '/ops/jobs', label: 'Jobs', badge: '3', icon: 'work' },
-  { href: '/ops/quality', label: 'Quality', badge: '2', icon: 'verified' },
-  { href: '/ops/audit', label: 'Audit', icon: 'policy' },
-  { href: '/ops/billing', label: 'Billing', icon: 'payments' },
-  { href: '/ops/flags', label: 'Flags', icon: 'toggle_on' },
-  { href: '/ops/content', label: 'Marketing CMS', icon: 'web' },
-];
-
 function planTone(plan: SchoolRow['plan']): 'ok' | 'warn' | 'bad' | 'info' | 'neutral' {
   if (plan === 'active' || plan === 'pilot') return 'ok';
   if (plan === 'grace') return 'warn';
@@ -147,12 +133,8 @@ function jobTone(status: JobRow['status']): 'ok' | 'warn' | 'bad' | 'info' | 'ne
 
 export function OpsConsoleView({ section = '' }: { section?: string }) {
   const key = section || '';
-  const [search, setSearch] = useState('');
-  const [message, setMessage] = useState('');
+  const { search, setSearch, setToast } = useAdminSectionState(key || 'ringkasan');
   const [flags, setFlags] = useState(FLAGS);
-
-  const title =
-    NAV.find((item) => item.href === `/ops${key ? `/${key}` : ''}`)?.label ?? 'Operasional platform';
 
   const accounts = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -203,20 +185,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
   }, [search]);
 
   return (
-    <AdminShell
-      brand="lembar ops"
-      title={title}
-      subtitle="Superadmin management console · least-privilege mock · no teacher question content"
-      nav={NAV}
-      currentPath={`/ops${key ? `/${key}` : ''}`}
-      topRight={<AdminBadge tone="info" label="superadmin" />}
-    >
-      {message ? (
-        <p className="rounded-xl border border-brand-accent/20 bg-brand-accent-soft px-4 py-3 text-body-sm text-brand-ink shadow-[var(--shadow-sm)]" role="status">
-          {message}
-        </p>
-      ) : null}
-
+    <div className="space-y-4">
       {key === '' ? (
         <>
           <AdminStatCards
@@ -264,7 +233,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                   { key: 'usage', header: 'Usage', render: (row) => row.usage },
                 ]}
                 rowActions={(row) => (
-                  <Button size="sm" variant="secondary" onClick={() => setMessage(`Buka tenant ${row.name}`)}>
+                  <Button size="sm" variant="secondary" onClick={() => setToast(`Buka tenant ${row.name}`)}>
                     Review
                   </Button>
                 )}
@@ -280,7 +249,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             search={search}
             onSearchChange={setSearch}
             searchPlaceholder="Cari akun, email, role, sekolah"
-            actions={<Button size="sm" variant="secondary" onClick={() => setMessage('Export akun mock disiapkan.')}>Export CSV</Button>}
+            actions={<Button size="sm" variant="secondary" onClick={() => setToast('Export akun mock disiapkan.')}>Export CSV</Button>}
           />
           <AdminDataTable
             rows={accounts}
@@ -310,10 +279,10 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             ]}
             rowActions={(row) => (
               <>
-                <Button size="sm" variant="secondary" onClick={() => setMessage(`Impersonate disabled mock: ${row.id}`)}>
+                <Button size="sm" variant="secondary" onClick={() => setToast(`Impersonate disabled mock: ${row.id}`)}>
                   Detail
                 </Button>
-                <Button size="sm" variant="danger" onClick={() => setMessage(`Suspend mock: ${row.displayName}`)}>
+                <Button size="sm" variant="danger" onClick={() => setToast(`Suspend mock: ${row.displayName}`)}>
                   Suspend
                 </Button>
               </>
@@ -328,7 +297,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             search={search}
             onSearchChange={setSearch}
             searchPlaceholder="Cari sekolah / owner / status"
-            actions={<Button size="sm" onClick={() => setMessage('Onboarding tenant mock dibuka.')}>Tambah tenant</Button>}
+            actions={<Button size="sm" onClick={() => setToast('Onboarding tenant mock dibuka.')}>Tambah tenant</Button>}
           />
           <AdminDataTable
             rows={schools}
@@ -345,10 +314,10 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             ]}
             rowActions={(row) => (
               <>
-                <Button size="sm" variant="secondary" onClick={() => setMessage(`Billing ${row.name}`)}>
+                <Button size="sm" variant="secondary" onClick={() => setToast(`Billing ${row.name}`)}>
                   Billing
                 </Button>
-                <Button size="sm" variant="secondary" onClick={() => setMessage(`Audit ${row.name}`)}>
+                <Button size="sm" variant="secondary" onClick={() => setToast(`Audit ${row.name}`)}>
                   Audit
                 </Button>
               </>
@@ -384,7 +353,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             { key: 'version', header: 'Versi', render: (row) => row.version },
           ]}
           rowActions={(row) => (
-            <Button size="sm" variant="secondary" onClick={() => setMessage(`Kelola ${row.name}`)}>
+            <Button size="sm" variant="secondary" onClick={() => setToast(`Kelola ${row.name}`)}>
               Kelola
             </Button>
           )}
@@ -410,11 +379,11 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             ]}
             rowActions={(row) => (
               <>
-                <Button size="sm" variant="secondary" onClick={() => setMessage(`Inspect ${row.id}`)}>
+                <Button size="sm" variant="secondary" onClick={() => setToast(`Inspect ${row.id}`)}>
                   Inspect
                 </Button>
                 {row.status === 'failed' ? (
-                  <Button size="sm" onClick={() => setMessage(`Retry ${row.id}`)}>
+                  <Button size="sm" onClick={() => setToast(`Retry ${row.id}`)}>
                     Retry
                   </Button>
                 ) : null}
@@ -446,7 +415,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
               { key: 'created', header: 'Dibuat', render: (row) => row.createdAt },
             ]}
             rowActions={(row) => (
-              <Button size="sm" variant="secondary" onClick={() => setMessage(`Triage ${row.id}`)}>
+              <Button size="sm" variant="secondary" onClick={() => setToast(`Triage ${row.id}`)}>
                 Triage
               </Button>
             )}
@@ -499,7 +468,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
               { key: 'renew', header: 'Renew', render: (row) => row.renewsAt },
             ]}
             rowActions={(row) => (
-              <Button size="sm" variant="secondary" onClick={() => setMessage(`Billing detail ${row.school}`)}>
+              <Button size="sm" variant="secondary" onClick={() => setToast(`Billing detail ${row.school}`)}>
                 Kelola
               </Button>
             )}
@@ -528,7 +497,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                 setFlags((prev) =>
                   prev.map((item) => (item.id === row.id ? { ...item, enabled: !item.enabled } : item)),
                 );
-                setMessage(`Flag ${row.key} diubah (mock).`);
+                setToast(`Flag ${row.key} diubah (mock).`);
               }}
             >
               Toggle
@@ -543,7 +512,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             search={search}
             onSearchChange={setSearch}
             searchPlaceholder="Cari slug / judul / status"
-            actions={<Button size="sm" onClick={() => setMessage('Buat draft CMS mock.')}>Draft baru</Button>}
+            actions={<Button size="sm" onClick={() => setToast('Buat draft CMS mock.')}>Draft baru</Button>}
           />
           <AdminDataTable
             rows={content}
@@ -561,12 +530,12 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             ]}
             rowActions={(row) => (
               <>
-                <Button size="sm" variant="secondary" onClick={() => setMessage(`Edit ${row.slug}`)}>
+                <Button size="sm" variant="secondary" onClick={() => setToast(`Edit ${row.slug}`)}>
                   Edit
                 </Button>
                 <Button
                   size="sm"
-                  onClick={() => setMessage(`${row.status === 'published' ? 'Unpublish' : 'Publish'} ${row.slug}`)}
+                  onClick={() => setToast(`${row.status === 'published' ? 'Unpublish' : 'Publish'} ${row.slug}`)}
                 >
                   {row.status === 'published' ? 'Unpublish' : 'Publish'}
                 </Button>
@@ -575,6 +544,6 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
           />
         </>
       ) : null}
-    </AdminShell>
+    </div>
   );
 }

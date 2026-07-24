@@ -1,6 +1,8 @@
+'use client';
+
+import { SchoolAdminShell } from '@/src/features/admin/AdminAppShell';
 import type { ReactNode } from 'react';
 
 export default function SchoolLayout({ children }: { children: ReactNode }) {
-  // Management chrome is owned by SchoolAdminView for a real admin-panel feel.
-  return children;
+  return <SchoolAdminShell>{children}</SchoolAdminShell>;
 }
