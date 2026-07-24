@@ -153,13 +153,13 @@ const LIBRARY: LibraryRow[] = [
 ];
 
 const NAV = [
-  { href: '/school', label: 'Ringkasan' },
-  { href: '/school/guru', label: 'Guru', badge: String(TEACHERS.length) },
-  { href: '/school/guru/undang', label: 'Undang' },
-  { href: '/school/penggunaan', label: 'Penggunaan' },
-  { href: '/school/pengaturan', label: 'Pengaturan' },
-  { href: '/school/library', label: 'Library' },
-  { href: '/school/audit', label: 'Audit' },
+  { href: '/school', label: 'Ringkasan', icon: 'dashboard' },
+  { href: '/school/guru', label: 'Guru', badge: String(TEACHERS.length), icon: 'group' },
+  { href: '/school/guru/undang', label: 'Undang', icon: 'person_add' },
+  { href: '/school/penggunaan', label: 'Penggunaan', icon: 'monitoring' },
+  { href: '/school/pengaturan', label: 'Pengaturan', icon: 'settings' },
+  { href: '/school/library', label: 'Library', icon: 'inventory_2' },
+  { href: '/school/audit', label: 'Audit', icon: 'history' },
 ];
 
 function teacherTone(status: TeacherRow['status']): 'ok' | 'warn' | 'bad' | 'neutral' {
@@ -244,7 +244,7 @@ export function SchoolAdminView({ section = '' }: { section?: string }) {
       topRight={<AdminBadge tone="ok" label="school_admin" />}
     >
       {message ? (
-        <p className="rounded-md border border-brand-line bg-brand-accent-soft px-3 py-2 text-body-sm" role="status">
+        <p className="rounded-xl border border-brand-accent/20 bg-brand-accent-soft px-4 py-3 text-body-sm text-brand-ink shadow-[var(--shadow-sm)]" role="status">
           {message}
         </p>
       ) : null}
@@ -253,10 +253,10 @@ export function SchoolAdminView({ section = '' }: { section?: string }) {
         <>
           <AdminStatCards
             items={[
-              { label: 'Guru aktif', value: '24', hint: '3 undangan menunggu' },
-              { label: 'Kuota terpakai', value: '312 / 500', hint: '62% periode ini' },
-              { label: 'Lembar final', value: '48', hint: '30 hari terakhir' },
-              { label: 'Bagikan aktif', value: '17', hint: '2 akan kedaluwarsa' },
+              { label: 'Guru aktif', value: '24', hint: '3 undangan menunggu', tone: 'ok' },
+              { label: 'Kuota terpakai', value: '312 / 500', hint: '62% periode ini', tone: 'info' },
+              { label: 'Lembar final', value: '48', hint: '30 hari terakhir', tone: 'ok' },
+              { label: 'Bagikan aktif', value: '17', hint: '2 akan kedaluwarsa', tone: 'warn' },
             ]}
           />
           <AdminToolbar
@@ -306,10 +306,10 @@ export function SchoolAdminView({ section = '' }: { section?: string }) {
         <>
           <AdminStatCards
             items={[
-              { label: 'Total guru', value: String(TEACHERS.length) },
-              { label: 'Aktif', value: String(TEACHERS.filter((t) => t.status === 'Aktif').length) },
-              { label: 'Undangan', value: String(TEACHERS.filter((t) => t.status === 'Undangan').length) },
-              { label: 'Ditangguhkan', value: String(TEACHERS.filter((t) => t.status === 'Ditangguhkan').length) },
+              { label: 'Total guru', value: String(TEACHERS.length), tone: 'neutral' },
+              { label: 'Aktif', value: String(TEACHERS.filter((t) => t.status === 'Aktif').length), tone: 'ok' },
+              { label: 'Undangan', value: String(TEACHERS.filter((t) => t.status === 'Undangan').length), tone: 'warn' },
+              { label: 'Ditangguhkan', value: String(TEACHERS.filter((t) => t.status === 'Ditangguhkan').length), tone: 'bad' },
             ]}
           />
           <AdminToolbar
@@ -384,7 +384,7 @@ export function SchoolAdminView({ section = '' }: { section?: string }) {
       {current === 'guru/undang' ? (
         <div className="grid gap-4 lg:grid-cols-[1.2fr_1fr]">
           <form
-            className="space-y-3 rounded-lg border border-brand-line bg-brand-surface-raised p-4"
+            className="space-y-3 rounded-[var(--radius-lg)] border border-brand-line/80 bg-brand-surface-raised p-5 shadow-[var(--shadow-sm)]"
             onSubmit={(e) => {
               e.preventDefault();
               setMessage(`Undangan mock dikirim ke ${inviteEmail || 'email kosong'}`);
@@ -423,7 +423,7 @@ export function SchoolAdminView({ section = '' }: { section?: string }) {
               </Button>
             </div>
           </form>
-          <div className="rounded-lg border border-brand-line bg-brand-surface-raised p-4">
+          <div className="rounded-[var(--radius-lg)] border border-brand-line/80 bg-brand-surface-raised p-5 shadow-[var(--shadow-sm)]">
             <h3 className="font-semibold">Antrian undangan</h3>
             <AdminDataTable
               rows={TEACHERS.filter((t) => t.status === 'Undangan')}
@@ -445,10 +445,10 @@ export function SchoolAdminView({ section = '' }: { section?: string }) {
         <>
           <AdminStatCards
             items={[
-              { label: 'Generate', value: '312' },
-              { label: 'Finalisasi', value: '148' },
-              { label: 'Share aktif', value: '17' },
-              { label: 'Rata-rata final/guru', value: '6.2' },
+              { label: 'Generate', value: '312', tone: 'info' },
+              { label: 'Finalisasi', value: '148', tone: 'ok' },
+              { label: 'Share aktif', value: '17', tone: 'warn' },
+              { label: 'Rata-rata final/guru', value: '6.2', tone: 'neutral' },
             ]}
           />
           <AdminToolbar search={search} onSearchChange={setSearch} searchPlaceholder="Cari guru" />
@@ -467,7 +467,7 @@ export function SchoolAdminView({ section = '' }: { section?: string }) {
 
       {current === 'pengaturan' ? (
         <div className="grid gap-4 lg:grid-cols-2">
-          <div className="space-y-3 rounded-lg border border-brand-line bg-brand-surface-raised p-4">
+          <div className="space-y-3 rounded-[var(--radius-lg)] border border-brand-line/80 bg-brand-surface-raised p-5 shadow-[var(--shadow-sm)]">
             <h2 className="text-h3 font-semibold">Identitas sekolah</h2>
             <label className="flex flex-col gap-1">
               <span className="text-label-semibold">Nama tampilan</span>
@@ -479,7 +479,7 @@ export function SchoolAdminView({ section = '' }: { section?: string }) {
             </label>
             <Button onClick={() => setMessage('Pengaturan sekolah disimpan (mock).')}>Simpan</Button>
           </div>
-          <div className="space-y-3 rounded-lg border border-brand-line bg-brand-surface-raised p-4">
+          <div className="space-y-3 rounded-[var(--radius-lg)] border border-brand-line/80 bg-brand-surface-raised p-5 shadow-[var(--shadow-sm)]">
             <h2 className="text-h3 font-semibold">Branding</h2>
             <div className="rounded-md border border-dashed border-brand-line px-4 py-8 text-center text-body-sm text-brand-ink-muted">
               Logo sekolah belum diunggah
