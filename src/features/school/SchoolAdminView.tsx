@@ -359,7 +359,7 @@ export function SchoolAdminView({ section = '' }: { section?: string }) {
       {current === 'guru/undang' ? (
         <div className="grid gap-4 lg:grid-cols-[1.2fr_1fr]">
           <form
-            className="space-y-3 rounded-[var(--radius-lg)] border border-brand-line/80 bg-brand-surface-raised p-5 shadow-[var(--shadow-sm)]"
+            className="space-y-4 rounded-[var(--radius-lg)] border border-brand-line/80 bg-white p-5 shadow-[var(--shadow-sm)]"
             onSubmit={(e) => {
               e.preventDefault();
               const fd = new FormData(e.currentTarget);
@@ -368,49 +368,84 @@ export function SchoolAdminView({ section = '' }: { section?: string }) {
               e.currentTarget.reset();
             }}
           >
-            <h2 className="text-h3 font-semibold">Undang guru baru</h2>
-            <p className="text-body-sm text-brand-ink-muted">
-              Undangan mock memakai token `/undangan/demo-aktif`. Tidak mengirim email sungguhan.
-            </p>
-            <label className="flex flex-col gap-1">
-              <span className="text-label-semibold">Email guru</span>
+            <div className="flex flex-col gap-1 border-b border-[#e6dfd4] pb-3">
+              <h2 className="text-h3 font-semibold text-[#171717]">Undang guru baru</h2>
+              <p className="text-body-sm text-[#6d665d]">
+                Kirimkan tautan akses instan ke workspace sekolah untuk guru.
+              </p>
+            </div>
+
+            <label className="flex flex-col gap-1.5">
+              <span className="text-label-semibold text-[#171717]">Email guru</span>
               <input
                 required
                 type="email"
-                name="email" defaultValue=""
-                className="min-h-[var(--control-md)] rounded-md border border-brand-line px-3"
+                name="email"
+                defaultValue=""
+                className="min-h-[var(--control-md)] rounded-lg border border-[#e6dfd4] px-3 py-2 text-body-sm focus:border-[#a3202b] focus:outline-hidden"
                 placeholder="guru@sekolah.sch.id"
               />
             </label>
-            <label className="flex flex-col gap-1">
-              <span className="text-label-semibold">Catatan internal</span>
+
+            <label className="flex flex-col gap-1.5">
+              <span className="text-label-semibold text-[#171717]">Catatan internal</span>
               <textarea
-                name="note" defaultValue=""
-                className="min-h-24 rounded-md border border-brand-line px-3 py-2"
-                placeholder="Kelas / mapel opsional"
+                name="note"
+                defaultValue=""
+                className="min-h-24 rounded-lg border border-[#e6dfd4] px-3 py-2 text-body-sm focus:border-[#a3202b] focus:outline-hidden"
+                placeholder="Kelas / mata pelajaran opsional..."
               />
             </label>
-            <div className="flex flex-wrap gap-2">
+
+            <div className="flex flex-wrap gap-2 pt-2">
               <Button type="submit">Kirim undangan</Button>
               <Button type="button" variant="secondary" onClick={() => (window.location.href = '/school/guru')}>
                 Kembali ke tabel guru
               </Button>
             </div>
           </form>
-          <div className="rounded-[var(--radius-lg)] border border-brand-line/80 bg-brand-surface-raised p-5 shadow-[var(--shadow-sm)]">
-            <h3 className="font-semibold">Antrian undangan</h3>
-            <AdminDataTable
-              rows={TEACHERS.filter((t) => t.status === 'Undangan')}
-              columns={[
-                { key: 'name', header: 'Nama', render: (row) => row.name },
-                { key: 'email', header: 'Email', render: (row) => row.email },
-              ]}
-              rowActions={(row) => (
-                <Button size="sm" variant="secondary" onClick={() => setToast(`Undangan dikirim ulang: ${row.email}`)}>
-                  Kirim ulang
-                </Button>
-              )}
-            />
+
+          <div className="flex flex-col gap-4 rounded-[var(--radius-lg)] border border-brand-line/80 bg-white p-5 shadow-[var(--shadow-sm)]">
+            <div className="flex flex-col gap-1 border-b border-[#e6dfd4] pb-3">
+              <h3 className="font-semibold text-[#171717]">Tautan Undangan Cepat</h3>
+              <p className="text-body-xs text-[#6d665d]">
+                Salin tautan ini untuk dikirimkan langsung ke guru via pesan.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2 rounded-lg border border-[#e6dfd4] bg-[#fbf8f2] p-2.5">
+              <input
+                readOnly
+                value="https://lembar.id/undangan/demo-aktif"
+                className="w-full bg-transparent text-[12px] font-mono text-[#171717] focus:outline-hidden"
+              />
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => {
+                  navigator.clipboard?.writeText('https://lembar.id/undangan/demo-aktif');
+                  setToast('Tautan undangan disalin ke clipboard!');
+                }}
+              >
+                Salin
+              </Button>
+            </div>
+
+            <div className="pt-2">
+              <h3 className="font-semibold text-[#171717] mb-2 text-body-sm">Antrian Undangan Menunggu</h3>
+              <AdminDataTable
+                rows={TEACHERS.filter((t) => t.status === 'Undangan')}
+                columns={[
+                  { key: 'name', header: 'Nama', render: (row) => row.name },
+                  { key: 'email', header: 'Email', render: (row) => row.email },
+                ]}
+                rowActions={(row) => (
+                  <Button size="sm" variant="secondary" onClick={() => setToast(`Undangan dikirim ulang: ${row.email}`)}>
+                    Kirim ulang
+                  </Button>
+                )}
+              />
+            </div>
           </div>
         </div>
       ) : null}
@@ -419,19 +454,25 @@ export function SchoolAdminView({ section = '' }: { section?: string }) {
         <>
           <AdminStatCards
             items={[
-              { label: 'Generate', value: '312', tone: 'info' },
-              { label: 'Finalisasi', value: '148', tone: 'ok' },
-              { label: 'Share aktif', value: '17', tone: 'warn' },
-              { label: 'Rata-rata final/guru', value: '6.2', tone: 'neutral' },
+              { label: 'Total Generate', value: '312', hint: '30 hari terakhir', tone: 'info', delta: '+18%' },
+              { label: 'Lembar Finalisasi', value: '148', hint: '47.4% konversi', tone: 'ok', delta: '+12%' },
+              { label: 'Berbagi Aktif', value: '17', hint: '2 akan expired', tone: 'warn', delta: '2 exp' },
+              { label: 'Rata-rata Final/Guru', value: '6.2', hint: 'dari 24 guru aktif', tone: 'neutral', delta: '6.2' },
             ]}
           />
-          <AdminToolbar search={search} onSearchChange={setSearch} searchPlaceholder="Cari guru" />
+          <AdminToolbar search={search} onSearchChange={setSearch} searchPlaceholder="Cari nama guru..." />
           <AdminDataTable
             rows={usageRows}
             columns={[
-              { key: 'teacher', header: 'Guru', render: (row) => row.teacher },
-              { key: 'gen', header: 'Generate', render: (row) => row.generated },
-              { key: 'fin', header: 'Final', render: (row) => row.finalized },
+              { key: 'teacher', header: 'Guru', render: (row) => (
+                <div className="font-semibold text-[#171717]">{row.teacher}</div>
+              ) },
+              { key: 'gen', header: 'Generate', render: (row) => (
+                <span className="font-medium text-[#171717]">{row.generated}</span>
+              ) },
+              { key: 'fin', header: 'Final', render: (row) => (
+                <span className="font-semibold text-emerald-700">{row.finalized}</span>
+              ) },
               { key: 'share', header: 'Share', render: (row) => row.shared },
               { key: 'period', header: 'Periode', render: (row) => row.period },
             ]}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/app/components/ui';
 import {
   AdminAvatar,
@@ -286,6 +286,98 @@ function qualityTone(status: QualityRow['status']): 'ok' | 'warn' | 'bad' | 'inf
   return 'ok';
 }
 
+export function AdminPagination({
+  currentPage,
+  totalPages,
+  totalItems,
+  pageSize,
+  onPageChange,
+}: {
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  pageSize: number;
+  onPageChange: (page: number) => void;
+}) {
+  if (totalPages <= 1) return null;
+  const start = (currentPage - 1) * pageSize + 1;
+  const end = Math.min(currentPage * pageSize, totalItems);
+
+  return (
+    <div className="flex items-center justify-between border-t border-[#ddd4c8]/50 bg-[#faf8f5]/60 px-4 py-3 sm:px-6 rounded-b-2xl">
+      <div className="flex flex-1 justify-between sm:hidden">
+        <Button
+          size="sm"
+          variant="secondary"
+          disabled={currentPage === 1}
+          onClick={() => onPageChange(currentPage - 1)}
+        >
+          Sebelumnya
+        </Button>
+        <Button
+          size="sm"
+          variant="secondary"
+          disabled={currentPage === totalPages}
+          onClick={() => onPageChange(currentPage + 1)}
+        >
+          Berikutnya
+        </Button>
+      </div>
+      <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+        <div>
+          <p className="text-[12px] text-[#6d665d]">
+            Menampilkan <span className="font-semibold text-[#171717]">{start}</span> ke{' '}
+            <span className="font-semibold text-[#171717]">{end}</span> dari{' '}
+            <span className="font-semibold text-[#171717]">{totalItems}</span> hasil
+          </p>
+        </div>
+        <div>
+          <nav className="isolate inline-flex -space-x-px rounded-xl shadow-sm bg-white" aria-label="Pagination">
+            <button
+              onClick={() => onPageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="relative inline-flex items-center rounded-l-xl px-2 py-1.5 text-[#6d665d] ring-1 ring-inset ring-[#ddd4c8]/60 hover:bg-[#faf7f2] focus:z-20 focus:outline-offset-0 disabled:opacity-40 disabled:hover:bg-white"
+            >
+              <span className="sr-only">Sebelumnya</span>
+              <span className="material-symbols-outlined text-[16px]" aria-hidden>
+                chevron_left
+              </span>
+            </button>
+            {Array.from({ length: totalPages }).map((_, idx) => {
+              const p = idx + 1;
+              const isCurrent = p === currentPage;
+              return (
+                <button
+                  key={p}
+                  onClick={() => onPageChange(p)}
+                  aria-current={isCurrent ? 'page' : undefined}
+                  className={`relative inline-flex items-center px-3 py-1.5 text-[11px] font-semibold ${
+                    isCurrent
+                      ? 'z-10 bg-[#171717] text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#171717]'
+                      : 'text-[#171717] ring-1 ring-inset ring-[#ddd4c8]/60 hover:bg-[#faf7f2] focus:outline-offset-0'
+                  }`}
+                >
+                  {p}
+                </button>
+              );
+            })}
+            <button
+              onClick={() => onPageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="relative inline-flex items-center rounded-r-xl px-2 py-1.5 text-[#6d665d] ring-1 ring-inset ring-[#ddd4c8]/60 hover:bg-[#faf7f2] focus:z-20 focus:outline-offset-0 disabled:opacity-40 disabled:hover:bg-white"
+            >
+              <span className="sr-only">Berikutnya</span>
+              <span className="material-symbols-outlined text-[16px]" aria-hidden>
+                chevron_right
+              </span>
+            </button>
+          </nav>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function OpsConsoleView({ section = '' }: { section?: string }) {
   const key = section || '';
   const {
@@ -305,6 +397,12 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
   const [filterQuality, setFilterQuality] = useState<'' | QualityRow['status']>('');
   const [filterBilling, setFilterBilling] = useState<'' | BillingRow['state']>('');
   const [filterContent, setFilterContent] = useState<'' | ContentRow['status']>('');
+
+  const [page, setPage] = useState(1);
+
+  useEffect(() => {
+    setPage(1);
+  }, [search, filterRole, filterStatus, filterPlan, filterJobStatus, filterQuality, filterBilling, filterContent, key]);
 
   const accounts = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -440,32 +538,33 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             ]}
           />
           <div className="grid gap-4 xl:grid-cols-2">
-            <div className="space-y-3 rounded-[var(--radius-lg)] border border-brand-line/80 bg-brand-surface-raised p-4 shadow-[var(--shadow-sm)]">
-              <div className="flex items-center justify-between gap-2">
-                <h2 className="text-body-default font-semibold">Jobs terbaru</h2>
-                <a href="/ops/jobs" className="text-caption font-medium text-brand-accent hover:underline">
+            <div className="space-y-4 rounded-2xl border border-[#ddd4c8]/70 bg-white p-5 shadow-[0_2px_12px_rgba(23,23,23,0.01),0_1px_2px_rgba(23,23,23,0.02)]">
+              <div className="flex items-center justify-between gap-2 border-b border-[#eee6da]/50 pb-3">
+                <h2 className="text-[14px] font-semibold text-[#171717]">Jobs terbaru</h2>
+                <a href="/ops/jobs" className="text-[12px] font-semibold text-brand-accent hover:text-brand-accent-hover transition-colors">
                   Lihat semua
                 </a>
               </div>
               <AdminDataTable
                 rows={JOBS.slice(0, 4)}
                 footerNote="Preview · staging"
+                flat={true}
                 columns={[
-                  { key: 'id', header: 'Job', render: (row) => row.id },
+                  { key: 'id', header: 'Job', render: (row) => <code className="text-[11px] font-mono bg-[#f4eade] px-1.5 py-0.5 rounded text-[#514b44]">{row.id}</code> },
                   { key: 'tenant', header: 'Tenant', render: (row) => row.tenant },
                   {
                     key: 'status',
                     header: 'Status',
                     render: (row) => <AdminPill tone={jobTone(row.status)}>{row.status}</AdminPill>,
                   },
-                  { key: 'progress', header: 'Progress', render: (row) => row.progress },
+                  { key: 'progress', header: 'Progress', render: (row) => <span className="font-semibold tabular-nums text-[#171717]">{row.progress}</span> },
                 ]}
               />
             </div>
-            <div className="space-y-3 rounded-[var(--radius-lg)] border border-brand-line/80 bg-brand-surface-raised p-4 shadow-[var(--shadow-sm)]">
-              <div className="flex items-center justify-between gap-2">
-                <h2 className="text-body-default font-semibold">Tenant yang perlu perhatian</h2>
-                <a href="/ops/schools" className="text-caption font-medium text-brand-accent hover:underline">
+            <div className="space-y-4 rounded-2xl border border-[#ddd4c8]/70 bg-white p-5 shadow-[0_2px_12px_rgba(23,23,23,0.01),0_1px_2px_rgba(23,23,23,0.02)]">
+              <div className="flex items-center justify-between gap-2 border-b border-[#eee6da]/50 pb-3">
+                <h2 className="text-[14px] font-semibold text-[#171717]">Tenant yang perlu perhatian</h2>
+                <a href="/ops/schools" className="text-[12px] font-semibold text-brand-accent hover:text-brand-accent-hover transition-colors">
                   Lihat semua
                 </a>
               </div>
@@ -474,6 +573,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                 footerNote="Preview · staging"
                 emptyLabel="Tidak ada tenant berisiko."
                 emptyHint="Semua sekolah dalam status aman."
+                flat={true}
                 columns={[
                   { key: 'name', header: 'Sekolah', render: (row) => row.name },
                   {
@@ -481,7 +581,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                     header: 'Status',
                     render: (row) => <AdminPill tone={planTone(row.plan)}>{row.plan}</AdminPill>,
                   },
-                  { key: 'usage', header: 'Usage', render: (row) => row.usage },
+                  { key: 'usage', header: 'Usage', render: (row) => <span className="font-semibold tabular-nums text-[#171717]">{row.usage}</span> },
                 ]}
               />
             </div>
@@ -504,7 +604,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
           <AdminToolbar
             search={search}
             onSearchChange={setSearch}
-            searchPlaceholder="Cari nama / email / sekolah"
+            searchPlaceholder="Cari akun, email, role, sekolah"
             filters={
               <>
                 <AdminFilterChip active={filterRole === ''} onClick={() => setFilterRole('')}>
@@ -565,7 +665,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             </Button>
           </AdminBulkBar>
           <AdminDataTable
-            rows={accounts}
+            rows={accounts.slice((page - 1) * 3, page * 3)}
             selectable
             selectedIds={selectedIds}
             onToggleRow={toggleSelectedId}
@@ -620,6 +720,13 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
               </>
             )}
           />
+          <AdminPagination
+            currentPage={page}
+            totalPages={Math.ceil(accounts.length / 3)}
+            totalItems={accounts.length}
+            pageSize={3}
+            onPageChange={setPage}
+          />
         </>
       ) : null}
 
@@ -654,7 +761,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             }
           />
           <AdminDataTable
-            rows={schools}
+            rows={schools.slice((page - 1) * 3, page * 3)}
             emptyLabel="Tidak ada sekolah yang cocok."
             emptyHint="Coba hapus filter plan atau ubah kata kunci."
             columns={[
@@ -678,6 +785,13 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                 </Button>
               </>
             )}
+          />
+          <AdminPagination
+            currentPage={page}
+            totalPages={Math.ceil(schools.length / 3)}
+            totalItems={schools.length}
+            pageSize={3}
+            onPageChange={setPage}
           />
         </>
       ) : null}
@@ -796,7 +910,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             }
           />
           <AdminDataTable
-            rows={jobs}
+            rows={jobs.slice((page - 1) * 3, page * 3)}
             emptyLabel="Tidak ada job yang cocok."
             emptyHint="Ubah filter status atau kata kunci."
             columns={[
@@ -823,6 +937,13 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                 ) : null}
               </>
             )}
+          />
+          <AdminPagination
+            currentPage={page}
+            totalPages={Math.ceil(jobs.length / 3)}
+            totalItems={jobs.length}
+            pageSize={3}
+            onPageChange={setPage}
           />
         </>
       ) : null}
@@ -853,7 +974,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             }
           />
           <AdminDataTable
-            rows={quality}
+            rows={quality.slice((page - 1) * 3, page * 3)}
             emptyLabel="Tidak ada report yang cocok."
             columns={[
               { key: 'id', header: 'Report', render: (row) => row.id },
@@ -876,6 +997,13 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                 </Button>
               </>
             )}
+          />
+          <AdminPagination
+            currentPage={page}
+            totalPages={Math.ceil(quality.length / 3)}
+            totalItems={quality.length}
+            pageSize={3}
+            onPageChange={setPage}
           />
         </>
       ) : null}
@@ -951,7 +1079,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             }
           />
           <AdminDataTable
-            rows={billing}
+            rows={billing.slice((page - 1) * 3, page * 3)}
             emptyLabel="Tidak ada data billing yang cocok."
             columns={[
               { key: 'school', header: 'Sekolah', render: (row) => row.school },
@@ -968,6 +1096,13 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                 Kelola
               </Button>
             )}
+          />
+          <AdminPagination
+            currentPage={page}
+            totalPages={Math.ceil(billing.length / 3)}
+            totalItems={billing.length}
+            pageSize={3}
+            onPageChange={setPage}
           />
         </>
       ) : null}
@@ -1042,7 +1177,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             }
           />
           <AdminDataTable
-            rows={content}
+            rows={content.slice((page - 1) * 3, page * 3)}
             emptyLabel="Tidak ada konten yang cocok."
             columns={[
               { key: 'slug', header: 'Slug', render: (row) => row.slug },
@@ -1072,6 +1207,79 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
               </>
             )}
           />
+          <AdminPagination
+            currentPage={page}
+            totalPages={Math.ceil(content.length / 3)}
+            totalItems={content.length}
+            pageSize={3}
+            onPageChange={setPage}
+          />
+        </>
+      ) : null}
+
+      {key === 'profile' ? (
+        <>
+          <AdminPageHeader
+            title="Profil Saya"
+            description="Informasi akun Superadmin dan kredensial akses."
+            meta={<AdminPill tone="info">Platform Level</AdminPill>}
+          />
+          <div className="grid gap-6 md:grid-cols-2">
+            <div className="space-y-4 rounded-2xl border border-[#ddd4c8]/70 bg-white p-6 shadow-[0_2px_12px_rgba(23,23,23,0.01)]">
+              <h3 className="text-[14px] font-bold text-[#171717] border-b border-[#eee6da]/50 pb-2">Detail Akun</h3>
+              <div className="flex items-center gap-4">
+                <AdminAvatar name="Ops Superadmin" />
+                <div>
+                  <div className="text-[16px] font-bold text-[#171717]">Ops Superadmin</div>
+                  <div className="text-[12px] text-[#6d665d]">ops@lembar.id</div>
+                  <div className="mt-1.5">
+                    <AdminPill tone="info">superadmin</AdminPill>
+                  </div>
+                </div>
+              </div>
+              <div className="border-t border-[#eee6da]/50 pt-4 space-y-2.5 text-[12px]">
+                <div className="flex justify-between">
+                  <span className="text-[#8a8379]">Akses Hak</span>
+                  <span className="font-semibold text-brand-accent">FULL_CONTROL</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[#8a8379]">Masa Berlaku</span>
+                  <span className="font-medium text-[#171717]">Selamanya</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[#8a8379]">Metode Masuk</span>
+                  <span className="font-medium text-[#171717]">Google Workspace SSO</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4 rounded-2xl border border-[#ddd4c8]/70 bg-white p-6 shadow-[0_2px_12px_rgba(23,23,23,0.01)]">
+              <h3 className="text-[14px] font-bold text-[#171717] border-b border-[#eee6da]/50 pb-2">Informasi Sesi</h3>
+              <div className="space-y-2.5 text-[12px]">
+                <div className="flex justify-between">
+                  <span className="text-[#8a8379]">IP Address Saat Ini</span>
+                  <span className="font-mono text-[#171717]">192.168.1.100</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[#8a8379]">Browser / OS</span>
+                  <span className="font-medium text-[#171717]">Chrome · macOS</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[#8a8379]">Akses Terakhir</span>
+                  <span className="font-medium text-[#171717]">Baru saja</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[#8a8379]">Enkripsi Sesi</span>
+                  <span className="font-semibold text-[#8a8379]">TLS_AES_256_GCM_SHA384</span>
+                </div>
+              </div>
+              <div className="border-t border-[#eee6da]/50 pt-4">
+                <Button size="sm" variant="secondary" className="w-full justify-center" onClick={() => setToast('Log out dari perangkat lain (mock).')}>
+                  Log Out dari Perangkat Lain
+                </Button>
+              </div>
+            </div>
+          </div>
         </>
       ) : null}
 
@@ -1087,6 +1295,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
         'billing',
         'flags',
         'content',
+        'profile',
       ].includes(key) ? (
         <AdminPageHeader
           title={`Section ${key}`}

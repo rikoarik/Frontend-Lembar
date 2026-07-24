@@ -22,13 +22,13 @@ describe('marketing routes — baseline', () => {
 
     const hero = screen.getByRole('heading', {
       level: 1,
-      name: /lembar ujian yang siap ditinjau/i,
+      name: /Buat soal ujian otomatis/i,
     });
     expect(hero).toBeInTheDocument();
 
-    expect(screen.getByText('Pilih materi')).toBeInTheDocument();
-    expect(screen.getByText('Tinjau draft')).toBeInTheDocument();
-    expect(screen.getByText('Gunakan hasil')).toBeInTheDocument();
+    expect(screen.getByText(/Pilih materi/i)).toBeInTheDocument();
+    expect(screen.getByText(/Generate draft/i)).toBeInTheDocument();
+    expect(screen.getByText(/Tinjau & finalkan/i)).toBeInTheDocument();
 
     const header = screen.getByRole('banner');
     expect(within(header).getByRole('link', { name: 'Masuk' })).toBeInTheDocument();

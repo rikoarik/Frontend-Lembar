@@ -7,6 +7,8 @@ export type MockAccount = {
   accountId: string;
   displayName: string;
   role: MockRole;
+  /** All roles this account holds. Used for multi-role redirect logic. */
+  roles: MockRole[];
   homePath: string;
   workspaceId: string;
   workspaceName: string;
@@ -21,6 +23,7 @@ export const MOCK_ACCOUNTS: MockAccount[] = [
     accountId: 'acct_demo',
     displayName: 'Demo Guru',
     role: 'teacher',
+    roles: ['teacher', 'school_admin'],
     homePath: '/app',
     workspaceId: 'ws_demo',
     workspaceName: 'Ruang pribadi',
@@ -33,6 +36,7 @@ export const MOCK_ACCOUNTS: MockAccount[] = [
     accountId: 'acct_admin',
     displayName: 'Admin Sekolah',
     role: 'school_admin',
+    roles: ['school_admin'],
     homePath: '/school',
     workspaceId: 'ws_school_demo',
     workspaceName: 'SDN Contoh 01',
@@ -45,6 +49,7 @@ export const MOCK_ACCOUNTS: MockAccount[] = [
     accountId: 'acct_ops',
     displayName: 'Ops Superadmin',
     role: 'superadmin',
+    roles: ['superadmin'],
     homePath: '/ops',
     workspaceId: 'ws_platform',
     workspaceName: 'Platform lembar',

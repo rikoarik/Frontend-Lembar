@@ -42,7 +42,7 @@ export async function POST(request: Request) {
         401,
       );
     }
-    return mockOk(authSuccessFor(account), { setSession: account.session });
+    return mockOk(authSuccessFor(account), { setSession: account.session, setRoles: account.roles });
   }
 
   const upstream = await backendFetch('/v1/auth/login', {
@@ -84,5 +84,16 @@ export async function POST(request: Request) {
     secure: process.env.NEXT_PUBLIC_APP_URL?.startsWith('https://') ?? false,
     maxAge: 60 * 60 * 24 * 7,
   });
+  if (auth.user.roles && auth.user.roles.length > 0) {
+    response.cookies.set({
+      name: 'lembar_roles',
+      value: auth.user.roles.join(','),
+      path: '/',
+      sameSite: 'lax',
+      httpOnly: true,
+      secure: process.env.NEXT_PUBLIC_APP_URL?.startsWith('https://') ?? false,
+      maxAge: 60 * 60 * 24 * 7,
+    });
+  }
   return response;
 }

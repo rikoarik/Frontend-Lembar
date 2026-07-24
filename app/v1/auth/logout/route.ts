@@ -17,5 +17,6 @@ export async function POST() {
   });
   // Explicit clear both cookies
   response.cookies.set({ name: JWT_COOKIE, value: '', path: '/', maxAge: 0 });
+  response.cookies.set({ name: 'lembar_roles', value: '', path: '/', maxAge: 0 });
   return response;
 }

@@ -52,8 +52,8 @@ function MetricCard({
   hint,
 }: {
   label: string;
-  value: string | number;
-  hint?: string;
+  value: React.ReactNode;
+  hint?: React.ReactNode;
 }) {
   return (
     <div className="rounded-2xl border border-[#e6dfd4] bg-white p-4 shadow-[0_1px_0_rgba(23,23,23,0.03)]">
@@ -221,22 +221,27 @@ export default function AppDashboardPage() {
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard
           label="Total asesmen"
-          value={metrics.assessments.total}
-          hint={`${metrics.assessments.draft} draft · ${metrics.assessments.final} final`}
+          value={<span data-testid="metric-assessments-total">{metrics.assessments.total}</span>}
+          hint={
+            <span>
+              {metrics.assessments.draft} draft ·{' '}
+              <span data-testid="metric-assessments-final">{metrics.assessments.final}</span> final
+            </span>
+          }
         />
         <MetricCard
           label="Perlu ditinjau"
-          value={metrics.assessments.inReview}
+          value={<span data-testid="metric-assessments-review">{metrics.assessments.inReview}</span>}
           hint="Siap dicek sebelum final"
         />
         <MetricCard
           label="Sumber siap"
-          value={metrics.sources.ready}
+          value={<span data-testid="metric-sources-ready">{metrics.sources.ready}</span>}
           hint={`${metrics.sources.processing} diproses · ${metrics.sources.failed} gagal`}
         />
         <MetricCard
           label="Job aktif"
-          value={metrics.jobs.active}
+          value={<span data-testid="metric-jobs-active">{metrics.jobs.active}</span>}
           hint={`${metrics.jobs.failed} gagal · ${metrics.jobs.total} total`}
         />
       </section>

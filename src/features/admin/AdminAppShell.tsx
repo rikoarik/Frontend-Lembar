@@ -26,7 +26,12 @@ export function SchoolAdminShell({ children }: { children: ReactNode }) {
         title={title}
         subtitle="Panel admin sekolah · kelola guru, undangan, dan penggunaan"
         nav={SCHOOL_NAV}
-        topRight={<AdminBadge tone="ok" label="school_admin" />}
+        topRight={
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-[#eee6da] bg-[#fbf8f2]/90 px-2.5 py-1 text-[11px] font-semibold text-[#171717] shadow-sm">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#8a8379]" />
+            Admin Sekolah
+          </span>
+        }
         actorName="Admin Sekolah"
         actorMeta="SDN Contoh 01"
       >
@@ -43,11 +48,15 @@ export function OpsAdminShell({ children }: { children: ReactNode }) {
   return (
     <AdminPanelProvider panelId="ops">
       <AdminShell
-        brand="lembar ops"
+        brand="Lembar ops"
         title={title}
-        subtitle="Konsol superadmin · pantau platform, tenant, job, dan konten"
         nav={OPS_NAV}
-        topRight={<AdminBadge tone="info" label="superadmin" />}
+        topRight={
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-[#f0d5d7] bg-[#fdf7f7] px-2.5 py-1 text-[11px] font-semibold text-[#a3202b] shadow-sm">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#a3202b] animate-pulse" />
+            Superadmin
+          </span>
+        }
         actorName="Ops Superadmin"
         actorMeta="platform · least privilege"
       >

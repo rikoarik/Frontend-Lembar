@@ -1,6 +1,7 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import * as workspaceContext from '@/src/features/workspace/workspaceContext';
 import AppDashboardPage from '../(app)/app/page';
 
 const mockGET = vi.fn();
@@ -35,6 +36,16 @@ const EMPTY = {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  vi.spyOn(workspaceContext, 'useWorkspace').mockReturnValue({
+    displayName: 'Demo Guru',
+    activeWorkspace: { id: 'ws_demo', name: 'Ruang pribadi', kind: 'personal', activeRole: 'teacher' },
+    workspaces: [],
+    announcement: '',
+    cacheScope: 'ws_demo',
+    getCacheKey: (k: string) => k,
+    registerCache: () => () => {},
+    switchWorkspace: () => true,
+  });
   // Default: populated success
   mockGET.mockResolvedValue({ data: POPULATED, error: undefined });
 });
@@ -51,7 +62,7 @@ describe('F2-04 teacher dashboard — /app', () => {
     render(<AppDashboardPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Workspace Demo')).toBeInTheDocument();
+      expect(screen.getAllByText('Workspace Demo')[0]).toBeInTheDocument();
     });
 
     expect(screen.getByTestId('metric-assessments-total')).toHaveTextContent('15');
@@ -75,7 +86,7 @@ describe('F2-04 teacher dashboard — /app', () => {
       expect(screen.getByText(/belum ada lembar/i)).toBeInTheDocument();
     });
 
-    expect(screen.getByRole('link', { name: /buat lembar/i })).toBeInTheDocument();
+    expect(screen.getAllByRole('link', { name: /buat lembar/i })[0]).toBeInTheDocument();
   });
 
   it('renders error state on API failure with retry button', async () => {
@@ -105,6 +116,6 @@ describe('F2-04 teacher dashboard — /app', () => {
     await waitFor(() => expect(screen.getByRole('alert')).toBeInTheDocument());
     await user.click(screen.getByRole('button', { name: /coba lagi/i }));
 
-    await waitFor(() => expect(screen.getByText('Workspace Demo')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getAllByText('Workspace Demo')[0]).toBeInTheDocument());
   });
 });

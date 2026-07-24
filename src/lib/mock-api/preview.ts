@@ -35,12 +35,18 @@ export function mockFail(
 
 export function mockOk<T>(
   data: T,
-  init?: { setSession?: boolean | string; status?: number; clearSession?: boolean },
+  init?: { setSession?: boolean | string; setRoles?: string[]; status?: number; clearSession?: boolean },
 ) {
   const response = NextResponse.json({ data }, { status: init?.status ?? 200 });
   if (init?.clearSession) {
     response.cookies.set({
       name: SESSION_COOKIE,
+      value: '',
+      path: '/',
+      maxAge: 0,
+    });
+    response.cookies.set({
+      name: 'lembar_roles',
       value: '',
       path: '/',
       maxAge: 0,
@@ -55,6 +61,16 @@ export function mockOk<T>(
       sameSite: 'lax',
       httpOnly: true,
       // Preview is often plain HTTP on the VPS; secure only when the app URL is https.
+      secure: process.env.NEXT_PUBLIC_APP_URL?.startsWith('https://') ?? false,
+    });
+  }
+  if (init?.setRoles && init.setRoles.length > 0) {
+    response.cookies.set({
+      name: 'lembar_roles',
+      value: init.setRoles.join(','),
+      path: '/',
+      sameSite: 'lax',
+      httpOnly: true,
       secure: process.env.NEXT_PUBLIC_APP_URL?.startsWith('https://') ?? false,
     });
   }
