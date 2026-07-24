@@ -105,7 +105,7 @@
 
 @layer components {
   .material-symbols-outlined {
-    font-family: 'Material Symbols', sans-serif;
+    font-family: 'Material Symbols Outlined', 'Material Symbols', sans-serif;
     font-weight: 400;
     font-style: normal;
     line-height: 1;
@@ -122,6 +122,8 @@
       'wght' 400,
       'GRAD' 0,
       'opsz' 24;
+    /* Fallback font untuk menghindari FOIT */
+    font-display: fallback;
   }
   .paper-card {
     background-color: #ffffff;
