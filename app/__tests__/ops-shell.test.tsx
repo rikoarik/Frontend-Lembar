@@ -42,7 +42,7 @@ describe('ops superadmin management panel', () => {
     expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
     const search = screen.getByPlaceholderText(/cari akun, email, role, sekolah/i);
     await user.type(search, 'ops');
-    expect(screen.getByText(/Ops Superadmin/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Ops Superadmin/i).length).toBeGreaterThan(0);
     expect(screen.queryByText(/Demo Guru/i)).not.toBeInTheDocument();
   });
 

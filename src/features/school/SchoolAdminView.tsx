@@ -3,8 +3,10 @@
 import { useMemo } from 'react';
 import { Button } from '@/app/components/ui';
 import {
-  AdminBadge,
+  AdminAvatar,
   AdminDataTable,
+  AdminFilterChip,
+  AdminPill,
   AdminStatCards,
   AdminToolbar,
 } from '@/src/features/admin/AdminChrome';
@@ -219,10 +221,10 @@ export function SchoolAdminView({ section = '' }: { section?: string }) {
         <>
           <AdminStatCards
             items={[
-              { label: 'Guru aktif', value: '24', hint: '3 undangan menunggu', tone: 'ok' },
-              { label: 'Kuota terpakai', value: '312 / 500', hint: '62% periode ini', tone: 'info' },
-              { label: 'Lembar final', value: '48', hint: '30 hari terakhir', tone: 'ok' },
-              { label: 'Bagikan aktif', value: '17', hint: '2 akan kedaluwarsa', tone: 'warn' },
+              { label: 'Guru aktif', value: '24', hint: '3 undangan menunggu', tone: 'ok', delta: '+2' },
+              { label: 'Kuota terpakai', value: '312 / 500', hint: '62% periode ini', tone: 'info', delta: '62%' },
+              { label: 'Lembar final', value: '48', hint: '30 hari terakhir', tone: 'ok', delta: '+6' },
+              { label: 'Bagikan aktif', value: '17', hint: '2 akan kedaluwarsa', tone: 'warn', delta: '2 exp' },
             ]}
           />
           <AdminToolbar
@@ -244,16 +246,19 @@ export function SchoolAdminView({ section = '' }: { section?: string }) {
             rows={teachers.slice(0, 5)}
             columns={[
               { key: 'name', header: 'Guru', render: (row) => (
-                <div>
-                  <div className="font-semibold">{row.name}</div>
-                  <div className="text-caption text-brand-ink-muted">{row.email}</div>
+                <div className="flex items-center gap-3">
+                  <AdminAvatar name={row.name} />
+                  <div className="min-w-0">
+                    <div className="truncate font-semibold tracking-[-0.01em]">{row.name}</div>
+                    <div className="truncate text-[12px] text-brand-ink-muted">{row.email}</div>
+                  </div>
                 </div>
               ) },
-              { key: 'role', header: 'Peran', render: (row) => row.role },
+              { key: 'role', header: 'Peran', render: (row) => <AdminPill>{row.role}</AdminPill> },
               {
                 key: 'status',
                 header: 'Status',
-                render: (row) => <AdminBadge tone={teacherTone(row.status)} label={row.status} />,
+                render: (row) => <AdminPill tone={teacherTone(row.status)}>{row.status}</AdminPill>,
               },
               { key: 'final', header: 'Final', render: (row) => row.sheetsFinal },
             ]}
@@ -283,16 +288,17 @@ export function SchoolAdminView({ section = '' }: { section?: string }) {
             onSearchChange={setSearch}
             searchPlaceholder="Cari nama, email, atau peran"
             filters={
-              <select
-                value={statusFilter}
-                onChange={(e) => setFilter(e.target.value as typeof statusFilter)}
-                className="min-h-[var(--control-md)] rounded-md border border-brand-line px-3 text-body-sm"
-              >
-                <option value="all">Semua status</option>
-                <option value="Aktif">Aktif</option>
-                <option value="Undangan">Undangan</option>
-                <option value="Ditangguhkan">Ditangguhkan</option>
-              </select>
+              <>
+                {(['all', 'Aktif', 'Undangan', 'Ditangguhkan'] as const).map((value) => (
+                  <AdminFilterChip
+                    key={value}
+                    active={statusFilter === value}
+                    onClick={() => setFilter(value)}
+                  >
+                    {value === 'all' ? 'Semua' : value}
+                  </AdminFilterChip>
+                ))}
+              </>
             }
             actions={
               <Button size="sm" onClick={() => (window.location.href = '/school/guru/undang')}>
@@ -308,17 +314,20 @@ export function SchoolAdminView({ section = '' }: { section?: string }) {
                 key: 'name',
                 header: 'Guru',
                 render: (row) => (
-                  <div>
-                    <div className="font-semibold">{row.name}</div>
-                    <div className="text-caption text-brand-ink-muted">{row.email}</div>
+                  <div className="flex items-center gap-3">
+                    <AdminAvatar name={row.name} />
+                    <div className="min-w-0">
+                      <div className="truncate font-semibold tracking-[-0.01em]">{row.name}</div>
+                      <div className="truncate text-[12px] text-brand-ink-muted">{row.email}</div>
+                    </div>
                   </div>
                 ),
               },
-              { key: 'role', header: 'Peran', render: (row) => row.role },
+              { key: 'role', header: 'Peran', render: (row) => <AdminPill>{row.role}</AdminPill> },
               {
                 key: 'status',
                 header: 'Status',
-                render: (row) => <AdminBadge tone={teacherTone(row.status)} label={row.status} />,
+                render: (row) => <AdminPill tone={teacherTone(row.status)}>{row.status}</AdminPill>,
               },
               { key: 'last', header: 'Aktif terakhir', render: (row) => row.lastActive },
               { key: 'final', header: 'Lembar final', render: (row) => row.sheetsFinal },
@@ -474,7 +483,9 @@ export function SchoolAdminView({ section = '' }: { section?: string }) {
                 key: 'vis',
                 header: 'Visibilitas',
                 render: (row) => (
-                  <AdminBadge tone={row.visibility === 'Internal' ? 'ok' : 'neutral'} label={row.visibility} />
+                  <AdminPill tone={row.visibility === 'Internal' ? 'ok' : 'neutral'}>
+                    {row.visibility}
+                  </AdminPill>
                 ),
               },
               { key: 'updated', header: 'Diperbarui', render: (row) => row.updatedAt },
