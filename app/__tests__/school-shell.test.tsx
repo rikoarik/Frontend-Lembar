@@ -1,40 +1,30 @@
 import { describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { SchoolAdminView } from '@/src/features/school/SchoolAdminView';
 
-describe('F6 school admin mock surfaces — /school/*', () => {
-  it('renders index with section nav when no section', () => {
+describe('school admin management panel', () => {
+  it('renders dashboard management chrome and teacher table', () => {
     render(<SchoolAdminView section="" />);
-
     expect(screen.getByRole('heading', { level: 1, name: /ringkasan/i })).toBeInTheDocument();
-    const nav = screen.getByRole('navigation', { name: /navigasi school admin/i });
-    expect(nav).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /^guru$/i })).toHaveAttribute('href', '/school/guru');
-    expect(screen.getByRole('link', { name: /penggunaan/i })).toHaveAttribute(
-      'href',
-      '/school/penggunaan',
-    );
+    expect(screen.getAllByRole('navigation', { name: /navigasi panel/i }).length).toBeGreaterThan(0);
+    expect(screen.getByText(/Siti Aminah/i)).toBeInTheDocument();
+    expect(screen.getByText(/panel admin sekolah/i)).toBeInTheDocument();
   });
 
-  it('renders guru section', () => {
+  it('filters guru table by search', async () => {
+    const user = userEvent.setup();
     render(<SchoolAdminView section="guru" />);
-    expect(screen.getByRole('heading', { level: 1, name: /^guru$/i })).toBeInTheDocument();
+    const search = screen.getByPlaceholderText(/cari nama, email, atau peran/i);
+    await user.clear(search);
+    await user.type(search, 'Rina');
+    expect(screen.getByText(/Rina Kartika/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Budi Santoso/i)).not.toBeInTheDocument();
   });
 
-  it('renders guru/undang section', () => {
+  it('renders invite form', () => {
     render(<SchoolAdminView section="guru/undang" />);
-    expect(screen.getByRole('heading', { level: 1, name: /undang guru/i })).toBeInTheDocument();
-  });
-
-  it('renders audit section', () => {
-    render(<SchoolAdminView section="audit" />);
-    expect(screen.getByRole('heading', { level: 1, name: /audit/i })).toBeInTheDocument();
-  });
-
-  it('copy distinguishes school-admin from teacher workspace', () => {
-    render(<SchoolAdminView section="" />);
-    const content = document.body.textContent ?? '';
-    expect(content).not.toMatch(/workspace (guru|pribadi) anda/i);
-    expect(content).toMatch(/admin sekolah|data agregat sekolah|agregat sekolah/i);
+    expect(screen.getByRole('heading', { level: 1, name: /undang/i })).toBeInTheDocument();
+    expect(screen.getByLabelText(/email guru/i)).toBeInTheDocument();
   });
 });

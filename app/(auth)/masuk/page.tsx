@@ -27,8 +27,9 @@ export default function LoginPage() {
 
   const submit = useAuthSubmit<{ identifier: string; password: string }>({
     submit: (input, idempotencyKey) => authService.login(input, idempotencyKey),
-    onSuccess: () => {
-      window.location.href = '/app';
+    onSuccess: (value) => {
+      const payload = value as { homePath?: string } | null;
+      window.location.href = payload?.homePath || '/app';
     },
   });
 
@@ -53,9 +54,9 @@ export default function LoginPage() {
     <AuthShell
       side={
         <AuthSidePanel
-          eyebrow="Ruang kerja guru"
+          eyebrow="Ruang kerja lembar"
           title="Dari materi ke lembar siap ditinjau."
-          description="Buat draft, periksa setiap soal, lalu finalkan dengan kendali Anda."
+          description="Guru, admin sekolah, dan ops memakai portal masuk yang sama. Role diarahkan ke panel yang tepat."
         />
       }
     >
@@ -67,6 +68,12 @@ export default function LoginPage() {
             <Link href="/daftar" className="text-burgundy hover:underline">
               Daftar gratis
             </Link>
+            <div className="mt-3 rounded-md border border-brand-line bg-brand-paper px-3 py-2 text-left text-caption text-brand-ink-muted">
+              <div className="font-semibold text-brand-ink">Akun demo mock</div>
+              <div>guru: demo / demo1234 → /app</div>
+              <div>admin: admin / admin1234 → /school</div>
+              <div>ops: ops / ops1234 → /ops</div>
+            </div>
           </>
         }
       >

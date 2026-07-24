@@ -1,5 +1,8 @@
 import {
-  authSuccessPayload,
+  authSuccessFor,
+  findMockAccount,
+} from '@/src/lib/mock-api/accounts';
+import {
   isMockApiMode,
   mockFail,
   mockNotFound,
@@ -18,14 +21,15 @@ export async function POST(request: Request) {
 
   const identifier = String(body.identifier ?? '').trim();
   const password = String(body.password ?? '');
+  const account = findMockAccount(identifier, password);
 
-  if (identifier === 'demo' && password === 'demo1234') {
-    return mockOk(authSuccessPayload(), { setSession: true });
+  if (!account) {
+    return mockFail(
+      'INVALID_CREDENTIALS',
+      'Username/email/phone dan kata sandi tidak cocok.',
+      401,
+    );
   }
 
-  return mockFail(
-    'INVALID_CREDENTIALS',
-    'Username/email/phone dan kata sandi tidak cocok.',
-    401,
-  );
+  return mockOk(authSuccessFor(account), { setSession: account.session });
 }
