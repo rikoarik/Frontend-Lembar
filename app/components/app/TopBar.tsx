@@ -8,6 +8,8 @@ type TopBarProps = {
   onOpenMobileNav: () => void;
   onOpenSwitcher: () => void;
   displayName: string;
+  collapsed?: boolean;
+  onToggleCollapse?: () => void;
 };
 
 function titleFromPath(pathname: string): string {
@@ -30,6 +32,8 @@ export function TopBar({
   onOpenMobileNav,
   onOpenSwitcher,
   displayName,
+  collapsed = false,
+  onToggleCollapse,
 }: TopBarProps) {
   const pathname = usePathname() ?? '/app';
   const title = titleFromPath(pathname);
@@ -50,17 +54,41 @@ export function TopBar({
             menu
           </span>
         </button>
-        <div className="flex min-w-0 items-center gap-2.5">
-          <span
-            aria-hidden="true"
-            className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#a3202b] text-white"
+
+        <div className="flex items-center gap-2.5">
+          <Link
+            href="/app"
+            className="inline-flex items-center gap-2 text-[16px] font-semibold tracking-[-0.02em] text-[#171717]"
           >
-            <span className="material-symbols-outlined text-[16px]">layers</span>
-          </span>
-          <h1 className="truncate text-[15px] font-semibold tracking-[-0.02em] text-[#171717]">
-            {title}
-          </h1>
+            <span
+              aria-hidden="true"
+              className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#a3202b] text-white"
+            >
+              <span className="material-symbols-outlined text-[18px]">layers</span>
+            </span>
+            <span className="font-bold">lembar</span>
+          </Link>
+
+          {onToggleCollapse ? (
+            <button
+              type="button"
+              onClick={onToggleCollapse}
+              aria-label={collapsed ? 'Perluas sidebar' : 'Ciutkan sidebar'}
+              title={collapsed ? 'Perluas sidebar' : 'Ciutkan sidebar'}
+              className="hidden md:inline-flex h-8 w-8 items-center justify-center rounded-lg text-[#6d665d] hover:bg-[#f0ebe3] hover:text-[#171717] transition-colors"
+            >
+              <span aria-hidden="true" className="material-symbols-outlined text-[20px]">
+                {collapsed ? 'side_navigation' : 'menu_open'}
+              </span>
+            </button>
+          ) : null}
         </div>
+
+        <span className="hidden md:block h-4 w-px bg-[#e6dfd4]" />
+
+        <h1 className="truncate text-[15px] font-semibold tracking-[-0.02em] text-[#171717]">
+          {title}
+        </h1>
       </div>
 
       <div className="flex items-center gap-2">

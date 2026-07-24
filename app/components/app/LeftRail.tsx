@@ -134,65 +134,9 @@ export function LeftRail({
         collapsed ? 'w-[68px]' : 'w-[248px]',
       ].join(' ')}
     >
-      <div className="shrink-0 border-b border-[#e6dfd4] p-3">
-        <div className="mb-2 flex items-center justify-between gap-1">
-          <Link
-            href="/app"
-            onClick={onNavigate}
-            title="lembar"
-            className={[
-              'inline-flex items-center gap-2 rounded-lg py-1.5 text-[14px] font-semibold tracking-[-0.02em] text-[#171717] hover:bg-white min-w-0',
-              collapsed ? 'justify-center px-1' : 'px-2 w-full',
-            ].join(' ')}
-          >
-            <span
-              aria-hidden="true"
-              className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#a3202b] text-white"
-            >
-              <span className="material-symbols-outlined text-[18px]">layers</span>
-            </span>
-            {!collapsed && (
-              <>
-                <span className="truncate">lembar</span>
-                {activeWorkspaceKind === 'school' ? (
-                  <span className="ml-auto rounded-full bg-white px-2 py-0.5 text-[11px] font-medium text-[#6d665d] ring-1 ring-[#e6dfd4]">
-                    Sekolah
-                  </span>
-                ) : null}
-              </>
-            )}
-          </Link>
-          {onToggleCollapse && !collapsed ? (
-            <button
-              type="button"
-              onClick={onToggleCollapse}
-              aria-label="Ciutkan sidebar"
-              title="Ciutkan sidebar"
-              className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[#8a8379] hover:bg-white hover:text-[#171717] transition-colors"
-            >
-              <span aria-hidden="true" className="material-symbols-outlined text-[18px]">
-                menu_open
-              </span>
-            </button>
-          ) : null}
-        </div>
-
-        {collapsed && onToggleCollapse ? (
-          <button
-            type="button"
-            onClick={onToggleCollapse}
-            aria-label="Perluas sidebar"
-            title="Perluas sidebar"
-            className="mb-2 flex w-full items-center justify-center rounded-lg py-1.5 text-[#8a8379] hover:bg-white hover:text-[#171717] transition-colors"
-          >
-            <span aria-hidden="true" className="material-symbols-outlined text-[18px]">
-              side_navigation
-            </span>
-          </button>
-        ) : null}
-
-        {workspaceSwitcher ? <div>{workspaceSwitcher}</div> : null}
-      </div>
+      {workspaceSwitcher ? (
+        <div className="shrink-0 border-b border-[#e6dfd4] p-3">{workspaceSwitcher}</div>
+      ) : null}
 
       <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-2 py-3">
         <NavSection collapsed={collapsed}>
