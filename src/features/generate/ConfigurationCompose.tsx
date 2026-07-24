@@ -850,9 +850,11 @@ export default function ConfigurationCompose() {
                     id="compose-teacherFocus"
                     value={values.teacherFocus}
                     onChange={(e) => update('teacherFocus', e.target.value)}
-                    className={`${fieldClass} min-h-24 resize-y`}
+                    className={`${fieldClass} min-h-24 max-h-64 resize-y overflow-y-auto`}
                     placeholder="Contoh: Fokus pada pemahaman konsep pecahan"
                     maxLength={500}
+                    rows={4}
+                    data-lenis-prevent
                     aria-invalid={localErrors.teacherFocus ? true : undefined}
                   />
                   <p className={helpClass}>Maksimal 500 karakter. Tidak dikirim ke analitik.</p>
@@ -871,9 +873,11 @@ export default function ConfigurationCompose() {
                     id="compose-exampleQuestion"
                     value={values.exampleQuestion}
                     onChange={(e) => update('exampleQuestion', e.target.value)}
-                    className={`${fieldClass} min-h-24 resize-y`}
+                    className={`${fieldClass} min-h-28 max-h-80 resize-y overflow-y-auto`}
                     placeholder="Tulis contoh soal untuk dijadikan gaya atau referensi"
                     maxLength={2000}
+                    rows={5}
+                    data-lenis-prevent
                     aria-invalid={localErrors.exampleQuestion ? true : undefined}
                   />
                   <p className={helpClass}>
