@@ -3,8 +3,9 @@
 import { useMemo, useState } from 'react';
 import { Button } from '@/app/components/ui';
 import {
-  AdminBadge,
+  AdminAvatar,
   AdminDataTable,
+  AdminPill,
   AdminStatCards,
   AdminToolbar,
 } from '@/src/features/admin/AdminChrome';
@@ -190,10 +191,10 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
         <>
           <AdminStatCards
             items={[
-              { label: 'Job aktif', value: '3', hint: '1 gagal perlu retry', tone: 'info' },
-              { label: 'Quality open', value: '2', hint: 'butuh triage', tone: 'warn' },
-              { label: 'Tenant pantau', value: '2', hint: 'grace/blocked', tone: 'bad' },
-              { label: 'Flag pilot', value: '2', hint: 'scope terbatas', tone: 'ok' },
+              { label: 'Job aktif', value: '3', hint: '1 gagal perlu retry', tone: 'info', delta: 'live' },
+              { label: 'Quality open', value: '2', hint: 'butuh triage', tone: 'warn', delta: 'P1' },
+              { label: 'Tenant pantau', value: '2', hint: 'grace/blocked', tone: 'bad', delta: '2' },
+              { label: 'Flag pilot', value: '2', hint: 'scope terbatas', tone: 'ok', delta: 'on' },
             ]}
           />
           <div className="grid gap-4 xl:grid-cols-2">
@@ -210,7 +211,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                   {
                     key: 'status',
                     header: 'Status',
-                    render: (row) => <AdminBadge tone={jobTone(row.status)} label={row.status} />,
+                    render: (row) => <AdminPill tone={jobTone(row.status)}>{row.status}</AdminPill>,
                   },
                   { key: 'progress', header: 'Progress', render: (row) => row.progress },
                 ]}
@@ -228,7 +229,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                   {
                     key: 'plan',
                     header: 'Status',
-                    render: (row) => <AdminBadge tone={planTone(row.plan)} label={row.plan} />,
+                    render: (row) => <AdminPill tone={planTone(row.plan)}>{row.plan}</AdminPill>,
                   },
                   { key: 'usage', header: 'Usage', render: (row) => row.usage },
                 ]}
@@ -258,21 +259,23 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                 key: 'name',
                 header: 'Akun',
                 render: (row) => (
-                  <div>
-                    <div className="font-semibold">{row.displayName}</div>
-                    <div className="text-caption text-brand-ink-muted">{row.email}</div>
+                  <div className="flex items-center gap-3">
+                    <AdminAvatar name={row.displayName} />
+                    <div className="min-w-0">
+                      <div className="truncate font-semibold tracking-[-0.01em]">{row.displayName}</div>
+                      <div className="truncate text-[12px] text-brand-ink-muted">{row.email}</div>
+                    </div>
                   </div>
                 ),
               },
-              { key: 'role', header: 'Role', render: (row) => row.role },
+              { key: 'role', header: 'Role', render: (row) => <AdminPill>{row.role}</AdminPill> },
               {
                 key: 'status',
                 header: 'Status',
                 render: (row) => (
-                  <AdminBadge
-                    tone={row.status === 'aktif' ? 'ok' : row.status === 'baru' ? 'info' : 'bad'}
-                    label={row.status}
-                  />
+                  <AdminPill tone={row.status === 'aktif' ? 'ok' : row.status === 'baru' ? 'info' : 'bad'}>
+                    {row.status}
+                  </AdminPill>
                 ),
               },
               { key: 'school', header: 'Sekolah', render: (row) => row.school },
@@ -306,7 +309,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
               {
                 key: 'plan',
                 header: 'Paket',
-                render: (row) => <AdminBadge tone={planTone(row.plan)} label={row.plan} />,
+                render: (row) => <AdminPill tone={planTone(row.plan)}>{row.plan}</AdminPill>,
               },
               { key: 'teachers', header: 'Guru', render: (row) => row.teachers },
               { key: 'usage', header: 'Usage', render: (row) => row.usage },
@@ -347,7 +350,9 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
               key: 'status',
               header: 'Status',
               render: (row) => (
-                <AdminBadge tone={row.status === 'published' || row.status === 'aktif' ? 'ok' : 'neutral'} label={row.status} />
+                <AdminPill tone={row.status === 'published' || row.status === 'aktif' ? 'ok' : 'neutral'}>
+                  {row.status}
+                </AdminPill>
               ),
             },
             { key: 'version', header: 'Versi', render: (row) => row.version },
@@ -372,7 +377,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
               {
                 key: 'status',
                 header: 'Status',
-                render: (row) => <AdminBadge tone={jobTone(row.status)} label={row.status} />,
+                render: (row) => <AdminPill tone={jobTone(row.status)}>{row.status}</AdminPill>,
               },
               { key: 'progress', header: 'Progress', render: (row) => row.progress },
               { key: 'updated', header: 'Update', render: (row) => row.updatedAt },
@@ -405,10 +410,9 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                 key: 'status',
                 header: 'Status',
                 render: (row) => (
-                  <AdminBadge
-                    tone={row.status === 'open' ? 'warn' : row.status === 'triaged' ? 'info' : 'ok'}
-                    label={row.status}
-                  />
+                  <AdminPill tone={row.status === 'open' ? 'warn' : row.status === 'triaged' ? 'info' : 'ok'}>
+                    {row.status}
+                  </AdminPill>
                 ),
               },
               { key: 'reporter', header: 'Reporter', render: (row) => row.reporter },
@@ -450,7 +454,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                 key: 'state',
                 header: 'State',
                 render: (row) => (
-                  <AdminBadge
+                  <AdminPill
                     tone={
                       row.state === 'active'
                         ? 'ok'
@@ -460,8 +464,9 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                             ? 'bad'
                             : 'neutral'
                     }
-                    label={row.state}
-                  />
+                  >
+                    {row.state}
+                  </AdminPill>
                 ),
               },
               { key: 'seats', header: 'Seats', render: (row) => row.seats },
@@ -486,7 +491,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             {
               key: 'enabled',
               header: 'State',
-              render: (row) => <AdminBadge tone={row.enabled ? 'ok' : 'neutral'} label={row.enabled ? 'on' : 'off'} />,
+              render: (row) => <AdminPill tone={row.enabled ? 'ok' : 'neutral'}>{row.enabled ? 'on' : 'off'}</AdminPill>,
             },
           ]}
           rowActions={(row) => (
@@ -523,7 +528,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                 key: 'status',
                 header: 'Status',
                 render: (row) => (
-                  <AdminBadge tone={row.status === 'published' ? 'ok' : 'neutral'} label={row.status} />
+                  <AdminPill tone={row.status === 'published' ? 'ok' : 'neutral'}>{row.status}</AdminPill>
                 ),
               },
               { key: 'updated', header: 'Update', render: (row) => row.updatedAt },
