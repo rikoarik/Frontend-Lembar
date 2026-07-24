@@ -32,6 +32,7 @@ export type AuthSuccessPayload = {
   workspaceId: string;
   workspaceKind: WorkspaceKind;
   activeRole: ActiveRole;
+  homePath?: string;
 };
 
 export type InvitationStatus = 'pending' | 'expired' | 'revoked' | 'invalid';

@@ -8,7 +8,7 @@ type AuthFormShellProps = {
   title: string;
   description?: string;
   children: ReactNode;
-  foot: ReactNode;
+  foot?: ReactNode;
 };
 
 export default function AuthFormShell({
@@ -44,7 +44,7 @@ export default function AuthFormShell({
         {children}
       </section>
       <div className="mt-auto flex flex-col gap-2 text-center font-body-sm text-body-sm text-secondary">
-        {foot}
+        {foot ?? null}
       </div>
     </main>
   );

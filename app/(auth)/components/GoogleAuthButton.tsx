@@ -28,18 +28,50 @@ function GoogleMark() {
 
 export default function GoogleAuthButton({ intent }: GoogleAuthButtonProps) {
   const [message, setMessage] = useState<string>();
+  const [busy, setBusy] = useState(false);
   const label = intent === 'masuk' ? 'Masuk dengan Google' : 'Daftar dengan Google';
+
+  const onClick = async () => {
+    setBusy(true);
+    setMessage(undefined);
+    try {
+      const response = await fetch('/v1/auth/google/url', {
+        method: 'GET',
+        credentials: 'include',
+      });
+      const payload = await response.json().catch(() => null);
+      if (!response.ok || !payload?.url) {
+        setMessage(payload?.error?.message || 'Google OAuth belum siap. Coba lagi nanti.');
+        setBusy(false);
+        return;
+      }
+      // Persist state for optional CSRF check later.
+      if (payload.state) {
+        try {
+          sessionStorage.setItem('lembar_google_oauth_state', payload.state);
+        } catch {
+          // ignore storage failures
+        }
+      }
+      window.location.href = payload.url as string;
+    } catch {
+      setMessage('Tidak dapat terhubung ke server autentikasi.');
+      setBusy(false);
+    }
+  };
 
   return (
     <div className="flex flex-col gap-2">
       <button
         type="button"
-        onClick={() => setMessage('Google akan aktif setelah backend autentikasi tersedia.')}
+        onClick={() => void onClick()}
+        disabled={busy}
+        aria-busy={busy}
         aria-describedby={message ? `google-${intent}-status` : undefined}
-        className="flex h-11 w-full items-center justify-center gap-3 rounded-md border border-border-subtle bg-paper px-4 font-label-semibold text-label-semibold text-ink transition-colors hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-burgundy/30 active:bg-surface-container"
+        className="flex h-11 w-full items-center justify-center gap-3 rounded-md border border-border-subtle bg-paper px-4 font-label-semibold text-label-semibold text-ink transition-colors hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-burgundy/30 active:bg-surface-container disabled:opacity-60"
       >
         <GoogleMark />
-        {label}
+        {busy ? 'Menghubungkan…' : label}
       </button>
       {message ? (
         <p
