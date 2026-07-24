@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { Button } from '@/app/components/ui';
 import {
   AdminAvatar,
@@ -136,18 +136,25 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
   const key = section || '';
   const { search, setSearch, setToast } = useAdminSectionState(key || 'ringkasan');
   const [flags, setFlags] = useState(FLAGS);
-
+  const [filterRole, setFilterRole] = useState<'' | 'teacher' | 'school_admin' | 'superadmin'>('');
+  const [filterStatus, setFilterStatus] = useState<'' | 'aktif' | 'baru' | 'ditangguhkan'>('');
+  const [filterSekolah, setFilterSekolah] = useState('');
   const accounts = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return ACCOUNTS;
-    return ACCOUNTS.filter(
-      (row) =>
+    return ACCOUNTS.filter((row) => {
+      const matchSearch =
+        !q ||
         row.displayName.toLowerCase().includes(q) ||
         row.email.toLowerCase().includes(q) ||
         row.role.includes(q) ||
-        row.school.toLowerCase().includes(q),
-    );
-  }, [search]);
+        row.school.toLowerCase().includes(q);
+      const matchRole = filterRole === '' || row.role === filterRole;
+      const matchStatus = filterStatus === '' || row.status === filterStatus;
+      const matchSekolah =
+        filterSekolah === '' || row.school.toLowerCase().includes(filterSekolah.toLowerCase());
+      return matchSearch && matchRole && matchStatus && matchSekolah;
+    });
+  }, [search, filterRole, filterStatus, filterSekolah]);
 
   const schools = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -252,6 +259,56 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             searchPlaceholder="Cari akun, email, role, sekolah"
             actions={<Button size="sm" variant="secondary" onClick={() => setToast('Export akun mock disiapkan.')}>Export CSV</Button>}
           />
+          {/* Filter bar: Role, Status, Sekolah — auto-apply via onChange */}
+          <div className="flex flex-wrap gap-3 rounded-md border border-brand-line bg-brand-surface-raised px-3 py-2">
+            <label className="flex flex-col gap-1">
+              <span className="text-caption text-brand-ink-muted">Role</span>
+              <select
+                value={filterRole}
+                onChange={(e) => setFilterRole(e.target.value as typeof filterRole)}
+                className="rounded border border-brand-line bg-brand-paper px-2 py-1 text-body-sm text-brand-ink focus:outline-none focus:ring-2 focus:ring-brand-accent/30"
+              >
+                <option value="">Semua role</option>
+                <option value="teacher">teacher</option>
+                <option value="school_admin">school_admin</option>
+                <option value="superadmin">superadmin</option>
+              </select>
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="text-caption text-brand-ink-muted">Status</span>
+              <select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value as typeof filterStatus)}
+                className="rounded border border-brand-line bg-brand-paper px-2 py-1 text-body-sm text-brand-ink focus:outline-none focus:ring-2 focus:ring-brand-accent/30"
+              >
+                <option value="">Semua status</option>
+                <option value="aktif">aktif</option>
+                <option value="baru">baru</option>
+                <option value="ditangguhkan">ditangguhkan</option>
+              </select>
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="text-caption text-brand-ink-muted">Sekolah</span>
+              <input
+                type="text"
+                value={filterSekolah}
+                onChange={(e) => setFilterSekolah(e.target.value)}
+                placeholder="Cari sekolah…"
+                className="rounded border border-brand-line bg-brand-paper px-2 py-1 text-body-sm text-brand-ink placeholder:text-brand-ink-muted focus:outline-none focus:ring-2 focus:ring-brand-accent/30"
+              />
+            </label>
+            {(filterRole !== '' || filterStatus !== '' || filterSekolah !== '') && (
+              <div className="flex items-end">
+                <button
+                  type="button"
+                  onClick={() => { setFilterRole(''); setFilterStatus(''); setFilterSekolah(''); }}
+                  className="rounded px-2 py-1 text-caption text-brand-ink-muted hover:bg-brand-paper hover:text-brand-ink"
+                >
+                  Reset filter
+                </button>
+              </div>
+            )}
+          </div>
           <AdminDataTable
             rows={accounts}
             columns={[

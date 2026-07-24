@@ -94,11 +94,7 @@ export function HistoryView() {
               <option value="generating">Diproses</option>
             </select>
           </label>
-          <div className="flex items-end">
-            <Button variant="secondary" onClick={() => void load()}>
-              Terapkan
-            </Button>
-          </div>
+
         </div>
       </Panel>
 

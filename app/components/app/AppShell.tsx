@@ -23,6 +23,10 @@ export function AppShell({ children }: AppShellProps) {
     />
   );
 
+  const accountMenu = (
+    <AccountMenu displayName={displayName} planLabel="Paket Guru" />
+  );
+
   return (
     <div className="min-h-screen bg-brand-paper text-brand-ink">
       <a
@@ -45,12 +49,8 @@ export function AppShell({ children }: AppShellProps) {
           <LeftRail
             activeWorkspaceKind={activeWorkspace.kind}
             activeRole={activeWorkspace.activeRole}
-            workspaceSwitcher={
-              <>
-                {switcher}
-                <AccountMenu displayName={displayName} planLabel="Paket Guru" />
-              </>
-            }
+            workspaceSwitcher={switcher}
+            accountMenu={accountMenu}
           />
         </div>
 
@@ -72,12 +72,8 @@ export function AppShell({ children }: AppShellProps) {
                 activeWorkspaceKind={activeWorkspace.kind}
                 activeRole={activeWorkspace.activeRole}
                 onNavigate={() => setMobileNavOpen(false)}
-                workspaceSwitcher={
-                  <>
-                    {switcher}
-                    <AccountMenu displayName={displayName} planLabel="Paket Guru" />
-                  </>
-                }
+                workspaceSwitcher={switcher}
+                accountMenu={accountMenu}
               />
             </div>
           </div>

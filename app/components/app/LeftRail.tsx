@@ -7,7 +7,10 @@ import type { ActiveRole, WorkspaceKind } from '@/src/types/auth';
 type LeftRailProps = {
   activeWorkspaceKind: WorkspaceKind;
   activeRole: ActiveRole;
+  /** Workspace switcher — ditempatkan PERMANEN di atas nav list */
   workspaceSwitcher?: React.ReactNode;
+  /** Account menu — ditempatkan PERMANEN di bawah nav list */
+  accountMenu?: React.ReactNode;
   onNavigate?: () => void;
 };
 
@@ -18,7 +21,7 @@ const TEACHER_NAV = [
   { href: '/app/template', label: 'Template', icon: 'description' },
   { href: '/app/generate', label: 'Generate', icon: 'auto_awesome' },
   { href: '/app/bantuan', label: 'Bantuan', icon: 'help' },
-  { href: '/app/gates', label: 'Gates', icon: 'verified' },
+  { href: '/app/gates', label: 'Status Integrasi', icon: 'verified' },
 ];
 
 const SCHOOL_ONLY_NAV = [
@@ -38,6 +41,7 @@ export function LeftRail({
   activeWorkspaceKind,
   activeRole,
   workspaceSwitcher,
+  accountMenu,
   onNavigate,
 }: LeftRailProps) {
   const pathname = usePathname() ?? '/app';
@@ -55,6 +59,7 @@ export function LeftRail({
       aria-label="Navigasi utama"
       className="flex h-full w-64 shrink-0 flex-col gap-2 border-r border-brand-line bg-brand-surface-raised px-3 py-4"
     >
+      {/* Logo lembar */}
       <Link
         href="/app"
         className="mb-2 inline-flex items-center gap-2 rounded-md px-2 py-2 text-body-default font-semibold text-brand-ink hover:bg-brand-paper"
@@ -70,6 +75,12 @@ export function LeftRail({
         ) : null}
       </Link>
 
+      {/* Workspace switcher — PERMANEN di atas nav, popover overlay */}
+      {workspaceSwitcher ? (
+        <div className="mb-2">{workspaceSwitcher}</div>
+      ) : null}
+
+      {/* Nav items */}
       <ul className="flex flex-col gap-1" role="list">
         {items.map((item) => {
           const isActive =
@@ -78,8 +89,8 @@ export function LeftRail({
             <li key={item.href}>
               <Link
                 href={item.href}
-                aria-current={isActive ? 'page' : undefined}
                 onClick={onNavigate}
+                aria-current={isActive ? 'page' : undefined}
                 className={[
                   'flex items-center gap-3 rounded-md px-3 py-2 text-body-default',
                   isActive
@@ -104,7 +115,10 @@ export function LeftRail({
         })}
       </ul>
 
-      <div className="mt-auto flex flex-col gap-2 pt-4">{workspaceSwitcher}</div>
+      {/* Account menu — PERMANEN di bawah, popover overlay ke atas */}
+      {accountMenu ? (
+        <div className="mt-auto pt-2">{accountMenu}</div>
+      ) : null}
     </nav>
   );
 }
