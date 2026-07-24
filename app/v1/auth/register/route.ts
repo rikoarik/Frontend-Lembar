@@ -43,36 +43,62 @@ export async function POST(request: Request) {
     return mockOk(authSuccessPayload(), { setSession: true });
   }
 
-  // Live mode → backend JWT register
   const email = String(body.email ?? '').trim();
   const password = String(body.password ?? '');
-  const name = String(body.name ?? body.username ?? '').trim();
+  const username = String(body.username ?? body.name ?? '').trim();
+  const phone = String(body.phone ?? '').trim();
+  const name = username;
 
-  if (!email || !password || !name) {
-    return mockFail('VALIDATION_FAILED', 'Lengkapi email, nama, dan kata sandi.', 400, {
+  if (!email || !password || !username || !phone) {
+    return mockFail('VALIDATION_FAILED', 'Lengkapi username, email, telepon, dan kata sandi.', 400, {
       email: email ? [] : ['Wajib diisi.'],
-      username: name ? [] : ['Wajib diisi.'],
+      username: username ? [] : ['Wajib diisi.'],
+      phone: phone ? [] : ['Wajib diisi.'],
       password: password ? [] : ['Wajib diisi.'],
     });
   }
 
   const upstream = await backendFetch('/v1/auth/register', {
     method: 'POST',
-    body: JSON.stringify({ email, password, name }),
+    body: JSON.stringify({
+      email,
+      password,
+      username,
+      name,
+      phone,
+    }),
   });
 
   if (!upstream.ok) {
     const payload = await upstream.json().catch(() => null);
     const message = payload?.error?.message || 'Gagal membuat akun.';
-    const code =
-      upstream.status === 409 || /sudah terdaftar/i.test(message)
-        ? 'DUPLICATE_RESOURCE'
-        : upstream.status === 400
-          ? 'VALIDATION_FAILED'
-          : 'UNKNOWN';
-    return mockFail(code, message, upstream.status || 500, {
-      email: code === 'DUPLICATE_RESOURCE' ? ['Email sudah terdaftar.'] : [],
-    });
+    const lower = String(message).toLowerCase();
+    const fieldErrors: Record<string, string[]> = {};
+    let code = 'UNKNOWN';
+    let status = upstream.status || 500;
+
+    if (lower.includes('email')) {
+      code = 'DUPLICATE_RESOURCE';
+      fieldErrors.email = [message];
+      status = 409;
+    } else if (lower.includes('username')) {
+      code = 'DUPLICATE_RESOURCE';
+      fieldErrors.username = [message];
+      status = 409;
+    } else if (lower.includes('telepon') || lower.includes('phone')) {
+      code = 'DUPLICATE_RESOURCE';
+      fieldErrors.phone = [message];
+      status = 409;
+    } else if (lower.includes('kata sandi') || lower.includes('password')) {
+      code = 'VALIDATION_FAILED';
+      fieldErrors.password = [message];
+      status = 400;
+    } else if (upstream.status === 400) {
+      code = 'VALIDATION_FAILED';
+      status = 400;
+    }
+
+    return mockFail(code, message, status, fieldErrors);
   }
 
   const auth = (await upstream.json()) as BackendAuthResponse;

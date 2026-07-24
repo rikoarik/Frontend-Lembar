@@ -27,13 +27,12 @@ export async function POST(request: Request) {
   const password = String(body.password ?? '');
 
   if (!identifier || !password) {
-    return mockFail('VALIDATION_FAILED', 'Email dan kata sandi wajib diisi.', 400, {
+    return mockFail('VALIDATION_FAILED', 'Email/username/telepon dan kata sandi wajib diisi.', 400, {
       identifier: identifier ? [] : ['Wajib diisi.'],
       password: password ? [] : ['Wajib diisi.'],
     });
   }
 
-  // Mock mode keeps local demo accounts.
   if (isMockApiMode()) {
     const account = findMockAccount(identifier, password);
     if (!account) {
@@ -46,12 +45,13 @@ export async function POST(request: Request) {
     return mockOk(authSuccessFor(account), { setSession: account.session });
   }
 
-  // Live mode: proxy to backend JWT auth.
-  // Backend currently accepts email only.
-  const email = identifier.includes('@') ? identifier : identifier;
   const upstream = await backendFetch('/v1/auth/login', {
     method: 'POST',
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({
+      identifier,
+      email: identifier.includes('@') ? identifier : undefined,
+      password,
+    }),
   });
 
   if (!upstream.ok) {
@@ -59,7 +59,7 @@ export async function POST(request: Request) {
     const message =
       payload?.error?.message ||
       (upstream.status === 401
-        ? 'Email dan kata sandi tidak cocok.'
+        ? 'Email/username/telepon dan kata sandi tidak cocok.'
         : 'Gagal masuk. Coba lagi.');
     return mockFail(
       upstream.status === 401 ? 'INVALID_CREDENTIALS' : 'UNKNOWN',
@@ -75,7 +75,6 @@ export async function POST(request: Request) {
 
   const response = NextResponse.json({ data: authSuccessFromBackend(auth) }, { status: 200 });
   response.cookies.set(jwtCookieOptions(auth.token));
-  // Keep legacy cookie name for any existing mock-era readers.
   response.cookies.set({
     name: 'lembar_session',
     value: auth.token,
