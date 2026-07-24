@@ -1,7 +1,23 @@
 import type { ReactNode } from 'react';
+import { Inter, Manrope } from 'next/font/google';
 import './globals.css';
 import LenisProvider from './components/marketing/LenisProvider';
 import { QueryProvider } from './components/QueryProvider';
+
+// Optimized font loading with next/font/google
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
+  display: 'swap',
+  variable: '--font-inter',
+});
+
+const manrope = Manrope({
+  subsets: ['latin'],
+  weight: ['500', '600', '700'],
+  display: 'swap',
+  variable: '--font-manrope',
+});
 
 export const metadata = {
   title: 'lembar',
@@ -11,15 +27,13 @@ export const metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="id">
+    <html lang="id" className={`${inter.variable} ${manrope.variable}`}>
       <head>
-        {/* Preconnect untuk Google Fonts */}
+        {/* Material Symbols from Google Fonts CDN */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        
-        {/* Google Fonts - Inter, Manrope, Material Symbols (async load) */}
         <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@500;600;700&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap"
           rel="stylesheet"
         />
       </head>
