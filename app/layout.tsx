@@ -32,7 +32,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         {/* Preconnect for Google Fonts */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        
+
         {/* Preload Material Symbols font for instant icon render */}
         <link
           rel="preload"
@@ -41,7 +41,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           type="font/woff2"
           crossOrigin="anonymous"
         />
-        
+
         {/* Material Symbols stylesheet */}
         <link
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap"
