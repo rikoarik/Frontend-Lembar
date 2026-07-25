@@ -721,7 +721,17 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
   const [billingEditLoading, setBillingEditLoading] = useState(false);
   const [billingPage, setBillingPage] = useState(1);
 
-  // ── Create Flag state ─────────────────────────────────────────────────
+  // ── Create Prompt state ──────────────────────────────────────────────
+  const [createPromptOpen, setCreatePromptOpen] = useState(false);
+  const [createPromptName, setCreatePromptName] = useState('');
+  const [createPromptSlug, setCreatePromptSlug] = useState('');
+  const [createPromptDesc, setCreatePromptDesc] = useState('');
+  const [createPromptText, setCreatePromptText] = useState('');
+  const [createPromptLoading, setCreatePromptLoading] = useState(false);
+
+  // ── Learning Signals state ────────────────────────────────────────────
+  const [signalsData, setSignalsData] = useState<{ prompt_template_id: string; pattern: string; frequency: number; avg_rating: number; suggested_action: string }[]>([]);
+  const [signalsLoading, setSignalsLoading] = useState(false);
   const [createFlagOpen, setCreateFlagOpen] = useState(false);
   const [createFlagKey, setCreateFlagKey] = useState('');
   const [createFlagDesc, setCreateFlagDesc] = useState('');
@@ -934,6 +944,19 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
   useEffect(() => { if (key === 'prompts') loadPrompts(); }, [key]);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { if (key === 'content') loadContent(); }, [key]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (key === 'learning-signals') {
+      setSignalsLoading(true);
+      adminService.learningSignals().then((res) => {
+        if (res.ok) {
+          const val = res.value as any;
+          setSignalsData(Array.isArray(val?.data) ? val.data : Array.isArray(val) ? val : []);
+        }
+        setSignalsLoading(false);
+      });
+    }
+  }, [key]);
 
   // audit — reactive to page
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1773,8 +1796,100 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                 {promptsData.filter((p) => p.status === 'active').length} aktif
               </AdminPill>
             }
+            actions={
+              <Button size="sm" onClick={() => setCreatePromptOpen(true)}>
+                Buat prompt
+              </Button>
+            }
           />
           {promptsLoading ? <div className="mb-2"><AdminPill tone="info">Memuat...</AdminPill></div> : null}
+
+          {/* Create Prompt inline form */}
+          {createPromptOpen ? (
+            <div className="rounded-2xl border border-[#ddd4c8]/70 bg-white p-4 space-y-3 shadow-sm">
+              <h4 className="text-[13px] font-bold text-[#171717]">Prompt baru</h4>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-semibold text-[#6d665d] mb-1">Nama *</label>
+                  <input
+                    type="text"
+                    value={createPromptName}
+                    onChange={(e) => {
+                      setCreatePromptName(e.target.value);
+                      if (!createPromptSlug) {
+                        setCreatePromptSlug(e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''));
+                      }
+                    }}
+                    placeholder="cth: Question Generator v3"
+                    className="w-full h-9 rounded-xl border border-[#ddd4c8] bg-white px-3 text-[12px] focus:outline-none focus:ring-2 focus:ring-[#171717]/20"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-[#6d665d] mb-1">Slug *</label>
+                  <input
+                    type="text"
+                    value={createPromptSlug}
+                    onChange={(e) => setCreatePromptSlug(e.target.value)}
+                    placeholder="question-generator-v3"
+                    className="w-full h-9 rounded-xl border border-[#ddd4c8] bg-white px-3 text-[12px] font-mono focus:outline-none focus:ring-2 focus:ring-[#171717]/20"
+                  />
+                </div>
+                <div className="col-span-2">
+                  <label className="block text-[11px] font-semibold text-[#6d665d] mb-1">Deskripsi singkat</label>
+                  <input
+                    type="text"
+                    value={createPromptDesc}
+                    onChange={(e) => setCreatePromptDesc(e.target.value)}
+                    placeholder="Untuk apa prompt ini dipakai?"
+                    className="w-full h-9 rounded-xl border border-[#ddd4c8] bg-white px-3 text-[12px] focus:outline-none focus:ring-2 focus:ring-[#171717]/20"
+                  />
+                </div>
+                <div className="col-span-2">
+                  <label className="block text-[11px] font-semibold text-[#6d665d] mb-1">Teks prompt awal</label>
+                  <textarea
+                    rows={4}
+                    value={createPromptText}
+                    onChange={(e) => setCreatePromptText(e.target.value)}
+                    placeholder="Tulis instruksi prompt di sini. Bisa diubah lagi setelah dibuat."
+                    className="w-full rounded-xl border border-[#ddd4c8] bg-white px-3 py-2 text-[12px] font-mono focus:outline-none focus:ring-2 focus:ring-[#171717]/20 resize-none"
+                  />
+                </div>
+              </div>
+              <div className="flex items-center gap-2 pt-1">
+                <Button
+                  size="sm"
+                  disabled={createPromptLoading || !createPromptName.trim() || !createPromptSlug.trim()}
+                  onClick={() => {
+                    setCreatePromptLoading(true);
+                    adminService.createPrompt({
+                      name: createPromptName.trim(),
+                      slug: createPromptSlug.trim(),
+                      description: createPromptDesc.trim() || undefined,
+                      promptText: createPromptText.trim() || undefined,
+                    }).then((res) => {
+                      if (res.ok) {
+                        setToast(`Prompt "${createPromptName}" berhasil dibuat.`);
+                        setCreatePromptOpen(false);
+                        setCreatePromptName('');
+                        setCreatePromptSlug('');
+                        setCreatePromptDesc('');
+                        setCreatePromptText('');
+                        loadPrompts();
+                      } else {
+                        setToast(`Gagal: ${res.error.safeMessage}`);
+                      }
+                      setCreatePromptLoading(false);
+                    });
+                  }}
+                >
+                  {createPromptLoading ? 'Menyimpan...' : 'Buat prompt'}
+                </Button>
+                <Button size="sm" variant="secondary" onClick={() => { setCreatePromptOpen(false); setCreatePromptName(''); setCreatePromptSlug(''); setCreatePromptDesc(''); setCreatePromptText(''); }}>
+                  Batal
+                </Button>
+              </div>
+            </div>
+          ) : null}
 
           {/* Search prompts */}
           <AdminToolbar
@@ -2893,12 +3008,98 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
         </>
       ) : null}
 
+      {key === 'learning-signals' ? (
+        <>
+          <AdminPageHeader
+            title="Learning Signals"
+            description="Pola AI yang terdeteksi dari feedback pengguna — prompt mana yang underperform dan perlu diperbaiki."
+            meta={
+              signalsData.length > 0 ? (
+                <AdminPill tone="warn">{signalsData.length} sinyal aktif</AdminPill>
+              ) : null
+            }
+            actions={
+              <Button size="sm" variant="secondary" onClick={() => {
+                setSignalsLoading(true);
+                adminService.learningSignals().then((res) => {
+                  if (res.ok) {
+                    const val = res.value as any;
+                    setSignalsData(Array.isArray(val?.data) ? val.data : Array.isArray(val) ? val : []);
+                  }
+                  setSignalsLoading(false);
+                });
+              }}>
+                Refresh
+              </Button>
+            }
+          />
+          {signalsLoading ? <div className="mb-2"><AdminPill tone="info">Memuat sinyal...</AdminPill></div> : null}
+
+          {signalsData.length === 0 && !signalsLoading ? (
+            <div className="rounded-2xl border border-[#ddd4c8]/60 bg-[#faf8f5] p-8 text-center space-y-2">
+              <div className="text-[14px] font-semibold text-[#171717]">Belum ada learning signal</div>
+              <div className="text-[13px] text-[#6d665d]">Sinyal muncul ketika pengguna memberikan feedback pada hasil generate. Data dari tabel ai_learning_signals.</div>
+            </div>
+          ) : (
+            <AdminDataTable
+              rows={signalsData.map((s, i) => ({ ...s, id: `signal-${i}` }))}
+              emptyLabel="Tidak ada sinyal."
+              columns={[
+                {
+                  key: 'prompt',
+                  header: 'Prompt Template',
+                  render: (row) => (
+                    <span className="font-mono text-[11px] text-[#514b44]">{(row as any).prompt_template_id ?? '—'}</span>
+                  ),
+                },
+                {
+                  key: 'pattern',
+                  header: 'Pola',
+                  render: (row) => <span className="text-[12px]">{(row as any).pattern ?? '—'}</span>,
+                },
+                {
+                  key: 'frequency',
+                  header: 'Frekuensi',
+                  render: (row) => <span className="tabular-nums font-semibold">{String((row as any).frequency ?? 0)}</span>,
+                },
+                {
+                  key: 'rating',
+                  header: 'Avg Rating',
+                  render: (row) => {
+                    const r = Number((row as any).avg_rating ?? 0);
+                    const tone = r < 2.5 ? 'bad' : r < 3.5 ? 'warn' : 'ok';
+                    return <AdminPill tone={tone}>{r.toFixed(1)} ★</AdminPill>;
+                  },
+                },
+                {
+                  key: 'action',
+                  header: 'Aksi yang Disarankan',
+                  render: (row) => (
+                    <span className="text-[12px] text-[#c9703a] font-medium">{(row as any).suggested_action ?? '—'}</span>
+                  ),
+                },
+              ]}
+              rowActions={(row) => (
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => window.open(`/ops/prompts`, '_self')}
+                >
+                  Lihat prompt
+                </Button>
+              )}
+            />
+          )}
+        </>
+      ) : null}
+
       {key !== '' &&
       ![
         'accounts',
         'schools',
         'catalog',
         'prompts',
+        'learning-signals',
         'jobs',
         'quality',
         'audit',

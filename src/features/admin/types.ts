@@ -31,6 +31,7 @@ export const OPS_NAV: AdminNavItem[] = [
   { href: '/ops/schools', label: 'Sekolah', icon: 'apartment' },
   { href: '/ops/catalog', label: 'Katalog', icon: 'menu_book' },
   { href: '/ops/prompts', label: 'Prompt', icon: 'terminal' },
+  { href: '/ops/learning-signals', label: 'Learning Signals', icon: 'psychology' },
   { href: '/ops/jobs', label: 'Jobs', icon: 'work' },
   { href: '/ops/quality', label: 'Quality', icon: 'verified' },
   { href: '/ops/audit', label: 'Audit', icon: 'policy' },
