@@ -199,7 +199,7 @@ function SectionGuru({
     const res = await schoolService.memberSuspend(member.id);
     if (res.ok) {
       setToast(`${member.name} ditangguhkan`);
-      fetchMembers(search, filter);
+      fetchMembers(search, filter, page);
     } else {
       setToast(`Gagal menangguhkan: ${res.error.safeMessage}`);
     }
@@ -211,7 +211,7 @@ function SectionGuru({
     const res = await schoolService.memberUnsuspend(member.id);
     if (res.ok) {
       setToast(`${member.name} diaktifkan kembali`);
-      fetchMembers(search, filter);
+      fetchMembers(search, filter, page);
     } else {
       setToast(`Gagal mengaktifkan: ${res.error.safeMessage}`);
     }
@@ -224,7 +224,7 @@ function SectionGuru({
     const res = await schoolService.removeMember(member.id);
     if (res.ok) {
       setToast(`${member.name} dihapus`);
-      fetchMembers(search, filter);
+      fetchMembers(search, filter, page);
     } else {
       setToast(`Gagal menghapus: ${res.error.safeMessage}`);
     }
@@ -335,6 +335,31 @@ function SectionGuru({
             },
           ]}
         />
+      )}
+      {meta && meta.pages > 1 && (
+        <div className="flex items-center justify-between pt-2 text-sm">
+          <span className="text-neutral-500">
+            {meta.total} anggota · halaman {meta.page} / {meta.pages}
+          </span>
+          <div className="flex gap-1">
+            <Button
+              size="sm"
+              variant="secondary"
+              disabled={page <= 1}
+              onClick={() => setPage((p) => p - 1)}
+            >
+              ‹ Sebelumnya
+            </Button>
+            <Button
+              size="sm"
+              variant="secondary"
+              disabled={page >= meta.pages}
+              onClick={() => setPage((p) => p + 1)}
+            >
+              Berikutnya ›
+            </Button>
+          </div>
+        </div>
       )}
     </>
   );
@@ -612,22 +637,22 @@ function SectionLibrary({
   setToast: (msg: string) => void;
 }) {
   const [items, setItems] = useState<SchoolLibraryItem[]>([]);
+  const [meta, setMeta] = useState<SchoolLibraryResult['meta'] | null>(null);
+  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  useEffect(() => { setPage(1); }, [search]);
+
   const fetchLibrary = useCallback(
-    (q: string) => {
+    (q: string, pg: number) => {
       setLoading(true);
-      schoolService.library({ q: q || undefined }).then((res) => {
+      schoolService.library({ q: q || undefined, page: pg, limit: 20 }).then((res) => {
         if (res.ok) {
-          const raw = res.value as unknown as
-            | { data: SchoolLibraryItem[] }
-            | SchoolLibraryItem[];
-          setItems(
-            Array.isArray(raw)
-              ? raw
-              : (raw as { data: SchoolLibraryItem[] }).data ?? [],
-          );
+          // service wraps paginated responses as { data, meta }
+          const result = res.value as unknown as SchoolLibraryResult;
+          setItems(result.data ?? []);
+          setMeta(result.meta ?? null);
         } else {
           setToast(`Gagal memuat library: ${res.error.safeMessage}`);
         }
@@ -639,11 +664,11 @@ function SectionLibrary({
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => fetchLibrary(search), 300);
+    debounceRef.current = setTimeout(() => fetchLibrary(search, page), 300);
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [search, fetchLibrary]);
+  }, [search, page, fetchLibrary]);
 
   return (
     <>
@@ -694,6 +719,31 @@ function SectionLibrary({
           ]}
         />
       )}
+      {meta && meta.pages > 1 && (
+        <div className="flex items-center justify-between pt-2 text-sm">
+          <span className="text-neutral-500">
+            {meta.total} item · halaman {meta.page} / {meta.pages}
+          </span>
+          <div className="flex gap-1">
+            <Button
+              size="sm"
+              variant="secondary"
+              disabled={page <= 1}
+              onClick={() => setPage((p) => p - 1)}
+            >
+              ‹ Sebelumnya
+            </Button>
+            <Button
+              size="sm"
+              variant="secondary"
+              disabled={page >= meta.pages}
+              onClick={() => setPage((p) => p + 1)}
+            >
+              Berikutnya ›
+            </Button>
+          </div>
+        </div>
+      )}
     </>
   );
 }
@@ -710,22 +760,22 @@ function SectionAudit({
   setToast: (msg: string) => void;
 }) {
   const [rows, setRows] = useState<SchoolAuditRow[]>([]);
+  const [meta, setMeta] = useState<SchoolAuditResult['meta'] | null>(null);
+  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  useEffect(() => { setPage(1); }, [search]);
+
   const fetchAudit = useCallback(
-    (q: string) => {
+    (q: string, pg: number) => {
       setLoading(true);
-      schoolService.audit({ q: q || undefined }).then((res) => {
+      schoolService.audit({ q: q || undefined, page: pg, limit: 20 }).then((res) => {
         if (res.ok) {
-          const raw = res.value as unknown as
-            | { data: SchoolAuditRow[] }
-            | SchoolAuditRow[];
-          setRows(
-            Array.isArray(raw)
-              ? raw
-              : (raw as { data: SchoolAuditRow[] }).data ?? [],
-          );
+          // service wraps paginated responses as { data, meta }
+          const result = res.value as unknown as SchoolAuditResult;
+          setRows(result.data ?? []);
+          setMeta(result.meta ?? null);
         } else {
           setToast(`Gagal memuat audit: ${res.error.safeMessage}`);
         }
@@ -737,11 +787,11 @@ function SectionAudit({
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => fetchAudit(search), 300);
+    debounceRef.current = setTimeout(() => fetchAudit(search, page), 300);
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [search, fetchAudit]);
+  }, [search, page, fetchAudit]);
 
   return (
     <>
@@ -783,7 +833,130 @@ function SectionAudit({
           ]}
         />
       )}
+      {meta && meta.pages > 1 && (
+        <div className="flex items-center justify-between pt-2 text-sm">
+          <span className="text-neutral-500">
+            {meta.total} entri · halaman {meta.page} / {meta.pages}
+          </span>
+          <div className="flex gap-1">
+            <Button
+              size="sm"
+              variant="secondary"
+              disabled={page <= 1}
+              onClick={() => setPage((p) => p - 1)}
+            >
+              ‹ Sebelumnya
+            </Button>
+            <Button
+              size="sm"
+              variant="secondary"
+              disabled={page >= meta.pages}
+              onClick={() => setPage((p) => p + 1)}
+            >
+              Berikutnya ›
+            </Button>
+          </div>
+        </div>
+      )}
     </>
+  );
+}
+
+// ── Section: Undangan ────────────────────────────────────────────────────────
+
+function SectionUndangan({ setToast }: { setToast: (msg: string) => void }) {
+  const [invitations, setInvitations] = useState<SchoolInvitation[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [cancelId, setCancelId] = useState<string | null>(null);
+
+  function fetchInvitations() {
+    setLoading(true);
+    schoolService.invitations().then((res) => {
+      if (res.ok) {
+        setInvitations(res.value);
+      } else {
+        setToast(`Gagal memuat undangan: ${res.error.safeMessage}`);
+      }
+      setLoading(false);
+    });
+  }
+
+  useEffect(() => {
+    fetchInvitations();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function handleCancel(inv: SchoolInvitation) {
+    if (!confirm(`Batalkan undangan ke ${inv.email}?`)) return;
+    setCancelId(inv.id);
+    const res = await schoolService.cancelInvitation(inv.id);
+    if (res.ok) {
+      setToast(`Undangan ke ${inv.email} dibatalkan`);
+      fetchInvitations();
+    } else {
+      setToast(`Gagal membatalkan: ${res.error.safeMessage}`);
+    }
+    setCancelId(null);
+  }
+
+  if (loading) return <AdminContentLoading />;
+
+  return (
+    <AdminDataTable
+      rows={invitations}
+      emptyLabel="Tidak ada undangan pending"
+      columns={[
+        {
+          key: 'email',
+          header: 'Email',
+          render: (row) => (
+            <div>
+              <div className="font-medium text-sm">{row.email}</div>
+              {row.invitedBy && (
+                <div className="text-xs text-neutral-400">
+                  Diundang oleh {row.invitedBy}
+                </div>
+              )}
+            </div>
+          ),
+        },
+        {
+          key: 'role',
+          header: 'Peran',
+          render: (row) => (
+            <AdminPill tone="neutral">
+              {row.role === 'school_admin' ? 'Admin sekolah' : 'Guru'}
+            </AdminPill>
+          ),
+        },
+        {
+          key: 'createdAt',
+          header: 'Dikirim',
+          render: (row) => fmtDate(row.createdAt),
+        },
+        {
+          key: 'expiresAt',
+          header: 'Kedaluwarsa',
+          render: (row) => fmtDate(row.expiresAt),
+        },
+        {
+          key: 'actions',
+          header: '',
+          render: (row) => (
+            <div className="flex justify-end">
+              <Button
+                size="sm"
+                variant="secondary"
+                disabled={cancelId === row.id}
+                onClick={() => handleCancel(row)}
+              >
+                {cancelId === row.id ? 'Membatalkan…' : 'Batalkan'}
+              </Button>
+            </div>
+          ),
+        },
+      ]}
+    />
   );
 }
 
@@ -812,6 +985,10 @@ export function SchoolAdminView({ section = '' }: { section?: string }) {
 
       {current === 'undang' ? (
         <SectionUndang setToast={setToast} />
+      ) : null}
+
+      {current === 'undangan' ? (
+        <SectionUndangan setToast={setToast} />
       ) : null}
 
       {current === 'penggunaan' ? (
