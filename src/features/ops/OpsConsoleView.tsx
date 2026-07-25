@@ -800,7 +800,12 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
   const [billingEditLoading, setBillingEditLoading] = useState(false);
   const [billingPage, setBillingPage] = useState(1);
 
-  // ── Create Prompt state ──────────────────────────────────────────────
+  // ── Catalog state ─────────────────────────────────────────────────────
+  const [catalogGrades, setCatalogGrades] = useState<{ id: string; label: string; status: string }[]>([]);
+  const [catalogSubjects, setCatalogSubjects] = useState<{ id: string; label: string; status: string }[]>([]);
+  const [catalogSelectedGrade, setCatalogSelectedGrade] = useState<string>('');
+  const [catalogLoading, setCatalogLoading] = useState(false);
+  const [catalogSubjectsLoading, setCatalogSubjectsLoading] = useState(false);
   const [createPromptOpen, setCreatePromptOpen] = useState(false);
   const [createPromptName, setCreatePromptName] = useState('');
   const [createPromptSlug, setCreatePromptSlug] = useState('');
@@ -1023,6 +1028,26 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
   useEffect(() => { if (key === 'prompts') loadPrompts(); }, [key]);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { if (key === 'content') loadContent(); }, [key]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (key === 'catalog') {
+      setCatalogLoading(true);
+      fetch('/v1/catalog/grades').then((r) => r.json()).then((j) => {
+        setCatalogGrades(j?.data ?? []);
+        setCatalogLoading(false);
+        // load subjects for first grade if available
+        const firstGrade = j?.data?.[0]?.id;
+        if (firstGrade) {
+          setCatalogSelectedGrade(firstGrade);
+          setCatalogSubjectsLoading(true);
+          fetch(`/v1/catalog/subjects?gradeId=${firstGrade}`).then((r) => r.json()).then((js) => {
+            setCatalogSubjects(js?.data ?? []);
+            setCatalogSubjectsLoading(false);
+          }).catch(() => setCatalogSubjectsLoading(false));
+        }
+      }).catch(() => setCatalogLoading(false));
+    }
+  }, [key]);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (key === 'learning-signals') {
@@ -1828,47 +1853,107 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
         <>
           <AdminPageHeader
             title="Katalog"
-            description="Kelola grade, mapel, dan material yang dipakai generator."
+            description="Grade, mapel, dan material yang dipakai generator soal."
+            meta={
+              catalogGrades.length > 0 ? (
+                <AdminPill tone="ok">{catalogGrades.filter((g) => g.status === 'active').length} grade aktif</AdminPill>
+              ) : null
+            }
             actions={
-              <Button size="sm" onClick={() => setToast('Sync katalog dijalankan dari BE saat data berubah.')}>
-                Sync katalog
+              <Button size="sm" variant="secondary" onClick={() => {
+                setCatalogLoading(true);
+                fetch('/v1/catalog/grades').then((r) => r.json()).then((j) => {
+                  setCatalogGrades(j?.data ?? []);
+                  setCatalogLoading(false);
+                }).catch(() => setCatalogLoading(false));
+              }}>
+                Refresh
               </Button>
             }
           />
+          {catalogLoading ? <div className="mb-2"><AdminPill tone="info">Memuat katalog...</AdminPill></div> : null}
+
           <AdminStatCards
             items={[
-              { label: 'Grade', value: '12', hint: 'aktif', tone: 'ok' },
-              { label: 'Mapel', value: '28', hint: 'published', tone: 'info' },
-              { label: 'Material', value: '146', hint: 'siap pakai', tone: 'neutral' },
-              { label: 'Draft', value: '7', hint: 'perlu review', tone: 'warn' },
-            ]}
-          />
-          <AdminDataTable
-            rows={[
-              { id: 'cat_1', label: 'Kelas 7', type: 'grade', status: 'published' },
-              { id: 'cat_2', label: 'Matematika', type: 'subject', status: 'published' },
-              { id: 'cat_3', label: 'IPA', type: 'subject', status: 'draft' },
-              { id: 'cat_4', label: 'Buku paket tema 1', type: 'material', status: 'published' },
-            ]}
-            columns={[
-              { key: 'label', header: 'Item', render: (row) => row.label },
-              { key: 'type', header: 'Tipe', render: (row) => row.type },
               {
-                key: 'status',
-                header: 'Status',
-                render: (row) => (
-                  <AdminPill tone={row.status === 'published' ? 'ok' : 'neutral'}>
-                    {row.status}
-                  </AdminPill>
-                ),
+                label: 'Grade',
+                value: catalogLoading ? '…' : String(catalogGrades.length),
+                hint: 'dari BE',
+                tone: 'ok',
+              },
+              {
+                label: 'Mapel',
+                value: catalogSubjectsLoading ? '…' : String(catalogSubjects.length),
+                hint: catalogSelectedGrade ? `untuk ${catalogGrades.find((g) => g.id === catalogSelectedGrade)?.label ?? catalogSelectedGrade}` : 'pilih grade',
+                tone: 'info',
+              },
+              {
+                label: 'Sumber data',
+                value: 'Live BE',
+                hint: '/v1/catalog/*',
+                tone: 'neutral',
               },
             ]}
-            rowActions={(row) => (
-              <Button size="sm" variant="secondary" onClick={() => setToast(`Edit ${row.label}`)}>
-                Edit
-              </Button>
-            )}
           />
+
+          {/* Grade selector + subjects */}
+          <div className="grid gap-4 lg:grid-cols-2">
+            {/* Grades */}
+            <div className="rounded-2xl border border-[#ddd4c8]/70 bg-white p-4 space-y-3">
+              <h3 className="text-[14px] font-bold text-[#171717]">Grade ({catalogGrades.length})</h3>
+              {catalogGrades.length === 0 && !catalogLoading ? (
+                <div className="text-[12px] text-[#6d665d]">Belum ada data grade.</div>
+              ) : (
+                <div className="space-y-1">
+                  {catalogGrades.map((g) => (
+                    <button
+                      key={g.id}
+                      onClick={() => {
+                        setCatalogSelectedGrade(g.id);
+                        setCatalogSubjectsLoading(true);
+                        fetch(`/v1/catalog/subjects?gradeId=${g.id}`).then((r) => r.json()).then((j) => {
+                          setCatalogSubjects(j?.data ?? []);
+                          setCatalogSubjectsLoading(false);
+                        }).catch(() => setCatalogSubjectsLoading(false));
+                      }}
+                      className={`w-full text-left px-3 py-2 rounded-xl text-[12px] transition-colors flex items-center justify-between ${
+                        catalogSelectedGrade === g.id
+                          ? 'bg-[#171717] text-white font-semibold'
+                          : 'hover:bg-[#faf8f5] text-[#171717]'
+                      }`}
+                    >
+                      <span>{g.label}</span>
+                      <AdminPill tone={g.status === 'active' ? 'ok' : 'neutral'}>{g.status}</AdminPill>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Subjects untuk grade terpilih */}
+            <div className="rounded-2xl border border-[#ddd4c8]/70 bg-white p-4 space-y-3">
+              <h3 className="text-[14px] font-bold text-[#171717]">
+                Mapel — {catalogGrades.find((g) => g.id === catalogSelectedGrade)?.label ?? 'pilih grade'}
+              </h3>
+              {catalogSubjectsLoading ? (
+                <div className="text-[12px] text-[#6d665d]">Memuat mapel...</div>
+              ) : catalogSubjects.length === 0 ? (
+                <div className="text-[12px] text-[#6d665d]">Belum ada mapel untuk grade ini.</div>
+              ) : (
+                <div className="space-y-1">
+                  {catalogSubjects.map((s) => (
+                    <div
+                      key={s.id}
+                      className="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-[#faf8f5] text-[12px]"
+                    >
+                      <span className="text-[#171717]">{s.label}</span>
+                      <AdminPill tone={s.status === 'active' ? 'ok' : 'neutral'}>{s.status}</AdminPill>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
         </>
       ) : null}
 
@@ -3052,7 +3137,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-[#8a8379]">Metode Masuk</span>
-                  <span className="font-medium text-[#171717]">Google Workspace SSO</span>
+                  <span className="font-medium text-[#171717]">JWT Multi-role</span>
                 </div>
               </div>
             </div>
@@ -3063,31 +3148,53 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
               </h3>
               <div className="space-y-2.5 text-[12px]">
                 <div className="flex justify-between">
-                  <span className="text-[#8a8379]">IP Address Saat Ini</span>
-                  <span className="font-mono text-[#171717]">192.168.1.100</span>
+                  <span className="text-[#8a8379]">Browser</span>
+                  <span className="font-medium text-[#171717] text-right max-w-[60%] truncate">
+                    {typeof navigator !== 'undefined'
+                      ? navigator.userAgent.match(/Chrome\/[\d.]+/)?.[0]
+                        ?? navigator.userAgent.match(/Firefox\/[\d.]+/)?.[0]
+                        ?? navigator.userAgent.match(/Safari\/[\d.]+/)?.[0]
+                        ?? 'Browser'
+                      : 'Browser'}
+                  </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-[#8a8379]">Browser / OS</span>
-                  <span className="font-medium text-[#171717]">Chrome · macOS</span>
+                  <span className="text-[#8a8379]">Platform</span>
+                  <span className="font-medium text-[#171717]">
+                    {typeof navigator !== 'undefined' ? navigator.platform || 'Web' : 'Web'}
+                  </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-[#8a8379]">Akses Terakhir</span>
-                  <span className="font-medium text-[#171717]">Baru saja</span>
+                  <span className="text-[#8a8379]">Zona Waktu</span>
+                  <span className="font-medium text-[#171717]">
+                    {typeof Intl !== 'undefined' ? Intl.DateTimeFormat().resolvedOptions().timeZone : '—'}
+                  </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-[#8a8379]">Enkripsi Sesi</span>
-                  <span className="font-semibold text-[#8a8379]">TLS_AES_256_GCM_SHA384</span>
+                  <span className="text-[#8a8379]">Sesi Dimulai</span>
+                  <span className="font-medium text-[#171717]">
+                    {new Date().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })}
+                  </span>
                 </div>
               </div>
-              <div className="border-t border-[#eee6da]/50 pt-4">
+              <div className="border-t border-[#eee6da]/50 pt-4 space-y-2">
                 <Button
                   size="sm"
                   variant="secondary"
                   className="w-full justify-center"
-                  onClick={() => setToast('Fitur log out perangkat lain belum tersedia.')}
+                  onClick={() => {
+                    if (confirm('Logout dari sesi ini?')) {
+                      fetch('/v1/auth/logout', { method: 'POST', credentials: 'include' })
+                        .then(() => { window.location.href = '/ops/login'; })
+                        .catch(() => { window.location.href = '/ops/login'; });
+                    }
+                  }}
                 >
-                  Log Out dari Perangkat Lain
+                  Log Out Sesi Ini
                 </Button>
+                <div className="text-[11px] text-[#b0a89f] text-center">
+                  Multi-device logout belum tersedia — fitur dalam pengembangan BE
+                </div>
               </div>
             </div>
           </div>
