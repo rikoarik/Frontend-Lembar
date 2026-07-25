@@ -1256,42 +1256,35 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
 
       {key === 'schools' ? (
         <>
-          <AdminPageHeader
-            title="Sekolah / tenant"
-            description="Pantau status plan, usage, dan owner setiap tenant sekolah."
-            meta={
-              <AdminPill tone="warn">
-                {schools.filter((s) => s.plan !== 'active' && s.plan !== 'pilot').length} perlu
-                perhatian
-              </AdminPill>
-            }
-            actions={
-              <Button size="sm" onClick={() => setToast('Tambah tenant sekolah (mock).')}>
-                Tambah sekolah
-              </Button>
-            }
-          />
+          <div className="flex items-center justify-between px-1 py-1">
+            <h2 className="text-[18px] font-bold text-[#171717]">Sekolah / tenant</h2>
+            <Button size="sm" onClick={() => setToast('Tambah tenant sekolah (mock).')}>
+              Tambah sekolah
+            </Button>
+          </div>
           {schoolsLoading ? <div className="mb-2"><AdminPill tone="info">Memuat...</AdminPill></div> : null}
           <AdminToolbar
             search={search}
             onSearchChange={setSearch}
             searchPlaceholder="Cari sekolah / owner / plan"
             filters={
-              <>
-                {(['', 'pilot', 'active', 'grace', 'blocked'] as const).map((plan) => (
-                  <AdminFilterChip
-                    key={plan || 'all'}
-                    active={filterPlan === plan}
-                    onClick={() => setFilterPlan(plan)}
-                  >
-                    {plan || 'Semua plan'}
-                  </AdminFilterChip>
-                ))}
-              </>
+              <div className="flex items-center gap-2">
+                <select
+                  value={filterPlan}
+                  onChange={(e) => setFilterPlan(e.target.value as typeof filterPlan)}
+                  className="h-9 rounded-xl border border-[#ddd4c8] bg-white pl-3 pr-8 text-[12px] font-medium text-[#171717] focus:outline-none focus:ring-2 focus:ring-[#171717]/20 cursor-pointer"
+                >
+                  <option value="">Semua plan</option>
+                  <option value="pilot">pilot</option>
+                  <option value="active">active</option>
+                  <option value="grace">grace</option>
+                  <option value="blocked">blocked</option>
+                </select>
+              </div>
             }
           />
           <AdminDataTable
-            rows={schools.slice((page - 1) * 3, page * 3)}
+            rows={schools.slice((page - 1) * 10, page * 10)}
             emptyLabel="Tidak ada sekolah yang cocok."
             emptyHint="Coba hapus filter plan atau ubah kata kunci."
             columns={[
@@ -1306,21 +1299,21 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
               { key: 'owner', header: 'Owner', render: (row) => row.owner },
             ]}
             rowActions={(row) => (
-              <>
+              <div className="flex items-center gap-1.5 whitespace-nowrap">
                 <Button size="sm" variant="secondary" onClick={() => setToast(`Buka ${row.name}`)}>
                   Buka
                 </Button>
                 <Button size="sm" onClick={() => setToast(`Ubah plan ${row.name}`)}>
                   Ubah plan
                 </Button>
-              </>
+              </div>
             )}
           />
           <AdminPagination
             currentPage={page}
-            totalPages={Math.ceil(schools.length / 3)}
+            totalPages={Math.max(1, Math.ceil(schools.length / 10))}
             totalItems={schools.length}
-            pageSize={3}
+            pageSize={10}
             onPageChange={setPage}
           />
         </>
