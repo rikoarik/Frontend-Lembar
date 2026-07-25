@@ -265,7 +265,7 @@ export function AdminDataTable<T extends { id: string }>({
   emptyAction,
   rowActions,
   density = 'comfortable',
-  footerNote = 'Data preview · staging',
+  footerNote = 'Data preview',
   selectable = false,
   selectedIds = [],
   onToggleRow,

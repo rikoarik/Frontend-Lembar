@@ -418,9 +418,11 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             description="Pantau kesehatan job, tenant berisiko, quality report, dan flag pilot dari satu tempat."
             meta={
               <>
-                <AdminPill tone={dashboardLoading ? 'info' : dashboard ? 'ok' : 'warn'}>
-                  {dashboardLoading ? 'memuat...' : dashboard ? 'live' : 'staging mock'}
-                </AdminPill>
+                {dashboardLoading ? (
+                  <AdminPill tone="info">memuat...</AdminPill>
+                ) : dashboard ? (
+                  <AdminPill tone="ok">live</AdminPill>
+                ) : null}
                 <AdminPill tone="ok">least privilege</AdminPill>
               </>
             }

@@ -16,6 +16,73 @@ vi.mock('next/navigation', () => ({
   }),
 }));
 
+vi.mock('@/src/services/admin/adminService', () => ({
+  adminService: {
+    dashboard: vi.fn().mockResolvedValue({
+      ok: true,
+      value: {
+        users: 42,
+        schools: 5,
+        jobsActive: 3,
+        qualityOpen: 2,
+        flagsEnabled: 4,
+      },
+    }),
+    jobs: vi.fn().mockResolvedValue({
+      ok: true,
+      value: [
+        {
+          id: 'job_8f2a',
+          type: 'GENERATE_ASSESSMENT',
+          tenant: 'SDN Contoh 01',
+          status: 'running',
+          progress: '65%',
+          updatedAt: '2 menit lalu',
+        },
+      ],
+    }),
+    accounts: vi.fn().mockResolvedValue({
+      ok: true,
+      value: [
+        {
+          id: 'acc_1',
+          displayName: 'Ops Superadmin',
+          email: 'ops@lembar.id',
+          role: 'superadmin',
+          status: 'aktif',
+          school: 'Lembar HQ',
+        },
+        {
+          id: 'acc_2',
+          displayName: 'Demo Guru',
+          email: 'guru@lembar.id',
+          role: 'teacher',
+          status: 'aktif',
+          school: 'SDN 01',
+        },
+      ],
+    }),
+    billing: vi.fn().mockResolvedValue({
+      ok: true,
+      value: [
+        {
+          id: 'bil_1',
+          school: 'SMP Harapan',
+          state: 'active',
+          seats: '25/30',
+          renewsAt: '2026-12-31',
+        },
+      ],
+    }),
+    schools: vi.fn().mockResolvedValue({ ok: true, value: [] }),
+    qualityReports: vi.fn().mockResolvedValue({ ok: true, value: [] }),
+    flags: vi.fn().mockResolvedValue({ ok: true, value: [] }),
+    prompts: vi.fn().mockResolvedValue({ ok: true, value: [] }),
+    audit: vi.fn().mockResolvedValue({ ok: true, value: [] }),
+    marketingPages: vi.fn().mockResolvedValue({ ok: true, value: [] }),
+  },
+}));
+
 function renderOps(section: string) {
   return render(
     <OpsAdminShell>
@@ -29,28 +96,28 @@ describe('ops superadmin management panel', () => {
     push.mockReset();
   });
 
-  it('keeps shell chrome and renders jobs table content', () => {
+  it('keeps shell chrome and renders jobs table content', async () => {
     renderOps('');
     expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
     expect(screen.getAllByRole('navigation', { name: /navigasi panel/i }).length).toBeGreaterThan(
       0,
     );
-    expect(screen.getByText(/job_8f2a/i)).toBeInTheDocument();
+    expect(await screen.findByText(/job_8f2a/i)).toBeInTheDocument();
   });
 
   it('renders accounts management table and supports search state', async () => {
     const user = userEvent.setup();
     renderOps('accounts');
     expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
-    const search = screen.getByPlaceholderText(/cari akun, email, role, sekolah/i);
+    const search = await screen.findByPlaceholderText(/cari akun, email, role, sekolah/i);
     await user.type(search, 'ops');
-    expect(screen.getAllByText(/Ops Superadmin/i).length).toBeGreaterThan(0);
+    expect((await screen.findAllByText(/Ops Superadmin/i)).length).toBeGreaterThan(0);
     expect(screen.queryByText(/Demo Guru/i)).not.toBeInTheDocument();
   });
 
-  it('renders billing section table', () => {
+  it('renders billing section table', async () => {
     renderOps('billing');
-    expect(screen.getByText(/SMP Harapan/i)).toBeInTheDocument();
+    expect(await screen.findByText(/SMP Harapan/i)).toBeInTheDocument();
   });
 
   it('does not leak teacher question content', () => {
