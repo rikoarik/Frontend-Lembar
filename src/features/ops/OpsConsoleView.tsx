@@ -231,6 +231,10 @@ function AccountDetailView({
   const [editName, setEditName] = useState('');
   const [editPhone, setEditPhone] = useState('');
   const [saving, setSaving] = useState(false);
+  const [rolesEditing, setRolesEditing] = useState(false);
+  const [rolesSaving, setRolesSaving] = useState(false);
+  const AVAILABLE_ROLES = ['teacher', 'school_admin', 'subscriber'] as const;
+  const [editRoles, setEditRoles] = useState<string[]>([]);
 
   useEffect(() => {
     setLoading(true);
@@ -389,6 +393,81 @@ function AccountDetailView({
                   <span className="font-semibold text-[#171717]">{detail.stats?.jobsTotal ?? 0}</span>
                 </div>
               </div>
+            </div>
+
+            {/* Role Editor Card */}
+            <div className="rounded-2xl border border-[#ddd4c8]/70 bg-white p-5 shadow-sm space-y-3 text-[13px]">
+              <div className="flex items-center justify-between">
+                <h3 className="text-[15px] font-bold text-[#171717]">Role & Akses</h3>
+                {!rolesEditing ? (
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => {
+                      setEditRoles(detail.roles ?? [detail.role]);
+                      setRolesEditing(true);
+                    }}
+                  >
+                    Edit role
+                  </Button>
+                ) : null}
+              </div>
+
+              {!rolesEditing ? (
+                <div className="flex flex-wrap gap-1.5">
+                  {(detail.roles ?? [detail.role]).map((r) => (
+                    <AdminPill key={r} tone={r === 'superadmin' ? 'bad' : r === 'school_admin' ? 'info' : 'neutral'}>
+                      {r}
+                    </AdminPill>
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div className="text-[11px] text-[#6d665d]">Pilih role untuk akun ini. Perubahan langsung disimpan.</div>
+                  <div className="space-y-1.5">
+                    {AVAILABLE_ROLES.map((r) => (
+                      <label key={r} className="flex items-center gap-2 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={editRoles.includes(r)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setEditRoles((prev) => [...prev, r]);
+                            } else {
+                              setEditRoles((prev) => prev.filter((x) => x !== r));
+                            }
+                          }}
+                          className="rounded accent-[#171717]"
+                        />
+                        <span className="text-[13px] font-medium text-[#171717]">{r}</span>
+                      </label>
+                    ))}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      disabled={rolesSaving || editRoles.length === 0}
+                      onClick={() => {
+                        setRolesSaving(true);
+                        adminService.updateRoles(accountId, editRoles).then((res) => {
+                          if (res.ok) {
+                            setToast(`Role akun diperbarui: ${res.value.roles.join(', ')}`);
+                            setDetail({ ...detail, roles: res.value.roles, role: res.value.roles[0] as typeof detail.role ?? detail.role });
+                            setRolesEditing(false);
+                            onUpdated();
+                          } else {
+                            setToast(`Gagal: ${res.error.safeMessage}`);
+                          }
+                          setRolesSaving(false);
+                        });
+                      }}
+                    >
+                      {rolesSaving ? 'Menyimpan...' : 'Simpan role'}
+                    </Button>
+                    <Button size="sm" variant="secondary" onClick={() => setRolesEditing(false)}>Batal</Button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -1058,9 +1137,16 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
               {
                 label: 'Job aktif',
                 value: dashboard ? String(dashboard.jobsActive) : '—',
-                hint: dashboardLoading ? 'memuat...' : 'total job berjalan',
+                hint: dashboardLoading ? 'memuat...' : 'running + queued',
                 tone: 'info',
                 delta: 'live',
+              },
+              {
+                label: 'Job gagal',
+                value: dashboard ? String(dashboard.jobsFailed) : '—',
+                hint: dashboardLoading ? 'memuat...' : 'butuh retry',
+                tone: (dashboard?.jobsFailed ?? 0) > 0 ? 'bad' : 'ok',
+                delta: (dashboard?.jobsFailed ?? 0) > 0 ? 'P0' : '✓',
               },
               {
                 label: 'Quality open',
@@ -1074,7 +1160,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                 value: dashboard ? String(dashboard.users) : '—',
                 hint: dashboardLoading ? 'memuat...' : 'total akun aktif',
                 tone: 'ok',
-                delta: String(dashboard?.users ?? '—'),
+                delta: String(dashboard?.schools ?? '—') + ' sekolah',
               },
               {
                 label: 'Flag aktif',

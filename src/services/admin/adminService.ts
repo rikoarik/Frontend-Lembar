@@ -83,6 +83,7 @@ export type AdminDashboard = {
   users: number;
   schools: number;
   jobsActive: number;
+  jobsFailed: number;
   qualityOpen: number;
   flagsEnabled: number;
 };
