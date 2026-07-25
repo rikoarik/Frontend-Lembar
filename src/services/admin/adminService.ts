@@ -100,7 +100,8 @@ export type AdminSchoolRow = {
   name: string;
   plan: 'pilot' | 'active' | 'grace' | 'blocked';
   teachers: number;
-  usage: string;
+  seats: number;
+  renewsAt: string;
   owner: string;
 };
 
@@ -141,6 +142,14 @@ export type AdminAuditRow = {
   actor: string;
   action: string;
   target: string;
+};
+
+export type AdminContentRow = {
+  id: string;
+  slug: string;
+  title: string;
+  status: 'published' | 'draft';
+  updatedAt: string;
 };
 
 // ── Service ────────────────────────────────────────────────────────────────
@@ -205,5 +214,10 @@ export const adminService = {
     if (params?.actor) qs.set('actor', params.actor);
     const q = qs.toString();
     return request<AdminAuditRow[]>(`/v1/admin/audit${q ? `?${q}` : ''}`);
+  },
+
+  // Marketing / Content pages
+  marketingPages(): Promise<Result<AdminContentRow[], AdminError>> {
+    return request<AdminContentRow[]>('/v1/ops/marketing/pages');
   },
 };

@@ -13,253 +13,29 @@ import {
   AdminToolbar,
 } from '@/src/features/admin/AdminChrome';
 import { useAdminSectionState } from '@/src/features/admin/adminPanelState';
-import { adminService, type AdminDashboard, type AdminJobRow } from '@/src/services/admin/adminService';
+import {
+  adminService,
+  type AdminDashboard,
+  type AdminJobRow,
+  type AdminAccountRow,
+  type AdminSchoolRow,
+  type AdminQualityRow,
+  type AdminBillingRow,
+  type AdminFlagRow,
+  type AdminPromptRow,
+  type AdminAuditRow,
+  type AdminContentRow,
+} from '@/src/services/admin/adminService';
 
-type AccountRow = {
-  id: string;
-  displayName: string;
-  email: string;
-  role: 'teacher' | 'school_admin' | 'superadmin';
-  status: 'aktif' | 'ditangguhkan' | 'baru';
-  school: string;
-};
+// ── Type aliases — mapped to service types so UI code is decoupled ──────────
+type AccountRow = AdminAccountRow;
+type SchoolRow = AdminSchoolRow;
+type JobRow = AdminJobRow;
+type QualityRow = AdminQualityRow;
+type BillingRow = AdminBillingRow;
+type FlagRow = AdminFlagRow;
+type ContentRow = AdminContentRow;
 
-type SchoolRow = {
-  id: string;
-  name: string;
-  plan: 'pilot' | 'active' | 'grace' | 'blocked';
-  teachers: number;
-  usage: string;
-  owner: string;
-};
-
-type JobRow = {
-  id: string;
-  type: string;
-  tenant: string;
-  status: 'queued' | 'running' | 'failed' | 'succeeded';
-  progress: string;
-  updatedAt: string;
-};
-
-type QualityRow = {
-  id: string;
-  reason: string;
-  status: 'open' | 'triaged' | 'closed';
-  reporter: string;
-  createdAt: string;
-};
-
-type BillingRow = {
-  id: string;
-  school: string;
-  state: 'active' | 'grace' | 'blocked' | 'expired';
-  seats: string;
-  renewsAt: string;
-};
-
-type FlagRow = {
-  id: string;
-  key: string;
-  description: string;
-  enabled: boolean;
-  scope: 'global' | 'pilot';
-};
-
-type ContentRow = {
-  id: string;
-  slug: string;
-  title: string;
-  status: 'published' | 'draft';
-  updatedAt: string;
-};
-
-const ACCOUNTS: AccountRow[] = [
-  {
-    id: 'acct_demo',
-    displayName: 'Demo Guru',
-    email: 'demo@lembar.id',
-    role: 'teacher',
-    status: 'aktif',
-    school: '—',
-  },
-  {
-    id: 'acct_admin',
-    displayName: 'Admin Sekolah',
-    email: 'admin@sdncontoh.sch.id',
-    role: 'school_admin',
-    status: 'aktif',
-    school: 'SDN Contoh 01',
-  },
-  {
-    id: 'acct_ops',
-    displayName: 'Ops Superadmin',
-    email: 'ops@lembar.id',
-    role: 'superadmin',
-    status: 'aktif',
-    school: 'Platform',
-  },
-  {
-    id: 'acct_04',
-    displayName: 'Guru Baru',
-    email: 'baru@sekolah.sch.id',
-    role: 'teacher',
-    status: 'baru',
-    school: 'SMP Harapan',
-  },
-  {
-    id: 'acct_05',
-    displayName: 'Admin Grace',
-    email: 'grace@sekolah.sch.id',
-    role: 'school_admin',
-    status: 'ditangguhkan',
-    school: 'SMA Nusantara',
-  },
-];
-
-const SCHOOLS: SchoolRow[] = [
-  {
-    id: 'sch_01',
-    name: 'SDN Contoh 01',
-    plan: 'pilot',
-    teachers: 24,
-    usage: '312/500',
-    owner: 'admin@sdncontoh.sch.id',
-  },
-  {
-    id: 'sch_02',
-    name: 'SMP Harapan',
-    plan: 'grace',
-    teachers: 41,
-    usage: '480/500',
-    owner: 'admin@smpharapan.sch.id',
-  },
-  {
-    id: 'sch_03',
-    name: 'SMA Nusantara',
-    plan: 'blocked',
-    teachers: 60,
-    usage: '500/500',
-    owner: 'admin@smanusantara.sch.id',
-  },
-  {
-    id: 'sch_04',
-    name: 'SD Mawar',
-    plan: 'active',
-    teachers: 18,
-    usage: '120/400',
-    owner: 'admin@sdmawar.sch.id',
-  },
-];
-
-const JOBS: JobRow[] = [
-  {
-    id: 'job_8f2a',
-    type: 'generate',
-    tenant: 'SDN Contoh 01',
-    status: 'running',
-    progress: '58%',
-    updatedAt: '1 mnt lalu',
-  },
-  {
-    id: 'job_11bc',
-    type: 'generate',
-    tenant: 'SMP Harapan',
-    status: 'queued',
-    progress: '0%',
-    updatedAt: '3 mnt lalu',
-  },
-  {
-    id: 'job_99aa',
-    type: 'export',
-    tenant: 'SMA Nusantara',
-    status: 'failed',
-    progress: '—',
-    updatedAt: '12 mnt lalu',
-  },
-  {
-    id: 'job_22cd',
-    type: 'generate',
-    tenant: 'SD Mawar',
-    status: 'succeeded',
-    progress: '100%',
-    updatedAt: '25 mnt lalu',
-  },
-];
-
-const QUALITY: QualityRow[] = [
-  {
-    id: 'rep_a1',
-    reason: 'kualitas_soal',
-    status: 'open',
-    reporter: 'guru.siti',
-    createdAt: '2026-07-23',
-  },
-  {
-    id: 'rep_b2',
-    reason: 'kunci_salah',
-    status: 'triaged',
-    reporter: 'guru.rina',
-    createdAt: '2026-07-22',
-  },
-  {
-    id: 'rep_c3',
-    reason: 'privasi',
-    status: 'closed',
-    reporter: 'guru.budi',
-    createdAt: '2026-07-20',
-  },
-];
-
-const BILLING: BillingRow[] = [
-  { id: 'bill_1', school: 'SDN Contoh 01', state: 'active', seats: '30', renewsAt: '2026-08-24' },
-  { id: 'bill_2', school: 'SMP Harapan', state: 'grace', seats: '50', renewsAt: '2026-07-28' },
-  { id: 'bill_3', school: 'SMA Nusantara', state: 'blocked', seats: '80', renewsAt: '2026-07-10' },
-  { id: 'bill_4', school: 'SD Mawar', state: 'active', seats: '20', renewsAt: '2026-09-01' },
-];
-
-const FLAGS: FlagRow[] = [
-  {
-    id: 'f1',
-    key: 'share.links',
-    description: 'Controlled share links',
-    enabled: true,
-    scope: 'global',
-  },
-  {
-    id: 'f2',
-    key: 'cms.marketing',
-    description: 'Structured marketing CMS',
-    enabled: true,
-    scope: 'global',
-  },
-  {
-    id: 'f3',
-    key: 'analytics.creator',
-    description: 'Creator analytics screen',
-    enabled: true,
-    scope: 'pilot',
-  },
-  {
-    id: 'f4',
-    key: 'ops.bulk_actions',
-    description: 'Bulk tenant actions',
-    enabled: false,
-    scope: 'pilot',
-  },
-];
-
-const CONTENT: ContentRow[] = [
-  { id: 'c1', slug: 'home', title: 'Beranda', status: 'published', updatedAt: '2026-07-20' },
-  { id: 'c2', slug: 'harga', title: 'Harga', status: 'draft', updatedAt: '2026-07-23' },
-  {
-    id: 'c3',
-    slug: 'untuk-sekolah',
-    title: 'Untuk Sekolah',
-    status: 'published',
-    updatedAt: '2026-07-18',
-  },
-];
 
 function planTone(plan: SchoolRow['plan']): 'ok' | 'warn' | 'bad' | 'info' | 'neutral' {
   if (plan === 'active' || plan === 'pilot') return 'ok';
@@ -399,13 +175,15 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
   // ── Live dashboard state ──────────────────────────────────────────────
   const [dashboard, setDashboard] = useState<AdminDashboard | null>(null);
   const [dashboardJobs, setDashboardJobs] = useState<AdminJobRow[]>([]);
+  const [dashboardSchools, setDashboardSchools] = useState<AdminSchoolRow[]>([]);
   const [dashboardLoading, setDashboardLoading] = useState(false);
 
   const loadDashboard = () => {
     setDashboardLoading(true);
-    Promise.all([adminService.dashboard(), adminService.jobs(4)]).then(([kpiRes, jobsRes]) => {
+    Promise.all([adminService.dashboard(), adminService.jobs(4), adminService.schools()]).then(([kpiRes, jobsRes, schoolsRes]) => {
       if (kpiRes.ok) setDashboard(kpiRes.value);
       if (jobsRes.ok) setDashboardJobs(jobsRes.value);
+      if (schoolsRes.ok) setDashboardSchools(schoolsRes.value);
       setDashboardLoading(false);
     });
   };
@@ -416,7 +194,120 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
   }, [key]);
   // ─────────────────────────────────────────────────────────────────────
 
-  const [flags, setFlags] = useState(FLAGS);
+  // ── Per-section live data state ────────────────────────────────────────
+  const [accountsData, setAccountsData] = useState<AccountRow[]>([]);
+  const [accountsLoading, setAccountsLoading] = useState(false);
+
+  const [schoolsData, setSchoolsData] = useState<SchoolRow[]>([]);
+  const [schoolsLoading, setSchoolsLoading] = useState(false);
+
+  const [jobsData, setJobsData] = useState<JobRow[]>([]);
+  const [jobsLoading, setJobsLoading] = useState(false);
+
+  const [qualityData, setQualityData] = useState<QualityRow[]>([]);
+  const [qualityLoading, setQualityLoading] = useState(false);
+
+  const [billingData, setBillingData] = useState<BillingRow[]>([]);
+  const [billingLoading, setBillingLoading] = useState(false);
+
+  const [flagsData, setFlagsData] = useState<FlagRow[]>([]);
+  const [flagsLoading, setFlagsLoading] = useState(false);
+
+  const [promptsData, setPromptsData] = useState<AdminPromptRow[]>([]);
+  const [promptsLoading, setPromptsLoading] = useState(false);
+
+  const [auditData, setAuditData] = useState<AdminAuditRow[]>([]);
+  const [auditLoading, setAuditLoading] = useState(false);
+
+  const [contentData, setContentData] = useState<ContentRow[]>([]);
+  const [contentLoading, setContentLoading] = useState(false);
+
+  // ── Fetch loaders ─────────────────────────────────────────────────────
+  const loadAccounts = () => {
+    setAccountsLoading(true);
+    adminService.accounts().then((res) => {
+      if (res.ok) setAccountsData(res.value);
+      setAccountsLoading(false);
+    });
+  };
+  const loadSchools = () => {
+    setSchoolsLoading(true);
+    adminService.schools().then((res) => {
+      if (res.ok) setSchoolsData(res.value);
+      setSchoolsLoading(false);
+    });
+  };
+  const loadJobs = () => {
+    setJobsLoading(true);
+    adminService.jobs(50).then((res) => {
+      if (res.ok) setJobsData(res.value);
+      setJobsLoading(false);
+    });
+  };
+  const loadQuality = () => {
+    setQualityLoading(true);
+    adminService.qualityReports().then((res) => {
+      if (res.ok) setQualityData(res.value);
+      setQualityLoading(false);
+    });
+  };
+  const loadBilling = () => {
+    setBillingLoading(true);
+    adminService.billing().then((res) => {
+      if (res.ok) setBillingData(res.value);
+      setBillingLoading(false);
+    });
+  };
+  const loadFlags = () => {
+    setFlagsLoading(true);
+    adminService.flags().then((res) => {
+      if (res.ok) setFlagsData(res.value);
+      setFlagsLoading(false);
+    });
+  };
+  const loadPrompts = () => {
+    setPromptsLoading(true);
+    adminService.prompts().then((res) => {
+      if (res.ok) setPromptsData(res.value);
+      setPromptsLoading(false);
+    });
+  };
+  const loadAudit = () => {
+    setAuditLoading(true);
+    adminService.audit().then((res) => {
+      if (res.ok) setAuditData(res.value);
+      setAuditLoading(false);
+    });
+  };
+  const loadContent = () => {
+    setContentLoading(true);
+    adminService.marketingPages().then((res) => {
+      if (res.ok) setContentData(res.value);
+      setContentLoading(false);
+    });
+  };
+
+  // ── Fetch on section change ──────────────────────────────────────────
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { if (key === 'accounts') loadAccounts(); }, [key]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { if (key === 'schools') loadSchools(); }, [key]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { if (key === 'jobs') loadJobs(); }, [key]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { if (key === 'quality') loadQuality(); }, [key]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { if (key === 'billing') loadBilling(); }, [key]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { if (key === 'flags') loadFlags(); }, [key]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { if (key === 'prompts') loadPrompts(); }, [key]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { if (key === 'audit') loadAudit(); }, [key]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { if (key === 'content') loadContent(); }, [key]);
+
+  
   const [filterRole, setFilterRole] = useState<'' | AccountRow['role']>('');
   const [filterStatus, setFilterStatus] = useState<'' | AccountRow['status']>('');
   const [filterPlan, setFilterPlan] = useState<'' | SchoolRow['plan']>('');
@@ -443,7 +334,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
 
   const accounts = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return ACCOUNTS.filter((row) => {
+    return accountsData.filter((row) => {
       const matchSearch =
         !q ||
         row.displayName.toLowerCase().includes(q) ||
@@ -454,11 +345,11 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
       const matchStatus = filterStatus === '' || row.status === filterStatus;
       return matchSearch && matchRole && matchStatus;
     });
-  }, [search, filterRole, filterStatus]);
+  }, [accountsData, search, filterRole, filterStatus]);
 
   const schools = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return SCHOOLS.filter((row) => {
+    return schoolsData.filter((row) => {
       const matchSearch =
         !q ||
         row.name.toLowerCase().includes(q) ||
@@ -467,11 +358,11 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
       const matchPlan = filterPlan === '' || row.plan === filterPlan;
       return matchSearch && matchPlan;
     });
-  }, [search, filterPlan]);
+  }, [schoolsData, search, filterPlan]);
 
   const jobs = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return JOBS.filter((row) => {
+    return jobsData.filter((row) => {
       const matchSearch =
         !q ||
         row.id.includes(q) ||
@@ -481,11 +372,11 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
       const matchStatus = filterJobStatus === '' || row.status === filterJobStatus;
       return matchSearch && matchStatus;
     });
-  }, [search, filterJobStatus]);
+  }, [jobsData, search, filterJobStatus]);
 
   const quality = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return QUALITY.filter((row) => {
+    return qualityData.filter((row) => {
       const matchSearch =
         !q ||
         row.id.includes(q) ||
@@ -495,26 +386,26 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
       const matchStatus = filterQuality === '' || row.status === filterQuality;
       return matchSearch && matchStatus;
     });
-  }, [search, filterQuality]);
+  }, [qualityData, search, filterQuality]);
 
   const billing = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return BILLING.filter((row) => {
+    return billingData.filter((row) => {
       const matchSearch = !q || row.school.toLowerCase().includes(q) || row.state.includes(q);
       const matchState = filterBilling === '' || row.state === filterBilling;
       return matchSearch && matchState;
     });
-  }, [search, filterBilling]);
+  }, [billingData, search, filterBilling]);
 
   const content = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return CONTENT.filter((row) => {
+    return contentData.filter((row) => {
       const matchSearch =
         !q || row.slug.includes(q) || row.title.toLowerCase().includes(q) || row.status.includes(q);
       const matchStatus = filterContent === '' || row.status === filterContent;
       return matchSearch && matchStatus;
     });
-  }, [search, filterContent]);
+  }, [contentData, search, filterContent]);
 
   const clearSelection = () => setSelectedIds([]);
 
@@ -592,8 +483,8 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                 </a>
               </div>
               <AdminDataTable
-                rows={dashboardJobs.length > 0 ? dashboardJobs : JOBS.slice(0, 4)}
-                footerNote={dashboardJobs.length > 0 ? 'Live · BE' : 'Preview · staging'}
+                rows={dashboardJobs}
+                footerNote={dashboardJobs.length > 0 ? 'Live · BE' : 'Memuat...'}
                 flat={true}
                 columns={[
                   {
@@ -636,8 +527,8 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                 </a>
               </div>
               <AdminDataTable
-                rows={SCHOOLS.filter((s) => s.plan === 'grace' || s.plan === 'blocked')}
-                footerNote="Preview · staging"
+                rows={dashboardSchools.filter((s) => s.plan === 'grace' || s.plan === 'blocked')}
+                footerNote={dashboardSchools.length > 0 ? 'Live · BE' : 'Memuat...'}
                 emptyLabel="Tidak ada tenant berisiko."
                 emptyHint="Semua sekolah dalam status aman."
                 flat={true}
@@ -649,10 +540,10 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                     render: (row) => <AdminPill tone={planTone(row.plan)}>{row.plan}</AdminPill>,
                   },
                   {
-                    key: 'usage',
-                    header: 'Usage',
+                    key: 'seats',
+                    header: 'Seats',
                     render: (row) => (
-                      <span className="font-semibold tabular-nums text-[#171717]">{row.usage}</span>
+                      <span className="font-semibold tabular-nums text-[#171717]">{String(row.seats)}</span>
                     ),
                   },
                 ]}
@@ -674,6 +565,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
               </Button>
             }
           />
+          {accountsLoading ? <div className="mb-2"><AdminPill tone="info">Memuat...</AdminPill></div> : null}
           <AdminToolbar
             search={search}
             onSearchChange={setSearch}
@@ -835,6 +727,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
               </Button>
             }
           />
+          {schoolsLoading ? <div className="mb-2"><AdminPill tone="info">Memuat...</AdminPill></div> : null}
           <AdminToolbar
             search={search}
             onSearchChange={setSearch}
@@ -865,7 +758,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                 render: (row) => <AdminPill tone={planTone(row.plan)}>{row.plan}</AdminPill>,
               },
               { key: 'teachers', header: 'Guru', render: (row) => String(row.teachers) },
-              { key: 'usage', header: 'Usage', render: (row) => row.usage },
+              { key: 'seats', header: 'Seats / Renew', render: (row) => `${String(row.seats)} / ${row.renewsAt}` },
               { key: 'owner', header: 'Owner', render: (row) => row.owner },
             ]}
             rowActions={(row) => (
@@ -948,6 +841,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
               </Button>
             }
           />
+          {promptsLoading ? <div className="mb-2"><AdminPill tone="info">Memuat...</AdminPill></div> : null}
           <AdminDataTable
             rows={[
               { id: 'p1', name: 'generate.v3', owner: 'ops', status: 'active' },
@@ -992,6 +886,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
               </Button>
             }
           />
+          {jobsLoading ? <div className="mb-2"><AdminPill tone="info">Memuat...</AdminPill></div> : null}
           <AdminToolbar
             search={search}
             onSearchChange={setSearch}
@@ -1032,7 +927,15 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                   Detail
                 </Button>
                 {row.status === 'failed' ? (
-                  <Button size="sm" onClick={() => setToast(`Retry ${row.id}`)}>
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      adminService.retryJob(row.id).then((res) => {
+                        setToast(res.ok ? `Job ${row.id} di-retry.` : `Gagal retry: ${res.error.safeMessage}`);
+                        loadJobs();
+                      });
+                    }}
+                  >
                     Retry
                   </Button>
                 ) : null}
@@ -1060,6 +963,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
               </AdminPill>
             }
           />
+          {qualityLoading ? <div className="mb-2"><AdminPill tone="info">Memuat...</AdminPill></div> : null}
           <AdminToolbar
             search={search}
             onSearchChange={setSearch}
@@ -1094,7 +998,16 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             ]}
             rowActions={(row) => (
               <>
-                <Button size="sm" variant="secondary" onClick={() => setToast(`Triage ${row.id}`)}>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => {
+                    adminService.triageReport(row.id, 'triaged').then((res) => {
+                      setToast(res.ok ? `Report ${row.id} ditriage.` : `Gagal triage: ${res.error.safeMessage}`);
+                      loadQuality();
+                    });
+                  }}
+                >
                   Triage
                 </Button>
                 <Button size="sm" onClick={() => setToast(`Tutup ${row.id}`)}>
@@ -1119,6 +1032,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             title="Audit trail"
             description="Jejak aksi superadmin untuk akuntabilitas platform."
           />
+          {auditLoading ? <div className="mb-2"><AdminPill tone="info">Memuat...</AdminPill></div> : null}
           <AdminDataTable
             rows={[
               {
@@ -1173,6 +1087,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
               </AdminPill>
             }
           />
+          {billingLoading ? <div className="mb-2"><AdminPill tone="info">Memuat...</AdminPill></div> : null}
           <AdminToolbar
             search={search}
             onSearchChange={setSearch}
@@ -1230,8 +1145,9 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             title="Feature flags"
             description="Nyalakan/matikan fitur global atau pilot tanpa deploy."
           />
+          {flagsLoading ? <div className="mb-2"><AdminPill tone="info">Memuat...</AdminPill></div> : null}
           <AdminDataTable
-            rows={flags}
+            rows={flagsData}
             columns={[
               { key: 'key', header: 'Flag', render: (row) => row.key },
               { key: 'desc', header: 'Deskripsi', render: (row) => row.description },
@@ -1251,12 +1167,14 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                 size="sm"
                 variant="secondary"
                 onClick={() => {
-                  setFlags((prev) =>
-                    prev.map((item) =>
-                      item.id === row.id ? { ...item, enabled: !item.enabled } : item,
-                    ),
-                  );
-                  setToast(`Flag ${row.key} diubah (mock).`);
+                  adminService.toggleFlag(row.key).then((res) => {
+                    if (res.ok) {
+                      setToast(`Flag ${row.key} ${res.value.enabled ? 'diaktifkan' : 'dimatikan'}.`);
+                    } else {
+                      setToast(`Gagal toggle: ${res.error.safeMessage}`);
+                    }
+                    loadFlags();
+                  });
                 }}
               >
                 Toggle
@@ -1277,6 +1195,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
               </Button>
             }
           />
+          {contentLoading ? <div className="mb-2"><AdminPill tone="info">Memuat...</AdminPill></div> : null}
           <AdminToolbar
             search={search}
             onSearchChange={setSearch}
