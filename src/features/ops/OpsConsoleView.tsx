@@ -1032,20 +1032,26 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
   useEffect(() => {
     if (key === 'catalog') {
       setCatalogLoading(true);
-      fetch('/v1/catalog/grades').then((r) => r.json()).then((j) => {
-        setCatalogGrades(j?.data ?? []);
-        setCatalogLoading(false);
-        // load subjects for first grade if available
-        const firstGrade = j?.data?.[0]?.id;
-        if (firstGrade) {
-          setCatalogSelectedGrade(firstGrade);
-          setCatalogSubjectsLoading(true);
-          fetch(`/v1/catalog/subjects?gradeId=${firstGrade}`).then((r) => r.json()).then((js) => {
-            setCatalogSubjects(js?.data ?? []);
-            setCatalogSubjectsLoading(false);
-          }).catch(() => setCatalogSubjectsLoading(false));
-        }
-      }).catch(() => setCatalogLoading(false));
+      const base = (process.env.NEXT_PUBLIC_API_BASE_URL ?? '/v1').replace(/\/+$/, '');
+      fetch(`${base}/catalog/grades`, { credentials: 'include' })
+        .then((r) => r.json())
+        .then((j) => {
+          setCatalogGrades(j?.data ?? []);
+          setCatalogLoading(false);
+          const firstGrade = j?.data?.[0]?.id;
+          if (firstGrade) {
+            setCatalogSelectedGrade(firstGrade);
+            setCatalogSubjectsLoading(true);
+            fetch(`${base}/catalog/subjects?gradeId=${firstGrade}`, { credentials: 'include' })
+              .then((r) => r.json())
+              .then((js) => {
+                setCatalogSubjects(js?.data ?? []);
+                setCatalogSubjectsLoading(false);
+              })
+              .catch(() => setCatalogSubjectsLoading(false));
+          }
+        })
+        .catch(() => setCatalogLoading(false));
     }
   }, [key]);
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -3087,7 +3093,19 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                 <Button
                   size="sm"
                   variant={row.status === 'published' ? 'secondary' : undefined}
-                  onClick={() => setToast(`${row.status === 'published' ? 'Unpublish' : 'Publish'} ${row.slug} — hubungkan ke CMS endpoint`)}
+                  onClick={() => {
+                    const action = row.status === 'published'
+                      ? adminService.unpublishPage(row.slug)
+                      : adminService.publishPage(row.slug);
+                    action.then((res) => {
+                      if (res.ok) {
+                        setToast(`${row.status === 'published' ? 'Unpublish' : 'Publish'} ${row.slug} berhasil.`);
+                        loadContent();
+                      } else {
+                        setToast(`Gagal: ${res.error.safeMessage}`);
+                      }
+                    });
+                  }}
                 >
                   {row.status === 'published' ? 'Unpublish' : 'Publish'}
                 </Button>

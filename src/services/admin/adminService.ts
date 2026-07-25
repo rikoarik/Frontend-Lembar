@@ -540,6 +540,15 @@ export const adminService = {
     return request(`/v1/admin/entitlements/${workspaceId}`, 'POST', data);
   },
 
+  // Marketing CMS publish/unpublish
+  publishPage(slug: string): Promise<Result<unknown, AdminError>> {
+    return request(`/v1/ops/marketing/pages/${encodeURIComponent(slug)}/publish`, 'POST');
+  },
+
+  unpublishPage(slug: string): Promise<Result<unknown, AdminError>> {
+    return request(`/v1/ops/marketing/pages/${encodeURIComponent(slug)}/unpublish`, 'POST');
+  },
+
   // Create marketing content page
   createMarketingPage(data: { slug: string; title: string }): Promise<Result<{ slug: string; title: string }, AdminError>> {
     return request('/v1/ops/marketing/pages', 'POST', data);
