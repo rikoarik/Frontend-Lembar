@@ -40,6 +40,7 @@ export const OPS_NAV: AdminNavItem[] = [
   { href: '/ops/billing', label: 'Billing', icon: 'payments' },
   { href: '/ops/flags', label: 'Flags', icon: 'toggle_on' },
   { href: '/ops/content', label: 'Marketing CMS', icon: 'web' },
+  { href: '/ops/profile', label: 'Profil', icon: 'account_circle' },
 ];
 
 export function isAdminNavActive(href: string, currentPath: string): boolean {

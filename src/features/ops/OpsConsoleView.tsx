@@ -521,8 +521,6 @@ function AccountRowActions({
                   setIsOpen(false);
                   if (onOpenDetail) {
                     onOpenDetail(row.id);
-                  } else {
-                    setToast(`Detail ${row.displayName}`);
                   }
                 }}
               >
@@ -1023,11 +1021,15 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { if (key === 'billing') loadBilling(); }, [key]);
   // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { if (key === 'billing') loadBilling(filterBilling, search, billingPage); }, [billingPage]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { if (key === 'flags') loadFlags(); }, [key]);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { if (key === 'prompts') loadPrompts(); }, [key]);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { if (key === 'content') loadContent(); }, [key]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { if (key === 'content') loadContent(); }, [contentPage]);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (key === 'catalog') {
