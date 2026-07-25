@@ -18,6 +18,8 @@ import {
   type AdminDashboard,
   type AdminJobRow,
   type AdminAccountRow,
+  type AdminAccountDetail,
+  type AdminAccountAuditItem,
   type AdminSchoolRow,
   type AdminQualityRow,
   type AdminBillingRow,
@@ -72,6 +74,38 @@ function qualityTone(status: QualityRow['status']): 'ok' | 'warn' | 'bad' | 'inf
   return 'ok';
 }
 
+function getPaginationRange(currentPage: number, totalPages: number): (number | '...')[] {
+  if (totalPages <= 7) {
+    return Array.from({ length: totalPages }, (_, i) => i + 1);
+  }
+
+  const leftSiblingIndex = Math.max(currentPage - 1, 1);
+  const rightSiblingIndex = Math.min(currentPage + 1, totalPages);
+
+  const shouldShowLeftDots = leftSiblingIndex > 2;
+  const shouldShowRightDots = rightSiblingIndex < totalPages - 1;
+
+  if (!shouldShowLeftDots && shouldShowRightDots) {
+    const leftRange = Array.from({ length: 4 }, (_, i) => i + 1);
+    return [...leftRange, '...', totalPages];
+  }
+
+  if (shouldShowLeftDots && !shouldShowRightDots) {
+    const rightRange = Array.from({ length: 4 }, (_, i) => totalPages - 3 + i);
+    return [1, '...', ...rightRange];
+  }
+
+  if (shouldShowLeftDots && shouldShowRightDots) {
+    const middleRange = Array.from(
+      { length: rightSiblingIndex - leftSiblingIndex + 1 },
+      (_, i) => leftSiblingIndex + i,
+    );
+    return [1, '...', ...middleRange, '...', totalPages];
+  }
+
+  return Array.from({ length: totalPages }, (_, i) => i + 1);
+}
+
 export function AdminPagination({
   currentPage,
   totalPages,
@@ -85,9 +119,10 @@ export function AdminPagination({
   pageSize: number;
   onPageChange: (page: number) => void;
 }) {
-  if (totalPages <= 1) return null;
+  if (totalItems <= 0) return null;
   const start = (currentPage - 1) * pageSize + 1;
   const end = Math.min(currentPage * pageSize, totalItems);
+  const paginationRange = getPaginationRange(currentPage, totalPages);
 
   return (
     <div className="flex items-center justify-between border-t border-[#ddd4c8]/50 bg-[#faf8f5]/60 px-4 py-3 sm:px-6 rounded-b-2xl">
@@ -132,8 +167,19 @@ export function AdminPagination({
                 chevron_left
               </span>
             </button>
-            {Array.from({ length: totalPages }).map((_, idx) => {
-              const p = idx + 1;
+            {paginationRange.map((item, idx) => {
+              if (item === '...') {
+                return (
+                  <span
+                    key={`dots-${idx}`}
+                    className="relative inline-flex items-center px-3 py-1.5 text-[11px] font-semibold text-[#8a8379] ring-1 ring-inset ring-[#ddd4c8]/60 select-none bg-white"
+                  >
+                    …
+                  </span>
+                );
+              }
+
+              const p = item as number;
               const isCurrent = p === currentPage;
               return (
                 <button
@@ -167,10 +213,335 @@ export function AdminPagination({
   );
 }
 
+function AccountDetailView({
+  accountId,
+  onBack,
+  setToast,
+  onUpdated,
+}: {
+  accountId: string;
+  onBack: () => void;
+  setToast: (msg: string) => void;
+  onUpdated: () => void;
+}) {
+  const [loading, setLoading] = useState(true);
+  const [detail, setDetail] = useState<AdminAccountDetail | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editPhone, setEditPhone] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setLoading(true);
+    adminService.accountDetail(accountId).then((res) => {
+      if (res.ok) {
+        setDetail(res.value);
+        setEditName(res.value.name || res.value.displayName || '');
+        setEditPhone(res.value.phone || '');
+      } else {
+        setToast(`Gagal memuat detail: ${res.error.safeMessage}`);
+      }
+      setLoading(false);
+    });
+  }, [accountId, setToast]);
+
+  const handleSave = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    adminService
+      .updateAccount(accountId, { name: editName, phone: editPhone })
+      .then((res) => {
+        if (res.ok) {
+          setDetail(res.value);
+          setToast(`Detail akun ${res.value.name} berhasil diperbarui.`);
+          onUpdated();
+        } else {
+          setToast(`Gagal memperbarui: ${res.error.safeMessage}`);
+        }
+      })
+      .finally(() => setSaving(false));
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Top Header Bar with Back Button */}
+      <div className="flex items-center justify-between">
+        <button
+          type="button"
+          onClick={onBack}
+          className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#6d665d] hover:text-[#171717] transition-colors"
+        >
+          ← Kembali ke Daftar Akun
+        </button>
+      </div>
+
+      <AdminPageHeader
+        title={detail?.name || 'Detail Akun'}
+        description={detail?.email ? `ID: ${detail.id} · ${detail.email}` : `ID: ${accountId}`}
+        meta={
+          detail ? (
+            <>
+              <AdminPill tone={detail.status === 'aktif' ? 'ok' : 'warn'}>
+                {detail.status}
+              </AdminPill>
+              <AdminPill tone="info">{detail.role}</AdminPill>
+            </>
+          ) : null
+        }
+      />
+
+      {loading ? (
+        <div className="rounded-2xl border border-[#ddd4c8]/70 bg-white py-14 text-center text-[13px] text-[#6d665d]">
+          Memuat detail akun...
+        </div>
+      ) : detail ? (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {/* Left / Main Column: Edit Profile Form */}
+          <div className="lg:col-span-2 space-y-4">
+            <form onSubmit={handleSave} className="rounded-2xl border border-[#ddd4c8]/70 bg-white p-5 shadow-sm space-y-4">
+              <h3 className="text-[15px] font-bold text-[#171717]">Edit Profil Akun</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[12px] font-medium text-[#6d665d] mb-1.5">Nama Lengkap</label>
+                  <input
+                    type="text"
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    className="w-full h-10 rounded-xl border border-[#ddd4c8] bg-white px-3.5 text-[13px] text-[#171717] focus:outline-none focus:ring-2 focus:ring-[#171717]/20"
+                    placeholder="Nama akun"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[12px] font-medium text-[#6d665d] mb-1.5">No. Telepon</label>
+                  <input
+                    type="text"
+                    value={editPhone}
+                    onChange={(e) => setEditPhone(e.target.value)}
+                    className="w-full h-10 rounded-xl border border-[#ddd4c8] bg-white px-3.5 text-[13px] text-[#171717] focus:outline-none focus:ring-2 focus:ring-[#171717]/20"
+                    placeholder="+628123456789"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end pt-2">
+                <Button size="sm" type="submit" disabled={saving}>
+                  {saving ? 'Menyimpan...' : 'Simpan Perubahan'}
+                </Button>
+              </div>
+            </form>
+
+            {/* Audit Log Timeline */}
+            {detail.auditLog && detail.auditLog.length > 0 && (
+              <div className="rounded-2xl border border-[#ddd4c8]/70 bg-white p-5 shadow-sm space-y-3">
+                <h3 className="text-[15px] font-bold text-[#171717]">Log Audit Riwayat Aktivitas</h3>
+                <div className="rounded-xl border border-[#ddd4c8] bg-white overflow-hidden text-[12px]">
+                  <table className="w-full text-left">
+                    <thead className="border-b border-[#ddd4c8]/60 bg-[#faf7f2] text-[11px] text-[#6d665d]">
+                      <tr>
+                        <th className="px-3.5 py-2.5">Aksi</th>
+                        <th className="px-3.5 py-2.5">Oleh</th>
+                        <th className="px-3.5 py-2.5">Waktu</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#ddd4c8]/40">
+                      {detail.auditLog.map((log: AdminAccountAuditItem) => (
+                        <tr key={log.id}>
+                          <td className="px-3.5 py-2.5 font-mono text-[11px] text-[#171717]">{log.action}</td>
+                          <td className="px-3.5 py-2.5">{log.by}</td>
+                          <td className="px-3.5 py-2.5 text-[#6d665d]">{log.at}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Right Column: Metadata Overview */}
+          <div className="space-y-4">
+            <div className="rounded-2xl border border-[#ddd4c8]/70 bg-white p-5 shadow-sm space-y-3 text-[13px]">
+              <h3 className="text-[15px] font-bold text-[#171717]">Informasi Sistem</h3>
+              
+              <div className="divide-y divide-[#ddd4c8]/40">
+                <div className="py-2 flex items-center justify-between">
+                  <span className="text-[#6d665d]">Username</span>
+                  <span className="font-semibold text-[#171717]">{detail.username || '-'}</span>
+                </div>
+                <div className="py-2 flex items-center justify-between">
+                  <span className="text-[#6d665d]">Sekolah</span>
+                  <span className="font-semibold text-[#171717]">{detail.school || detail.schoolSlug || '-'}</span>
+                </div>
+                <div className="py-2 flex items-center justify-between">
+                  <span className="text-[#6d665d]">Workspace ID</span>
+                  <span className="font-mono text-[11px] text-[#171717]">{detail.workspaceId || '-'}</span>
+                </div>
+                <div className="py-2 flex items-center justify-between">
+                  <span className="text-[#6d665d]">Status Billing</span>
+                  <span className="font-semibold text-[#171717]">{detail.billing?.state || 'free'}</span>
+                </div>
+                <div className="py-2 flex items-center justify-between">
+                  <span className="text-[#6d665d]">Kuota Terpakai</span>
+                  <span className="font-semibold text-[#171717]">{detail.stats?.quotaUsed ?? 0}</span>
+                </div>
+                <div className="py-2 flex items-center justify-between">
+                  <span className="text-[#6d665d]">Total Job</span>
+                  <span className="font-semibold text-[#171717]">{detail.stats?.jobsTotal ?? 0}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function AccountRowActions({
+  row,
+  impersonatingId,
+  handleImpersonate,
+  loadAccounts,
+  setToast,
+  onOpenDetail,
+}: {
+  row: AccountRow;
+  impersonatingId: string | null;
+  handleImpersonate: (row: AccountRow) => void;
+  loadAccounts: () => void;
+  setToast: (msg: string) => void;
+  onOpenDetail?: (id: string) => void;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const isSuspended = row.status === 'ditangguhkan';
+
+  return (
+    <div className="relative flex items-center gap-1.5">
+      <Button
+        size="sm"
+        disabled={impersonatingId === row.id || row.role === 'superadmin'}
+        onClick={() => handleImpersonate(row)}
+      >
+        {impersonatingId === row.id ? 'Mengalihkan...' : 'Impersonate'}
+      </Button>
+
+      <div className="relative">
+        <Button size="sm" variant="secondary" onClick={() => setIsOpen((prev) => !prev)}>
+          Aksi <span className="text-[10px] ml-0.5">▼</span>
+        </Button>
+
+        {isOpen && (
+          <>
+            {/* Backdrop to close dropdown when clicking outside */}
+            <div className="fixed inset-0 z-30" onClick={() => setIsOpen(false)} />
+            <div className="absolute right-0 mt-1 w-40 rounded-lg border border-[#ddd4c8] bg-white py-1 shadow-lg z-40 text-left">
+              <button
+                type="button"
+                className="w-full px-3 py-1.5 text-[12px] text-[#171717] hover:bg-[#faf7f2] text-left transition-colors font-medium"
+                onClick={() => {
+                  setIsOpen(false);
+                  if (onOpenDetail) {
+                    onOpenDetail(row.id);
+                  } else {
+                    setToast(`Detail ${row.displayName}`);
+                  }
+                }}
+              >
+                Detail
+              </button>
+
+              <button
+                type="button"
+                className="w-full px-3 py-1.5 text-[12px] text-[#171717] hover:bg-[#faf7f2] text-left transition-colors font-medium"
+                onClick={() => {
+                  setIsOpen(false);
+                  adminService.resetPassword(row.id).then((res) => {
+                    if (res.ok) {
+                      setToast(`Reset sandi berhasil dikirim ke ${row.email}.`);
+                    } else {
+                      setToast(`Gagal: ${res.error.safeMessage}`);
+                    }
+                  });
+                }}
+              >
+                Reset Sandi
+              </button>
+
+              {row.role !== 'superadmin' && (
+                <>
+                  <button
+                    type="button"
+                    className="w-full px-3 py-1.5 text-[12px] text-[#171717] hover:bg-[#faf7f2] text-left transition-colors font-medium"
+                    onClick={() => {
+                      setIsOpen(false);
+                      const action = isSuspended
+                        ? adminService.unsuspendAccount(row.id)
+                        : adminService.suspendAccount(row.id);
+                      action.then((res) => {
+                        if (res.ok) {
+                          setToast(
+                            `Akun ${row.displayName} berhasil ${isSuspended ? 'diaktifkan' : 'ditangguhkan'}.`,
+                          );
+                          loadAccounts();
+                        } else {
+                          setToast(`Gagal: ${res.error.safeMessage}`);
+                        }
+                      });
+                    }}
+                  >
+                    {isSuspended ? 'Aktifkan' : 'Suspend'}
+                  </button>
+
+                  <div className="border-t border-[#eee6da] my-1" />
+
+                  <button
+                    type="button"
+                    className="w-full px-3 py-1.5 text-[12px] text-red-600 hover:bg-red-50 text-left transition-colors font-semibold"
+                    onClick={() => {
+                      setIsOpen(false);
+                      if (confirm(`Apakah Anda yakin ingin menghapus akun ${row.displayName}?`)) {
+                        adminService.deleteAccount(row.id).then((res) => {
+                          if (res.ok) {
+                            setToast(`Akun ${row.displayName} berhasil dihapus.`);
+                            loadAccounts();
+                          } else {
+                            setToast(`Gagal: ${res.error.safeMessage}`);
+                          }
+                        });
+                      }
+                    }}
+                  >
+                    Hapus
+                  </button>
+                </>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function OpsConsoleView({ section = '' }: { section?: string }) {
   const key = section || '';
   const { search, setSearch, selectedIds, setSelectedIds, toggleSelectedId, setToast } =
     useAdminSectionState(key || 'ringkasan');
+
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteName, setInviteName] = useState('');
+  const [inviteRole, setInviteRole] = useState<'' | 'teacher' | 'school_admin' | 'superadmin'>('');
+  const [inviteLoading, setInviteLoading] = useState(false);
+
+  const [filterRole, setFilterRole] = useState<'' | AccountRow['role']>('');
+  const [filterStatus, setFilterStatus] = useState<'' | AccountRow['status']>('');
+  const [filterPlan, setFilterPlan] = useState<'' | SchoolRow['plan']>('');
+  const [filterJobStatus, setFilterJobStatus] = useState<'' | JobRow['status']>('');
+  const [filterQuality, setFilterQuality] = useState<'' | QualityRow['status']>('');
+  const [filterBilling, setFilterBilling] = useState<'' | BillingRow['state']>('');
+  const [filterContent, setFilterContent] = useState<'' | ContentRow['status']>('');
+
+  const [page, setPage] = useState(1);
+  const [impersonatingId, setImpersonatingId] = useState<string | null>(null);
 
   // ── Live dashboard state ──────────────────────────────────────────────
   const [dashboard, setDashboard] = useState<AdminDashboard | null>(null);
@@ -196,7 +567,9 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
 
   // ── Per-section live data state ────────────────────────────────────────
   const [accountsData, setAccountsData] = useState<AccountRow[]>([]);
+  const [accountsMeta, setAccountsMeta] = useState({ total: 0, pages: 1 });
   const [accountsLoading, setAccountsLoading] = useState(false);
+  const [detailAccountId, setDetailAccountId] = useState<string | null>(null);
 
   const [schoolsData, setSchoolsData] = useState<SchoolRow[]>([]);
   const [schoolsLoading, setSchoolsLoading] = useState(false);
@@ -223,12 +596,40 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
   const [contentLoading, setContentLoading] = useState(false);
 
   // ── Fetch loaders ─────────────────────────────────────────────────────
-  const loadAccounts = () => {
+  const loadAccounts = (
+    currentPage = page,
+    searchVal = search,
+    roleVal = filterRole,
+    statusVal = filterStatus,
+  ) => {
     setAccountsLoading(true);
-    adminService.accounts().then((res) => {
-      if (res.ok) setAccountsData(res.value);
-      setAccountsLoading(false);
-    });
+    adminService
+      .accounts({
+        q: searchVal || undefined,
+        role: roleVal || undefined,
+        status: statusVal || undefined,
+        page: currentPage,
+        limit: 10,
+      })
+      .then((res) => {
+        if (res.ok) {
+          const val = res.value as any;
+          if (val && typeof val === 'object' && Array.isArray(val.data) && val.meta) {
+            setAccountsData(val.data);
+            setAccountsMeta({
+              total: val.meta.total ?? val.data.length,
+              pages: val.meta.pages ?? Math.max(1, Math.ceil((val.meta.total ?? val.data.length) / 10)),
+            });
+          } else if (Array.isArray(val)) {
+            setAccountsData(val);
+            setAccountsMeta({
+              total: val.length,
+              pages: Math.max(1, Math.ceil(val.length / 10)),
+            });
+          }
+        }
+        setAccountsLoading(false);
+      });
   };
   const loadSchools = () => {
     setSchoolsLoading(true);
@@ -289,7 +690,11 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
 
   // ── Fetch on section change ──────────────────────────────────────────
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { if (key === 'accounts') loadAccounts(); }, [key]);
+  useEffect(() => {
+    if (key === 'accounts') {
+      loadAccounts(page, search, filterRole, filterStatus);
+    }
+  }, [key, page, search, filterRole, filterStatus]);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { if (key === 'schools') loadSchools(); }, [key]);
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -308,22 +713,22 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
   useEffect(() => { if (key === 'content') loadContent(); }, [key]);
 
   
-  // ── Invite form state ────────────────────────────────────────────────
-  const [inviteOpen, setInviteOpen] = useState(false);
-  const [inviteEmail, setInviteEmail] = useState('');
-  const [inviteName, setInviteName] = useState('');
-  const [inviteRole, setInviteRole] = useState<'' | 'teacher' | 'school_admin' | 'superadmin'>('');
-  const [inviteLoading, setInviteLoading] = useState(false);
-
-  const [filterRole, setFilterRole] = useState<'' | AccountRow['role']>('');
-  const [filterStatus, setFilterStatus] = useState<'' | AccountRow['status']>('');
-  const [filterPlan, setFilterPlan] = useState<'' | SchoolRow['plan']>('');
-  const [filterJobStatus, setFilterJobStatus] = useState<'' | JobRow['status']>('');
-  const [filterQuality, setFilterQuality] = useState<'' | QualityRow['status']>('');
-  const [filterBilling, setFilterBilling] = useState<'' | BillingRow['state']>('');
-  const [filterContent, setFilterContent] = useState<'' | ContentRow['status']>('');
-
-  const [page, setPage] = useState(1);
+  // ── Impersonate Action ────────────────────────────────────────────────
+  const handleImpersonate = (row: AccountRow) => {
+    setImpersonatingId(row.id);
+    setToast(`Memulai impersonasi sebagai ${row.displayName}...`);
+    adminService.impersonateAccount(row.id).then((res) => {
+      if (res.ok) {
+        setToast(`Impersonasi ${res.value.targetName || res.value.targetEmail} berhasil. Mengalihkan...`);
+        setTimeout(() => {
+          window.location.href = res.value.homePath;
+        }, 300);
+      } else {
+        setToast(`Gagal: ${res.error.safeMessage}`);
+        setImpersonatingId(null);
+      }
+    });
+  };
 
   useEffect(() => {
     setPage(1);
@@ -563,17 +968,21 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
       ) : null}
 
       {key === 'accounts' ? (
-        <>
-          <AdminPageHeader
-            title="Akun platform"
-            description="Cari, filter, dan kelola akun guru, admin sekolah, serta superadmin."
-            meta={<AdminPill tone="info">{accounts.length} ditampilkan</AdminPill>}
-            actions={
-              <Button size="sm" onClick={() => { setInviteOpen((o) => !o); }}>
-                Undang akun
-              </Button>
-            }
+        detailAccountId ? (
+          <AccountDetailView
+            accountId={detailAccountId}
+            onBack={() => setDetailAccountId(null)}
+            setToast={setToast}
+            onUpdated={loadAccounts}
           />
+        ) : (
+        <>
+          <div className="flex items-center justify-between px-1 py-1">
+            <h2 className="text-[18px] font-bold text-[#171717]">Akun platform</h2>
+            <Button size="sm" onClick={() => setInviteOpen((o) => !o)}>
+              Undang akun
+            </Button>
+          </div>
           {accountsLoading ? <div className="mb-2"><AdminPill tone="info">Memuat...</AdminPill></div> : null}
           {inviteOpen && (
             <form
@@ -662,50 +1071,29 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             onSearchChange={setSearch}
             searchPlaceholder="Cari akun, email, role, sekolah"
             filters={
-              <>
-                <AdminFilterChip active={filterRole === ''} onClick={() => setFilterRole('')}>
-                  Semua role
-                </AdminFilterChip>
-                <AdminFilterChip
-                  active={filterRole === 'teacher'}
-                  onClick={() => setFilterRole('teacher')}
+              <div className="flex items-center gap-2">
+                <select
+                  value={filterRole}
+                  onChange={(e) => setFilterRole(e.target.value as typeof filterRole)}
+                  className="h-9 rounded-xl border border-[#ddd4c8] bg-white pl-3 pr-8 text-[12px] font-medium text-[#171717] focus:outline-none focus:ring-2 focus:ring-[#171717]/20 cursor-pointer"
                 >
-                  teacher
-                </AdminFilterChip>
-                <AdminFilterChip
-                  active={filterRole === 'school_admin'}
-                  onClick={() => setFilterRole('school_admin')}
+                  <option value="">Semua role</option>
+                  <option value="teacher">teacher</option>
+                  <option value="school_admin">school_admin</option>
+                  <option value="superadmin">superadmin</option>
+                </select>
+
+                <select
+                  value={filterStatus}
+                  onChange={(e) => setFilterStatus(e.target.value as typeof filterStatus)}
+                  className="h-9 rounded-xl border border-[#ddd4c8] bg-white pl-3 pr-8 text-[12px] font-medium text-[#171717] focus:outline-none focus:ring-2 focus:ring-[#171717]/20 cursor-pointer"
                 >
-                  school_admin
-                </AdminFilterChip>
-                <AdminFilterChip
-                  active={filterRole === 'superadmin'}
-                  onClick={() => setFilterRole('superadmin')}
-                >
-                  superadmin
-                </AdminFilterChip>
-                <AdminFilterChip active={filterStatus === ''} onClick={() => setFilterStatus('')}>
-                  Semua status
-                </AdminFilterChip>
-                <AdminFilterChip
-                  active={filterStatus === 'aktif'}
-                  onClick={() => setFilterStatus('aktif')}
-                >
-                  aktif
-                </AdminFilterChip>
-                <AdminFilterChip
-                  active={filterStatus === 'baru'}
-                  onClick={() => setFilterStatus('baru')}
-                >
-                  baru
-                </AdminFilterChip>
-                <AdminFilterChip
-                  active={filterStatus === 'ditangguhkan'}
-                  onClick={() => setFilterStatus('ditangguhkan')}
-                >
-                  ditangguhkan
-                </AdminFilterChip>
-              </>
+                  <option value="">Semua status</option>
+                  <option value="aktif">aktif</option>
+                  <option value="baru">baru</option>
+                  <option value="ditangguhkan">ditangguhkan</option>
+                </select>
+              </div>
             }
           />
           <AdminBulkBar count={selectedIds.length} onClear={clearSelection}>
@@ -714,12 +1102,11 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
               variant="secondary"
               onClick={() => {
                 const ids = [...selectedIds];
-                Promise.all(ids.map((id) => adminService.suspendAccount(id))).then((results) => {
-                  const failed = results.filter((r) => !r.ok).length;
-                  if (failed === 0) {
-                    setToast(`${ids.length} akun berhasil disuspend.`);
+                adminService.bulkSuspend(ids).then((res) => {
+                  if (res.ok) {
+                    setToast(`${res.value.succeeded} akun berhasil ditangguhkan, ${res.value.failed} gagal.`);
                   } else {
-                    setToast(`${ids.length - failed} berhasil, ${failed} gagal.`);
+                    setToast(`Gagal: ${res.error.safeMessage}`);
                   }
                   clearSelection();
                   loadAccounts();
@@ -730,6 +1117,45 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             </Button>
             <Button
               size="sm"
+              variant="secondary"
+              onClick={() => {
+                const ids = [...selectedIds];
+                adminService.bulkUnsuspend(ids).then((res) => {
+                  if (res.ok) {
+                    setToast(`${res.value.succeeded} akun berhasil diaktifkan, ${res.value.failed} gagal.`);
+                  } else {
+                    setToast(`Gagal: ${res.error.safeMessage}`);
+                  }
+                  clearSelection();
+                  loadAccounts();
+                });
+              }}
+            >
+              Aktifkan
+            </Button>
+            <Button
+              size="sm"
+              variant="danger"
+              onClick={() => {
+                const ids = [...selectedIds];
+                if (confirm(`Apakah Anda yakin ingin menghapus ${ids.length} akun terpilih?`)) {
+                  adminService.bulkDelete(ids).then((res) => {
+                    if (res.ok) {
+                      setToast(`${res.value.succeeded} akun berhasil dihapus, ${res.value.failed} gagal.`);
+                    } else {
+                      setToast(`Gagal: ${res.error.safeMessage}`);
+                    }
+                    clearSelection();
+                    loadAccounts();
+                  });
+                }
+              }}
+            >
+              Hapus
+            </Button>
+            <Button
+              size="sm"
+              variant="secondary"
               onClick={() => {
                 const ids = [...selectedIds];
                 Promise.all(ids.map((id) => adminService.resetPassword(id))).then((results) => {
@@ -743,7 +1169,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             </Button>
           </AdminBulkBar>
           <AdminDataTable
-            rows={accounts.slice((page - 1) * 3, page * 3)}
+            rows={accountsMeta.total !== accountsData.length ? accounts : accounts.slice((page - 1) * 10, page * 10)}
             selectable
             selectedIds={selectedIds}
             onToggleRow={toggleSelectedId}
@@ -796,28 +1222,36 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
               { key: 'school', header: 'Sekolah', render: (row) => row.school },
             ]}
             rowActions={(row) => (
-              <>
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  onClick={() => setToast(`Detail ${row.displayName}`)}
-                >
-                  Detail
-                </Button>
-                <Button size="sm" onClick={() => setToast('Fitur impersonate akan segera hadir.')}>
-                  Impersonate
-                </Button>
-              </>
+              <AccountRowActions
+                row={row}
+                impersonatingId={impersonatingId}
+                handleImpersonate={handleImpersonate}
+                loadAccounts={loadAccounts}
+                setToast={setToast}
+                onOpenDetail={setDetailAccountId}
+              />
             )}
           />
           <AdminPagination
             currentPage={page}
-            totalPages={Math.ceil(accounts.length / 3)}
-            totalItems={accounts.length}
-            pageSize={3}
+            totalPages={
+              accountsMeta.total !== accountsData.length
+                ? accountsMeta.pages
+                : Math.max(1, Math.ceil(accounts.length / 10))
+            }
+            totalItems={accountsMeta.total !== accountsData.length ? accountsMeta.total : accounts.length}
+            pageSize={10}
             onPageChange={setPage}
           />
         </>
+        )
+      ) : key.startsWith('accounts/') ? (
+        <AccountDetailView
+          accountId={key.replace('accounts/', '')}
+          onBack={() => { window.location.href = '/ops/accounts'; }}
+          setToast={setToast}
+          onUpdated={loadAccounts}
+        />
       ) : null}
 
       {key === 'schools' ? (

@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState, useTransition, type ReactNode } from 'react';
 import { Button, StatusBadge } from '@/app/components/ui';
 import type { StatusLabel } from '@/app/components/ui';
+import { ImpersonationBanner } from '@/app/components/auth/ImpersonationBanner';
 import { useAdminPanel } from '@/src/features/admin/adminPanelState';
 import {
   isAdminNavActive,
@@ -184,7 +185,7 @@ export function AdminPageHeader({
   meta?: ReactNode;
 }) {
   return (
-    <div className="flex flex-col gap-3 rounded-2xl border border-[#ddd4c8]/70 bg-white p-5 shadow-[0_2px_12px_rgba(23,23,23,0.01),0_1px_2px_rgba(23,23,23,0.02)] sm:flex-row sm:items-start sm:justify-between">
+    <div className="flex flex-col gap-2.5 rounded-2xl border border-[#ddd4c8]/70 bg-white px-5 py-3.5 sm:py-4 shadow-[0_2px_12px_rgba(23,23,23,0.01),0_1px_2px_rgba(23,23,23,0.02)] sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0">
         <h2 className="text-[18px] font-bold leading-normal pb-0.5 tracking-[-0.03em] text-[#171717]">
           {title}
@@ -384,7 +385,9 @@ export function AdminDataTable<T extends { id: string }>({
                   ))}
                   {rowActions ? (
                     <td className={`px-4 ${cellY} align-middle`}>
-                      <div className="flex flex-wrap justify-end gap-1.5">{rowActions(row)}</div>
+                      <div className="flex items-center justify-end gap-1.5 whitespace-nowrap">
+                        {rowActions(row)}
+                      </div>
                     </td>
                   ) : null}
                 </tr>
@@ -511,6 +514,12 @@ export function AdminShell({
     };
   }, [profileOpen]);
 
+  useEffect(() => {
+    if (!toast) return;
+    const timer = setTimeout(() => setToast(null), 4000);
+    return () => clearTimeout(timer);
+  }, [toast, setToast]);
+
   const navigate = useCallback(
     (href: string) => {
       if (href === pathname) return;
@@ -522,7 +531,8 @@ export function AdminShell({
   );
 
   return (
-    <div className="h-dvh overflow-hidden bg-[#faf7f2] text-[#171717]">
+    <div className="h-dvh flex flex-col overflow-hidden bg-[#faf7f2] text-[#171717]">
+      <ImpersonationBanner />
       <a
         href="#konten-admin"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[var(--z-toast)] focus:rounded-md focus:bg-white focus:px-3 focus:py-2"
@@ -812,14 +822,14 @@ export function AdminShell({
           >
             {toast ? (
               <div
-                className="flex items-start justify-between gap-3 rounded-xl border border-[#ddd4c8] bg-white px-4 py-3 text-[13px] shadow-[0_8px_24px_rgba(23,23,23,0.06)]"
+                className="fixed bottom-6 right-6 z-[var(--z-toast)] flex items-center justify-between gap-4 rounded-xl border border-[#333] bg-[#171717] text-white px-4 py-3 text-[13px] shadow-2xl max-w-md"
                 role="status"
                 aria-live="polite"
               >
-                <span className="text-[#171717]">{toast}</span>
+                <span className="font-medium text-white">{toast}</span>
                 <button
                   type="button"
-                  className="text-[12px] font-semibold text-[#6d665d] hover:text-[#171717]"
+                  className="text-[12px] font-bold text-[#b0a89e] hover:text-white transition-colors ml-2"
                   onClick={() => setToast(null)}
                 >
                   Tutup

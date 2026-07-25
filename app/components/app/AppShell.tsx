@@ -5,6 +5,7 @@ import { LeftRail } from './LeftRail';
 import { TopBar } from './TopBar';
 import { WorkspaceSwitcher } from './WorkspaceSwitcher';
 import { AccountMenu } from './AccountMenu';
+import { ImpersonationBanner } from '@/app/components/auth/ImpersonationBanner';
 import { useWorkspace } from '@/src/features/workspace/workspaceContext';
 
 type AppShellProps = {
@@ -32,6 +33,7 @@ export function AppShell({ children }: AppShellProps) {
 
   return (
     <div className="flex h-dvh flex-col overflow-hidden bg-[#f3eee6] text-[#171717]">
+      <ImpersonationBanner />
       <a
         href="#konten-utama"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[var(--z-toast)] focus:rounded-md focus:bg-white focus:px-3 focus:py-2"

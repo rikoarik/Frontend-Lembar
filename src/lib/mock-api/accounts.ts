@@ -70,6 +70,14 @@ export function findMockAccountBySession(session: string | undefined | null): Mo
   return MOCK_ACCOUNTS.find((account) => account.session === session) ?? null;
 }
 
+export function findMockAccountById(id: string): MockAccount | null {
+  return (
+    MOCK_ACCOUNTS.find(
+      (account) => account.accountId === id || account.session === id || account.identifier === id,
+    ) ?? null
+  );
+}
+
 export function authSuccessFor(account: MockAccount) {
   return {
     accountId: account.accountId,

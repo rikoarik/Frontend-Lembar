@@ -11,7 +11,14 @@
 
 import { err, ok, type Result } from '@/src/types/result';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? '/v1';
+function resolveApiUrl(path: string): string {
+  const base = (process.env.NEXT_PUBLIC_API_BASE_URL ?? '/v1').replace(/\/+$/, '');
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  if (base.endsWith('/v1') && cleanPath.startsWith('/v1')) {
+    return `${base}${cleanPath.slice(3)}`;
+  }
+  return `${base}${cleanPath}`;
+}
 
 export type AdminError = {
   code: string;
@@ -44,7 +51,7 @@ async function request<T>(
   body?: unknown,
 ): Promise<Result<T, AdminError>> {
   try {
-    const response = await fetch(`${API_BASE}${path}`, {
+    const response = await fetch(resolveApiUrl(path), {
       method,
       credentials: 'include',
       headers: {
@@ -54,7 +61,10 @@ async function request<T>(
       body: body === undefined ? undefined : JSON.stringify(body),
     });
     if (response.ok) {
-      const json = (await response.json()) as { data: T };
+      const json = (await response.json()) as { data: T; meta?: unknown };
+      if (json && typeof json === 'object' && 'meta' in json && json.meta !== undefined) {
+        return ok({ data: json.data, meta: json.meta } as unknown as T);
+      }
       return ok(json.data);
     }
     return err(await parseError(response));
@@ -90,9 +100,45 @@ export type AdminAccountRow = {
   id: string;
   displayName: string;
   email: string;
-  role: 'teacher' | 'school_admin' | 'superadmin';
+  role: 'teacher' | 'school_admin' | 'superadmin' | 'subscriber';
   status: 'aktif' | 'ditangguhkan' | 'baru';
   school: string;
+};
+
+export type AdminAccountAuditItem = {
+  id: string;
+  action: string;
+  at: string;
+  by: string;
+};
+
+export type AdminAccountDetail = {
+  id: string;
+  email: string;
+  name: string;
+  displayName?: string;
+  username?: string | null;
+  phone?: string | null;
+  roles?: string[];
+  role: 'teacher' | 'school_admin' | 'superadmin' | 'subscriber';
+  status: 'aktif' | 'ditangguhkan' | 'baru';
+  school?: string;
+  schoolSlug?: string;
+  workspaceId?: string;
+  billing?: {
+    state: string;
+    plan: string;
+    seats: number;
+    renewsAt?: string | null;
+  };
+  stats?: {
+    jobsTotal: number;
+    quotaUsed: number;
+  };
+  createdAt?: string;
+  updatedAt?: string;
+  lastLoginAt?: string | null;
+  auditLog?: AdminAccountAuditItem[];
 };
 
 export type AdminSchoolRow = {
@@ -161,24 +207,104 @@ export const adminService = {
   },
 
   // Accounts
-  accounts(): Promise<Result<AdminAccountRow[], AdminError>> {
-    return request<AdminAccountRow[]>('/v1/admin/accounts');
+  accounts(params?: {
+    q?: string;
+    role?: string;
+    status?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<
+    Result<
+      {
+        data: AdminAccountRow[];
+        meta: { total: number; page: number; limit: number; pages: number };
+      },
+      AdminError
+    >
+  > {
+    const query = new URLSearchParams();
+    if (params?.q) query.set('q', params.q);
+    if (params?.role) query.set('role', params.role);
+    if (params?.status) query.set('status', params.status);
+    if (params?.page) query.set('page', String(params.page));
+    if (params?.limit) query.set('limit', String(params.limit));
+    const qs = query.toString();
+    return request<{
+      data: AdminAccountRow[];
+      meta: { total: number; page: number; limit: number; pages: number };
+    }>(`/v1/admin/accounts${qs ? `?${qs}` : ''}`);
   },
 
   inviteAccount(payload: {
     email: string;
     name?: string;
     role?: string;
-  }): Promise<Result<{ id: string }, AdminError>> {
-    return request<{ id: string }>('/v1/admin/accounts/invite', 'POST', payload);
+  }): Promise<Result<{ email: string; invited: boolean }, AdminError>> {
+    return request<{ email: string; invited: boolean }>('/v1/admin/accounts/invite', 'POST', payload);
   },
 
-  suspendAccount(id: string): Promise<Result<{ id: string }, AdminError>> {
-    return request<{ id: string }>(`/v1/admin/accounts/${id}/suspend`, 'POST');
+  suspendAccount(id: string): Promise<Result<{ id: string; suspended: boolean }, AdminError>> {
+    return request<{ id: string; suspended: boolean }>(`/v1/admin/accounts/${id}/suspend`, 'POST');
   },
 
-  resetPassword(id: string): Promise<Result<{ id: string }, AdminError>> {
-    return request<{ id: string }>(`/v1/admin/accounts/${id}/reset-password`, 'POST');
+  unsuspendAccount(id: string): Promise<Result<{ id: string; suspended: boolean }, AdminError>> {
+    return request<{ id: string; suspended: boolean }>(`/v1/admin/accounts/${id}/unsuspend`, 'POST');
+  },
+
+  accountDetail(id: string): Promise<Result<AdminAccountDetail, AdminError>> {
+    return request<AdminAccountDetail>(`/v1/admin/accounts/${id}`);
+  },
+
+  updateAccount(
+    id: string,
+    payload: { name?: string; phone?: string },
+  ): Promise<Result<AdminAccountDetail, AdminError>> {
+    return request<AdminAccountDetail>(`/v1/admin/accounts/${id}`, 'PATCH', payload);
+  },
+
+  deleteAccount(id: string): Promise<Result<{ id: string; deleted: boolean; email: string }, AdminError>> {
+    return request<{ id: string; deleted: boolean; email: string }>(`/v1/admin/accounts/${id}`, 'DELETE');
+  },
+
+  bulkSuspend(ids: string[]): Promise<Result<{ succeeded: number; failed: number }, AdminError>> {
+    return request<{ succeeded: number; failed: number }>('/v1/admin/accounts/bulk/suspend', 'POST', { ids });
+  },
+
+  bulkUnsuspend(ids: string[]): Promise<Result<{ succeeded: number; failed: number }, AdminError>> {
+    return request<{ succeeded: number; failed: number }>('/v1/admin/accounts/bulk/unsuspend', 'POST', { ids });
+  },
+
+  bulkDelete(ids: string[]): Promise<Result<{ succeeded: number; failed: number }, AdminError>> {
+    return request<{ succeeded: number; failed: number }>('/v1/admin/accounts/bulk/delete', 'POST', { ids });
+  },
+
+  impersonateAccount(
+    id: string,
+  ): Promise<
+    Result<
+      {
+        token: string;
+        targetId: string;
+        targetEmail: string;
+        targetName: string;
+        expiresIn: number;
+        homePath: string;
+      },
+      AdminError
+    >
+  > {
+    return request<{
+      token: string;
+      targetId: string;
+      targetEmail: string;
+      targetName: string;
+      expiresIn: number;
+      homePath: string;
+    }>(`/v1/admin/accounts/${id}/impersonate`, 'POST');
+  },
+
+  resetPassword(id: string): Promise<Result<{ id: string; resetSent: boolean }, AdminError>> {
+    return request<{ id: string; resetSent: boolean }>(`/v1/admin/accounts/${id}/reset-password`, 'POST');
   },
 
   updateRoles(id: string, roles: string[]): Promise<Result<{ id: string; roles: string[] }, AdminError>> {

@@ -43,24 +43,32 @@ vi.mock('@/src/services/admin/adminService', () => ({
     }),
     accounts: vi.fn().mockResolvedValue({
       ok: true,
-      value: [
-        {
-          id: 'acc_1',
-          displayName: 'Ops Superadmin',
-          email: 'ops@lembar.id',
-          role: 'superadmin',
-          status: 'aktif',
-          school: 'Lembar HQ',
+      value: {
+        data: [
+          {
+            id: 'acc_1',
+            displayName: 'Ops Superadmin',
+            email: 'ops@lembar.id',
+            role: 'superadmin',
+            status: 'aktif',
+            school: 'Lembar HQ',
+          },
+          {
+            id: 'acc_2',
+            displayName: 'Demo Guru',
+            email: 'guru@lembar.id',
+            role: 'teacher',
+            status: 'aktif',
+            school: 'SDN 01',
+          },
+        ],
+        meta: {
+          total: 2,
+          page: 1,
+          limit: 10,
+          pages: 1,
         },
-        {
-          id: 'acc_2',
-          displayName: 'Demo Guru',
-          email: 'guru@lembar.id',
-          role: 'teacher',
-          status: 'aktif',
-          school: 'SDN 01',
-        },
-      ],
+      },
     }),
     billing: vi.fn().mockResolvedValue({
       ok: true,

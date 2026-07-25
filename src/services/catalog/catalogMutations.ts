@@ -8,6 +8,15 @@ type CatalogOption = components['schemas']['CatalogOption'];
 
 const DEFAULT_TIMEOUT_MS = 15_000;
 
+function resolveApiUrl(path: string): string {
+  const base = (process.env.NEXT_PUBLIC_API_BASE_URL ?? '/v1').replace(/\/+$/, '');
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  if (base.endsWith('/v1') && cleanPath.startsWith('/v1')) {
+    return `${base}${cleanPath.slice(3)}`;
+  }
+  return `${base}${cleanPath}`;
+}
+
 async function getCatalog<T>(
   path: string,
   headers: Record<string, string>,
@@ -20,7 +29,7 @@ async function getCatalog<T>(
   }
   let response: Response;
   try {
-    response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL ?? '/api'}${path}`, {
+    response = await fetch(resolveApiUrl(path), {
       method: 'GET',
       credentials: 'include',
       headers: {

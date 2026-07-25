@@ -10,7 +10,12 @@ function apiOrigin(value) {
 const isDev = process.env.NODE_ENV === 'development';
 const shouldUpgradeInsecureRequests =
   process.env.VERCEL === '1' || process.env.NEXT_PUBLIC_APP_URL?.startsWith('https://');
-const connectSrc = ["connect-src 'self'", apiOrigin(process.env.NEXT_PUBLIC_API_BASE_URL)]
+const connectSrc = [
+  "connect-src 'self'",
+  apiOrigin(process.env.NEXT_PUBLIC_API_BASE_URL),
+  apiOrigin(process.env.BACKEND_API_BASE_URL),
+  'https://api.lembar.web.id',
+]
   .filter(Boolean)
   .join(' ');
 

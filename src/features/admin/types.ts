@@ -17,7 +17,7 @@ export type AdminColumn<T> = {
 
 export const SCHOOL_NAV: AdminNavItem[] = [
   { href: '/school', label: 'Ringkasan', icon: 'dashboard' },
-  { href: '/school/guru', label: 'Guru', badge: '5', icon: 'group' },
+  { href: '/school/guru', label: 'Guru', icon: 'group' },
   { href: '/school/guru/undang', label: 'Undang', icon: 'person_add' },
   { href: '/school/penggunaan', label: 'Penggunaan', icon: 'monitoring' },
   { href: '/school/pengaturan', label: 'Pengaturan', icon: 'settings' },
@@ -27,12 +27,12 @@ export const SCHOOL_NAV: AdminNavItem[] = [
 
 export const OPS_NAV: AdminNavItem[] = [
   { href: '/ops', label: 'Ringkasan', icon: 'dashboard' },
-  { href: '/ops/accounts', label: 'Akun', badge: '5', icon: 'manage_accounts' },
-  { href: '/ops/schools', label: 'Sekolah', badge: '4', icon: 'apartment' },
+  { href: '/ops/accounts', label: 'Akun', icon: 'manage_accounts' },
+  { href: '/ops/schools', label: 'Sekolah', icon: 'apartment' },
   { href: '/ops/catalog', label: 'Katalog', icon: 'menu_book' },
   { href: '/ops/prompts', label: 'Prompt', icon: 'terminal' },
-  { href: '/ops/jobs', label: 'Jobs', badge: '3', icon: 'work' },
-  { href: '/ops/quality', label: 'Quality', badge: '2', icon: 'verified' },
+  { href: '/ops/jobs', label: 'Jobs', icon: 'work' },
+  { href: '/ops/quality', label: 'Quality', icon: 'verified' },
   { href: '/ops/audit', label: 'Audit', icon: 'policy' },
   { href: '/ops/billing', label: 'Billing', icon: 'payments' },
   { href: '/ops/flags', label: 'Flags', icon: 'toggle_on' },

@@ -32,20 +32,24 @@ export async function POST(request: Request) {
   }
 
   if (isMockApiMode()) {
+    console.log('[Login BFF] Mode is MOCK. Identifier:', identifier);
     const account = findMockAccount(identifier, password);
     if (!account) {
+      console.warn('[Login BFF] Mock login failed for identifier:', identifier);
       return mockFail(
         'INVALID_CREDENTIALS',
         'Username/email/phone dan kata sandi tidak cocok.',
         401,
       );
     }
+    console.log('[Login BFF] Mock login success for account:', account.accountId, account.roles);
     return mockOk(authSuccessFor(account), {
       setSession: account.session,
       setRoles: account.roles,
     });
   }
 
+  console.log('[Login BFF] Mode is LIVE. Fetching upstream login from backend...');
   const upstream = await backendFetch('/v1/auth/login', {
     method: 'POST',
     body: JSON.stringify({
@@ -57,6 +61,7 @@ export async function POST(request: Request) {
 
   if (!upstream.ok) {
     const payload = await upstream.json().catch(() => null);
+    console.error('[Login BFF] Upstream login failed with status:', upstream.status, payload);
     const message =
       payload?.error?.message ||
       (upstream.status === 401
@@ -71,8 +76,12 @@ export async function POST(request: Request) {
 
   const auth = (await upstream.json()) as BackendAuthResponse;
   if (!auth?.token || !auth?.user) {
+    console.error('[Login BFF] Invalid backend auth payload:', auth);
     return mockFail('UNKNOWN', 'Respons autentikasi tidak valid.', 502);
   }
+
+  console.log('[Login BFF Success] Logged in user:', auth.user.email, 'roles:', auth.user.roles);
+  console.log('[Login BFF Success] JWT token preview:', auth.token.slice(0, 15) + '...');
 
   const response = NextResponse.json({ data: authSuccessFromBackend(auth) }, { status: 200 });
   response.cookies.set(jwtCookieOptions(auth.token));
