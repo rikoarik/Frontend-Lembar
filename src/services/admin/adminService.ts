@@ -198,6 +198,24 @@ export type AdminContentRow = {
   updatedAt: string;
 };
 
+export type AdminMeta = {
+  total: number;
+  page: number;
+  limit: number;
+  pages: number;
+};
+
+export type AdminAuditDetail = {
+  id: string;
+  actor: string;
+  actorName: string;
+  action: string;
+  targetType: string;
+  target: string;
+  metadata: Record<string, unknown>;
+  at: string;
+};
+
 // ── Service ────────────────────────────────────────────────────────────────
 
 export const adminService = {
@@ -334,11 +352,6 @@ export const adminService = {
     return request(`/v1/admin/quality-reports/${id}`, 'PATCH', { status });
   },
 
-  // Billing
-  billing(): Promise<Result<AdminBillingRow[], AdminError>> {
-    return request<AdminBillingRow[]>('/v1/admin/billing');
-  },
-
   // Flags
   flags(): Promise<Result<AdminFlagRow[], AdminError>> {
     return request<AdminFlagRow[]>('/v1/admin/flags');
@@ -348,21 +361,69 @@ export const adminService = {
     return request(`/v1/admin/flags/${key}/toggle`, 'PATCH');
   },
 
+  deleteFlag(key: string): Promise<Result<{ key: string; deleted: boolean }, AdminError>> {
+    return request(`/v1/admin/flags/${key}`, 'DELETE');
+  },
+
+  createFlag(data: { key: string; description?: string; scope?: string }): Promise<Result<AdminFlagRow, AdminError>> {
+    return request<AdminFlagRow>('/v1/admin/flags', 'POST', data);
+  },
+
   // Prompts
   prompts(): Promise<Result<AdminPromptRow[], AdminError>> {
     return request<AdminPromptRow[]>('/v1/admin/prompts');
   },
 
+  activatePrompt(id: string): Promise<Result<{ id: string; status: string }, AdminError>> {
+    return request(`/v1/admin/prompts/${id}/status`, 'PATCH', { status: 'active' });
+  },
+
+  deactivatePrompt(id: string): Promise<Result<{ id: string; status: string }, AdminError>> {
+    return request(`/v1/admin/prompts/${id}/status`, 'PATCH', { status: 'draft' });
+  },
+
   // Audit
-  audit(params?: { action?: string; actor?: string }): Promise<Result<AdminAuditRow[], AdminError>> {
+  audit(params?: { action?: string; actor?: string; from?: string; to?: string; page?: number; limit?: number }): Promise<Result<{ data: AdminAuditRow[]; meta: AdminMeta }, AdminError>> {
     const qs = new URLSearchParams();
     if (params?.action) qs.set('action', params.action);
     if (params?.actor) qs.set('actor', params.actor);
+    if (params?.from) qs.set('from', params.from);
+    if (params?.to) qs.set('to', params.to);
+    if (params?.page) qs.set('page', String(params.page));
+    if (params?.limit) qs.set('limit', String(params.limit));
     const q = qs.toString();
-    return request<AdminAuditRow[]>(`/v1/admin/audit${q ? `?${q}` : ''}`);
+    return request<{ data: AdminAuditRow[]; meta: AdminMeta }>(`/v1/admin/audit${q ? `?${q}` : ''}`);
   },
 
-  // Marketing / Content pages
+  auditDetail(id: string): Promise<Result<AdminAuditDetail, AdminError>> {
+    return request<AdminAuditDetail>(`/v1/admin/audit/${id}`);
+  },
+
+  // Billing
+  billing(params?: { state?: string; q?: string; page?: number; limit?: number }): Promise<Result<{ data: AdminBillingRow[]; meta: AdminMeta }, AdminError>> {
+    const qs = new URLSearchParams();
+    if (params?.state) qs.set('state', params.state);
+    if (params?.q) qs.set('q', params.q);
+    if (params?.page) qs.set('page', String(params.page));
+    if (params?.limit) qs.set('limit', String(params.limit));
+    const q = qs.toString();
+    return request<{ data: AdminBillingRow[]; meta: AdminMeta }>(`/v1/admin/billing${q ? `?${q}` : ''}`);
+  },
+
+  updateBilling(id: string, data: { state?: string; plan?: string; seats?: number }): Promise<Result<{ id: string } & Partial<AdminBillingRow>, AdminError>> {
+    return request(`/v1/admin/billing/${id}`, 'PATCH', data);
+  },
+
+  createBilling(data: { tenantId: string; schoolName: string; plan?: string; seats?: number; state?: string }): Promise<Result<{ id: string; tenantId: string; schoolName: string }, AdminError>> {
+    return request('/v1/admin/billing', 'POST', data);
+  },
+
+  // Dashboard trends
+  dashboardTrends(): Promise<Result<{ jobs: { day: string; count: number }[]; quality: { day: string; count: number }[] }, AdminError>> {
+    return request('/v1/admin/dashboard/trends');
+  },
+
+  // Marketing / Content pages — no BE endpoint; kept for type compat but will gracefully fail
   marketingPages(): Promise<Result<AdminContentRow[], AdminError>> {
     return request<AdminContentRow[]>('/v1/ops/marketing/pages');
   },

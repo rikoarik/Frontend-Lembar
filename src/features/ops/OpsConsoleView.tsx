@@ -27,6 +27,8 @@ import {
   type AdminPromptRow,
   type AdminAuditRow,
   type AdminContentRow,
+  type AdminMeta,
+  type AdminAuditDetail,
 } from '@/src/services/admin/adminService';
 
 // ── Type aliases — mapped to service types so UI code is decoupled ──────────
@@ -581,6 +583,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
   const [qualityLoading, setQualityLoading] = useState(false);
 
   const [billingData, setBillingData] = useState<BillingRow[]>([]);
+  const [billingMeta, setBillingMeta] = useState({ total: 0, pages: 1 });
   const [billingLoading, setBillingLoading] = useState(false);
 
   const [flagsData, setFlagsData] = useState<FlagRow[]>([]);
@@ -641,21 +644,40 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
   const loadJobs = () => {
     setJobsLoading(true);
     adminService.jobs(50).then((res) => {
-      if (res.ok) setJobsData(res.value);
+      if (res.ok) {
+        const val = res.value as any;
+        setJobsData(Array.isArray(val) ? val : (val?.data ?? []));
+      }
       setJobsLoading(false);
     });
   };
   const loadQuality = () => {
     setQualityLoading(true);
     adminService.qualityReports().then((res) => {
-      if (res.ok) setQualityData(res.value);
+      if (res.ok) {
+        const val = res.value as any;
+        setQualityData(Array.isArray(val) ? val : (val?.data ?? []));
+      }
       setQualityLoading(false);
     });
   };
-  const loadBilling = () => {
+  const loadBilling = (stateFilter = filterBilling, searchVal = search, pg = page) => {
     setBillingLoading(true);
-    adminService.billing().then((res) => {
-      if (res.ok) setBillingData(res.value);
+    adminService.billing({
+      state: stateFilter || undefined,
+      q: searchVal || undefined,
+      page: pg,
+      limit: 10,
+    }).then((res) => {
+      if (res.ok) {
+        const val = res.value as any;
+        if (val?.data && val?.meta) {
+          setBillingData(val.data);
+          setBillingMeta({ total: val.meta.total, pages: val.meta.pages });
+        } else {
+          setBillingData(Array.isArray(val) ? val : []);
+        }
+      }
       setBillingLoading(false);
     });
   };
@@ -675,8 +697,11 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
   };
   const loadAudit = () => {
     setAuditLoading(true);
-    adminService.audit().then((res) => {
-      if (res.ok) setAuditData(res.value);
+    adminService.audit({ page: 1, limit: 50 }).then((res) => {
+      if (res.ok) {
+        const val = res.value as any;
+        setAuditData(Array.isArray(val) ? val : (val?.data ?? []));
+      }
       setAuditLoading(false);
     });
   };
@@ -1287,10 +1312,26 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             ]}
             rowActions={(row) => (
               <div className="flex items-center gap-1.5 whitespace-nowrap">
-                <Button size="sm" variant="secondary" onClick={() => setToast(`Buka ${row.name}`)}>
-                  Buka
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => window.open(`/ops?section=billing&q=${encodeURIComponent(row.name)}`, '_self')}
+                >
+                  Billing
                 </Button>
-                <Button size="sm" onClick={() => setToast(`Ubah plan ${row.name}`)}>
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    adminService.updateBilling(row.id, { plan: row.plan === 'active' ? 'grace' : 'active' }).then((res) => {
+                      if (res.ok) {
+                        setToast(`Plan ${row.name} diperbarui.`);
+                        loadSchools();
+                      } else {
+                        setToast(`Gagal: ${res.error.safeMessage}`);
+                      }
+                    });
+                  }}
+                >
                   Ubah plan
                 </Button>
               </div>
@@ -1359,19 +1400,12 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
           <AdminPageHeader
             title="Prompt library"
             description="Template prompt internal untuk generate, repair, dan quality check."
-            actions={
-              <Button size="sm" onClick={() => setToast('Buat prompt baru (mock).')}>
-                Prompt baru
-              </Button>
-            }
           />
           {promptsLoading ? <div className="mb-2"><AdminPill tone="info">Memuat...</AdminPill></div> : null}
           <AdminDataTable
-            rows={[
-              { id: 'p1', name: 'generate.v3', owner: 'ops', status: 'active' },
-              { id: 'p2', name: 'repair.schema', owner: 'eng', status: 'active' },
-              { id: 'p3', name: 'quality.guard', owner: 'ops', status: 'draft' },
-            ]}
+            rows={promptsData}
+            emptyLabel="Belum ada prompt."
+            emptyHint="Prompt akan muncul setelah data dimuat dari server."
             columns={[
               { key: 'name', header: 'Prompt', render: (row) => row.name },
               { key: 'owner', header: 'Owner', render: (row) => row.owner },
@@ -1386,9 +1420,42 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
               },
             ]}
             rowActions={(row) => (
-              <Button size="sm" variant="secondary" onClick={() => setToast(`Buka ${row.name}`)}>
-                Buka
-              </Button>
+              <div className="flex items-center gap-1.5">
+                {row.status === 'draft' ? (
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      adminService.activatePrompt(row.id).then((res) => {
+                        if (res.ok) {
+                          setToast(`Prompt ${row.name} diaktifkan.`);
+                          loadPrompts();
+                        } else {
+                          setToast(`Gagal: ${res.error.safeMessage}`);
+                        }
+                      });
+                    }}
+                  >
+                    Aktifkan
+                  </Button>
+                ) : (
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => {
+                      adminService.deactivatePrompt(row.id).then((res) => {
+                        if (res.ok) {
+                          setToast(`Prompt ${row.name} dinonaktifkan.`);
+                          loadPrompts();
+                        } else {
+                          setToast(`Gagal: ${res.error.safeMessage}`);
+                        }
+                      });
+                    }}
+                  >
+                    Nonaktifkan
+                  </Button>
+                )}
+              </div>
             )}
           />
         </>
@@ -1405,7 +1472,18 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
               </AdminPill>
             }
             actions={
-              <Button size="sm" onClick={() => setToast('Retry semua failed (mock).')}>
+              <Button
+                size="sm"
+                onClick={() => {
+                  const failedIds = jobsData.filter((j) => j.status === 'failed').map((j) => j.id);
+                  if (failedIds.length === 0) { setToast('Tidak ada job failed.'); return; }
+                  Promise.all(failedIds.map((id) => adminService.retryJob(id))).then((results) => {
+                    const ok = results.filter((r) => r.ok).length;
+                    setToast(`${ok} dari ${failedIds.length} job failed di-retry.`);
+                    loadJobs();
+                  });
+                }}
+              >
                 Retry failed
               </Button>
             }
@@ -1534,7 +1612,12 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                 >
                   Triage
                 </Button>
-                <Button size="sm" onClick={() => setToast(`Tutup ${row.id}`)}>
+                <Button size="sm" onClick={() => {
+                  adminService.triageReport(row.id, 'closed').then((res) => {
+                    setToast(res.ok ? `Report ${row.id} ditutup.` : `Gagal tutup: ${res.error.safeMessage}`);
+                    loadQuality();
+                  });
+                }}>
                   Tutup
                 </Button>
               </>
