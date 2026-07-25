@@ -15,9 +15,7 @@ function iso(daysAgo = 0, hour = 10): string {
   return d.toISOString();
 }
 
-function q(
-  partial: Omit<ReviewQuestion, 'updatedAt'> & { updatedAt?: string },
-): ReviewQuestion {
+function q(partial: Omit<ReviewQuestion, 'updatedAt'> & { updatedAt?: string }): ReviewQuestion {
   return {
     ...partial,
     updatedAt: partial.updatedAt ?? iso(0, 12),
@@ -283,10 +281,12 @@ function seed() {
 
 seed();
 
-export function listAssessments(filters: {
-  q?: string;
-  lifecycle?: AssessmentLifecycle | 'all';
-} = {}): AssessmentSummary[] {
+export function listAssessments(
+  filters: {
+    q?: string;
+    lifecycle?: AssessmentLifecycle | 'all';
+  } = {},
+): AssessmentSummary[] {
   seed();
   const q = (filters.q ?? '').trim().toLowerCase();
   const lifecycle = filters.lifecycle ?? 'all';
@@ -311,7 +311,10 @@ export function getAssessment(id: string): AssessmentDetail | null {
   return item ? withDerived(item) : null;
 }
 
-export function ensureAssessmentFromJob(assessmentId: string, reviewMode: 'quick' | 'detail' = 'quick') {
+export function ensureAssessmentFromJob(
+  assessmentId: string,
+  reviewMode: 'quick' | 'detail' = 'quick',
+) {
   seed();
   if (store.has(assessmentId)) return getAssessment(assessmentId)!;
   const created: AssessmentDetail = withDerived({
@@ -406,13 +409,18 @@ export function updateQuestionContent(
   return next;
 }
 
-export function finalizeAssessment(assessmentId: string, acknowledged: boolean): {
-  ok: true;
-  value: FinalizeResult;
-} | {
-  ok: false;
-  error: { code: string; message: string; blockers?: string[] };
-} {
+export function finalizeAssessment(
+  assessmentId: string,
+  acknowledged: boolean,
+):
+  | {
+      ok: true;
+      value: FinalizeResult;
+    }
+  | {
+      ok: false;
+      error: { code: string; message: string; blockers?: string[] };
+    } {
   const item = getAssessment(assessmentId);
   if (!item) {
     return { ok: false, error: { code: 'RESOURCE_NOT_FOUND', message: 'Lembar tidak ditemukan.' } };

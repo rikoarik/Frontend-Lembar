@@ -4,11 +4,22 @@ import userEvent from '@testing-library/user-event';
 import { WorkspaceProvider, useWorkspace } from '@/src/features/workspace/workspaceContext';
 import type { Workspace } from '@/src/features/workspace/workspaceContext';
 
-const PERSONAL_WS: Workspace = { id: 'ws-1', name: 'Ruang Saya', kind: 'personal', activeRole: 'teacher' };
-const SCHOOL_WS: Workspace = { id: 'ws-2', name: 'SDN 01', kind: 'school', activeRole: 'school_admin' };
+const PERSONAL_WS: Workspace = {
+  id: 'ws-1',
+  name: 'Ruang Saya',
+  kind: 'personal',
+  activeRole: 'teacher',
+};
+const SCHOOL_WS: Workspace = {
+  id: 'ws-2',
+  name: 'SDN 01',
+  kind: 'school',
+  activeRole: 'school_admin',
+};
 
 function Probe() {
-  const { activeWorkspace, workspaces, displayName, getCacheKey, registerCache, switchWorkspace } = useWorkspace();
+  const { activeWorkspace, workspaces, displayName, getCacheKey, registerCache, switchWorkspace } =
+    useWorkspace();
   return (
     <div>
       <p data-testid="workspace-id">{activeWorkspace.id}</p>
@@ -16,10 +27,19 @@ function Probe() {
       <p data-testid="display-name">{displayName}</p>
       <p data-testid="cache-key">{getCacheKey('dashboard')}</p>
       <p data-testid="workspace-count">{workspaces.length}</p>
-      <button type="button" onClick={() => { registerCache('dashboard', () => { window.localStorage.setItem('cleared', 'yes'); }); }}>
+      <button
+        type="button"
+        onClick={() => {
+          registerCache('dashboard', () => {
+            window.localStorage.setItem('cleared', 'yes');
+          });
+        }}
+      >
         register
       </button>
-      <button type="button" onClick={() => switchWorkspace('ws-2')}>switch</button>
+      <button type="button" onClick={() => switchWorkspace('ws-2')}>
+        switch
+      </button>
     </div>
   );
 }
@@ -76,10 +96,7 @@ describe('WorkspaceContext — F2-03 real data injection', () => {
 
   it('scopes cache keys by active workspace id', () => {
     render(
-      <WorkspaceProvider
-        initialWorkspaces={[PERSONAL_WS, SCHOOL_WS]}
-        initialActiveId="ws-2"
-      >
+      <WorkspaceProvider initialWorkspaces={[PERSONAL_WS, SCHOOL_WS]} initialActiveId="ws-2">
         <Probe />
       </WorkspaceProvider>,
     );

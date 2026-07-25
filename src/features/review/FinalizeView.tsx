@@ -74,7 +74,9 @@ export function FinalizeView({ assessmentId }: { assessmentId: string }) {
       <Panel
         title={assessment.title}
         description={`${assessment.subject} · ${assessment.gradeLabel}`}
-        actions={<StatusBadge label={assessment.lifecycle === 'final' ? 'Final' : 'Perlu ditinjau'} />}
+        actions={
+          <StatusBadge label={assessment.lifecycle === 'final' ? 'Final' : 'Perlu ditinjau'} />
+        }
       >
         <div className="grid gap-3 sm:grid-cols-3">
           <div className="rounded-md border border-brand-line bg-brand-paper px-3 py-3">
@@ -95,7 +97,10 @@ export function FinalizeView({ assessmentId }: { assessmentId: string }) {
       </Panel>
 
       {assessment.finalizeBlockers.length > 0 ? (
-        <Panel title="Masih ada penghalang" description="Selesaikan item berikut sebelum finalisasi.">
+        <Panel
+          title="Masih ada penghalang"
+          description="Selesaikan item berikut sebelum finalisasi."
+        >
           <ul className="list-disc space-y-1 pl-5 text-body-default text-brand-ink">
             {assessment.finalizeBlockers.map((item) => (
               <li key={item}>{item}</li>
@@ -111,7 +116,10 @@ export function FinalizeView({ assessmentId }: { assessmentId: string }) {
           </div>
         </Panel>
       ) : (
-        <Panel title="Konfirmasi tanggung jawab" description="AI hanya membuat draft. Guru menentukan hasil final.">
+        <Panel
+          title="Konfirmasi tanggung jawab"
+          description="AI hanya membuat draft. Guru menentukan hasil final."
+        >
           <label className="flex items-start gap-3 text-body-default">
             <input
               type="checkbox"

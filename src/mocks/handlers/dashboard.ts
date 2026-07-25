@@ -35,7 +35,10 @@ const EMPTY_RESPONSE: DashboardSummaryResponse = {
       sources: { total: 0, ready: 0, processing: 0, failed: 0 },
       jobs: { total: 0, active: 0, failed: 0 },
     },
-    emptyState: { isEmpty: true, message: 'Belum ada lembar. Mulai dengan membuat lembar pertama Anda.' },
+    emptyState: {
+      isEmpty: true,
+      message: 'Belum ada lembar. Mulai dengan membuat lembar pertama Anda.',
+    },
   },
 };
 

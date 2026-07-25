@@ -13,11 +13,7 @@ vi.mock('@/src/services/source/sourceService', () => ({
   },
 }));
 
-function createMockFile(
-  name: string,
-  size: number,
-  type: string = 'application/pdf',
-): File {
+function createMockFile(name: string, size: number, type: string = 'application/pdf'): File {
   const content = new Uint8Array(size);
   return new File([content], name, { type });
 }
@@ -29,9 +25,7 @@ function renderWithQueryClient(ui: React.ReactElement) {
       mutations: { retry: false },
     },
   });
-  return render(
-    <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>,
-  );
+  return render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>);
 }
 
 describe('PrivatePdfSource', () => {
@@ -40,9 +34,7 @@ describe('PrivatePdfSource', () => {
   });
 
   it('should render empty state initially', () => {
-    renderWithQueryClient(
-      <PrivatePdfSource workspaceId="test-workspace" />,
-    );
+    renderWithQueryClient(<PrivatePdfSource workspaceId="test-workspace" />);
 
     expect(screen.getByText('Unggah dokumen PDF')).toBeInTheDocument();
     expect(screen.getByText('Pilih file')).toBeInTheDocument();
@@ -50,9 +42,7 @@ describe('PrivatePdfSource', () => {
 
   it('should show file input when clicking select button', async () => {
     const user = userEvent.setup();
-    renderWithQueryClient(
-      <PrivatePdfSource workspaceId="test-workspace" />,
-    );
+    renderWithQueryClient(<PrivatePdfSource workspaceId="test-workspace" />);
 
     const fileInput = screen.getByLabelText('Pilih file PDF');
     expect(fileInput).toBeInTheDocument();
@@ -61,9 +51,7 @@ describe('PrivatePdfSource', () => {
   });
 
   it('should show validation error for invalid file type', async () => {
-    renderWithQueryClient(
-      <PrivatePdfSource workspaceId="test-workspace" />,
-    );
+    renderWithQueryClient(<PrivatePdfSource workspaceId="test-workspace" />);
 
     const fileInput = screen.getByLabelText('Pilih file PDF');
     const file = createMockFile('test.txt', 1024, 'text/plain');
@@ -76,9 +64,7 @@ describe('PrivatePdfSource', () => {
   });
 
   it('should show validation error for oversized file', async () => {
-    renderWithQueryClient(
-      <PrivatePdfSource workspaceId="test-workspace" />,
-    );
+    renderWithQueryClient(<PrivatePdfSource workspaceId="test-workspace" />);
 
     const fileInput = screen.getByLabelText('Pilih file PDF');
     const file = createMockFile('large.pdf', 51 * 1024 * 1024);
@@ -91,9 +77,7 @@ describe('PrivatePdfSource', () => {
   });
 
   it('should have proper ARIA attributes on panel', () => {
-    renderWithQueryClient(
-      <PrivatePdfSource workspaceId="test-workspace" />,
-    );
+    renderWithQueryClient(<PrivatePdfSource workspaceId="test-workspace" />);
 
     const heading = screen.getByRole('heading', { name: 'Sumber PDF Pribadi' });
     expect(heading).toBeInTheDocument();
@@ -101,9 +85,7 @@ describe('PrivatePdfSource', () => {
 
   it('should support keyboard navigation', async () => {
     const user = userEvent.setup();
-    renderWithQueryClient(
-      <PrivatePdfSource workspaceId="test-workspace" />,
-    );
+    renderWithQueryClient(<PrivatePdfSource workspaceId="test-workspace" />);
 
     const selectButton = screen.getByRole('button', { name: 'Pilih file' });
     await user.tab();
@@ -111,9 +93,7 @@ describe('PrivatePdfSource', () => {
   });
 
   it('should render drag and drop zone', () => {
-    renderWithQueryClient(
-      <PrivatePdfSource workspaceId="test-workspace" />,
-    );
+    renderWithQueryClient(<PrivatePdfSource workspaceId="test-workspace" />);
 
     const dropZone = screen.getByText('Unggah dokumen PDF').closest('[class*="border-dashed"]');
     expect(dropZone).toBeInTheDocument();

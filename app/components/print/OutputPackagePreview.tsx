@@ -1,11 +1,7 @@
 import type { ReactNode } from 'react';
 import A4PreviewFrame from './A4PreviewFrame';
 
-export type OutputSection =
-  | 'lembar-soal'
-  | 'lembar-jawaban'
-  | 'kunci-jawaban'
-  | 'pembahasan';
+export type OutputSection = 'lembar-soal' | 'lembar-jawaban' | 'kunci-jawaban' | 'pembahasan';
 
 const SECTION_LABELS: Record<OutputSection, string> = {
   'lembar-soal': 'Lembar Soal Siswa',
@@ -60,14 +56,10 @@ export default function OutputPackagePreview({
   });
 
   return (
-    <div
-      className={`flex flex-col gap-4 ${className}`}
-      data-testid="output-package-preview"
-    >
+    <div className={`flex flex-col gap-4 ${className}`} data-testid="output-package-preview">
       {/* Package manifest */}
       <div className="text-body-xs text-brand-muted" aria-label="Isi paket">
-        Termasuk:{' '}
-        {orderedSections.map((s) => SECTION_LABELS[s]).join(', ')}
+        Termasuk: {orderedSections.map((s) => SECTION_LABELS[s]).join(', ')}
       </div>
 
       {orderedSections.map((section, idx) => (

@@ -130,7 +130,10 @@ export default function MarketingNavbar() {
           ref={panelRef}
           className="border-t border-brand-line bg-brand-paper md:hidden"
         >
-          <nav aria-label="Navigasi seluler" className="mx-auto flex max-w-container-max flex-col gap-1 px-margin-mobile py-unit-3">
+          <nav
+            aria-label="Navigasi seluler"
+            className="mx-auto flex max-w-container-max flex-col gap-1 px-margin-mobile py-unit-3"
+          >
             {marketingNavigation.map((item) => {
               const active = isActive(item, pathname);
               return (

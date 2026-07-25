@@ -26,20 +26,20 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
             cd ~/Projects/Frontend-Lembar
-            
+
             # Pull latest changes
             git pull origin dev
-            
+
             # Install dependencies
             pnpm install --frozen-lockfile
-            
+
             # Build for production
             pnpm run build
-            
+
             # Restart PM2
             pm2 restart lembar-frontend --update-env
-            
+
             # Check status
             pm2 status lembar-frontend
-            
+
             echo "✅ Frontend deployed successfully!"

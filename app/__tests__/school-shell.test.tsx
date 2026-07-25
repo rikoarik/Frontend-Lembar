@@ -32,7 +32,9 @@ describe('school admin management panel', () => {
   it('keeps shell chrome and renders teacher table content', () => {
     renderSchool('');
     expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
-    expect(screen.getAllByRole('navigation', { name: /navigasi panel/i }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole('navigation', { name: /navigasi panel/i }).length).toBeGreaterThan(
+      0,
+    );
     expect(screen.getByText(/Siti Aminah/i)).toBeInTheDocument();
     expect(screen.getByText(/panel admin sekolah/i)).toBeInTheDocument();
   });

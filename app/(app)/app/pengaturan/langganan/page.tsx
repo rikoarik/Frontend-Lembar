@@ -121,11 +121,7 @@ export default function PlanUsageSettingsPage() {
           </div>
 
           {!isRestricted && (
-            <UsageMeter
-              used={plan.usageUsed}
-              limit={plan.usageLimit}
-              unit={plan.usageUnit}
-            />
+            <UsageMeter used={plan.usageUsed} limit={plan.usageLimit} unit={plan.usageUnit} />
           )}
 
           {plan.state === 'grace' && plan.graceDaysLeft !== undefined && (
@@ -136,19 +132,12 @@ export default function PlanUsageSettingsPage() {
 
           <div className="flex flex-col sm:flex-row gap-2 pt-1">
             {plan.state === 'active' && (
-              <Button
-                variant="quiet"
-                size="sm"
-                onClick={() => handleSubscribe('Paket Berbayar')}
-              >
+              <Button variant="quiet" size="sm" onClick={() => handleSubscribe('Paket Berbayar')}>
                 Hubungi tim kami
               </Button>
             )}
             {(plan.state === 'grace' || plan.state === 'blocked' || plan.state === 'expired') && (
-              <Button
-                size="sm"
-                onClick={() => handleSubscribe('Perpanjangan Paket')}
-              >
+              <Button size="sm" onClick={() => handleSubscribe('Perpanjangan Paket')}>
                 Hubungi tim kami
               </Button>
             )}
@@ -172,24 +161,34 @@ export default function PlanUsageSettingsPage() {
             <div className="flex flex-col gap-3">
               <div className="flex flex-col">
                 <h3 className="text-[16px] font-bold text-[#171717]">Paket Guru Pro</h3>
-                <p className="text-[12px] text-[#6d665d]">Untuk guru mandiri yang butuh kuota lebih tinggi</p>
+                <p className="text-[12px] text-[#6d665d]">
+                  Untuk guru mandiri yang butuh kuota lebih tinggi
+                </p>
               </div>
 
               <ul className="flex flex-col gap-2 pt-2 border-t border-[#e6dfd4]">
                 <li className="flex items-center gap-2 text-[13px] text-[#171717]">
-                  <span className="material-symbols-outlined text-[16px] text-emerald-600">check_circle</span>
+                  <span className="material-symbols-outlined text-[16px] text-emerald-600">
+                    check_circle
+                  </span>
                   <span>Kuota 500 lembar / bulan</span>
                 </li>
                 <li className="flex items-center gap-2 text-[13px] text-[#171717]">
-                  <span className="material-symbols-outlined text-[16px] text-emerald-600">check_circle</span>
+                  <span className="material-symbols-outlined text-[16px] text-emerald-600">
+                    check_circle
+                  </span>
                   <span>Pemrosesan AI prioritas cepat</span>
                 </li>
                 <li className="flex items-center gap-2 text-[13px] text-[#171717]">
-                  <span className="material-symbols-outlined text-[16px] text-emerald-600">check_circle</span>
+                  <span className="material-symbols-outlined text-[16px] text-emerald-600">
+                    check_circle
+                  </span>
                   <span>Ekspor PDF &amp; Word tanpa batas</span>
                 </li>
                 <li className="flex items-center gap-2 text-[13px] text-[#171717]">
-                  <span className="material-symbols-outlined text-[16px] text-emerald-600">check_circle</span>
+                  <span className="material-symbols-outlined text-[16px] text-emerald-600">
+                    check_circle
+                  </span>
                   <span>Akses semua kurikulum &amp; template</span>
                 </li>
               </ul>
@@ -217,19 +216,27 @@ export default function PlanUsageSettingsPage() {
 
               <ul className="flex flex-col gap-2 pt-2 border-t border-[#e6dfd4]">
                 <li className="flex items-center gap-2 text-[13px] text-[#171717]">
-                  <span className="material-symbols-outlined text-[16px] text-emerald-600">check_circle</span>
+                  <span className="material-symbols-outlined text-[16px] text-emerald-600">
+                    check_circle
+                  </span>
                   <span>Kuota shared seluruh guru sekolah</span>
                 </li>
                 <li className="flex items-center gap-2 text-[13px] text-[#171717]">
-                  <span className="material-symbols-outlined text-[16px] text-emerald-600">check_circle</span>
+                  <span className="material-symbols-outlined text-[16px] text-emerald-600">
+                    check_circle
+                  </span>
                   <span>Dashboard manajemen admin sekolah</span>
                 </li>
                 <li className="flex items-center gap-2 text-[13px] text-[#171717]">
-                  <span className="material-symbols-outlined text-[16px] text-emerald-600">check_circle</span>
+                  <span className="material-symbols-outlined text-[16px] text-emerald-600">
+                    check_circle
+                  </span>
                   <span>Bank soal bersama terpusat</span>
                 </li>
                 <li className="flex items-center gap-2 text-[13px] text-[#171717]">
-                  <span className="material-symbols-outlined text-[16px] text-emerald-600">check_circle</span>
+                  <span className="material-symbols-outlined text-[16px] text-emerald-600">
+                    check_circle
+                  </span>
                   <span>Dukungan pendampingan khusus</span>
                 </li>
               </ul>
@@ -237,11 +244,7 @@ export default function PlanUsageSettingsPage() {
 
             <div className="pt-5 mt-4 border-t border-[#e6dfd4]">
               <Link href="/harga" className="block w-full">
-                <Button
-                  variant="secondary"
-                  size="md"
-                  className="w-full justify-center"
-                >
+                <Button variant="secondary" size="md" className="w-full justify-center">
                   Lihat Detail Paket Sekolah
                 </Button>
               </Link>
@@ -272,7 +275,8 @@ export default function PlanUsageSettingsPage() {
             ) : (
               <div className="flex flex-col gap-3">
                 <p className="text-body-sm text-[#6d665d]">
-                  Anda memilih untuk berlangganan <strong>{selectedTier}</strong>. Tim kami akan menghubungi Anda untuk instruksi pembayaran dan aktivasi kuota instan.
+                  Anda memilih untuk berlangganan <strong>{selectedTier}</strong>. Tim kami akan
+                  menghubungi Anda untuk instruksi pembayaran dan aktivasi kuota instan.
                 </p>
                 <div className="flex justify-end gap-2 pt-2">
                   <Button variant="quiet" size="sm" onClick={() => setSubscribeModalOpen(false)}>

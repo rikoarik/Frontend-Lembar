@@ -32,18 +32,14 @@ describe('fetchMarketingPage', () => {
   });
 
   it('returns null on 404', async () => {
-    vi.spyOn(global, 'fetch').mockResolvedValueOnce(
-      new Response('Not Found', { status: 404 }),
-    );
+    vi.spyOn(global, 'fetch').mockResolvedValueOnce(new Response('Not Found', { status: 404 }));
 
     const result = await fetchMarketingPage('home');
     expect(result).toBeNull();
   });
 
   it('returns null on 500', async () => {
-    vi.spyOn(global, 'fetch').mockResolvedValueOnce(
-      new Response('Server Error', { status: 500 }),
-    );
+    vi.spyOn(global, 'fetch').mockResolvedValueOnce(new Response('Server Error', { status: 500 }));
 
     const result = await fetchMarketingPage('harga');
     expect(result).toBeNull();

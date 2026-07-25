@@ -1,10 +1,5 @@
 import { NextResponse } from 'next/server';
-import {
-  authSuccessPayload,
-  isMockApiMode,
-  mockFail,
-  mockOk,
-} from '@/src/lib/mock-api/preview';
+import { authSuccessPayload, isMockApiMode, mockFail, mockOk } from '@/src/lib/mock-api/preview';
 import {
   authSuccessFromBackend,
   backendFetch,
@@ -50,12 +45,17 @@ export async function POST(request: Request) {
   const name = username;
 
   if (!email || !password || !username || !phone) {
-    return mockFail('VALIDATION_FAILED', 'Lengkapi username, email, telepon, dan kata sandi.', 400, {
-      email: email ? [] : ['Wajib diisi.'],
-      username: username ? [] : ['Wajib diisi.'],
-      phone: phone ? [] : ['Wajib diisi.'],
-      password: password ? [] : ['Wajib diisi.'],
-    });
+    return mockFail(
+      'VALIDATION_FAILED',
+      'Lengkapi username, email, telepon, dan kata sandi.',
+      400,
+      {
+        email: email ? [] : ['Wajib diisi.'],
+        username: username ? [] : ['Wajib diisi.'],
+        phone: phone ? [] : ['Wajib diisi.'],
+        password: password ? [] : ['Wajib diisi.'],
+      },
+    );
   }
 
   const upstream = await backendFetch('/v1/auth/register', {
@@ -106,10 +106,7 @@ export async function POST(request: Request) {
     return mockFail('UNKNOWN', 'Respons registrasi tidak valid.', 502);
   }
 
-  const response = NextResponse.json(
-    { data: authSuccessFromBackend(auth) },
-    { status: 201 },
-  );
+  const response = NextResponse.json({ data: authSuccessFromBackend(auth) }, { status: 201 });
   response.cookies.set(jwtCookieOptions(auth.token));
   response.cookies.set({
     name: 'lembar_session',

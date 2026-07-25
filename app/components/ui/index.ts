@@ -8,3 +8,5 @@ export { StatusBadge } from './StatusBadge';
 export type { StatusBadgeProps, StatusLabel } from './StatusBadge';
 export { Panel } from './Panel';
 export type { PanelProps } from './Panel';
+export { Spinner } from './Spinner';
+export type { SpinnerProps } from './Spinner';

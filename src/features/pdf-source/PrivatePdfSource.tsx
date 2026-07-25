@@ -4,11 +4,7 @@ import { useCallback, useRef, useState } from 'react';
 import { Button } from '@/app/components/ui/Button';
 import { Panel } from '@/app/components/ui/Panel';
 import { usePdfSourceUpload } from './state/usePdfSourceUpload';
-import {
-  sanitizeFileInfo,
-  validatePdfUpload,
-  redactTokens,
-} from './validation/pdf-validation';
+import { sanitizeFileInfo, validatePdfUpload, redactTokens } from './validation/pdf-validation';
 import type { SourceError } from '@/src/types/source';
 
 type PrivatePdfSourceProps = {
@@ -44,12 +40,7 @@ function ErrorDisplay({
     >
       <p className="text-body-sm text-brand-danger">{redactTokens(error.safeMessage)}</p>
       {retryable && onRetry && (
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={onRetry}
-          className="mt-3"
-        >
+        <Button variant="secondary" size="sm" onClick={onRetry} className="mt-3">
           Coba lagi
         </Button>
       )}
@@ -73,9 +64,7 @@ function UploadProgress({ progress }: { progress: number }) {
           style={{ width: `${progress}%` }}
         />
       </div>
-      <p className="mt-2 text-body-sm text-brand-ink-muted">
-        Mengunggah... {progress}%
-      </p>
+      <p className="mt-2 text-body-sm text-brand-ink-muted">Mengunggah... {progress}%</p>
     </div>
   );
 }
@@ -89,9 +78,7 @@ function ProcessingState() {
       className="flex flex-col items-center gap-3 p-4"
     >
       <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-accent border-t-transparent" />
-      <p className="text-body-sm text-brand-ink-muted">
-        Memproses dokumen PDF...
-      </p>
+      <p className="text-body-sm text-brand-ink-muted">Memproses dokumen PDF...</p>
     </div>
   );
 }
@@ -121,17 +108,10 @@ function SuccessState({
           stroke="currentColor"
           aria-hidden="true"
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M5 13l4 4L19 7"
-          />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
         </svg>
         <div className="flex-1">
-          <p className="text-body-sm font-medium text-brand-success">
-            Dokumen berhasil diproses
-          </p>
+          <p className="text-body-sm font-medium text-brand-success">Dokumen berhasil diproses</p>
           <p className="mt-1 text-body-sm text-brand-ink-muted">
             {fileName}
             {pageCount != null && ` · ${pageCount} halaman`}
@@ -184,12 +164,7 @@ function DeleteConfirmation({
         >
           Ya, hapus
         </Button>
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={onCancel}
-          disabled={isDeleting}
-        >
+        <Button variant="secondary" size="sm" onClick={onCancel} disabled={isDeleting}>
           Batal
         </Button>
       </div>
@@ -197,13 +172,7 @@ function DeleteConfirmation({
   );
 }
 
-function EmptyState({
-  onFileSelect,
-  disabled,
-}: {
-  onFileSelect: () => void;
-  disabled: boolean;
-}) {
+function EmptyState({ onFileSelect, disabled }: { onFileSelect: () => void; disabled: boolean }) {
   return (
     <div className="flex flex-col items-center gap-4 p-6">
       <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-paper">
@@ -223,32 +192,17 @@ function EmptyState({
         </svg>
       </div>
       <div className="text-center">
-        <p className="text-body-sm font-medium text-brand-ink">
-          Unggah dokumen PDF
-        </p>
-        <p className="mt-1 text-body-sm text-brand-ink-muted">
-          Format PDF, maksimal 50 MB
-        </p>
+        <p className="text-body-sm font-medium text-brand-ink">Unggah dokumen PDF</p>
+        <p className="mt-1 text-body-sm text-brand-ink-muted">Format PDF, maksimal 50 MB</p>
       </div>
-      <Button
-        variant="primary"
-        size="md"
-        onClick={onFileSelect}
-        disabled={disabled}
-      >
+      <Button variant="primary" size="md" onClick={onFileSelect} disabled={disabled}>
         Pilih file
       </Button>
     </div>
   );
 }
 
-function InsufficientState({
-  onReplace,
-  isBusy,
-}: {
-  onReplace: () => void;
-  isBusy: boolean;
-}) {
+function InsufficientState({ onReplace, isBusy }: { onReplace: () => void; isBusy: boolean }) {
   return (
     <div
       role="alert"
@@ -271,9 +225,7 @@ function InsufficientState({
           />
         </svg>
         <div className="flex-1">
-          <p className="text-body-sm font-medium text-brand-warning">
-            Konten tidak cukup
-          </p>
+          <p className="text-body-sm font-medium text-brand-warning">Konten tidak cukup</p>
           <p className="mt-1 text-body-sm text-brand-ink-muted">
             Gunakan dokumen dengan lebih banyak teks.
           </p>
@@ -292,11 +244,7 @@ function InsufficientState({
   );
 }
 
-export function PrivatePdfSource({
-  workspaceId,
-  onSuccess,
-  className,
-}: PrivatePdfSourceProps) {
+export function PrivatePdfSource({ workspaceId, onSuccess, className }: PrivatePdfSourceProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -402,12 +350,7 @@ export function PrivatePdfSource({
     }
 
     if (upload.phase === 'insufficient') {
-      return (
-        <InsufficientState
-          onReplace={handleFileSelect}
-          isBusy={isBusy}
-        />
-      );
+      return <InsufficientState onReplace={handleFileSelect} isBusy={isBusy} />;
     }
 
     if (upload.phase === 'processing') {

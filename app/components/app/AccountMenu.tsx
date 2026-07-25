@@ -109,7 +109,10 @@ export function AccountMenu({ displayName, planLabel, compact = false }: Account
               </span>
               <span className="truncate text-[11px] text-[#6d665d]">{planLabel}</span>
             </span>
-            <span aria-hidden="true" className="material-symbols-outlined ml-auto text-[18px] text-[#8a8379]">
+            <span
+              aria-hidden="true"
+              className="material-symbols-outlined ml-auto text-[18px] text-[#8a8379]"
+            >
               {open ? 'expand_more' : 'expand_less'}
             </span>
           </>

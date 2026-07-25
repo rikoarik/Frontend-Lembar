@@ -15,14 +15,24 @@ const MOCK_GRADES = [
 const MOCK_SUBJECTS_G4 = [
   { id: 's-4', label: 'Matematika', status: 'active' as const },
   { id: 's-5', label: 'Bahasa Indonesia', status: 'active' as const },
-  { id: 's-6', label: 'Ilmu Pengetahuan Alam dan Sosial (IPAS) — yang memiliki judul sangat panjang sehingga perlu ditangani secara khusus', status: 'active' as const },
+  {
+    id: 's-6',
+    label:
+      'Ilmu Pengetahuan Alam dan Sosial (IPAS) — yang memiliki judul sangat panjang sehingga perlu ditangani secara khusus',
+    status: 'active' as const,
+  },
 ];
 
 const MOCK_MATERIALS_S4 = [
   { id: 'm-10', label: 'Bilangan Cacah sampai 10.000', status: 'active' as const },
   { id: 'm-11', label: 'Operasi Hitung Penjumlahan dan Pengurangan', status: 'active' as const },
   { id: 'm-12', label: 'Perkalian dan Pembagian Bilangan Cacah', status: 'active' as const },
-  { id: 'm-13', label: 'Pengukuran Panjang dan Berat dalam Satuan Baku — Materi dengan deskripsi sangat panjang untuk menguji overflow', status: 'active' as const },
+  {
+    id: 'm-13',
+    label:
+      'Pengukuran Panjang dan Berat dalam Satuan Baku — Materi dengan deskripsi sangat panjang untuk menguji overflow',
+    status: 'active' as const,
+  },
 ];
 
 const mockListGrades = vi.fn();
@@ -44,9 +54,8 @@ beforeEach(() => {
   mockListGrades.mockResolvedValue(ok(MOCK_GRADES));
   mockListSubjects.mockImplementation((_ws: string, gradeId: string) => {
     if (gradeId === 'g-4') return Promise.resolve(ok(MOCK_SUBJECTS_G4));
-    if (gradeId === 'g-7') return Promise.resolve(ok([
-      { id: 's-8', label: 'Matematika', status: 'active' as const },
-    ]));
+    if (gradeId === 'g-7')
+      return Promise.resolve(ok([{ id: 's-8', label: 'Matematika', status: 'active' as const }]));
     return Promise.resolve(ok([]));
   });
   mockListMaterials.mockImplementation((_ws: string, _g: string, subjectId: string) => {
@@ -164,7 +173,8 @@ describe('GenerateForm — long-content', () => {
     await pickSelect('Kelas', 'Kelas 4');
     await waitForSubjects();
 
-    const longLabel = 'Ilmu Pengetahuan Alam dan Sosial (IPAS) — yang memiliki judul sangat panjang sehingga perlu ditangani secara khusus';
+    const longLabel =
+      'Ilmu Pengetahuan Alam dan Sosial (IPAS) — yang memiliki judul sangat panjang sehingga perlu ditangani secara khusus';
     expect(screen.getByText(longLabel)).toBeInTheDocument();
   });
 });

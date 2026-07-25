@@ -12,7 +12,8 @@ type AppShellProps = {
 };
 
 export function AppShell({ children }: AppShellProps) {
-  const { activeWorkspace, workspaces, switchWorkspace, announcement, displayName } = useWorkspace();
+  const { activeWorkspace, workspaces, switchWorkspace, announcement, displayName } =
+    useWorkspace();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
 

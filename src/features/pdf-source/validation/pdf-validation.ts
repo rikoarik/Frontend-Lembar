@@ -39,29 +39,17 @@ export function validatePdfUpload(input: PdfUploadInput): ValidationResult {
   const { file } = input;
 
   if (!ALLOWED_CONTENT_TYPES.includes(file.type as (typeof ALLOWED_CONTENT_TYPES)[number])) {
-    push(
-      failures,
-      'file',
-      'Format file tidak valid. Hanya file PDF yang dapat diunggah.',
-    );
+    push(failures, 'file', 'Format file tidak valid. Hanya file PDF yang dapat diunggah.');
   }
 
   const ext = getFileExtension(file.name);
   if (!ALLOWED_EXTENSIONS.includes(ext as (typeof ALLOWED_EXTENSIONS)[number])) {
-    push(
-      failures,
-      'file',
-      'Ekstensi file tidak valid. File harus berekstensi .pdf.',
-    );
+    push(failures, 'file', 'Ekstensi file tidak valid. File harus berekstensi .pdf.');
   }
 
   if (file.size > MAX_FILE_SIZE_BYTES) {
     const maxSizeMB = MAX_FILE_SIZE_BYTES / (1024 * 1024);
-    push(
-      failures,
-      'file',
-      `Ukuran file melebihi batas maksimal ${maxSizeMB} MB.`,
-    );
+    push(failures, 'file', `Ukuran file melebihi batas maksimal ${maxSizeMB} MB.`);
   }
 
   if (file.size === 0) {

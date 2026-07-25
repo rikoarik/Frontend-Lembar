@@ -6,11 +6,7 @@ import type {
   SourceUploadIntent,
   SourceUploadResult,
 } from '@/src/types/source';
-import {
-  mapEnvelopeToSourceError,
-  networkError,
-  timeoutError,
-} from './sourceErrors';
+import { mapEnvelopeToSourceError, networkError, timeoutError } from './sourceErrors';
 
 const DEFAULT_TIMEOUT_MS = 30_000;
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? '/v1';
@@ -151,23 +147,15 @@ export const sourceMutations = {
     sourceId: string,
     workspaceId: string,
   ): Promise<Result<SourceState, SourceError>> {
-    return request<SourceState>(
-      `/sources/${sourceId}`,
-      'GET',
-      undefined,
-      { workspaceId },
-    );
+    return request<SourceState>(`/sources/${sourceId}`, 'GET', undefined, { workspaceId });
   },
 
   async deleteSource(
     uploadId: string,
     workspaceId: string,
   ): Promise<Result<SourceDeleteResult, SourceError>> {
-    return request<SourceDeleteResult>(
-      `/uploads/sources/${uploadId}/delete`,
-      'POST',
-      undefined,
-      { workspaceId },
-    );
+    return request<SourceDeleteResult>(`/uploads/sources/${uploadId}/delete`, 'POST', undefined, {
+      workspaceId,
+    });
   },
 };

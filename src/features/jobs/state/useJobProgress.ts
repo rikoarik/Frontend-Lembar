@@ -3,10 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { jobService } from '@/src/services/jobs/jobService';
 import type { JobError } from '@/src/services/jobs/jobErrors';
-import {
-  isTerminalJobStatus,
-  type JobSnapshot,
-} from '@/src/features/jobs/types';
+import { isTerminalJobStatus, type JobSnapshot } from '@/src/features/jobs/types';
 import { clearActiveJob } from '@/src/features/jobs/activeJobStorage';
 
 const DEFAULT_POLL_MS = 1_200;

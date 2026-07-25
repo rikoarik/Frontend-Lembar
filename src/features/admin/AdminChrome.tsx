@@ -36,14 +36,13 @@ function avatarTone(name: string): string {
   return AVATAR_TONES[hash % AVATAR_TONES.length] ?? AVATAR_TONES[0];
 }
 
-export function AdminAvatar({
-  name,
-  size = 'md',
-}: {
-  name: string;
-  size?: 'sm' | 'md' | 'lg';
-}) {
-  const dim = size === 'sm' ? 'h-7 w-7 text-[10px]' : size === 'lg' ? 'h-10 w-10 text-body-sm' : 'h-8 w-8 text-[11px]';
+export function AdminAvatar({ name, size = 'md' }: { name: string; size?: 'sm' | 'md' | 'lg' }) {
+  const dim =
+    size === 'sm'
+      ? 'h-7 w-7 text-[10px]'
+      : size === 'lg'
+        ? 'h-10 w-10 text-body-sm'
+        : 'h-8 w-8 text-[11px]';
   return (
     <span
       aria-hidden
@@ -74,7 +73,9 @@ export function AdminStatCards({
             className={`relative overflow-hidden rounded-2xl border border-[#ddd4c8]/80 bg-white p-5 shadow-[0_2px_12px_rgba(23,23,23,0.01),0_1px_2px_rgba(23,23,23,0.02)] hover:shadow-[0_8px_24px_rgba(23,23,23,0.06)] hover:-translate-y-0.5 transition-all duration-300 ${borderAccent}`}
           >
             <div className="flex items-center justify-between gap-3">
-              <div className="text-[11px] font-bold tracking-wider uppercase text-[#6d665d]/90">{item.label}</div>
+              <div className="text-[11px] font-bold tracking-wider uppercase text-[#6d665d]/90">
+                {item.label}
+              </div>
               {item.delta ? (
                 <span className="inline-flex items-center rounded-full bg-[#f4eade] px-2 py-0.5 text-[9px] font-bold text-[#514b44] uppercase tracking-wider">
                   {item.delta}
@@ -185,7 +186,9 @@ export function AdminPageHeader({
   return (
     <div className="flex flex-col gap-3 rounded-2xl border border-[#ddd4c8]/70 bg-white p-5 shadow-[0_2px_12px_rgba(23,23,23,0.01),0_1px_2px_rgba(23,23,23,0.02)] sm:flex-row sm:items-start sm:justify-between">
       <div className="min-w-0">
-        <h2 className="text-[18px] font-bold leading-normal pb-0.5 tracking-[-0.03em] text-[#171717]">{title}</h2>
+        <h2 className="text-[18px] font-bold leading-normal pb-0.5 tracking-[-0.03em] text-[#171717]">
+          {title}
+        </h2>
         {description ? (
           <p className="mt-1 max-w-2xl text-[13px] leading-relaxed text-[#6d665d]">{description}</p>
         ) : null}
@@ -215,7 +218,9 @@ export function AdminEmptyState({
         </span>
       </div>
       <p className="text-[14px] font-semibold text-[#171717]">{title}</p>
-      {description ? <p className="mx-auto mt-1 max-w-md text-[13px] text-[#6d665d]">{description}</p> : null}
+      {description ? (
+        <p className="mx-auto mt-1 max-w-md text-[13px] text-[#6d665d]">{description}</p>
+      ) : null}
       {action ? <div className="mt-4 flex justify-center">{action}</div> : null}
     </div>
   );
@@ -282,8 +287,10 @@ export function AdminDataTable<T extends { id: string }>({
   flat?: boolean;
 }) {
   const cellY = density === 'compact' ? 'py-2' : 'py-3';
-  const allSelected = selectable && rows.length > 0 && rows.every((row) => selectedIds.includes(row.id));
-  const someSelected = selectable && rows.some((row) => selectedIds.includes(row.id)) && !allSelected;
+  const allSelected =
+    selectable && rows.length > 0 && rows.every((row) => selectedIds.includes(row.id));
+  const someSelected =
+    selectable && rows.some((row) => selectedIds.includes(row.id)) && !allSelected;
 
   if (rows.length === 0) {
     return (
@@ -436,7 +443,9 @@ export function AdminPill({
             ? 'bg-brand-info-soft text-brand-info ring-brand-info/25'
             : 'bg-[#f0ebe3] text-[#514b44] ring-[#ddd4c8]';
   return (
-    <span className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-[11px] font-semibold leading-normal ring-1 ring-inset ${cls}`}>
+    <span
+      className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-[11px] font-semibold leading-normal ring-1 ring-inset ${cls}`}
+    >
       {children}
     </span>
   );
@@ -447,7 +456,10 @@ export function AdminContentLoading() {
     <div className="space-y-4" aria-busy="true" aria-live="polite" aria-label="Memuat konten">
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="h-[108px] animate-pulse rounded-xl border border-[#ddd4c8] bg-white" />
+          <div
+            key={i}
+            className="h-[108px] animate-pulse rounded-xl border border-[#ddd4c8] bg-white"
+          />
         ))}
       </div>
       <div className="h-12 animate-pulse rounded-xl border border-[#ddd4c8] bg-white" />
@@ -550,9 +562,13 @@ export function AdminShell({
                   <div className="min-w-0">
                     <div className="text-[14px] font-semibold tracking-[-0.02em] text-white">
                       <span className="font-extrabold text-white">lembar</span>{' '}
-                      <span className="font-normal text-brand-accent-soft/85">{brand.split(' ')[1] || ''}</span>
+                      <span className="font-normal text-brand-accent-soft/85">
+                        {brand.split(' ')[1] || ''}
+                      </span>
                     </div>
-                    <div className="text-[9px] tracking-wider uppercase text-white/40 font-bold">Console</div>
+                    <div className="text-[9px] tracking-wider uppercase text-white/40 font-bold">
+                      Console
+                    </div>
                   </div>
                 </div>
                 <button
@@ -570,7 +586,10 @@ export function AdminShell({
             )}
           </div>
 
-          <nav aria-label="Navigasi panel" className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto p-3">
+          <nav
+            aria-label="Navigasi panel"
+            className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto p-3"
+          >
             {!collapsed ? (
               <div className="px-2.5 pb-1.5 pt-1 text-[10px] font-bold uppercase tracking-[0.12em] text-white/30">
                 Workspace
@@ -615,7 +634,9 @@ export function AdminShell({
                   {!collapsed && item.badge ? (
                     <span
                       className={`rounded-md px-1.5 py-0.5 text-[10px] font-semibold tabular-nums ${
-                        active ? 'bg-brand-accent-soft text-brand-accent' : 'bg-white/10 text-white/75'
+                        active
+                          ? 'bg-brand-accent-soft text-brand-accent'
+                          : 'bg-white/10 text-white/75'
                       }`}
                     >
                       {item.badge}
@@ -637,8 +658,12 @@ export function AdminShell({
                 <div className="flex items-center gap-3 border-b border-white/10 pb-3">
                   <AdminAvatar name={resolvedActorName} size="md" />
                   <div className="min-w-0">
-                    <div className="truncate text-[13px] font-bold text-white">{resolvedActorName}</div>
-                    <div className="truncate text-[11px] text-white/60">{isOps ? 'ops@lembar.id' : 'admin@sekolah.sch.id'}</div>
+                    <div className="truncate text-[13px] font-bold text-white">
+                      {resolvedActorName}
+                    </div>
+                    <div className="truncate text-[11px] text-white/60">
+                      {isOps ? 'ops@lembar.id' : 'admin@sekolah.sch.id'}
+                    </div>
                   </div>
                 </div>
 
@@ -648,7 +673,10 @@ export function AdminShell({
                     onClick={() => setProfileOpen(false)}
                     className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[12px] font-medium text-white/80 hover:bg-white/10 hover:text-white transition-colors"
                   >
-                    <span className="material-symbols-outlined text-[16px] text-white/50" aria-hidden>
+                    <span
+                      className="material-symbols-outlined text-[16px] text-white/50"
+                      aria-hidden
+                    >
                       auto_awesome
                     </span>
                     Aplikasi Guru
@@ -658,7 +686,10 @@ export function AdminShell({
                     onClick={() => setProfileOpen(false)}
                     className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[12px] font-medium text-white/80 hover:bg-white/10 hover:text-white transition-colors"
                   >
-                    <span className="material-symbols-outlined text-[16px] text-white/50" aria-hidden>
+                    <span
+                      className="material-symbols-outlined text-[16px] text-white/50"
+                      aria-hidden
+                    >
                       person
                     </span>
                     Pengaturan Profil
@@ -715,11 +746,16 @@ export function AdminShell({
                 </h1>
                 <div className="mt-0.5 flex flex-wrap items-center gap-2 text-[11px] text-[#8a8379]">
                   <span className="font-semibold text-brand-accent-hover/80">{brand}</span>
-                  <span aria-hidden className="text-[#ccc4b8]">/</span>
+                  <span aria-hidden className="text-[#ccc4b8]">
+                    /
+                  </span>
                   <span className="font-medium text-[#171717]/80">{title}</span>
                   {isPending ? (
                     <span className="inline-flex items-center gap-1 rounded-md bg-brand-info-soft px-1.5 py-0.5 text-[9px] font-bold text-brand-info ml-1">
-                      <span className="material-symbols-outlined animate-spin text-[11px]" aria-hidden>
+                      <span
+                        className="material-symbols-outlined animate-spin text-[11px]"
+                        aria-hidden
+                      >
                         progress_activity
                       </span>
                       memuat
@@ -730,9 +766,7 @@ export function AdminShell({
                   <p className="mt-1 max-w-3xl text-[12px] leading-5 text-[#6d665d]">{subtitle}</p>
                 ) : null}
               </div>
-              <div className="flex flex-wrap items-center gap-3">
-                {topRight}
-              </div>
+              <div className="flex flex-wrap items-center gap-3">{topRight}</div>
             </div>
           </header>
 
@@ -746,7 +780,12 @@ export function AdminShell({
                     href={item.href}
                     prefetch
                     onClick={(event) => {
-                      if (!event.metaKey && !event.ctrlKey && !event.shiftKey && event.button === 0) {
+                      if (
+                        !event.metaKey &&
+                        !event.ctrlKey &&
+                        !event.shiftKey &&
+                        event.button === 0
+                      ) {
                         event.preventDefault();
                         navigate(item.href);
                       }
@@ -767,7 +806,10 @@ export function AdminShell({
             </nav>
           </div>
 
-          <main id="konten-admin" className="relative min-h-0 flex-1 space-y-6 overflow-y-auto p-5 md:p-8">
+          <main
+            id="konten-admin"
+            className="relative min-h-0 flex-1 space-y-6 overflow-y-auto p-5 md:p-8"
+          >
             {toast ? (
               <div
                 className="flex items-start justify-between gap-3 rounded-xl border border-[#ddd4c8] bg-white px-4 py-3 text-[13px] shadow-[0_8px_24px_rgba(23,23,23,0.06)]"

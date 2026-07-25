@@ -176,4 +176,3 @@ describe('F1-06 BlockRenderer — contract fixtures', () => {
 
 // --- fetchMarketingPage integration tests live in src/lib/marketing/__tests__/
 // BlockRenderer is the focus of this file; fetcher is tested separately.
-

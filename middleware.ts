@@ -27,7 +27,10 @@ function redirectTo(request: NextRequest, pathname: string): NextResponse {
 function getRolesFromCookies(request: NextRequest, session: string): string[] {
   const rolesStr = request.cookies.get(ROLES_COOKIE)?.value;
   if (rolesStr) {
-    return rolesStr.split(',').map((r) => r.trim()).filter(Boolean);
+    return rolesStr
+      .split(',')
+      .map((r) => r.trim())
+      .filter(Boolean);
   }
   // Fallback for compatibility/mock sessions
   if (session === 'ops') return ['superadmin'];

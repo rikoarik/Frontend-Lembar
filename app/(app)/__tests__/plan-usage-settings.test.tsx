@@ -11,9 +11,7 @@ describe('F2-08 plan/usage settings — /app/pengaturan/langganan', () => {
   it('renders page heading and plan label', () => {
     render(<PlanUsageSettingsPage />);
 
-    expect(
-      screen.getByRole('heading', { level: 1, name: /paket & kuota/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1, name: /paket & kuota/i })).toBeInTheDocument();
 
     expect(screen.getByText(/paket saat ini/i)).toBeInTheDocument();
     expect(screen.getByText('Paket Aktif')).toBeInTheDocument();
@@ -31,9 +29,7 @@ describe('F2-08 plan/usage settings — /app/pengaturan/langganan', () => {
   it('renders CTA button', () => {
     render(<PlanUsageSettingsPage />);
 
-    expect(
-      screen.getByRole('button', { name: /hubungi tim kami/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /hubungi tim kami/i })).toBeInTheDocument();
   });
 
   it('CTA button is keyboard accessible', async () => {

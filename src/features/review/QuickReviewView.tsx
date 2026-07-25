@@ -5,7 +5,11 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button, Panel, StatusBadge } from '@/app/components/ui';
 import type { StatusLabel } from '@/app/components/ui';
 import { assessmentService } from '@/src/services/assessments/assessmentService';
-import type { AssessmentDetail, QuestionReviewState, ReviewQuestion } from '@/src/features/review/types';
+import type {
+  AssessmentDetail,
+  QuestionReviewState,
+  ReviewQuestion,
+} from '@/src/features/review/types';
 import { reviewStateLabel } from '@/src/features/review/types';
 
 type FilterKey = 'all' | 'unreviewed' | 'warnings' | 'accepted';
@@ -96,7 +100,11 @@ export function QuickReviewView({
 
   const setState = async (questionId: string, reviewState: QuestionReviewState) => {
     setBusy(true);
-    const result = await assessmentService.updateQuestionState(assessmentId, questionId, reviewState);
+    const result = await assessmentService.updateQuestionState(
+      assessmentId,
+      questionId,
+      reviewState,
+    );
     setBusy(false);
     if (!result.ok) {
       setStatusNote(result.error.safeMessage);
@@ -149,7 +157,10 @@ export function QuickReviewView({
       <Panel title="Tinjauan belum bisa dimuat" description={error ?? 'Lembar tidak ditemukan.'}>
         <div className="flex flex-wrap gap-3">
           <Button onClick={() => void load()}>Coba lagi</Button>
-          <Link href="/app/riwayat" className="inline-flex min-h-[var(--control-md)] items-center rounded-md border border-brand-line px-4">
+          <Link
+            href="/app/riwayat"
+            className="inline-flex min-h-[var(--control-md)] items-center rounded-md border border-brand-line px-4"
+          >
             Buka riwayat
           </Link>
         </div>
@@ -315,8 +326,16 @@ export function QuickReviewView({
         </>
       ) : (
         <Panel
-          title={current ? `Soal ${current.number} dari ${questions.length || assessment.questionCount}` : 'Tidak ada soal'}
-          description={current ? `${reviewStateLabel(current.reviewState)} · ${current.topic}` : 'Ubah filter untuk melihat soal.'}
+          title={
+            current
+              ? `Soal ${current.number} dari ${questions.length || assessment.questionCount}`
+              : 'Tidak ada soal'
+          }
+          description={
+            current
+              ? `${reviewStateLabel(current.reviewState)} · ${current.topic}`
+              : 'Ubah filter untuk melihat soal.'
+          }
         >
           {current ? (
             <div className="flex flex-col gap-4">
@@ -353,8 +372,8 @@ export function QuickReviewView({
                 />
               </label>
               <p className="text-body-sm text-brand-ink-muted">
-                Kunci: {current.answerKey.toUpperCase()} · Sumber: {current.sourceLabel} · Kesulitan:{' '}
-                {current.difficulty}
+                Kunci: {current.answerKey.toUpperCase()} · Sumber: {current.sourceLabel} ·
+                Kesulitan: {current.difficulty}
               </p>
               {current.warnings.length > 0 ? (
                 <div className="rounded-md border border-brand-warning/30 bg-brand-warning-soft px-3 py-2">
@@ -396,7 +415,9 @@ export function QuickReviewView({
               </div>
             </div>
           ) : (
-            <p className="text-body-default text-brand-ink-muted">Tidak ada soal pada filter ini.</p>
+            <p className="text-body-default text-brand-ink-muted">
+              Tidak ada soal pada filter ini.
+            </p>
           )}
         </Panel>
       )}

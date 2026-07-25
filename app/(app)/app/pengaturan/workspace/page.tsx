@@ -58,11 +58,12 @@ export default function WorkspaceSettingsPage() {
     <div className="flex flex-col gap-4">
       <h1 className="text-brand-ink font-semibold text-body-xl">Workspace</h1>
 
-      {actionStatus && (
-        <FormStatus tone="idle" message={actionStatus} />
-      )}
+      {actionStatus && <FormStatus tone="idle" message={actionStatus} />}
 
-      <Panel title="Keanggotaan workspace" description="Workspace yang Anda ikuti dan peran Anda di masing-masing.">
+      <Panel
+        title="Keanggotaan workspace"
+        description="Workspace yang Anda ikuti dan peran Anda di masing-masing."
+      >
         <ul className="flex flex-col gap-2" aria-label="Daftar workspace">
           {memberships.map((ws) => (
             <li
@@ -124,12 +125,7 @@ export default function WorkspaceSettingsPage() {
               disimpan akan hilang.
             </p>
             <div className="flex gap-2">
-              <Button
-                size="sm"
-                onClick={handleSwitch}
-                loading={actionBusy}
-                disabled={actionBusy}
-              >
+              <Button size="sm" onClick={handleSwitch} loading={actionBusy} disabled={actionBusy}>
                 {actionBusy ? 'Beralih…' : 'Ya, beralih'}
               </Button>
               <Button variant="quiet" size="sm" onClick={() => setSwitchTarget(null)}>

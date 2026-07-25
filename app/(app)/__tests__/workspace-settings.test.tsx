@@ -11,9 +11,7 @@ describe('F2-07 workspace settings — /app/pengaturan/workspace', () => {
   it('renders membership list with role labels and active indicator', () => {
     render(<WorkspaceSettingsPage />);
 
-    expect(
-      screen.getByRole('heading', { level: 1, name: /workspace/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1, name: /workspace/i })).toBeInTheDocument();
 
     const list = screen.getByRole('list', { name: /daftar workspace/i });
     expect(list).toBeInTheDocument();

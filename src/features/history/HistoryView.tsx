@@ -94,7 +94,6 @@ export function HistoryView() {
               <option value="generating">Diproses</option>
             </select>
           </label>
-
         </div>
       </Panel>
 
@@ -105,7 +104,10 @@ export function HistoryView() {
           <Button onClick={() => void load()}>Coba lagi</Button>
         </Panel>
       ) : items.length === 0 ? (
-        <Panel title="Belum ada lembar" description="Mulai dari generate untuk membuat draft pertama.">
+        <Panel
+          title="Belum ada lembar"
+          description="Mulai dari generate untuk membuat draft pertama."
+        >
           <Link
             href="/app/generate"
             className="inline-flex min-h-[var(--control-md)] items-center rounded-md bg-brand-accent px-4 text-white"
@@ -124,7 +126,8 @@ export function HistoryView() {
               >
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <p className="text-body-sm text-brand-ink-muted">
-                    {lifecycleLabel(item.lifecycle)} · {item.reviewedCount}/{item.questionCount} ditinjau
+                    {lifecycleLabel(item.lifecycle)} · {item.reviewedCount}/{item.questionCount}{' '}
+                    ditinjau
                     {item.warningCount > 0 ? ` · ${item.warningCount} peringatan` : ''}
                   </p>
                   <div className="flex flex-wrap gap-2">

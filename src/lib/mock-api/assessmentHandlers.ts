@@ -22,7 +22,8 @@ export async function listAssessmentsHandler(request: Request) {
   if (denied) return denied;
   const url = new URL(request.url);
   const q = url.searchParams.get('q') ?? undefined;
-  const lifecycle = (url.searchParams.get('lifecycle') as AssessmentLifecycle | 'all' | null) ?? 'all';
+  const lifecycle =
+    (url.searchParams.get('lifecycle') as AssessmentLifecycle | 'all' | null) ?? 'all';
   return mockOk(listAssessments({ q, lifecycle: lifecycle || 'all' }));
 }
 
@@ -120,11 +121,7 @@ export async function outputHandler(assessmentId: string) {
   if (denied) return denied;
   const item = getOutputPackage(assessmentId);
   if (!item) {
-    return mockFail(
-      'STATE_CONFLICT',
-      'Output hanya tersedia setelah lembar difinalkan.',
-      409,
-    );
+    return mockFail('STATE_CONFLICT', 'Output hanya tersedia setelah lembar difinalkan.', 409);
   }
   return mockOk(item);
 }

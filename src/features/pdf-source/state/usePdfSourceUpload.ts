@@ -6,7 +6,14 @@ import { sourceService } from '@/src/services/source/sourceService';
 import type { SourceError, SourceState, SourceUploadIntent } from '@/src/types/source';
 import { redactTokens } from '@/src/features/pdf-source/validation/pdf-validation';
 
-type UploadPhase = 'idle' | 'validating' | 'requesting' | 'uploading' | 'processing' | 'insufficient' | 'done';
+type UploadPhase =
+  | 'idle'
+  | 'validating'
+  | 'requesting'
+  | 'uploading'
+  | 'processing'
+  | 'insufficient'
+  | 'done';
 
 export type UsePdfSourceUploadOptions = {
   workspaceId: string;
@@ -33,15 +40,8 @@ function generateIdempotencyKey(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
 }
 
-export function usePdfSourceUpload(
-  options: UsePdfSourceUploadOptions,
-): UsePdfSourceUploadReturn {
-  const {
-    workspaceId,
-    onSuccess,
-    onError,
-    pollingIntervalMs = 2000,
-  } = options;
+export function usePdfSourceUpload(options: UsePdfSourceUploadOptions): UsePdfSourceUploadReturn {
+  const { workspaceId, onSuccess, onError, pollingIntervalMs = 2000 } = options;
 
   const queryClient = useQueryClient();
   const [phase, setPhase] = useState<UploadPhase>('idle');

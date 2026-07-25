@@ -74,7 +74,14 @@ type ContentRow = {
 };
 
 const ACCOUNTS: AccountRow[] = [
-  { id: 'acct_demo', displayName: 'Demo Guru', email: 'demo@lembar.id', role: 'teacher', status: 'aktif', school: '—' },
+  {
+    id: 'acct_demo',
+    displayName: 'Demo Guru',
+    email: 'demo@lembar.id',
+    role: 'teacher',
+    status: 'aktif',
+    school: '—',
+  },
   {
     id: 'acct_admin',
     displayName: 'Admin Sekolah',
@@ -267,7 +274,9 @@ function jobTone(status: JobRow['status']): 'ok' | 'warn' | 'bad' | 'info' | 'ne
   return 'bad';
 }
 
-function accountStatusTone(status: AccountRow['status']): 'ok' | 'warn' | 'bad' | 'info' | 'neutral' {
+function accountStatusTone(
+  status: AccountRow['status'],
+): 'ok' | 'warn' | 'bad' | 'info' | 'neutral' {
   if (status === 'aktif') return 'ok';
   if (status === 'baru') return 'info';
   return 'warn';
@@ -332,7 +341,10 @@ export function AdminPagination({
           </p>
         </div>
         <div>
-          <nav className="isolate inline-flex -space-x-px rounded-xl shadow-sm bg-white" aria-label="Pagination">
+          <nav
+            className="isolate inline-flex -space-x-px rounded-xl shadow-sm bg-white"
+            aria-label="Pagination"
+          >
             <button
               onClick={() => onPageChange(currentPage - 1)}
               disabled={currentPage === 1}
@@ -380,14 +392,8 @@ export function AdminPagination({
 
 export function OpsConsoleView({ section = '' }: { section?: string }) {
   const key = section || '';
-  const {
-    search,
-    setSearch,
-    selectedIds,
-    setSelectedIds,
-    toggleSelectedId,
-    setToast,
-  } = useAdminSectionState(key || 'ringkasan');
+  const { search, setSearch, selectedIds, setSelectedIds, toggleSelectedId, setToast } =
+    useAdminSectionState(key || 'ringkasan');
 
   const [flags, setFlags] = useState(FLAGS);
   const [filterRole, setFilterRole] = useState<'' | AccountRow['role']>('');
@@ -402,7 +408,17 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
 
   useEffect(() => {
     setPage(1);
-  }, [search, filterRole, filterStatus, filterPlan, filterJobStatus, filterQuality, filterBilling, filterContent, key]);
+  }, [
+    search,
+    filterRole,
+    filterStatus,
+    filterPlan,
+    filterJobStatus,
+    filterQuality,
+    filterBilling,
+    filterContent,
+    key,
+  ]);
 
   const accounts = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -496,7 +512,11 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             }
             actions={
               <>
-                <Button size="sm" variant="secondary" onClick={() => setToast('Refresh ringkasan (mock).')}>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => setToast('Refresh ringkasan (mock).')}
+                >
                   Refresh
                 </Button>
                 <Button size="sm" onClick={() => setToast('Buka antrian job gagal.')}>
@@ -541,7 +561,10 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             <div className="space-y-4 rounded-2xl border border-[#ddd4c8]/70 bg-white p-5 shadow-[0_2px_12px_rgba(23,23,23,0.01),0_1px_2px_rgba(23,23,23,0.02)]">
               <div className="flex items-center justify-between gap-2 border-b border-[#eee6da]/50 pb-3">
                 <h2 className="text-[14px] font-semibold text-[#171717]">Jobs terbaru</h2>
-                <a href="/ops/jobs" className="text-[12px] font-semibold text-brand-accent hover:text-brand-accent-hover transition-colors">
+                <a
+                  href="/ops/jobs"
+                  className="text-[12px] font-semibold text-brand-accent hover:text-brand-accent-hover transition-colors"
+                >
                   Lihat semua
                 </a>
               </div>
@@ -550,21 +573,42 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                 footerNote="Preview · staging"
                 flat={true}
                 columns={[
-                  { key: 'id', header: 'Job', render: (row) => <code className="text-[11px] font-mono bg-[#f4eade] px-1.5 py-0.5 rounded text-[#514b44]">{row.id}</code> },
+                  {
+                    key: 'id',
+                    header: 'Job',
+                    render: (row) => (
+                      <code className="text-[11px] font-mono bg-[#f4eade] px-1.5 py-0.5 rounded text-[#514b44]">
+                        {row.id}
+                      </code>
+                    ),
+                  },
                   { key: 'tenant', header: 'Tenant', render: (row) => row.tenant },
                   {
                     key: 'status',
                     header: 'Status',
                     render: (row) => <AdminPill tone={jobTone(row.status)}>{row.status}</AdminPill>,
                   },
-                  { key: 'progress', header: 'Progress', render: (row) => <span className="font-semibold tabular-nums text-[#171717]">{row.progress}</span> },
+                  {
+                    key: 'progress',
+                    header: 'Progress',
+                    render: (row) => (
+                      <span className="font-semibold tabular-nums text-[#171717]">
+                        {row.progress}
+                      </span>
+                    ),
+                  },
                 ]}
               />
             </div>
             <div className="space-y-4 rounded-2xl border border-[#ddd4c8]/70 bg-white p-5 shadow-[0_2px_12px_rgba(23,23,23,0.01),0_1px_2px_rgba(23,23,23,0.02)]">
               <div className="flex items-center justify-between gap-2 border-b border-[#eee6da]/50 pb-3">
-                <h2 className="text-[14px] font-semibold text-[#171717]">Tenant yang perlu perhatian</h2>
-                <a href="/ops/schools" className="text-[12px] font-semibold text-brand-accent hover:text-brand-accent-hover transition-colors">
+                <h2 className="text-[14px] font-semibold text-[#171717]">
+                  Tenant yang perlu perhatian
+                </h2>
+                <a
+                  href="/ops/schools"
+                  className="text-[12px] font-semibold text-brand-accent hover:text-brand-accent-hover transition-colors"
+                >
                   Lihat semua
                 </a>
               </div>
@@ -581,7 +625,13 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                     header: 'Status',
                     render: (row) => <AdminPill tone={planTone(row.plan)}>{row.plan}</AdminPill>,
                   },
-                  { key: 'usage', header: 'Usage', render: (row) => <span className="font-semibold tabular-nums text-[#171717]">{row.usage}</span> },
+                  {
+                    key: 'usage',
+                    header: 'Usage',
+                    render: (row) => (
+                      <span className="font-semibold tabular-nums text-[#171717]">{row.usage}</span>
+                    ),
+                  },
                 ]}
               />
             </div>
@@ -660,7 +710,10 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             >
               Suspend
             </Button>
-            <Button size="sm" onClick={() => setToast(`Kirim reset sandi ke ${selectedIds.length} akun.`)}>
+            <Button
+              size="sm"
+              onClick={() => setToast(`Kirim reset sandi ke ${selectedIds.length} akun.`)}
+            >
               Reset sandi
             </Button>
           </AdminBulkBar>
@@ -673,11 +726,15 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             emptyLabel="Tidak ada akun yang cocok."
             emptyHint="Ubah filter atau kata kunci pencarian."
             emptyAction={
-              <Button size="sm" variant="secondary" onClick={() => {
-                setSearch('');
-                setFilterRole('');
-                setFilterStatus('');
-              }}>
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => {
+                  setSearch('');
+                  setFilterRole('');
+                  setFilterStatus('');
+                }}
+              >
                 Reset filter
               </Button>
             }
@@ -698,7 +755,11 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
               {
                 key: 'role',
                 header: 'Role',
-                render: (row) => <AdminPill tone={row.role === 'superadmin' ? 'info' : 'neutral'}>{row.role}</AdminPill>,
+                render: (row) => (
+                  <AdminPill tone={row.role === 'superadmin' ? 'info' : 'neutral'}>
+                    {row.role}
+                  </AdminPill>
+                ),
               },
               {
                 key: 'status',
@@ -711,7 +772,11 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             ]}
             rowActions={(row) => (
               <>
-                <Button size="sm" variant="secondary" onClick={() => setToast(`Detail ${row.displayName}`)}>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => setToast(`Detail ${row.displayName}`)}
+                >
                   Detail
                 </Button>
                 <Button size="sm" onClick={() => setToast(`Impersonate ${row.email} (mock).`)}>
@@ -735,7 +800,12 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
           <AdminPageHeader
             title="Sekolah / tenant"
             description="Pantau status plan, usage, dan owner setiap tenant sekolah."
-            meta={<AdminPill tone="warn">{schools.filter((s) => s.plan !== 'active' && s.plan !== 'pilot').length} perlu perhatian</AdminPill>}
+            meta={
+              <AdminPill tone="warn">
+                {schools.filter((s) => s.plan !== 'active' && s.plan !== 'pilot').length} perlu
+                perhatian
+              </AdminPill>
+            }
             actions={
               <Button size="sm" onClick={() => setToast('Tambah tenant sekolah (mock).')}>
                 Tambah sekolah
@@ -829,7 +899,9 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                 key: 'status',
                 header: 'Status',
                 render: (row) => (
-                  <AdminPill tone={row.status === 'published' ? 'ok' : 'neutral'}>{row.status}</AdminPill>
+                  <AdminPill tone={row.status === 'published' ? 'ok' : 'neutral'}>
+                    {row.status}
+                  </AdminPill>
                 ),
               },
             ]}
@@ -866,7 +938,9 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                 key: 'status',
                 header: 'Status',
                 render: (row) => (
-                  <AdminPill tone={row.status === 'active' ? 'ok' : 'neutral'}>{row.status}</AdminPill>
+                  <AdminPill tone={row.status === 'active' ? 'ok' : 'neutral'}>
+                    {row.status}
+                  </AdminPill>
                 ),
               },
             ]}
@@ -884,7 +958,11 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
           <AdminPageHeader
             title="Jobs"
             description="Pantau antrian generate/export lintas tenant dan retry job gagal."
-            meta={<AdminPill tone="bad">{jobs.filter((j) => j.status === 'failed').length} gagal</AdminPill>}
+            meta={
+              <AdminPill tone="bad">
+                {jobs.filter((j) => j.status === 'failed').length} gagal
+              </AdminPill>
+            }
             actions={
               <Button size="sm" onClick={() => setToast('Retry semua failed (mock).')}>
                 Retry failed
@@ -953,7 +1031,11 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
           <AdminPageHeader
             title="Quality reports"
             description="Triage laporan kualitas soal, kunci, dan privasi dari pengguna."
-            meta={<AdminPill tone="warn">{quality.filter((q) => q.status !== 'closed').length} open/triaged</AdminPill>}
+            meta={
+              <AdminPill tone="warn">
+                {quality.filter((q) => q.status !== 'closed').length} open/triaged
+              </AdminPill>
+            }
           />
           <AdminToolbar
             search={search}
@@ -1045,7 +1127,11 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
               { key: 'target', header: 'Target', render: (row) => row.target },
             ]}
             rowActions={(row) => (
-              <Button size="sm" variant="secondary" onClick={() => setToast(`Detail audit ${row.id}`)}>
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => setToast(`Detail audit ${row.id}`)}
+              >
                 Detail
               </Button>
             )}
@@ -1058,7 +1144,11 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
           <AdminPageHeader
             title="Billing"
             description="Pantau status langganan, seats, dan perpanjangan tenant."
-            meta={<AdminPill tone="warn">{billing.filter((b) => b.state !== 'active').length} non-active</AdminPill>}
+            meta={
+              <AdminPill tone="warn">
+                {billing.filter((b) => b.state !== 'active').length} non-active
+              </AdminPill>
+            }
           />
           <AdminToolbar
             search={search}
@@ -1092,7 +1182,11 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
               { key: 'renew', header: 'Renew', render: (row) => row.renewsAt },
             ]}
             rowActions={(row) => (
-              <Button size="sm" variant="secondary" onClick={() => setToast(`Billing detail ${row.school}`)}>
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => setToast(`Billing detail ${row.school}`)}
+              >
                 Kelola
               </Button>
             )}
@@ -1123,7 +1217,9 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                 key: 'enabled',
                 header: 'State',
                 render: (row) => (
-                  <AdminPill tone={row.enabled ? 'ok' : 'neutral'}>{row.enabled ? 'on' : 'off'}</AdminPill>
+                  <AdminPill tone={row.enabled ? 'ok' : 'neutral'}>
+                    {row.enabled ? 'on' : 'off'}
+                  </AdminPill>
                 ),
               },
             ]}
@@ -1186,7 +1282,9 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                 key: 'status',
                 header: 'Status',
                 render: (row) => (
-                  <AdminPill tone={row.status === 'published' ? 'ok' : 'neutral'}>{row.status}</AdminPill>
+                  <AdminPill tone={row.status === 'published' ? 'ok' : 'neutral'}>
+                    {row.status}
+                  </AdminPill>
                 ),
               },
               { key: 'updated', header: 'Update', render: (row) => row.updatedAt },
@@ -1226,7 +1324,9 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
           />
           <div className="grid gap-6 md:grid-cols-2">
             <div className="space-y-4 rounded-2xl border border-[#ddd4c8]/70 bg-white p-6 shadow-[0_2px_12px_rgba(23,23,23,0.01)]">
-              <h3 className="text-[14px] font-bold text-[#171717] border-b border-[#eee6da]/50 pb-2">Detail Akun</h3>
+              <h3 className="text-[14px] font-bold text-[#171717] border-b border-[#eee6da]/50 pb-2">
+                Detail Akun
+              </h3>
               <div className="flex items-center gap-4">
                 <AdminAvatar name="Ops Superadmin" />
                 <div>
@@ -1254,7 +1354,9 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             </div>
 
             <div className="space-y-4 rounded-2xl border border-[#ddd4c8]/70 bg-white p-6 shadow-[0_2px_12px_rgba(23,23,23,0.01)]">
-              <h3 className="text-[14px] font-bold text-[#171717] border-b border-[#eee6da]/50 pb-2">Informasi Sesi</h3>
+              <h3 className="text-[14px] font-bold text-[#171717] border-b border-[#eee6da]/50 pb-2">
+                Informasi Sesi
+              </h3>
               <div className="space-y-2.5 text-[12px]">
                 <div className="flex justify-between">
                   <span className="text-[#8a8379]">IP Address Saat Ini</span>
@@ -1274,7 +1376,12 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                 </div>
               </div>
               <div className="border-t border-[#eee6da]/50 pt-4">
-                <Button size="sm" variant="secondary" className="w-full justify-center" onClick={() => setToast('Log out dari perangkat lain (mock).')}>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  className="w-full justify-center"
+                  onClick={() => setToast('Log out dari perangkat lain (mock).')}
+                >
                   Log Out dari Perangkat Lain
                 </Button>
               </div>

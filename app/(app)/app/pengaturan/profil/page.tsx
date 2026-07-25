@@ -40,12 +40,13 @@ export default function ProfileSettingsPage() {
   const [notifyNewsletter, setNotifyNewsletter] = useState(true);
   const [prefStatus, setPrefStatus] = useState('');
 
-  const initials = displayName
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? '')
-    .join('') || 'G';
+  const initials =
+    displayName
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase() ?? '')
+      .join('') || 'G';
 
   const handleNameSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -251,7 +252,11 @@ export default function ProfileSettingsPage() {
                   </Button>
                 </div>
               ) : (
-                <form onSubmit={handlePasswordSubmit} className="flex flex-col gap-3 rounded-lg border border-[#e6dfd4] bg-white p-3.5" noValidate>
+                <form
+                  onSubmit={handlePasswordSubmit}
+                  className="flex flex-col gap-3 rounded-lg border border-[#e6dfd4] bg-white p-3.5"
+                  noValidate
+                >
                   <h3 className="text-[13px] font-semibold text-[#171717]">Ubah Kata Sandi</h3>
                   {passwordError ? <FormStatus tone="alert" message={passwordError} /> : null}
 
@@ -369,8 +374,12 @@ export default function ProfileSettingsPage() {
                   className="mt-0.5 h-4 w-4 rounded border-brand-line text-brand-accent focus:ring-brand-accent"
                 />
                 <div className="flex flex-col">
-                  <span className="text-[13px] font-medium text-[#171717]">Status Pembuatan Lembar</span>
-                  <span className="text-[11px] text-[#6d665d]">Email saat AI selesai membuat lembar</span>
+                  <span className="text-[13px] font-medium text-[#171717]">
+                    Status Pembuatan Lembar
+                  </span>
+                  <span className="text-[11px] text-[#6d665d]">
+                    Email saat AI selesai membuat lembar
+                  </span>
                 </div>
               </label>
 
@@ -385,8 +394,12 @@ export default function ProfileSettingsPage() {
                   className="mt-0.5 h-4 w-4 rounded border-brand-line text-brand-accent focus:ring-brand-accent"
                 />
                 <div className="flex flex-col">
-                  <span className="text-[13px] font-medium text-[#171717]">Pembaruan Fitur &amp; Tips</span>
-                  <span className="text-[11px] text-[#6d665d]">Info fitur terbaru dan panduan pembuatan soal</span>
+                  <span className="text-[13px] font-medium text-[#171717]">
+                    Pembaruan Fitur &amp; Tips
+                  </span>
+                  <span className="text-[11px] text-[#6d665d]">
+                    Info fitur terbaru dan panduan pembuatan soal
+                  </span>
                 </div>
               </label>
             </div>

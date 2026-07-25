@@ -18,17 +18,11 @@ export const sourceService = {
     return sourceMutations.createUploadIntent(fileName, sizeBytes, workspaceId, idempotencyKey);
   },
 
-  uploadFile(
-    file: File,
-    uploadUrl: string,
-  ): Promise<Result<SourceUploadResult, SourceError>> {
+  uploadFile(file: File, uploadUrl: string): Promise<Result<SourceUploadResult, SourceError>> {
     return sourceMutations.uploadFile(file, uploadUrl);
   },
 
-  getSource(
-    sourceId: string,
-    workspaceId: string,
-  ): Promise<Result<SourceState, SourceError>> {
+  getSource(sourceId: string, workspaceId: string): Promise<Result<SourceState, SourceError>> {
     return sourceMutations.getSource(sourceId, workspaceId);
   },
 

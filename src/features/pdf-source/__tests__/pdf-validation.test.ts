@@ -5,11 +5,7 @@ import {
   redactTokens,
 } from '@/src/features/pdf-source/validation/pdf-validation';
 
-function createMockFile(
-  name: string,
-  size: number,
-  type: string = 'application/pdf',
-): File {
+function createMockFile(name: string, size: number, type: string = 'application/pdf'): File {
   const content = new Uint8Array(size);
   return new File([content], name, { type });
 }
@@ -103,7 +99,8 @@ describe('sanitizeFileInfo', () => {
 
 describe('redactTokens', () => {
   it('should redact JWT tokens', () => {
-    const input = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
+    const input =
+      'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
     const result = redactTokens(input);
     expect(result).toContain('[redacted]');
     expect(result).not.toContain('eyJ');
@@ -130,7 +127,8 @@ describe('redactTokens', () => {
   });
 
   it('should handle multiple tokens in one string', () => {
-    const input = 'Token1: abcdefghijklmnopqrstuvwxyz012345.abcdefghijklmnoPQRSTUVWXYZ678901.abcdefghijklmnopqrstuVWXYZ234567 Token2: 550e8400-e29b-41d4-a716-446655440000';
+    const input =
+      'Token1: abcdefghijklmnopqrstuvwxyz012345.abcdefghijklmnoPQRSTUVWXYZ678901.abcdefghijklmnopqrstuVWXYZ234567 Token2: 550e8400-e29b-41d4-a716-446655440000';
     const result = redactTokens(input);
     expect(result).toContain('[redacted]');
     expect(result).toContain('[id-redacted]');

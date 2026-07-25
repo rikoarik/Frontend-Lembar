@@ -110,7 +110,12 @@ export const catalogHandlers = [
     const scenario = url.searchParams.get('__scenario');
     if (!gradeId || !subjectId) {
       return HttpResponse.json(
-        { error: { code: 'VALIDATION_FAILED', message: 'Parameter gradeId dan subjectId wajib diisi.' } },
+        {
+          error: {
+            code: 'VALIDATION_FAILED',
+            message: 'Parameter gradeId dan subjectId wajib diisi.',
+          },
+        },
         { status: 400 },
       );
     }

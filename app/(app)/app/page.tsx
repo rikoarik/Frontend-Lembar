@@ -58,7 +58,9 @@ function MetricCard({
   return (
     <div className="rounded-2xl border border-[#e6dfd4] bg-white p-4 shadow-[0_1px_0_rgba(23,23,23,0.03)]">
       <div className="text-[12px] font-medium text-[#6d665d]">{label}</div>
-      <div className="mt-2 text-[28px] font-semibold tracking-[-0.04em] text-[#171717]">{value}</div>
+      <div className="mt-2 text-[28px] font-semibold tracking-[-0.04em] text-[#171717]">
+        {value}
+      </div>
       {hint ? <div className="mt-2 text-[12px] text-[#8a8379]">{hint}</div> : null}
     </div>
   );
@@ -113,9 +115,14 @@ export default function AppDashboardPage() {
 
   if (state.status === 'error') {
     return (
-      <div className="mx-auto flex max-w-lg flex-col gap-4 rounded-2xl border border-[#e6dfd4] bg-white p-6" role="alert">
+      <div
+        className="mx-auto flex max-w-lg flex-col gap-4 rounded-2xl border border-[#e6dfd4] bg-white p-6"
+        role="alert"
+      >
         <div>
-          <h2 className="text-[18px] font-semibold tracking-[-0.03em] text-[#171717]">Gagal memuat beranda</h2>
+          <h2 className="text-[18px] font-semibold tracking-[-0.03em] text-[#171717]">
+            Gagal memuat beranda
+          </h2>
           <p className="mt-1 text-[13px] text-[#6d665d]">{state.message}</p>
         </div>
         <div>
@@ -231,7 +238,9 @@ export default function AppDashboardPage() {
         />
         <MetricCard
           label="Perlu ditinjau"
-          value={<span data-testid="metric-assessments-review">{metrics.assessments.inReview}</span>}
+          value={
+            <span data-testid="metric-assessments-review">{metrics.assessments.inReview}</span>
+          }
           hint="Siap dicek sebelum final"
         />
         <MetricCard
@@ -249,7 +258,9 @@ export default function AppDashboardPage() {
       <section className="grid gap-3 lg:grid-cols-[1.4fr_1fr]">
         <div className="rounded-2xl border border-[#e6dfd4] bg-white p-4 shadow-[0_1px_0_rgba(23,23,23,0.03)]">
           <div className="flex items-center justify-between gap-3">
-            <h3 className="text-[15px] font-semibold tracking-[-0.02em] text-[#171717]">Aksi cepat</h3>
+            <h3 className="text-[15px] font-semibold tracking-[-0.02em] text-[#171717]">
+              Aksi cepat
+            </h3>
             <span className="text-[12px] text-[#8a8379]">Subscriber workspace</span>
           </div>
           <div className="mt-3 grid gap-2 sm:grid-cols-2">
@@ -265,7 +276,10 @@ export default function AppDashboardPage() {
                 ].join(' ')}
               >
                 <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[18px] text-[#514b44]" aria-hidden>
+                  <span
+                    className="material-symbols-outlined text-[18px] text-[#514b44]"
+                    aria-hidden
+                  >
                     {action.icon}
                   </span>
                   <span className="text-[13px] font-semibold text-[#171717]">{action.title}</span>
@@ -277,7 +291,9 @@ export default function AppDashboardPage() {
         </div>
 
         <div className="rounded-2xl border border-[#e6dfd4] bg-white p-4 shadow-[0_1px_0_rgba(23,23,23,0.03)]">
-          <h3 className="text-[15px] font-semibold tracking-[-0.02em] text-[#171717]">Status workspace</h3>
+          <h3 className="text-[15px] font-semibold tracking-[-0.02em] text-[#171717]">
+            Status workspace
+          </h3>
           <dl className="mt-3 space-y-3 text-[13px]">
             <div className="flex items-center justify-between gap-3 border-b border-[#f0ebe3] pb-3">
               <dt className="text-[#6d665d]">Workspace</dt>

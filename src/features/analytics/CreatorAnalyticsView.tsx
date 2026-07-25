@@ -144,7 +144,10 @@ const CHART_DATA: Record<RangeOption, { day: string; count: number; final: numbe
   ],
 };
 
-const RANGE_SUBJECTS: Record<RangeOption, { name: string; count: number; percentage: number; color: string }[]> = {
+const RANGE_SUBJECTS: Record<
+  RangeOption,
+  { name: string; count: number; percentage: number; color: string }[]
+> = {
   '7d': [
     { name: 'Matematika', count: 7, percentage: 39, color: 'bg-[#a3202b]' },
     { name: 'Bahasa Indonesia', count: 5, percentage: 28, color: 'bg-amber-600' },
@@ -165,7 +168,10 @@ const RANGE_SUBJECTS: Record<RangeOption, { name: string; count: number; percent
   ],
 };
 
-const RANGE_QUESTION_TYPES: Record<RangeOption, { type: string; count: number; percentage: number }[]> = {
+const RANGE_QUESTION_TYPES: Record<
+  RangeOption,
+  { type: string; count: number; percentage: number }[]
+> = {
   '7d': [
     { type: 'Pilihan Ganda', count: 130, percentage: 65 },
     { type: 'Isian Singkat', count: 44, percentage: 22 },
@@ -183,26 +189,113 @@ const RANGE_QUESTION_TYPES: Record<RangeOption, { type: string; count: number; p
   ],
 };
 
-const RANGE_ACTIVITIES: Record<RangeOption, { id: string; title: string; date: string; status: string; questions: number }[]> = {
+const RANGE_ACTIVITIES: Record<
+  RangeOption,
+  { id: string; title: string; date: string; status: string; questions: number }[]
+> = {
   '7d': [
-    { id: '1', title: 'Ulangan Harian Matematika Bab 3 - Fraction & Desimal', date: 'Hari ini, 14:20', status: 'Final', questions: 20 },
-    { id: '2', title: 'Asesmen Sumatif Bahasa Indonesia - Teks Laporan', date: 'Kemarin, 09:15', status: 'Dalam Review', questions: 15 },
-    { id: '3', title: 'Latihan IPA Kelas 8 - Sistem Pencernaan', date: '22 Juli 2026', status: 'Final', questions: 25 },
+    {
+      id: '1',
+      title: 'Ulangan Harian Matematika Bab 3 - Fraction & Desimal',
+      date: 'Hari ini, 14:20',
+      status: 'Final',
+      questions: 20,
+    },
+    {
+      id: '2',
+      title: 'Asesmen Sumatif Bahasa Indonesia - Teks Laporan',
+      date: 'Kemarin, 09:15',
+      status: 'Dalam Review',
+      questions: 15,
+    },
+    {
+      id: '3',
+      title: 'Latihan IPA Kelas 8 - Sistem Pencernaan',
+      date: '22 Juli 2026',
+      status: 'Final',
+      questions: 25,
+    },
   ],
   '30d': [
-    { id: '1', title: 'Ulangan Harian Matematika Bab 3 - Fraction & Desimal', date: 'Hari ini, 14:20', status: 'Final', questions: 20 },
-    { id: '2', title: 'Asesmen Sumatif Bahasa Indonesia - Teks Laporan', date: 'Kemarin, 09:15', status: 'Dalam Review', questions: 15 },
-    { id: '3', title: 'Latihan IPA Kelas 8 - Sistem Pencernaan', date: '22 Juli 2026', status: 'Final', questions: 25 },
-    { id: '4', title: 'Kuis Bahasa Inggris - Descriptive Text & Grammar', date: '18 Juli 2026', status: 'Final', questions: 15 },
-    { id: '5', title: 'PTS Matematika Semester 1 - Aljabar & Geometri', date: '10 Juli 2026', status: 'Final', questions: 30 },
+    {
+      id: '1',
+      title: 'Ulangan Harian Matematika Bab 3 - Fraction & Desimal',
+      date: 'Hari ini, 14:20',
+      status: 'Final',
+      questions: 20,
+    },
+    {
+      id: '2',
+      title: 'Asesmen Sumatif Bahasa Indonesia - Teks Laporan',
+      date: 'Kemarin, 09:15',
+      status: 'Dalam Review',
+      questions: 15,
+    },
+    {
+      id: '3',
+      title: 'Latihan IPA Kelas 8 - Sistem Pencernaan',
+      date: '22 Juli 2026',
+      status: 'Final',
+      questions: 25,
+    },
+    {
+      id: '4',
+      title: 'Kuis Bahasa Inggris - Descriptive Text & Grammar',
+      date: '18 Juli 2026',
+      status: 'Final',
+      questions: 15,
+    },
+    {
+      id: '5',
+      title: 'PTS Matematika Semester 1 - Aljabar & Geometri',
+      date: '10 Juli 2026',
+      status: 'Final',
+      questions: 30,
+    },
   ],
   semester: [
-    { id: '1', title: 'Ulangan Harian Matematika Bab 3 - Fraction & Desimal', date: 'Hari ini, 14:20', status: 'Final', questions: 20 },
-    { id: '2', title: 'Asesmen Sumatif Bahasa Indonesia - Teks Laporan', date: 'Kemarin, 09:15', status: 'Dalam Review', questions: 15 },
-    { id: '3', title: 'Latihan IPA Kelas 8 - Sistem Pencernaan', date: '22 Juli 2026', status: 'Final', questions: 25 },
-    { id: '4', title: 'Kuis Bahasa Inggris - Descriptive Text & Grammar', date: '18 Juli 2026', status: 'Final', questions: 15 },
-    { id: '5', title: 'PTS Matematika Semester 1 - Aljabar & Geometri', date: '10 Juli 2026', status: 'Final', questions: 30 },
-    { id: '6', title: 'Ujian Akhir Semester IPA Kelas 8', date: '02 Juni 2026', status: 'Final', questions: 40 },
+    {
+      id: '1',
+      title: 'Ulangan Harian Matematika Bab 3 - Fraction & Desimal',
+      date: 'Hari ini, 14:20',
+      status: 'Final',
+      questions: 20,
+    },
+    {
+      id: '2',
+      title: 'Asesmen Sumatif Bahasa Indonesia - Teks Laporan',
+      date: 'Kemarin, 09:15',
+      status: 'Dalam Review',
+      questions: 15,
+    },
+    {
+      id: '3',
+      title: 'Latihan IPA Kelas 8 - Sistem Pencernaan',
+      date: '22 Juli 2026',
+      status: 'Final',
+      questions: 25,
+    },
+    {
+      id: '4',
+      title: 'Kuis Bahasa Inggris - Descriptive Text & Grammar',
+      date: '18 Juli 2026',
+      status: 'Final',
+      questions: 15,
+    },
+    {
+      id: '5',
+      title: 'PTS Matematika Semester 1 - Aljabar & Geometri',
+      date: '10 Juli 2026',
+      status: 'Final',
+      questions: 30,
+    },
+    {
+      id: '6',
+      title: 'Ujian Akhir Semester IPA Kelas 8',
+      date: '02 Juni 2026',
+      status: 'Final',
+      questions: 40,
+    },
   ],
 };
 
@@ -308,7 +401,10 @@ export function CreatorAnalyticsView() {
 
           <div className="flex h-60 items-end gap-4 pt-6 border-b border-[#e6dfd4] pb-3">
             {chartSeries.map((item) => (
-              <div key={item.day} className="flex flex-1 flex-col items-center gap-2 h-full justify-end">
+              <div
+                key={item.day}
+                className="flex flex-1 flex-col items-center gap-2 h-full justify-end"
+              >
                 <div className="flex w-full items-end justify-center gap-2 h-full">
                   {/* Total Bar */}
                   <div
@@ -348,7 +444,9 @@ export function CreatorAnalyticsView() {
               <div key={subject.name} className="flex flex-col gap-1.5">
                 <div className="flex justify-between text-[13px]">
                   <span className="font-medium text-[#171717]">{subject.name}</span>
-                  <span className="text-[#6d665d] font-semibold">{subject.count} lembar ({subject.percentage}%)</span>
+                  <span className="text-[#6d665d] font-semibold">
+                    {subject.count} lembar ({subject.percentage}%)
+                  </span>
                 </div>
                 <div className="h-2.5 rounded-full bg-[#f0ebe3] overflow-hidden">
                   <div
@@ -362,10 +460,16 @@ export function CreatorAnalyticsView() {
         </Panel>
 
         {/* Question Types Overview */}
-        <Panel title="Komposisi Tipe Soal" description="Tipe soal yang paling umum digunakan dalam lembar kerja.">
+        <Panel
+          title="Komposisi Tipe Soal"
+          description="Tipe soal yang paling umum digunakan dalam lembar kerja."
+        >
           <div className="flex flex-col gap-3 pt-1">
             {questionTypes.map((qt) => (
-              <div key={qt.type} className="flex items-center justify-between rounded-lg bg-[#fbf8f2] border border-[#e6dfd4] px-4 py-3">
+              <div
+                key={qt.type}
+                className="flex items-center justify-between rounded-lg bg-[#fbf8f2] border border-[#e6dfd4] px-4 py-3"
+              >
                 <div className="flex flex-col">
                   <span className="text-[13px] font-semibold text-[#171717]">{qt.type}</span>
                   <span className="text-[11px] text-[#6d665d]">{qt.count} soal dihasilkan</span>
@@ -380,7 +484,10 @@ export function CreatorAnalyticsView() {
       </div>
 
       {/* Recent Activity List & Quick Actions */}
-      <Panel title="Aktivitas Lembar Terbaru" description="Daftar pembuatan lembar kerja terakhir Anda.">
+      <Panel
+        title="Aktivitas Lembar Terbaru"
+        description="Daftar pembuatan lembar kerja terakhir Anda."
+      >
         <div className="flex flex-col gap-3 pt-1">
           <div className="flex flex-col divide-y divide-[#e6dfd4]">
             {recentActivities.map((act) => (
@@ -390,7 +497,10 @@ export function CreatorAnalyticsView() {
                 className="flex items-center justify-between py-3.5 first:pt-0 last:pb-0 gap-3 group hover:bg-[#fbf8f2] px-2 rounded-lg transition-colors"
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <span aria-hidden="true" className="material-symbols-outlined text-[22px] text-[#8a8379] group-hover:text-[#a3202b] transition-colors shrink-0">
+                  <span
+                    aria-hidden="true"
+                    className="material-symbols-outlined text-[22px] text-[#8a8379] group-hover:text-[#a3202b] transition-colors shrink-0"
+                  >
                     description
                   </span>
                   <div className="flex flex-col min-w-0">

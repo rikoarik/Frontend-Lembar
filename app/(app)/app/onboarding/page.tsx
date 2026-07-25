@@ -19,12 +19,10 @@ export default function OnboardingPage() {
     >
       <div className="w-full max-w-md">
         <div className="mb-8">
-          <h1 className="text-h1 font-bold text-brand-ink mb-3">
-            Selamat datang di lembar
-          </h1>
+          <h1 className="text-h1 font-bold text-brand-ink mb-3">Selamat datang di lembar</h1>
           <p className="text-body-default text-brand-ink-muted">
-            Akun Anda sudah siap. Workspace pribadi Anda akan dibuat secara otomatis saat Anda
-            mulai menggunakan aplikasi.
+            Akun Anda sudah siap. Workspace pribadi Anda akan dibuat secara otomatis saat Anda mulai
+            menggunakan aplikasi.
           </p>
         </div>
 

@@ -58,7 +58,13 @@ export function mapJobEnvelope(
 }
 
 export function jobNetworkError(cause?: unknown): JobError {
-  return { code: 'NETWORK', safeMessage: COPY.NETWORK.safeMessage, hint: COPY.NETWORK.hint, retryable: true, cause };
+  return {
+    code: 'NETWORK',
+    safeMessage: COPY.NETWORK.safeMessage,
+    hint: COPY.NETWORK.hint,
+    retryable: true,
+    cause,
+  };
 }
 
 export function jobTimeoutError(): JobError {

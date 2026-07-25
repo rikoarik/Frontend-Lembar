@@ -5,11 +5,7 @@ import OutputPackagePreview from '@/app/components/print/OutputPackagePreview';
 import Link from 'next/link';
 import { use } from 'react';
 
-export default function OutputPrintPage({
-  params,
-}: {
-  params: Promise<{ assessmentId: string }>;
-}) {
+export default function OutputPrintPage({ params }: { params: Promise<{ assessmentId: string }> }) {
   const { assessmentId } = use(params);
   return (
     <div className="flex flex-col gap-4">

@@ -1,5 +1,6 @@
 import { forwardRef } from 'react';
 import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode } from 'react';
+import { Spinner } from './Spinner';
 
 /**
  * Button — primitive. See docs/frontend/DESIGN-SYSTEM.md §"Button".
@@ -91,12 +92,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       className={join(base, sizeClass[size], variantClass[variant], className)}
       {...rest}
     >
-      {loading ? (
-        <span
-          aria-hidden="true"
-          className="inline-block h-2 w-2 rounded-full bg-current opacity-70"
-        />
-      ) : null}
+      {loading ? <Spinner size={size === 'lg' ? 'md' : 'sm'} /> : null}
       <span>{loading && loadingLabel ? loadingLabel : children}</span>
     </button>
   );
@@ -123,12 +119,7 @@ export const LinkButton = forwardRef<HTMLAnchorElement, LinkButtonProps>(functio
       className={join(base, sizeClass[size], variantClass[variant], className)}
       {...rest}
     >
-      {loading ? (
-        <span
-          aria-hidden="true"
-          className="inline-block h-2 w-2 rounded-full bg-current opacity-70"
-        />
-      ) : null}
+      {loading ? <Spinner size={size === 'lg' ? 'md' : 'sm'} /> : null}
       <span>{loading && loadingLabel ? loadingLabel : children}</span>
     </a>
   );

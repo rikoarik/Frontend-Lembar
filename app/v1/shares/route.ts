@@ -25,9 +25,12 @@ export async function POST(request: Request) {
   if (!body.assessmentId || !body.title) {
     return mockFail('VALIDATION_FAILED', 'assessmentId dan title wajib.', 400);
   }
-  return mockOk(createShare({
-    assessmentId: body.assessmentId,
-    title: body.title,
-    daysValid: body.daysValid,
-  }), { status: 201 });
+  return mockOk(
+    createShare({
+      assessmentId: body.assessmentId,
+      title: body.title,
+      daysValid: body.daysValid,
+    }),
+    { status: 201 },
+  );
 }

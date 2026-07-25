@@ -11,15 +11,14 @@ describe('F2-06 profile settings — /app/pengaturan/profil', () => {
   it('renders display-name form, password-change entry, and log-out-everywhere CTA', async () => {
     render(<ProfileSettingsPage />);
 
-    expect(
-      screen.getByRole('heading', { level: 1, name: /profil/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1, name: /profil/i })).toBeInTheDocument();
 
     expect(screen.getByLabelText(/nama tampilan/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /simpan nama/i })).toBeInTheDocument();
-    expect(
-      screen.getByRole('link', { name: /ubah kata sandi/i }),
-    ).toHaveAttribute('href', '/lupa-sandi');
+    expect(screen.getByRole('link', { name: /ubah kata sandi/i })).toHaveAttribute(
+      'href',
+      '/lupa-sandi',
+    );
     expect(
       screen.getByRole('button', { name: /keluar dari semua perangkat/i }),
     ).toBeInTheDocument();
@@ -54,19 +53,13 @@ describe('F2-06 profile settings — /app/pengaturan/profil', () => {
     const user = userEvent.setup();
     render(<ProfileSettingsPage />);
 
-    await user.click(
-      screen.getByRole('button', { name: /keluar dari semua perangkat/i }),
-    );
-    expect(
-      screen.getByText(/semua sesi aktif akan diakhiri/i),
-    ).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /keluar dari semua perangkat/i }));
+    expect(screen.getByText(/semua sesi aktif akan diakhiri/i)).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: /ya, keluarkan semua/i }));
 
     await waitFor(() => {
-      expect(screen.getByRole('status')).toHaveTextContent(
-        /semua perangkat telah dikeluarkan/i,
-      );
+      expect(screen.getByRole('status')).toHaveTextContent(/semua perangkat telah dikeluarkan/i);
     });
   });
 });

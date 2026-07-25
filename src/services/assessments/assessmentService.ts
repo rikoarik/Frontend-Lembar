@@ -108,9 +108,13 @@ export const assessmentService = {
     );
   },
   finalize(assessmentId: string, acknowledged: boolean) {
-    return request<FinalizeResult>(`/assessments/${encodeURIComponent(assessmentId)}/finalize`, 'POST', {
-      acknowledged,
-    });
+    return request<FinalizeResult>(
+      `/assessments/${encodeURIComponent(assessmentId)}/finalize`,
+      'POST',
+      {
+        acknowledged,
+      },
+    );
   },
   getOutput(assessmentId: string) {
     return request<OutputPackage>(`/assessments/${encodeURIComponent(assessmentId)}/output`);

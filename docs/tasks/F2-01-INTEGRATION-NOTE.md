@@ -5,6 +5,7 @@
 ## Current State
 
 Auth screens fully implemented in `app/(auth)`:
+
 - `/masuk` - Login with identifier (username/email/phone) + password
 - `/daftar` - Register with username, email, phone, password
 - `/lupa-sandi` - Recovery request
@@ -29,6 +30,7 @@ Per owner directive "CONTRACT AVAILABLE, LIVE IMPLEMENTATION PENDING":
 ## Next Steps
 
 When backend publishes auth OpenAPI contract:
+
 1. Regenerate `src/lib/api/schema.d.ts` from updated openapi.yaml
 2. Optional: Migrate authMutations to use `apiClient` (typed) instead of raw fetch
 3. Existing implementation continues working - no breaking changes

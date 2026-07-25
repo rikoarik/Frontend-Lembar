@@ -172,7 +172,9 @@ export default function GenerateForm() {
         setInitialLoadError(result.error.safeMessage);
       }
     });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
     // gradeId loading starts as true; no sync setState
   }, [workspaceId]);
 
@@ -180,28 +182,36 @@ export default function GenerateForm() {
   useEffect(() => {
     if (!values.gradeId || !values.curriculumVersionId) return;
     let cancelled = false;
-    catalogService.listSubjects(workspaceId, values.gradeId, values.curriculumVersionId).then((result) => {
-      if (cancelled) return;
-      setLoading((prev) => ({ ...prev, subjectId: false }));
-      if (result.ok) {
-        setSubjects(result.value);
-      }
-    });
-    return () => { cancelled = true; };
+    catalogService
+      .listSubjects(workspaceId, values.gradeId, values.curriculumVersionId)
+      .then((result) => {
+        if (cancelled) return;
+        setLoading((prev) => ({ ...prev, subjectId: false }));
+        if (result.ok) {
+          setSubjects(result.value);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [values.gradeId, values.curriculumVersionId, workspaceId]);
 
   // ── Load materials when subject changes ───────
   useEffect(() => {
     if (!values.gradeId || !values.subjectId || !values.curriculumVersionId) return;
     let cancelled = false;
-    catalogService.listMaterials(workspaceId, values.gradeId, values.subjectId, values.curriculumVersionId).then((result) => {
-      if (cancelled) return;
-      setLoading((prev) => ({ ...prev, materialIds: false }));
-      if (result.ok) {
-        setMaterials(result.value);
-      }
-    });
-    return () => { cancelled = true; };
+    catalogService
+      .listMaterials(workspaceId, values.gradeId, values.subjectId, values.curriculumVersionId)
+      .then((result) => {
+        if (cancelled) return;
+        setLoading((prev) => ({ ...prev, materialIds: false }));
+        if (result.ok) {
+          setMaterials(result.value);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [values.gradeId, values.subjectId, values.curriculumVersionId, workspaceId]);
 
   // ── Update helper with cascade ────────────────
@@ -295,7 +305,9 @@ export default function GenerateForm() {
     const items: { label: string; value: string }[] = [];
     const gradeLabel = grades.find((g) => g.id === values.gradeId)?.label;
     const subjectLabel = subjects.find((s) => s.id === values.subjectId)?.label;
-    const curriculumLabel = CURRICULUM_OPTIONS.find((c) => c.id === values.curriculumVersionId)?.label;
+    const curriculumLabel = CURRICULUM_OPTIONS.find(
+      (c) => c.id === values.curriculumVersionId,
+    )?.label;
 
     if (curriculumLabel) items.push({ label: 'Kurikulum', value: curriculumLabel });
     if (gradeLabel) items.push({ label: 'Kelas', value: gradeLabel });
@@ -352,9 +364,7 @@ export default function GenerateForm() {
             className="flex w-full items-center justify-between rounded-md border border-brand-line bg-brand-surface-raised px-4 py-3 text-left"
             aria-expanded={summaryOpen}
           >
-            <span className="text-label-semibold text-brand-ink">
-              Ringkasan ({readinessLabel})
-            </span>
+            <span className="text-label-semibold text-brand-ink">Ringkasan ({readinessLabel})</span>
             <span className="text-brand-ink-muted">{summaryOpen ? 'Sembunyikan' : 'Lihat'}</span>
           </button>
           {summaryOpen && (
@@ -502,7 +512,11 @@ export default function GenerateForm() {
                         aria-invalid={localErrors.subjectId ? true : undefined}
                       >
                         <option value="">
-                          {loading.subjectId ? 'Memuat…' : values.gradeId ? 'Pilih mata pelajaran' : 'Pilih kelas terlebih dahulu'}
+                          {loading.subjectId
+                            ? 'Memuat…'
+                            : values.gradeId
+                              ? 'Pilih mata pelajaran'
+                              : 'Pilih kelas terlebih dahulu'}
                         </option>
                         {subjects.map((s) => (
                           <option key={s.id} value={s.id}>
@@ -522,9 +536,7 @@ export default function GenerateForm() {
                       <fieldset>
                         <legend className={labelClass}>
                           Materi <span className="text-brand-danger">*</span>
-                          <p className={`${helpClass} mt-0.5`}>
-                            Pilih minimal satu materi
-                          </p>
+                          <p className={`${helpClass} mt-0.5`}>Pilih minimal satu materi</p>
                         </legend>
                         <div
                           className="mt-2 max-h-48 overflow-y-auto rounded-md border border-brand-line bg-brand-surface-raised"
@@ -640,9 +652,7 @@ export default function GenerateForm() {
                     min={1}
                     max={200}
                     value={values.questionCount}
-                    onChange={(e) =>
-                      update('questionCount', Math.max(1, Number(e.target.value)))
-                    }
+                    onChange={(e) => update('questionCount', Math.max(1, Number(e.target.value)))}
                     className={fieldClass}
                     aria-invalid={localErrors.questionCount ? true : undefined}
                   />
@@ -706,7 +716,10 @@ export default function GenerateForm() {
             </Panel>
 
             {/* ── Section C: Konteks & Referensi ──── */}
-            <Panel title="Konteks & Referensi" description="Tambahan informasi untuk AI (opsional).">
+            <Panel
+              title="Konteks & Referensi"
+              description="Tambahan informasi untuk AI (opsional)."
+            >
               <div className="flex flex-col gap-5">
                 <div className="flex flex-col gap-2">
                   <label htmlFor="gen-teacherFocus" className={labelClass}>
@@ -721,9 +734,7 @@ export default function GenerateForm() {
                     maxLength={500}
                     aria-invalid={localErrors.teacherFocus ? true : undefined}
                   />
-                  <p className={helpClass}>
-                    Maksimal 500 karakter. Tidak dikirim ke analitik.
-                  </p>
+                  <p className={helpClass}>Maksimal 500 karakter. Tidak dikirim ke analitik.</p>
                   {localErrors.teacherFocus ? (
                     <p className={errorClass} role="alert">
                       {localErrors.teacherFocus}
@@ -759,7 +770,10 @@ export default function GenerateForm() {
             {/* Submit */}
             <div className="flex flex-col gap-4">
               {submitted && !validateGenerateForm(values).ok && (
-                <p className="rounded-md border border-brand-danger bg-brand-danger-soft px-4 py-3 text-body-sm text-brand-danger" role="alert">
+                <p
+                  className="rounded-md border border-brand-danger bg-brand-danger-soft px-4 py-3 text-body-sm text-brand-danger"
+                  role="alert"
+                >
                   Perbaiki isian yang belum lengkap sebelum melanjutkan.
                 </p>
               )}
@@ -776,19 +790,13 @@ export default function GenerateForm() {
         {/* ── Desktop sticky summary ─────────────── */}
         <aside className="hidden w-72 shrink-0 self-start lg:block lg:sticky lg:top-6">
           <div className="rounded-md border border-brand-line bg-brand-surface-raised px-4 py-4">
-            <h3 className="text-label-semibold text-brand-ink">
-              Ringkasan Konfigurasi
-            </h3>
-            <p className={`${helpClass} mb-3`}>
-              Kesiapan: {readinessLabel}
-            </p>
+            <h3 className="text-label-semibold text-brand-ink">Ringkasan Konfigurasi</h3>
+            <p className={`${helpClass} mb-3`}>Kesiapan: {readinessLabel}</p>
             {summaryItems.length > 0 ? (
               <ul className="flex flex-col gap-2">
                 {summaryItems.map((item) => (
                   <li key={item.label} className="flex items-start justify-between gap-2">
-                    <span className="text-body-sm text-brand-ink-muted shrink-0">
-                      {item.label}
-                    </span>
+                    <span className="text-body-sm text-brand-ink-muted shrink-0">{item.label}</span>
                     <span className="text-body-sm text-brand-ink text-right truncate max-w-[140px]">
                       {item.value}
                     </span>
@@ -796,9 +804,7 @@ export default function GenerateForm() {
                 ))}
               </ul>
             ) : (
-              <p className={helpClass}>
-                Pilih materi dan pengaturan untuk melihat ringkasan.
-              </p>
+              <p className={helpClass}>Pilih materi dan pengaturan untuk melihat ringkasan.</p>
             )}
           </div>
         </aside>
@@ -817,9 +823,7 @@ function SummaryContent({
 }) {
   return (
     <>
-      <p className="text-body-sm text-brand-ink-muted mb-2">
-        Kesiapan: {readinessLabel}
-      </p>
+      <p className="text-body-sm text-brand-ink-muted mb-2">Kesiapan: {readinessLabel}</p>
       {items.length > 0 ? (
         <ul className="flex flex-col gap-1">
           {items.map((item) => (
@@ -832,7 +836,9 @@ function SummaryContent({
           ))}
         </ul>
       ) : (
-        <p className="text-body-sm text-brand-ink-muted">Pilih materi dan pengaturan untuk melihat ringkasan.</p>
+        <p className="text-body-sm text-brand-ink-muted">
+          Pilih materi dan pengaturan untuk melihat ringkasan.
+        </p>
       )}
     </>
   );

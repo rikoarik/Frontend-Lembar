@@ -1,5 +1,7 @@
 'use client';
 
+import { Spinner } from '@/app/components/ui/Spinner';
+
 type SubmitButtonProps = {
   label: string;
   busyLabel: string;
@@ -22,11 +24,18 @@ export default function SubmitButton({
       type="submit"
       disabled={busy || disabled}
       aria-busy={busy ? true : undefined}
-      className="h-11 w-full rounded-md bg-burgundy px-4 font-label-semibold text-label-semibold text-on-primary transition-colors hover:bg-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-burgundy/30 disabled:cursor-not-allowed disabled:opacity-60"
+      className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-md bg-burgundy px-4 font-label-semibold text-label-semibold text-on-primary transition-colors hover:bg-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-burgundy/30 disabled:cursor-not-allowed disabled:opacity-60"
       name={name}
       value={value}
     >
-      {busy ? busyLabel : label}
+      {busy ? (
+        <>
+          <Spinner size="sm" />
+          <span>{busyLabel}</span>
+        </>
+      ) : (
+        <span>{label}</span>
+      )}
     </button>
   );
 }

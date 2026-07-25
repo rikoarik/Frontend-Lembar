@@ -32,7 +32,9 @@ describe('ops superadmin management panel', () => {
   it('keeps shell chrome and renders jobs table content', () => {
     renderOps('');
     expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
-    expect(screen.getAllByRole('navigation', { name: /navigasi panel/i }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole('navigation', { name: /navigasi panel/i }).length).toBeGreaterThan(
+      0,
+    );
     expect(screen.getByText(/job_8f2a/i)).toBeInTheDocument();
   });
 

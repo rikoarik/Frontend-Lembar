@@ -54,7 +54,10 @@ export function WorkspaceSwitcher({
                 {active?.name ?? 'Tanpa workspace'}
               </span>
             </span>
-            <span aria-hidden="true" className="material-symbols-outlined text-[18px] text-[#8a8379]">
+            <span
+              aria-hidden="true"
+              className="material-symbols-outlined text-[18px] text-[#8a8379]"
+            >
               {open ? 'expand_less' : 'expand_more'}
             </span>
           </>
@@ -101,7 +104,10 @@ export function WorkspaceSwitcher({
                     </span>
                   </span>
                   {isActive ? (
-                    <span aria-hidden="true" className="material-symbols-outlined ml-auto text-[16px] text-[#171717]">
+                    <span
+                      aria-hidden="true"
+                      className="material-symbols-outlined ml-auto text-[16px] text-[#171717]"
+                    >
                       check
                     </span>
                   ) : null}

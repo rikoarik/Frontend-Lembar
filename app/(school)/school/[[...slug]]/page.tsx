@@ -5,11 +5,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default async function SchoolPage({
-  params,
-}: {
-  params: Promise<{ slug?: string[] }>;
-}) {
+export default async function SchoolPage({ params }: { params: Promise<{ slug?: string[] }> }) {
   const { slug = [] } = await params;
   return <SchoolAdminView section={slug.join('/')} />;
 }

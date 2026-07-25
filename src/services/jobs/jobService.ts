@@ -9,7 +9,14 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? '/v1';
 async function parseEnvelope(response: Response) {
   try {
     const body = (await response.json()) as { error?: Record<string, unknown> };
-    return (body?.error as { code?: string; message?: string; requestId?: string; retryable?: boolean }) ?? null;
+    return (
+      (body?.error as {
+        code?: string;
+        message?: string;
+        requestId?: string;
+        retryable?: boolean;
+      }) ?? null
+    );
   } catch {
     return null;
   }

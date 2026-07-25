@@ -21,20 +21,16 @@ async function api<T>(path: string, init?: RequestInit): Promise<T> {
   return json.data as T;
 }
 
-export function ShareManager({
-  assessmentId,
-  title,
-}: {
-  assessmentId: string;
-  title: string;
-}) {
+export function ShareManager({ assessmentId, title }: { assessmentId: string; title: string }) {
   const [items, setItems] = useState<ShareLink[]>([]);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
 
   const load = useCallback(async () => {
     try {
-      const data = await api<ShareLink[]>(`/shares?assessmentId=${encodeURIComponent(assessmentId)}`);
+      const data = await api<ShareLink[]>(
+        `/shares?assessmentId=${encodeURIComponent(assessmentId)}`,
+      );
       setItems(data);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Gagal memuat tautan.');
@@ -90,7 +86,10 @@ export function ShareManager({
   };
 
   return (
-    <Panel title="Tautan bagikan terkontrol" description="Buat, salin, atau cabut tautan read-only.">
+    <Panel
+      title="Tautan bagikan terkontrol"
+      description="Buat, salin, atau cabut tautan read-only."
+    >
       <div className="flex flex-col gap-3">
         <div className="flex flex-wrap gap-2">
           <Button loading={busy} loadingLabel="Membuat…" onClick={() => void onCreate()}>
@@ -128,7 +127,8 @@ export function ShareManager({
                     />
                   </div>
                   <p className="text-caption text-brand-ink-muted">
-                    Status {item.status} · kedaluwarsa {new Date(item.expiresAt).toLocaleDateString('id-ID')}
+                    Status {item.status} · kedaluwarsa{' '}
+                    {new Date(item.expiresAt).toLocaleDateString('id-ID')}
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">

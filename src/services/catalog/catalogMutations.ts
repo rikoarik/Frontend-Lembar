@@ -45,7 +45,9 @@ async function getCatalog<T>(
   }
 
   try {
-    const body = (await response.json()) as { error?: { code?: string; message?: string; requestId?: string; retryable?: boolean } };
+    const body = (await response.json()) as {
+      error?: { code?: string; message?: string; requestId?: string; retryable?: boolean };
+    };
     return err(mapEnvelopeToCatalogError(body?.error ?? null, response.status));
   } catch {
     return err(mapEnvelopeToCatalogError(null, response.status));
@@ -57,7 +59,11 @@ export const catalogMutations = {
     workspaceId: string,
     signal?: AbortSignal,
   ): Promise<Result<CatalogOption[], CatalogError>> {
-    return getCatalog<CatalogOption[]>('/v1/catalog/grades', { 'X-Workspace-Id': workspaceId }, signal);
+    return getCatalog<CatalogOption[]>(
+      '/v1/catalog/grades',
+      { 'X-Workspace-Id': workspaceId },
+      signal,
+    );
   },
 
   listSubjects(

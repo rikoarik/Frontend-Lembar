@@ -41,14 +41,14 @@ export default function A4PreviewFrame({
       <div
         className="relative bg-white shadow-md overflow-hidden"
         style={{
-          width: 'var(--print-page-width)',          // 210mm
-          minHeight: 'var(--print-page-height)',     // 297mm
-          paddingTop: 'var(--print-margin-top)',     // 14mm
+          width: 'var(--print-page-width)', // 210mm
+          minHeight: 'var(--print-page-height)', // 297mm
+          paddingTop: 'var(--print-margin-top)', // 14mm
           paddingRight: 'var(--print-margin-right)', // 14mm
           paddingBottom: 'var(--print-margin-bottom)', // 14mm
-          paddingLeft: 'var(--print-margin-left)',   // 14mm
-          fontSize: 'var(--print-font-size)',        // 10.5pt
-          lineHeight: 'var(--print-line-height)',    // 1.4
+          paddingLeft: 'var(--print-margin-left)', // 14mm
+          fontSize: 'var(--print-font-size)', // 10.5pt
+          lineHeight: 'var(--print-line-height)', // 1.4
           boxSizing: 'border-box',
         }}
         role="region"

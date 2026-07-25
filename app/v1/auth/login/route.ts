@@ -1,13 +1,6 @@
 import { NextResponse } from 'next/server';
-import {
-  authSuccessFor,
-  findMockAccount,
-} from '@/src/lib/mock-api/accounts';
-import {
-  isMockApiMode,
-  mockFail,
-  mockOk,
-} from '@/src/lib/mock-api/preview';
+import { authSuccessFor, findMockAccount } from '@/src/lib/mock-api/accounts';
+import { isMockApiMode, mockFail, mockOk } from '@/src/lib/mock-api/preview';
 import {
   authSuccessFromBackend,
   backendFetch,
@@ -27,10 +20,15 @@ export async function POST(request: Request) {
   const password = String(body.password ?? '');
 
   if (!identifier || !password) {
-    return mockFail('VALIDATION_FAILED', 'Email/username/telepon dan kata sandi wajib diisi.', 400, {
-      identifier: identifier ? [] : ['Wajib diisi.'],
-      password: password ? [] : ['Wajib diisi.'],
-    });
+    return mockFail(
+      'VALIDATION_FAILED',
+      'Email/username/telepon dan kata sandi wajib diisi.',
+      400,
+      {
+        identifier: identifier ? [] : ['Wajib diisi.'],
+        password: password ? [] : ['Wajib diisi.'],
+      },
+    );
   }
 
   if (isMockApiMode()) {
@@ -42,7 +40,10 @@ export async function POST(request: Request) {
         401,
       );
     }
-    return mockOk(authSuccessFor(account), { setSession: account.session, setRoles: account.roles });
+    return mockOk(authSuccessFor(account), {
+      setSession: account.session,
+      setRoles: account.roles,
+    });
   }
 
   const upstream = await backendFetch('/v1/auth/login', {

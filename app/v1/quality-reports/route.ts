@@ -8,10 +8,13 @@ export async function POST(request: Request) {
   } catch {
     body = {};
   }
-  return mockOk({
-    reportId: `rep_${Math.random().toString(36).slice(2, 8)}`,
-    receivedAt: new Date().toISOString(),
-    assessmentId: body.assessmentId ?? null,
-    questionId: body.questionId ?? null,
-  }, { status: 201 });
+  return mockOk(
+    {
+      reportId: `rep_${Math.random().toString(36).slice(2, 8)}`,
+      receivedAt: new Date().toISOString(),
+      assessmentId: body.assessmentId ?? null,
+      questionId: body.questionId ?? null,
+    },
+    { status: 201 },
+  );
 }

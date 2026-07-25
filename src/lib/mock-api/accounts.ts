@@ -60,9 +60,8 @@ export const MOCK_ACCOUNTS: MockAccount[] = [
 export function findMockAccount(identifier: string, password: string): MockAccount | null {
   const id = identifier.trim().toLowerCase();
   return (
-    MOCK_ACCOUNTS.find(
-      (account) => account.identifier === id && account.password === password,
-    ) ?? null
+    MOCK_ACCOUNTS.find((account) => account.identifier === id && account.password === password) ??
+    null
   );
 }
 

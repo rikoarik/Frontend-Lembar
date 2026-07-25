@@ -5,6 +5,7 @@ import Link from 'next/link';
 import AuthShell from '../../(auth)/AuthShell';
 import AuthFormShell from '../../(auth)/components/AuthFormShell';
 import AuthSidePanel from '../../(auth)/components/AuthSidePanel';
+import { Spinner } from '@/app/components/ui/Spinner';
 
 type Status =
   | { kind: 'loading' }
@@ -87,19 +88,68 @@ export default function GoogleAuthCallbackPage() {
     >
       <AuthFormShell title="Autentikasi Google">
         {status.kind === 'loading' ? (
-          <p className="font-body-sm text-body-sm text-secondary">Memverifikasi akun Google…</p>
+          <div className="flex flex-col items-center justify-center gap-4 rounded-xl border border-border-subtle bg-surface-container-lowest p-8 text-center shadow-sm">
+            <Spinner size="lg" className="text-burgundy" />
+            <div className="flex flex-col gap-1">
+              <p className="font-label-semibold text-body-default text-ink">
+                Memverifikasi akun Google…
+              </p>
+              <p className="font-body-sm text-body-sm text-secondary">
+                Mohon tunggu sebentar, kami sedang mengonfirmasi identitas Anda.
+              </p>
+            </div>
+          </div>
         ) : null}
         {status.kind === 'success' ? (
-          <p className="font-body-sm text-body-sm text-secondary">
-            Berhasil. Mengalihkan ke {status.homePath}…
-          </p>
+          <div className="flex flex-col items-center justify-center gap-4 rounded-xl border border-border-subtle bg-surface-container-lowest p-8 text-center shadow-sm">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
+              <svg
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2.5}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <div className="flex flex-col gap-1">
+              <p className="font-label-semibold text-body-default text-ink">Autentikasi Berhasil</p>
+              <p className="font-body-sm text-body-sm text-secondary">
+                Mengalihkan Anda ke portal ({status.homePath})…
+              </p>
+            </div>
+          </div>
         ) : null}
         {status.kind === 'error' ? (
-          <div className="flex flex-col gap-3">
-            <p className="font-body-sm text-body-sm text-danger" role="alert">
-              {status.message}
-            </p>
-            <Link href="/masuk" className="text-burgundy hover:underline font-body-sm text-body-sm">
+          <div className="flex flex-col gap-4 rounded-xl border border-red-200 bg-red-50/60 p-6">
+            <div className="flex items-start gap-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-red-100 text-burgundy">
+                <svg
+                  className="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                  />
+                </svg>
+              </div>
+              <div className="flex flex-col gap-1">
+                <h2 className="font-label-semibold text-body-default text-ink">
+                  Gagal Memverifikasi
+                </h2>
+                <p className="font-body-sm text-body-sm text-secondary">{status.message}</p>
+              </div>
+            </div>
+            <Link
+              href="/masuk"
+              className="inline-flex h-10 items-center justify-center rounded-md bg-burgundy px-4 font-label-semibold text-body-sm text-white transition-colors hover:bg-primary"
+            >
               Kembali ke halaman masuk
             </Link>
           </div>

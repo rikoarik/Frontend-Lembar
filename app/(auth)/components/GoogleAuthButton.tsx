@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Spinner } from '@/app/components/ui/Spinner';
 
 type GoogleAuthButtonProps = {
   intent: 'masuk' | 'daftar';
@@ -70,8 +71,17 @@ export default function GoogleAuthButton({ intent }: GoogleAuthButtonProps) {
         aria-describedby={message ? `google-${intent}-status` : undefined}
         className="flex h-11 w-full items-center justify-center gap-3 rounded-md border border-border-subtle bg-paper px-4 font-label-semibold text-label-semibold text-ink transition-colors hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-burgundy/30 active:bg-surface-container disabled:opacity-60"
       >
-        <GoogleMark />
-        {busy ? 'Menghubungkan…' : label}
+        {busy ? (
+          <>
+            <Spinner size="sm" className="text-ink opacity-80" />
+            <span>Menghubungkan…</span>
+          </>
+        ) : (
+          <>
+            <GoogleMark />
+            <span>{label}</span>
+          </>
+        )}
       </button>
       {message ? (
         <p

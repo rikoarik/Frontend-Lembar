@@ -163,13 +163,9 @@ function teacherTone(status: TeacherRow['status']): 'ok' | 'warn' | 'bad' | 'neu
 
 export function SchoolAdminView({ section = '' }: { section?: string }) {
   const current = section || '';
-  const {
-    search,
-    filter,
-    setSearch,
-    setFilter,
-    setToast,
-  } = useAdminSectionState(current || 'ringkasan');
+  const { search, filter, setSearch, setFilter, setToast } = useAdminSectionState(
+    current || 'ringkasan',
+  );
   const statusFilter = (filter as 'all' | TeacherRow['status']) || 'all';
   // local form fields only (not panel-global)
   // invite form is local ephemeral UI state via uncontrolled defaults + toast feedback
@@ -221,10 +217,34 @@ export function SchoolAdminView({ section = '' }: { section?: string }) {
         <>
           <AdminStatCards
             items={[
-              { label: 'Guru aktif', value: '24', hint: '3 undangan menunggu', tone: 'ok', delta: '+2' },
-              { label: 'Kuota terpakai', value: '312 / 500', hint: '62% periode ini', tone: 'info', delta: '62%' },
-              { label: 'Lembar final', value: '48', hint: '30 hari terakhir', tone: 'ok', delta: '+6' },
-              { label: 'Bagikan aktif', value: '17', hint: '2 akan kedaluwarsa', tone: 'warn', delta: '2 exp' },
+              {
+                label: 'Guru aktif',
+                value: '24',
+                hint: '3 undangan menunggu',
+                tone: 'ok',
+                delta: '+2',
+              },
+              {
+                label: 'Kuota terpakai',
+                value: '312 / 500',
+                hint: '62% periode ini',
+                tone: 'info',
+                delta: '62%',
+              },
+              {
+                label: 'Lembar final',
+                value: '48',
+                hint: '30 hari terakhir',
+                tone: 'ok',
+                delta: '+6',
+              },
+              {
+                label: 'Bagikan aktif',
+                value: '17',
+                hint: '2 akan kedaluwarsa',
+                tone: 'warn',
+                delta: '2 exp',
+              },
             ]}
           />
           <AdminToolbar
@@ -236,7 +256,11 @@ export function SchoolAdminView({ section = '' }: { section?: string }) {
                 <Button size="sm" onClick={() => (window.location.href = '/school/guru/undang')}>
                   Undang guru
                 </Button>
-                <Button size="sm" variant="secondary" onClick={() => (window.location.href = '/school/penggunaan')}>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => (window.location.href = '/school/penggunaan')}
+                >
                   Lihat penggunaan
                 </Button>
               </>
@@ -245,15 +269,19 @@ export function SchoolAdminView({ section = '' }: { section?: string }) {
           <AdminDataTable
             rows={teachers.slice(0, 5)}
             columns={[
-              { key: 'name', header: 'Guru', render: (row) => (
-                <div className="flex items-center gap-3">
-                  <AdminAvatar name={row.name} />
-                  <div className="min-w-0">
-                    <div className="truncate font-semibold tracking-[-0.01em]">{row.name}</div>
-                    <div className="truncate text-[12px] text-brand-ink-muted">{row.email}</div>
+              {
+                key: 'name',
+                header: 'Guru',
+                render: (row) => (
+                  <div className="flex items-center gap-3">
+                    <AdminAvatar name={row.name} />
+                    <div className="min-w-0">
+                      <div className="truncate font-semibold tracking-[-0.01em]">{row.name}</div>
+                      <div className="truncate text-[12px] text-brand-ink-muted">{row.email}</div>
+                    </div>
                   </div>
-                </div>
-              ) },
+                ),
+              },
               { key: 'role', header: 'Peran', render: (row) => <AdminPill>{row.role}</AdminPill> },
               {
                 key: 'status',
@@ -264,7 +292,11 @@ export function SchoolAdminView({ section = '' }: { section?: string }) {
             ]}
             rowActions={(row) => (
               <>
-                <Button size="sm" variant="secondary" onClick={() => setToast(`Detail mock: ${row.name}`)}>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => setToast(`Detail mock: ${row.name}`)}
+                >
                   Detail
                 </Button>
               </>
@@ -278,9 +310,21 @@ export function SchoolAdminView({ section = '' }: { section?: string }) {
           <AdminStatCards
             items={[
               { label: 'Total guru', value: String(TEACHERS.length), tone: 'neutral' },
-              { label: 'Aktif', value: String(TEACHERS.filter((t) => t.status === 'Aktif').length), tone: 'ok' },
-              { label: 'Undangan', value: String(TEACHERS.filter((t) => t.status === 'Undangan').length), tone: 'warn' },
-              { label: 'Ditangguhkan', value: String(TEACHERS.filter((t) => t.status === 'Ditangguhkan').length), tone: 'bad' },
+              {
+                label: 'Aktif',
+                value: String(TEACHERS.filter((t) => t.status === 'Aktif').length),
+                tone: 'ok',
+              },
+              {
+                label: 'Undangan',
+                value: String(TEACHERS.filter((t) => t.status === 'Undangan').length),
+                tone: 'warn',
+              },
+              {
+                label: 'Ditangguhkan',
+                value: String(TEACHERS.filter((t) => t.status === 'Ditangguhkan').length),
+                tone: 'bad',
+              },
             ]}
           />
           <AdminToolbar
@@ -334,7 +378,11 @@ export function SchoolAdminView({ section = '' }: { section?: string }) {
             ]}
             rowActions={(row) => (
               <>
-                <Button size="sm" variant="secondary" onClick={() => setToast(`Peran diubah (mock): ${row.name}`)}>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => setToast(`Peran diubah (mock): ${row.name}`)}
+                >
                   Ubah peran
                 </Button>
                 <Button
@@ -399,7 +447,11 @@ export function SchoolAdminView({ section = '' }: { section?: string }) {
 
             <div className="flex flex-wrap gap-2 pt-2">
               <Button type="submit">Kirim undangan</Button>
-              <Button type="button" variant="secondary" onClick={() => (window.location.href = '/school/guru')}>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => (window.location.href = '/school/guru')}
+              >
                 Kembali ke tabel guru
               </Button>
             </div>
@@ -432,7 +484,9 @@ export function SchoolAdminView({ section = '' }: { section?: string }) {
             </div>
 
             <div className="pt-2">
-              <h3 className="font-semibold text-[#171717] mb-2 text-body-sm">Antrian Undangan Menunggu</h3>
+              <h3 className="font-semibold text-[#171717] mb-2 text-body-sm">
+                Antrian Undangan Menunggu
+              </h3>
               <AdminDataTable
                 rows={TEACHERS.filter((t) => t.status === 'Undangan')}
                 columns={[
@@ -440,7 +494,11 @@ export function SchoolAdminView({ section = '' }: { section?: string }) {
                   { key: 'email', header: 'Email', render: (row) => row.email },
                 ]}
                 rowActions={(row) => (
-                  <Button size="sm" variant="secondary" onClick={() => setToast(`Undangan dikirim ulang: ${row.email}`)}>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => setToast(`Undangan dikirim ulang: ${row.email}`)}
+                  >
                     Kirim ulang
                   </Button>
                 )}
@@ -454,25 +512,63 @@ export function SchoolAdminView({ section = '' }: { section?: string }) {
         <>
           <AdminStatCards
             items={[
-              { label: 'Total Generate', value: '312', hint: '30 hari terakhir', tone: 'info', delta: '+18%' },
-              { label: 'Lembar Finalisasi', value: '148', hint: '47.4% konversi', tone: 'ok', delta: '+12%' },
-              { label: 'Berbagi Aktif', value: '17', hint: '2 akan expired', tone: 'warn', delta: '2 exp' },
-              { label: 'Rata-rata Final/Guru', value: '6.2', hint: 'dari 24 guru aktif', tone: 'neutral', delta: '6.2' },
+              {
+                label: 'Total Generate',
+                value: '312',
+                hint: '30 hari terakhir',
+                tone: 'info',
+                delta: '+18%',
+              },
+              {
+                label: 'Lembar Finalisasi',
+                value: '148',
+                hint: '47.4% konversi',
+                tone: 'ok',
+                delta: '+12%',
+              },
+              {
+                label: 'Berbagi Aktif',
+                value: '17',
+                hint: '2 akan expired',
+                tone: 'warn',
+                delta: '2 exp',
+              },
+              {
+                label: 'Rata-rata Final/Guru',
+                value: '6.2',
+                hint: 'dari 24 guru aktif',
+                tone: 'neutral',
+                delta: '6.2',
+              },
             ]}
           />
-          <AdminToolbar search={search} onSearchChange={setSearch} searchPlaceholder="Cari nama guru..." />
+          <AdminToolbar
+            search={search}
+            onSearchChange={setSearch}
+            searchPlaceholder="Cari nama guru..."
+          />
           <AdminDataTable
             rows={usageRows}
             columns={[
-              { key: 'teacher', header: 'Guru', render: (row) => (
-                <div className="font-semibold text-[#171717]">{row.teacher}</div>
-              ) },
-              { key: 'gen', header: 'Generate', render: (row) => (
-                <span className="font-medium text-[#171717]">{row.generated}</span>
-              ) },
-              { key: 'fin', header: 'Final', render: (row) => (
-                <span className="font-semibold text-emerald-700">{row.finalized}</span>
-              ) },
+              {
+                key: 'teacher',
+                header: 'Guru',
+                render: (row) => <div className="font-semibold text-[#171717]">{row.teacher}</div>,
+              },
+              {
+                key: 'gen',
+                header: 'Generate',
+                render: (row) => (
+                  <span className="font-medium text-[#171717]">{row.generated}</span>
+                ),
+              },
+              {
+                key: 'fin',
+                header: 'Final',
+                render: (row) => (
+                  <span className="font-semibold text-emerald-700">{row.finalized}</span>
+                ),
+              },
               { key: 'share', header: 'Share', render: (row) => row.shared },
               { key: 'period', header: 'Periode', render: (row) => row.period },
             ]}
@@ -486,11 +582,17 @@ export function SchoolAdminView({ section = '' }: { section?: string }) {
             <h2 className="text-h3 font-semibold">Identitas sekolah</h2>
             <label className="flex flex-col gap-1">
               <span className="text-label-semibold">Nama tampilan</span>
-              <input defaultValue="SDN Contoh 01" className="min-h-[var(--control-md)] rounded-md border border-brand-line px-3" />
+              <input
+                defaultValue="SDN Contoh 01"
+                className="min-h-[var(--control-md)] rounded-md border border-brand-line px-3"
+              />
             </label>
             <label className="flex flex-col gap-1">
               <span className="text-label-semibold">Domain undangan</span>
-              <input defaultValue="sdncontoh.sch.id" className="min-h-[var(--control-md)] rounded-md border border-brand-line px-3" />
+              <input
+                defaultValue="sdncontoh.sch.id"
+                className="min-h-[var(--control-md)] rounded-md border border-brand-line px-3"
+              />
             </label>
             <Button onClick={() => setToast('Pengaturan sekolah disimpan (mock).')}>Simpan</Button>
           </div>
@@ -512,7 +614,15 @@ export function SchoolAdminView({ section = '' }: { section?: string }) {
             search={search}
             onSearchChange={setSearch}
             searchPlaceholder="Cari template / bank internal"
-            actions={<Button size="sm" variant="secondary" onClick={() => setToast('Buat item library mock.')}>Tambah item</Button>}
+            actions={
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => setToast('Buat item library mock.')}
+              >
+                Tambah item
+              </Button>
+            }
           />
           <AdminDataTable
             rows={libraryRows}
@@ -542,7 +652,11 @@ export function SchoolAdminView({ section = '' }: { section?: string }) {
 
       {current === 'audit' ? (
         <>
-          <AdminToolbar search={search} onSearchChange={setSearch} searchPlaceholder="Cari actor/aksi/target" />
+          <AdminToolbar
+            search={search}
+            onSearchChange={setSearch}
+            searchPlaceholder="Cari actor/aksi/target"
+          />
           <AdminDataTable
             rows={auditRows}
             columns={[

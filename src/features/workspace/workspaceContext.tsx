@@ -125,7 +125,15 @@ export function WorkspaceProvider({
       registerCache,
       switchWorkspace,
     }),
-    [activeWorkspace, workspaceList, initialDisplayName, announcement, getCacheKey, registerCache, switchWorkspace],
+    [
+      activeWorkspace,
+      workspaceList,
+      initialDisplayName,
+      announcement,
+      getCacheKey,
+      registerCache,
+      switchWorkspace,
+    ],
   );
 
   return <WorkspaceContext.Provider value={value}>{children}</WorkspaceContext.Provider>;

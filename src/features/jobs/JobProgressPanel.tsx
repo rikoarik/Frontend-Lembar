@@ -63,9 +63,7 @@ export function JobProgressPanel({
         <div className="flex flex-col gap-3">
           {error.hint ? <p className="text-body-sm text-brand-ink-muted">{error.hint}</p> : null}
           <div className="flex flex-wrap gap-3">
-            {error.retryable && onRefresh ? (
-              <Button onClick={onRefresh}>Coba lagi</Button>
-            ) : null}
+            {error.retryable && onRefresh ? <Button onClick={onRefresh}>Coba lagi</Button> : null}
             <Link
               href="/app"
               className="inline-flex min-h-[var(--control-md)] items-center rounded-md border border-brand-line px-4 text-body-default text-brand-ink"
@@ -106,7 +104,9 @@ export function JobProgressPanel({
     >
       <div className="flex flex-col gap-4" aria-live="polite">
         <div className="flex flex-col gap-1">
-          <p className="text-body-default font-semibold text-brand-ink">{jobStatusLabel(job.status)}</p>
+          <p className="text-body-default font-semibold text-brand-ink">
+            {jobStatusLabel(job.status)}
+          </p>
           {stage ? <p className="text-body-sm text-brand-ink-muted">{stage}</p> : null}
           <p className="text-caption text-brand-ink-muted">ID pekerjaan: {job.jobId}</p>
         </div>

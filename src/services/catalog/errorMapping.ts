@@ -47,7 +47,9 @@ export function mapEnvelopeToCatalogError(
   fallback?: Partial<CatalogError>,
 ): CatalogError {
   const rawCode = envelope?.code ?? '';
-  const code: CatalogErrorCode = (KNOWN_CODES.has(rawCode) ? rawCode : 'UNKNOWN') as CatalogErrorCode;
+  const code: CatalogErrorCode = (
+    KNOWN_CODES.has(rawCode) ? rawCode : 'UNKNOWN'
+  ) as CatalogErrorCode;
   const copy =
     fallback?.retryable === undefined
       ? COPY[code]

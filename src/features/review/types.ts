@@ -5,12 +5,7 @@ export type QuestionReviewState =
   | 'rejected'
   | 'needs_attention';
 
-export type AssessmentLifecycle =
-  | 'draft'
-  | 'generating'
-  | 'review'
-  | 'final'
-  | 'archived';
+export type AssessmentLifecycle = 'draft' | 'generating' | 'review' | 'final' | 'archived';
 
 export type QuestionWarning = {
   code: string;

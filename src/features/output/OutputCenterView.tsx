@@ -83,7 +83,11 @@ export function OutputCenterView({ assessmentId }: { assessmentId: string }) {
         actions={
           <StatusBadge
             label={
-              output.status === 'ready' ? 'Final' : output.status === 'failed' ? 'Gagal' : 'Diproses'
+              output.status === 'ready'
+                ? 'Final'
+                : output.status === 'failed'
+                  ? 'Gagal'
+                  : 'Diproses'
             }
           />
         }
@@ -135,10 +139,7 @@ export function OutputCenterView({ assessmentId }: { assessmentId: string }) {
         </div>
       </Panel>
 
-      <ShareManager
-        assessmentId={assessmentId}
-        title={`Output ${assessmentId}`}
-      />
+      <ShareManager assessmentId={assessmentId} title={`Output ${assessmentId}`} />
 
       <Panel title="Pratinjau paket" description="Urutan paket: lembar siswa, kunci, pembahasan.">
         <div className="overflow-auto">

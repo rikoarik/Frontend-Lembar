@@ -20,9 +20,7 @@ describe('F1-11 share viewer — /bagikan/[token]', () => {
     render(<ShareViewer token="valid-token" />);
 
     await waitFor(() => {
-      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
-        /ujian matematika/i,
-      );
+      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/ujian matematika/i);
     });
 
     expect(screen.getByText(/lembar soal/i)).toBeInTheDocument();
@@ -34,9 +32,7 @@ describe('F1-11 share viewer — /bagikan/[token]', () => {
     render(<ShareViewer token="revoked-test" />);
 
     await waitFor(() => {
-      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
-        /tautan tidak tersedia/i,
-      );
+      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/tautan tidak tersedia/i);
     });
 
     // Must NOT show the assessment title
@@ -49,9 +45,7 @@ describe('F1-11 share viewer — /bagikan/[token]', () => {
     render(<ShareViewer token="expired-test" />);
 
     await waitFor(() => {
-      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
-        /tautan kedaluwarsa/i,
-      );
+      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/tautan kedaluwarsa/i);
     });
 
     expect(screen.queryByText(/ujian matematika/i)).not.toBeInTheDocument();

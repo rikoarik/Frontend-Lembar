@@ -87,7 +87,8 @@ function deriveRuntime(job: MockJob): JobSnapshot {
     canRetry,
     error: errorInfo,
     updatedAt: nowIso(),
-    assessmentId: status === 'succeeded' ? job.assessmentId ?? `asm_${job.jobId}` : job.assessmentId,
+    assessmentId:
+      status === 'succeeded' ? (job.assessmentId ?? `asm_${job.jobId}`) : job.assessmentId,
     compositionId: job.compositionId,
   };
   jobs.set(job.jobId, next);

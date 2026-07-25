@@ -10,9 +10,6 @@ export default async function ReviewPage({
   const { assessmentId } = await params;
   const { mode } = await searchParams;
   return (
-    <QuickReviewView
-      assessmentId={assessmentId}
-      mode={mode === 'detail' ? 'detail' : 'quick'}
-    />
+    <QuickReviewView assessmentId={assessmentId} mode={mode === 'detail' ? 'detail' : 'quick'} />
   );
 }

@@ -13,11 +13,11 @@ interface SharePackage {
 // Mock fetch until backend share API lands
 async function fetchShare(token: string): Promise<{ state: ShareState; package?: SharePackage }> {
   await new Promise((r) => setTimeout(r, 600));
-  
+
   // Mock routing based on token pattern for testing
   if (token === 'revoked-test') return { state: 'revoked' };
   if (token === 'expired-test') return { state: 'expired' };
-  
+
   return {
     state: 'valid',
     package: {
@@ -62,12 +62,10 @@ export default function ShareViewer({ token }: { token: string }) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center max-w-md px-4">
-          <h1 className="text-body-xl font-semibold text-brand-ink mb-2">
-            Tautan tidak tersedia
-          </h1>
+          <h1 className="text-body-xl font-semibold text-brand-ink mb-2">Tautan tidak tersedia</h1>
           <p className="text-body-sm text-brand-muted mb-4">
-            Tautan berbagi ini telah dicabut oleh pembuat. Hubungi guru atau tim Anda untuk
-            akses ulang.
+            Tautan berbagi ini telah dicabut oleh pembuat. Hubungi guru atau tim Anda untuk akses
+            ulang.
           </p>
         </div>
       </div>
@@ -78,9 +76,7 @@ export default function ShareViewer({ token }: { token: string }) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center max-w-md px-4">
-          <h1 className="text-body-xl font-semibold text-brand-ink mb-2">
-            Tautan kedaluwarsa
-          </h1>
+          <h1 className="text-body-xl font-semibold text-brand-ink mb-2">Tautan kedaluwarsa</h1>
           <p className="text-body-sm text-brand-muted mb-4">
             Tautan berbagi ini sudah tidak berlaku. Hubungi pembuat untuk tautan baru.
           </p>
@@ -93,12 +89,8 @@ export default function ShareViewer({ token }: { token: string }) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center max-w-md px-4">
-          <h1 className="text-body-xl font-semibold text-brand-ink mb-2">
-            Konten tidak tersedia
-          </h1>
-          <p className="text-body-sm text-brand-muted mb-4">
-            Paket berbagi tidak ditemukan.
-          </p>
+          <h1 className="text-body-xl font-semibold text-brand-ink mb-2">Konten tidak tersedia</h1>
+          <p className="text-body-sm text-brand-muted mb-4">Paket berbagi tidak ditemukan.</p>
         </div>
       </div>
     );

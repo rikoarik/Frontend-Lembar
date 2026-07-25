@@ -54,16 +54,12 @@ describe('content-telemetry-audit — teacherFocus', () => {
   });
 
   it('accepts teacherFocus one below the maximum (499 chars)', () => {
-    const result = validateComposition(
-      valid({ teacherFocus: repeat('a', TEACHER_FOCUS_MAX - 1) }),
-    );
+    const result = validateComposition(valid({ teacherFocus: repeat('a', TEACHER_FOCUS_MAX - 1) }));
     expect(result.ok).toBe(true);
   });
 
   it('rejects teacherFocus one above the maximum (501 chars)', () => {
-    const result = validateComposition(
-      valid({ teacherFocus: repeat('a', TEACHER_FOCUS_MAX + 1) }),
-    );
+    const result = validateComposition(valid({ teacherFocus: repeat('a', TEACHER_FOCUS_MAX + 1) }));
     expect(result.ok).toBe(false);
     if (!result.ok) {
       const f = result.failures.find((x) => x.field === 'teacherFocus');

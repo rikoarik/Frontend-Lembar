@@ -86,9 +86,7 @@ function HeroBlock({ block }: { block: MarketingBlock }) {
         {block.heading && (
           <h1 className="text-h1 font-bold leading-tight max-w-3xl mb-6">{block.heading}</h1>
         )}
-        {block.body && (
-          <p className="text-body-lead max-w-2xl opacity-80 mb-6">{block.body}</p>
-        )}
+        {block.body && <p className="text-body-lead max-w-2xl opacity-80 mb-6">{block.body}</p>}
         <CtaList ctas={block.ctas} />
       </div>
     </section>
@@ -108,9 +106,7 @@ function WorkflowBlock({ block }: { block: MarketingBlock }) {
             {block.eyebrow}
           </p>
         )}
-        {block.heading && (
-          <h2 className="text-h2 font-bold mb-4">{block.heading}</h2>
-        )}
+        {block.heading && <h2 className="text-h2 font-bold mb-4">{block.heading}</h2>}
         {block.body && <p className="text-body-default opacity-80 mb-10">{block.body}</p>}
         {block.items && block.items.length > 0 && (
           <ol className="grid grid-cols-1 md:grid-cols-3 gap-6 list-none">
@@ -142,9 +138,7 @@ function GenericItemsBlock({ block }: { block: MarketingBlock }) {
             {block.eyebrow}
           </p>
         )}
-        {block.heading && (
-          <h2 className="text-h2 font-bold mb-4">{block.heading}</h2>
-        )}
+        {block.heading && <h2 className="text-h2 font-bold mb-4">{block.heading}</h2>}
         {block.body && <p className="text-body-default opacity-80 mb-10">{block.body}</p>}
         {block.items && block.items.length > 0 && (
           <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 list-none">
@@ -179,17 +173,13 @@ function FaqBlock({ block }: { block: MarketingBlock }) {
             {block.eyebrow}
           </p>
         )}
-        {block.heading && (
-          <h2 className="text-h2 font-bold mb-8">{block.heading}</h2>
-        )}
+        {block.heading && <h2 className="text-h2 font-bold mb-8">{block.heading}</h2>}
         {block.items && block.items.length > 0 && (
           <dl className="divide-y divide-brand-line">
             {block.items.map((item: MarketingBlockItem) => (
               <div key={item.id} className="py-5">
                 <dt className="text-body-default font-semibold mb-2">{item.title}</dt>
-                {item.body && (
-                  <dd className="text-body-sm opacity-70">{item.body}</dd>
-                )}
+                {item.body && <dd className="text-body-sm opacity-70">{item.body}</dd>}
               </div>
             ))}
           </dl>
@@ -213,10 +203,10 @@ function FinalCtaBlock({ block }: { block: MarketingBlock }) {
             {block.eyebrow}
           </p>
         )}
-        {block.heading && (
-          <h2 className="text-h2 font-bold mb-4">{block.heading}</h2>
+        {block.heading && <h2 className="text-h2 font-bold mb-4">{block.heading}</h2>}
+        {block.body && (
+          <p className="text-body-default opacity-80 mb-8 max-w-xl mx-auto">{block.body}</p>
         )}
-        {block.body && <p className="text-body-default opacity-80 mb-8 max-w-xl mx-auto">{block.body}</p>}
         <CtaList ctas={block.ctas} />
       </div>
     </section>

@@ -25,14 +25,22 @@ const LIBRARY_NAV = [
   { href: '/app/template', label: 'Template', icon: 'description' },
 ] as const;
 
-const SUPPORT_NAV = [
-  { href: '/app/bantuan', label: 'Bantuan', icon: 'help' },
-] as const;
+const SUPPORT_NAV = [{ href: '/app/bantuan', label: 'Bantuan', icon: 'help' }] as const;
 
 const SCHOOL_ONLY_NAV = [
   { href: '/app/kelas', label: 'Kelas', icon: 'groups', entitlement: 'school_admin' as const },
-  { href: '/app/analitik', label: 'Analitik', icon: 'monitoring', entitlement: 'school_admin' as const },
-  { href: '/school', label: 'Admin sekolah', icon: 'apartment', entitlement: 'school_admin' as const },
+  {
+    href: '/app/analitik',
+    label: 'Analitik',
+    icon: 'monitoring',
+    entitlement: 'school_admin' as const,
+  },
+  {
+    href: '/school',
+    label: 'Admin sekolah',
+    icon: 'apartment',
+    entitlement: 'school_admin' as const,
+  },
 ];
 
 function roleAllows(activeRole: ActiveRole, entitlement: ActiveRole): boolean {

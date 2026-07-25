@@ -38,7 +38,8 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Generator Soal AI untuk Guru — lembar',
-    description: 'Generator soal otomatis berbasis AI. Buat soal dari kurikulum atau PDF, tinjau draft, cetak gratis.',
+    description:
+      'Generator soal otomatis berbasis AI. Buat soal dari kurikulum atau PDF, tinjau draft, cetak gratis.',
     images: ['/og-image.svg'],
   },
   robots: {
@@ -65,8 +66,9 @@ export default async function LandingPage() {
                 Buat soal ujian otomatis dari materi kurikulum atau PDF Anda
               </h1>
               <p className="font-body-lead text-body-lead text-secondary max-w-md">
-                Generator soal berbasis AI yang menghasilkan draft ujian, ulangan, dan latihan dari Buku Siswa atau
-                materi Anda. Tinjau setiap butir soal sebelum cetak atau bagikan. Gratis tanpa batas untuk guru.
+                Generator soal berbasis AI yang menghasilkan draft ujian, ulangan, dan latihan dari
+                Buku Siswa atau materi Anda. Tinjau setiap butir soal sebelum cetak atau bagikan.
+                Gratis tanpa batas untuk guru.
               </p>
               <div className="flex flex-wrap gap-4 mt-4">
                 <Link
@@ -95,12 +97,17 @@ export default async function LandingPage() {
                   <span className="material-symbols-outlined text-[14px] text-primary" aria-hidden>
                     check_circle
                   </span>
-                  <span className="font-label-semibold text-label-semibold text-secondary">Draft AI siap tinjau</span>
+                  <span className="font-label-semibold text-label-semibold text-secondary">
+                    Draft AI siap tinjau
+                  </span>
                 </div>
 
                 <div className="space-y-4 text-caption text-secondary">
                   <div className="flex items-start gap-2">
-                    <span className="material-symbols-outlined text-[20px] text-primary mt-0.5" aria-hidden>
+                    <span
+                      className="material-symbols-outlined text-[20px] text-primary mt-0.5"
+                      aria-hidden
+                    >
                       quiz
                     </span>
                     <div className="flex-1">
@@ -112,19 +119,27 @@ export default async function LandingPage() {
                   </div>
 
                   <div className="flex items-start gap-2">
-                    <span className="material-symbols-outlined text-[20px] text-primary mt-0.5" aria-hidden>
+                    <span
+                      className="material-symbols-outlined text-[20px] text-primary mt-0.5"
+                      aria-hidden
+                    >
                       auto_stories
                     </span>
                     <div className="flex-1">
                       <h3 className="font-label-semibold text-label-semibold text-ink mb-1">
                         Dari kurikulum atau PDF
                       </h3>
-                      <p>Upload materi, pilih topik dari katalog kurikulum, atau gabungkan keduanya</p>
+                      <p>
+                        Upload materi, pilih topik dari katalog kurikulum, atau gabungkan keduanya
+                      </p>
                     </div>
                   </div>
 
                   <div className="flex items-start gap-2">
-                    <span className="material-symbols-outlined text-[20px] text-primary mt-0.5" aria-hidden>
+                    <span
+                      className="material-symbols-outlined text-[20px] text-primary mt-0.5"
+                      aria-hidden
+                    >
                       fact_check
                     </span>
                     <div className="flex-1">
@@ -136,7 +151,10 @@ export default async function LandingPage() {
                   </div>
 
                   <div className="flex items-start gap-2">
-                    <span className="material-symbols-outlined text-[20px] text-primary mt-0.5" aria-hidden>
+                    <span
+                      className="material-symbols-outlined text-[20px] text-primary mt-0.5"
+                      aria-hidden
+                    >
                       print
                     </span>
                     <div className="flex-1">
@@ -160,7 +178,10 @@ export default async function LandingPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="text-center">
                 <div className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-primary-fixed mb-4">
-                  <span className="material-symbols-outlined text-[28px] text-on-primary-fixed" aria-hidden>
+                  <span
+                    className="material-symbols-outlined text-[28px] text-on-primary-fixed"
+                    aria-hidden
+                  >
                     upload_file
                   </span>
                 </div>
@@ -171,22 +192,33 @@ export default async function LandingPage() {
               </div>
               <div className="text-center">
                 <div className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-primary-fixed mb-4">
-                  <span className="material-symbols-outlined text-[28px] text-on-primary-fixed" aria-hidden>
+                  <span
+                    className="material-symbols-outlined text-[28px] text-on-primary-fixed"
+                    aria-hidden
+                  >
                     auto_awesome
                   </span>
                 </div>
-                <h3 className="font-label-large text-label-large text-ink mb-2">2. Generate draft soal</h3>
+                <h3 className="font-label-large text-label-large text-ink mb-2">
+                  2. Generate draft soal
+                </h3>
                 <p className="text-body-medium text-secondary">
-                  AI membuat draft soal berdasarkan materi, lengkap dengan kunci jawaban dan referensi sumber
+                  AI membuat draft soal berdasarkan materi, lengkap dengan kunci jawaban dan
+                  referensi sumber
                 </p>
               </div>
               <div className="text-center">
                 <div className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-primary-fixed mb-4">
-                  <span className="material-symbols-outlined text-[28px] text-on-primary-fixed" aria-hidden>
+                  <span
+                    className="material-symbols-outlined text-[28px] text-on-primary-fixed"
+                    aria-hidden
+                  >
                     task_alt
                   </span>
                 </div>
-                <h3 className="font-label-large text-label-large text-ink mb-2">3. Tinjau & finalkan</h3>
+                <h3 className="font-label-large text-label-large text-ink mb-2">
+                  3. Tinjau & finalkan
+                </h3>
                 <p className="text-body-medium text-secondary">
                   Periksa, edit, atau regenerate soal sampai puas, lalu cetak atau bagikan link aman
                 </p>
@@ -204,25 +236,35 @@ export default async function LandingPage() {
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="border border-border-subtle rounded-DEFAULT p-6 bg-surface">
-              <h3 className="font-label-large text-label-large text-ink mb-2">✓ Gratis selamanya</h3>
+              <h3 className="font-label-large text-label-large text-ink mb-2">
+                ✓ Gratis selamanya
+              </h3>
               <p className="text-body-medium text-secondary">
-                Generate soal tanpa batas, tidak ada trial, tidak ada hidden cost. Untuk guru Indonesia.
+                Generate soal tanpa batas, tidak ada trial, tidak ada hidden cost. Untuk guru
+                Indonesia.
               </p>
             </div>
             <div className="border border-border-subtle rounded-DEFAULT p-6 bg-surface">
-              <h3 className="font-label-large text-label-large text-ink mb-2">✓ Kontrol penuh di tangan guru</h3>
+              <h3 className="font-label-large text-label-large text-ink mb-2">
+                ✓ Kontrol penuh di tangan guru
+              </h3>
               <p className="text-body-medium text-secondary">
-                Draft AI selalu ditinjau guru. Edit, regenerate, hapus soal sesuka Anda sebelum final.
+                Draft AI selalu ditinjau guru. Edit, regenerate, hapus soal sesuka Anda sebelum
+                final.
               </p>
             </div>
             <div className="border border-border-subtle rounded-DEFAULT p-6 bg-surface">
-              <h3 className="font-label-large text-label-large text-ink mb-2">✓ Katalog kurikulum lengkap</h3>
+              <h3 className="font-label-large text-label-large text-ink mb-2">
+                ✓ Katalog kurikulum lengkap
+              </h3>
               <p className="text-body-medium text-secondary">
                 Pilih topik dari Kurikulum Merdeka atau K-13, atau upload materi sendiri.
               </p>
             </div>
             <div className="border border-border-subtle rounded-DEFAULT p-6 bg-surface">
-              <h3 className="font-label-large text-label-large text-ink mb-2">✓ Hasil siap pakai</h3>
+              <h3 className="font-label-large text-label-large text-ink mb-2">
+                ✓ Hasil siap pakai
+              </h3>
               <p className="text-body-medium text-secondary">
                 PDF siap cetak atau link bagikan yang aman, tanpa iklan atau watermark.
               </p>
@@ -236,7 +278,8 @@ export default async function LandingPage() {
               Mulai buat soal otomatis sekarang
             </h2>
             <p className="text-body-lead text-secondary max-w-2xl mx-auto mb-8">
-              Generator soal AI untuk guru Indonesia. Daftar gratis, langsung buat soal tanpa kartu kredit.
+              Generator soal AI untuk guru Indonesia. Daftar gratis, langsung buat soal tanpa kartu
+              kredit.
             </p>
             <Link
               className="inline-flex font-label-semibold text-label-semibold bg-burgundy text-white px-8 py-4 rounded h-[52px] items-center justify-center transition-colors hover:bg-primary shadow-sm"

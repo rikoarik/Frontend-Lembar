@@ -35,7 +35,12 @@ export function mockFail(
 
 export function mockOk<T>(
   data: T,
-  init?: { setSession?: boolean | string; setRoles?: string[]; status?: number; clearSession?: boolean },
+  init?: {
+    setSession?: boolean | string;
+    setRoles?: string[];
+    status?: number;
+    clearSession?: boolean;
+  },
 ) {
   const response = NextResponse.json({ data }, { status: init?.status ?? 200 });
   if (init?.clearSession) {

@@ -6,9 +6,7 @@ import OutputPackagePreview from '../OutputPackagePreview';
 describe('F0-08 A4PreviewFrame — print preview foundation', () => {
   it('renders A4 page region with accessible label', () => {
     render(<A4PreviewFrame>content</A4PreviewFrame>);
-    expect(
-      screen.getByRole('region', { name: /pratinjau halaman a4/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: /pratinjau halaman a4/i })).toBeInTheDocument();
   });
 
   it('shows draft label by default', () => {
@@ -34,7 +32,11 @@ describe('F0-08 A4PreviewFrame — print preview foundation', () => {
   });
 
   it('renders children inside A4 frame', () => {
-    render(<A4PreviewFrame><p>Soal nomor 1</p></A4PreviewFrame>);
+    render(
+      <A4PreviewFrame>
+        <p>Soal nomor 1</p>
+      </A4PreviewFrame>,
+    );
     expect(screen.getByText('Soal nomor 1')).toBeInTheDocument();
   });
 });
@@ -74,12 +76,7 @@ describe('F0-08 OutputPackagePreview — package order and student safety', () =
   });
 
   it('shows package manifest listing included sections', () => {
-    render(
-      <OutputPackagePreview
-        sections={['lembar-soal', 'kunci-jawaban']}
-        content={{}}
-      />,
-    );
+    render(<OutputPackagePreview sections={['lembar-soal', 'kunci-jawaban']} content={{}} />);
     expect(screen.getByLabelText(/isi paket/i)).toHaveTextContent(/lembar soal siswa/i);
     expect(screen.getByLabelText(/isi paket/i)).toHaveTextContent(/kunci jawaban/i);
   });
