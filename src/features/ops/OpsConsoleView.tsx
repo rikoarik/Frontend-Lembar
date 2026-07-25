@@ -553,10 +553,20 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
 
   const loadDashboard = () => {
     setDashboardLoading(true);
-    Promise.all([adminService.dashboard(), adminService.jobs(4), adminService.schools()]).then(([kpiRes, jobsRes, schoolsRes]) => {
+    Promise.all([
+      adminService.dashboard(),
+      adminService.jobs({ limit: 4 }),
+      adminService.schools({ limit: 4 }),
+    ]).then(([kpiRes, jobsRes, schoolsRes]) => {
       if (kpiRes.ok) setDashboard(kpiRes.value);
-      if (jobsRes.ok) setDashboardJobs(jobsRes.value);
-      if (schoolsRes.ok) setDashboardSchools(schoolsRes.value);
+      if (jobsRes.ok) {
+        const jv = jobsRes.value as { data: AdminJobRow[]; meta: unknown };
+        setDashboardJobs(jv.data ?? []);
+      }
+      if (schoolsRes.ok) {
+        const sv = schoolsRes.value as { data: AdminSchoolRow[]; meta: unknown };
+        setDashboardSchools(sv.data ?? []);
+      }
       setDashboardLoading(false);
     });
   };
@@ -574,13 +584,19 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
   const [detailAccountId, setDetailAccountId] = useState<string | null>(null);
 
   const [schoolsData, setSchoolsData] = useState<SchoolRow[]>([]);
+  const [schoolsMeta, setSchoolsMeta] = useState({ total: 0, pages: 1 });
   const [schoolsLoading, setSchoolsLoading] = useState(false);
+  const [schoolsPage, setSchoolsPage] = useState(1);
 
   const [jobsData, setJobsData] = useState<JobRow[]>([]);
+  const [jobsMeta, setJobsMeta] = useState({ total: 0, pages: 1 });
   const [jobsLoading, setJobsLoading] = useState(false);
+  const [jobsPage, setJobsPage] = useState(1);
 
   const [qualityData, setQualityData] = useState<QualityRow[]>([]);
+  const [qualityMeta, setQualityMeta] = useState({ total: 0, pages: 1 });
   const [qualityLoading, setQualityLoading] = useState(false);
+  const [qualityPage, setQualityPage] = useState(1);
 
   const [billingData, setBillingData] = useState<BillingRow[]>([]);
   const [billingMeta, setBillingMeta] = useState({ total: 0, pages: 1 });
@@ -634,32 +650,56 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
         setAccountsLoading(false);
       });
   };
-  const loadSchools = () => {
+  const loadSchools = (
+    pg = schoolsPage,
+    searchVal = search,
+    planVal = filterPlan,
+  ) => {
     setSchoolsLoading(true);
-    adminService.schools().then((res) => {
-      if (res.ok) setSchoolsData(res.value);
-      setSchoolsLoading(false);
-    });
+    adminService
+      .schools({ q: searchVal || undefined, plan: planVal || undefined, page: pg, limit: 10 })
+      .then((res) => {
+        if (res.ok) {
+          const val = res.value as { data: SchoolRow[]; meta: { total: number; pages: number } };
+          setSchoolsData(val.data ?? []);
+          setSchoolsMeta({ total: val.meta?.total ?? 0, pages: val.meta?.pages ?? 1 });
+        }
+        setSchoolsLoading(false);
+      });
   };
-  const loadJobs = () => {
+  const loadJobs = (
+    pg = jobsPage,
+    searchVal = search,
+    statusVal = filterJobStatus,
+  ) => {
     setJobsLoading(true);
-    adminService.jobs(50).then((res) => {
-      if (res.ok) {
-        const val = res.value as any;
-        setJobsData(Array.isArray(val) ? val : (val?.data ?? []));
-      }
-      setJobsLoading(false);
-    });
+    adminService
+      .jobs({ q: searchVal || undefined, status: statusVal || undefined, page: pg, limit: 20 })
+      .then((res) => {
+        if (res.ok) {
+          const val = res.value as { data: JobRow[]; meta: { total: number; pages: number } };
+          setJobsData(val.data ?? []);
+          setJobsMeta({ total: val.meta?.total ?? 0, pages: val.meta?.pages ?? 1 });
+        }
+        setJobsLoading(false);
+      });
   };
-  const loadQuality = () => {
+  const loadQuality = (
+    pg = qualityPage,
+    searchVal = search,
+    statusVal = filterQuality,
+  ) => {
     setQualityLoading(true);
-    adminService.qualityReports().then((res) => {
-      if (res.ok) {
-        const val = res.value as any;
-        setQualityData(Array.isArray(val) ? val : (val?.data ?? []));
-      }
-      setQualityLoading(false);
-    });
+    adminService
+      .qualityReports({ status: statusVal || undefined, q: searchVal || undefined, page: pg, limit: 20 })
+      .then((res) => {
+        if (res.ok) {
+          const val = res.value as { data: QualityRow[]; meta: { total: number; pages: number } };
+          setQualityData(val.data ?? []);
+          setQualityMeta({ total: val.meta?.total ?? 0, pages: val.meta?.pages ?? 1 });
+        }
+        setQualityLoading(false);
+      });
   };
   const loadBilling = (stateFilter = filterBilling, searchVal = search, pg = page) => {
     setBillingLoading(true);
@@ -714,18 +754,53 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
   };
 
   // ── Fetch on section change ──────────────────────────────────────────
+  // accounts — reactive to page, search, role, status
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (key === 'accounts') {
       loadAccounts(page, search, filterRole, filterStatus);
     }
   }, [key, page, search, filterRole, filterStatus]);
+
+  // schools — reactive to search + plan filter; page managed separately
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { if (key === 'schools') loadSchools(); }, [key]);
+  useEffect(() => {
+    if (key === 'schools') {
+      setSchoolsPage(1);
+      loadSchools(1, search, filterPlan);
+    }
+  }, [key, search, filterPlan]);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { if (key === 'jobs') loadJobs(); }, [key]);
+  useEffect(() => {
+    if (key === 'schools') loadSchools(schoolsPage, search, filterPlan);
+  }, [schoolsPage]);
+
+  // jobs — reactive to search + status filter; page managed separately
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { if (key === 'quality') loadQuality(); }, [key]);
+  useEffect(() => {
+    if (key === 'jobs') {
+      setJobsPage(1);
+      loadJobs(1, search, filterJobStatus);
+    }
+  }, [key, search, filterJobStatus]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (key === 'jobs') loadJobs(jobsPage, search, filterJobStatus);
+  }, [jobsPage]);
+
+  // quality — reactive to search + status filter; page managed separately
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (key === 'quality') {
+      setQualityPage(1);
+      loadQuality(1, search, filterQuality);
+    }
+  }, [key, search, filterQuality]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (key === 'quality') loadQuality(qualityPage, search, filterQuality);
+  }, [qualityPage]);
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { if (key === 'billing') loadBilling(); }, [key]);
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -755,75 +830,29 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
     });
   };
 
+  // Reset shared `page` (accounts) when its filters change; schools/jobs/quality have own page state
   useEffect(() => {
     setPage(1);
   }, [
     search,
     filterRole,
     filterStatus,
-    filterPlan,
-    filterJobStatus,
-    filterQuality,
     filterBilling,
     filterContent,
     key,
   ]);
 
-  const accounts = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    return accountsData.filter((row) => {
-      const matchSearch =
-        !q ||
-        row.displayName.toLowerCase().includes(q) ||
-        row.email.toLowerCase().includes(q) ||
-        row.role.includes(q) ||
-        row.school.toLowerCase().includes(q);
-      const matchRole = filterRole === '' || row.role === filterRole;
-      const matchStatus = filterStatus === '' || row.status === filterStatus;
-      return matchSearch && matchRole && matchStatus;
-    });
-  }, [accountsData, search, filterRole, filterStatus]);
+  // accounts — server-filtered; client memo just exposes data as-is
+  const accounts = useMemo(() => accountsData, [accountsData]);
 
-  const schools = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    return schoolsData.filter((row) => {
-      const matchSearch =
-        !q ||
-        row.name.toLowerCase().includes(q) ||
-        row.owner.toLowerCase().includes(q) ||
-        row.plan.includes(q);
-      const matchPlan = filterPlan === '' || row.plan === filterPlan;
-      return matchSearch && matchPlan;
-    });
-  }, [schoolsData, search, filterPlan]);
+  // schools — server-filtered; client memo just exposes data as-is
+  const schools = useMemo(() => schoolsData, [schoolsData]);
 
-  const jobs = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    return jobsData.filter((row) => {
-      const matchSearch =
-        !q ||
-        row.id.includes(q) ||
-        row.tenant.toLowerCase().includes(q) ||
-        row.type.includes(q) ||
-        row.status.includes(q);
-      const matchStatus = filterJobStatus === '' || row.status === filterJobStatus;
-      return matchSearch && matchStatus;
-    });
-  }, [jobsData, search, filterJobStatus]);
+  // jobs — server-filtered; client memo just exposes data as-is
+  const jobs = useMemo(() => jobsData, [jobsData]);
 
-  const quality = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    return qualityData.filter((row) => {
-      const matchSearch =
-        !q ||
-        row.id.includes(q) ||
-        row.reason.includes(q) ||
-        row.reporter.includes(q) ||
-        row.status.includes(q);
-      const matchStatus = filterQuality === '' || row.status === filterQuality;
-      return matchSearch && matchStatus;
-    });
-  }, [qualityData, search, filterQuality]);
+  // quality — server-filtered; client memo just exposes data as-is
+  const quality = useMemo(() => qualityData, [qualityData]);
 
   const billing = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -1296,7 +1325,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             }
           />
           <AdminDataTable
-            rows={schools.slice((page - 1) * 10, page * 10)}
+            rows={schools}
             emptyLabel="Tidak ada sekolah yang cocok."
             emptyHint="Coba hapus filter plan atau ubah kata kunci."
             columns={[
@@ -1338,11 +1367,11 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             )}
           />
           <AdminPagination
-            currentPage={page}
-            totalPages={Math.max(1, Math.ceil(schools.length / 10))}
-            totalItems={schools.length}
+            currentPage={schoolsPage}
+            totalPages={schoolsMeta.pages}
+            totalItems={schoolsMeta.total}
             pageSize={10}
-            onPageChange={setPage}
+            onPageChange={setSchoolsPage}
           />
         </>
       ) : null}
@@ -1508,7 +1537,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             }
           />
           <AdminDataTable
-            rows={jobs.slice((page - 1) * 3, page * 3)}
+            rows={jobs}
             emptyLabel="Tidak ada job yang cocok."
             emptyHint="Ubah filter status atau kata kunci."
             columns={[
@@ -1545,11 +1574,11 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             )}
           />
           <AdminPagination
-            currentPage={page}
-            totalPages={Math.ceil(jobs.length / 3)}
-            totalItems={jobs.length}
-            pageSize={3}
-            onPageChange={setPage}
+            currentPage={jobsPage}
+            totalPages={jobsMeta.pages}
+            totalItems={jobsMeta.total}
+            pageSize={20}
+            onPageChange={setJobsPage}
           />
         </>
       ) : null}
@@ -1585,7 +1614,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             }
           />
           <AdminDataTable
-            rows={quality.slice((page - 1) * 3, page * 3)}
+            rows={quality}
             emptyLabel="Tidak ada report yang cocok."
             columns={[
               { key: 'id', header: 'Report', render: (row) => row.id },
@@ -1624,11 +1653,11 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             )}
           />
           <AdminPagination
-            currentPage={page}
-            totalPages={Math.ceil(quality.length / 3)}
-            totalItems={quality.length}
-            pageSize={3}
-            onPageChange={setPage}
+            currentPage={qualityPage}
+            totalPages={qualityMeta.pages}
+            totalItems={qualityMeta.total}
+            pageSize={20}
+            onPageChange={setQualityPage}
           />
         </>
       ) : null}

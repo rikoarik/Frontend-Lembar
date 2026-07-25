@@ -330,13 +330,35 @@ export const adminService = {
   },
 
   // Schools
-  schools(): Promise<Result<AdminSchoolRow[], AdminError>> {
-    return request<AdminSchoolRow[]>('/v1/admin/schools');
+  schools(params?: {
+    q?: string;
+    plan?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<Result<{ data: AdminSchoolRow[]; meta: AdminMeta }, AdminError>> {
+    const qs = new URLSearchParams();
+    if (params?.q) qs.set('q', params.q);
+    if (params?.plan) qs.set('plan', params.plan);
+    if (params?.page) qs.set('page', String(params.page));
+    if (params?.limit) qs.set('limit', String(params.limit));
+    const q = qs.toString();
+    return request<{ data: AdminSchoolRow[]; meta: AdminMeta }>(`/v1/admin/schools${q ? `?${q}` : ''}`);
   },
 
   // Jobs
-  jobs(limit = 20): Promise<Result<AdminJobRow[], AdminError>> {
-    return request<AdminJobRow[]>(`/v1/admin/jobs?limit=${limit}`);
+  jobs(params?: {
+    q?: string;
+    status?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<Result<{ data: AdminJobRow[]; meta: AdminMeta }, AdminError>> {
+    const qs = new URLSearchParams();
+    if (params?.q) qs.set('q', params.q);
+    if (params?.status) qs.set('status', params.status);
+    if (params?.page) qs.set('page', String(params.page));
+    if (params?.limit) qs.set('limit', String(params.limit ?? 20));
+    const q = qs.toString();
+    return request<{ data: AdminJobRow[]; meta: AdminMeta }>(`/v1/admin/jobs${q ? `?${q}` : ''}`);
   },
 
   retryJob(id: string): Promise<Result<{ id: string; retried: boolean }, AdminError>> {
@@ -344,8 +366,19 @@ export const adminService = {
   },
 
   // Quality reports
-  qualityReports(): Promise<Result<AdminQualityRow[], AdminError>> {
-    return request<AdminQualityRow[]>('/v1/admin/quality-reports');
+  qualityReports(params?: {
+    status?: string;
+    q?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<Result<{ data: AdminQualityRow[]; meta: AdminMeta }, AdminError>> {
+    const qs = new URLSearchParams();
+    if (params?.status) qs.set('status', params.status);
+    if (params?.q) qs.set('q', params.q);
+    if (params?.page) qs.set('page', String(params.page));
+    if (params?.limit) qs.set('limit', String(params.limit));
+    const q = qs.toString();
+    return request<{ data: AdminQualityRow[]; meta: AdminMeta }>(`/v1/admin/quality-reports${q ? `?${q}` : ''}`);
   },
 
   triageReport(id: string, status: string): Promise<Result<unknown, AdminError>> {
