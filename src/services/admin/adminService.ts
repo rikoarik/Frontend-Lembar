@@ -471,6 +471,69 @@ export const adminService = {
     return request('/v1/admin/schools', 'POST', data);
   },
 
+  // Job detail + retry
+  jobDetail(id: string): Promise<Result<Record<string, unknown>, AdminError>> {
+    return request<Record<string, unknown>>(`/v1/admin/jobs/${id}`);
+  },
+
+  // School detail (members list) + rename + delete
+  schoolDetail(id: string): Promise<Result<{
+    school: { id: string; name: string; slug: string; plan: string; state: string; seats: number; renewsAt: string };
+    members: { id: string; email: string; name: string; username: string | null; roles: string[]; createdAt: string }[];
+    memberCount: number;
+  }, AdminError>> {
+    return request(`/v1/admin/schools/${id}`);
+  },
+
+  renameSchool(id: string, name: string): Promise<Result<{ id: string; name: string }, AdminError>> {
+    return request(`/v1/admin/schools/${id}`, 'PATCH', { name });
+  },
+
+  deleteSchool(id: string): Promise<Result<{ id: string; deleted: boolean }, AdminError>> {
+    return request(`/v1/admin/schools/${id}`, 'DELETE');
+  },
+
+  // Quality report detail + notes update
+  qualityDetail(id: string): Promise<Result<{
+    id: string; reason: string; status: string; reporter: string; notes: string;
+    workspaceId: string; createdAt: string;
+  }, AdminError>> {
+    return request(`/v1/admin/quality-reports/${id}`);
+  },
+
+  updateQualityNotes(id: string, data: { notes?: string; status?: string }): Promise<Result<unknown, AdminError>> {
+    return request(`/v1/admin/quality-reports/${id}`, 'PATCH', data);
+  },
+
+  // Prompt detail + versions + eval cases + learning signals
+  promptDetail(id: string): Promise<Result<Record<string, unknown>, AdminError>> {
+    return request(`/v1/admin/prompts/${id}`);
+  },
+
+  promptVersions(id: string): Promise<Result<{ data: unknown[] }, AdminError>> {
+    return request(`/v1/admin/prompts/${id}/versions`);
+  },
+
+  activatePromptVersion(id: string, version: number): Promise<Result<unknown, AdminError>> {
+    return request(`/v1/admin/prompts/${id}/versions/${version}/activate`, 'PATCH');
+  },
+
+  promptEvalCases(id: string): Promise<Result<{ data: unknown[] }, AdminError>> {
+    return request(`/v1/admin/prompts/${id}/eval-cases`);
+  },
+
+  promptMetrics(id: string): Promise<Result<Record<string, unknown>, AdminError>> {
+    return request(`/v1/admin/prompts/${id}/metrics`);
+  },
+
+  learningSignals(): Promise<Result<{ data: { prompt_template_id: string; pattern: string; frequency: number; avg_rating: number; suggested_action: string }[] }, AdminError>> {
+    return request('/v1/admin/learning-signals');
+  },
+
+  createPrompt(data: { name: string; slug: string; description?: string; promptText?: string; contextWindow?: string }): Promise<Result<Record<string, unknown>, AdminError>> {
+    return request('/v1/admin/prompts', 'POST', data);
+  },
+
   // Set entitlement (plan) for a workspace
   setEntitlement(workspaceId: string, data: { plan: 'free' | 'pro' }): Promise<Result<{ workspaceId: string; plan: string }, AdminError>> {
     return request(`/v1/admin/entitlements/${workspaceId}`, 'POST', data);

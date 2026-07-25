@@ -655,15 +655,35 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
   const [schoolsMeta, setSchoolsMeta] = useState({ total: 0, pages: 1 });
   const [schoolsLoading, setSchoolsLoading] = useState(false);
   const [schoolsPage, setSchoolsPage] = useState(1);
+  // School detail modal
+  const [schoolDetailId, setSchoolDetailId] = useState<string | null>(null);
+  const [schoolDetailData, setSchoolDetailData] = useState<{
+    school: { id: string; name: string; slug: string; plan: string; state: string; seats: number; renewsAt: string };
+    members: { id: string; email: string; name: string; username: string | null; roles: string[]; createdAt: string }[];
+    memberCount: number;
+  } | null>(null);
+  const [schoolDetailLoading, setSchoolDetailLoading] = useState(false);
+  const [schoolRenameValue, setSchoolRenameValue] = useState('');
+  const [schoolRenameSaving, setSchoolRenameSaving] = useState(false);
 
   const [jobsData, setJobsData] = useState<JobRow[]>([]);
   const [jobsMeta, setJobsMeta] = useState({ total: 0, pages: 1 });
   const [jobsLoading, setJobsLoading] = useState(false);
   const [jobsPage, setJobsPage] = useState(1);
+  // Job detail modal
+  const [jobDetailId, setJobDetailId] = useState<string | null>(null);
+  const [jobDetailData, setJobDetailData] = useState<Record<string, unknown> | null>(null);
+  const [jobDetailLoading, setJobDetailLoading] = useState(false);
 
   const [qualityData, setQualityData] = useState<QualityRow[]>([]);
   const [qualityMeta, setQualityMeta] = useState({ total: 0, pages: 1 });
   const [qualityLoading, setQualityLoading] = useState(false);
+  // Quality detail modal
+  const [qualityDetailId, setQualityDetailId] = useState<string | null>(null);
+  const [qualityDetailData, setQualityDetailData] = useState<{ id: string; reason: string; status: string; reporter: string; notes: string; workspaceId: string; createdAt: string } | null>(null);
+  const [qualityDetailLoading, setQualityDetailLoading] = useState(false);
+  const [qualityNotesDraft, setQualityNotesDraft] = useState('');
+  const [qualityNotesSaving, setQualityNotesSaving] = useState(false);
   const [qualityPage, setQualityPage] = useState(1);
 
   const [billingData, setBillingData] = useState<BillingRow[]>([]);
@@ -1005,7 +1025,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
               >
                 Refresh
               </Button>
-              <Button size="sm" onClick={() => setToast('Buka antrian job gagal.')}>
+              <Button size="sm" onClick={() => { window.location.href = '/ops/jobs?status=failed'; }}>
                 Review job gagal
               </Button>
             </div>
@@ -1478,6 +1498,130 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
           ) : null}
 
           {schoolsLoading ? <div className="mb-2"><AdminPill tone="info">Memuat...</AdminPill></div> : null}
+
+          {/* School detail modal */}
+          {schoolDetailId ? (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => { setSchoolDetailId(null); setSchoolDetailData(null); }}>
+              <div className="bg-white rounded-2xl shadow-xl w-full max-w-xl p-6 space-y-4 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold text-[16px] text-[#171717]">Detail Sekolah</h3>
+                  <button className="text-[#6d665d] hover:text-[#171717] text-xl" onClick={() => { setSchoolDetailId(null); setSchoolDetailData(null); }}>×</button>
+                </div>
+                {schoolDetailLoading ? (
+                  <div className="text-[13px] text-[#6d665d]">Memuat...</div>
+                ) : schoolDetailData ? (
+                  <div className="space-y-4">
+                    {/* Info + rename */}
+                    <div className="grid grid-cols-3 gap-x-3 gap-y-2 text-[13px]">
+                      <span className="font-semibold text-[#6d665d]">Nama</span>
+                      <span className="col-span-2 font-semibold">{schoolDetailData.school.name}</span>
+                      <span className="font-semibold text-[#6d665d]">Slug</span>
+                      <span className="col-span-2 font-mono text-[11px]">{schoolDetailData.school.slug}</span>
+                      <span className="font-semibold text-[#6d665d]">Plan</span>
+                      <span className="col-span-2"><AdminPill tone={planTone(schoolDetailData.school.plan as SchoolRow['plan'])}>{schoolDetailData.school.plan}</AdminPill></span>
+                      <span className="font-semibold text-[#6d665d]">State</span>
+                      <span className="col-span-2"><AdminPill tone={billingTone(schoolDetailData.school.state as BillingRow['state'])}>{schoolDetailData.school.state}</AdminPill></span>
+                      <span className="font-semibold text-[#6d665d]">Seats</span>
+                      <span className="col-span-2 tabular-nums">{schoolDetailData.school.seats}</span>
+                      <span className="font-semibold text-[#6d665d]">Member</span>
+                      <span className="col-span-2 tabular-nums">{schoolDetailData.memberCount}</span>
+                    </div>
+
+                    {/* Rename */}
+                    <div className="border-t border-[#eee6da] pt-3 space-y-2">
+                      <div className="text-[12px] font-semibold text-[#171717]">Ganti nama sekolah</div>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={schoolRenameValue}
+                          onChange={(e) => setSchoolRenameValue(e.target.value)}
+                          className="flex-1 h-9 rounded-xl border border-[#ddd4c8] bg-white px-3 text-[12px] focus:outline-none focus:ring-2 focus:ring-[#171717]/20"
+                        />
+                        <Button
+                          size="sm"
+                          disabled={schoolRenameSaving || !schoolRenameValue.trim() || schoolRenameValue === schoolDetailData.school.name}
+                          onClick={() => {
+                            setSchoolRenameSaving(true);
+                            adminService.renameSchool(schoolDetailId, schoolRenameValue.trim()).then((res) => {
+                              if (res.ok) {
+                                setToast(`Sekolah berhasil diganti nama.`);
+                                loadSchools();
+                                setSchoolDetailData({ ...schoolDetailData, school: { ...schoolDetailData.school, name: schoolRenameValue.trim() } });
+                              } else {
+                                setToast(`Gagal: ${res.error.safeMessage}`);
+                              }
+                              setSchoolRenameSaving(false);
+                            });
+                          }}
+                        >
+                          {schoolRenameSaving ? 'Menyimpan...' : 'Simpan'}
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Members list */}
+                    <div className="border-t border-[#eee6da] pt-3 space-y-2">
+                      <div className="text-[12px] font-semibold text-[#171717]">Anggota ({schoolDetailData.memberCount})</div>
+                      <div className="rounded-xl border border-[#ddd4c8]/60 overflow-hidden">
+                        {schoolDetailData.members.length === 0 ? (
+                          <div className="p-4 text-[12px] text-[#6d665d]">Belum ada anggota.</div>
+                        ) : (
+                          <table className="w-full text-[12px]">
+                            <thead className="bg-[#faf8f5]">
+                              <tr>
+                                <th className="text-left px-3 py-2 font-semibold text-[#6d665d]">Nama</th>
+                                <th className="text-left px-3 py-2 font-semibold text-[#6d665d]">Email</th>
+                                <th className="text-left px-3 py-2 font-semibold text-[#6d665d]">Role</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {schoolDetailData.members.map((m) => (
+                                <tr key={m.id} className="border-t border-[#f0e8de]">
+                                  <td className="px-3 py-2">{m.name || m.username || '—'}</td>
+                                  <td className="px-3 py-2 text-[#6d665d]">{m.email}</td>
+                                  <td className="px-3 py-2">
+                                    <AdminPill tone={m.roles.includes('school_admin') ? 'info' : 'neutral'}>
+                                      {m.roles[0] ?? 'subscriber'}
+                                    </AdminPill>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Delete */}
+                    <div className="border-t border-[#eee6da] pt-3">
+                      <Button
+                        size="sm"
+                        variant="danger"
+                        onClick={() => {
+                          if (confirm(`Hapus sekolah "${schoolDetailData.school.name}"? Aksi ini tidak bisa dibatalkan.`)) {
+                            adminService.deleteSchool(schoolDetailId).then((res) => {
+                              if (res.ok) {
+                                setToast(`Sekolah dihapus.`);
+                                setSchoolDetailId(null);
+                                setSchoolDetailData(null);
+                                loadSchools();
+                              } else {
+                                setToast(`Gagal: ${res.error.safeMessage}`);
+                              }
+                            });
+                          }
+                        }}
+                      >
+                        Hapus sekolah ini
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-[13px] text-[#6d665d]">Tidak ada data.</div>
+                )}
+              </div>
+            </div>
+          ) : null}
           <AdminToolbar
             search={search}
             onSearchChange={setSearch}
@@ -1516,6 +1660,22 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             ]}
             rowActions={(row) => (
               <div className="flex items-center gap-1.5 whitespace-nowrap">
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => {
+                    setSchoolDetailId(row.id);
+                    setSchoolDetailLoading(true);
+                    setSchoolDetailData(null);
+                    setSchoolRenameValue(row.name);
+                    adminService.schoolDetail(row.id).then((res) => {
+                      if (res.ok) setSchoolDetailData(res.value);
+                      setSchoolDetailLoading(false);
+                    });
+                  }}
+                >
+                  Detail
+                </Button>
                 <Button
                   size="sm"
                   variant="secondary"
@@ -1758,11 +1918,83 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                   });
                 }}
               >
-                Retry failed
+                Retry semua failed
               </Button>
             }
           />
           {jobsLoading ? <div className="mb-2"><AdminPill tone="info">Memuat...</AdminPill></div> : null}
+
+          {/* Job detail modal */}
+          {jobDetailId ? (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => { setJobDetailId(null); setJobDetailData(null); }}>
+              <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 space-y-4" onClick={(e) => e.stopPropagation()}>
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold text-[16px] text-[#171717]">Detail Job</h3>
+                  <button className="text-[#6d665d] hover:text-[#171717] text-xl" onClick={() => { setJobDetailId(null); setJobDetailData(null); }}>×</button>
+                </div>
+                {jobDetailLoading ? (
+                  <div className="text-[13px] text-[#6d665d]">Memuat...</div>
+                ) : jobDetailData ? (
+                  <div className="space-y-3 text-[13px]">
+                    <div className="grid grid-cols-3 gap-x-3 gap-y-2">
+                      <span className="font-semibold text-[#6d665d]">ID</span>
+                      <span className="col-span-2 font-mono text-[11px] break-all">{String(jobDetailData.id ?? '—')}</span>
+                      <span className="font-semibold text-[#6d665d]">Tipe</span>
+                      <span className="col-span-2 font-mono">{String(jobDetailData.type ?? '—')}</span>
+                      <span className="font-semibold text-[#6d665d]">Status</span>
+                      <span className="col-span-2">
+                        <AdminPill tone={jobTone((jobDetailData.status as JobRow['status']) ?? 'failed')}>
+                          {String(jobDetailData.status ?? '—')}
+                        </AdminPill>
+                      </span>
+                      <span className="font-semibold text-[#6d665d]">Tenant</span>
+                      <span className="col-span-2">{String(jobDetailData.workspace_id ?? '—')}</span>
+                      <span className="font-semibold text-[#6d665d]">Attempt</span>
+                      <span className="col-span-2 tabular-nums">{String(jobDetailData.attempt ?? 0)}</span>
+                      <span className="font-semibold text-[#6d665d]">Dibuat</span>
+                      <span className="col-span-2 text-[11px]">{jobDetailData.created_at ? new Date(String(jobDetailData.created_at)).toLocaleString('id-ID') : '—'}</span>
+                      <span className="font-semibold text-[#6d665d]">Update</span>
+                      <span className="col-span-2 text-[11px]">{jobDetailData.updated_at ? new Date(String(jobDetailData.updated_at)).toLocaleString('id-ID') : '—'}</span>
+                    </div>
+                    {jobDetailData.input ? (
+                      <div>
+                        <div className="font-semibold text-[#6d665d] mb-1 text-[12px]">Input payload</div>
+                        <pre className="bg-[#f5f0eb] rounded-xl p-3 text-[10px] overflow-auto max-h-32">{JSON.stringify(jobDetailData.input, null, 2)}</pre>
+                      </div>
+                    ) : null}
+                    {jobDetailData.error ? (
+                      <div>
+                        <div className="font-semibold text-[#c9703a] mb-1 text-[12px]">Error</div>
+                        <pre className="bg-[#fff3ee] rounded-xl p-3 text-[10px] overflow-auto max-h-32 text-[#c9703a]">{String(jobDetailData.error)}</pre>
+                      </div>
+                    ) : null}
+                    {jobDetailData.status === 'failed' ? (
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          adminService.retryJob(jobDetailId).then((res) => {
+                            if (res.ok) {
+                              setToast('Job di-retry.');
+                              setJobDetailId(null);
+                              setJobDetailData(null);
+                              loadJobs();
+                            } else {
+                              setToast(`Gagal retry: ${res.error.safeMessage}`);
+                            }
+                          });
+                        }}
+                      >
+                        Retry job ini
+                      </Button>
+                    ) : null}
+                  </div>
+                ) : (
+                  <div className="text-[13px] text-[#6d665d]">Tidak ada data.</div>
+                )}
+              </div>
+            </div>
+          ) : null}
+
           <AdminToolbar
             search={search}
             onSearchChange={setSearch}
@@ -1786,20 +2018,40 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             emptyLabel="Tidak ada job yang cocok."
             emptyHint="Ubah filter status atau kata kunci."
             columns={[
-              { key: 'id', header: 'Job', render: (row) => row.id },
-              { key: 'type', header: 'Tipe', render: (row) => row.type },
-              { key: 'tenant', header: 'Tenant', render: (row) => row.tenant },
+              {
+                key: 'id',
+                header: 'Job',
+                render: (row) => (
+                  <code className="text-[11px] font-mono bg-[#f4eade] px-1.5 py-0.5 rounded text-[#514b44]">
+                    {row.id.slice(0, 8)}…
+                  </code>
+                ),
+              },
+              { key: 'type', header: 'Tipe', render: (row) => <span className="font-mono text-[11px]">{row.type}</span> },
+              { key: 'tenant', header: 'Tenant', render: (row) => <span className="text-[12px]">{row.tenant}</span> },
               {
                 key: 'status',
                 header: 'Status',
                 render: (row) => <AdminPill tone={jobTone(row.status)}>{row.status}</AdminPill>,
               },
-              { key: 'progress', header: 'Progress', render: (row) => row.progress },
-              { key: 'updated', header: 'Update', render: (row) => row.updatedAt },
+              { key: 'progress', header: 'Progress', render: (row) => <span className="tabular-nums text-[12px]">{row.progress}</span> },
+              { key: 'updated', header: 'Update', render: (row) => <span className="text-[11px] text-[#6d665d]">{row.updatedAt}</span> },
             ]}
             rowActions={(row) => (
-              <>
-                <Button size="sm" variant="secondary" onClick={() => setToast(`Detail ${row.id}`)}>
+              <div className="flex items-center gap-1.5">
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => {
+                    setJobDetailId(row.id);
+                    setJobDetailLoading(true);
+                    setJobDetailData(null);
+                    adminService.jobDetail(row.id).then((res) => {
+                      if (res.ok) setJobDetailData(res.value);
+                      setJobDetailLoading(false);
+                    });
+                  }}
+                >
                   Detail
                 </Button>
                 {row.status === 'failed' ? (
@@ -1807,7 +2059,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                     size="sm"
                     onClick={() => {
                       adminService.retryJob(row.id).then((res) => {
-                        setToast(res.ok ? `Job ${row.id} di-retry.` : `Gagal retry: ${res.error.safeMessage}`);
+                        setToast(res.ok ? `Job ${row.id.slice(0, 8)} di-retry.` : `Gagal: ${res.error.safeMessage}`);
                         loadJobs();
                       });
                     }}
@@ -1815,7 +2067,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                     Retry
                   </Button>
                 ) : null}
-              </>
+              </div>
             )}
           />
           <AdminPagination
@@ -1840,6 +2092,92 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             }
           />
           {qualityLoading ? <div className="mb-2"><AdminPill tone="info">Memuat...</AdminPill></div> : null}
+
+          {/* Quality detail modal */}
+          {qualityDetailId ? (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => { setQualityDetailId(null); setQualityDetailData(null); }}>
+              <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 space-y-4 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold text-[16px] text-[#171717]">Detail Quality Report</h3>
+                  <button className="text-[#6d665d] hover:text-[#171717] text-xl" onClick={() => { setQualityDetailId(null); setQualityDetailData(null); }}>×</button>
+                </div>
+                {qualityDetailLoading ? (
+                  <div className="text-[13px] text-[#6d665d]">Memuat...</div>
+                ) : qualityDetailData ? (
+                  <div className="space-y-4 text-[13px]">
+                    <div className="grid grid-cols-3 gap-x-3 gap-y-2">
+                      <span className="font-semibold text-[#6d665d]">ID</span>
+                      <span className="col-span-2 font-mono text-[10px] break-all">{qualityDetailData.id}</span>
+                      <span className="font-semibold text-[#6d665d]">Reporter</span>
+                      <span className="col-span-2">{qualityDetailData.reporter}</span>
+                      <span className="font-semibold text-[#6d665d]">Workspace</span>
+                      <span className="col-span-2 font-mono text-[10px]">{qualityDetailData.workspaceId}</span>
+                      <span className="font-semibold text-[#6d665d]">Status</span>
+                      <span className="col-span-2">
+                        <AdminPill tone={qualityTone(qualityDetailData.status as QualityRow['status'])}>{qualityDetailData.status}</AdminPill>
+                      </span>
+                      <span className="font-semibold text-[#6d665d]">Dibuat</span>
+                      <span className="col-span-2 text-[11px]">{new Date(qualityDetailData.createdAt).toLocaleString('id-ID')}</span>
+                    </div>
+                    <div>
+                      <div className="font-semibold text-[#6d665d] mb-1">Alasan laporan</div>
+                      <div className="bg-[#faf8f5] rounded-xl p-3 text-[12px]">{qualityDetailData.reason}</div>
+                    </div>
+                    {/* Notes editor */}
+                    <div>
+                      <div className="font-semibold text-[#171717] mb-1 text-[12px]">Catatan internal</div>
+                      <textarea
+                        rows={4}
+                        value={qualityNotesDraft}
+                        onChange={(e) => setQualityNotesDraft(e.target.value)}
+                        className="w-full rounded-xl border border-[#ddd4c8] bg-white px-3 py-2 text-[12px] text-[#171717] focus:outline-none focus:ring-2 focus:ring-[#171717]/20 resize-none"
+                        placeholder="Tambah catatan internal untuk report ini..."
+                      />
+                      <Button
+                        size="sm"
+                        disabled={qualityNotesSaving}
+                        onClick={() => {
+                          setQualityNotesSaving(true);
+                          adminService.updateQualityNotes(qualityDetailId, { notes: qualityNotesDraft }).then((res) => {
+                            if (res.ok) {
+                              setToast('Catatan disimpan.');
+                              setQualityDetailData({ ...qualityDetailData, notes: qualityNotesDraft });
+                            } else {
+                              setToast(`Gagal: ${res.error.safeMessage}`);
+                            }
+                            setQualityNotesSaving(false);
+                          });
+                        }}
+                      >
+                        {qualityNotesSaving ? 'Menyimpan...' : 'Simpan catatan'}
+                      </Button>
+                    </div>
+                    {/* Quick triage actions */}
+                    <div className="flex items-center gap-2 border-t border-[#eee6da] pt-3">
+                      {qualityDetailData.status !== 'triaged' ? (
+                        <Button size="sm" variant="secondary" onClick={() => {
+                          adminService.updateQualityNotes(qualityDetailId, { status: 'triaged' }).then((res) => {
+                            if (res.ok) { setToast('Report ditriage.'); setQualityDetailData({ ...qualityDetailData, status: 'triaged' }); loadQuality(); }
+                            else setToast(`Gagal: ${res.error.safeMessage}`);
+                          });
+                        }}>Triage</Button>
+                      ) : null}
+                      {qualityDetailData.status !== 'closed' ? (
+                        <Button size="sm" onClick={() => {
+                          adminService.updateQualityNotes(qualityDetailId, { status: 'closed' }).then((res) => {
+                            if (res.ok) { setToast('Report ditutup.'); setQualityDetailData({ ...qualityDetailData, status: 'closed' }); loadQuality(); }
+                            else setToast(`Gagal: ${res.error.safeMessage}`);
+                          });
+                        }}>Tutup report</Button>
+                      ) : null}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-[13px] text-[#6d665d]">Tidak ada data.</div>
+                )}
+              </div>
+            </div>
+          ) : null}
           <AdminToolbar
             search={search}
             onSearchChange={setSearch}
@@ -1873,13 +2211,31 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
               { key: 'created', header: 'Dibuat', render: (row) => row.createdAt },
             ]}
             rowActions={(row) => (
-              <>
+              <div className="flex items-center gap-1.5">
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => {
+                    setQualityDetailId(row.id);
+                    setQualityDetailLoading(true);
+                    setQualityDetailData(null);
+                    adminService.qualityDetail(row.id).then((res) => {
+                      if (res.ok) {
+                        setQualityDetailData(res.value);
+                        setQualityNotesDraft(res.value.notes ?? '');
+                      }
+                      setQualityDetailLoading(false);
+                    });
+                  }}
+                >
+                  Detail
+                </Button>
                 <Button
                   size="sm"
                   variant="secondary"
                   onClick={() => {
                     adminService.triageReport(row.id, 'triaged').then((res) => {
-                      setToast(res.ok ? `Report ${row.id} ditriage.` : `Gagal triage: ${res.error.safeMessage}`);
+                      setToast(res.ok ? `Report ditriage.` : `Gagal triage: ${res.error.safeMessage}`);
                       loadQuality();
                     });
                   }}
@@ -1888,13 +2244,13 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                 </Button>
                 <Button size="sm" onClick={() => {
                   adminService.triageReport(row.id, 'closed').then((res) => {
-                    setToast(res.ok ? `Report ${row.id} ditutup.` : `Gagal tutup: ${res.error.safeMessage}`);
+                    setToast(res.ok ? `Report ditutup.` : `Gagal tutup: ${res.error.safeMessage}`);
                     loadQuality();
                   });
                 }}>
                   Tutup
                 </Button>
-              </>
+              </div>
             )}
           />
           <AdminPagination
