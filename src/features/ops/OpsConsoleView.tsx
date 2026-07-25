@@ -308,6 +308,13 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
   useEffect(() => { if (key === 'content') loadContent(); }, [key]);
 
   
+  // ── Invite form state ────────────────────────────────────────────────
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteName, setInviteName] = useState('');
+  const [inviteRole, setInviteRole] = useState<'' | 'teacher' | 'school_admin' | 'superadmin'>('');
+  const [inviteLoading, setInviteLoading] = useState(false);
+
   const [filterRole, setFilterRole] = useState<'' | AccountRow['role']>('');
   const [filterStatus, setFilterStatus] = useState<'' | AccountRow['status']>('');
   const [filterPlan, setFilterPlan] = useState<'' | SchoolRow['plan']>('');
@@ -562,12 +569,94 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             description="Cari, filter, dan kelola akun guru, admin sekolah, serta superadmin."
             meta={<AdminPill tone="info">{accounts.length} ditampilkan</AdminPill>}
             actions={
-              <Button size="sm" onClick={() => setToast('Undang akun baru (mock).')}>
+              <Button size="sm" onClick={() => { setInviteOpen((o) => !o); }}>
                 Undang akun
               </Button>
             }
           />
           {accountsLoading ? <div className="mb-2"><AdminPill tone="info">Memuat...</AdminPill></div> : null}
+          {inviteOpen && (
+            <form
+              className="mb-4 flex flex-wrap gap-2 items-end rounded-xl border border-[#ddd4c8] bg-[#faf7f2] px-4 py-3"
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (!inviteEmail) return;
+                setInviteLoading(true);
+                adminService
+                  .inviteAccount({ email: inviteEmail, name: inviteName || undefined, role: inviteRole || undefined })
+                  .then((res) => {
+                    if (res.ok) {
+                      setToast(`Undangan terkirim ke ${inviteEmail}.`);
+                      setInviteEmail('');
+                      setInviteName('');
+                      setInviteRole('');
+                      setInviteOpen(false);
+                      loadAccounts();
+                    } else {
+                      setToast(`Gagal: ${res.error.safeMessage}`);
+                    }
+                  })
+                  .finally(() => setInviteLoading(false));
+              }}
+            >
+              <div className="flex flex-col gap-1">
+                <label className="text-[11px] font-medium text-[#6d665d]" htmlFor="invite-email">
+                  Email *
+                </label>
+                <input
+                  id="invite-email"
+                  type="email"
+                  required
+                  value={inviteEmail}
+                  onChange={(e) => setInviteEmail(e.target.value)}
+                  placeholder="guru@sekolah.id"
+                  className="rounded-lg border border-[#ddd4c8] bg-white px-3 py-1.5 text-[13px] text-[#171717] placeholder:text-[#b0a89e] focus:outline-none focus:ring-2 focus:ring-[#171717]/20"
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-[11px] font-medium text-[#6d665d]" htmlFor="invite-name">
+                  Nama
+                </label>
+                <input
+                  id="invite-name"
+                  type="text"
+                  value={inviteName}
+                  onChange={(e) => setInviteName(e.target.value)}
+                  placeholder="Opsional"
+                  className="rounded-lg border border-[#ddd4c8] bg-white px-3 py-1.5 text-[13px] text-[#171717] placeholder:text-[#b0a89e] focus:outline-none focus:ring-2 focus:ring-[#171717]/20"
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-[11px] font-medium text-[#6d665d]" htmlFor="invite-role">
+                  Role
+                </label>
+                <select
+                  id="invite-role"
+                  value={inviteRole}
+                  onChange={(e) => setInviteRole(e.target.value as typeof inviteRole)}
+                  className="rounded-lg border border-[#ddd4c8] bg-white px-3 py-1.5 text-[13px] text-[#171717] focus:outline-none focus:ring-2 focus:ring-[#171717]/20"
+                >
+                  <option value="">— pilih —</option>
+                  <option value="teacher">teacher</option>
+                  <option value="school_admin">school_admin</option>
+                  <option value="superadmin">superadmin</option>
+                </select>
+              </div>
+              <div className="flex gap-2">
+                <Button size="sm" type="submit" disabled={inviteLoading}>
+                  {inviteLoading ? 'Mengirim…' : 'Kirim undangan'}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  type="button"
+                  onClick={() => { setInviteOpen(false); setInviteEmail(''); setInviteName(''); setInviteRole(''); }}
+                >
+                  Batal
+                </Button>
+              </div>
+            </form>
+          )}
           <AdminToolbar
             search={search}
             onSearchChange={setSearch}
@@ -623,13 +712,32 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             <Button
               size="sm"
               variant="secondary"
-              onClick={() => setToast(`Suspend ${selectedIds.length} akun (mock).`)}
+              onClick={() => {
+                const ids = [...selectedIds];
+                Promise.all(ids.map((id) => adminService.suspendAccount(id))).then((results) => {
+                  const failed = results.filter((r) => !r.ok).length;
+                  if (failed === 0) {
+                    setToast(`${ids.length} akun berhasil disuspend.`);
+                  } else {
+                    setToast(`${ids.length - failed} berhasil, ${failed} gagal.`);
+                  }
+                  clearSelection();
+                  loadAccounts();
+                });
+              }}
             >
               Suspend
             </Button>
             <Button
               size="sm"
-              onClick={() => setToast(`Kirim reset sandi ke ${selectedIds.length} akun.`)}
+              onClick={() => {
+                const ids = [...selectedIds];
+                Promise.all(ids.map((id) => adminService.resetPassword(id))).then((results) => {
+                  const ok = results.filter((r) => r.ok).length;
+                  setToast(`Reset sandi terkirim ke ${ok} akun.`);
+                  clearSelection();
+                });
+              }}
             >
               Reset sandi
             </Button>
@@ -696,7 +804,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                 >
                   Detail
                 </Button>
-                <Button size="sm" onClick={() => setToast(`Impersonate ${row.email} (mock).`)}>
+                <Button size="sm" onClick={() => setToast('Fitur impersonate akan segera hadir.')}>
                   Impersonate
                 </Button>
               </>

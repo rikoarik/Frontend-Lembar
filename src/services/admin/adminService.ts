@@ -165,6 +165,26 @@ export const adminService = {
     return request<AdminAccountRow[]>('/v1/admin/accounts');
   },
 
+  inviteAccount(payload: {
+    email: string;
+    name?: string;
+    role?: string;
+  }): Promise<Result<{ id: string }, AdminError>> {
+    return request<{ id: string }>('/v1/admin/accounts/invite', 'POST', payload);
+  },
+
+  suspendAccount(id: string): Promise<Result<{ id: string }, AdminError>> {
+    return request<{ id: string }>(`/v1/admin/accounts/${id}/suspend`, 'POST');
+  },
+
+  resetPassword(id: string): Promise<Result<{ id: string }, AdminError>> {
+    return request<{ id: string }>(`/v1/admin/accounts/${id}/reset-password`, 'POST');
+  },
+
+  updateRoles(id: string, roles: string[]): Promise<Result<{ id: string; roles: string[] }, AdminError>> {
+    return request<{ id: string; roles: string[] }>(`/v1/admin/accounts/${id}/roles`, 'PATCH', { roles });
+  },
+
   // Schools
   schools(): Promise<Result<AdminSchoolRow[], AdminError>> {
     return request<AdminSchoolRow[]>('/v1/admin/schools');
