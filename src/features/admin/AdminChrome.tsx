@@ -561,7 +561,7 @@ export function AdminShell({
                   </div>
                   <div className="min-w-0">
                     <div className="text-[14px] font-semibold tracking-[-0.02em] text-white">
-                      <span className="font-extrabold text-white">lembar</span>{' '}
+                      <span className="font-extrabold text-white">Lembar</span>{' '}
                       <span className="font-normal text-brand-accent-soft/85">
                         {brand.split(' ')[1] || ''}
                       </span>
