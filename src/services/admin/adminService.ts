@@ -428,6 +428,11 @@ export const adminService = {
     return request<{ data: AdminAuditRow[]; meta: AdminMeta }>(`/v1/admin/audit${q ? `?${q}` : ''}`);
   },
 
+  // Alias for audit() — BE uses /v1/admin/audit, FE prefers auditLogs naming
+  auditLogs(params?: { action?: string; actor?: string; from?: string; to?: string; page?: number; limit?: number }): Promise<Result<{ data: AdminAuditRow[]; meta: AdminMeta }, AdminError>> {
+    return this.audit(params);
+  },
+
   auditDetail(id: string): Promise<Result<AdminAuditDetail, AdminError>> {
     return request<AdminAuditDetail>(`/v1/admin/audit/${id}`);
   },
@@ -443,7 +448,7 @@ export const adminService = {
     return request<{ data: AdminBillingRow[]; meta: AdminMeta }>(`/v1/admin/billing${q ? `?${q}` : ''}`);
   },
 
-  updateBilling(id: string, data: { state?: string; plan?: string; seats?: number }): Promise<Result<{ id: string } & Partial<AdminBillingRow>, AdminError>> {
+  updateBilling(id: string, data: { state?: string; plan?: string; seats?: number; renewsAt?: string }): Promise<Result<{ id: string } & Partial<AdminBillingRow>, AdminError>> {
     return request(`/v1/admin/billing/${id}`, 'PATCH', data);
   },
 
@@ -464,6 +469,11 @@ export const adminService = {
   // Create school/tenant
   createSchool(data: { name: string; slug?: string }): Promise<Result<{ id: string; name: string; slug: string }, AdminError>> {
     return request('/v1/admin/schools', 'POST', data);
+  },
+
+  // Set entitlement (plan) for a workspace
+  setEntitlement(workspaceId: string, data: { plan: 'free' | 'pro' }): Promise<Result<{ workspaceId: string; plan: string }, AdminError>> {
+    return request(`/v1/admin/entitlements/${workspaceId}`, 'POST', data);
   },
 
   // Create marketing content page

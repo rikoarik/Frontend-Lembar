@@ -523,6 +523,74 @@ function AccountRowActions({
   );
 }
 
+// ── Dashboard Trends Chart Component ────────────────────────────────────────
+function DashboardTrendsChart() {
+  const [trends, setTrends] = useState<{
+    jobs: { day: string; count: number }[];
+    quality: { day: string; count: number }[];
+  } | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    adminService.dashboardTrends().then((res) => {
+      if (res.ok) setTrends(res.value as any);
+      setLoading(false);
+    });
+  }, []);
+
+  if (loading) return (
+    <div className="rounded-2xl border border-[#ddd4c8]/70 bg-white p-5">
+      <AdminPill tone="info">Memuat trend 7 hari...</AdminPill>
+    </div>
+  );
+
+  if (!trends || (trends.jobs.length === 0 && trends.quality.length === 0)) return null;
+
+  const maxJobs = Math.max(...trends.jobs.map((d) => d.count), 1);
+  const maxQuality = Math.max(...trends.quality.map((d) => d.count), 1);
+  const BAR_H = 48;
+
+  function MiniBar({ data, max, color }: { data: { day: string; count: number }[]; max: number; color: string }) {
+    if (data.length === 0) return <div className="text-[12px] text-[#b0a89f]">Belum ada data</div>;
+    return (
+      <div className="flex items-end gap-1 h-12">
+        {data.map((d) => {
+          const h = Math.max(2, Math.round((d.count / max) * BAR_H));
+          const label = d.day.slice(5); // MM-DD
+          return (
+            <div key={d.day} className="flex flex-col items-center gap-0.5 flex-1" title={`${d.day}: ${d.count}`}>
+              <div
+                className={`w-full rounded-t-sm ${color}`}
+                style={{ height: `${h}px` }}
+              />
+              <span className="text-[9px] text-[#b0a89f] tabular-nums">{label}</span>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid gap-4 sm:grid-cols-2">
+      <div className="rounded-2xl border border-[#ddd4c8]/70 bg-white p-4 space-y-2">
+        <div className="flex items-center justify-between">
+          <h3 className="text-[13px] font-semibold text-[#171717]">Jobs 7 hari</h3>
+          <span className="text-[11px] text-[#6d665d]">total: {trends.jobs.reduce((s, d) => s + d.count, 0)}</span>
+        </div>
+        <MiniBar data={trends.jobs} max={maxJobs} color="bg-[#4a7c59]" />
+      </div>
+      <div className="rounded-2xl border border-[#ddd4c8]/70 bg-white p-4 space-y-2">
+        <div className="flex items-center justify-between">
+          <h3 className="text-[13px] font-semibold text-[#171717]">Quality reports 7 hari</h3>
+          <span className="text-[11px] text-[#6d665d]">total: {trends.quality.reduce((s, d) => s + d.count, 0)}</span>
+        </div>
+        <MiniBar data={trends.quality} max={maxQuality} color="bg-[#c9703a]" />
+      </div>
+    </div>
+  );
+}
+
 export function OpsConsoleView({ section = '' }: { section?: string }) {
   const key = section || '';
   const { search, setSearch, selectedIds, setSelectedIds, toggleSelectedId, setToast } =
@@ -609,10 +677,42 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
   const [promptsLoading, setPromptsLoading] = useState(false);
 
   const [auditData, setAuditData] = useState<AdminAuditRow[]>([]);
+  const [auditMeta, setAuditMeta] = useState<AdminMeta>({ total: 0, page: 1, limit: 20, pages: 1 });
+  const [auditPage, setAuditPage] = useState(1);
   const [auditLoading, setAuditLoading] = useState(false);
 
   const [contentData, setContentData] = useState<ContentRow[]>([]);
   const [contentLoading, setContentLoading] = useState(false);
+  const [contentPage, setContentPage] = useState(1);
+  const [contentMeta, setContentMeta] = useState({ total: 0, pages: 1 });
+
+  // ── Audit detail modal state ─────────────────────────────────────────
+  const [auditDetailId, setAuditDetailId] = useState<string | null>(null);
+  const [auditDetailData, setAuditDetailData] = useState<AdminAuditDetail | null>(null);
+  const [auditDetailLoading, setAuditDetailLoading] = useState(false);
+  const [filterAuditAction, setFilterAuditAction] = useState('');
+  const [filterAuditActor, setFilterAuditActor] = useState('');
+
+  // ── Billing modal state ───────────────────────────────────────────────
+  const [billingEditRow, setBillingEditRow] = useState<BillingRow | null>(null);
+  const [billingEditState, setBillingEditState] = useState<BillingRow['state']>('active');
+  const [billingEditSeats, setBillingEditSeats] = useState('');
+  const [billingEditRenews, setBillingEditRenews] = useState('');
+  const [billingEditLoading, setBillingEditLoading] = useState(false);
+  const [billingPage, setBillingPage] = useState(1);
+
+  // ── Create Flag state ─────────────────────────────────────────────────
+  const [createFlagOpen, setCreateFlagOpen] = useState(false);
+  const [createFlagKey, setCreateFlagKey] = useState('');
+  const [createFlagDesc, setCreateFlagDesc] = useState('');
+  const [createFlagScope, setCreateFlagScope] = useState<'global' | 'pilot'>('global');
+  const [createFlagLoading, setCreateFlagLoading] = useState(false);
+
+  // ── Create School modal state ─────────────────────────────────────────
+  const [createSchoolOpen, setCreateSchoolOpen] = useState(false);
+  const [createSchoolName, setCreateSchoolName] = useState('');
+  const [createSchoolSlug, setCreateSchoolSlug] = useState('');
+  const [createSchoolLoading, setCreateSchoolLoading] = useState(false);
 
   // ── Fetch loaders ─────────────────────────────────────────────────────
   const loadAccounts = (
@@ -701,7 +801,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
         setQualityLoading(false);
       });
   };
-  const loadBilling = (stateFilter = filterBilling, searchVal = search, pg = page) => {
+  const loadBilling = (stateFilter = filterBilling, searchVal = search, pg = billingPage) => {
     setBillingLoading(true);
     adminService.billing({
       state: stateFilter || undefined,
@@ -735,12 +835,17 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
       setPromptsLoading(false);
     });
   };
-  const loadAudit = () => {
+  const loadAudit = (page: number) => {
     setAuditLoading(true);
-    adminService.audit({ page: 1, limit: 50 }).then((res) => {
+    adminService.auditLogs({ page, limit: 20 }).then((res) => {
       if (res.ok) {
         const val = res.value as any;
-        setAuditData(Array.isArray(val) ? val : (val?.data ?? []));
+        if (val?.data && val?.meta) {
+          setAuditData(val.data);
+          setAuditMeta(val.meta);
+        } else {
+          setAuditData(Array.isArray(val) ? val : (val?.data ?? []));
+        }
       }
       setAuditLoading(false);
     });
@@ -808,9 +913,20 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { if (key === 'prompts') loadPrompts(); }, [key]);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { if (key === 'audit') loadAudit(); }, [key]);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { if (key === 'content') loadContent(); }, [key]);
+
+  // audit — reactive to page
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (key === 'audit') {
+      setAuditPage(1);
+      loadAudit(1);
+    }
+  }, [key]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (key === 'audit') loadAudit(auditPage);
+  }, [auditPage]);
 
   
   // ── Impersonate Action ────────────────────────────────────────────────
@@ -1005,6 +1121,9 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
               />
             </div>
           </div>
+
+          {/* 7-day trend charts from /v1/admin/dashboard/trends */}
+          <DashboardTrendsChart />
         </>
       ) : null}
 
@@ -1299,21 +1418,65 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
         <>
           <div className="flex items-center justify-between px-1 py-1">
             <h2 className="text-[18px] font-bold text-[#171717]">Sekolah / tenant</h2>
-            <Button size="sm" onClick={() => {
-              const name = window.prompt('Nama sekolah baru:');
-              if (!name?.trim()) return;
-              adminService.createSchool({ name: name.trim() }).then((res) => {
-                if (res.ok) {
-                  setToast(`Sekolah "${name}" berhasil dibuat.`);
-                  loadSchools(1);
-                } else {
-                  setToast(`Gagal: ${res.error.safeMessage}`);
-                }
-              });
-            }}>
+            <Button size="sm" onClick={() => setCreateSchoolOpen(true)}>
               Tambah sekolah
             </Button>
           </div>
+
+          {/* Create School inline form */}
+          {createSchoolOpen && key === 'schools' ? (
+            <div className="rounded-2xl border border-[#ddd4c8]/70 bg-white p-4 space-y-3 shadow-sm">
+              <h4 className="text-[13px] font-bold text-[#171717]">Sekolah baru</h4>
+              <div className="flex flex-wrap items-end gap-3">
+                <div>
+                  <label className="block text-[11px] font-semibold text-[#6d665d] mb-1">Nama sekolah *</label>
+                  <input
+                    type="text"
+                    value={createSchoolName}
+                    onChange={(e) => setCreateSchoolName(e.target.value)}
+                    placeholder="cth: SMA Negeri 1 Jakarta"
+                    className="h-9 w-64 rounded-xl border border-[#ddd4c8] bg-white px-3 text-[12px] text-[#171717] placeholder:text-[#b0a89f] focus:outline-none focus:ring-2 focus:ring-[#171717]/20"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-[#6d665d] mb-1">Slug (opsional)</label>
+                  <input
+                    type="text"
+                    value={createSchoolSlug}
+                    onChange={(e) => setCreateSchoolSlug(e.target.value)}
+                    placeholder="sma-negeri-1-jakarta"
+                    className="h-9 w-52 rounded-xl border border-[#ddd4c8] bg-white px-3 text-[12px] text-[#171717] placeholder:text-[#b0a89f] focus:outline-none focus:ring-2 focus:ring-[#171717]/20"
+                  />
+                </div>
+                <Button
+                  size="sm"
+                  disabled={createSchoolLoading || !createSchoolName.trim()}
+                  onClick={() => {
+                    setCreateSchoolLoading(true);
+                    adminService.createSchool({
+                      name: createSchoolName.trim(),
+                      slug: createSchoolSlug.trim() || undefined,
+                    }).then((res) => {
+                      if (res.ok) {
+                        setToast(`Sekolah "${createSchoolName}" berhasil dibuat.`);
+                        setCreateSchoolName('');
+                        setCreateSchoolSlug('');
+                        setCreateSchoolOpen(false);
+                        loadSchools(1);
+                      } else {
+                        setToast(`Gagal: ${res.error.safeMessage}`);
+                      }
+                      setCreateSchoolLoading(false);
+                    });
+                  }}
+                >
+                  {createSchoolLoading ? 'Menyimpan...' : 'Buat'}
+                </Button>
+                <Button size="sm" variant="secondary" onClick={() => { setCreateSchoolOpen(false); setCreateSchoolName(''); setCreateSchoolSlug(''); }}>Batal</Button>
+              </div>
+            </div>
+          ) : null}
+
           {schoolsLoading ? <div className="mb-2"><AdminPill tone="info">Memuat...</AdminPill></div> : null}
           <AdminToolbar
             search={search}
@@ -1340,15 +1503,16 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             emptyLabel="Tidak ada sekolah yang cocok."
             emptyHint="Coba hapus filter plan atau ubah kata kunci."
             columns={[
-              { key: 'name', header: 'Sekolah', render: (row) => row.name },
+              { key: 'name', header: 'Sekolah', render: (row) => <span className="font-semibold">{row.name}</span> },
               {
                 key: 'plan',
                 header: 'Plan',
                 render: (row) => <AdminPill tone={planTone(row.plan)}>{row.plan}</AdminPill>,
               },
-              { key: 'teachers', header: 'Guru', render: (row) => String(row.teachers) },
-              { key: 'seats', header: 'Seats / Renew', render: (row) => `${String(row.seats)} / ${row.renewsAt}` },
-              { key: 'owner', header: 'Owner', render: (row) => row.owner },
+              { key: 'teachers', header: 'Guru', render: (row) => <span className="tabular-nums">{String(row.teachers)}</span> },
+              { key: 'seats', header: 'Seats', render: (row) => <span className="tabular-nums">{String(row.seats)}</span> },
+              { key: 'renew', header: 'Perpanjangan', render: (row) => <span className="text-[11px] text-[#6d665d]">{row.renewsAt}</span> },
+              { key: 'owner', header: 'Owner', render: (row) => <span className="text-[12px]">{row.owner}</span> },
             ]}
             rowActions={(row) => (
               <div className="flex items-center gap-1.5 whitespace-nowrap">
@@ -1362,14 +1526,18 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                 <Button
                   size="sm"
                   onClick={() => {
-                    adminService.updateBilling(row.id, { plan: row.plan === 'active' ? 'grace' : 'active' }).then((res) => {
-                      if (res.ok) {
-                        setToast(`Plan ${row.name} diperbarui.`);
-                        loadSchools();
-                      } else {
-                        setToast(`Gagal: ${res.error.safeMessage}`);
-                      }
-                    });
+                    const nextPlan = row.plan === 'active' ? 'grace' : row.plan === 'grace' ? 'blocked' : 'active';
+                    const entitlementPlan: 'pro' | 'free' = (nextPlan === 'active') ? 'pro' : 'free';
+                    if (confirm(`Ubah plan ${row.name} dari "${row.plan}" ke "${nextPlan}"?`)) {
+                      adminService.setEntitlement(row.id, { plan: entitlementPlan }).then((res) => {
+                        if (res.ok) {
+                          setToast(`Entitlement ${row.name} diperbarui ke ${nextPlan}.`);
+                          loadSchools();
+                        } else {
+                          setToast(`Gagal: ${res.error.safeMessage}`);
+                        }
+                      });
+                    }
                   }}
                 >
                   Ubah plan
@@ -1440,15 +1608,61 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
           <AdminPageHeader
             title="Prompt library"
             description="Template prompt internal untuk generate, repair, dan quality check."
+            meta={
+              <AdminPill tone="ok">
+                {promptsData.filter((p) => p.status === 'active').length} aktif
+              </AdminPill>
+            }
           />
           {promptsLoading ? <div className="mb-2"><AdminPill tone="info">Memuat...</AdminPill></div> : null}
+
+          {/* Search prompts */}
+          <AdminToolbar
+            search={search}
+            onSearchChange={setSearch}
+            searchPlaceholder="Cari nama prompt / slug / owner"
+            filters={
+              <>
+                {(['', 'active', 'draft'] as const).map((s) => (
+                  <AdminFilterChip
+                    key={s || 'all'}
+                    active={search === '' && s === ''}
+                    onClick={() => {
+                      if (s) setSearch(s);
+                      else setSearch('');
+                    }}
+                  >
+                    {s || 'Semua'}
+                  </AdminFilterChip>
+                ))}
+              </>
+            }
+          />
+
           <AdminDataTable
-            rows={promptsData}
+            rows={promptsData.filter((p) => {
+              const q = search.trim().toLowerCase();
+              return !q || p.name.toLowerCase().includes(q) || p.owner?.toLowerCase().includes(q) || (p as any).slug?.toLowerCase().includes(q);
+            })}
             emptyLabel="Belum ada prompt."
             emptyHint="Prompt akan muncul setelah data dimuat dari server."
             columns={[
-              { key: 'name', header: 'Prompt', render: (row) => row.name },
-              { key: 'owner', header: 'Owner', render: (row) => row.owner },
+              {
+                key: 'name',
+                header: 'Prompt',
+                render: (row) => (
+                  <div>
+                    <div className="font-semibold text-[13px]">{row.name}</div>
+                    {(row as any).slug ? <div className="font-mono text-[10px] text-[#6d665d]">{(row as any).slug}</div> : null}
+                  </div>
+                ),
+              },
+              { key: 'owner', header: 'Owner', render: (row) => <span className="text-[12px]">{row.owner ?? '—'}</span> },
+              {
+                key: 'version',
+                header: 'Ver',
+                render: (row) => <span className="font-mono text-[11px]">{(row as any).version ?? 'v1'}</span>,
+              },
               {
                 key: 'status',
                 header: 'Status',
@@ -1457,6 +1671,26 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                     {row.status}
                   </AdminPill>
                 ),
+              },
+              {
+                key: 'metrics',
+                header: 'Performa',
+                render: (row) => {
+                  const r = row as any;
+                  const latency = r.avgLatencyMs ? `${Number(r.avgLatencyMs).toFixed(0)}ms` : null;
+                  const success = r.successRate ? `${(Number(r.successRate) * 100).toFixed(0)}%` : null;
+                  const runs = r.totalRuns ? `${r.totalRuns}×` : null;
+                  const cost = r.avgCostUsd ? `$${Number(r.avgCostUsd).toFixed(4)}` : null;
+                  if (!latency && !success && !runs) return <span className="text-[11px] text-[#b0a89f]">—</span>;
+                  return (
+                    <div className="flex flex-col gap-0.5">
+                      {success ? <span className="text-[11px] text-[#4a7c59]">{success} ok</span> : null}
+                      {latency ? <span className="text-[11px] text-[#6d665d]">{latency}</span> : null}
+                      {runs ? <span className="text-[11px] text-[#9e9792]">{runs} runs</span> : null}
+                      {cost ? <span className="text-[11px] text-[#9e9792]">{cost}/call</span> : null}
+                    </div>
+                  );
+                },
               },
             ]}
             rowActions={(row) => (
@@ -1678,47 +1912,135 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
           <AdminPageHeader
             title="Audit trail"
             description="Jejak aksi superadmin untuk akuntabilitas platform."
+            meta={<AdminPill tone="neutral">{auditMeta.total} entri</AdminPill>}
           />
           {auditLoading ? <div className="mb-2"><AdminPill tone="info">Memuat...</AdminPill></div> : null}
+
+          {/* Audit detail modal */}
+          {auditDetailId ? (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => { setAuditDetailId(null); setAuditDetailData(null); }}>
+              <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 space-y-4" onClick={(e) => e.stopPropagation()}>
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold text-[16px] text-[#171717]">Detail Audit</h3>
+                  <button className="text-[#6d665d] hover:text-[#171717] text-xl leading-none" onClick={() => { setAuditDetailId(null); setAuditDetailData(null); }}>×</button>
+                </div>
+                {auditDetailLoading ? (
+                  <div className="text-[13px] text-[#6d665d]">Memuat detail...</div>
+                ) : auditDetailData ? (
+                  <div className="space-y-2 text-[13px]">
+                    <div className="grid grid-cols-3 gap-x-3 gap-y-2">
+                      <span className="font-semibold text-[#6d665d]">ID</span>
+                      <span className="col-span-2 font-mono text-[11px] break-all">{auditDetailData.id}</span>
+                      <span className="font-semibold text-[#6d665d]">Waktu</span>
+                      <span className="col-span-2">{auditDetailData.at}</span>
+                      <span className="font-semibold text-[#6d665d]">Actor</span>
+                      <span className="col-span-2">{auditDetailData.actorName ?? auditDetailData.actor}</span>
+                      <span className="font-semibold text-[#6d665d]">Aksi</span>
+                      <span className="col-span-2 font-mono">{auditDetailData.action}</span>
+                      <span className="font-semibold text-[#6d665d]">Target</span>
+                      <span className="col-span-2">{auditDetailData.targetType ? `${auditDetailData.targetType}:` : ''}{auditDetailData.target}</span>
+                    </div>
+                    {auditDetailData.metadata && Object.keys(auditDetailData.metadata).length > 0 ? (
+                      <div>
+                        <div className="font-semibold text-[#6d665d] mb-1">Metadata</div>
+                        <pre className="bg-[#f5f0eb] rounded-xl p-3 text-[11px] overflow-auto max-h-40">{JSON.stringify(auditDetailData.metadata, null, 2)}</pre>
+                      </div>
+                    ) : null}
+                  </div>
+                ) : (
+                  <div className="text-[13px] text-[#6d665d]">Tidak ada data.</div>
+                )}
+              </div>
+            </div>
+          ) : null}
+
+          {/* Filter bar */}
+          <div className="flex flex-wrap items-center gap-2 pb-1">
+            <input
+              type="text"
+              value={filterAuditAction}
+              onChange={(e) => setFilterAuditAction(e.target.value)}
+              placeholder="Filter aksi (cth: account.suspend)"
+              className="h-9 rounded-xl border border-[#ddd4c8] bg-white px-3 text-[12px] text-[#171717] placeholder:text-[#b0a89f] focus:outline-none focus:ring-2 focus:ring-[#171717]/20 w-52"
+            />
+            <input
+              type="text"
+              value={filterAuditActor}
+              onChange={(e) => setFilterAuditActor(e.target.value)}
+              placeholder="Filter actor (email / ID)"
+              className="h-9 rounded-xl border border-[#ddd4c8] bg-white px-3 text-[12px] text-[#171717] placeholder:text-[#b0a89f] focus:outline-none focus:ring-2 focus:ring-[#171717]/20 w-52"
+            />
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => {
+                setAuditPage(1);
+                adminService.audit({
+                  action: filterAuditAction || undefined,
+                  actor: filterAuditActor || undefined,
+                  page: 1,
+                  limit: 20,
+                }).then((res) => {
+                  if (res.ok) {
+                    const val = res.value as { data: AdminAuditRow[]; meta: AdminMeta };
+                    setAuditData(val.data ?? []);
+                    setAuditMeta(val.meta ?? auditMeta);
+                  }
+                });
+              }}
+            >
+              Terapkan filter
+            </Button>
+            {(filterAuditAction || filterAuditActor) ? (
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => {
+                  setFilterAuditAction('');
+                  setFilterAuditActor('');
+                  loadAudit(1);
+                }}
+              >
+                Reset
+              </Button>
+            ) : null}
+          </div>
+
           <AdminDataTable
-            rows={[
-              {
-                id: 'aud_1',
-                actor: 'ops@lembar.id',
-                action: 'role.update',
-                target: 'admin@sdncontoh.sch.id',
-                at: '2026-07-24 10:12',
-              },
-              {
-                id: 'aud_2',
-                actor: 'ops@lembar.id',
-                action: 'tenant.plan_change',
-                target: 'SMP Harapan',
-                at: '2026-07-24 09:40',
-              },
-              {
-                id: 'aud_3',
-                actor: 'ops@lembar.id',
-                action: 'flag.toggle',
-                target: 'ops.bulk_actions',
-                at: '2026-07-23 18:05',
-              },
-            ]}
+            rows={auditData}
+            emptyLabel="Belum ada jejak audit."
+            emptyHint="Audit trail akan muncul setelah ada aksi superadmin."
             columns={[
-              { key: 'at', header: 'Waktu', render: (row) => row.at },
-              { key: 'actor', header: 'Actor', render: (row) => row.actor },
-              { key: 'action', header: 'Aksi', render: (row) => row.action },
-              { key: 'target', header: 'Target', render: (row) => row.target },
+              { key: 'at', header: 'Waktu', render: (row) => <span className="text-[11px] tabular-nums">{row.at}</span> },
+              { key: 'actor', header: 'Actor', render: (row) => <span className="font-mono text-[11px]">{row.actor}</span> },
+              { key: 'action', header: 'Aksi', render: (row) => <span className="font-mono text-[12px]">{row.action}</span> },
+              { key: 'target', header: 'Target', render: (row) => <span className="text-[11px] text-[#6d665d]">{row.target}</span> },
             ]}
             rowActions={(row) => (
               <Button
                 size="sm"
                 variant="secondary"
-                onClick={() => setToast(`Detail audit ${row.id}`)}
+                onClick={() => {
+                  setAuditDetailId(row.id);
+                  setAuditDetailLoading(true);
+                  setAuditDetailData(null);
+                  adminService.auditDetail(row.id).then((res) => {
+                    if (res.ok) setAuditDetailData(res.value);
+                    else setAuditDetailData({ id: row.id, at: row.at, actor: row.actor, action: row.action, targetId: row.target, metadata: {}, createdAt: row.at } as any);
+                    setAuditDetailLoading(false);
+                  });
+                }}
               >
                 Detail
               </Button>
             )}
+          />
+          <AdminPagination
+            currentPage={auditPage}
+            totalPages={auditMeta.pages}
+            totalItems={auditMeta.total}
+            pageSize={20}
+            onPageChange={setAuditPage}
           />
         </>
       ) : null}
@@ -1730,11 +2052,84 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             description="Pantau status langganan, seats, dan perpanjangan tenant."
             meta={
               <AdminPill tone="warn">
-                {billing.filter((b) => b.state !== 'active').length} non-active
+                {billingData.filter((b) => b.state !== 'active').length} non-active
               </AdminPill>
             }
           />
           {billingLoading ? <div className="mb-2"><AdminPill tone="info">Memuat...</AdminPill></div> : null}
+
+          {/* Billing edit modal */}
+          {billingEditRow ? (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setBillingEditRow(null)}>
+              <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 space-y-4" onClick={(e) => e.stopPropagation()}>
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold text-[16px] text-[#171717]">Kelola Billing — {billingEditRow.school}</h3>
+                  <button className="text-[#6d665d] hover:text-[#171717] text-xl leading-none" onClick={() => setBillingEditRow(null)}>×</button>
+                </div>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-[12px] font-semibold text-[#6d665d] mb-1">State</label>
+                    <select
+                      value={billingEditState}
+                      onChange={(e) => setBillingEditState(e.target.value as BillingRow['state'])}
+                      className="w-full h-9 rounded-xl border border-[#ddd4c8] bg-white px-3 text-[13px] text-[#171717] focus:outline-none focus:ring-2 focus:ring-[#171717]/20"
+                    >
+                      <option value="active">active</option>
+                      <option value="grace">grace</option>
+                      <option value="blocked">blocked</option>
+                      <option value="expired">expired</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[12px] font-semibold text-[#6d665d] mb-1">Seats</label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={billingEditSeats}
+                      onChange={(e) => setBillingEditSeats(e.target.value)}
+                      className="w-full h-9 rounded-xl border border-[#ddd4c8] bg-white px-3 text-[13px] text-[#171717] focus:outline-none focus:ring-2 focus:ring-[#171717]/20"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[12px] font-semibold text-[#6d665d] mb-1">Tanggal Perpanjangan</label>
+                    <input
+                      type="date"
+                      value={billingEditRenews}
+                      onChange={(e) => setBillingEditRenews(e.target.value)}
+                      className="w-full h-9 rounded-xl border border-[#ddd4c8] bg-white px-3 text-[13px] text-[#171717] focus:outline-none focus:ring-2 focus:ring-[#171717]/20"
+                    />
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 pt-2">
+                  <Button
+                    size="sm"
+                    disabled={billingEditLoading}
+                    onClick={() => {
+                      setBillingEditLoading(true);
+                      adminService.updateBilling(billingEditRow.id, {
+                        state: billingEditState,
+                        seats: billingEditSeats ? Number(billingEditSeats) : undefined,
+                        renewsAt: billingEditRenews || undefined,
+                      }).then((res) => {
+                        if (res.ok) {
+                          setToast(`Billing ${billingEditRow.school} berhasil diperbarui.`);
+                          setBillingEditRow(null);
+                          loadBilling();
+                        } else {
+                          setToast(`Gagal: ${res.error.safeMessage}`);
+                        }
+                        setBillingEditLoading(false);
+                      });
+                    }}
+                  >
+                    {billingEditLoading ? 'Menyimpan...' : 'Simpan'}
+                  </Button>
+                  <Button size="sm" variant="secondary" onClick={() => setBillingEditRow(null)}>Batal</Button>
+                </div>
+              </div>
+            </div>
+          ) : null}
+
           <AdminToolbar
             search={search}
             onSearchChange={setSearch}
@@ -1754,34 +2149,39 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             }
           />
           <AdminDataTable
-            rows={billing.slice((page - 1) * 3, page * 3)}
+            rows={billingData}
             emptyLabel="Tidak ada data billing yang cocok."
             columns={[
-              { key: 'school', header: 'Sekolah', render: (row) => row.school },
+              { key: 'school', header: 'Sekolah', render: (row) => <span className="font-semibold">{row.school}</span> },
               {
                 key: 'state',
                 header: 'State',
                 render: (row) => <AdminPill tone={billingTone(row.state)}>{row.state}</AdminPill>,
               },
-              { key: 'seats', header: 'Seats', render: (row) => row.seats },
-              { key: 'renew', header: 'Renew', render: (row) => row.renewsAt },
+              { key: 'seats', header: 'Seats', render: (row) => <span className="tabular-nums">{row.seats}</span> },
+              { key: 'renew', header: 'Perpanjangan', render: (row) => <span className="text-[12px] text-[#6d665d]">{row.renewsAt ?? '—'}</span> },
             ]}
             rowActions={(row) => (
               <Button
                 size="sm"
                 variant="secondary"
-                onClick={() => setToast(`Billing detail ${row.school}`)}
+                onClick={() => {
+                  setBillingEditRow(row);
+                  setBillingEditState(row.state);
+                  setBillingEditSeats(String(row.seats ?? ''));
+                  setBillingEditRenews(row.renewsAt ? row.renewsAt.split('T')[0] : '');
+                }}
               >
                 Kelola
               </Button>
             )}
           />
           <AdminPagination
-            currentPage={page}
-            totalPages={Math.ceil(billing.length / 3)}
-            totalItems={billing.length}
-            pageSize={3}
-            onPageChange={setPage}
+            currentPage={billingPage}
+            totalPages={billingMeta.pages}
+            totalItems={billingMeta.total}
+            pageSize={10}
+            onPageChange={setBillingPage}
           />
         </>
       ) : null}
@@ -1791,14 +2191,98 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
           <AdminPageHeader
             title="Feature flags"
             description="Nyalakan/matikan fitur global atau pilot tanpa deploy."
+            actions={
+              <Button size="sm" onClick={() => setCreateFlagOpen(true)}>
+                Tambah flag
+              </Button>
+            }
           />
           {flagsLoading ? <div className="mb-2"><AdminPill tone="info">Memuat...</AdminPill></div> : null}
+
+          {/* Create Flag inline form */}
+          {createFlagOpen ? (
+            <div className="rounded-2xl border border-[#ddd4c8]/70 bg-white p-4 space-y-3 shadow-sm">
+              <h4 className="text-[13px] font-bold text-[#171717]">Flag baru</h4>
+              <div className="flex flex-wrap items-end gap-3">
+                <div>
+                  <label className="block text-[11px] font-semibold text-[#6d665d] mb-1">Key *</label>
+                  <input
+                    type="text"
+                    value={createFlagKey}
+                    onChange={(e) => setCreateFlagKey(e.target.value)}
+                    placeholder="cth: enable_pdf_v2"
+                    className="h-9 w-52 rounded-xl border border-[#ddd4c8] bg-white px-3 text-[12px] text-[#171717] placeholder:text-[#b0a89f] focus:outline-none focus:ring-2 focus:ring-[#171717]/20"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-[#6d665d] mb-1">Deskripsi</label>
+                  <input
+                    type="text"
+                    value={createFlagDesc}
+                    onChange={(e) => setCreateFlagDesc(e.target.value)}
+                    placeholder="Deskripsi singkat flag"
+                    className="h-9 w-64 rounded-xl border border-[#ddd4c8] bg-white px-3 text-[12px] text-[#171717] placeholder:text-[#b0a89f] focus:outline-none focus:ring-2 focus:ring-[#171717]/20"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-[#6d665d] mb-1">Scope</label>
+                  <select
+                    value={createFlagScope}
+                    onChange={(e) => setCreateFlagScope(e.target.value as 'global' | 'pilot')}
+                    className="h-9 rounded-xl border border-[#ddd4c8] bg-white pl-3 pr-8 text-[12px] text-[#171717] focus:outline-none focus:ring-2 focus:ring-[#171717]/20"
+                  >
+                    <option value="global">global</option>
+                    <option value="pilot">pilot</option>
+                  </select>
+                </div>
+                <Button
+                  size="sm"
+                  disabled={createFlagLoading || !createFlagKey.trim()}
+                  onClick={() => {
+                    setCreateFlagLoading(true);
+                    adminService.createFlag({
+                      key: createFlagKey.trim(),
+                      description: createFlagDesc.trim() || undefined,
+                      scope: createFlagScope,
+                    }).then((res) => {
+                      if (res.ok) {
+                        setToast(`Flag "${createFlagKey}" berhasil dibuat.`);
+                        setCreateFlagKey('');
+                        setCreateFlagDesc('');
+                        setCreateFlagScope('global');
+                        setCreateFlagOpen(false);
+                        loadFlags();
+                      } else {
+                        setToast(`Gagal: ${res.error.safeMessage}`);
+                      }
+                      setCreateFlagLoading(false);
+                    });
+                  }}
+                >
+                  {createFlagLoading ? 'Menyimpan...' : 'Buat'}
+                </Button>
+                <Button size="sm" variant="secondary" onClick={() => { setCreateFlagOpen(false); setCreateFlagKey(''); setCreateFlagDesc(''); }}>Batal</Button>
+              </div>
+            </div>
+          ) : null}
+
+          {/* Search flags */}
+          <AdminToolbar
+            search={search}
+            onSearchChange={setSearch}
+            searchPlaceholder="Cari key / deskripsi"
+          />
+
           <AdminDataTable
-            rows={flagsData}
+            rows={flagsData.filter((f) => {
+              const q = search.trim().toLowerCase();
+              return !q || f.key.toLowerCase().includes(q) || f.description.toLowerCase().includes(q);
+            })}
+            emptyLabel="Tidak ada feature flag."
             columns={[
-              { key: 'key', header: 'Flag', render: (row) => row.key },
-              { key: 'desc', header: 'Deskripsi', render: (row) => row.description },
-              { key: 'scope', header: 'Scope', render: (row) => row.scope },
+              { key: 'key', header: 'Flag', render: (row) => <span className="font-mono text-[12px]">{row.key}</span> },
+              { key: 'desc', header: 'Deskripsi', render: (row) => <span className="text-[12px] text-[#6d665d]">{row.description || '—'}</span> },
+              { key: 'scope', header: 'Scope', render: (row) => <AdminPill tone={row.scope === 'pilot' ? 'warn' : 'neutral'}>{row.scope}</AdminPill> },
               {
                 key: 'enabled',
                 header: 'State',
@@ -1810,22 +2294,42 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
               },
             ]}
             rowActions={(row) => (
-              <Button
-                size="sm"
-                variant="secondary"
-                onClick={() => {
-                  adminService.toggleFlag(row.key).then((res) => {
-                    if (res.ok) {
-                      setToast(`Flag ${row.key} ${res.value.enabled ? 'diaktifkan' : 'dimatikan'}.`);
-                    } else {
-                      setToast(`Gagal toggle: ${res.error.safeMessage}`);
+              <div className="flex items-center gap-1.5">
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => {
+                    adminService.toggleFlag(row.key).then((res) => {
+                      if (res.ok) {
+                        setToast(`Flag ${row.key} ${res.value.enabled ? 'diaktifkan' : 'dimatikan'}.`);
+                      } else {
+                        setToast(`Gagal toggle: ${res.error.safeMessage}`);
+                      }
+                      loadFlags();
+                    });
+                  }}
+                >
+                  Toggle
+                </Button>
+                <Button
+                  size="sm"
+                  variant="danger"
+                  onClick={() => {
+                    if (confirm(`Hapus flag "${row.key}"?`)) {
+                      adminService.deleteFlag(row.key).then((res) => {
+                        if (res.ok) {
+                          setToast(`Flag "${row.key}" dihapus.`);
+                        } else {
+                          setToast(`Gagal hapus: ${res.error.safeMessage}`);
+                        }
+                        loadFlags();
+                      });
                     }
-                    loadFlags();
-                  });
-                }}
-              >
-                Toggle
-              </Button>
+                  }}
+                >
+                  Hapus
+                </Button>
+              </div>
             )}
           />
         </>
@@ -1837,24 +2341,67 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             title="Marketing CMS"
             description="Kelola draft dan publish halaman marketing publik."
             actions={
-            <Button size="sm" onClick={() => {
-              const slug = window.prompt('Slug halaman baru (contoh: tentang-kami):');
-              if (!slug?.trim()) return;
-              const title = window.prompt('Judul halaman:') ?? slug;
-              adminService.createMarketingPage({ slug: slug.trim(), title: title.trim() }).then((res) => {
-                if (res.ok) {
-                  setToast(`Draft "${title}" berhasil dibuat.`);
-                  loadContent();
-                } else {
-                  setToast(`Gagal: ${res.error.safeMessage}`);
-                }
-              });
-            }}>
-              Draft baru
-            </Button>
+              <Button size="sm" onClick={() => setCreateSchoolOpen(true)}>
+                Draft baru
+              </Button>
             }
           />
           {contentLoading ? <div className="mb-2"><AdminPill tone="info">Memuat...</AdminPill></div> : null}
+
+          {/* Inline create content form — reuse createSchool modal state as createContent */}
+          {createSchoolOpen ? (
+            <div className="rounded-2xl border border-[#ddd4c8]/70 bg-white p-4 space-y-3 shadow-sm">
+              <h4 className="text-[13px] font-bold text-[#171717]">Draft halaman baru</h4>
+              <div className="flex flex-wrap items-end gap-3">
+                <div>
+                  <label className="block text-[11px] font-semibold text-[#6d665d] mb-1">Slug * (cth: tentang-kami)</label>
+                  <input
+                    type="text"
+                    value={createSchoolName}
+                    onChange={(e) => setCreateSchoolName(e.target.value)}
+                    placeholder="tentang-kami"
+                    className="h-9 w-52 rounded-xl border border-[#ddd4c8] bg-white px-3 text-[12px] text-[#171717] placeholder:text-[#b0a89f] focus:outline-none focus:ring-2 focus:ring-[#171717]/20"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-[#6d665d] mb-1">Judul</label>
+                  <input
+                    type="text"
+                    value={createSchoolSlug}
+                    onChange={(e) => setCreateSchoolSlug(e.target.value)}
+                    placeholder="Tentang Kami"
+                    className="h-9 w-64 rounded-xl border border-[#ddd4c8] bg-white px-3 text-[12px] text-[#171717] placeholder:text-[#b0a89f] focus:outline-none focus:ring-2 focus:ring-[#171717]/20"
+                  />
+                </div>
+                <Button
+                  size="sm"
+                  disabled={createSchoolLoading || !createSchoolName.trim()}
+                  onClick={() => {
+                    setCreateSchoolLoading(true);
+                    adminService.createMarketingPage({
+                      slug: createSchoolName.trim(),
+                      title: createSchoolSlug.trim() || createSchoolName.trim(),
+                    }).then((res) => {
+                      if (res.ok) {
+                        setToast(`Draft "${createSchoolSlug || createSchoolName}" berhasil dibuat.`);
+                        setCreateSchoolName('');
+                        setCreateSchoolSlug('');
+                        setCreateSchoolOpen(false);
+                        loadContent();
+                      } else {
+                        setToast(`Gagal: ${res.error.safeMessage}`);
+                      }
+                      setCreateSchoolLoading(false);
+                    });
+                  }}
+                >
+                  {createSchoolLoading ? 'Menyimpan...' : 'Buat draft'}
+                </Button>
+                <Button size="sm" variant="secondary" onClick={() => { setCreateSchoolOpen(false); setCreateSchoolName(''); setCreateSchoolSlug(''); }}>Batal</Button>
+              </div>
+            </div>
+          ) : null}
+
           <AdminToolbar
             search={search}
             onSearchChange={setSearch}
@@ -1874,10 +2421,10 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             }
           />
           <AdminDataTable
-            rows={content.slice((page - 1) * 3, page * 3)}
+            rows={content}
             emptyLabel="Tidak ada konten yang cocok."
             columns={[
-              { key: 'slug', header: 'Slug', render: (row) => row.slug },
+              { key: 'slug', header: 'Slug', render: (row) => <span className="font-mono text-[11px]">{row.slug}</span> },
               { key: 'title', header: 'Judul', render: (row) => row.title },
               {
                 key: 'status',
@@ -1888,30 +2435,29 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                   </AdminPill>
                 ),
               },
-              { key: 'updated', header: 'Update', render: (row) => row.updatedAt },
+              { key: 'updated', header: 'Update', render: (row) => <span className="text-[11px] text-[#6d665d]">{row.updatedAt}</span> },
             ]}
             rowActions={(row) => (
-              <>
-                <Button size="sm" variant="secondary" onClick={() => setToast(`Edit ${row.slug}`)}>
+              <div className="flex items-center gap-1.5">
+                <Button size="sm" variant="secondary" onClick={() => window.open(`/ops/content/${row.slug}`, '_blank')}>
                   Edit
                 </Button>
                 <Button
                   size="sm"
-                  onClick={() =>
-                    setToast(`${row.status === 'published' ? 'Unpublish' : 'Publish'} ${row.slug}`)
-                  }
+                  variant={row.status === 'published' ? 'secondary' : undefined}
+                  onClick={() => setToast(`${row.status === 'published' ? 'Unpublish' : 'Publish'} ${row.slug} — hubungkan ke CMS endpoint`)}
                 >
                   {row.status === 'published' ? 'Unpublish' : 'Publish'}
                 </Button>
-              </>
+              </div>
             )}
           />
           <AdminPagination
-            currentPage={page}
-            totalPages={Math.ceil(content.length / 3)}
-            totalItems={content.length}
-            pageSize={3}
-            onPageChange={setPage}
+            currentPage={contentPage}
+            totalPages={contentMeta.pages}
+            totalItems={contentMeta.total}
+            pageSize={10}
+            onPageChange={setContentPage}
           />
         </>
       ) : null}
