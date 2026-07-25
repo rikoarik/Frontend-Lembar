@@ -18,11 +18,13 @@ export type AdminColumn<T> = {
 export const SCHOOL_NAV: AdminNavItem[] = [
   { href: '/school', label: 'Ringkasan', icon: 'dashboard' },
   { href: '/school/guru', label: 'Guru', icon: 'group' },
-  { href: '/school/guru/undang', label: 'Undang', icon: 'person_add' },
+  { href: '/school/undang', label: 'Undang', icon: 'person_add' },
+  { href: '/school/undangan', label: 'Undangan aktif', icon: 'mail' },
   { href: '/school/penggunaan', label: 'Penggunaan', icon: 'monitoring' },
   { href: '/school/pengaturan', label: 'Pengaturan', icon: 'settings' },
   { href: '/school/library', label: 'Library', icon: 'inventory_2' },
   { href: '/school/audit', label: 'Audit', icon: 'history' },
+  { href: '/school/notifikasi', label: 'Notifikasi', icon: 'notifications' },
 ];
 
 export const OPS_NAV: AdminNavItem[] = [

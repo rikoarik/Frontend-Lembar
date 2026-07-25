@@ -24,6 +24,8 @@ import {
   type SchoolAuditResult,
   type SchoolInvitation,
   type SchoolDashboard,
+  type SchoolNotification,
+  type SchoolNotificationsResult,
 } from '@/src/services/school/schoolService';
 
 // ── helpers ───────────────────────────────────────────────────────────────────
@@ -962,6 +964,133 @@ function SectionUndangan({ setToast }: { setToast: (msg: string) => void }) {
 
 // ── Root export ───────────────────────────────────────────────────────────────
 
+// ── Section: Notifikasi ───────────────────────────────────────────────────────
+
+function SectionNotifikasi({ setToast }: { setToast: (msg: string) => void }) {
+  const [data, setData] = useState<SchoolNotification[]>([]);
+  const [meta, setMeta] = useState<SchoolNotificationsResult['meta'] | null>(null);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [filterStatus, setFilterStatus] = useState('');
+
+  const fetchNotifications = useCallback((pg: number, status: string) => {
+    setLoading(true);
+    schoolService.notifications({ page: pg, limit: 20, status: status || undefined }).then((res) => {
+      if (res.ok) {
+        setData(res.value.data ?? []);
+        setMeta(res.value.meta ?? null);
+      } else {
+        setToast(`Gagal memuat notifikasi: ${res.error.safeMessage}`);
+      }
+      setLoading(false);
+    });
+  }, [setToast]);
+
+  useEffect(() => {
+    fetchNotifications(page, filterStatus);
+  }, [fetchNotifications, page, filterStatus]);
+
+  function notifTone(status: string): 'ok' | 'warn' | 'bad' | 'neutral' {
+    if (status === 'delivered') return 'ok';
+    if (status === 'pending') return 'neutral';
+    return 'bad';
+  }
+
+  return (
+    <>
+      <div className="flex flex-wrap gap-2 mb-3">
+        {(['', 'pending', 'delivered', 'failed'] as const).map((s) => (
+          <button
+            key={s || 'all'}
+            onClick={() => { setFilterStatus(s); setPage(1); }}
+            className={`px-3 py-1 rounded-full text-[12px] font-medium border transition-colors ${
+              filterStatus === s
+                ? 'bg-[#171717] text-white border-[#171717]'
+                : 'bg-white text-[#6d665d] border-[#ddd4c8] hover:bg-[#faf8f5]'
+            }`}
+          >
+            {s || 'Semua'}
+          </button>
+        ))}
+        <button
+          onClick={() => fetchNotifications(page, filterStatus)}
+          className="px-3 py-1 rounded-full text-[12px] font-medium border border-[#ddd4c8] bg-white text-[#6d665d] hover:bg-[#faf8f5] ml-auto"
+        >
+          Refresh
+        </button>
+      </div>
+
+      {loading ? (
+        <AdminContentLoading />
+      ) : data.length === 0 ? (
+        <div className="rounded-2xl border border-[#ddd4c8]/60 bg-[#faf8f5] p-8 text-center text-[13px] text-[#6d665d]">
+          Belum ada notifikasi.
+        </div>
+      ) : (
+        <AdminDataTable
+          rows={data}
+          emptyLabel="Tidak ada notifikasi."
+          columns={[
+            {
+              key: 'type',
+              header: 'Tipe',
+              render: (row) => <span className="font-mono text-[11px]">{row.type}</span>,
+            },
+            {
+              key: 'status',
+              header: 'Status',
+              render: (row) => <AdminPill tone={notifTone(row.status)}>{row.status}</AdminPill>,
+            },
+            {
+              key: 'attempt',
+              header: 'Attempt',
+              render: (row) => <span className="tabular-nums text-[12px]">{row.attemptCount}</span>,
+            },
+            {
+              key: 'error',
+              header: 'Error',
+              render: (row) => (
+                <span className="text-[11px] text-[#c9703a] truncate max-w-[200px] block">
+                  {row.lastError ?? '—'}
+                </span>
+              ),
+            },
+            {
+              key: 'created',
+              header: 'Dibuat',
+              render: (row) => <span className="text-[11px] text-[#6d665d]">{row.createdAt ?? '—'}</span>,
+            },
+          ]}
+        />
+      )}
+
+      {meta && meta.pages > 1 ? (
+        <div className="flex items-center justify-between pt-2 text-sm">
+          <span className="text-neutral-500">
+            {meta.total} notifikasi · halaman {meta.page} / {meta.pages}
+          </span>
+          <div className="flex gap-1">
+            <button
+              disabled={page <= 1}
+              onClick={() => setPage((p) => p - 1)}
+              className="px-3 py-1 rounded-lg border border-[#ddd4c8] text-[12px] disabled:opacity-40"
+            >
+              ‹
+            </button>
+            <button
+              disabled={page >= meta.pages}
+              onClick={() => setPage((p) => p + 1)}
+              className="px-3 py-1 rounded-lg border border-[#ddd4c8] text-[12px] disabled:opacity-40"
+            >
+              ›
+            </button>
+          </div>
+        </div>
+      ) : null}
+    </>
+  );
+}
+
 export function SchoolAdminView({ section = '' }: { section?: string }) {
   const current = section || '';
   const { search, filter, setSearch, setFilter, setToast } =
@@ -1013,6 +1142,10 @@ export function SchoolAdminView({ section = '' }: { section?: string }) {
           setSearch={setSearch}
           setToast={setToast}
         />
+      ) : null}
+
+      {current === 'notifikasi' ? (
+        <SectionNotifikasi setToast={setToast} />
       ) : null}
     </div>
   );
