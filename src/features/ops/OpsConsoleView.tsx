@@ -825,34 +825,21 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
     <div className="space-y-4">
       {key === '' ? (
         <>
-          <AdminPageHeader
-            title="Ringkasan platform"
-            description="Pantau kesehatan job, tenant berisiko, quality report, dan flag pilot dari satu tempat."
-            meta={
-              <>
-                {dashboardLoading ? (
-                  <AdminPill tone="info">memuat...</AdminPill>
-                ) : dashboard ? (
-                  <AdminPill tone="ok">live</AdminPill>
-                ) : null}
-                <AdminPill tone="ok">least privilege</AdminPill>
-              </>
-            }
-            actions={
-              <>
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  onClick={() => { loadDashboard(); setToast('Refresh ringkasan...'); }}
-                >
-                  Refresh
-                </Button>
-                <Button size="sm" onClick={() => setToast('Buka antrian job gagal.')}>
-                  Review job gagal
-                </Button>
-              </>
-            }
-          />
+          <div className="flex items-center justify-between px-1 py-1">
+            <h2 className="text-[18px] font-bold text-[#171717]">Ringkasan platform</h2>
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => { loadDashboard(); setToast('Refresh ringkasan...'); }}
+              >
+                Refresh
+              </Button>
+              <Button size="sm" onClick={() => setToast('Buka antrian job gagal.')}>
+                Review job gagal
+              </Button>
+            </div>
+          </div>
           <AdminStatCards
             items={[
               {
