@@ -1299,7 +1299,18 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
         <>
           <div className="flex items-center justify-between px-1 py-1">
             <h2 className="text-[18px] font-bold text-[#171717]">Sekolah / tenant</h2>
-            <Button size="sm" onClick={() => setToast('Tambah tenant sekolah (mock).')}>
+            <Button size="sm" onClick={() => {
+              const name = window.prompt('Nama sekolah baru:');
+              if (!name?.trim()) return;
+              adminService.createSchool({ name: name.trim() }).then((res) => {
+                if (res.ok) {
+                  setToast(`Sekolah "${name}" berhasil dibuat.`);
+                  loadSchools(1);
+                } else {
+                  setToast(`Gagal: ${res.error.safeMessage}`);
+                }
+              });
+            }}>
               Tambah sekolah
             </Button>
           </div>
@@ -1382,7 +1393,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             title="Katalog"
             description="Kelola grade, mapel, dan material yang dipakai generator."
             actions={
-              <Button size="sm" onClick={() => setToast('Sync katalog (mock).')}>
+              <Button size="sm" onClick={() => setToast('Sync katalog dijalankan dari BE saat data berubah.')}>
                 Sync katalog
               </Button>
             }
@@ -1826,9 +1837,21 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             title="Marketing CMS"
             description="Kelola draft dan publish halaman marketing publik."
             actions={
-              <Button size="sm" onClick={() => setToast('Buat draft CMS mock.')}>
-                Draft baru
-              </Button>
+            <Button size="sm" onClick={() => {
+              const slug = window.prompt('Slug halaman baru (contoh: tentang-kami):');
+              if (!slug?.trim()) return;
+              const title = window.prompt('Judul halaman:') ?? slug;
+              adminService.createMarketingPage({ slug: slug.trim(), title: title.trim() }).then((res) => {
+                if (res.ok) {
+                  setToast(`Draft "${title}" berhasil dibuat.`);
+                  loadContent();
+                } else {
+                  setToast(`Gagal: ${res.error.safeMessage}`);
+                }
+              });
+            }}>
+              Draft baru
+            </Button>
             }
           />
           {contentLoading ? <div className="mb-2"><AdminPill tone="info">Memuat...</AdminPill></div> : null}
@@ -1958,7 +1981,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                   size="sm"
                   variant="secondary"
                   className="w-full justify-center"
-                  onClick={() => setToast('Log out dari perangkat lain (mock).')}
+                  onClick={() => setToast('Fitur log out perangkat lain belum tersedia.')}
                 >
                   Log Out dari Perangkat Lain
                 </Button>

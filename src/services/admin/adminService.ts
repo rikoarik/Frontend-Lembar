@@ -456,8 +456,18 @@ export const adminService = {
     return request('/v1/admin/dashboard/trends');
   },
 
-  // Marketing / Content pages — no BE endpoint; kept for type compat but will gracefully fail
+  // Marketing / Content pages
   marketingPages(): Promise<Result<AdminContentRow[], AdminError>> {
     return request<AdminContentRow[]>('/v1/ops/marketing/pages');
+  },
+
+  // Create school/tenant
+  createSchool(data: { name: string; slug?: string }): Promise<Result<{ id: string; name: string; slug: string }, AdminError>> {
+    return request('/v1/admin/schools', 'POST', data);
+  },
+
+  // Create marketing content page
+  createMarketingPage(data: { slug: string; title: string }): Promise<Result<{ slug: string; title: string }, AdminError>> {
+    return request('/v1/ops/marketing/pages', 'POST', data);
   },
 };

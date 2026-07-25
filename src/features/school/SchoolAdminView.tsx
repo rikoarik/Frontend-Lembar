@@ -1,9 +1,10 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Button } from '@/app/components/ui';
 import {
   AdminAvatar,
+  AdminContentLoading,
   AdminDataTable,
   AdminFilterChip,
   AdminPill,
@@ -11,662 +12,830 @@ import {
   AdminToolbar,
 } from '@/src/features/admin/AdminChrome';
 import { useAdminSectionState } from '@/src/features/admin/adminPanelState';
+import {
+  schoolService,
+  type SchoolMember,
+  type SchoolMembersResult,
+  type SchoolUsage,
+  type SchoolSettings,
+  type SchoolLibraryItem,
+  type SchoolLibraryResult,
+  type SchoolAuditRow,
+  type SchoolAuditResult,
+  type SchoolInvitation,
+  type SchoolDashboard,
+} from '@/src/services/school/schoolService';
 
-type TeacherRow = {
-  id: string;
-  name: string;
-  email: string;
-  role: 'Guru' | 'Kurikulum' | 'Admin sekolah';
-  status: 'Aktif' | 'Undangan' | 'Ditangguhkan';
-  lastActive: string;
-  sheetsFinal: number;
-};
+// ── helpers ───────────────────────────────────────────────────────────────────
 
-type UsageRow = {
-  id: string;
-  teacher: string;
-  generated: number;
-  finalized: number;
-  shared: number;
-  period: string;
-};
+function memberRoleLabel(role: SchoolMember['role']): string {
+  if (role === 'school_admin') return 'Admin sekolah';
+  return 'Guru';
+}
 
-type AuditRow = {
-  id: string;
-  actor: string;
-  action: string;
-  target: string;
-  at: string;
-};
-
-type LibraryRow = {
-  id: string;
-  name: string;
-  kind: 'Template' | 'Bank soal';
-  owner: string;
-  updatedAt: string;
-  visibility: 'Internal' | 'Draft';
-};
-
-const TEACHERS: TeacherRow[] = [
-  {
-    id: 't1',
-    name: 'Siti Aminah',
-    email: 'siti@sdncontoh.sch.id',
-    role: 'Guru',
-    status: 'Aktif',
-    lastActive: '2026-07-23',
-    sheetsFinal: 12,
-  },
-  {
-    id: 't2',
-    name: 'Budi Santoso',
-    email: 'budi@sdncontoh.sch.id',
-    role: 'Guru',
-    status: 'Undangan',
-    lastActive: '—',
-    sheetsFinal: 0,
-  },
-  {
-    id: 't3',
-    name: 'Rina Kartika',
-    email: 'rina@sdncontoh.sch.id',
-    role: 'Kurikulum',
-    status: 'Aktif',
-    lastActive: '2026-07-22',
-    sheetsFinal: 19,
-  },
-  {
-    id: 't4',
-    name: 'Agus Pratama',
-    email: 'agus@sdncontoh.sch.id',
-    role: 'Guru',
-    status: 'Ditangguhkan',
-    lastActive: '2026-07-10',
-    sheetsFinal: 3,
-  },
-  {
-    id: 't5',
-    name: 'Dewi Lestari',
-    email: 'dewi@sdncontoh.sch.id',
-    role: 'Guru',
-    status: 'Aktif',
-    lastActive: '2026-07-24',
-    sheetsFinal: 8,
-  },
-];
-
-const USAGE: UsageRow[] = [
-  { id: 'u1', teacher: 'Siti Aminah', generated: 24, finalized: 12, shared: 5, period: '30 hari' },
-  { id: 'u2', teacher: 'Rina Kartika', generated: 31, finalized: 19, shared: 8, period: '30 hari' },
-  { id: 'u3', teacher: 'Dewi Lestari', generated: 15, finalized: 8, shared: 2, period: '30 hari' },
-  { id: 'u4', teacher: 'Agus Pratama', generated: 7, finalized: 3, shared: 0, period: '30 hari' },
-];
-
-const AUDIT: AuditRow[] = [
-  {
-    id: 'a1',
-    actor: 'admin.siti',
-    action: 'Undang guru',
-    target: 'budi@sdncontoh.sch.id',
-    at: '2026-07-23 09:12',
-  },
-  {
-    id: 'a2',
-    actor: 'admin.siti',
-    action: 'Ubah kuota workspace',
-    target: 'ws_school_demo',
-    at: '2026-07-22 14:40',
-  },
-  {
-    id: 'a3',
-    actor: 'admin.budi',
-    action: 'Aktifkan branding',
-    target: 'logo sekolah',
-    at: '2026-07-20 11:05',
-  },
-];
-
-const LIBRARY: LibraryRow[] = [
-  {
-    id: 'l1',
-    name: 'Template UTS Matematika',
-    kind: 'Template',
-    owner: 'Kurikulum',
-    updatedAt: '2026-07-18',
-    visibility: 'Internal',
-  },
-  {
-    id: 'l2',
-    name: 'Bank IPAS kelas 5',
-    kind: 'Bank soal',
-    owner: 'Rina Kartika',
-    updatedAt: '2026-07-21',
-    visibility: 'Internal',
-  },
-  {
-    id: 'l3',
-    name: 'Draft PTS Bahasa',
-    kind: 'Template',
-    owner: 'Siti Aminah',
-    updatedAt: '2026-07-23',
-    visibility: 'Draft',
-  },
-];
-
-function teacherTone(status: TeacherRow['status']): 'ok' | 'warn' | 'bad' | 'neutral' {
-  if (status === 'Aktif') return 'ok';
-  if (status === 'Undangan') return 'warn';
-  if (status === 'Ditangguhkan') return 'bad';
+function memberStateTone(
+  state: SchoolMember['state'],
+): 'ok' | 'warn' | 'bad' | 'neutral' {
+  if (state === 'active') return 'ok';
+  if (state === 'suspended') return 'bad';
   return 'neutral';
 }
 
+function memberStateLabel(state: SchoolMember['state']): string {
+  if (state === 'active') return 'Aktif';
+  if (state === 'suspended') return 'Ditangguhkan';
+  return 'Dicabut';
+}
+
+function fmtDate(iso: string | null | undefined): string {
+  if (!iso) return '—';
+  try {
+    return new Date(iso).toLocaleDateString('id-ID', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    });
+  } catch {
+    return iso;
+  }
+}
+
+// ── Section: Ringkasan ────────────────────────────────────────────────────────
+
+function SectionRingkasan({
+  setToast,
+}: {
+  setToast: (msg: string) => void;
+}) {
+  const [dashboard, setDashboard] = useState<SchoolDashboard | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    schoolService.dashboard().then((res) => {
+      if (cancelled) return;
+      if (res.ok) {
+        setDashboard(res.value);
+      } else {
+        setToast(`Gagal memuat ringkasan: ${res.error.safeMessage}`);
+      }
+      setLoading(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [setToast]);
+
+  if (loading) return <AdminContentLoading />;
+
+  const pct =
+    dashboard && dashboard.stats.quotaLimit > 0
+      ? Math.round(
+          (dashboard.stats.quotaUsed / dashboard.stats.quotaLimit) * 100,
+        )
+      : 0;
+
+  return (
+    <AdminStatCards
+      items={[
+        {
+          label: 'Anggota aktif',
+          value: String(dashboard?.stats.activeMembers ?? '—'),
+          hint: `dari ${dashboard?.stats.totalMembers ?? 0} total`,
+          tone: 'ok',
+        },
+        {
+          label: 'Kuota terpakai',
+          value: `${dashboard?.stats.quotaUsed ?? 0} / ${dashboard?.stats.quotaLimit ?? 0}`,
+          hint: `${pct}% periode ini`,
+          tone: pct >= 90 ? 'bad' : pct >= 70 ? 'warn' : 'info',
+          delta: `${pct}%`,
+        },
+        {
+          label: 'Lembar final',
+          value: String(dashboard?.stats.totalAssessments ?? '—'),
+          hint: 'total workspace',
+          tone: 'ok',
+        },
+        {
+          label: 'Sekolah',
+          value: dashboard?.workspace.name ?? '—',
+          hint: `${dashboard?.workspace.plan ?? ''} · ${dashboard?.workspace.level ?? ''}`,
+          tone: 'neutral',
+        },
+      ]}
+    />
+  );
+}
+
+// ── Section: Guru (members) ───────────────────────────────────────────────────
+
+function SectionGuru({
+  search,
+  filter,
+  setSearch,
+  setFilter,
+  setToast,
+}: {
+  search: string;
+  filter: string;
+  setSearch: (v: string) => void;
+  setFilter: (v: string) => void;
+  setToast: (msg: string) => void;
+}) {
+  const [members, setMembers] = useState<SchoolMember[]>([]);
+  const [meta, setMeta] = useState<SchoolMembersResult['meta'] | null>(null);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [actionId, setActionId] = useState<string | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const fetchMembers = useCallback(
+    (q: string, role: string, pg: number) => {
+      setLoading(true);
+      schoolService
+        .members({
+          q: q || undefined,
+          role:
+            role !== 'all'
+              ? (role as 'teacher' | 'school_admin')
+              : undefined,
+          page: pg,
+          limit: 20,
+        })
+        .then((res) => {
+          if (res.ok) {
+            // service wraps paginated responses as { data, meta }
+            const result = res.value as unknown as SchoolMembersResult;
+            setMembers(result.data ?? []);
+            setMeta(result.meta ?? null);
+          } else {
+            setToast(`Gagal memuat anggota: ${res.error.safeMessage}`);
+          }
+          setLoading(false);
+        });
+    },
+    [setToast],
+  );
+
+  useEffect(() => {
+    setPage(1);
+  }, [search, filter]);
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(
+      () => fetchMembers(search, filter, page),
+      300,
+    );
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [search, filter, page, fetchMembers]);
+
+  async function handleSuspend(member: SchoolMember) {
+    setActionId(member.id);
+    const res = await schoolService.memberSuspend(member.id);
+    if (res.ok) {
+      setToast(`${member.name} ditangguhkan`);
+      fetchMembers(search, filter);
+    } else {
+      setToast(`Gagal menangguhkan: ${res.error.safeMessage}`);
+    }
+    setActionId(null);
+  }
+
+  async function handleUnsuspend(member: SchoolMember) {
+    setActionId(member.id);
+    const res = await schoolService.memberUnsuspend(member.id);
+    if (res.ok) {
+      setToast(`${member.name} diaktifkan kembali`);
+      fetchMembers(search, filter);
+    } else {
+      setToast(`Gagal mengaktifkan: ${res.error.safeMessage}`);
+    }
+    setActionId(null);
+  }
+
+  async function handleRemove(member: SchoolMember) {
+    if (!confirm(`Hapus ${member.name} dari sekolah ini?`)) return;
+    setActionId(member.id);
+    const res = await schoolService.removeMember(member.id);
+    if (res.ok) {
+      setToast(`${member.name} dihapus`);
+      fetchMembers(search, filter);
+    } else {
+      setToast(`Gagal menghapus: ${res.error.safeMessage}`);
+    }
+    setActionId(null);
+  }
+
+  const roleFilters = [
+    { value: 'all', label: 'Semua' },
+    { value: 'teacher', label: 'Guru' },
+    { value: 'school_admin', label: 'Admin' },
+  ] as const;
+
+  return (
+    <>
+      <AdminToolbar
+        search={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Cari nama / email…"
+        filters={
+          <>
+            {roleFilters.map(({ value, label }) => (
+              <AdminFilterChip
+                key={value}
+                active={filter === value}
+                onClick={() => setFilter(value)}
+              >
+                {label}
+              </AdminFilterChip>
+            ))}
+          </>
+        }
+      />
+      {loading ? (
+        <AdminContentLoading />
+      ) : (
+        <AdminDataTable
+          rows={members}
+          emptyLabel="Tidak ada anggota"
+          columns={[
+            {
+              key: 'name',
+              header: 'Anggota',
+              render: (row) => (
+                <div className="flex items-center gap-3">
+                  <AdminAvatar name={row.name} />
+                  <div>
+                    <div className="font-medium text-sm">{row.name}</div>
+                    <div className="text-xs text-neutral-400">{row.email}</div>
+                  </div>
+                </div>
+              ),
+            },
+            {
+              key: 'role',
+              header: 'Peran',
+              render: (row) => (
+                <AdminPill tone="neutral">{memberRoleLabel(row.role)}</AdminPill>
+              ),
+            },
+            {
+              key: 'state',
+              header: 'Status',
+              render: (row) => (
+                <AdminPill tone={memberStateTone(row.state)}>
+                  {memberStateLabel(row.state)}
+                </AdminPill>
+              ),
+            },
+            {
+              key: 'lastActiveAt',
+              header: 'Aktif terakhir',
+              render: (row) => fmtDate(row.lastActiveAt),
+            },
+            {
+              key: 'actions',
+              header: '',
+              render: (row) => (
+                <div className="flex gap-2 justify-end">
+                  {row.state === 'active' ? (
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      disabled={actionId === row.id}
+                      onClick={() => handleSuspend(row)}
+                    >
+                      Tangguhkan
+                    </Button>
+                  ) : row.state === 'suspended' ? (
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      disabled={actionId === row.id}
+                      onClick={() => handleUnsuspend(row)}
+                    >
+                      Aktifkan
+                    </Button>
+                  ) : null}
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    disabled={actionId === row.id}
+                    onClick={() => handleRemove(row)}
+                  >
+                    Hapus
+                  </Button>
+                </div>
+              ),
+            },
+          ]}
+        />
+      )}
+    </>
+  );
+}
+
+// ── Section: Undang ───────────────────────────────────────────────────────────
+
+function SectionUndang({ setToast }: { setToast: (msg: string) => void }) {
+  const [email, setEmail] = useState('');
+  const [role, setRole] = useState<'teacher' | 'school_admin'>('teacher');
+  const [loading, setLoading] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const trimmed = email.trim();
+    if (!trimmed) return;
+    setLoading(true);
+    const res = await schoolService.inviteMember({ email: trimmed, role });
+    if (res.ok) {
+      setToast(`Undangan dikirim ke ${trimmed}`);
+      setEmail('');
+    } else {
+      setToast(`Gagal mengirim undangan: ${res.error.safeMessage}`);
+    }
+    setLoading(false);
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="max-w-md space-y-4">
+      <div>
+        <label
+          className="block text-sm font-medium mb-1"
+          htmlFor="invite-email"
+        >
+          Email
+        </label>
+        <input
+          id="invite-email"
+          type="email"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="guru@sekolah.sch.id"
+          className="w-full rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white"
+        />
+      </div>
+      <div>
+        <label
+          className="block text-sm font-medium mb-1"
+          htmlFor="invite-role"
+        >
+          Peran
+        </label>
+        <select
+          id="invite-role"
+          value={role}
+          onChange={(e) =>
+            setRole(e.target.value as 'teacher' | 'school_admin')
+          }
+          className="w-full rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white"
+        >
+          <option value="teacher">Guru</option>
+          <option value="school_admin">Admin sekolah</option>
+        </select>
+      </div>
+      <Button type="submit" size="sm" disabled={loading}>
+        {loading ? 'Mengirim…' : 'Kirim undangan'}
+      </Button>
+    </form>
+  );
+}
+
+// ── Section: Penggunaan ───────────────────────────────────────────────────────
+
+function SectionPenggunaan({
+  setToast,
+}: {
+  setToast: (msg: string) => void;
+}) {
+  const [usage, setUsage] = useState<SchoolUsage | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    schoolService.usage().then((res) => {
+      if (cancelled) return;
+      if (res.ok) {
+        setUsage(res.value);
+      } else {
+        setToast(`Gagal memuat penggunaan: ${res.error.safeMessage}`);
+      }
+      setLoading(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [setToast]);
+
+  if (loading) return <AdminContentLoading />;
+
+  if (!usage) {
+    return (
+      <div className="text-sm text-neutral-400 py-8 text-center">
+        Data tidak tersedia
+      </div>
+    );
+  }
+
+  const pct = Math.round(
+    (usage.quotaUsed / Math.max(usage.quotaLimit, 1)) * 100,
+  );
+
+  return (
+    <div className="space-y-6">
+      <div className="rounded-lg border border-neutral-200 p-4 dark:border-neutral-700">
+        <div className="flex justify-between text-sm mb-2">
+          <span className="font-medium">Kuota terpakai</span>
+          <span className="text-neutral-500">
+            {usage.quotaUsed} / {usage.quotaLimit} ({pct}%)
+          </span>
+        </div>
+        <div className="h-2 rounded-full bg-neutral-100 dark:bg-neutral-800">
+          <div
+            className={`h-2 rounded-full transition-all ${
+              pct >= 90
+                ? 'bg-red-500'
+                : pct >= 70
+                  ? 'bg-yellow-500'
+                  : 'bg-blue-500'
+            }`}
+            style={{ width: `${Math.min(pct, 100)}%` }}
+          />
+        </div>
+      </div>
+
+      {usage.breakdown.length > 0 && (
+        <AdminDataTable
+          rows={usage.breakdown.map((b) => ({ ...b, id: b.userId }))}
+          emptyLabel="Tidak ada data"
+          columns={[
+            {
+              key: 'name',
+              header: 'Guru',
+              render: (row) => (
+                <div className="flex items-center gap-3">
+                  <AdminAvatar name={row.name} />
+                  <div>
+                    <div className="font-medium text-sm">{row.name}</div>
+                    <div className="text-xs text-neutral-400">{row.email}</div>
+                  </div>
+                </div>
+              ),
+            },
+            {
+              key: 'used',
+              header: 'Kuota dipakai',
+              render: (row) => String(row.used),
+            },
+          ]}
+        />
+      )}
+
+      {usage.trend.length > 0 && (
+        <div className="rounded-lg border border-neutral-200 p-4 dark:border-neutral-700">
+          <div className="text-sm font-medium mb-3">Tren bulanan</div>
+          <div className="space-y-2">
+            {usage.trend.map((t) => (
+              <div key={t.month} className="flex justify-between text-sm">
+                <span className="text-neutral-500">{t.month}</span>
+                <span className="font-medium">{t.used}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Section: Pengaturan ───────────────────────────────────────────────────────
+
+function SectionPengaturan({
+  setToast,
+}: {
+  setToast: (msg: string) => void;
+}) {
+  const [settings, setSettings] = useState<SchoolSettings | null>(null);
+  const [name, setName] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    schoolService.settings().then((res) => {
+      if (cancelled) return;
+      if (res.ok) {
+        setSettings(res.value);
+        setName(res.value.name);
+      } else {
+        setToast(`Gagal memuat pengaturan: ${res.error.safeMessage}`);
+      }
+      setLoading(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [setToast]);
+
+  async function handleSave(e: React.FormEvent) {
+    e.preventDefault();
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    setSaving(true);
+    const res = await schoolService.updateSettings({ name: trimmed });
+    if (res.ok) {
+      setToast('Pengaturan disimpan');
+      setSettings((prev) => (prev ? { ...prev, name: trimmed } : prev));
+    } else {
+      setToast(`Gagal menyimpan: ${res.error.safeMessage}`);
+    }
+    setSaving(false);
+  }
+
+  if (loading) return <AdminContentLoading />;
+
+  return (
+    <form onSubmit={handleSave} className="max-w-md space-y-4">
+      <div>
+        <label
+          className="block text-sm font-medium mb-1"
+          htmlFor="settings-name"
+        >
+          Nama sekolah
+        </label>
+        <input
+          id="settings-name"
+          type="text"
+          required
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="w-full rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white"
+        />
+      </div>
+      {settings && (
+        <div className="text-xs text-neutral-400 space-y-1">
+          <div>
+            Slug: <span className="font-mono">{settings.slug}</span>
+          </div>
+          <div>Level: {settings.level}</div>
+          <div>Paket: {settings.plan}</div>
+          <div>Kursi: {settings.seats}</div>
+          {settings.renewsAt && (
+            <div>Perpanjang: {fmtDate(settings.renewsAt)}</div>
+          )}
+        </div>
+      )}
+      <Button type="submit" size="sm" disabled={saving}>
+        {saving ? 'Menyimpan…' : 'Simpan pengaturan'}
+      </Button>
+    </form>
+  );
+}
+
+// ── Section: Library ──────────────────────────────────────────────────────────
+
+function SectionLibrary({
+  search,
+  setSearch,
+  setToast,
+}: {
+  search: string;
+  setSearch: (v: string) => void;
+  setToast: (msg: string) => void;
+}) {
+  const [items, setItems] = useState<SchoolLibraryItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const fetchLibrary = useCallback(
+    (q: string) => {
+      setLoading(true);
+      schoolService.library({ q: q || undefined }).then((res) => {
+        if (res.ok) {
+          const raw = res.value as unknown as
+            | { data: SchoolLibraryItem[] }
+            | SchoolLibraryItem[];
+          setItems(
+            Array.isArray(raw)
+              ? raw
+              : (raw as { data: SchoolLibraryItem[] }).data ?? [],
+          );
+        } else {
+          setToast(`Gagal memuat library: ${res.error.safeMessage}`);
+        }
+        setLoading(false);
+      });
+    },
+    [setToast],
+  );
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => fetchLibrary(search), 300);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [search, fetchLibrary]);
+
+  return (
+    <>
+      <AdminToolbar
+        search={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Cari judul / mapel / penulis…"
+      />
+      {loading ? (
+        <AdminContentLoading />
+      ) : (
+        <AdminDataTable
+          rows={items}
+          emptyLabel="Tidak ada asesmen di library"
+          columns={[
+            {
+              key: 'title',
+              header: 'Judul',
+              render: (row) => (
+                <div>
+                  <div className="font-medium text-sm">{row.title}</div>
+                  <div className="text-xs text-neutral-400">
+                    {[row.subject, row.grade].filter(Boolean).join(' · ')}
+                  </div>
+                </div>
+              ),
+            },
+            {
+              key: 'authorName',
+              header: 'Penulis',
+              render: (row) => (
+                <div className="flex items-center gap-2">
+                  <AdminAvatar name={row.authorName} />
+                  <span className="text-sm">{row.authorName}</span>
+                </div>
+              ),
+            },
+            {
+              key: 'questionCount',
+              header: 'Soal',
+              render: (row) => String(row.questionCount),
+            },
+            {
+              key: 'updatedAt',
+              header: 'Diperbarui',
+              render: (row) => fmtDate(row.updatedAt),
+            },
+          ]}
+        />
+      )}
+    </>
+  );
+}
+
+// ── Section: Audit ────────────────────────────────────────────────────────────
+
+function SectionAudit({
+  search,
+  setSearch,
+  setToast,
+}: {
+  search: string;
+  setSearch: (v: string) => void;
+  setToast: (msg: string) => void;
+}) {
+  const [rows, setRows] = useState<SchoolAuditRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const fetchAudit = useCallback(
+    (q: string) => {
+      setLoading(true);
+      schoolService.audit({ q: q || undefined }).then((res) => {
+        if (res.ok) {
+          const raw = res.value as unknown as
+            | { data: SchoolAuditRow[] }
+            | SchoolAuditRow[];
+          setRows(
+            Array.isArray(raw)
+              ? raw
+              : (raw as { data: SchoolAuditRow[] }).data ?? [],
+          );
+        } else {
+          setToast(`Gagal memuat audit: ${res.error.safeMessage}`);
+        }
+        setLoading(false);
+      });
+    },
+    [setToast],
+  );
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => fetchAudit(search), 300);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [search, fetchAudit]);
+
+  return (
+    <>
+      <AdminToolbar
+        search={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Cari aktor / aksi / target…"
+      />
+      {loading ? (
+        <AdminContentLoading />
+      ) : (
+        <AdminDataTable
+          rows={rows}
+          emptyLabel="Tidak ada log audit"
+          columns={[
+            {
+              key: 'createdAt',
+              header: 'Waktu',
+              render: (row) => fmtDate(row.createdAt),
+            },
+            {
+              key: 'actorEmail',
+              header: 'Aktor',
+              render: (row) => row.actorEmail,
+            },
+            {
+              key: 'action',
+              header: 'Aksi',
+              render: (row) => row.action,
+            },
+            {
+              key: 'targetType',
+              header: 'Target',
+              render: (row) =>
+                row.targetType
+                  ? `${row.targetType}${row.targetId ? ` #${row.targetId}` : ''}`
+                  : '—',
+            },
+          ]}
+        />
+      )}
+    </>
+  );
+}
+
+// ── Root export ───────────────────────────────────────────────────────────────
+
 export function SchoolAdminView({ section = '' }: { section?: string }) {
   const current = section || '';
-  const { search, filter, setSearch, setFilter, setToast } = useAdminSectionState(
-    current || 'ringkasan',
-  );
-  const statusFilter = (filter as 'all' | TeacherRow['status']) || 'all';
-  // local form fields only (not panel-global)
-  // invite form is local ephemeral UI state via uncontrolled defaults + toast feedback
-
-  const teachers = useMemo(() => {
-    return TEACHERS.filter((row) => {
-      if (statusFilter !== 'all' && row.status !== statusFilter) return false;
-      const q = search.trim().toLowerCase();
-      if (!q) return true;
-      return (
-        row.name.toLowerCase().includes(q) ||
-        row.email.toLowerCase().includes(q) ||
-        row.role.toLowerCase().includes(q)
-      );
-    });
-  }, [search, statusFilter]);
-
-  const usageRows = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return USAGE;
-    return USAGE.filter((row) => row.teacher.toLowerCase().includes(q));
-  }, [search]);
-
-  const auditRows = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return AUDIT;
-    return AUDIT.filter(
-      (row) =>
-        row.actor.toLowerCase().includes(q) ||
-        row.action.toLowerCase().includes(q) ||
-        row.target.toLowerCase().includes(q),
-    );
-  }, [search]);
-
-  const libraryRows = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return LIBRARY;
-    return LIBRARY.filter(
-      (row) =>
-        row.name.toLowerCase().includes(q) ||
-        row.kind.toLowerCase().includes(q) ||
-        row.owner.toLowerCase().includes(q),
-    );
-  }, [search]);
+  const { search, filter, setSearch, setFilter, setToast } =
+    useAdminSectionState(current || 'ringkasan');
 
   return (
     <div className="space-y-4">
       {current === '' ? (
-        <>
-          <AdminStatCards
-            items={[
-              {
-                label: 'Guru aktif',
-                value: '24',
-                hint: '3 undangan menunggu',
-                tone: 'ok',
-                delta: '+2',
-              },
-              {
-                label: 'Kuota terpakai',
-                value: '312 / 500',
-                hint: '62% periode ini',
-                tone: 'info',
-                delta: '62%',
-              },
-              {
-                label: 'Lembar final',
-                value: '48',
-                hint: '30 hari terakhir',
-                tone: 'ok',
-                delta: '+6',
-              },
-              {
-                label: 'Bagikan aktif',
-                value: '17',
-                hint: '2 akan kedaluwarsa',
-                tone: 'warn',
-                delta: '2 exp',
-              },
-            ]}
-          />
-          <AdminToolbar
-            search={search}
-            onSearchChange={setSearch}
-            searchPlaceholder="Cari guru untuk pratinjau cepat…"
-            actions={
-              <>
-                <Button size="sm" onClick={() => (window.location.href = '/school/guru/undang')}>
-                  Undang guru
-                </Button>
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  onClick={() => (window.location.href = '/school/penggunaan')}
-                >
-                  Lihat penggunaan
-                </Button>
-              </>
-            }
-          />
-          <AdminDataTable
-            rows={teachers.slice(0, 5)}
-            columns={[
-              {
-                key: 'name',
-                header: 'Guru',
-                render: (row) => (
-                  <div className="flex items-center gap-3">
-                    <AdminAvatar name={row.name} />
-                    <div className="min-w-0">
-                      <div className="truncate font-semibold tracking-[-0.01em]">{row.name}</div>
-                      <div className="truncate text-[12px] text-brand-ink-muted">{row.email}</div>
-                    </div>
-                  </div>
-                ),
-              },
-              { key: 'role', header: 'Peran', render: (row) => <AdminPill>{row.role}</AdminPill> },
-              {
-                key: 'status',
-                header: 'Status',
-                render: (row) => <AdminPill tone={teacherTone(row.status)}>{row.status}</AdminPill>,
-              },
-              { key: 'final', header: 'Final', render: (row) => row.sheetsFinal },
-            ]}
-            rowActions={(row) => (
-              <>
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  onClick={() => setToast(`Detail mock: ${row.name}`)}
-                >
-                  Detail
-                </Button>
-              </>
-            )}
-          />
-        </>
+        <SectionRingkasan setToast={setToast} />
       ) : null}
 
       {current === 'guru' ? (
-        <>
-          <AdminStatCards
-            items={[
-              { label: 'Total guru', value: String(TEACHERS.length), tone: 'neutral' },
-              {
-                label: 'Aktif',
-                value: String(TEACHERS.filter((t) => t.status === 'Aktif').length),
-                tone: 'ok',
-              },
-              {
-                label: 'Undangan',
-                value: String(TEACHERS.filter((t) => t.status === 'Undangan').length),
-                tone: 'warn',
-              },
-              {
-                label: 'Ditangguhkan',
-                value: String(TEACHERS.filter((t) => t.status === 'Ditangguhkan').length),
-                tone: 'bad',
-              },
-            ]}
-          />
-          <AdminToolbar
-            search={search}
-            onSearchChange={setSearch}
-            searchPlaceholder="Cari nama, email, atau peran"
-            filters={
-              <>
-                {(['all', 'Aktif', 'Undangan', 'Ditangguhkan'] as const).map((value) => (
-                  <AdminFilterChip
-                    key={value}
-                    active={statusFilter === value}
-                    onClick={() => setFilter(value)}
-                  >
-                    {value === 'all' ? 'Semua' : value}
-                  </AdminFilterChip>
-                ))}
-              </>
-            }
-            actions={
-              <Button size="sm" onClick={() => (window.location.href = '/school/guru/undang')}>
-                Undang guru
-              </Button>
-            }
-          />
-          <AdminDataTable
-            rows={teachers}
-            emptyLabel="Tidak ada guru yang cocok dengan filter."
-            columns={[
-              {
-                key: 'name',
-                header: 'Guru',
-                render: (row) => (
-                  <div className="flex items-center gap-3">
-                    <AdminAvatar name={row.name} />
-                    <div className="min-w-0">
-                      <div className="truncate font-semibold tracking-[-0.01em]">{row.name}</div>
-                      <div className="truncate text-[12px] text-brand-ink-muted">{row.email}</div>
-                    </div>
-                  </div>
-                ),
-              },
-              { key: 'role', header: 'Peran', render: (row) => <AdminPill>{row.role}</AdminPill> },
-              {
-                key: 'status',
-                header: 'Status',
-                render: (row) => <AdminPill tone={teacherTone(row.status)}>{row.status}</AdminPill>,
-              },
-              { key: 'last', header: 'Aktif terakhir', render: (row) => row.lastActive },
-              { key: 'final', header: 'Lembar final', render: (row) => row.sheetsFinal },
-            ]}
-            rowActions={(row) => (
-              <>
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  onClick={() => setToast(`Peran diubah (mock): ${row.name}`)}
-                >
-                  Ubah peran
-                </Button>
-                <Button
-                  size="sm"
-                  variant={row.status === 'Ditangguhkan' ? 'primary' : 'danger'}
-                  onClick={() =>
-                    setToast(
-                      row.status === 'Ditangguhkan'
-                        ? `Diaktifkan kembali (mock): ${row.name}`
-                        : `Ditangguhkan (mock): ${row.name}`,
-                    )
-                  }
-                >
-                  {row.status === 'Ditangguhkan' ? 'Aktifkan' : 'Tangguhkan'}
-                </Button>
-              </>
-            )}
-          />
-        </>
+        <SectionGuru
+          search={search}
+          filter={filter || 'all'}
+          setSearch={setSearch}
+          setFilter={setFilter}
+          setToast={setToast}
+        />
       ) : null}
 
-      {current === 'guru/undang' ? (
-        <div className="grid gap-4 lg:grid-cols-[1.2fr_1fr]">
-          <form
-            className="space-y-4 rounded-[var(--radius-lg)] border border-brand-line/80 bg-white p-5 shadow-[var(--shadow-sm)]"
-            onSubmit={(e) => {
-              e.preventDefault();
-              const fd = new FormData(e.currentTarget);
-              const email = String(fd.get('email') || '').trim();
-              setToast(`Undangan mock dikirim ke ${email || 'email kosong'}`);
-              e.currentTarget.reset();
-            }}
-          >
-            <div className="flex flex-col gap-1 border-b border-[#e6dfd4] pb-3">
-              <h2 className="text-h3 font-semibold text-[#171717]">Undang guru baru</h2>
-              <p className="text-body-sm text-[#6d665d]">
-                Kirimkan tautan akses instan ke workspace sekolah untuk guru.
-              </p>
-            </div>
-
-            <label className="flex flex-col gap-1.5">
-              <span className="text-label-semibold text-[#171717]">Email guru</span>
-              <input
-                required
-                type="email"
-                name="email"
-                defaultValue=""
-                className="min-h-[var(--control-md)] rounded-lg border border-[#e6dfd4] px-3 py-2 text-body-sm focus:border-[#a3202b] focus:outline-hidden"
-                placeholder="guru@sekolah.sch.id"
-              />
-            </label>
-
-            <label className="flex flex-col gap-1.5">
-              <span className="text-label-semibold text-[#171717]">Catatan internal</span>
-              <textarea
-                name="note"
-                defaultValue=""
-                className="min-h-24 rounded-lg border border-[#e6dfd4] px-3 py-2 text-body-sm focus:border-[#a3202b] focus:outline-hidden"
-                placeholder="Kelas / mata pelajaran opsional..."
-              />
-            </label>
-
-            <div className="flex flex-wrap gap-2 pt-2">
-              <Button type="submit">Kirim undangan</Button>
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={() => (window.location.href = '/school/guru')}
-              >
-                Kembali ke tabel guru
-              </Button>
-            </div>
-          </form>
-
-          <div className="flex flex-col gap-4 rounded-[var(--radius-lg)] border border-brand-line/80 bg-white p-5 shadow-[var(--shadow-sm)]">
-            <div className="flex flex-col gap-1 border-b border-[#e6dfd4] pb-3">
-              <h3 className="font-semibold text-[#171717]">Tautan Undangan Cepat</h3>
-              <p className="text-body-xs text-[#6d665d]">
-                Salin tautan ini untuk dikirimkan langsung ke guru via pesan.
-              </p>
-            </div>
-
-            <div className="flex items-center gap-2 rounded-lg border border-[#e6dfd4] bg-[#fbf8f2] p-2.5">
-              <input
-                readOnly
-                value="https://lembar.id/undangan/demo-aktif"
-                className="w-full bg-transparent text-[12px] font-mono text-[#171717] focus:outline-hidden"
-              />
-              <Button
-                size="sm"
-                variant="secondary"
-                onClick={() => {
-                  navigator.clipboard?.writeText('https://lembar.id/undangan/demo-aktif');
-                  setToast('Tautan undangan disalin ke clipboard!');
-                }}
-              >
-                Salin
-              </Button>
-            </div>
-
-            <div className="pt-2">
-              <h3 className="font-semibold text-[#171717] mb-2 text-body-sm">
-                Antrian Undangan Menunggu
-              </h3>
-              <AdminDataTable
-                rows={TEACHERS.filter((t) => t.status === 'Undangan')}
-                columns={[
-                  { key: 'name', header: 'Nama', render: (row) => row.name },
-                  { key: 'email', header: 'Email', render: (row) => row.email },
-                ]}
-                rowActions={(row) => (
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => setToast(`Undangan dikirim ulang: ${row.email}`)}
-                  >
-                    Kirim ulang
-                  </Button>
-                )}
-              />
-            </div>
-          </div>
-        </div>
+      {current === 'undang' ? (
+        <SectionUndang setToast={setToast} />
       ) : null}
 
       {current === 'penggunaan' ? (
-        <>
-          <AdminStatCards
-            items={[
-              {
-                label: 'Total Generate',
-                value: '312',
-                hint: '30 hari terakhir',
-                tone: 'info',
-                delta: '+18%',
-              },
-              {
-                label: 'Lembar Finalisasi',
-                value: '148',
-                hint: '47.4% konversi',
-                tone: 'ok',
-                delta: '+12%',
-              },
-              {
-                label: 'Berbagi Aktif',
-                value: '17',
-                hint: '2 akan expired',
-                tone: 'warn',
-                delta: '2 exp',
-              },
-              {
-                label: 'Rata-rata Final/Guru',
-                value: '6.2',
-                hint: 'dari 24 guru aktif',
-                tone: 'neutral',
-                delta: '6.2',
-              },
-            ]}
-          />
-          <AdminToolbar
-            search={search}
-            onSearchChange={setSearch}
-            searchPlaceholder="Cari nama guru..."
-          />
-          <AdminDataTable
-            rows={usageRows}
-            columns={[
-              {
-                key: 'teacher',
-                header: 'Guru',
-                render: (row) => <div className="font-semibold text-[#171717]">{row.teacher}</div>,
-              },
-              {
-                key: 'gen',
-                header: 'Generate',
-                render: (row) => (
-                  <span className="font-medium text-[#171717]">{row.generated}</span>
-                ),
-              },
-              {
-                key: 'fin',
-                header: 'Final',
-                render: (row) => (
-                  <span className="font-semibold text-emerald-700">{row.finalized}</span>
-                ),
-              },
-              { key: 'share', header: 'Share', render: (row) => row.shared },
-              { key: 'period', header: 'Periode', render: (row) => row.period },
-            ]}
-          />
-        </>
+        <SectionPenggunaan setToast={setToast} />
       ) : null}
 
       {current === 'pengaturan' ? (
-        <div className="grid gap-4 lg:grid-cols-2">
-          <div className="space-y-3 rounded-[var(--radius-lg)] border border-brand-line/80 bg-brand-surface-raised p-5 shadow-[var(--shadow-sm)]">
-            <h2 className="text-h3 font-semibold">Identitas sekolah</h2>
-            <label className="flex flex-col gap-1">
-              <span className="text-label-semibold">Nama tampilan</span>
-              <input
-                defaultValue="SDN Contoh 01"
-                className="min-h-[var(--control-md)] rounded-md border border-brand-line px-3"
-              />
-            </label>
-            <label className="flex flex-col gap-1">
-              <span className="text-label-semibold">Domain undangan</span>
-              <input
-                defaultValue="sdncontoh.sch.id"
-                className="min-h-[var(--control-md)] rounded-md border border-brand-line px-3"
-              />
-            </label>
-            <Button onClick={() => setToast('Pengaturan sekolah disimpan (mock).')}>Simpan</Button>
-          </div>
-          <div className="space-y-3 rounded-[var(--radius-lg)] border border-brand-line/80 bg-brand-surface-raised p-5 shadow-[var(--shadow-sm)]">
-            <h2 className="text-h3 font-semibold">Branding</h2>
-            <div className="rounded-md border border-dashed border-brand-line px-4 py-8 text-center text-body-sm text-brand-ink-muted">
-              Logo sekolah belum diunggah
-            </div>
-            <Button variant="secondary" onClick={() => setToast('Upload logo mock diterima.')}>
-              Unggah logo
-            </Button>
-          </div>
-        </div>
+        <SectionPengaturan setToast={setToast} />
       ) : null}
 
       {current === 'library' ? (
-        <>
-          <AdminToolbar
-            search={search}
-            onSearchChange={setSearch}
-            searchPlaceholder="Cari template / bank internal"
-            actions={
-              <Button
-                size="sm"
-                variant="secondary"
-                onClick={() => setToast('Buat item library mock.')}
-              >
-                Tambah item
-              </Button>
-            }
-          />
-          <AdminDataTable
-            rows={libraryRows}
-            columns={[
-              { key: 'name', header: 'Nama', render: (row) => row.name },
-              { key: 'kind', header: 'Jenis', render: (row) => row.kind },
-              { key: 'owner', header: 'Pemilik', render: (row) => row.owner },
-              {
-                key: 'vis',
-                header: 'Visibilitas',
-                render: (row) => (
-                  <AdminPill tone={row.visibility === 'Internal' ? 'ok' : 'neutral'}>
-                    {row.visibility}
-                  </AdminPill>
-                ),
-              },
-              { key: 'updated', header: 'Diperbarui', render: (row) => row.updatedAt },
-            ]}
-            rowActions={(row) => (
-              <Button size="sm" variant="secondary" onClick={() => setToast(`Buka ${row.name}`)}>
-                Kelola
-              </Button>
-            )}
-          />
-        </>
+        <SectionLibrary
+          search={search}
+          setSearch={setSearch}
+          setToast={setToast}
+        />
       ) : null}
 
       {current === 'audit' ? (
-        <>
-          <AdminToolbar
-            search={search}
-            onSearchChange={setSearch}
-            searchPlaceholder="Cari actor/aksi/target"
-          />
-          <AdminDataTable
-            rows={auditRows}
-            columns={[
-              { key: 'at', header: 'Waktu', render: (row) => row.at },
-              { key: 'actor', header: 'Aktor', render: (row) => row.actor },
-              { key: 'action', header: 'Aksi', render: (row) => row.action },
-              { key: 'target', header: 'Target', render: (row) => row.target },
-            ]}
-          />
-        </>
+        <SectionAudit
+          search={search}
+          setSearch={setSearch}
+          setToast={setToast}
+        />
       ) : null}
     </div>
   );
