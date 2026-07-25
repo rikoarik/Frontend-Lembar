@@ -13,6 +13,7 @@ import {
   AdminToolbar,
 } from '@/src/features/admin/AdminChrome';
 import { useAdminSectionState } from '@/src/features/admin/adminPanelState';
+import { adminService, type AdminDashboard, type AdminJobRow } from '@/src/services/admin/adminService';
 
 type AccountRow = {
   id: string;
@@ -395,6 +396,26 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
   const { search, setSearch, selectedIds, setSelectedIds, toggleSelectedId, setToast } =
     useAdminSectionState(key || 'ringkasan');
 
+  // ── Live dashboard state ──────────────────────────────────────────────
+  const [dashboard, setDashboard] = useState<AdminDashboard | null>(null);
+  const [dashboardJobs, setDashboardJobs] = useState<AdminJobRow[]>([]);
+  const [dashboardLoading, setDashboardLoading] = useState(false);
+
+  const loadDashboard = () => {
+    setDashboardLoading(true);
+    Promise.all([adminService.dashboard(), adminService.jobs(4)]).then(([kpiRes, jobsRes]) => {
+      if (kpiRes.ok) setDashboard(kpiRes.value);
+      if (jobsRes.ok) setDashboardJobs(jobsRes.value);
+      setDashboardLoading(false);
+    });
+  };
+
+  useEffect(() => {
+    if (key === '') loadDashboard();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key]);
+  // ─────────────────────────────────────────────────────────────────────
+
   const [flags, setFlags] = useState(FLAGS);
   const [filterRole, setFilterRole] = useState<'' | AccountRow['role']>('');
   const [filterStatus, setFilterStatus] = useState<'' | AccountRow['status']>('');
@@ -506,7 +527,9 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             description="Pantau kesehatan job, tenant berisiko, quality report, dan flag pilot dari satu tempat."
             meta={
               <>
-                <AdminPill tone="info">staging mock</AdminPill>
+                <AdminPill tone={dashboardLoading ? 'info' : dashboard ? 'ok' : 'warn'}>
+                  {dashboardLoading ? 'memuat...' : dashboard ? 'live' : 'staging mock'}
+                </AdminPill>
                 <AdminPill tone="ok">least privilege</AdminPill>
               </>
             }
@@ -515,7 +538,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                 <Button
                   size="sm"
                   variant="secondary"
-                  onClick={() => setToast('Refresh ringkasan (mock).')}
+                  onClick={() => { loadDashboard(); setToast('Refresh ringkasan...'); }}
                 >
                   Refresh
                 </Button>
@@ -529,29 +552,29 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             items={[
               {
                 label: 'Job aktif',
-                value: '3',
-                hint: '1 gagal perlu retry',
+                value: dashboard ? String(dashboard.jobsActive) : '—',
+                hint: dashboardLoading ? 'memuat...' : 'total job berjalan',
                 tone: 'info',
                 delta: 'live',
               },
               {
                 label: 'Quality open',
-                value: '2',
-                hint: 'butuh triage',
-                tone: 'warn',
-                delta: 'P1',
+                value: dashboard ? String(dashboard.qualityOpen) : '—',
+                hint: dashboardLoading ? 'memuat...' : 'butuh triage',
+                tone: (dashboard?.qualityOpen ?? 0) > 0 ? 'warn' : 'ok',
+                delta: (dashboard?.qualityOpen ?? 0) > 0 ? 'P1' : '✓',
               },
               {
-                label: 'Tenant pantau',
-                value: '2',
-                hint: 'grace/blocked',
-                tone: 'bad',
-                delta: '2',
+                label: 'Pengguna',
+                value: dashboard ? String(dashboard.users) : '—',
+                hint: dashboardLoading ? 'memuat...' : 'total akun aktif',
+                tone: 'ok',
+                delta: String(dashboard?.users ?? '—'),
               },
               {
-                label: 'Flag pilot',
-                value: '2',
-                hint: 'scope terbatas',
+                label: 'Flag aktif',
+                value: dashboard ? String(dashboard.flagsEnabled) : '—',
+                hint: dashboardLoading ? 'memuat...' : 'scope terbatas',
                 tone: 'ok',
                 delta: 'on',
               },
@@ -569,8 +592,8 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                 </a>
               </div>
               <AdminDataTable
-                rows={JOBS.slice(0, 4)}
-                footerNote="Preview · staging"
+                rows={dashboardJobs.length > 0 ? dashboardJobs : JOBS.slice(0, 4)}
+                footerNote={dashboardJobs.length > 0 ? 'Live · BE' : 'Preview · staging'}
                 flat={true}
                 columns={[
                   {
