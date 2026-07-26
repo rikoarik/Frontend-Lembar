@@ -11,6 +11,7 @@ import {
   AdminPill,
   AdminStatCards,
   AdminToolbar,
+  AdminContentLoading,
 } from '@/src/features/admin/AdminChrome';
 import { useAdminSectionState } from '@/src/features/admin/adminPanelState';
 import {
@@ -307,8 +308,9 @@ function AccountDetailView({
               <h3 className="text-[15px] font-bold text-[#171717]">Edit Profil Akun</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[12px] font-medium text-[#6d665d] mb-1.5">Nama Lengkap</label>
+                  <label htmlFor="account-edit-name" className="block text-[12px] font-medium text-[#6d665d] mb-1.5">Nama Lengkap</label>
                   <input
+                    id="account-edit-name"
                     type="text"
                     value={editName}
                     onChange={(e) => setEditName(e.target.value)}
@@ -317,7 +319,7 @@ function AccountDetailView({
                   />
                 </div>
                 <div>
-                  <label className="block text-[12px] font-medium text-[#6d665d] mb-1.5">No. Telepon</label>
+                  <label htmlFor="account-edit-phone" className="block text-[12px] font-medium text-[#6d665d] mb-1.5">No. Telepon</label>
                   <input
                     type="text"
                     value={editPhone}
@@ -505,18 +507,26 @@ function AccountRowActions({
       </Button>
 
       <div className="relative">
-        <Button size="sm" variant="secondary" onClick={() => setIsOpen((prev) => !prev)}>
-          Aksi <span className="text-[10px] ml-0.5">▼</span>
+        <Button
+          size="sm"
+          variant="secondary"
+          onClick={() => setIsOpen((prev) => !prev)}
+          aria-label="Aksi untuk akun ini"
+          aria-expanded={isOpen}
+          aria-haspopup="menu"
+        >
+          Aksi <span className="text-[10px] ml-0.5" aria-hidden>▼</span>
         </Button>
 
         {isOpen && (
           <>
             {/* Backdrop to close dropdown when clicking outside */}
             <div className="fixed inset-0 z-30" onClick={() => setIsOpen(false)} />
-            <div className="absolute right-0 mt-1 w-40 rounded-lg border border-[#ddd4c8] bg-white py-1 shadow-lg z-40 text-left">
+            <div className="absolute right-0 mt-1 w-40 rounded-lg border border-[#ddd4c8] bg-white py-1 shadow-lg z-40 text-left" role="menu">
               <button
                 type="button"
-                className="w-full px-3 py-1.5 text-[12px] text-[#171717] hover:bg-[#faf7f2] text-left transition-colors font-medium"
+                className="w-full px-3 py-1.5 text-[12px] text-[#171717] hover:bg-[#faf7f2] text-left transition-colors font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#171717]/30"
+                role="menuitem"
                 onClick={() => {
                   setIsOpen(false);
                   if (onOpenDetail) {
@@ -617,7 +627,7 @@ function DashboardTrendsChart() {
 
   if (loading) return (
     <div className="rounded-2xl border border-[#ddd4c8]/70 bg-white p-5">
-      <AdminPill tone="info">Memuat trend 7 hari...</AdminPill>
+      <AdminContentLoading />
     </div>
   );
 
@@ -1305,7 +1315,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
               Undang akun
             </Button>
           </div>
-          {accountsLoading ? <div className="mb-2"><AdminPill tone="info">Memuat...</AdminPill></div> : null}
+          {accountsLoading ? <AdminContentLoading /> : null}
           {inviteOpen && (
             <form
               className="mb-4 flex flex-wrap gap-2 items-end rounded-xl border border-[#ddd4c8] bg-[#faf7f2] px-4 py-3"
@@ -1591,8 +1601,9 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
               <h4 className="text-[13px] font-bold text-[#171717]">Sekolah baru</h4>
               <div className="flex flex-wrap items-end gap-3">
                 <div>
-                  <label className="block text-[11px] font-semibold text-[#6d665d] mb-1">Nama sekolah *</label>
+                  <label htmlFor="create-school-name" className="block text-[11px] font-semibold text-[#6d665d] mb-1">Nama sekolah *</label>
                   <input
+                    id="create-school-name"
                     type="text"
                     value={createSchoolName}
                     onChange={(e) => setCreateSchoolName(e.target.value)}
@@ -1601,8 +1612,9 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-semibold text-[#6d665d] mb-1">Slug (opsional)</label>
+                  <label htmlFor="create-school-slug" className="block text-[11px] font-semibold text-[#6d665d] mb-1">Slug (opsional)</label>
                   <input
+                    id="create-school-slug"
                     type="text"
                     value={createSchoolSlug}
                     onChange={(e) => setCreateSchoolSlug(e.target.value)}
@@ -1639,7 +1651,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             </div>
           ) : null}
 
-          {schoolsLoading ? <div className="mb-2"><AdminPill tone="info">Memuat...</AdminPill></div> : null}
+          {schoolsLoading ? <AdminContentLoading /> : null}
 
           {/* School detail modal */}
           {schoolDetailId ? (
@@ -1879,7 +1891,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
               </Button>
             }
           />
-          {catalogLoading ? <div className="mb-2"><AdminPill tone="info">Memuat katalog...</AdminPill></div> : null}
+          {catalogLoading ? <AdminContentLoading /> : null}
 
           <AdminStatCards
             items={[
@@ -1981,7 +1993,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
               </Button>
             }
           />
-          {promptsLoading ? <div className="mb-2"><AdminPill tone="info">Memuat...</AdminPill></div> : null}
+          {promptsLoading ? <AdminContentLoading /> : null}
 
           {/* Create Prompt inline form */}
           {createPromptOpen ? (
@@ -1989,7 +2001,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
               <h4 className="text-[13px] font-bold text-[#171717]">Prompt baru</h4>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] font-semibold text-[#6d665d] mb-1">Nama *</label>
+                  <label htmlFor="create-prompt-name" className="block text-[11px] font-semibold text-[#6d665d] mb-1">Nama *</label>
                   <input
                     type="text"
                     value={createPromptName}
@@ -2004,7 +2016,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-semibold text-[#6d665d] mb-1">Slug *</label>
+                  <label htmlFor="create-prompt-slug" className="block text-[11px] font-semibold text-[#6d665d] mb-1">Slug *</label>
                   <input
                     type="text"
                     value={createPromptSlug}
@@ -2014,9 +2026,10 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                   />
                 </div>
                 <div className="col-span-2">
-                  <label className="block text-[11px] font-semibold text-[#6d665d] mb-1">Deskripsi singkat</label>
+                  <label htmlFor="create-prompt-desc" className="block text-[11px] font-semibold text-[#6d665d] mb-1">Deskripsi singkat</label>
                   <input
                     type="text"
+                    id="create-prompt-desc"
                     value={createPromptDesc}
                     onChange={(e) => setCreatePromptDesc(e.target.value)}
                     placeholder="Untuk apa prompt ini dipakai?"
@@ -2024,9 +2037,10 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                   />
                 </div>
                 <div className="col-span-2">
-                  <label className="block text-[11px] font-semibold text-[#6d665d] mb-1">Teks prompt awal</label>
+                  <label htmlFor="create-prompt-text" className="block text-[11px] font-semibold text-[#6d665d] mb-1">Teks prompt awal</label>
                   <textarea
                     rows={4}
+                    id="create-prompt-text"
                     value={createPromptText}
                     onChange={(e) => setCreatePromptText(e.target.value)}
                     placeholder="Tulis instruksi prompt di sini. Bisa diubah lagi setelah dibuat."
@@ -2216,7 +2230,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
               </Button>
             }
           />
-          {jobsLoading ? <div className="mb-2"><AdminPill tone="info">Memuat...</AdminPill></div> : null}
+          {jobsLoading ? <AdminContentLoading /> : null}
 
           {/* Job detail modal */}
           {jobDetailId ? (
@@ -2385,7 +2399,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
               </AdminPill>
             }
           />
-          {qualityLoading ? <div className="mb-2"><AdminPill tone="info">Memuat...</AdminPill></div> : null}
+          {qualityLoading ? <AdminContentLoading /> : null}
 
           {/* Quality detail modal */}
           {qualityDetailId ? (
@@ -2564,15 +2578,30 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
             description="Jejak aksi superadmin untuk akuntabilitas platform."
             meta={<AdminPill tone="neutral">{auditMeta.total} entri</AdminPill>}
           />
-          {auditLoading ? <div className="mb-2"><AdminPill tone="info">Memuat...</AdminPill></div> : null}
+          {auditLoading ? <AdminContentLoading /> : null}
 
           {/* Audit detail modal */}
           {auditDetailId ? (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => { setAuditDetailId(null); setAuditDetailData(null); }}>
-              <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 space-y-4" onClick={(e) => e.stopPropagation()}>
+            <div
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+              onClick={() => { setAuditDetailId(null); setAuditDetailData(null); }}
+              onKeyDown={(e) => { if (e.key === 'Escape') { setAuditDetailId(null); setAuditDetailData(null); } }}
+            >
+              <div
+                className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 space-y-4"
+                onClick={(e) => e.stopPropagation()}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="audit-detail-title"
+              >
                 <div className="flex items-center justify-between">
-                  <h3 className="font-bold text-[16px] text-[#171717]">Detail Audit</h3>
-                  <button className="text-[#6d665d] hover:text-[#171717] text-xl leading-none" onClick={() => { setAuditDetailId(null); setAuditDetailData(null); }}>×</button>
+                  <h3 id="audit-detail-title" className="font-bold text-[16px] text-[#171717]">Detail Audit</h3>
+                  <button
+                    type="button"
+                    aria-label="Tutup detail audit"
+                    className="flex h-8 w-8 items-center justify-center rounded-lg text-[#6d665d] hover:bg-[#faf7f2] hover:text-[#171717] text-xl leading-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#171717]/30"
+                    onClick={() => { setAuditDetailId(null); setAuditDetailData(null); }}
+                  >×</button>
                 </div>
                 {auditDetailLoading ? (
                   <div className="text-[13px] text-[#6d665d]">Memuat detail...</div>
@@ -2706,7 +2735,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
               </AdminPill>
             }
           />
-          {billingLoading ? <div className="mb-2"><AdminPill tone="info">Memuat...</AdminPill></div> : null}
+          {billingLoading ? <AdminContentLoading /> : null}
 
           {/* Billing edit modal */}
           {billingEditRow ? (
@@ -2718,7 +2747,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                 </div>
                 <div className="space-y-3">
                   <div>
-                    <label className="block text-[12px] font-semibold text-[#6d665d] mb-1">State</label>
+                    <label htmlFor="billing-edit-state" className="block text-[12px] font-semibold text-[#6d665d] mb-1">State</label>
                     <select
                       value={billingEditState}
                       onChange={(e) => setBillingEditState(e.target.value as BillingRow['state'])}
@@ -2731,7 +2760,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-[12px] font-semibold text-[#6d665d] mb-1">Seats</label>
+                    <label htmlFor="billing-edit-seats" className="block text-[12px] font-semibold text-[#6d665d] mb-1">Seats</label>
                     <input
                       type="number"
                       min="0"
@@ -2741,7 +2770,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                     />
                   </div>
                   <div>
-                    <label className="block text-[12px] font-semibold text-[#6d665d] mb-1">Tanggal Perpanjangan</label>
+                    <label htmlFor="billing-edit-renews" className="block text-[12px] font-semibold text-[#6d665d] mb-1">Tanggal Perpanjangan</label>
                     <input
                       type="date"
                       value={billingEditRenews}
@@ -2847,7 +2876,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
               </Button>
             }
           />
-          {flagsLoading ? <div className="mb-2"><AdminPill tone="info">Memuat...</AdminPill></div> : null}
+          {flagsLoading ? <AdminContentLoading /> : null}
 
           {/* Create Flag inline form */}
           {createFlagOpen ? (
@@ -2855,7 +2884,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
               <h4 className="text-[13px] font-bold text-[#171717]">Flag baru</h4>
               <div className="flex flex-wrap items-end gap-3">
                 <div>
-                  <label className="block text-[11px] font-semibold text-[#6d665d] mb-1">Key *</label>
+                  <label htmlFor="create-flag-key" className="block text-[11px] font-semibold text-[#6d665d] mb-1">Key *</label>
                   <input
                     type="text"
                     value={createFlagKey}
@@ -2865,7 +2894,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-semibold text-[#6d665d] mb-1">Deskripsi</label>
+                  <label htmlFor="create-flag-desc" className="block text-[11px] font-semibold text-[#6d665d] mb-1">Deskripsi</label>
                   <input
                     type="text"
                     value={createFlagDesc}
@@ -2875,7 +2904,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-semibold text-[#6d665d] mb-1">Scope</label>
+                  <label htmlFor="create-flag-scope" className="block text-[11px] font-semibold text-[#6d665d] mb-1">Scope</label>
                   <select
                     value={createFlagScope}
                     onChange={(e) => setCreateFlagScope(e.target.value as 'global' | 'pilot')}
@@ -2996,7 +3025,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
               </Button>
             }
           />
-          {contentLoading ? <div className="mb-2"><AdminPill tone="info">Memuat...</AdminPill></div> : null}
+          {contentLoading ? <AdminContentLoading /> : null}
 
           {/* Inline create content form — reuse createSchool modal state as createContent */}
           {createSchoolOpen ? (
@@ -3004,7 +3033,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
               <h4 className="text-[13px] font-bold text-[#171717]">Draft halaman baru</h4>
               <div className="flex flex-wrap items-end gap-3">
                 <div>
-                  <label className="block text-[11px] font-semibold text-[#6d665d] mb-1">Slug * (cth: tentang-kami)</label>
+                  <label htmlFor="create-content-slug" className="block text-[11px] font-semibold text-[#6d665d] mb-1">Slug * (cth: tentang-kami)</label>
                   <input
                     type="text"
                     value={createSchoolName}
@@ -3014,7 +3043,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-semibold text-[#6d665d] mb-1">Judul</label>
+                  <label htmlFor="create-content-title" className="block text-[11px] font-semibold text-[#6d665d] mb-1">Judul</label>
                   <input
                     type="text"
                     value={createSchoolSlug}
@@ -3246,7 +3275,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
               </Button>
             }
           />
-          {signalsLoading ? <div className="mb-2"><AdminPill tone="info">Memuat sinyal...</AdminPill></div> : null}
+          {signalsLoading ? <AdminContentLoading /> : null}
 
           {signalsData.length === 0 && !signalsLoading ? (
             <div className="rounded-2xl border border-[#ddd4c8]/60 bg-[#faf8f5] p-8 text-center space-y-2">

@@ -248,7 +248,8 @@ export function AdminBulkBar({
           <button
             type="button"
             onClick={onClear}
-            className="rounded-lg px-2.5 py-1.5 text-[12px] font-semibold text-white/75 hover:bg-white/10 hover:text-white"
+            aria-label="Bersihkan pilihan"
+            className="rounded-lg px-2.5 py-1.5 text-[12px] font-semibold text-white/75 hover:bg-white/10 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/60"
           >
             Bersihkan
           </button>
@@ -257,7 +258,6 @@ export function AdminBulkBar({
     </div>
   );
 }
-
 export function AdminDataTable<T extends { id: string }>({
   columns,
   rows,
@@ -613,6 +613,7 @@ export function AdminShell({
                   href={item.href}
                   prefetch
                   title={collapsed ? item.label : undefined}
+                  aria-label={collapsed ? item.label : undefined}
                   onClick={(event) => {
                     if (!event.metaKey && !event.ctrlKey && !event.shiftKey && event.button === 0) {
                       event.preventDefault();
@@ -664,6 +665,7 @@ export function AdminShell({
                   collapsed ? 'left-full ml-3 bottom-0' : 'bottom-full left-3 mb-2'
                 }`}
                 role="menu"
+                aria-label="Menu profil"
               >
                 <div className="flex items-center gap-3 border-b border-white/10 pb-3">
                   <AdminAvatar name={resolvedActorName} size="md" />
@@ -728,7 +730,10 @@ export function AdminShell({
                 profileOpen ? 'ring-2 ring-white/20 bg-white/10' : ''
               } ${collapsed ? 'h-10 w-10 justify-center mx-auto p-0' : 'gap-3 p-2'}`}
               title={collapsed ? resolvedActorName : undefined}
-            >
+              aria-label={`Profil ${resolvedActorName}`}
+              aria-expanded={profileOpen}
+              aria-haspopup="menu"
+              >
               <AdminAvatar name={resolvedActorName} />
               {!collapsed ? (
                 <div className="min-w-0 flex-1">
@@ -805,6 +810,7 @@ export function AdminShell({
                         ? 'border-[#171717] bg-[#171717] text-white font-semibold'
                         : 'border-[#ddd4c8] bg-white text-[#171717] hover:bg-[#faf7f2]'
                     }`}
+                    aria-current={active ? 'page' : undefined}
                   >
                     <span className="material-symbols-outlined text-[16px]" aria-hidden>
                       {item.icon || 'circle'}
@@ -829,8 +835,9 @@ export function AdminShell({
                 <span className="font-medium text-white">{toast}</span>
                 <button
                   type="button"
-                  className="text-[12px] font-bold text-[#b0a89e] hover:text-white transition-colors ml-2"
+                  className="text-[12px] font-bold text-[#b0a89e] hover:text-white transition-colors ml-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/60"
                   onClick={() => setToast(null)}
+                  aria-label="Tutup notifikasi"
                 >
                   Tutup
                 </button>
