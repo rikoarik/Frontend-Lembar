@@ -122,9 +122,20 @@ export function OpsCatalogSection({
       .catch(() => setCatalogLoading(false));
   };
 
-  /** Filter & group grades by jenjang */
+  /** Normalize jenjang to uppercase SD/SMP/SMA/SMK */
+function normalizeJenjang(raw?: string): Jenjang | undefined {
+  if (!raw) return undefined;
+  const upper = raw.toUpperCase().trim();
+  if (upper === 'SMK') return 'SMK';
+  if (upper === 'SMA') return 'SMA';
+  if (upper === 'SMP') return 'SMP';
+  if (upper === 'SD') return 'SD';
+  return undefined;
+}
+
+/** Filter & group grades by jenjang */
   const gradeJenjang = (g: { label: string; jenjang?: string }) =>
-    (g.jenjang as Jenjang | undefined) || inferJenjang(g.label);
+    normalizeJenjang(g.jenjang) || inferJenjang(g.label);
 
   const filteredGrades =
     catalogJenjangFilter === 'semua'
