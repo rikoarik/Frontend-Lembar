@@ -168,6 +168,18 @@ export type AdminBillingRow = {
   renewsAt: string;
 };
 
+export type PaymentOrder = {
+  id: string;
+  workspaceId: string;
+  school: string;
+  amount: number;
+  currency: string;
+  status: 'pending' | 'paid' | 'failed' | 'expired' | 'cancelled';
+  gateway: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type AdminFlagRow = {
   id: string;
   key: string;
@@ -455,6 +467,23 @@ export const adminService = {
 
   createBilling(data: { tenantId: string; schoolName: string; plan?: string; seats?: number; state?: string }): Promise<Result<{ id: string; tenantId: string; schoolName: string }, AdminError>> {
     return request('/v1/admin/billing', 'POST', data);
+  },
+
+  // Payment orders
+  paymentOrders(params?: { workspaceId?: string; status?: string; page?: number; limit?: number }): Promise<Result<{ data: PaymentOrder[]; meta: AdminMeta }, AdminError>> {
+    const qs = new URLSearchParams();
+    if (params?.workspaceId) qs.set('workspaceId', params.workspaceId);
+    if (params?.status) qs.set('status', params.status);
+    if (params?.page) qs.set('page', String(params.page));
+    if (params?.limit) qs.set('limit', String(params.limit));
+    const q = qs.toString();
+    return request<{ data: PaymentOrder[]; meta: AdminMeta }>(`/v1/payment/orders${q ? `?${q}` : ''}`);
+  },
+  upgradeWorkspace(workspaceId: string): Promise<Result<{ workspaceId: string; plan: string }, AdminError>> {
+    return request<{ workspaceId: string; plan: string }>(`/v1/me/plan/upgrade`, 'POST', { workspaceId });
+  },
+  downgradeWorkspace(workspaceId: string): Promise<Result<{ workspaceId: string; plan: string }, AdminError>> {
+    return request<{ workspaceId: string; plan: string }>(`/v1/me/plan/downgrade`, 'POST', { workspaceId });
   },
 
   // Dashboard trends
