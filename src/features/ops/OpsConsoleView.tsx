@@ -1192,12 +1192,12 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
       {key === '' ? (
         <>
           <div className="flex items-center justify-between px-1 py-1">
-            <h2 className="text-[18px] font-bold text-[#171717]">Ringkasan platform</h2>
+            <h2 className="text-[18px] font-bold text-[#171717]">Ikhtisar</h2>
             <div className="flex items-center gap-2">
               <Button
                 size="sm"
                 variant="secondary"
-                onClick={() => { loadDashboard(); setToast('Refresh ringkasan...'); }}
+                onClick={() => { loadDashboard(); setToast('Memperbarui data...'); }}
               >
                 Refresh
               </Button>
@@ -1218,28 +1218,27 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
               {
                 label: 'Job gagal',
                 value: dashboard ? String(dashboard.jobsFailed) : '—',
-                hint: dashboardLoading ? 'memuat...' : 'butuh retry',
+                hint: dashboardLoading ? 'memuat...' : 'perlu di-retry',
                 tone: (dashboard?.jobsFailed ?? 0) > 0 ? 'bad' : 'ok',
                 delta: (dashboard?.jobsFailed ?? 0) > 0 ? 'P0' : '✓',
               },
               {
                 label: 'Quality open',
                 value: dashboard ? String(dashboard.qualityOpen) : '—',
-                hint: dashboardLoading ? 'memuat...' : 'butuh triage',
+                hint: dashboardLoading ? 'memuat...' : 'perlu ditinjau',
                 tone: (dashboard?.qualityOpen ?? 0) > 0 ? 'warn' : 'ok',
                 delta: (dashboard?.qualityOpen ?? 0) > 0 ? 'P1' : '✓',
               },
               {
                 label: 'Pengguna',
                 value: dashboard ? String(dashboard.users) : '—',
-                hint: dashboardLoading ? 'memuat...' : 'total akun aktif',
+                hint: dashboardLoading ? 'memuat...' : String(dashboard?.schools ?? '—') + ' sekolah',
                 tone: 'ok',
-                delta: String(dashboard?.schools ?? '—') + ' sekolah',
               },
               {
                 label: 'Flag aktif',
                 value: dashboard ? String(dashboard.flagsEnabled) : '—',
-                hint: dashboardLoading ? 'memuat...' : 'scope terbatas',
+                hint: dashboardLoading ? 'memuat...' : 'feature flags',
                 tone: 'ok',
                 delta: 'on',
               },
@@ -1258,7 +1257,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
               </div>
               <AdminDataTable
                 rows={dashboardJobs}
-                footerNote={dashboardJobs.length > 0 ? 'Live · BE' : 'Memuat...'}
+                footerNote={dashboardJobs.length > 0 ? undefined : 'Memuat...'}
                 flat={true}
                 columns={[
                   {
@@ -1302,7 +1301,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
               </div>
               <AdminDataTable
                 rows={dashboardSchools.filter((s) => s.plan === 'grace' || s.plan === 'blocked')}
-                footerNote={dashboardSchools.length > 0 ? 'Live · BE' : 'Memuat...'}
+                footerNote={dashboardSchools.length > 0 ? undefined : 'Memuat...'}
                 emptyLabel="Tidak ada tenant berisiko."
                 emptyHint="Semua sekolah dalam status aman."
                 flat={true}
@@ -1341,7 +1340,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
         ) : (
         <>
           <div className="flex items-center justify-between px-1 py-1">
-            <h2 className="text-[18px] font-bold text-[#171717]">Akun platform</h2>
+            <h2 className="text-[18px] font-bold text-[#171717]">Akun</h2>
             <Button size="sm" onClick={() => setInviteOpen((o) => !o)}>
               Undang akun
             </Button>
@@ -1620,7 +1619,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
       {key === 'schools' ? (
         <>
           <div className="flex items-center justify-between px-1 py-1">
-            <h2 className="text-[18px] font-bold text-[#171717]">Sekolah / tenant</h2>
+            <h2 className="text-[18px] font-bold text-[#171717]">Sekolah</h2>
             <Button size="sm" onClick={() => setCreateSchoolOpen(true)}>
               Tambah sekolah
             </Button>
@@ -1876,7 +1875,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                     if (confirm(`Ubah plan ${row.name} dari "${row.plan}" ke "${nextPlan}"?`)) {
                       adminService.setEntitlement(row.id, { plan: entitlementPlan }).then((res) => {
                         if (res.ok) {
-                          setToast(`Entitlement ${row.name} diperbarui ke ${nextPlan}.`);
+                          setToast(`Plan ${row.name} diperbarui ke ${nextPlan}.`);
                           loadSchools();
                         } else {
                           setToast(`Gagal: ${res.error.safeMessage}`);
@@ -2048,7 +2047,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                               const res = await adminService.updateGradeStatus(g.id, next);
                               if (res.ok) {
                                 setCatalogGrades((prev) => prev.map((x) => x.id === g.id ? { ...x, status: next } : x));
-                                setToast(`Status grade "${g.label}" → ${next}.`);
+                                setToast(`Grade "${g.label}" diubah ke ${next}.`);
                               } else {
                                 setToast(`Gagal: ${(res as { ok: false; error: { safeMessage: string } }).error.safeMessage}`);
                               }
@@ -2170,7 +2169,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                               const res = await adminService.updateSubjectStatus(s.id, next);
                               if (res.ok) {
                                 setCatalogSubjects((prev) => prev.map((x) => x.id === s.id ? { ...x, status: next } : x));
-                                setToast(`Status mapel "${s.label}" → ${next}.`);
+                                setToast(`Mapel "${s.label}" diubah ke ${next}.`);
                               } else {
                                 setToast(`Gagal: ${(res as { ok: false; error: { safeMessage: string } }).error.safeMessage}`);
                               }
@@ -2212,8 +2211,8 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
       {key === 'prompts' ? (
         <>
           <AdminPageHeader
-            title="Prompt library"
-            description="Template prompt internal untuk generate, repair, dan quality check."
+            title="Prompt"
+            description="Template prompt untuk generate, repair, dan quality check."
             meta={
               <AdminPill tone="ok">
                 {promptsData.filter((p) => p.status === 'active').length} aktif
@@ -2345,7 +2344,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
               return !q || p.name.toLowerCase().includes(q) || p.owner?.toLowerCase().includes(q) || (p as any).slug?.toLowerCase().includes(q);
             })}
             emptyLabel="Belum ada prompt."
-            emptyHint="Prompt akan muncul setelah data dimuat dari server."
+            emptyHint="Belum ada prompt yang tersimpan."
             columns={[
               {
                 key: 'name',
@@ -2439,7 +2438,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
         <>
           <AdminPageHeader
             title="Jobs"
-            description="Pantau antrian generate/export lintas tenant dan retry job gagal."
+            description="Queue generate, export, dan indexing."
             meta={
               <AdminPill tone="bad">
                 {jobs.filter((j) => j.status === 'failed').length} gagal
@@ -2623,8 +2622,8 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
       {key === 'quality' ? (
         <>
           <AdminPageHeader
-            title="Quality reports"
-            description="Triage laporan kualitas soal, kunci, dan privasi dari pengguna."
+            title="Quality"
+            description="Laporan kualitas output yang perlu ditinjau."
             meta={
               <AdminPill tone="warn">
                 {quality.filter((q) => q.status !== 'closed').length} open/triaged
@@ -2806,8 +2805,8 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
       {key === 'audit' ? (
         <>
           <AdminPageHeader
-            title="Audit trail"
-            description="Jejak aksi superadmin untuk akuntabilitas platform."
+            title="Audit"
+            description="Riwayat aksi admin — siapa melakukan apa dan kapan."
             meta={<AdminPill tone="neutral">{auditMeta.total} entri</AdminPill>}
           />
           {auditLoading ? <AdminContentLoading /> : null}
@@ -2960,10 +2959,10 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
         <>
           <AdminPageHeader
             title="Billing"
-            description="Pantau status langganan, seats, perpanjangan tenant, dan payment orders."
+            description="Status langganan, seats, perpanjangan, dan riwayat pembayaran."
             meta={
               <AdminPill tone="warn">
-                {billingData.filter((b) => b.state !== 'active').length} non-active
+                {billingData.filter((b) => b.state !== 'active').length} tidak aktif
               </AdminPill>
             }
           />
@@ -3315,8 +3314,8 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
       {key === 'content' ? (
         <>
           <AdminPageHeader
-            title="Marketing CMS"
-            description="Kelola draft dan publish halaman marketing publik."
+            title="Konten"
+            description="Draft dan publish halaman publik."
             actions={
               <Button size="sm" onClick={() => setCreateSchoolOpen(true)}>
                 Draft baru
@@ -3552,7 +3551,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
         <>
           <AdminPageHeader
             title="Learning Signals"
-            description="Pola AI yang terdeteksi dari feedback pengguna — prompt mana yang underperform dan perlu diperbaiki."
+            description="Pola dari feedback pengguna — prompt mana yang perlu diperbaiki."
             meta={
               signalsData.length > 0 ? (
                 <AdminPill tone="warn">{signalsData.length} sinyal aktif</AdminPill>
