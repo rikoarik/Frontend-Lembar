@@ -21,11 +21,36 @@ export function WorkspaceSwitcher({
   const wrapperRef = useRef<HTMLDivElement>(null);
   const active = workspaces.find((workspace) => workspace.id === activeWorkspaceId);
 
+  // Filter workspaces to match current active workspace kind (e.g. personal in /app)
+  // so school admin workspaces never mix into the /app workspace switcher.
+  const relevantWorkspaces = workspaces.filter(
+    (w) => w.kind === (active?.kind ?? 'personal'),
+  );
+  const hasMultiple = relevantWorkspaces.length > 1;
+
   const handleBlur = (e: React.FocusEvent<HTMLDivElement>) => {
     if (!wrapperRef.current?.contains(e.relatedTarget as Node)) {
       setOpen(false);
     }
   };
+
+  if (!hasMultiple) {
+    return (
+      <div className="flex w-full items-center gap-2 rounded-xl border border-[#e6dfd4] bg-white px-3 py-2.5">
+        <span aria-hidden="true" className="material-symbols-outlined text-[20px] text-[#8a8379]">
+          person
+        </span>
+        <div className="flex min-w-0 flex-col">
+          <span className="text-[10px] font-bold tracking-wider uppercase text-[#8a8379]">
+            Workspace
+          </span>
+          <span className="truncate text-[13px] font-semibold text-[#171717]">
+            {active?.name ?? 'Ruang pribadi'}
+          </span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div ref={wrapperRef} onBlur={handleBlur} className="relative w-full">
@@ -73,7 +98,7 @@ export function WorkspaceSwitcher({
             compact ? 'left-0 w-56' : 'left-0 right-0',
           ].join(' ')}
         >
-          {workspaces.map((workspace) => {
+          {relevantWorkspaces.map((workspace) => {
             const isActive = workspace.id === activeWorkspaceId;
             return (
               <li key={workspace.id}>
@@ -94,14 +119,7 @@ export function WorkspaceSwitcher({
                     <span className="truncate text-[13px] font-semibold text-[#171717]">
                       {workspace.name}
                     </span>
-                    <span className="text-[11px] text-[#6d665d]">
-                      {workspace.kind === 'school' ? 'Sekolah' : 'Pribadi'} ·{' '}
-                      {workspace.activeRole === 'school_admin'
-                        ? 'Admin sekolah'
-                        : workspace.activeRole === 'superadmin'
-                          ? 'Superadmin'
-                          : 'Guru'}
-                    </span>
+                    <span className="text-[11px] text-[#6d665d]">Pribadi</span>
                   </span>
                   {isActive ? (
                     <span

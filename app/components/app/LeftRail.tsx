@@ -175,21 +175,7 @@ export function LeftRail({
           ))}
         </NavSection>
 
-        {schoolItems.length > 0 ? (
-          <NavSection label="Sekolah" collapsed={collapsed}>
-            {schoolItems.map((item) => (
-              <NavLink
-                key={item.href}
-                href={item.href}
-                label={item.label}
-                icon={item.icon}
-                active={isActive(item.href)}
-                collapsed={collapsed}
-                onNavigate={onNavigate}
-              />
-            ))}
-          </NavSection>
-        ) : null}
+
 
         <NavSection label="Bantuan" collapsed={collapsed}>
           {SUPPORT_NAV.map((item) => (

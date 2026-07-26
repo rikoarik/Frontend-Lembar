@@ -20,19 +20,41 @@ export function appOrigin(): string {
 }
 
 export type BackendUser = {
-  id: string;
-  email: string;
-  name: string;
-  roles?: string[] | string;
+  id?: string;
+  email?: string;
+  name?: string;
+  roles?: string[] | string | Array<{ name?: string; role?: string; id?: string }>;
   role?: string;
-  workspaceId: string | null;
+  workspaceId?: string | null;
+  workspace?: {
+    id?: string;
+    type?: string;
+    role?: string;
+    permissions?: string[];
+  } | null;
+  activeWorkspace?: {
+    id?: string;
+    type?: string;
+    role?: string;
+    permissions?: string[];
+  } | null;
+  workspaces?: Array<{
+    id?: string;
+    type?: string;
+    role?: string;
+    permissions?: string[];
+  }>;
 };
 
 export type BackendAuthResponse = {
-  token: string;
-  user: BackendUser;
-  /** Some backends wrap under `data` */
-  data?: { user?: BackendUser; token?: string };
+  token?: string;
+  user?: BackendUser;
+  workspace?: { id?: string; type?: string; role?: string };
+  data?: {
+    token?: string;
+    user?: BackendUser;
+    workspace?: { id?: string; type?: string; role?: string };
+  };
 };
 
 /**
@@ -41,18 +63,55 @@ export type BackendAuthResponse = {
  * - `roles: "superadmin"` (single string)
  * - `roles: "superadmin,school_admin"` (comma-separated)
  * - `role: "superadmin"` (singular field)
+ * - `workspace: { role: "school_admin" }` or `activeWorkspace: { role: "school_admin" }`
+ * - `workspaces: [{ role: "school_admin" }]` or `workspace: { type: "school" }`
  */
-function normalizeRoles(user: BackendUser): string[] {
-  if (Array.isArray(user.roles) && user.roles.length > 0) {
-    return user.roles;
+export function normalizeRoles(user: any): string[] {
+  if (!user) return [];
+  const found = new Set<string>();
+
+  const check = (val: unknown) => {
+    if (typeof val === 'string' && val.trim()) {
+      val.split(',').forEach((r) => found.add(r.trim()));
+    }
+  };
+
+  // 1. Check user.roles (array/string/objects)
+  if (Array.isArray(user.roles)) {
+    for (const r of user.roles) {
+      if (typeof r === 'string') check(r);
+      else if (r && typeof r === 'object') {
+        if ('role' in r && typeof r.role === 'string') check(r.role);
+        if ('name' in r && typeof r.name === 'string') check(r.name);
+      }
+    }
+  } else {
+    check(user.roles);
   }
-  if (typeof user.roles === 'string' && user.roles.trim()) {
-    return user.roles.split(',').map((r) => r.trim()).filter(Boolean);
+
+  // 2. Check user.role (singular)
+  check(user.role);
+
+  // 3. Check workspace object (user.workspace / user.activeWorkspace / root workspace)
+  const wsRole = user.workspace?.role ?? user.activeWorkspace?.role;
+  check(wsRole);
+
+  const wsType = user.workspace?.type ?? user.activeWorkspace?.type;
+  if (wsType === 'school') {
+    found.add('school_admin');
   }
-  if (typeof user.role === 'string' && user.role.trim()) {
-    return user.role.split(',').map((r) => r.trim()).filter(Boolean);
+
+  // 4. Check workspaces array
+  if (Array.isArray(user.workspaces)) {
+    for (const ws of user.workspaces) {
+      if (ws && typeof ws === 'object') {
+        if (typeof ws.role === 'string') check(ws.role);
+        if (ws.type === 'school') found.add('school_admin');
+      }
+    }
   }
-  return [];
+
+  return Array.from(found).filter(Boolean);
 }
 
 export function homePathForRoles(roles: string[] | string | undefined | null): string {
@@ -77,10 +136,8 @@ export function activeRoleForRoles(
   return 'teacher';
 }
 
-export function authSuccessFromBackend(auth: BackendAuthResponse) {
-  // Handle backends that nest user under data
-  const user = auth.user ?? auth.data?.user;
-  if (!user) {
+export function authSuccessFromBackend(auth: any) {
+  if (!auth) {
     return {
       accountId: '',
       workspaceId: '',
@@ -89,11 +146,24 @@ export function authSuccessFromBackend(auth: BackendAuthResponse) {
       homePath: '/app',
     };
   }
-  const roles = normalizeRoles(user);
+
+  // Support both { user, workspace } and { data: { user, workspace } } and direct payload
+  const user = auth.user ?? auth.data?.user ?? auth.data ?? auth;
+  const workspace = auth.workspace ?? auth.data?.workspace ?? user?.workspace ?? user?.activeWorkspace;
+
+  const mergedUser = {
+    ...user,
+    workspace: workspace ?? user?.workspace,
+  };
+
+  const roles = normalizeRoles(mergedUser);
   const role = activeRoleForRoles(roles);
+  const accountId = user?.id ?? user?.accountId ?? user?.user?.id ?? '';
+  const workspaceId = workspace?.id ?? user?.workspaceId ?? (accountId ? `ws_${accountId.slice(0, 8)}` : 'ws_demo');
+
   return {
-    accountId: user.id,
-    workspaceId: user.workspaceId ?? `ws_${user.id.slice(0, 8)}`,
+    accountId,
+    workspaceId,
     workspaceKind: workspaceKindForRoles(roles),
     activeRole: role,
     homePath: homePathForRoles(roles),
@@ -103,7 +173,8 @@ export function authSuccessFromBackend(auth: BackendAuthResponse) {
 export function mePayloadFromBackendUser(user: BackendUser) {
   const roles = normalizeRoles(user);
   const role = activeRoleForRoles(roles);
-  const workspaceId = user.workspaceId ?? `ws_${user.id.slice(0, 8)}`;
+  const userId = user?.id ?? 'demo';
+  const workspaceId = user?.workspaceId ?? `ws_${userId.slice(0, 8)}`;
   const workspaceName =
     role === 'superadmin'
       ? 'Platform lembar'

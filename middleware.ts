@@ -6,6 +6,7 @@ import { type NextRequest, NextResponse } from 'next/server';
  */
 const SESSION_COOKIE = 'lembar_session';
 const ROLES_COOKIE = 'lembar_roles';
+const ACTIVE_ROLE_COOKIE = 'lembar_active_role';
 
 function redirectToLogin(request: NextRequest): NextResponse {
   const loginUrl = request.nextUrl.clone();
@@ -39,16 +40,23 @@ function getRolesFromCookies(request: NextRequest, session: string): string[] {
 }
 
 /**
- * Route guards:
- * - /app/* requires any valid session
- * - /school/* requires school_admin (or superadmin)
- * - /ops/* requires superadmin
- *
- * Role-based redirects on landing pages:
- * - superadmin hitting /app → redirect to /ops
- * - school_admin hitting /app → redirect to /school
- * Exception: if user has multiple roles they can access /app freely
- * since they also have teacher capabilities.
+ * Determine the user's current active role.
+ */
+function getActiveRole(request: NextRequest, session: string, roles: string[]): string {
+  const cookieRole = request.cookies.get(ACTIVE_ROLE_COOKIE)?.value;
+  if (cookieRole && (roles.includes(cookieRole) || roles.length === 0)) {
+    return cookieRole;
+  }
+  if (roles.includes('superadmin')) return 'superadmin';
+  if (roles.includes('school_admin')) return 'school_admin';
+  return 'teacher';
+}
+
+/**
+ * Route guards & Role-based workspace redirects:
+ * - /app/* represents Teacher / Personal Workspace
+ * - /school/* represents School Admin Workspace
+ * - /ops/* represents Platform Superadmin Workspace
  */
 export function middleware(request: NextRequest): NextResponse {
   const { pathname } = request.nextUrl;
@@ -67,9 +75,9 @@ export function middleware(request: NextRequest): NextResponse {
   }
 
   const roles = getRolesFromCookies(request, session);
+  const activeRole = getActiveRole(request, session, roles);
   const isSuperadmin = roles.includes('superadmin');
   const isSchoolAdmin = roles.includes('school_admin');
-  const multiRole = roles.length > 1;
 
   // --- Access guards (hard blocks) ---
 
@@ -81,19 +89,17 @@ export function middleware(request: NextRequest): NextResponse {
     return redirectTo(request, '/app');
   }
 
-  // --- Landing-page redirects (soft: redirect single-role users to their panel) ---
+  // --- Landing-page redirects (redirect user to their active role workspace) ---
 
   const isAppLanding = pathname === '/app' || pathname === '/app/';
 
-  if (isApp && isSuperadmin && isAppLanding) {
-    // Superadmin always goes to /ops — superadmin doesn't need teacher dashboard.
-    return redirectTo(request, '/ops');
-  }
-
-  if (isApp && isSchoolAdmin && isAppLanding && !multiRole) {
-    // Pure school_admin → redirect to school panel.
-    // Multi-role (e.g. teacher + school_admin) can stay on /app.
-    return redirectTo(request, '/school');
+  if (isApp && isAppLanding) {
+    if (activeRole === 'superadmin') {
+      return redirectTo(request, '/ops');
+    }
+    if (activeRole === 'school_admin') {
+      return redirectTo(request, '/school');
+    }
   }
 
   return NextResponse.next();

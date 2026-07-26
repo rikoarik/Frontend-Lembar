@@ -31,6 +31,7 @@ export function RoleSwitcher() {
             href={rolePath(role)}
             onClick={(e) => {
               e.preventDefault();
+              document.cookie = `lembar_active_role=${role}; path=/; max-age=${60 * 60 * 24 * 7}`;
               window.location.href = rolePath(role);
             }}
             className={`px-2.5 py-1 text-[11px] font-semibold rounded-full transition-all ${

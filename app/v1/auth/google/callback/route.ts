@@ -4,6 +4,7 @@ import {
   authSuccessFromBackend,
   backendFetch,
   jwtCookieOptions,
+  normalizeRoles,
   type BackendAuthResponse,
 } from '@/src/lib/api/session';
 
@@ -38,20 +39,26 @@ export async function POST(request: Request) {
   }
 
   const raw = await upstream.json();
-  // Handle both { token, user } and { data: { token, user } } shapes
-  const auth: BackendAuthResponse = raw?.data?.token
-    ? { token: raw.data.token, user: raw.data.user, data: raw.data }
-    : (raw as BackendAuthResponse);
-
-  const token = auth.token ?? auth.data?.token;
-  const user = auth.user ?? auth.data?.user;
-  if (!token || !user) {
-    console.error('[Google Callback BFF] Invalid backend auth payload:', JSON.stringify(raw).slice(0, 300));
+  const token = raw?.token ?? raw?.data?.token;
+  if (!token) {
+    console.error('[Google Callback BFF] Token missing in backend payload:', JSON.stringify(raw).slice(0, 300));
     return mockFail('UNKNOWN', 'Respons Google OAuth tidak valid.', 502);
   }
 
-  const successPayload = authSuccessFromBackend(auth);
-  console.log('[Google Callback BFF] Success. User:', user.email, 'roles:', user.roles ?? user.role, 'homePath:', successPayload.homePath);
+  const successPayload = authSuccessFromBackend(raw);
+  const user = raw?.user ?? raw?.data?.user ?? raw?.data;
+  const roles = normalizeRoles(user);
+
+  console.log(
+    '[Google Callback BFF] Success. User:',
+    user?.email || user?.id,
+    'roles:',
+    roles,
+    'activeRole:',
+    successPayload.activeRole,
+    'homePath:',
+    successPayload.homePath,
+  );
 
   const response = NextResponse.json({ data: successPayload }, { status: 200 });
   response.cookies.set(jwtCookieOptions(token));
@@ -64,8 +71,7 @@ export async function POST(request: Request) {
     secure: process.env.NEXT_PUBLIC_APP_URL?.startsWith('https://') ?? false,
     maxAge: 60 * 60 * 24 * 7,
   });
-  // Set roles cookie for middleware/client role detection
-  const roles = Array.isArray(user.roles) ? user.roles : typeof user.roles === 'string' ? [user.roles] : typeof user.role === 'string' ? [user.role] : [];
+
   if (roles.length > 0) {
     response.cookies.set({
       name: 'lembar_roles',
@@ -77,5 +83,14 @@ export async function POST(request: Request) {
       maxAge: 60 * 60 * 24 * 7,
     });
   }
+  response.cookies.set({
+    name: 'lembar_active_role',
+    value: successPayload.activeRole,
+    path: '/',
+    sameSite: 'lax',
+    httpOnly: true,
+    secure: process.env.NEXT_PUBLIC_APP_URL?.startsWith('https://') ?? false,
+    maxAge: 60 * 60 * 24 * 7,
+  });
   return response;
 }

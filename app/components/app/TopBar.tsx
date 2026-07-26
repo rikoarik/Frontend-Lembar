@@ -113,14 +113,22 @@ export function TopBar({
             <span className="block h-full w-[24%] rounded-full bg-[#a3202b]" />
           </span>
         </Link>
-        <button
-          type="button"
-          onClick={onOpenSwitcher}
-          aria-label={`Ganti workspace, saat ini ${workspaceName}`}
-          className="inline-flex h-9 max-w-[180px] items-center gap-1.5 rounded-lg border border-[#e6dfd4] bg-white px-2.5 text-[12px] font-medium text-[#171717] hover:bg-[#f3eee6] md:max-w-[220px]"
+        <div
+          className="hidden h-9 max-w-[180px] items-center gap-1.5 rounded-lg border border-[#e6dfd4] bg-white px-2.5 text-[12px] font-medium text-[#171717] md:inline-flex md:max-w-[220px]"
         >
           <span aria-hidden="true" className="material-symbols-outlined text-[16px] text-[#8a8379]">
-            workspaces
+            person
+          </span>
+          <span className="truncate">{workspaceName}</span>
+        </div>
+        <button
+          type="button"
+          onClick={onOpenMobileNav}
+          aria-label={`Menu workspace, saat ini ${workspaceName}`}
+          className="inline-flex h-9 max-w-[160px] items-center gap-1.5 rounded-lg border border-[#e6dfd4] bg-white px-2.5 text-[12px] font-medium text-[#171717] hover:bg-[#f3eee6] md:hidden"
+        >
+          <span aria-hidden="true" className="material-symbols-outlined text-[16px] text-[#8a8379]">
+            person
           </span>
           <span className="truncate">{workspaceName}</span>
         </button>

@@ -52,3 +52,23 @@ describe('role-based mock login', () => {
     expect(json.data.activeRole).toBe('superadmin');
   });
 });
+
+describe('authSuccessFromBackend role normalization', () => {
+  it('correctly resolves school_admin from nested workspace.role payload', async () => {
+    const { authSuccessFromBackend } = await import('@/src/lib/api/session');
+    const rawBackendPayload = {
+      data: {
+        workspace: {
+          id: '97a072e4-89ea-403c-a03c-94a877f7ee55',
+          type: 'school',
+          name: 'Workspace sekolah',
+          role: 'school_admin',
+          permissions: ['school.manage'],
+        },
+      },
+    };
+    const res = authSuccessFromBackend(rawBackendPayload);
+    expect(res.activeRole).toBe('school_admin');
+    expect(res.homePath).toBe('/school');
+  });
+});
