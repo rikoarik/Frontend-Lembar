@@ -5,7 +5,7 @@ const BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? `http://127.0.0.1:${PORT}`;
 
 export default defineConfig({
   testDir: './scripts/gates',
-  testMatch: /playwright-smoke\.spec\.ts/,
+  testMatch: /playwright-smoke\.spec\.ts|superadmin-ops\.spec\.ts/,
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
