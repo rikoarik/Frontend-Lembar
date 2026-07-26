@@ -92,11 +92,12 @@ function SectionRingkasan({
 
   if (loading) return <AdminContentLoading />;
 
+  const stats = dashboard?.stats;
+  const quotaUsed = stats?.quotaUsed ?? 0;
+  const quotaLimit = stats?.quotaLimit ?? 0;
   const pct =
-    dashboard && dashboard.stats.quotaLimit > 0
-      ? Math.round(
-          (dashboard.stats.quotaUsed / dashboard.stats.quotaLimit) * 100,
-        )
+    quotaLimit > 0
+      ? Math.round((quotaUsed / quotaLimit) * 100)
       : 0;
 
   return (
@@ -104,20 +105,20 @@ function SectionRingkasan({
       items={[
         {
           label: 'Anggota aktif',
-          value: String(dashboard?.stats.activeMembers ?? '—'),
-          hint: `dari ${dashboard?.stats.totalMembers ?? 0} total`,
+          value: String(stats?.activeMembers ?? '—'),
+          hint: `dari ${stats?.totalMembers ?? 0} total`,
           tone: 'ok',
         },
         {
           label: 'Kuota terpakai',
-          value: `${dashboard?.stats.quotaUsed ?? 0} / ${dashboard?.stats.quotaLimit ?? 0}`,
+          value: `${quotaUsed} / ${quotaLimit}`,
           hint: `${pct}% periode ini`,
           tone: pct >= 90 ? 'bad' : pct >= 70 ? 'warn' : 'info',
           delta: `${pct}%`,
         },
         {
           label: 'Lembar final',
-          value: String(dashboard?.stats.totalAssessments ?? '—'),
+          value: String(stats?.totalAssessments ?? '—'),
           hint: 'total workspace',
           tone: 'ok',
         },
@@ -489,9 +490,12 @@ function SectionPenggunaan({
     );
   }
 
-  const pct = Math.round(
-    (usage.quotaUsed / Math.max(usage.quotaLimit, 1)) * 100,
-  );
+  const quotaUsed = usage?.quotaUsed ?? 0;
+  const quotaLimit = usage?.quotaLimit ?? 0;
+  const pct =
+    quotaLimit > 0
+      ? Math.round((quotaUsed / Math.max(quotaLimit, 1)) * 100)
+      : 0;
 
   return (
     <div className="space-y-6">
@@ -499,7 +503,7 @@ function SectionPenggunaan({
         <div className="flex justify-between text-sm mb-2">
           <span className="font-medium">Kuota terpakai</span>
           <span className="text-neutral-500">
-            {usage.quotaUsed} / {usage.quotaLimit} ({pct}%)
+            {quotaUsed} / {quotaLimit} ({pct}%)
           </span>
         </div>
         <div className="h-2 rounded-full bg-neutral-100 dark:bg-neutral-800">

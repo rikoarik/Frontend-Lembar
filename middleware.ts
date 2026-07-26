@@ -22,8 +22,32 @@ function redirectTo(request: NextRequest, pathname: string): NextResponse {
   return NextResponse.redirect(url);
 }
 
+function parseRolesFromJwt(jwt: string): string[] {
+  try {
+    const parts = jwt.split('.');
+    if (parts.length < 2) return [];
+    const base64Url = parts[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join(''),
+    );
+    const payload = JSON.parse(jsonPayload);
+    const rawRoles =
+      payload.roles ?? payload.role ?? payload.workspace?.role ?? payload.activeWorkspace?.role;
+    if (Array.isArray(rawRoles)) return rawRoles;
+    if (typeof rawRoles === 'string') return rawRoles.split(',').map((r) => r.trim()).filter(Boolean);
+    if (payload.workspace?.type === 'school') return ['school_admin'];
+    return [];
+  } catch {
+    return [];
+  }
+}
+
 /**
- * Retrieve roles array from cookies, falling back to session-based inference.
+ * Retrieve roles array from cookies, falling back to session JWT payload or session inference.
  */
 function getRolesFromCookies(request: NextRequest, session: string): string[] {
   const rolesStr = request.cookies.get(ROLES_COOKIE)?.value;
@@ -33,6 +57,18 @@ function getRolesFromCookies(request: NextRequest, session: string): string[] {
       .map((r) => r.trim())
       .filter(Boolean);
   }
+
+  const activeRole = request.cookies.get(ACTIVE_ROLE_COOKIE)?.value;
+  if (activeRole) {
+    return [activeRole];
+  }
+
+  // Fallback for JWT session payloads
+  const jwtRoles = parseRolesFromJwt(session);
+  if (jwtRoles.length > 0) {
+    return jwtRoles;
+  }
+
   // Fallback for compatibility/mock sessions
   if (session === 'ops') return ['superadmin'];
   if (session === 'admin') return ['school_admin'];

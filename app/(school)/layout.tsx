@@ -1,5 +1,3 @@
-'use client';
-
 import { SchoolAdminShell } from '@/src/features/admin/AdminAppShell';
 import type { ReactNode } from 'react';
 
