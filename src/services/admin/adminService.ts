@@ -582,4 +582,24 @@ export const adminService = {
   createMarketingPage(data: { slug: string; title: string }): Promise<Result<{ slug: string; title: string }, AdminError>> {
     return request('/v1/ops/marketing/pages', 'POST', data);
   },
+
+  // ── Catalog CRUD ─────────────────────────────────────────────────────────
+  updateGradeStatus(id: string, status: 'active' | 'archived' | 'unavailable'): Promise<Result<{ id: string; status: string }, AdminError>> {
+    return request<{ id: string; status: string }>(`/v1/admin/catalog/grades/${id}/status`, 'PATCH', { status });
+  },
+  updateSubjectStatus(id: string, status: 'active' | 'archived' | 'unavailable'): Promise<Result<{ id: string; status: string }, AdminError>> {
+    return request<{ id: string; status: string }>(`/v1/admin/catalog/subjects/${id}/status`, 'PATCH', { status });
+  },
+  createGrade(data: { label: string; status?: string }): Promise<Result<{ id: string; label: string; status: string }, AdminError>> {
+    return request<{ id: string; label: string; status: string }>('/v1/admin/catalog/grades', 'POST', data);
+  },
+  createSubject(data: { label: string; status?: string }): Promise<Result<{ id: string; label: string; status: string }, AdminError>> {
+    return request<{ id: string; label: string; status: string }>('/v1/admin/catalog/subjects', 'POST', data);
+  },
+  archiveGrade(id: string): Promise<Result<{ id: string; archived: boolean }, AdminError>> {
+    return request<{ id: string; archived: boolean }>(`/v1/admin/catalog/grades/${id}`, 'DELETE');
+  },
+  archiveSubject(id: string): Promise<Result<{ id: string; archived: boolean }, AdminError>> {
+    return request<{ id: string; archived: boolean }>(`/v1/admin/catalog/subjects/${id}`, 'DELETE');
+  },
 };
