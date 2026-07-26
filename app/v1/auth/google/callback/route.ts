@@ -37,21 +37,45 @@ export async function POST(request: Request) {
     );
   }
 
-  const auth = (await upstream.json()) as BackendAuthResponse;
-  if (!auth?.token || !auth?.user) {
+  const raw = await upstream.json();
+  // Handle both { token, user } and { data: { token, user } } shapes
+  const auth: BackendAuthResponse = raw?.data?.token
+    ? { token: raw.data.token, user: raw.data.user, data: raw.data }
+    : (raw as BackendAuthResponse);
+
+  const token = auth.token ?? auth.data?.token;
+  const user = auth.user ?? auth.data?.user;
+  if (!token || !user) {
+    console.error('[Google Callback BFF] Invalid backend auth payload:', JSON.stringify(raw).slice(0, 300));
     return mockFail('UNKNOWN', 'Respons Google OAuth tidak valid.', 502);
   }
 
-  const response = NextResponse.json({ data: authSuccessFromBackend(auth) }, { status: 200 });
-  response.cookies.set(jwtCookieOptions(auth.token));
+  const successPayload = authSuccessFromBackend(auth);
+  console.log('[Google Callback BFF] Success. User:', user.email, 'roles:', user.roles ?? user.role, 'homePath:', successPayload.homePath);
+
+  const response = NextResponse.json({ data: successPayload }, { status: 200 });
+  response.cookies.set(jwtCookieOptions(token));
   response.cookies.set({
     name: 'lembar_session',
-    value: auth.token,
+    value: token,
     path: '/',
     sameSite: 'lax',
     httpOnly: true,
     secure: process.env.NEXT_PUBLIC_APP_URL?.startsWith('https://') ?? false,
     maxAge: 60 * 60 * 24 * 7,
   });
+  // Set roles cookie for middleware/client role detection
+  const roles = Array.isArray(user.roles) ? user.roles : typeof user.roles === 'string' ? [user.roles] : typeof user.role === 'string' ? [user.role] : [];
+  if (roles.length > 0) {
+    response.cookies.set({
+      name: 'lembar_roles',
+      value: roles.join(','),
+      path: '/',
+      sameSite: 'lax',
+      httpOnly: true,
+      secure: process.env.NEXT_PUBLIC_APP_URL?.startsWith('https://') ?? false,
+      maxAge: 60 * 60 * 24 * 7,
+    });
+  }
   return response;
 }

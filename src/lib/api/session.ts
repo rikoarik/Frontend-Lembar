@@ -23,50 +23,86 @@ export type BackendUser = {
   id: string;
   email: string;
   name: string;
-  roles: string[];
+  roles?: string[] | string;
+  role?: string;
   workspaceId: string | null;
 };
 
 export type BackendAuthResponse = {
   token: string;
   user: BackendUser;
+  /** Some backends wrap under `data` */
+  data?: { user?: BackendUser; token?: string };
 };
 
-export function homePathForRoles(roles: string[] | undefined | null): string {
-  const list = roles ?? [];
+/**
+ * Normalize roles from various backend shapes:
+ * - `roles: ["superadmin"]` (array)
+ * - `roles: "superadmin"` (single string)
+ * - `roles: "superadmin,school_admin"` (comma-separated)
+ * - `role: "superadmin"` (singular field)
+ */
+function normalizeRoles(user: BackendUser): string[] {
+  if (Array.isArray(user.roles) && user.roles.length > 0) {
+    return user.roles;
+  }
+  if (typeof user.roles === 'string' && user.roles.trim()) {
+    return user.roles.split(',').map((r) => r.trim()).filter(Boolean);
+  }
+  if (typeof user.role === 'string' && user.role.trim()) {
+    return user.role.split(',').map((r) => r.trim()).filter(Boolean);
+  }
+  return [];
+}
+
+export function homePathForRoles(roles: string[] | string | undefined | null): string {
+  const list = Array.isArray(roles) ? roles : typeof roles === 'string' ? roles.split(',').map((r) => r.trim()) : [];
   if (list.includes('superadmin')) return '/ops';
   if (list.includes('school_admin')) return '/school';
   return '/app';
 }
 
-export function workspaceKindForRoles(roles: string[] | undefined | null): 'personal' | 'school' {
-  const list = roles ?? [];
+export function workspaceKindForRoles(roles: string[] | string | undefined | null): 'personal' | 'school' {
+  const list = Array.isArray(roles) ? roles : typeof roles === 'string' ? roles.split(',').map((r) => r.trim()) : [];
   if (list.includes('school_admin')) return 'school';
   return 'personal';
 }
 
 export function activeRoleForRoles(
-  roles: string[] | undefined | null,
+  roles: string[] | string | undefined | null,
 ): 'teacher' | 'school_admin' | 'superadmin' {
-  const list = roles ?? [];
+  const list = Array.isArray(roles) ? roles : typeof roles === 'string' ? roles.split(',').map((r) => r.trim()) : [];
   if (list.includes('superadmin')) return 'superadmin';
   if (list.includes('school_admin')) return 'school_admin';
   return 'teacher';
 }
 
 export function authSuccessFromBackend(auth: BackendAuthResponse) {
-  const role = activeRoleForRoles(auth.user.roles);
+  // Handle backends that nest user under data
+  const user = auth.user ?? auth.data?.user;
+  if (!user) {
+    return {
+      accountId: '',
+      workspaceId: '',
+      workspaceKind: 'personal' as const,
+      activeRole: 'teacher' as const,
+      homePath: '/app',
+    };
+  }
+  const roles = normalizeRoles(user);
+  const role = activeRoleForRoles(roles);
   return {
-    accountId: auth.user.id,
-    workspaceId: auth.user.workspaceId ?? `ws_${auth.user.id.slice(0, 8)}`,
-    workspaceKind: workspaceKindForRoles(auth.user.roles),
+    accountId: user.id,
+    workspaceId: user.workspaceId ?? `ws_${user.id.slice(0, 8)}`,
+    workspaceKind: workspaceKindForRoles(roles),
     activeRole: role,
-    homePath: homePathForRoles(auth.user.roles),
+    homePath: homePathForRoles(roles),
   };
 }
 
 export function mePayloadFromBackendUser(user: BackendUser) {
-  const role = activeRoleForRoles(user.roles);
+  const roles = normalizeRoles(user);
+  const role = activeRoleForRoles(roles);
   const workspaceId = user.workspaceId ?? `ws_${user.id.slice(0, 8)}`;
   const workspaceName =
     role === 'superadmin'
