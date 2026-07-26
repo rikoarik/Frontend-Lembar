@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
+import { RoleSwitcher } from '@/src/features/admin/RoleSwitcher';
 
 type TopBarProps = {
   workspaceName: string;
@@ -92,6 +93,7 @@ export function TopBar({
       </div>
 
       <div className="flex items-center gap-2">
+        <RoleSwitcher />
         <Link
           href="/app/pengaturan/langganan"
           className="hidden h-9 items-center gap-2 rounded-lg border border-[#e6dfd4] bg-white px-3 text-[12px] font-medium text-[#171717] hover:bg-[#f3eee6] sm:inline-flex"
