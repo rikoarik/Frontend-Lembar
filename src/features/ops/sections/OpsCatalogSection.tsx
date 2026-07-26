@@ -1,5 +1,4 @@
-'use client';
-
+import { useState } from 'react';
 import { Button } from '@/app/components/ui';
 import {
   AdminPageHeader,
@@ -7,6 +6,7 @@ import {
   AdminStatCards,
   AdminContentLoading,
   AdminEmptyState,
+  AdminConfirmModal,
 } from '@/src/features/admin/AdminChrome';
 import { adminService } from '@/src/services/admin/adminService';
 
@@ -63,6 +63,8 @@ export function OpsCatalogSection({
   setCatalogAddingSubject: (v: boolean) => void;
   setToast: (msg: string) => void;
 }) {
+  const [confirmDeleteGrade, setConfirmDeleteGrade] = useState<{ id: string; label: string } | null>(null);
+  const [confirmDeleteSubject, setConfirmDeleteSubject] = useState<{ id: string; label: string } | null>(null);
   const activeGradesCount = catalogGrades.filter((g) => g.status === 'active').length;
   const selectedGradeObj = catalogGrades.find((g) => g.id === catalogSelectedGrade);
   const activeSubjectsCount = catalogSubjects.filter((s) => s.status === 'active').length;
@@ -269,23 +271,8 @@ export function OpsCatalogSection({
                           size="sm"
                           variant="danger"
                           disabled={isUpdating}
-                          onClick={async () => {
-                            if (!confirm(`Hapus grade "${g.label}"?`)) return;
-                            setCatalogUpdatingIds((s) => new Set(s).add(g.id));
-                            const res = await adminService.archiveGrade(g.id);
-                            if (res.ok) {
-                              setCatalogGrades((prev) => prev.filter((x) => x.id !== g.id));
-                              setToast(`Grade "${g.label}" diarsip/hapus.`);
-                            } else {
-                              setToast(
-                                `Gagal: ${(res as { ok: false; error: { safeMessage: string } }).error.safeMessage}`,
-                              );
-                            }
-                            setCatalogUpdatingIds((s) => {
-                              const n = new Set(s);
-                              n.delete(g.id);
-                              return n;
-                            });
+                          onClick={() => {
+                            setConfirmDeleteGrade({ id: g.id, label: g.label });
                           }}
                         >
                           Hapus
@@ -339,20 +326,18 @@ export function OpsCatalogSection({
                 const label = catalogNewSubjectLabel.trim();
                 if (!label) return;
                 setCatalogAddingSubject(true);
-                const res = await adminService.createSubject({ label });
+                const res = await adminService.createSubject({
+                  label,
+                });
                 if (res.ok) {
                   setToast(`Mapel "${label}" berhasil ditambahkan.`);
                   setCatalogShowAddSubject(false);
                   setCatalogNewSubjectLabel('');
-                  setCatalogSubjectsLoading(true);
+                  // Reload subjects
                   const base = (process.env.NEXT_PUBLIC_API_BASE_URL ?? '/v1').replace(/\/+$/, '');
                   fetch(`${base}/catalog/subjects?gradeId=${catalogSelectedGrade}`, { credentials: 'include' })
                     .then((r) => r.json())
-                    .then((j) => {
-                      setCatalogSubjects(j?.data ?? []);
-                      setCatalogSubjectsLoading(false);
-                    })
-                    .catch(() => setCatalogSubjectsLoading(false));
+                    .then((j) => setCatalogSubjects(j?.data ?? []));
                 } else {
                   setToast(
                     `Gagal: ${(res as { ok: false; error: { safeMessage: string } }).error.safeMessage}`,
@@ -376,35 +361,19 @@ export function OpsCatalogSection({
 
           {/* Mapel list container */}
           <div className="flex-1">
-            {catalogSubjectsLoading ? (
-              <div className="flex items-center justify-center py-12 text-[13px] text-[#57534e]">
-                Memuat daftar mata pelajaran...
+            {!catalogSelectedGrade ? (
+              <div className="h-full flex items-center justify-center py-12 text-[#8a8379] text-[13px]">
+                ← Pilih grade terlebih dahulu untuk melihat daftar mata pelajaran.
               </div>
+            ) : catalogSubjectsLoading ? (
+              <AdminContentLoading />
             ) : catalogSubjects.length === 0 ? (
               <div className="h-full flex items-center justify-center py-10">
                 <AdminEmptyState
-                  title={catalogSelectedGrade ? 'Belum Ada Mapel' : 'Pilih Grade Terlebih Dahulu'}
-                  description={
-                    catalogSelectedGrade
-                      ? `Belum ada mata pelajaran yang dikonfigurasi untuk ${selectedGradeObj?.label ?? 'grade ini'}.`
-                      : 'Klik salah satu grade di panel kiri untuk menampilkan dan mengelola mata pelajaran.'
-                  }
-                  icon="auto_stories"
+                  title="Belum Ada Mapel"
+                  description="Belum ada mata pelajaran untuk grade ini."
+                  icon="menu_book"
                   flat={true}
-                  action={
-                    catalogSelectedGrade ? (
-                      <Button
-                        size="sm"
-                        onClick={() => {
-                          setCatalogShowAddSubject(true);
-                        }}
-                        className="inline-flex items-center justify-center gap-1.5"
-                      >
-                        <span className="material-symbols-outlined text-[16px] leading-none inline-flex items-center justify-center shrink-0 align-middle">add</span>
-                        <span className="leading-none">Tambah Mapel Pertama</span>
-                      </Button>
-                    ) : null
-                  }
                 />
               </div>
             ) : (
@@ -414,9 +383,9 @@ export function OpsCatalogSection({
                   return (
                     <div
                       key={s.id}
-                      className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-[#faf8f5]/60 hover:bg-[#f4ede4]/70 border border-[#ddd4c8]/40 text-[13px] transition-all"
+                      className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-[#faf8f5]/60 border border-[#ddd4c8]/40 text-[13px]"
                     >
-                      <span className="font-medium text-[#171717] flex-1 truncate">{s.label}</span>
+                      <span className="font-semibold text-[#171717]">{s.label}</span>
                       <div className="flex items-center gap-1.5 ml-2 shrink-0">
                         <AdminPill tone={s.status === 'active' ? 'ok' : 'neutral'}>{s.status}</AdminPill>
                         <Button
@@ -450,23 +419,8 @@ export function OpsCatalogSection({
                           size="sm"
                           variant="danger"
                           disabled={isUpdating}
-                          onClick={async () => {
-                            if (!confirm(`Hapus mapel "${s.label}"?`)) return;
-                            setCatalogUpdatingIds((prev) => new Set(prev).add(s.id));
-                            const res = await adminService.archiveSubject(s.id);
-                            if (res.ok) {
-                              setCatalogSubjects((prev) => prev.filter((x) => x.id !== s.id));
-                              setToast(`Mapel "${s.label}" diarsip/hapus.`);
-                            } else {
-                              setToast(
-                                `Gagal: ${(res as { ok: false; error: { safeMessage: string } }).error.safeMessage}`,
-                              );
-                            }
-                            setCatalogUpdatingIds((prev) => {
-                              const n = new Set(prev);
-                              n.delete(s.id);
-                              return n;
-                            });
+                          onClick={() => {
+                            setConfirmDeleteSubject({ id: s.id, label: s.label });
                           }}
                         >
                           Hapus
@@ -480,6 +434,62 @@ export function OpsCatalogSection({
           </div>
         </div>
       </div>
+
+      <AdminConfirmModal
+        open={!!confirmDeleteGrade}
+        title="Hapus Grade Katalog"
+        description={`Apakah Anda yakin ingin menghapus grade "${confirmDeleteGrade?.label}"?`}
+        confirmLabel="Ya, Hapus Grade"
+        cancelLabel="Batal"
+        variant="danger"
+        onConfirm={async () => {
+          if (!confirmDeleteGrade) return;
+          const { id, label } = confirmDeleteGrade;
+          setConfirmDeleteGrade(null);
+          setCatalogUpdatingIds((s) => new Set(s).add(id));
+          const res = await adminService.archiveGrade(id);
+          if (res.ok) {
+            setCatalogGrades((prev) => prev.filter((x) => x.id !== id));
+            setToast(`Grade "${label}" diarsip/hapus.`);
+          } else {
+            setToast(`Gagal: ${res.error.safeMessage}`);
+          }
+          setCatalogUpdatingIds((s) => {
+            const n = new Set(s);
+            n.delete(id);
+            return n;
+          });
+        }}
+        onCancel={() => setConfirmDeleteGrade(null)}
+      />
+
+      <AdminConfirmModal
+        open={!!confirmDeleteSubject}
+        title="Hapus Mata Pelajaran"
+        description={`Apakah Anda yakin ingin menghapus mapel "${confirmDeleteSubject?.label}"?`}
+        confirmLabel="Ya, Hapus Mapel"
+        cancelLabel="Batal"
+        variant="danger"
+        onConfirm={async () => {
+          if (!confirmDeleteSubject) return;
+          const { id, label } = confirmDeleteSubject;
+          setConfirmDeleteSubject(null);
+          setCatalogUpdatingIds((prev) => new Set(prev).add(id));
+          const res = await adminService.archiveSubject(id);
+          if (res.ok) {
+            setCatalogSubjects((prev) => prev.filter((x) => x.id !== id));
+            setToast(`Mapel "${label}" diarsip/hapus.`);
+          } else {
+            setToast(`Gagal: ${res.error.safeMessage}`);
+          }
+          setCatalogUpdatingIds((prev) => {
+            const n = new Set(prev);
+            n.delete(id);
+            return n;
+          });
+        }}
+        onCancel={() => setConfirmDeleteSubject(null)}
+      />
     </>
   );
 }

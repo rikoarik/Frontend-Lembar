@@ -541,19 +541,19 @@ export function AdminPill({
   );
 }
 
-export function AdminContentLoading() {
+export function AdminContentLoading({ label = 'Memuat data…' }: { label?: string }) {
   return (
-    <div className="space-y-4" aria-busy="true" aria-live="polite" aria-label="Memuat konten">
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <div
-            key={i}
-            className="h-[108px] animate-pulse rounded-xl border border-[#ddd4c8] bg-white"
-          />
-        ))}
-      </div>
-      <div className="h-12 animate-pulse rounded-xl border border-[#ddd4c8] bg-white" />
-      <div className="h-80 animate-pulse rounded-xl border border-[#ddd4c8] bg-white" />
+    <div
+      className="fixed top-4 right-28 z-40 inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border border-[#ddd4c8]/90 bg-white/95 backdrop-blur-md shadow-md text-[12px] font-medium text-[#171717] transition-all animate-in fade-in slide-in-from-top-2"
+      aria-busy="true"
+      aria-live="polite"
+      aria-label={label}
+    >
+      <span className="relative flex h-2.5 w-2.5 items-center justify-center">
+        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-accent opacity-75" />
+        <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-accent" />
+      </span>
+      <span className="text-[12px] font-semibold text-[#171717]">{label}</span>
     </div>
   );
 }

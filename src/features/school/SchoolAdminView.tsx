@@ -10,6 +10,7 @@ import {
   AdminPill,
   AdminStatCards,
   AdminToolbar,
+  AdminConfirmModal,
 } from '@/src/features/admin/AdminChrome';
 import { useAdminSectionState } from '@/src/features/admin/adminPanelState';
 import {
@@ -220,8 +221,9 @@ function SectionGuru({
     setActionId(null);
   }
 
+  const [confirmRemoveMember, setConfirmRemoveMember] = useState<SchoolMember | null>(null);
+
   async function handleRemove(member: SchoolMember) {
-    if (!confirm(`Hapus ${member.name} dari sekolah ini?`)) return;
     setActionId(member.id);
     const res = await schoolService.removeMember(member.id);
     if (res.ok) {
@@ -328,7 +330,7 @@ function SectionGuru({
                     size="sm"
                     variant="secondary"
                     disabled={actionId === row.id}
-                    onClick={() => handleRemove(row)}
+                    onClick={() => setConfirmRemoveMember(row)}
                   >
                     Hapus
                   </Button>
@@ -363,6 +365,22 @@ function SectionGuru({
           </div>
         </div>
       )}
+
+      <AdminConfirmModal
+        open={!!confirmRemoveMember}
+        title="Hapus Anggota Sekolah"
+        description={`Apakah Anda yakin ingin menghapus ${confirmRemoveMember?.name} dari sekolah ini?`}
+        confirmLabel="Ya, Hapus Anggota"
+        cancelLabel="Batal"
+        variant="danger"
+        onConfirm={() => {
+          if (!confirmRemoveMember) return;
+          const member = confirmRemoveMember;
+          setConfirmRemoveMember(null);
+          handleRemove(member);
+        }}
+        onCancel={() => setConfirmRemoveMember(null)}
+      />
     </>
   );
 }
@@ -627,6 +645,267 @@ function SectionPengaturan({
   );
 }
 
+// ── Section: Billing ──────────────────────────────────────────────────────────
+
+type SchoolInvoice = {
+  id: string;
+  date: string;
+  description: string;
+  amount: number;
+  paymentMethod: string;
+  status: 'paid' | 'pending' | 'failed';
+};
+
+const SAMPLE_INVOICES: SchoolInvoice[] = [
+  {
+    id: 'INV-SCH-2026-001',
+    date: '2026-01-10',
+    description: 'Langganan Paket Sekolah Pro (25 Lisensi Guru)',
+    amount: 4500000,
+    paymentMethod: 'Transfer Bank BCA',
+    status: 'paid',
+  },
+  {
+    id: 'INV-SCH-2025-001',
+    date: '2025-01-10',
+    description: 'Langganan Paket Sekolah Pro (15 Lisensi Guru)',
+    amount: 2700000,
+    paymentMethod: 'Transfer Bank BCA',
+    status: 'paid',
+  },
+];
+
+function SectionBilling({
+  setToast,
+}: {
+  setToast: (msg: string) => void;
+}) {
+  const [settings, setSettings] = useState<SchoolSettings | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    schoolService.settings().then((res) => {
+      if (cancelled) return;
+      if (res.ok) {
+        setSettings(res.value);
+      } else {
+        setToast(`Gagal memuat billing: ${res.error.safeMessage}`);
+      }
+      setLoading(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [setToast]);
+
+  if (loading) return <AdminContentLoading />;
+
+  const planLabel =
+    settings?.plan === 'pro_sekolah' || settings?.plan === 'school_pro'
+      ? 'Paket Sekolah Pro'
+      : settings?.plan === 'enterprise'
+        ? 'Paket Enterprise'
+        : 'Paket Sekolah Basic';
+
+  return (
+    <div className="space-y-6">
+      {/* Header & Status Card */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-[18px] font-bold text-[#171717]">Langganan & Tagihan Sekolah</h2>
+          <p className="text-[13px] text-[#6d665d] mt-0.5">
+            Kelola paket langganan, alokasi lisensi guru, dan riwayat tagihan faktur sekolah.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => setToast('Permintaan unduh faktur terakhir sedang diproses.')}
+          >
+            <span className="material-symbols-outlined text-[16px] mr-1" aria-hidden>
+              download
+            </span>
+            Unduh Faktur Terakhir
+          </Button>
+          <Button
+            size="sm"
+            onClick={() =>
+              setToast(
+                'Silakan hubungi Account Manager Lembar di sales@lembar.id untuk penambahan kursi.',
+              )
+            }
+          >
+            <span className="material-symbols-outlined text-[16px] mr-1" aria-hidden>
+              add_circle
+            </span>
+            Tambah Lisensi Guru
+          </Button>
+        </div>
+      </div>
+
+      {/* Overview Stat Cards */}
+      <AdminStatCards
+        items={[
+          {
+            label: 'Paket Langganan',
+            value: planLabel,
+            hint: `ID Sekolah: ${settings?.slug ?? '—'}`,
+            tone: 'ok',
+          },
+          {
+            label: 'Lisensi Guru (Seats)',
+            value: `${settings?.seats ?? 0} Guru`,
+            hint: 'Kapasitas akun guru aktif',
+            tone: 'info',
+          },
+          {
+            label: 'Perpanjangan Berikutnya',
+            value: fmtDate(settings?.renewsAt),
+            hint: 'Perpanjangan otomatis tahunan',
+            tone: 'neutral',
+          },
+          {
+            label: 'Status Pembayaran',
+            value: 'Lunas / Aktif',
+            hint: 'Tidak ada tagihan tertunggak',
+            tone: 'ok',
+          },
+        ]}
+      />
+
+      {/* Billing Overview Box */}
+      <div className="rounded-2xl border border-[#ddd4c8]/70 bg-white p-6 shadow-sm space-y-4">
+        <div className="flex items-center justify-between border-b border-[#eee6da]/70 pb-3">
+          <h3 className="text-[15px] font-bold text-[#171717]">Detail Langganan Sekolah</h3>
+          <AdminPill tone="ok">Status: Aktif</AdminPill>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-[13px]">
+          <div>
+            <span className="block text-[#6d665d] text-[11px] font-semibold uppercase tracking-wider">
+              Nama Instansi
+            </span>
+            <span className="font-bold text-[#171717]">{settings?.name ?? '—'}</span>
+          </div>
+          <div>
+            <span className="block text-[#6d665d] text-[11px] font-semibold uppercase tracking-wider">
+              Jenjang Sekolah
+            </span>
+            <span className="font-semibold text-[#171717] uppercase">
+              {settings?.level ?? 'SD / SMP / SMA'}
+            </span>
+          </div>
+          <div>
+            <span className="block text-[#6d665d] text-[11px] font-semibold uppercase tracking-wider">
+              Batas AI Per Bulan
+            </span>
+            <span className="font-semibold text-brand-accent">Unlimited Terpusat</span>
+          </div>
+          <div>
+            <span className="block text-[#6d665d] text-[11px] font-semibold uppercase tracking-wider">
+              Metode Tagihan
+            </span>
+            <span className="font-medium text-[#171717]">Faktur Tahunan (Invoice)</span>
+          </div>
+        </div>
+
+        <div className="rounded-xl bg-[#faf7f2] border border-[#eee6da] p-4 text-[12px] leading-relaxed text-[#57534e] space-y-1">
+          <div className="font-semibold text-[#171717] flex items-center gap-1.5">
+            <span className="material-symbols-outlined text-[16px] text-brand-accent">
+              verified
+            </span>
+            Manfaat Paket Sekolah Pro Aktif:
+          </div>
+          <ul className="list-disc list-inside space-y-0.5 text-[#6d665d] pl-1">
+            <li>
+              Akses penuh Pembuat Soal AI untuk seluruh {settings?.seats ?? 0} akun guru terdaftar
+            </li>
+            <li>Bank Soal Terpusat & Sinkronisasi Kurikulum Sekolah</li>
+            <li>Dashboard Analitik & Audit Log Aktivitas Guru</li>
+            <li>Dukungan Prioritas & Account Manager Khusus</li>
+          </ul>
+        </div>
+      </div>
+
+      {/* Invoices Table */}
+      <div className="space-y-3">
+        <h3 className="text-[15px] font-bold text-[#171717]">Riwayat Pembayaran & Faktur</h3>
+        <AdminDataTable
+          rows={SAMPLE_INVOICES}
+          columns={[
+            {
+              key: 'id',
+              header: 'No. Faktur',
+              render: (row) => (
+                <span className="font-mono font-semibold text-[#171717]">{row.id}</span>
+              ),
+            },
+            {
+              key: 'date',
+              header: 'Tanggal',
+              render: (row) => (
+                <span className="text-[12px] text-[#6d665d]">{fmtDate(row.date)}</span>
+              ),
+            },
+            {
+              key: 'description',
+              header: 'Deskripsi Paket',
+              render: (row) => (
+                <span className="font-medium text-[#171717]">{row.description}</span>
+              ),
+            },
+            {
+              key: 'amount',
+              header: 'Nominal',
+              align: 'right',
+              render: (row) => (
+                <span className="font-bold text-[#171717] tabular-nums">
+                  Rp {row.amount.toLocaleString('id-ID')}
+                </span>
+              ),
+            },
+            {
+              key: 'paymentMethod',
+              header: 'Metode',
+              render: (row) => <span className="text-[12px] text-[#6d665d]">{row.paymentMethod}</span>,
+            },
+            {
+              key: 'status',
+              header: 'Status',
+              align: 'center',
+              render: (row) => (
+                <AdminPill tone={row.status === 'paid' ? 'ok' : 'warn'}>
+                  {row.status === 'paid' ? 'Lunas' : 'Menunggu'}
+                </AdminPill>
+              ),
+            },
+            {
+              key: 'action',
+              header: 'Aksi',
+              align: 'right',
+              render: (row) => (
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => setToast(`Mengunduh faktur PDF ${row.id}...`)}
+                >
+                  <span className="material-symbols-outlined text-[15px] mr-1" aria-hidden>
+                    picture_as_pdf
+                  </span>
+                  Unduh Faktur
+                </Button>
+              ),
+            },
+          ]}
+        />
+      </div>
+    </div>
+  );
+}
+
 // ── Section: Library ──────────────────────────────────────────────────────────
 
 function SectionLibrary({
@@ -870,6 +1149,7 @@ function SectionUndangan({ setToast }: { setToast: (msg: string) => void }) {
   const [invitations, setInvitations] = useState<SchoolInvitation[]>([]);
   const [loading, setLoading] = useState(true);
   const [cancelId, setCancelId] = useState<string | null>(null);
+  const [confirmCancelInv, setConfirmCancelInv] = useState<SchoolInvitation | null>(null);
 
   function fetchInvitations() {
     setLoading(true);
@@ -889,7 +1169,6 @@ function SectionUndangan({ setToast }: { setToast: (msg: string) => void }) {
   }, []);
 
   async function handleCancel(inv: SchoolInvitation) {
-    if (!confirm(`Batalkan undangan ke ${inv.email}?`)) return;
     setCancelId(inv.id);
     const res = await schoolService.cancelInvitation(inv.id);
     if (res.ok) {
@@ -904,61 +1183,79 @@ function SectionUndangan({ setToast }: { setToast: (msg: string) => void }) {
   if (loading) return <AdminContentLoading />;
 
   return (
-    <AdminDataTable
-      rows={invitations}
-      emptyLabel="Tidak ada undangan pending"
-      columns={[
-        {
-          key: 'email',
-          header: 'Email',
-          render: (row) => (
-            <div>
-              <div className="font-medium text-sm">{row.email}</div>
-              {row.invitedBy && (
-                <div className="text-xs text-neutral-400">
-                  Diundang oleh {row.invitedBy}
-                </div>
-              )}
-            </div>
-          ),
-        },
-        {
-          key: 'role',
-          header: 'Peran',
-          render: (row) => (
-            <AdminPill tone="neutral">
-              {row.role === 'school_admin' ? 'Admin sekolah' : 'Guru'}
-            </AdminPill>
-          ),
-        },
-        {
-          key: 'createdAt',
-          header: 'Dikirim',
-          render: (row) => fmtDate(row.createdAt),
-        },
-        {
-          key: 'expiresAt',
-          header: 'Kedaluwarsa',
-          render: (row) => fmtDate(row.expiresAt),
-        },
-        {
-          key: 'actions',
-          header: '',
-          render: (row) => (
-            <div className="flex justify-end">
-              <Button
-                size="sm"
-                variant="secondary"
-                disabled={cancelId === row.id}
-                onClick={() => handleCancel(row)}
-              >
-                {cancelId === row.id ? 'Membatalkan…' : 'Batalkan'}
-              </Button>
-            </div>
-          ),
-        },
-      ]}
-    />
+    <>
+      <AdminDataTable
+        rows={invitations}
+        emptyLabel="Tidak ada undangan pending"
+        columns={[
+          {
+            key: 'email',
+            header: 'Email',
+            render: (row) => (
+              <div>
+                <div className="font-medium text-sm">{row.email}</div>
+                {row.invitedBy && (
+                  <div className="text-xs text-neutral-400">
+                    Diundang oleh {row.invitedBy}
+                  </div>
+                )}
+              </div>
+            ),
+          },
+          {
+            key: 'role',
+            header: 'Peran',
+            render: (row) => (
+              <AdminPill tone="neutral">
+                {row.role === 'school_admin' ? 'Admin sekolah' : 'Guru'}
+              </AdminPill>
+            ),
+          },
+          {
+            key: 'createdAt',
+            header: 'Dikirim',
+            render: (row) => fmtDate(row.createdAt),
+          },
+          {
+            key: 'expiresAt',
+            header: 'Kedaluwarsa',
+            render: (row) => fmtDate(row.expiresAt),
+          },
+          {
+            key: 'actions',
+            header: '',
+            render: (row) => (
+              <div className="flex justify-end">
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  disabled={cancelId === row.id}
+                  onClick={() => setConfirmCancelInv(row)}
+                >
+                  {cancelId === row.id ? 'Membatalkan…' : 'Batalkan'}
+                </Button>
+              </div>
+            ),
+          },
+        ]}
+      />
+
+      <AdminConfirmModal
+        open={!!confirmCancelInv}
+        title="Batalkan Undangan"
+        description={`Apakah Anda yakin ingin membatalkan undangan ke ${confirmCancelInv?.email}?`}
+        confirmLabel="Ya, Batalkan Undangan"
+        cancelLabel="Batal"
+        variant="danger"
+        onConfirm={() => {
+          if (!confirmCancelInv) return;
+          const inv = confirmCancelInv;
+          setConfirmCancelInv(null);
+          handleCancel(inv);
+        }}
+        onCancel={() => setConfirmCancelInv(null)}
+      />
+    </>
   );
 }
 
@@ -1122,6 +1419,10 @@ export function SchoolAdminView({ section = '' }: { section?: string }) {
 
       {current === 'penggunaan' ? (
         <SectionPenggunaan setToast={setToast} />
+      ) : null}
+
+      {current === 'billing' ? (
+        <SectionBilling setToast={setToast} />
       ) : null}
 
       {current === 'pengaturan' ? (

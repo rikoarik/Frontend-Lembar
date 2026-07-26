@@ -1,5 +1,4 @@
-'use client';
-
+import { useState } from 'react';
 import { Button } from '@/app/components/ui';
 import {
   AdminPageHeader,
@@ -7,6 +6,7 @@ import {
   AdminToolbar,
   AdminDataTable,
   AdminContentLoading,
+  AdminConfirmModal,
 } from '@/src/features/admin/AdminChrome';
 import { adminService, type AdminFlagRow } from '@/src/services/admin/adminService';
 
@@ -45,6 +45,8 @@ export function OpsFlagsSection({
   loadFlags: () => void;
   setToast: (msg: string) => void;
 }) {
+  const [confirmDeleteFlagKey, setConfirmDeleteFlagKey] = useState<string | null>(null);
+
   return (
     <>
       <div className="flex items-center justify-between px-1 py-1">
@@ -182,22 +184,36 @@ export function OpsFlagsSection({
               size="sm"
               variant="danger"
               onClick={() => {
-                if (confirm(`Hapus flag "${row.key}"?`)) {
-                  adminService.deleteFlag(row.key).then((res) => {
-                    if (res.ok) {
-                      setToast(`Flag "${row.key}" dihapus.`);
-                    } else {
-                      setToast(`Gagal hapus: ${res.error.safeMessage}`);
-                    }
-                    loadFlags();
-                  });
-                }
+                setConfirmDeleteFlagKey(row.key);
               }}
             >
               Hapus
             </Button>
           </div>
         )}
+      />
+
+      <AdminConfirmModal
+        open={!!confirmDeleteFlagKey}
+        title="Hapus Feature Flag"
+        description={`Apakah Anda yakin ingin menghapus feature flag "${confirmDeleteFlagKey}"?`}
+        confirmLabel="Ya, Hapus Flag"
+        cancelLabel="Batal"
+        variant="danger"
+        onConfirm={() => {
+          if (!confirmDeleteFlagKey) return;
+          const flagKey = confirmDeleteFlagKey;
+          setConfirmDeleteFlagKey(null);
+          adminService.deleteFlag(flagKey).then((res) => {
+            if (res.ok) {
+              setToast(`Flag "${flagKey}" dihapus.`);
+            } else {
+              setToast(`Gagal hapus: ${res.error.safeMessage}`);
+            }
+            loadFlags();
+          });
+        }}
+        onCancel={() => setConfirmDeleteFlagKey(null)}
       />
     </>
   );

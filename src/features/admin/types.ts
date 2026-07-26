@@ -21,6 +21,7 @@ export const SCHOOL_NAV: AdminNavItem[] = [
   { href: '/school/undang', label: 'Undang', icon: 'person_add' },
   { href: '/school/undangan', label: 'Undangan aktif', icon: 'mail' },
   { href: '/school/penggunaan', label: 'Penggunaan', icon: 'monitoring' },
+  { href: '/school/billing', label: 'Langganan & Billing', icon: 'payments' },
   { href: '/school/pengaturan', label: 'Pengaturan', icon: 'settings' },
   { href: '/school/library', label: 'Library', icon: 'inventory_2' },
   { href: '/school/audit', label: 'Audit', icon: 'history' },

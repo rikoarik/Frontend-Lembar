@@ -1,11 +1,11 @@
-'use client';
-
+import { useState } from 'react';
 import { Button } from '@/app/components/ui';
 import {
   AdminDataTable,
   AdminPill,
   AdminToolbar,
   AdminContentLoading,
+  AdminConfirmModal,
 } from '@/src/features/admin/AdminChrome';
 import { AdminPagination } from '../components/AdminPagination';
 import { billingTone, planTone } from '../utils/opsToneUtils';
@@ -76,6 +76,18 @@ export function OpsSchoolsSection({
   loadSchools: (pg?: number, searchVal?: string, planVal?: AdminSchoolRow['plan']) => void;
   setToast: (msg: string) => void;
 }) {
+  const [confirmPlanModal, setConfirmPlanModal] = useState<{
+    rowId: string;
+    schoolName: string;
+    currentPlan: string;
+    nextPlan: string;
+    entitlementPlan: 'pro' | 'free';
+  } | null>(null);
+  const [confirmDeleteSchoolModal, setConfirmDeleteSchoolModal] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+
   return (
     <>
       <div className="flex items-center justify-between px-1 py-1">
@@ -242,18 +254,10 @@ export function OpsSchoolsSection({
                     size="sm"
                     variant="danger"
                     onClick={() => {
-                      if (confirm(`Hapus sekolah "${schoolDetailData.school.name}"? Aksi ini tidak bisa dibatalkan.`)) {
-                        adminService.deleteSchool(schoolDetailId).then((res) => {
-                          if (res.ok) {
-                            setToast(`Sekolah dihapus.`);
-                            setSchoolDetailId(null);
-                            setSchoolDetailData(null);
-                            loadSchools();
-                          } else {
-                            setToast(`Gagal: ${res.error.safeMessage}`);
-                          }
-                        });
-                      }
+                      setConfirmDeleteSchoolModal({
+                        id: schoolDetailId,
+                        name: schoolDetailData.school.name,
+                      });
                     }}
                   >
                     Hapus sekolah ini
@@ -332,16 +336,13 @@ export function OpsSchoolsSection({
               onClick={() => {
                 const nextPlan = row.plan === 'active' ? 'grace' : row.plan === 'grace' ? 'blocked' : 'active';
                 const entitlementPlan: 'pro' | 'free' = (nextPlan === 'active') ? 'pro' : 'free';
-                if (confirm(`Ubah plan ${row.name} dari "${row.plan}" ke "${nextPlan}"?`)) {
-                  adminService.setEntitlement(row.id, { plan: entitlementPlan }).then((res) => {
-                    if (res.ok) {
-                      setToast(`Plan ${row.name} diperbarui ke ${nextPlan}.`);
-                      loadSchools();
-                    } else {
-                      setToast(`Gagal: ${res.error.safeMessage}`);
-                    }
-                  });
-                }
+                setConfirmPlanModal({
+                  rowId: row.id,
+                  schoolName: row.name,
+                  currentPlan: row.plan,
+                  nextPlan,
+                  entitlementPlan,
+                });
               }}
             >
               Ubah plan
@@ -355,6 +356,54 @@ export function OpsSchoolsSection({
         totalItems={schoolsMeta.total}
         pageSize={10}
         onPageChange={setSchoolsPage}
+      />
+
+      <AdminConfirmModal
+        open={!!confirmPlanModal}
+        title="Ubah Plan Sekolah"
+        description={`Apakah Anda yakin ingin mengubah plan ${confirmPlanModal?.schoolName} dari "${confirmPlanModal?.currentPlan}" ke "${confirmPlanModal?.nextPlan}"?`}
+        confirmLabel="Ya, Ubah Plan"
+        cancelLabel="Batal"
+        variant="warning"
+        onConfirm={() => {
+          if (!confirmPlanModal) return;
+          const { rowId, schoolName, nextPlan, entitlementPlan } = confirmPlanModal;
+          setConfirmPlanModal(null);
+          adminService.setEntitlement(rowId, { plan: entitlementPlan }).then((res) => {
+            if (res.ok) {
+              setToast(`Plan ${schoolName} diperbarui ke ${nextPlan}.`);
+              loadSchools();
+            } else {
+              setToast(`Gagal: ${res.error.safeMessage}`);
+            }
+          });
+        }}
+        onCancel={() => setConfirmPlanModal(null)}
+      />
+
+      <AdminConfirmModal
+        open={!!confirmDeleteSchoolModal}
+        title="Hapus Sekolah"
+        description={`Apakah Anda yakin ingin menghapus sekolah "${confirmDeleteSchoolModal?.name}"? Aksi ini tidak dapat dibatalkan.`}
+        confirmLabel="Ya, Hapus Sekolah"
+        cancelLabel="Batal"
+        variant="danger"
+        onConfirm={() => {
+          if (!confirmDeleteSchoolModal) return;
+          const { id } = confirmDeleteSchoolModal;
+          setConfirmDeleteSchoolModal(null);
+          adminService.deleteSchool(id).then((res) => {
+            if (res.ok) {
+              setToast(`Sekolah dihapus.`);
+              setSchoolDetailId(null);
+              setSchoolDetailData(null);
+              loadSchools();
+            } else {
+              setToast(`Gagal: ${res.error.safeMessage}`);
+            }
+          });
+        }}
+        onCancel={() => setConfirmDeleteSchoolModal(null)}
       />
     </>
   );
