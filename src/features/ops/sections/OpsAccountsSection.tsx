@@ -8,6 +8,7 @@ import {
   AdminToolbar,
   AdminContentLoading,
   AdminConfirmModal,
+  AdminSelect,
 } from '@/src/features/admin/AdminChrome';
 import { AccountDetailView, AccountRowActions } from '../components/AccountDetailView';
 import { AdminPagination } from '../components/AdminPagination';
@@ -177,69 +178,68 @@ export function OpsAccountsSection({
           <div className="flex flex-col gap-1">
             <label className="text-[11px] font-medium text-[#6d665d]" htmlFor="invite-role">
               Role
-            </label>
-            <select
-              id="invite-role"
-              value={inviteRole}
-              onChange={(e) => setInviteRole(e.target.value as typeof inviteRole)}
-              className="rounded-lg border border-[#ddd4c8] bg-white px-3 py-1.5 text-[13px] text-[#171717] focus:outline-none focus:ring-2 focus:ring-[#171717]/20"
-            >
-              <option value="">— pilih —</option>
-              <option value="teacher">teacher</option>
-              <option value="school_admin">school_admin</option>
-              <option value="superadmin">superadmin</option>
-            </select>
-          </div>
-          <div className="flex gap-2">
-            <Button size="sm" type="submit" disabled={inviteLoading}>
-              {inviteLoading ? 'Mengirim…' : 'Kirim undangan'}
-            </Button>
-            <Button
-              size="sm"
-              variant="secondary"
-              type="button"
-              onClick={() => {
-                setInviteOpen(false);
-                setInviteEmail('');
-                setInviteName('');
-                setInviteRole('');
-              }}
-            >
-              Batal
-            </Button>
-          </div>
-        </form>
-      )}
-      <AdminToolbar
-        search={search}
-        onSearchChange={setSearch}
-        searchPlaceholder="Cari akun, email, role, sekolah"
-        filters={
-          <div className="flex items-center gap-2">
-            <select
-              value={filterRole}
-              onChange={(e) => setFilterRole(e.target.value as typeof filterRole)}
-              className="h-9 rounded-xl border border-[#ddd4c8] bg-white pl-3 pr-8 text-[12px] font-medium text-[#171717] focus:outline-none focus:ring-2 focus:ring-[#171717]/20 cursor-pointer"
-            >
-              <option value="">Semua role</option>
-              <option value="teacher">teacher</option>
-              <option value="school_admin">school_admin</option>
-              <option value="superadmin">superadmin</option>
-            </select>
+          </label>
+          <AdminSelect
+            value={inviteRole}
+            onChange={(val) => setInviteRole(val as typeof inviteRole)}
+            options={[
+              { value: '', label: '— pilih role —' },
+              { value: 'teacher', label: 'teacher' },
+              { value: 'school_admin', label: 'school_admin' },
+              { value: 'superadmin', label: 'superadmin' },
+            ]}
+          />
+        </div>
+        <div className="flex gap-2">
+          <Button size="sm" type="submit" disabled={inviteLoading}>
+            {inviteLoading ? 'Mengirim…' : 'Kirim undangan'}
+          </Button>
+          <Button
+            size="sm"
+            variant="secondary"
+            type="button"
+            onClick={() => {
+              setInviteOpen(false);
+              setInviteEmail('');
+              setInviteName('');
+              setInviteRole('');
+            }}
+          >
+            Batal
+          </Button>
+        </div>
+      </form>
+    )}
+    <AdminToolbar
+      search={search}
+      onSearchChange={setSearch}
+      searchPlaceholder="Cari akun, email, role, sekolah"
+      filters={
+        <div className="flex items-center gap-2">
+          <AdminSelect
+            value={filterRole}
+            onChange={(val) => setFilterRole(val as typeof filterRole)}
+            options={[
+              { value: '', label: 'Semua role' },
+              { value: 'teacher', label: 'teacher' },
+              { value: 'school_admin', label: 'school_admin' },
+              { value: 'superadmin', label: 'superadmin' },
+            ]}
+          />
 
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value as typeof filterStatus)}
-              className="h-9 rounded-xl border border-[#ddd4c8] bg-white pl-3 pr-8 text-[12px] font-medium text-[#171717] focus:outline-none focus:ring-2 focus:ring-[#171717]/20 cursor-pointer"
-            >
-              <option value="">Semua status</option>
-              <option value="aktif">aktif</option>
-              <option value="baru">baru</option>
-              <option value="ditangguhkan">ditangguhkan</option>
-            </select>
-          </div>
-        }
-      />
+          <AdminSelect
+            value={filterStatus}
+            onChange={(val) => setFilterStatus(val as typeof filterStatus)}
+            options={[
+              { value: '', label: 'Semua status' },
+              { value: 'aktif', label: 'aktif' },
+              { value: 'baru', label: 'baru' },
+              { value: 'ditangguhkan', label: 'ditangguhkan' },
+            ]}
+          />
+        </div>
+      }
+    />
       <AdminBulkBar count={selectedIds.length} onClear={clearSelection}>
         <Button
           size="sm"

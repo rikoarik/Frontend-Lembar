@@ -22,10 +22,14 @@ const PREDEFINED_GRADES: Record<Jenjang, string[]> = {
 
 /** Infer jenjang from grade label — fallback to 'SD' if no match */
 function inferJenjang(label: string): Jenjang {
-  const upper = label.toUpperCase();
+  const upper = label.toUpperCase().trim();
   if (upper.includes('SMK')) return 'SMK';
   if (upper.includes('SMA')) return 'SMA';
   if (upper.includes('SMP')) return 'SMP';
+  if (upper.includes('SD')) return 'SD';
+  if (/\b(10|11|12)\b/.test(upper)) return 'SMA';
+  if (/\b(7|8|9)\b/.test(upper)) return 'SMP';
+  if (/\b([1-6])\b/.test(upper)) return 'SD';
   return 'SD';
 }
 
@@ -140,7 +144,9 @@ function normalizeJenjang(raw?: string): Jenjang | undefined {
   const filteredGrades =
     catalogJenjangFilter === 'semua'
       ? catalogGrades
-      : catalogGrades.filter((g) => gradeJenjang(g) === catalogJenjangFilter);
+      : catalogGrades.filter(
+          (g) => gradeJenjang(g).toLowerCase() === catalogJenjangFilter.toLowerCase(),
+        );
 
   // Grouped: { SD: [...], SMP: [...], ... }
   const groupedGrades: Partial<Record<Jenjang, typeof catalogGrades>> = {};
@@ -150,7 +156,11 @@ function normalizeJenjang(raw?: string): Jenjang | undefined {
       if (items.length > 0) groupedGrades[j] = items;
     }
   } else {
-    groupedGrades[catalogJenjangFilter as Jenjang] = filteredGrades;
+    const matchKey =
+      JENJANG_LIST.find(
+        (j) => j.toLowerCase() === catalogJenjangFilter.toLowerCase(),
+      ) || 'SD';
+    groupedGrades[matchKey] = filteredGrades;
   }
 
   const resetAddGradeForm = () => {

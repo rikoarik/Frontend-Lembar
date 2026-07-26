@@ -6,6 +6,7 @@ import {
   AdminToolbar,
   AdminContentLoading,
   AdminConfirmModal,
+  AdminSelect,
 } from '@/src/features/admin/AdminChrome';
 import { AdminPagination } from '../components/AdminPagination';
 import { billingTone, planTone } from '../utils/opsToneUtils';
@@ -276,17 +277,17 @@ export function OpsSchoolsSection({
         searchPlaceholder="Cari sekolah / owner / plan"
         filters={
           <div className="flex items-center gap-2">
-            <select
+            <AdminSelect
               value={filterPlan}
-              onChange={(e) => setFilterPlan(e.target.value as typeof filterPlan)}
-              className="h-9 rounded-xl border border-[#ddd4c8] bg-white pl-3 pr-8 text-[12px] font-medium text-[#171717] focus:outline-none focus:ring-2 focus:ring-[#171717]/20 cursor-pointer"
-            >
-              <option value="">Semua plan</option>
-              <option value="pilot">pilot</option>
-              <option value="active">active</option>
-              <option value="grace">grace</option>
-              <option value="blocked">blocked</option>
-            </select>
+              onChange={(val) => setFilterPlan(val as typeof filterPlan)}
+              options={[
+                { value: '', label: 'Semua plan' },
+                { value: 'pilot', label: 'pilot' },
+                { value: 'active', label: 'active' },
+                { value: 'grace', label: 'grace' },
+                { value: 'blocked', label: 'blocked' },
+              ]}
+            />
           </div>
         }
       />

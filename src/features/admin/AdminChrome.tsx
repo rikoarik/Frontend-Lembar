@@ -558,6 +558,82 @@ export function AdminContentLoading({ label = 'Memuat data…' }: { label?: stri
   );
 }
 
+export function AdminSelect<T extends string>({
+  value,
+  onChange,
+  options,
+  placeholder = 'Pilih...',
+  className = '',
+}: {
+  value: T;
+  onChange: (val: T) => void;
+  options: { value: T; label: string }[];
+  placeholder?: string;
+  className?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const selectedOption = options.find((o) => o.value === value);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    if (open) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [open]);
+
+  return (
+    <div ref={containerRef} className={`relative inline-block ${className}`}>
+      <button
+        type="button"
+        onClick={() => setOpen((p) => !p)}
+        className="h-9 px-3.5 rounded-xl border border-[#ddd4c8] bg-white text-[12px] font-medium text-[#171717] hover:bg-[#faf7f2] hover:border-[#b8ad9e] focus:outline-none focus:ring-2 focus:ring-[#171717]/20 inline-flex items-center gap-2 transition-all cursor-pointer shadow-sm select-none"
+      >
+        <span>{selectedOption ? selectedOption.label : placeholder}</span>
+        <span className={`material-symbols-outlined text-[16px] text-[#6d665d] transition-transform duration-150 ${open ? 'rotate-180' : ''}`}>
+          expand_more
+        </span>
+      </button>
+
+      {open && (
+        <div className="absolute right-0 top-full mt-1.5 min-w-[150px] max-h-[240px] overflow-y-auto rounded-2xl border border-[#ddd4c8] bg-white p-1.5 shadow-[0_8px_30px_rgba(23,23,23,0.12)] z-50 animate-in fade-in-50 zoom-in-95">
+          {options.map((opt) => {
+            const isSelected = opt.value === value;
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => {
+                  onChange(opt.value);
+                  setOpen(false);
+                }}
+                className={`w-full flex items-center justify-between gap-3 rounded-xl px-3 py-2 text-left text-[12px] font-medium transition-all ${
+                  isSelected
+                    ? 'bg-[#171717] text-white'
+                    : 'text-[#171717] hover:bg-[#faf7f2]'
+                }`}
+              >
+                <span>{opt.label}</span>
+                {isSelected && (
+                  <span className="material-symbols-outlined text-[14px] text-white">
+                    check
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function AdminShell({
   brand,
   title,

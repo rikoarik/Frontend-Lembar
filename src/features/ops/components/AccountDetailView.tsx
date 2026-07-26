@@ -160,33 +160,62 @@ export function AccountDetailView({
 
           {/* Right Column: Metadata Overview */}
           <div className="space-y-4">
-            <div className="rounded-2xl border border-[#ddd4c8]/70 bg-white p-5 shadow-sm space-y-3 text-[13px]">
-              <h3 className="text-[15px] font-bold text-[#171717]">Informasi Sistem</h3>
+            <div className="rounded-2xl border border-[#ddd4c8]/70 bg-white p-5 shadow-sm space-y-4 text-[13px]">
+              <div className="flex items-center justify-between border-b border-[#eee6da]/70 pb-3">
+                <h3 className="text-[15px] font-bold text-[#171717]">Informasi Sistem</h3>
+                <AdminPill tone={detail.billing?.state === 'active' || detail.billing?.state === 'pro' ? 'ok' : 'neutral'}>
+                  {detail.billing?.state || 'free'}
+                </AdminPill>
+              </div>
               
-              <div className="divide-y divide-[#ddd4c8]/40">
-                <div className="py-2 flex items-center justify-between">
-                  <span className="text-[#6d665d]">Username</span>
-                  <span className="font-semibold text-[#171717]">{detail.username || '-'}</span>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[#6d665d] text-[12px] font-medium shrink-0">Username</span>
+                  <span className="font-semibold text-[#171717] truncate">{detail.username || '—'}</span>
                 </div>
-                <div className="py-2 flex items-center justify-between">
-                  <span className="text-[#6d665d]">Sekolah</span>
-                  <span className="font-semibold text-[#171717]">{detail.school || detail.schoolSlug || '-'}</span>
+
+                <div className="space-y-1 pt-1 border-t border-[#eee6da]/50">
+                  <span className="text-[#6d665d] text-[12px] font-medium block">Sekolah / Instansi</span>
+                  <div className="p-2 rounded-xl bg-[#faf7f2] border border-[#eee6da] text-[12px] text-[#171717] font-medium break-all leading-snug">
+                    {detail.school || detail.schoolSlug || '—'}
+                  </div>
                 </div>
-                <div className="py-2 flex items-center justify-between">
-                  <span className="text-[#6d665d]">Workspace ID</span>
-                  <span className="font-mono text-[11px] text-[#171717]">{detail.workspaceId || '-'}</span>
+
+                <div className="space-y-1 pt-1 border-t border-[#eee6da]/50">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[#6d665d] text-[12px] font-medium">Workspace ID</span>
+                    {detail.workspaceId && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigator.clipboard.writeText(detail.workspaceId || '');
+                          setToast('Workspace ID disalin ke clipboard');
+                        }}
+                        className="text-[11px] font-medium text-[#171717] hover:underline inline-flex items-center gap-1"
+                      >
+                        <span className="material-symbols-outlined text-[13px]">content_copy</span>
+                        Salin
+                      </button>
+                    )}
+                  </div>
+                  <div className="p-2 rounded-xl bg-[#faf7f2] border border-[#eee6da] font-mono text-[11px] text-[#57534e] break-all">
+                    {detail.workspaceId || '—'}
+                  </div>
                 </div>
-                <div className="py-2 flex items-center justify-between">
-                  <span className="text-[#6d665d]">Status Billing</span>
-                  <span className="font-semibold text-[#171717]">{detail.billing?.state || 'free'}</span>
-                </div>
-                <div className="py-2 flex items-center justify-between">
-                  <span className="text-[#6d665d]">Kuota Terpakai</span>
-                  <span className="font-semibold text-[#171717]">{detail.stats?.quotaUsed ?? 0}</span>
-                </div>
-                <div className="py-2 flex items-center justify-between">
-                  <span className="text-[#6d665d]">Total Job</span>
-                  <span className="font-semibold text-[#171717]">{detail.stats?.jobsTotal ?? 0}</span>
+
+                <div className="grid grid-cols-2 gap-2 pt-2 border-t border-[#eee6da]/50 text-[12px]">
+                  <div className="p-2.5 rounded-xl bg-[#faf7f2] border border-[#eee6da]/60">
+                    <span className="block text-[11px] text-[#6d665d] font-medium">Kuota Terpakai</span>
+                    <span className="text-[14px] font-bold text-[#171717] tabular-nums mt-0.5 block">
+                      {detail.stats?.quotaUsed ?? 0}
+                    </span>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-[#faf7f2] border border-[#eee6da]/60">
+                    <span className="block text-[11px] text-[#6d665d] font-medium">Total Job</span>
+                    <span className="text-[14px] font-bold text-[#171717] tabular-nums mt-0.5 block">
+                      {detail.stats?.jobsTotal ?? 0}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
