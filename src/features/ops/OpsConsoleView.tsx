@@ -198,14 +198,16 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
   const [filterOrderStatus, setFilterOrderStatus] = useState('');
 
   // Catalog state
-  const [catalogGrades, setCatalogGrades] = useState<{ id: string; label: string; status: string }[]>([]);
+  const [catalogGrades, setCatalogGrades] = useState<{ id: string; label: string; status: string; jenjang?: string }[]>([]);
   const [catalogSubjects, setCatalogSubjects] = useState<{ id: string; label: string; status: string }[]>([]);
   const [catalogSelectedGrade, setCatalogSelectedGrade] = useState<string>('');
   const [catalogLoading, setCatalogLoading] = useState(false);
   const [catalogSubjectsLoading, setCatalogSubjectsLoading] = useState(false);
   const [catalogUpdatingIds, setCatalogUpdatingIds] = useState<Set<string>>(new Set());
   const [catalogShowAddGrade, setCatalogShowAddGrade] = useState(false);
-  const [catalogNewGradeLabel, setCatalogNewGradeLabel] = useState('');
+  const [catalogJenjangFilter, setCatalogJenjangFilter] = useState('semua');
+  const [catalogAddGradeJenjang, setCatalogAddGradeJenjang] = useState<string | null>(null);
+  const [catalogAddGradePredefined, setCatalogAddGradePredefined] = useState('');
   const [catalogAddingGrade, setCatalogAddingGrade] = useState(false);
   const [catalogShowAddSubject, setCatalogShowAddSubject] = useState(false);
   const [catalogNewSubjectLabel, setCatalogNewSubjectLabel] = useState('');
@@ -663,8 +665,6 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
           setCatalogUpdatingIds={setCatalogUpdatingIds}
           catalogShowAddGrade={catalogShowAddGrade}
           setCatalogShowAddGrade={setCatalogShowAddGrade}
-          catalogNewGradeLabel={catalogNewGradeLabel}
-          setCatalogNewGradeLabel={setCatalogNewGradeLabel}
           catalogAddingGrade={catalogAddingGrade}
           setCatalogAddingGrade={setCatalogAddingGrade}
           catalogShowAddSubject={catalogShowAddSubject}
@@ -673,6 +673,12 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
           setCatalogNewSubjectLabel={setCatalogNewSubjectLabel}
           catalogAddingSubject={catalogAddingSubject}
           setCatalogAddingSubject={setCatalogAddingSubject}
+          catalogJenjangFilter={catalogJenjangFilter}
+          setCatalogJenjangFilter={setCatalogJenjangFilter}
+          catalogAddGradeJenjang={catalogAddGradeJenjang}
+          setCatalogAddGradeJenjang={setCatalogAddGradeJenjang}
+          catalogAddGradePredefined={catalogAddGradePredefined}
+          setCatalogAddGradePredefined={setCatalogAddGradePredefined}
           setToast={setToast}
         />
       ) : null}
