@@ -39,6 +39,7 @@ import { OpsBillingSection } from './sections/OpsBillingSection';
 import { OpsFlagsSection } from './sections/OpsFlagsSection';
 import { OpsContentSection } from './sections/OpsContentSection';
 import { OpsLearningSignalsSection } from './sections/OpsLearningSignalsSection';
+import { OpsProfileSection } from './sections/OpsProfileSection';
 
 type AccountRow = AdminAccountRow;
 type SchoolRow = AdminSchoolRow;
@@ -852,107 +853,6 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
         />
       ) : null}
 
-      {key === 'profile-disabled' ? (
-        <>
-          <AdminPageHeader
-            title="Profil Saya"
-            description="Informasi akun Superadmin dan kredensial akses."
-            meta={<AdminPill tone="info">Platform Level</AdminPill>}
-          />
-          <div className="grid gap-6 md:grid-cols-2">
-            <div className="space-y-4 rounded-2xl border border-[#ddd4c8]/70 bg-white p-6 shadow-[0_2px_12px_rgba(23,23,23,0.01)]">
-              <h3 className="text-[14px] font-bold text-[#171717] border-b border-[#eee6da]/50 pb-2">
-                Detail Akun
-              </h3>
-              <div className="flex items-center gap-4">
-                <AdminAvatar name="Ops Superadmin" />
-                <div>
-                  <div className="text-[16px] font-bold text-[#171717]">Ops Superadmin</div>
-                  <div className="text-[12px] text-[#6d665d]">ops@lembar.id</div>
-                  <div className="mt-1.5">
-                    <AdminPill tone="info">superadmin</AdminPill>
-                  </div>
-                </div>
-              </div>
-              <div className="border-t border-[#eee6da]/50 pt-4 space-y-2.5 text-[12px]">
-                <div className="flex justify-between">
-                  <span className="text-[#8a8379]">Akses Hak</span>
-                  <span className="font-semibold text-brand-accent">FULL_CONTROL</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-[#8a8379]">Masa Berlaku</span>
-                  <span className="font-medium text-[#171717]">Selamanya</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-[#8a8379]">Metode Masuk</span>
-                  <span className="font-medium text-[#171717]">JWT Multi-role</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-4 rounded-2xl border border-[#ddd4c8]/70 bg-white p-6 shadow-[0_2px_12px_rgba(23,23,23,0.01)]">
-              <h3 className="text-[14px] font-bold text-[#171717] border-b border-[#eee6da]/50 pb-2">
-                Informasi Sesi
-              </h3>
-              <div className="space-y-2.5 text-[12px]">
-                <div className="flex justify-between">
-                  <span className="text-[#8a8379]">Browser</span>
-                  <span className="font-medium text-[#171717] text-right max-w-[60%] truncate">
-                    {typeof navigator !== 'undefined'
-                      ? navigator.userAgent.match(/Chrome\/[\d.]+/)?.[0]
-                        ?? navigator.userAgent.match(/Firefox\/[\d.]+/)?.[0]
-                        ?? navigator.userAgent.match(/Safari\/[\d.]+/)?.[0]
-                        ?? 'Browser'
-                      : 'Browser'}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-[#8a8379]">Platform</span>
-                  <span className="font-medium text-[#171717]">
-                    {typeof navigator !== 'undefined' ? navigator.platform || 'Web' : 'Web'}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-[#8a8379]">Zona Waktu</span>
-                  <span className="font-medium text-[#171717]">
-                    {typeof Intl !== 'undefined' ? Intl.DateTimeFormat().resolvedOptions().timeZone : '—'}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-[#8a8379]">Sesi Dimulai</span>
-                  <span className="font-medium text-[#171717]">
-                    {new Date().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })}
-                  </span>
-                </div>
-              </div>
-              <div className="border-t border-[#eee6da]/50 pt-4 space-y-2">
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  className="w-full justify-center"
-                  onClick={() => {
-                    if (confirm('Logout dari sesi ini?')) {
-                      fetch('/v1/auth/logout', { method: 'POST', credentials: 'include' })
-                        .then(() => {
-                          window.location.href = '/ops/login';
-                        })
-                        .catch(() => {
-                          window.location.href = '/ops/login';
-                        });
-                    }
-                  }}
-                >
-                  Log Out Sesi Ini
-                </Button>
-                <div className="text-[11px] text-[#b0a89f] text-center">
-                  Multi-device logout belum tersedia — fitur dalam pengembangan BE
-                </div>
-              </div>
-            </div>
-          </div>
-        </>
-      ) : null}
-
       {key === 'learning-signals' ? (
         <OpsLearningSignalsSection
           signalsData={signalsData}
@@ -961,6 +861,8 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
           setSignalsLoading={setSignalsLoading}
         />
       ) : null}
+
+      {key === 'profile' ? <OpsProfileSection setToast={setToast} /> : null}
 
       {key !== '' &&
       !key.startsWith('accounts/') &&
@@ -976,7 +878,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
         'billing',
         'flags',
         'content',
-        'profile-disabled',
+        'profile',
       ].includes(key) ? (
         <AdminPageHeader
           title={`Section ${key}`}

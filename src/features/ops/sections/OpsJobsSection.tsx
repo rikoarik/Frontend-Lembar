@@ -54,34 +54,26 @@ export function OpsJobsSection({
 }) {
   return (
     <>
-      <AdminPageHeader
-        title="Jobs"
-        description="Queue generate, export, dan indexing."
-        meta={
-          <AdminPill tone="bad">
-            {jobs.filter((j) => j.status === 'failed').length} gagal
-          </AdminPill>
-        }
-        actions={
-          <Button
-            size="sm"
-            onClick={() => {
-              const failedIds = jobsData.filter((j) => j.status === 'failed').map((j) => j.id);
-              if (failedIds.length === 0) {
-                setToast('Tidak ada job failed.');
-                return;
-              }
-              Promise.all(failedIds.map((id) => adminService.retryJob(id))).then((results) => {
-                const ok = results.filter((r) => r.ok).length;
-                setToast(`${ok} dari ${failedIds.length} job failed di-retry.`);
-                loadJobs();
-              });
-            }}
-          >
-            Retry semua failed
-          </Button>
-        }
-      />
+      <div className="flex items-center justify-between px-1 py-1">
+        <h2 className="text-[18px] font-bold text-[#171717]">Jobs</h2>
+        <Button
+          size="sm"
+          onClick={() => {
+            const failedIds = jobsData.filter((j) => j.status === 'failed').map((j) => j.id);
+            if (failedIds.length === 0) {
+              setToast('Tidak ada job failed.');
+              return;
+            }
+            Promise.all(failedIds.map((id) => adminService.retryJob(id))).then((results) => {
+              const ok = results.filter((r) => r.ok).length;
+              setToast(`${ok} dari ${failedIds.length} job failed di-retry.`);
+              loadJobs();
+            });
+          }}
+        >
+          Retry semua failed
+        </Button>
+      </div>
       {jobsLoading ? <AdminContentLoading /> : null}
 
       {/* Job detail modal */}

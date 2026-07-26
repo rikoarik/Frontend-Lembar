@@ -55,15 +55,12 @@ export function OpsContentSection({
 }) {
   return (
     <>
-      <AdminPageHeader
-        title="Konten"
-        description="Draft dan publish halaman publik."
-        actions={
-          <Button size="sm" onClick={() => setCreateSchoolOpen(true)}>
-            Draft baru
-          </Button>
-        }
-      />
+      <div className="flex items-center justify-between px-1 py-1">
+        <h2 className="text-[18px] font-bold text-[#171717]">Konten</h2>
+        <Button size="sm" onClick={() => setCreateSchoolOpen(true)}>
+          Draft baru
+        </Button>
+      </div>
       {contentLoading ? <AdminContentLoading /> : null}
 
       {/* Inline create content form */}

@@ -52,20 +52,12 @@ export function OpsPromptsSection({
 }) {
   return (
     <>
-      <AdminPageHeader
-        title="Prompt"
-        description="Template prompt untuk generate, repair, dan quality check."
-        meta={
-          <AdminPill tone="ok">
-            {promptsData.filter((p) => p.status === 'active').length} aktif
-          </AdminPill>
-        }
-        actions={
-          <Button size="sm" onClick={() => setCreatePromptOpen(true)}>
-            Buat prompt
-          </Button>
-        }
-      />
+      <div className="flex items-center justify-between px-1 py-1">
+        <h2 className="text-[18px] font-bold text-[#171717]">Prompt</h2>
+        <Button size="sm" onClick={() => setCreatePromptOpen(true)}>
+          Buat prompt
+        </Button>
+      </div>
       {promptsLoading ? <AdminContentLoading /> : null}
 
       {/* Create Prompt inline form */}

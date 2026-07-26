@@ -69,19 +69,14 @@ export function AdminStatCards({
   return (
     <div className={`grid gap-3.5 ${gridCols}`}>
       {items.map((item) => {
-        let borderAccent = 'border-t-2 border-t-[#b9afa2]';
-        if (item.tone === 'ok') borderAccent = 'border-t-2 border-t-[#176b45]';
-        if (item.tone === 'warn') borderAccent = 'border-t-2 border-t-[#8a5400]';
-        if (item.tone === 'bad') borderAccent = 'border-t-2 border-t-[#851925]';
-        if (item.tone === 'info') borderAccent = 'border-t-2 border-t-[#245a82]';
-
         return (
           <div
             key={item.label}
-            className={`relative overflow-hidden rounded-2xl border border-[#ddd4c8]/80 bg-white p-5 shadow-[0_2px_12px_rgba(23,23,23,0.01),0_1px_2px_rgba(23,23,23,0.02)] hover:shadow-[0_8px_24px_rgba(23,23,23,0.06)] hover:-translate-y-0.5 transition-all duration-300 ${borderAccent}`}
+            className="relative overflow-hidden rounded-2xl border border-[#ddd4c8]/80 bg-white p-5 shadow-[0_2px_12px_rgba(23,23,23,0.01),0_1px_2px_rgba(23,23,23,0.02)] hover:shadow-[0_8px_24px_rgba(23,23,23,0.06)] hover:-translate-y-0.5 transition-all duration-300"
           >
             <div className="flex items-center justify-between gap-3">
-              <div className="text-[11px] font-bold tracking-wider uppercase text-[#6d665d]/90">
+              <div className="flex items-center gap-1.5 text-[11px] font-bold tracking-wider uppercase text-[#57534e]">
+                {item.tone ? <AdminDot tone={item.tone} /> : null}
                 {item.label}
               </div>
               {item.delta ? (
@@ -93,10 +88,11 @@ export function AdminStatCards({
             <div className="mt-3.5 text-[34px] font-extrabold tracking-[-0.05em] text-[#171717] leading-none">
               {item.value}
             </div>
-            <div className="mt-3.5 flex items-center gap-1.5 text-[12px] text-[#8a8379]">
-              {item.tone ? <AdminDot tone={item.tone} /> : null}
-              {item.hint ? <span className="font-medium text-[#6d665d]">{item.hint}</span> : null}
-            </div>
+            {item.hint ? (
+              <div className="mt-3 text-[12px] font-medium text-[#57534e]">
+                {item.hint}
+              </div>
+            ) : null}
           </div>
         );
       })}
@@ -124,21 +120,27 @@ export function AdminToolbar({
   searchPlaceholder = 'Cari…',
   filters,
   actions,
+  flat = true,
 }: {
   search: string;
   onSearchChange: (value: string) => void;
   searchPlaceholder?: string;
   filters?: ReactNode;
   actions?: ReactNode;
+  flat?: boolean;
 }) {
+  const containerCls = flat
+    ? 'flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between py-1'
+    : 'flex flex-col gap-3 rounded-xl border border-[#ddd4c8] bg-white p-3 shadow-[0_1px_0_rgba(23,23,23,0.03)] lg:flex-row lg:items-center lg:justify-between';
+
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-[#ddd4c8] bg-white p-3 shadow-[0_1px_0_rgba(23,23,23,0.03)] lg:flex-row lg:items-center lg:justify-between">
+    <div className={containerCls}>
       <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-center">
         <label className="relative min-w-0 flex-1">
           <span className="sr-only">Cari</span>
           <span
             aria-hidden
-            className="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-[#8a8379]"
+            className="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-[#57534e]"
           >
             search
           </span>
@@ -146,7 +148,7 @@ export function AdminToolbar({
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder={searchPlaceholder}
-            className="min-h-[40px] w-full rounded-lg border border-[#ddd4c8] bg-[#f7f3ec] py-2 pl-10 pr-3 text-[13px] text-[#171717] placeholder:text-[#8a8379] focus-visible:border-[#b9afa2]"
+            className="min-h-[40px] w-full rounded-xl border border-[#ddd4c8] bg-white py-2 pl-10 pr-3 text-[13px] text-[#171717] placeholder:text-[#57534e] focus:outline-none focus:ring-2 focus:ring-[#171717]/20"
           />
         </label>
         {filters ? <div className="flex flex-wrap items-center gap-2">{filters}</div> : null}
@@ -212,24 +214,102 @@ export function AdminEmptyState({
   description,
   action,
   icon = 'inbox',
+  flat = false,
 }: {
   title?: string;
   description?: string;
   action?: ReactNode;
   icon?: string;
+  flat?: boolean;
 }) {
+  const containerCls = flat
+    ? 'rounded-xl bg-[#faf8f5]/60 px-6 py-8 text-center'
+    : 'rounded-xl border border-dashed border-[#ddd4c8] bg-white px-6 py-14 text-center';
+
   return (
-    <div className="rounded-xl border border-dashed border-[#ddd4c8] bg-white px-6 py-14 text-center">
-      <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-[#f0ebe3] text-[#6d665d]">
-        <span className="material-symbols-outlined text-[22px]" aria-hidden>
+    <div className={containerCls}>
+      <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-[#f0ebe3] text-[#57534e]">
+        <span className="material-symbols-outlined text-[20px] leading-none inline-flex items-center justify-center" aria-hidden>
           {icon}
         </span>
       </div>
-      <p className="text-[14px] font-semibold text-[#171717]">{title}</p>
+      <p className="text-[13px] font-semibold text-[#171717]">{title}</p>
       {description ? (
-        <p className="mx-auto mt-1 max-w-md text-[13px] text-[#6d665d]">{description}</p>
+        <p className="mx-auto mt-1 max-w-md text-[12px] text-[#57534e]">{description}</p>
       ) : null}
-      {action ? <div className="mt-4 flex justify-center">{action}</div> : null}
+      {action ? <div className="mt-3 flex justify-center">{action}</div> : null}
+    </div>
+  );
+}
+
+export function AdminConfirmModal({
+  open,
+  title = 'Konfirmasi Tindakan',
+  description,
+  confirmLabel = 'Ya, Lanjutkan',
+  cancelLabel = 'Batal',
+  variant = 'danger',
+  loading = false,
+  onConfirm,
+  onCancel,
+}: {
+  open: boolean;
+  title?: string;
+  description: string;
+  confirmLabel?: string;
+  cancelLabel?: string;
+  variant?: 'danger' | 'warning' | 'primary';
+  loading?: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  if (!open) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-[var(--z-modal)] flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-4 animate-in fade-in duration-150"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onCancel();
+      }}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="confirm-dialog-title"
+    >
+      <div className="w-full max-w-sm rounded-2xl border border-[#ddd4c8]/80 bg-white p-5 shadow-2xl space-y-4 animate-in zoom-in-95 duration-150">
+        <div className="flex items-start gap-3">
+          <div
+            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
+              variant === 'danger'
+                ? 'bg-red-50 text-red-600 border border-red-100'
+                : 'bg-amber-50 text-amber-600 border border-amber-100'
+            }`}
+          >
+            <span className="material-symbols-outlined text-[20px] leading-none inline-flex items-center justify-center" aria-hidden>
+              {variant === 'danger' ? 'warning' : 'help_outline'}
+            </span>
+          </div>
+          <div className="min-w-0 flex-1">
+            <h3 id="confirm-dialog-title" className="text-[15px] font-bold text-[#171717]">
+              {title}
+            </h3>
+            <p className="mt-1 text-[13px] leading-relaxed text-[#57534e]">{description}</p>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#eee6da]/60">
+          <Button size="sm" variant="secondary" onClick={onCancel} disabled={loading}>
+            {cancelLabel}
+          </Button>
+          <Button
+            size="sm"
+            variant={variant === 'danger' ? 'danger' : undefined}
+            onClick={onConfirm}
+            disabled={loading}
+          >
+            {loading ? 'Memproses…' : confirmLabel}
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -255,10 +335,9 @@ export function AdminBulkBar({
           <button
             type="button"
             onClick={onClear}
-            aria-label="Bersihkan pilihan"
-            className="rounded-lg px-2.5 py-1.5 text-[12px] font-semibold text-white/75 hover:bg-white/10 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/60"
+            className="text-[12px] font-medium text-white/70 hover:text-white underline"
           >
-            Bersihkan
+            Batal
           </button>
         ) : null}
       </div>
@@ -307,19 +386,20 @@ export function AdminDataTable<T extends { id: string }>({
         description={emptyHint}
         action={emptyAction}
         icon="filter_alt_off"
+        flat={flat}
       />
     );
   }
 
   const containerCls = flat
-    ? 'overflow-hidden border-t border-[#ddd4c8]/50'
-    : 'overflow-hidden rounded-2xl border border-[#ddd4c8]/70 bg-white shadow-[0_8px_24px_rgba(23,23,23,0.02),0_1px_3px_rgba(23,23,23,0.02)]';
+    ? 'border-t border-[#ddd4c8]/50'
+    : 'rounded-2xl border border-[#ddd4c8]/70 bg-white shadow-[0_8px_24px_rgba(23,23,23,0.02),0_1px_3px_rgba(23,23,23,0.02)]';
 
   return (
     <div className={containerCls}>
       <div className="overflow-x-auto">
         <table className="min-w-full border-collapse text-left text-[13px]">
-          <thead className="bg-[#faf8f5] border-b border-[#ddd4c8]/50 text-[11px] font-bold uppercase tracking-[0.08em] text-[#6d665d]">
+          <thead className="bg-[#faf7f2]/50 border-b border-[#ddd4c8]/60 text-[11px] font-bold uppercase tracking-[0.08em] text-[#57534e]">
             <tr>
               {selectable ? (
                 <th className="w-10 px-4 py-3">
@@ -538,7 +618,7 @@ export function AdminShell({
   );
 
   return (
-    <div className="h-dvh flex flex-col overflow-hidden bg-[#faf7f2] text-[#171717]">
+    <div className="h-dvh flex flex-col bg-[#faf7f2] text-[#171717]">
       <ImpersonationBanner />
       <a
         href="#konten-admin"
@@ -549,7 +629,7 @@ export function AdminShell({
       <div className="flex h-full w-full">
         {/* Fixed-height rail: never scrolls with page content */}
         <aside
-          className={`hidden h-full shrink-0 flex-col bg-[#171717] text-white md:flex transition-[width] duration-250 ease-in-out ${
+          className={`hidden h-full shrink-0 flex-col bg-[#171717] text-white md:flex transition-all duration-200 ease-in-out ${
             collapsed ? 'w-[68px]' : 'w-[252px]'
           }`}
         >
@@ -688,6 +768,19 @@ export function AdminShell({
 
                 <div className="mt-2 space-y-1">
                   <Link
+                    href="/ops/profile"
+                    onClick={() => setProfileOpen(false)}
+                    className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[12px] font-medium text-white/80 hover:bg-white/10 hover:text-white transition-colors"
+                  >
+                    <span
+                      className="material-symbols-outlined text-[16px] text-white/50"
+                      aria-hidden
+                    >
+                      person
+                    </span>
+                    Profil Sesi
+                  </Link>
+                  <a
                     href="/app"
                     onClick={() => setProfileOpen(false)}
                     className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[12px] font-medium text-white/80 hover:bg-white/10 hover:text-white transition-colors"
@@ -699,7 +792,7 @@ export function AdminShell({
                       auto_awesome
                     </span>
                     Aplikasi Guru
-                  </Link>
+                  </a>
                   <button
                     type="button"
                     onClick={async () => {
@@ -746,7 +839,7 @@ export function AdminShell({
           </div>
         </aside>
 
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
           <header className="shrink-0 border-b border-[#ddd4c8]/80 bg-white/80 py-3 px-4 backdrop-blur-md md:px-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="min-w-0">
@@ -822,18 +915,33 @@ export function AdminShell({
           >
             {toast ? (
               <div
-                className="fixed bottom-6 right-6 z-[var(--z-toast)] flex items-center justify-between gap-4 rounded-xl border border-[#333] bg-[#171717] text-white px-4 py-3 text-[13px] shadow-2xl max-w-md"
+                className="fixed top-5 right-5 z-[var(--z-toast)] flex items-center gap-3 rounded-2xl border border-[#ddd4c8]/90 bg-white/95 backdrop-blur-md px-4 py-3 text-[13px] shadow-[0_12px_32px_rgba(23,23,23,0.12),0_2px_6px_rgba(23,23,23,0.04)] max-w-md animate-in fade-in slide-in-from-top-4 duration-200"
                 role="status"
                 aria-live="polite"
               >
-                <span className="font-medium text-white">{toast}</span>
+                <div
+                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ${
+                    toast.toLowerCase().includes('gagal') || toast.toLowerCase().includes('error')
+                      ? 'bg-red-50 text-red-600 border border-red-100'
+                      : 'bg-[#e4f2ea] text-[#176b45] border border-[#c3e3d2]'
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-[18px] leading-none inline-flex items-center justify-center" aria-hidden>
+                    {toast.toLowerCase().includes('gagal') || toast.toLowerCase().includes('error')
+                      ? 'error'
+                      : 'check_circle'}
+                  </span>
+                </div>
+                <span className="font-medium text-[#171717] leading-snug">{toast}</span>
                 <button
                   type="button"
-                  className="text-[12px] font-bold text-[#b0a89e] hover:text-white transition-colors ml-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/60"
+                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[#8a8379] hover:bg-[#faf7f2] hover:text-[#171717] transition-colors ml-2"
                   onClick={() => setToast(null)}
                   aria-label="Tutup notifikasi"
                 >
-                  Tutup
+                  <span className="material-symbols-outlined text-[16px] leading-none inline-flex items-center justify-center" aria-hidden>
+                    close
+                  </span>
                 </button>
               </div>
             ) : null}

@@ -50,7 +50,7 @@ export function OpsOverviewSection({
                 )
               ) : null}
             </div>
-            <p className="mt-1 text-[13px] text-[#6d665d]">
+            <p className="mt-1 text-[13px] text-[#57534e] max-w-md leading-relaxed">
               Ringkasan performa pemrosesan job, kesehatan tenant, dan aktivitas sistem superadmin secara real-time.
             </p>
           </div>
@@ -157,12 +157,12 @@ export function OpsOverviewSection({
         <div className="flex flex-col space-y-4 rounded-2xl border border-[#ddd4c8]/80 bg-white p-5 shadow-[0_2px_12px_rgba(23,23,23,0.01),0_1px_2px_rgba(23,23,23,0.02)] transition-all duration-200 hover:shadow-[0_8px_24px_rgba(23,23,23,0.04)]">
           <div className="flex items-center justify-between gap-2 border-b border-[#eee6da]/60 pb-3.5">
             <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-[18px] text-[#6d665d]">
+              <span className="material-symbols-outlined text-[18px] text-[#57534e]">
                 view_list
               </span>
               <div>
                 <h3 className="text-[14px] font-bold text-[#171717]">Jobs Terbaru</h3>
-                <p className="text-[11px] text-[#8a8379]">Antrean & status eksekusi job terkini</p>
+                <p className="text-[12px] text-[#57534e]">Antrean & status eksekusi job terkini</p>
               </div>
             </div>
             <a
@@ -230,12 +230,12 @@ export function OpsOverviewSection({
         <div className="flex flex-col space-y-4 rounded-2xl border border-[#ddd4c8]/80 bg-white p-5 shadow-[0_2px_12px_rgba(23,23,23,0.01),0_1px_2px_rgba(23,23,23,0.02)] transition-all duration-200 hover:shadow-[0_8px_24px_rgba(23,23,23,0.04)]">
           <div className="flex items-center justify-between gap-2 border-b border-[#eee6da]/60 pb-3.5">
             <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-[18px] text-[#8a5400]">
+              <span className="material-symbols-outlined text-[18px] text-[#c9703a]">
                 warning
               </span>
               <div>
                 <h3 className="text-[14px] font-bold text-[#171717]">Tenant Perlu Perhatian</h3>
-                <p className="text-[11px] text-[#8a8379]">
+                <p className="text-[12px] text-[#57534e]">
                   Sekolah dalam status masa tenggang atau diblokir
                 </p>
               </div>
@@ -290,14 +290,14 @@ export function OpsOverviewSection({
       <DashboardTrendsChart />
 
       {/* Operational Health Footer Note */}
-      <div className="flex items-center justify-between rounded-xl border border-[#ddd4c8]/60 bg-[#faf8f5] px-4 py-3 text-[12px] text-[#6d665d]">
+      <div className="flex items-center justify-between rounded-xl border border-[#ddd4c8]/60 bg-[#faf8f5] px-4 py-3 text-[12px] text-[#57534e]">
         <div className="flex items-center gap-2">
           <span className="h-2 w-2 rounded-full bg-[#176b45]" aria-hidden />
           <span>
             Infrastruktur Superadmin lembar beroperasi normal — API, Database, Worker Queue, dan Storage terpantau stabil.
           </span>
         </div>
-        <span className="text-[11px] font-mono text-[#8a8379] hidden md:inline-block">
+        <span className="text-[12px] font-mono text-[#57534e] hidden md:inline-block">
           v1.0.0-ops
         </span>
       </div>

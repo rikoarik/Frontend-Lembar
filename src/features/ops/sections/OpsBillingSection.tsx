@@ -80,15 +80,9 @@ export function OpsBillingSection({
 }) {
   return (
     <>
-      <AdminPageHeader
-        title="Billing"
-        description="Status langganan, seats, perpanjangan, dan riwayat pembayaran."
-        meta={
-          <AdminPill tone="warn">
-            {billingData.filter((b) => b.state !== 'active').length} tidak aktif
-          </AdminPill>
-        }
-      />
+      <div className="flex items-center justify-between px-1 py-1">
+        <h2 className="text-[18px] font-bold text-[#171717]">Billing</h2>
+      </div>
       {billingLoading ? <AdminContentLoading /> : null}
 
       {/* Tab switcher */}

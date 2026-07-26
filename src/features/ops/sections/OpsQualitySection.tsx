@@ -68,15 +68,9 @@ export function OpsQualitySection({
 }) {
   return (
     <>
-      <AdminPageHeader
-        title="Quality"
-        description="Laporan kualitas output yang perlu ditinjau."
-        meta={
-          <AdminPill tone="warn">
-            {quality.filter((q) => q.status !== 'closed').length} open/triaged
-          </AdminPill>
-        }
-      />
+      <div className="flex items-center justify-between px-1 py-1">
+        <h2 className="text-[18px] font-bold text-[#171717]">Quality</h2>
+      </div>
       {qualityLoading ? <AdminContentLoading /> : null}
 
       {/* Quality detail modal */}

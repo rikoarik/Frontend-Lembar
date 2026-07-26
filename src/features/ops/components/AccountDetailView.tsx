@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/app/components/ui';
-import { AdminPageHeader, AdminPill } from '@/src/features/admin/AdminChrome';
+import { AdminPageHeader, AdminPill, AdminConfirmModal } from '@/src/features/admin/AdminChrome';
 import {
   adminService,
   type AdminAccountRow,
@@ -281,30 +281,56 @@ export function AccountRowActions({
   onOpenDetail,
 }: {
   row: AdminAccountRow;
-  impersonatingId: string | null;
-  handleImpersonate: (row: AdminAccountRow) => void;
+  impersonatingId?: string | null;
+  handleImpersonate?: (row: AdminAccountRow) => void;
   loadAccounts: () => void;
   setToast: (msg: string) => void;
   onOpenDetail?: (id: string) => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [coords, setCoords] = useState<{ top: number; right: number } | null>(null);
+  const btnRef = useRef<HTMLButtonElement>(null);
   const isSuspended = row.status === 'ditangguhkan';
 
+  const toggleOpen = () => {
+    if (!isOpen && btnRef.current) {
+      const rect = btnRef.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const menuHeight = 160;
+      if (spaceBelow < menuHeight) {
+        setCoords({
+          top: Math.max(8, rect.top - menuHeight - 4),
+          right: Math.max(8, window.innerWidth - rect.right),
+        });
+      } else {
+        setCoords({
+          top: rect.bottom + 4,
+          right: Math.max(8, window.innerWidth - rect.right),
+        });
+      }
+    }
+    setIsOpen((prev) => !prev);
+  };
+
   return (
-    <div className="relative flex items-center gap-1.5">
+    <div className="relative flex items-center justify-end gap-1.5">
       <Button
         size="sm"
         disabled={impersonatingId === row.id || row.role === 'superadmin'}
-        onClick={() => handleImpersonate(row)}
+        onClick={() => {
+          if (handleImpersonate) handleImpersonate(row);
+        }}
       >
         {impersonatingId === row.id ? 'Mengalihkan...' : 'Impersonate'}
       </Button>
 
       <div className="relative">
         <Button
+          ref={btnRef}
           size="sm"
           variant="secondary"
-          onClick={() => setIsOpen((prev) => !prev)}
+          onClick={toggleOpen}
           aria-label="Aksi untuk akun ini"
           aria-expanded={isOpen}
           aria-haspopup="menu"
@@ -312,13 +338,17 @@ export function AccountRowActions({
           Aksi <span className="text-[10px] ml-0.5" aria-hidden>▼</span>
         </Button>
 
-        {isOpen && (
+        {isOpen && coords && (
           <>
-            <div className="fixed inset-0 z-30" onClick={() => setIsOpen(false)} />
-            <div className="absolute right-0 mt-1 w-40 rounded-lg border border-[#ddd4c8] bg-white py-1 shadow-lg z-40 text-left" role="menu">
+            <div className="fixed inset-0 z-[999998]" onClick={() => setIsOpen(false)} />
+            <div
+              className="fixed w-44 rounded-xl border border-[#ddd4c8] bg-white p-1 shadow-2xl z-[999999] text-left animate-in fade-in zoom-in-95 duration-100 overflow-hidden font-sans"
+              style={{ top: `${coords.top}px`, right: `${coords.right}px` }}
+              role="menu"
+            >
               <button
                 type="button"
-                className="w-full px-3 py-1.5 text-[12px] text-[#171717] hover:bg-[#faf7f2] text-left transition-colors font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#171717]/30"
+                className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[12px] text-[#171717] hover:bg-[#faf7f2] text-left transition-colors font-medium whitespace-nowrap"
                 role="menuitem"
                 onClick={() => {
                   setIsOpen(false);
@@ -327,12 +357,16 @@ export function AccountRowActions({
                   }
                 }}
               >
-                Detail
+                <span className="material-symbols-outlined text-[16px] text-[#6d665d]" aria-hidden>
+                  visibility
+                </span>
+                <span className="truncate">Detail</span>
               </button>
 
               <button
                 type="button"
-                className="w-full px-3 py-1.5 text-[12px] text-[#171717] hover:bg-[#faf7f2] text-left transition-colors font-medium"
+                className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[12px] text-[#171717] hover:bg-[#faf7f2] text-left transition-colors font-medium whitespace-nowrap"
+                role="menuitem"
                 onClick={() => {
                   setIsOpen(false);
                   adminService.resetPassword(row.id).then((res) => {
@@ -344,14 +378,18 @@ export function AccountRowActions({
                   });
                 }}
               >
-                Reset Sandi
+                <span className="material-symbols-outlined text-[16px] text-[#6d665d]" aria-hidden>
+                  lock_reset
+                </span>
+                <span className="truncate">Reset Sandi</span>
               </button>
 
               {row.role !== 'superadmin' && (
                 <>
                   <button
                     type="button"
-                    className="w-full px-3 py-1.5 text-[12px] text-[#171717] hover:bg-[#faf7f2] text-left transition-colors font-medium"
+                    className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[12px] text-[#171717] hover:bg-[#faf7f2] text-left transition-colors font-medium whitespace-nowrap"
+                    role="menuitem"
                     onClick={() => {
                       setIsOpen(false);
                       const action = isSuspended
@@ -369,29 +407,27 @@ export function AccountRowActions({
                       });
                     }}
                   >
-                    {isSuspended ? 'Aktifkan' : 'Suspend'}
+                    <span className="material-symbols-outlined text-[16px] text-[#6d665d]" aria-hidden>
+                      {isSuspended ? 'check_circle' : 'block'}
+                    </span>
+                    <span className="truncate">{isSuspended ? 'Aktifkan' : 'Suspend'}</span>
                   </button>
 
                   <div className="border-t border-[#eee6da] my-1" />
 
                   <button
                     type="button"
-                    className="w-full px-3 py-1.5 text-[12px] text-red-600 hover:bg-red-50 text-left transition-colors font-semibold"
+                    className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[12px] text-red-600 hover:bg-red-50 text-left transition-colors font-semibold whitespace-nowrap"
+                    role="menuitem"
                     onClick={() => {
                       setIsOpen(false);
-                      if (confirm(`Apakah Anda yakin ingin menghapus akun ${row.displayName}?`)) {
-                        adminService.deleteAccount(row.id).then((res) => {
-                          if (res.ok) {
-                            setToast(`Akun ${row.displayName} berhasil dihapus.`);
-                            loadAccounts();
-                          } else {
-                            setToast(`Gagal: ${res.error.safeMessage}`);
-                          }
-                        });
-                      }
+                      setConfirmDeleteOpen(true);
                     }}
                   >
-                    Hapus
+                    <span className="material-symbols-outlined text-[16px] text-red-500" aria-hidden>
+                      delete
+                    </span>
+                    <span className="truncate">Hapus</span>
                   </button>
                 </>
               )}
@@ -399,6 +435,27 @@ export function AccountRowActions({
           </>
         )}
       </div>
+
+      <AdminConfirmModal
+        open={confirmDeleteOpen}
+        title="Hapus Akun"
+        description={`Apakah Anda yakin ingin menghapus akun ${row.displayName}? Tindakan ini tidak dapat dibatalkan.`}
+        confirmLabel="Ya, Hapus Akun"
+        cancelLabel="Batal"
+        variant="danger"
+        onConfirm={() => {
+          setConfirmDeleteOpen(false);
+          adminService.deleteAccount(row.id).then((res) => {
+            if (res.ok) {
+              setToast(`Akun ${row.displayName} berhasil dihapus.`);
+              loadAccounts();
+            } else {
+              setToast(`Gagal: ${res.error.safeMessage}`);
+            }
+          });
+        }}
+        onCancel={() => setConfirmDeleteOpen(false)}
+      />
     </div>
   );
 }

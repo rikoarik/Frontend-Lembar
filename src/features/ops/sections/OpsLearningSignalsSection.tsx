@@ -28,33 +28,25 @@ export function OpsLearningSignalsSection({
 }) {
   return (
     <>
-      <AdminPageHeader
-        title="Learning Signals"
-        description="Pola dari feedback pengguna — prompt mana yang perlu diperbaiki."
-        meta={
-          signalsData.length > 0 ? (
-            <AdminPill tone="warn">{signalsData.length} sinyal aktif</AdminPill>
-          ) : null
-        }
-        actions={
-          <Button
-            size="sm"
-            variant="secondary"
-            onClick={() => {
-              setSignalsLoading(true);
-              adminService.learningSignals().then((res) => {
-                if (res.ok) {
-                  const val = res.value as any;
-                  setSignalsData(Array.isArray(val?.data) ? val.data : Array.isArray(val) ? val : []);
-                }
-                setSignalsLoading(false);
-              });
-            }}
-          >
-            Refresh
-          </Button>
-        }
-      />
+      <div className="flex items-center justify-between px-1 py-1">
+        <h2 className="text-[18px] font-bold text-[#171717]">Learning Signals</h2>
+        <Button
+          size="sm"
+          variant="secondary"
+          onClick={() => {
+            setSignalsLoading(true);
+            adminService.learningSignals().then((res) => {
+              if (res.ok) {
+                const val = res.value as any;
+                setSignalsData(Array.isArray(val?.data) ? val.data : Array.isArray(val) ? val : []);
+              }
+              setSignalsLoading(false);
+            });
+          }}
+        >
+          Refresh
+        </Button>
+      </div>
       {signalsLoading ? <AdminContentLoading /> : null}
 
       {signalsData.length === 0 && !signalsLoading ? (

@@ -51,11 +51,9 @@ export function OpsAuditSection({
 }) {
   return (
     <>
-      <AdminPageHeader
-        title="Audit"
-        description="Riwayat aksi admin — siapa melakukan apa dan kapan."
-        meta={<AdminPill tone="neutral">{auditMeta.total} entri</AdminPill>}
-      />
+      <div className="flex items-center justify-between px-1 py-1">
+        <h2 className="text-[18px] font-bold text-[#171717]">Audit Log</h2>
+      </div>
       {auditLoading ? <AdminContentLoading /> : null}
 
       {/* Audit detail modal */}

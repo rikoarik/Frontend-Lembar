@@ -47,15 +47,12 @@ export function OpsFlagsSection({
 }) {
   return (
     <>
-      <AdminPageHeader
-        title="Feature flags"
-        description="Nyalakan/matikan fitur global atau pilot tanpa deploy."
-        actions={
-          <Button size="sm" onClick={() => setCreateFlagOpen(true)}>
-            Tambah flag
-          </Button>
-        }
-      />
+      <div className="flex items-center justify-between px-1 py-1">
+        <h2 className="text-[18px] font-bold text-[#171717]">Feature Flags</h2>
+        <Button size="sm" onClick={() => setCreateFlagOpen(true)}>
+          Tambah flag
+        </Button>
+      </div>
       {flagsLoading ? <AdminContentLoading /> : null}
 
       {/* Create Flag inline form */}

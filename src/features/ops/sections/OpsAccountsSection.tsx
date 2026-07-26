@@ -1,5 +1,4 @@
-'use client';
-
+import { useState } from 'react';
 import { Button } from '@/app/components/ui';
 import {
   AdminAvatar,
@@ -8,6 +7,7 @@ import {
   AdminPill,
   AdminToolbar,
   AdminContentLoading,
+  AdminConfirmModal,
 } from '@/src/features/admin/AdminChrome';
 import { AccountDetailView, AccountRowActions } from '../components/AccountDetailView';
 import { AdminPagination } from '../components/AdminPagination';
@@ -83,6 +83,8 @@ export function OpsAccountsSection({
   loadAccounts: () => void;
   setToast: (msg: string) => void;
 }) {
+  const [confirmDeleteBulkOpen, setConfirmDeleteBulkOpen] = useState(false);
+
   if (detailAccountId) {
     return (
       <AccountDetailView
@@ -279,17 +281,8 @@ export function OpsAccountsSection({
           size="sm"
           variant="danger"
           onClick={() => {
-            const ids = [...selectedIds];
-            if (confirm(`Apakah Anda yakin ingin menghapus ${ids.length} akun terpilih?`)) {
-              adminService.bulkDelete(ids).then((res) => {
-                if (res.ok) {
-                  setToast(`${res.value.succeeded} akun berhasil dihapus, ${res.value.failed} gagal.`);
-                } else {
-                  setToast(`Gagal: ${res.error.safeMessage}`);
-                }
-                clearSelection();
-                loadAccounts();
-              });
+            if (selectedIds.length > 0) {
+              setConfirmDeleteBulkOpen(true);
             }
           }}
         >
@@ -388,6 +381,29 @@ export function OpsAccountsSection({
         totalItems={accountsMeta.total !== accountsData.length ? accountsMeta.total : accounts.length}
         pageSize={10}
         onPageChange={setPage}
+      />
+
+      <AdminConfirmModal
+        open={confirmDeleteBulkOpen}
+        title="Hapus Akun Terpilih"
+        description={`Apakah Anda yakin ingin menghapus ${selectedIds.length} akun terpilih? Tindakan ini tidak dapat dibatalkan.`}
+        confirmLabel="Ya, Hapus Akun"
+        cancelLabel="Batal"
+        variant="danger"
+        onConfirm={() => {
+          const ids = [...selectedIds];
+          setConfirmDeleteBulkOpen(false);
+          adminService.bulkDelete(ids).then((res) => {
+            if (res.ok) {
+              setToast(`${res.value.succeeded} akun berhasil dihapus, ${res.value.failed} gagal.`);
+            } else {
+              setToast(`Gagal: ${res.error.safeMessage}`);
+            }
+            clearSelection();
+            loadAccounts();
+          });
+        }}
+        onCancel={() => setConfirmDeleteBulkOpen(false)}
       />
     </>
   );
