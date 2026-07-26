@@ -1938,7 +1938,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
               {
                 label: 'Grade',
                 value: catalogLoading ? '…' : String(catalogGrades.length),
-                hint: 'dari BE',
+                hint: `${catalogGrades.filter((g) => g.status === 'active').length} aktif`,
                 tone: 'ok',
               },
               {
@@ -1946,12 +1946,6 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
                 value: catalogSubjectsLoading ? '…' : String(catalogSubjects.length),
                 hint: catalogSelectedGrade ? `untuk ${catalogGrades.find((g) => g.id === catalogSelectedGrade)?.label ?? catalogSelectedGrade}` : 'pilih grade',
                 tone: 'info',
-              },
-              {
-                label: 'Sumber data',
-                value: 'Live BE',
-                hint: '/v1/catalog/*',
-                tone: 'neutral',
               },
             ]}
           />
@@ -3457,7 +3451,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
         </>
       ) : null}
 
-      {key === 'profile' ? (
+      {key === 'profile-disabled' ? (
         <>
           <AdminPageHeader
             title="Profil Saya"
@@ -3652,7 +3646,6 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
         'billing',
         'flags',
         'content',
-        'profile',
       ].includes(key) ? (
         <AdminPageHeader
           title={`Section ${key}`}

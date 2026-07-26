@@ -693,19 +693,6 @@ export function AdminShell({
                     </span>
                     Aplikasi Guru
                   </Link>
-                  <Link
-                    href={isOps ? '/ops/profile' : '/school/profile'}
-                    onClick={() => setProfileOpen(false)}
-                    className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[12px] font-medium text-white/80 hover:bg-white/10 hover:text-white transition-colors"
-                  >
-                    <span
-                      className="material-symbols-outlined text-[16px] text-white/50"
-                      aria-hidden
-                    >
-                      person
-                    </span>
-                    Pengaturan Profil
-                  </Link>
                   <button
                     type="button"
                     onClick={async () => {
