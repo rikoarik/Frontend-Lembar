@@ -1,28 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Panel, Button } from '@/app/components/ui';
 
 type EntitlementState = 'free' | 'active' | 'grace' | 'blocked' | 'expired';
 
-interface PlanMock {
-  state: EntitlementState;
-  planLabel: string;
-  usageUsed: number;
-  usageLimit: number;
-  usageUnit: string;
-  graceDaysLeft?: number;
+interface PlanData {
+  workspaceId: string;
+  plan: 'free' | 'pro';
+  generationsUsedThisMonth: number;
+  monthlyLimit: number | null;
+  billingCycleStartedAt: string;
 }
-
-// Mock data until B6-01 entitlement API lands.
-const MOCK_PLAN: PlanMock = {
-  state: 'active',
-  planLabel: 'Paket Aktif',
-  usageUsed: 12,
-  usageLimit: 50,
-  usageUnit: 'lembar',
-};
 
 const STATE_COPY: Record<EntitlementState, { heading: string; body: string }> = {
   free: {
@@ -47,7 +37,15 @@ const STATE_COPY: Record<EntitlementState, { heading: string; body: string }> = 
   },
 };
 
-function UsageMeter({ used, limit, unit }: { used: number; limit: number; unit: string }) {
+function UsageMeter({
+  used,
+  limit,
+  unit,
+}: {
+  used: number;
+  limit: number;
+  unit: string;
+}) {
   const pct = Math.min(100, Math.round((used / limit) * 100));
   const isHigh = pct >= 80;
 
@@ -77,13 +75,64 @@ function UsageMeter({ used, limit, unit }: { used: number; limit: number; unit: 
 }
 
 export default function PlanUsageSettingsPage() {
-  const [plan] = useState<PlanMock>(MOCK_PLAN);
+  const [plan, setPlan] = useState<PlanData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [subscribeModalOpen, setSubscribeModalOpen] = useState(false);
   const [selectedTier, setSelectedTier] = useState<string | null>(null);
   const [subscribeSuccess, setSubscribeSuccess] = useState('');
 
-  const stateCopy = STATE_COPY[plan.state];
-  const isRestricted = plan.state === 'blocked' || plan.state === 'expired';
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/v1/me/plan', { credentials: 'include' })
+      .then((res) => {
+        if (!res.ok) throw new Error('Gagal memuat data paket');
+        return res.json();
+      })
+      .then((json) => {
+        if (cancelled) return;
+        setPlan(json.data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setError(err.message || 'Gagal memuat data paket');
+        setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col gap-6 w-full">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-brand-ink font-semibold text-body-xl">Paket &amp; kuota</h1>
+        </div>
+        <div className="h-40 animate-pulse rounded-2xl bg-[#efe8dc]" />
+        <div className="h-60 animate-pulse rounded-2xl bg-[#efe8dc]" />
+      </div>
+    );
+  }
+
+  if (error || !plan) {
+    return (
+      <div className="flex flex-col gap-6 w-full">
+        <h1 className="text-brand-ink font-semibold text-body-xl">Paket &amp; kuota</h1>
+        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          {error || 'Data tidak tersedia'}
+        </div>
+      </div>
+    );
+  }
+
+  const isUnlimited = plan.monthlyLimit === null;
+  const limit = plan.monthlyLimit ?? 0;
+  const used = plan.generationsUsedThisMonth;
+  const state: EntitlementState = plan.plan === 'pro' ? 'active' : 'free';
+  const stateCopy = STATE_COPY[state];
+  const planLabel = plan.plan === 'pro' ? 'Guru Pro' : 'Paket Gratis';
 
   const handleSubscribe = (tierName: string) => {
     setSelectedTier(tierName);
@@ -91,11 +140,52 @@ export default function PlanUsageSettingsPage() {
   };
 
   const handleConfirmPay = async () => {
-    setSubscribeSuccess('Permintaan langganan berhasil diproses.');
-    setTimeout(() => {
-      setSubscribeModalOpen(false);
-      setSubscribeSuccess('');
-    }, 2000);
+    setSubscribeModalOpen(false);
+    setSubscribeSuccess('Memproses langganan...');
+    const idem =
+      typeof crypto !== 'undefined' && 'randomUUID' in crypto
+        ? crypto.randomUUID()
+        : `idem-${Date.now()}`;
+    try {
+      const res = await fetch('/v1/payment/orders', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'content-type': 'application/json',
+          'x-idempotency-key': idem,
+        },
+        body: JSON.stringify({ workspaceId: plan.workspaceId, toPlan: 'pro', amountCents: 0 }),
+      });
+      const json = await res.json().catch(() => null) as { data?: { orderId?: string } ; error?: { message?: string } } | null;
+      const orderId = json?.data?.orderId;
+      if (!res.ok || !orderId) {
+        setSubscribeSuccess(`Gagal: ${json?.error?.message ?? 'Tidak dapat memproses.'}`);
+        return;
+      }
+      // Auto-confirm by upgrading the plan (Ponytail: demo bypass without
+      // payment gateway. Re-render to show 'Pro Aktif'.
+      const upgradeRes = await fetch('/v1/me/plan/upgrade', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ orderId }),
+      });
+      if (!upgradeRes.ok) {
+        setSubscribeSuccess('Pembayaran dicatat, namun upgrade gagal. Coba lagi sebentar.');
+        return;
+      }
+      const refresh = await fetch('/v1/me/plan', { credentials: 'include' });
+      const refreshed = await refresh.json().catch(() => null);
+      if (refresh.ok && refreshed?.data) {
+        setPlan(refreshed.data);
+      }
+      setSubscribeSuccess(`Selamat! Paket ${selectedTier} sudah aktif.`);
+      setTimeout(() => setSubscribeSuccess(''), 3000);
+    } catch (err) {
+      setSubscribeSuccess(
+        `Gagal: ${err instanceof Error ? err.message : 'Tidak dapat memproses.'}`,
+      );
+    }
   };
 
   return (
@@ -113,31 +203,33 @@ export default function PlanUsageSettingsPage() {
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <span className="text-body-sm text-brand-muted">Paket saat ini:</span>
-              <span className="text-body-sm font-medium text-brand-ink">{plan.planLabel}</span>
+              <span className="text-body-sm font-medium text-brand-ink">{planLabel}</span>
             </div>
-            <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700 ring-1 ring-emerald-200">
-              Aktif Periode Ini
+            <span
+              className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ring-1 ${
+                plan.plan === 'pro'
+                  ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
+                  : 'bg-neutral-50 text-neutral-600 ring-neutral-200'
+              }`}
+            >
+              {plan.plan === 'pro' ? 'Pro Aktif' : 'Gratis'}
             </span>
           </div>
 
-          {!isRestricted && (
-            <UsageMeter used={plan.usageUsed} limit={plan.usageLimit} unit={plan.usageUnit} />
-          )}
-
-          {plan.state === 'grace' && plan.graceDaysLeft !== undefined && (
-            <p className="text-body-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-3 py-2">
-              Masa tenggang berakhir dalam {plan.graceDaysLeft} hari.
-            </p>
-          )}
+          <UsageMeter
+            used={used}
+            limit={isUnlimited ? Math.max(used, 1) : limit}
+            unit={isUnlimited ? 'lembar (unlimited)' : 'lembar / bulan'}
+          />
 
           <div className="flex flex-col sm:flex-row gap-2 pt-1">
-            {plan.state === 'active' && (
-              <Button variant="quiet" size="sm" onClick={() => handleSubscribe('Paket Berbayar')}>
-                Hubungi tim kami
+            {plan.plan === 'free' && (
+              <Button size="sm" onClick={() => handleSubscribe('Guru Pro')}>
+                Upgrade ke Guru Pro
               </Button>
             )}
-            {(plan.state === 'grace' || plan.state === 'blocked' || plan.state === 'expired') && (
-              <Button size="sm" onClick={() => handleSubscribe('Perpanjangan Paket')}>
+            {plan.plan === 'pro' && (
+              <Button variant="quiet" size="sm" onClick={() => handleSubscribe('Perpanjangan')}>
                 Hubungi tim kami
               </Button>
             )}
@@ -145,7 +237,7 @@ export default function PlanUsageSettingsPage() {
         </div>
       </Panel>
 
-      {/* Opsi Langganan & Upgrade (Paid Subscription Section) */}
+      {/* Opsi Langganan & Upgrade */}
       <div className="flex flex-col gap-3">
         <h2 className="text-[16px] font-semibold text-[#171717]">Pilihan Paket Langganan</h2>
         <p className="text-body-sm text-[#6d665d]">
@@ -201,7 +293,7 @@ export default function PlanUsageSettingsPage() {
                 className="w-full justify-center"
                 onClick={() => handleSubscribe('Guru Pro')}
               >
-                Langganan Paket Pro
+                {plan.plan === 'pro' ? 'Paket Aktif' : 'Langganan Paket Pro'}
               </Button>
             </div>
           </div>
