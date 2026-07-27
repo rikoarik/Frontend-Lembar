@@ -508,7 +508,7 @@ export const adminService = {
 
   // School detail (members list) + rename + delete
   schoolDetail(id: string): Promise<Result<{
-    school: { id: string; name: string; slug: string; plan: string; state: string; seats: number; renewsAt: string };
+    school: { id: string; workspaceId: string; name: string; slug: string; plan: string; state: string; seats: number; renewsAt: string };
     members: { id: string; email: string; name: string; username: string | null; roles: string[]; createdAt: string }[];
     memberCount: number;
   }, AdminError>> {

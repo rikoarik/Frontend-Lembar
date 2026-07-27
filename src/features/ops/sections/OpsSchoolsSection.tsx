@@ -370,7 +370,14 @@ export function OpsSchoolsSection({
           if (!confirmPlanModal) return;
           const { rowId, schoolName, nextPlan, entitlementPlan } = confirmPlanModal;
           setConfirmPlanModal(null);
-          adminService.setEntitlement(rowId, { plan: entitlementPlan }).then((res) => {
+          adminService.schoolDetail(rowId).then((detail) => {
+            if (!detail.ok) {
+              setToast(`Gagal: ${detail.error.safeMessage}`);
+              return;
+            }
+            return adminService.setEntitlement(detail.value.school.workspaceId, { plan: entitlementPlan });
+          }).then((res) => {
+            if (!res) return;
             if (res.ok) {
               setToast(`Plan ${schoolName} diperbarui ke ${nextPlan}.`);
               loadSchools();
