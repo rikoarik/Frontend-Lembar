@@ -85,7 +85,13 @@ vi.mock('@/src/services/admin/adminService', () => ({
     schools: vi.fn().mockResolvedValue({ ok: true, value: [] }),
     qualityReports: vi.fn().mockResolvedValue({ ok: true, value: [] }),
     flags: vi.fn().mockResolvedValue({ ok: true, value: [] }),
-    prompts: vi.fn().mockResolvedValue({ ok: true, value: [] }),
+    prompts: vi.fn().mockResolvedValue({
+      ok: true,
+      value: [
+        { id: 'prompt_active', name: 'Alpha Active', owner: 'Ops', status: 'active', successRate: 25 },
+        { id: 'prompt_draft', name: 'Alpha Draft', owner: 'Ops', status: 'draft', successRate: 10 },
+      ],
+    }),
     audit: vi.fn().mockResolvedValue({ ok: true, value: [] }),
     marketingPages: vi.fn().mockResolvedValue({ ok: true, value: [] }),
   },
@@ -126,6 +132,21 @@ describe('ops superadmin management panel', () => {
   it('renders billing section table', async () => {
     renderOps('billing');
     expect(await screen.findByText(/SMP Harapan/i)).toBeInTheDocument();
+  });
+
+  it('filters prompts by status independently from search and renders percent values directly', async () => {
+    const user = userEvent.setup();
+    renderOps('prompts');
+
+    const search = await screen.findByPlaceholderText(/cari nama prompt \/ slug \/ owner/i);
+    await user.type(search, 'alpha');
+    await user.click(screen.getByRole('button', { name: 'draft' }));
+
+    expect(search).toHaveValue('alpha');
+    expect(await screen.findByText('Alpha Draft')).toBeInTheDocument();
+    expect(screen.queryByText('Alpha Active')).not.toBeInTheDocument();
+    expect(screen.getByText('10% ok')).toBeInTheDocument();
+    expect(screen.queryByText(/1000% ok/)).not.toBeInTheDocument();
   });
 
   it('does not leak teacher question content', () => {

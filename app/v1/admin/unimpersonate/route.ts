@@ -51,5 +51,12 @@ export async function POST() {
     maxAge: 0,
   });
 
+  response.cookies.set({
+    name: 'lembar_is_impersonating',
+    value: '',
+    path: '/',
+    maxAge: 0,
+  });
+
   return response;
 }

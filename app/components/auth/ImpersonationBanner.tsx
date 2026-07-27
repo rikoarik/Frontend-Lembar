@@ -1,34 +1,33 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+
+function readCookie(name: string) {
+  if (typeof document === 'undefined') return null;
+  const match = document.cookie
+    .split(';')
+    .map((cookie) => cookie.trim())
+    .find((cookie) => cookie.startsWith(`${name}=`));
+
+  return match ? decodeURIComponent(match.split('=').slice(1).join('=')) : null;
+}
 
 export function ImpersonationBanner() {
-  const [impersonatedName, setImpersonatedName] = useState<string | null>(null);
+  const [impersonatedName] = useState<string | null>(() => {
+    if (readCookie('lembar_is_impersonating') !== '1') return null;
+    return readCookie('lembar_impersonated_name') || 'Pengguna Impersonasi';
+  });
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (typeof document === 'undefined') return;
-    const cookies = document.cookie.split(';').map((c) => c.trim());
-    const hasImpersonator = cookies.some((c) => c.startsWith('lembar_impersonator='));
-    const nameCookie = cookies.find((c) => c.startsWith('lembar_impersonated_name='));
-
-    if (hasImpersonator || nameCookie) {
-      const val = nameCookie ? decodeURIComponent(nameCookie.split('=')[1] ?? '') : 'Pengguna Impersonasi';
-      setImpersonatedName(val || 'Pengguna Impersonasi');
-    } else {
-      setImpersonatedName(null);
-    }
-  }, []);
 
   if (!impersonatedName) return null;
 
   const handleExit = async () => {
     setLoading(true);
     try {
-      await fetch('/v1/admin/unimpersonate', { method: 'POST' });
+      const response = await fetch('/v1/admin/unimpersonate', { method: 'POST' });
+      const payload = (await response.json().catch(() => null)) as { data?: { targetPath?: string } } | null;
+      window.location.href = payload?.data?.targetPath || '/ops';
     } catch {
-      // ignore
-    } finally {
       window.location.href = '/ops';
     }
   };
@@ -47,7 +46,7 @@ export function ImpersonationBanner() {
         disabled={loading}
         className="rounded-md bg-amber-950 px-3 py-1 text-[11px] font-bold text-amber-100 transition hover:bg-black focus:outline-none focus:ring-2 focus:ring-amber-950"
       >
-        {loading ? 'Mengakhiri...' : 'Akhiri Impersonasi (Kembali ke /ops)'}
+        {loading ? 'Mengakhiri...' : 'Kembali ke admin'}
       </button>
     </div>
   );

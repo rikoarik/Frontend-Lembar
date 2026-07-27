@@ -88,7 +88,8 @@ export async function POST(
     response.cookies.set({ name: JWT_COOKIE, value: token, path: '/', sameSite: 'lax', httpOnly: true, maxAge: 60 * 60 });
     response.cookies.set({ name: SESSION_COOKIE, value: token, path: '/', sameSite: 'lax', httpOnly: true, maxAge: 60 * 60 });
     response.cookies.set({ name: 'lembar_roles', value: roles.join(','), path: '/', sameSite: 'lax', httpOnly: true });
-    response.cookies.set({ name: 'lembar_impersonated_name', value: displayName, path: '/', sameSite: 'lax', httpOnly: false });
+    response.cookies.set({ name: 'lembar_is_impersonating', value: '1', path: '/', sameSite: 'lax', httpOnly: false, maxAge: 60 * 60 });
+    response.cookies.set({ name: 'lembar_impersonated_name', value: displayName, path: '/', sameSite: 'lax', httpOnly: false, maxAge: 60 * 60 });
 
     return response;
   }
@@ -109,7 +110,8 @@ export async function POST(
   response.cookies.set({ name: 'lembar_impersonator', value: currentToken || 'ops', path: '/', sameSite: 'lax', httpOnly: true });
   response.cookies.set({ name: SESSION_COOKIE, value: mockAccount.session, path: '/', sameSite: 'lax', httpOnly: true, maxAge: 60 * 60 * 24 });
   response.cookies.set({ name: 'lembar_roles', value: mockAccount.roles.join(','), path: '/', sameSite: 'lax', httpOnly: true });
-  response.cookies.set({ name: 'lembar_impersonated_name', value: displayName, path: '/', sameSite: 'lax', httpOnly: false });
+  response.cookies.set({ name: 'lembar_is_impersonating', value: '1', path: '/', sameSite: 'lax', httpOnly: false, maxAge: 60 * 60 * 24 });
+  response.cookies.set({ name: 'lembar_impersonated_name', value: displayName, path: '/', sameSite: 'lax', httpOnly: false, maxAge: 60 * 60 * 24 });
 
   return response;
 }
