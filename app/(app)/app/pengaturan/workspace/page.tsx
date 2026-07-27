@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Panel, Button } from '@/app/components/ui';
 import FormStatus from '@/app/(auth)/components/FormStatus';
 
@@ -14,12 +14,13 @@ interface WorkspaceMembership {
   isPersonal: boolean;
 }
 
-// Mock data until B1-02 lands
-const MOCK_MEMBERSHIPS: WorkspaceMembership[] = [
-  { id: 'ws-1', name: 'Workspace Pribadi', role: 'owner', isActive: true, isPersonal: true },
-  { id: 'ws-2', name: 'SD Negeri 01 Maju', role: 'admin', isActive: false, isPersonal: false },
-  { id: 'ws-3', name: 'Tim Guru Matematika', role: 'member', isActive: false, isPersonal: false },
-];
+interface MeWorkspace {
+  id: string;
+  name: string;
+  type: string;
+  role: string;
+  permissions?: string[];
+}
 
 const ROLE_LABEL: Record<WorkspaceRole, string> = {
   owner: 'Pemilik',
@@ -27,32 +28,94 @@ const ROLE_LABEL: Record<WorkspaceRole, string> = {
   member: 'Anggota',
 };
 
+function mapRole(backendRole: string): WorkspaceRole {
+  if (backendRole === 'admin') return 'admin';
+  if (backendRole === 'member') return 'member';
+  return 'owner';
+}
+
 export default function WorkspaceSettingsPage() {
-  const [memberships] = useState<WorkspaceMembership[]>(MOCK_MEMBERSHIPS);
+  const [memberships, setMemberships] = useState<WorkspaceMembership[]>([]);
+  const [loading, setLoading] = useState(true);
   const [switchTarget, setSwitchTarget] = useState<WorkspaceMembership | null>(null);
   const [leaveTarget, setLeaveTarget] = useState<WorkspaceMembership | null>(null);
   const [actionBusy, setActionBusy] = useState(false);
   const [actionStatus, setActionStatus] = useState('');
 
+  useEffect(() => {
+    async function fetchWorkspaces() {
+      try {
+        const res = await fetch('/v1/me', { credentials: 'include' });
+        if (!res.ok) throw new Error('Gagal memuat data workspace');
+        const json = await res.json();
+        const raw: MeWorkspace[] = json?.data?.workspaces ?? [];
+        const mapped: WorkspaceMembership[] = raw.map((w) => ({
+          id: w.id,
+          name: w.name,
+          role: mapRole(w.role),
+          isActive: false, // will be set below
+          isPersonal: w.type === 'personal',
+        }));
+
+        // Determine active workspace from the backend: the one whose role is 'owner'
+        // OR we match by the first personal workspace. If backend provides activeWorkspace
+        // context via a cookie/header, we'll use that. For now, mark the personal one as active
+        // if exactly one is personal, otherwise leave first as active.
+        const personalWs = mapped.filter((w) => w.isPersonal);
+        if (personalWs.length === 1) {
+          personalWs[0].isActive = true;
+        } else if (mapped.length > 0) {
+          mapped[0].isActive = true;
+        }
+
+        setMemberships(mapped);
+      } catch {
+        setActionStatus('Gagal memuat data workspace.');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchWorkspaces();
+  }, []);
+
   const handleSwitch = async () => {
     if (!switchTarget) return;
     setActionBusy(true);
-    // mock until B1-02
-    await new Promise((r) => setTimeout(r, 400));
-    setActionBusy(false);
-    setSwitchTarget(null);
-    setActionStatus(`Beralih ke workspace "${switchTarget.name}".`);
+    try {
+      const res = await fetch('/v1/auth/workspace/switch', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ workspaceId: switchTarget.id }),
+      });
+      if (!res.ok) throw new Error('Gagal beralih workspace');
+      window.location.reload();
+    } catch {
+      setActionBusy(false);
+      setSwitchTarget(null);
+      setActionStatus(`Gagal beralih ke workspace "${switchTarget.name}".`);
+    }
   };
 
   const handleLeave = async () => {
     if (!leaveTarget) return;
-    setActionBusy(true);
-    // mock until B1-02
-    await new Promise((r) => setTimeout(r, 400));
-    setActionBusy(false);
     setLeaveTarget(null);
-    setActionStatus(`Anda telah keluar dari workspace "${leaveTarget.name}".`);
+    setActionStatus('Fitur keluar workspace belum tersedia');
   };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col gap-4">
+        <h1 className="text-brand-ink font-semibold text-body-xl">Workspace</h1>
+        <Panel title="Keanggotaan workspace" description="Memuat data…">
+          <div className="flex items-center justify-center py-8">
+            <span className="text-body-sm text-brand-muted">Memuat…</span>
+          </div>
+        </Panel>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -64,56 +127,62 @@ export default function WorkspaceSettingsPage() {
         title="Keanggotaan workspace"
         description="Workspace yang Anda ikuti dan peran Anda di masing-masing."
       >
-        <ul className="flex flex-col gap-2" aria-label="Daftar workspace">
-          {memberships.map((ws) => (
-            <li
-              key={ws.id}
-              className="flex flex-col sm:flex-row sm:items-center gap-2 border border-brand-line rounded-md p-3 bg-brand-paper"
-            >
-              <div className="flex-1 flex flex-col gap-0.5">
-                <div className="flex items-center gap-2">
-                  <span className="text-body-sm font-medium text-brand-ink">{ws.name}</span>
-                  {ws.isActive && (
-                    <span
-                      className="text-label-xs text-brand-accent bg-brand-accent/10 rounded px-1.5 py-0.5"
-                      aria-label="workspace aktif"
+        {memberships.length === 0 ? (
+          <div className="flex items-center justify-center py-8">
+            <span className="text-body-sm text-brand-muted">Tidak ada workspace ditemukan.</span>
+          </div>
+        ) : (
+          <ul className="flex flex-col gap-2" aria-label="Daftar workspace">
+            {memberships.map((ws) => (
+              <li
+                key={ws.id}
+                className="flex flex-col sm:flex-row sm:items-center gap-2 border border-brand-line rounded-md p-3 bg-brand-paper"
+              >
+                <div className="flex-1 flex flex-col gap-0.5">
+                  <div className="flex items-center gap-2">
+                    <span className="text-body-sm font-medium text-brand-ink">{ws.name}</span>
+                    {ws.isActive && (
+                      <span
+                        className="text-label-xs text-brand-accent bg-brand-accent/10 rounded px-1.5 py-0.5"
+                        aria-label="workspace aktif"
+                      >
+                        Aktif
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-body-xs text-brand-muted">{ROLE_LABEL[ws.role]}</span>
+                </div>
+
+                <div className="flex gap-2 shrink-0">
+                  {!ws.isActive && (
+                    <Button
+                      variant="quiet"
+                      size="sm"
+                      onClick={() => {
+                        setActionStatus('');
+                        setSwitchTarget(ws);
+                      }}
                     >
-                      Aktif
-                    </span>
+                      Pilih
+                    </Button>
+                  )}
+                  {!ws.isPersonal && ws.role !== 'owner' && (
+                    <Button
+                      variant="quiet"
+                      size="sm"
+                      onClick={() => {
+                        setActionStatus('');
+                        setLeaveTarget(ws);
+                      }}
+                    >
+                      Keluar
+                    </Button>
                   )}
                 </div>
-                <span className="text-body-xs text-brand-muted">{ROLE_LABEL[ws.role]}</span>
-              </div>
-
-              <div className="flex gap-2 shrink-0">
-                {!ws.isActive && (
-                  <Button
-                    variant="quiet"
-                    size="sm"
-                    onClick={() => {
-                      setActionStatus('');
-                      setSwitchTarget(ws);
-                    }}
-                  >
-                    Pilih
-                  </Button>
-                )}
-                {!ws.isPersonal && ws.role !== 'owner' && (
-                  <Button
-                    variant="quiet"
-                    size="sm"
-                    onClick={() => {
-                      setActionStatus('');
-                      setLeaveTarget(ws);
-                    }}
-                  >
-                    Keluar
-                  </Button>
-                )}
-              </div>
-            </li>
-          ))}
-        </ul>
+              </li>
+            ))}
+          </ul>
+        )}
       </Panel>
 
       {/* Switch workspace confirmation */}
@@ -149,7 +218,6 @@ export default function WorkspaceSettingsPage() {
                 variant="danger"
                 size="sm"
                 onClick={handleLeave}
-                loading={actionBusy}
                 disabled={actionBusy}
               >
                 {actionBusy ? 'Keluar…' : 'Ya, keluar'}

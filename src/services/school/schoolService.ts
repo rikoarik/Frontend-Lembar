@@ -109,7 +109,7 @@ async function request<T>(
   if (path.startsWith('/v1/school/members')) {
     const url = new URL(path, 'http://localhost');
     const q = url.searchParams.get('q')?.toLowerCase();
-    const filtered = q ? MOCK_MEMBERS.filter((m) => m.name.toLowerCase().includes(q)) : MOCK_MEMBERS;
+    const filtered = q ? MOCK_MEMBERS.filter((m) => (m.name ?? m.email).toLowerCase().includes(q)) : MOCK_MEMBERS;
     return ok({
       data: filtered,
       meta: { page: 1, limit: 10, total: filtered.length, totalPages: 1 },
@@ -146,14 +146,16 @@ export type SchoolSettings = {
 export type SchoolMember = {
   id: string;
   email: string;
-  name: string;
+  name?: string;
   role: 'teacher' | 'school_admin';
   state: 'active' | 'suspended' | 'revoked';
   joinedAt: string;
-  lastActiveAt: string | null;
+  lastActiveAt?: string | null;
 };
 
-export type SchoolMemberDetail = SchoolMember & {
+export type SchoolMemberDetail = Omit<SchoolMember, 'state'> & {
+  state?: SchoolMember['state'];
+  status?: string;
   stats: {
     assessmentCount: number;
     quotaUsed: number;
@@ -167,8 +169,9 @@ export type SchoolMembersResult = {
 
 export type SchoolInvitationResult = {
   token: string;
+  tokenHash?: string;
   email: string;
-  role: string;
+  role?: string;
   expiresAt: string;
 };
 
@@ -183,7 +186,7 @@ export type SchoolInvitation = {
 
 export type SchoolUsageBreakdownItem = {
   userId: string;
-  name: string;
+  name?: string;
   email: string;
   used: number;
 };
@@ -206,10 +209,12 @@ export type SchoolLibraryItem = {
   subject: string | null;
   grade: string | null;
   questionCount: number;
+  createdAt: string;
+  authorId: string;
   authorName: string;
-  authorEmail: string;
-  finalizedAt: string;
-  updatedAt: string;
+  authorEmail?: string;
+  finalizedAt?: string;
+  updatedAt?: string;
 };
 
 export type SchoolLibraryResult = {
@@ -219,18 +224,16 @@ export type SchoolLibraryResult = {
 
 export type SchoolLibraryDetail = SchoolLibraryItem & {
   blueprint: Record<string, unknown> | null;
-  questions: Array<{ id: string; type: string; text: string }>;
+  questions: Array<{ id: string; questionNo: number; type: string; status: string }>;
 };
 
 export type SchoolAuditRow = {
   id: string;
-  actorId: string;
-  actorEmail: string;
+  at: string;
+  actor: string;
   action: string;
-  targetType: string;
-  targetId: string;
+  target?: string;
   metadata: Record<string, unknown> | null;
-  createdAt: string;
 };
 
 export type SchoolAuditResult = {
@@ -239,13 +242,14 @@ export type SchoolAuditResult = {
 };
 
 export type SchoolStatsData = {
+  workspaceName: string;
   totalMembers: number;
   activeMembers: number;
-  suspendedMembers: number;
-  pendingInvitations: number;
-  totalAssessments: number;
-  quotaUsed: number;
-  quotaLimit: number;
+  teacherCount: number;
+  adminCount: number;
+  plan: string;
+  generationsUsedThisMonth: number;
+  monthlyLimit: number | null;
 };
 
 export type SchoolNotification = {
@@ -268,14 +272,14 @@ export type SchoolDashboard = {
     id: string;
     name: string;
     level: string;
-    plan: string;
+    tenantId: string;
   };
-  stats: {
-    totalMembers: number;
-    activeMembers: number;
-    totalAssessments: number;
-    quotaUsed: number;
-    quotaLimit: number;
+  members: SchoolMember[];
+  memberCount: number;
+  usage: {
+    generationsUsedThisMonth: number;
+    monthlyLimit: number | null;
+    plan: 'free' | 'pro';
   };
 };
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Panel, Button } from '@/app/components/ui';
 import FormField from '@/app/(auth)/components/FormField';
@@ -8,13 +8,13 @@ import FormStatus from '@/app/(auth)/components/FormStatus';
 
 export default function ProfileSettingsPage() {
   // Profile Info State
-  const [displayName, setDisplayName] = useState('Guru Demo');
+  const [displayName, setDisplayName] = useState('');
   const [nameError, setNameError] = useState('');
   const [nameStatus, setNameStatus] = useState('');
   const [nameBusy, setNameBusy] = useState(false);
 
   // Email State
-  const [email, setEmail] = useState('guru@lembar.id');
+  const [email, setEmail] = useState('');
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [newEmail, setNewEmail] = useState('');
   const [emailError, setEmailError] = useState('');
@@ -40,6 +40,42 @@ export default function ProfileSettingsPage() {
   const [notifyNewsletter, setNotifyNewsletter] = useState(true);
   const [prefStatus, setPrefStatus] = useState('');
 
+  // Profile loading state
+  const [profileLoading, setProfileLoading] = useState(true);
+  const [profileError, setProfileError] = useState('');
+
+  // Fetch profile data on mount
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await fetch('/v1/me', { credentials: 'include' });
+        if (!res.ok) {
+          setProfileError('Gagal memuat profil. Silakan masuk ulang.');
+          setProfileLoading(false);
+          return;
+        }
+        const json = await res.json();
+        const account = json?.data?.account;
+        if (account?.displayName) {
+          setDisplayName(account.displayName);
+        }
+        // Email is not returned from /v1/me, use a placeholder
+        // The backend may include email in account object in future
+        if (account?.email) {
+          setEmail(account.email);
+        } else {
+          setEmail('');
+        }
+      } catch {
+        setProfileError('Gagal memuat profil. Periksa koneksi Anda.');
+      } finally {
+        setProfileLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
   const initials =
     displayName
       .split(/\s+/)
@@ -58,7 +94,7 @@ export default function ProfileSettingsPage() {
     setNameBusy(true);
     await new Promise((r) => setTimeout(r, 300));
     setNameBusy(false);
-    setNameStatus('Nama tampilan disimpan.');
+    setNameStatus('Nama akan diperbarui setelah endpoint tersedia');
   };
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
@@ -74,7 +110,7 @@ export default function ProfileSettingsPage() {
     setEmail(newEmail);
     setNewEmail('');
     setShowEmailForm(false);
-    setEmailStatus('Alamat email berhasil diperbarui.');
+    setEmailStatus('Email akan diperbarui setelah endpoint tersedia');
   };
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
@@ -99,21 +135,50 @@ export default function ProfileSettingsPage() {
     setNewPassword('');
     setConfirmPassword('');
     setShowPasswordForm(false);
-    setPasswordStatus('Kata sandi berhasil diperbarui.');
+    setPasswordStatus('Kata sandi akan diperbarui setelah endpoint tersedia');
   };
 
   const handleLogoutAll = async () => {
     setLogoutBusy(true);
-    await new Promise((r) => setTimeout(r, 500));
-    setLogoutBusy(false);
-    setLogoutConfirm(false);
-    setLogoutStatus('Semua perangkat telah dikeluarkan.');
+    setLogoutStatus('');
+    try {
+      const res = await fetch('/v1/auth/logout-all', {
+        method: 'POST',
+        credentials: 'include',
+      });
+      if (!res.ok) {
+        setLogoutStatus('Gagal mengeluarkan sesi. Silakan coba lagi.');
+      } else {
+        setLogoutConfirm(false);
+        setLogoutStatus('Semua perangkat telah dikeluarkan.');
+      }
+    } catch {
+      setLogoutStatus('Gagal menghubungi server. Periksa koneksi Anda.');
+    } finally {
+      setLogoutBusy(false);
+    }
   };
 
   const handleSavePreferences = () => {
     setPrefStatus('Preferensi notifikasi disimpan.');
     setTimeout(() => setPrefStatus(''), 3000);
   };
+
+  if (profileLoading) {
+    return (
+      <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-0.5">
+          <h1 className="text-brand-ink font-semibold text-body-xl">Profil</h1>
+          <p className="text-body-sm text-[#6d665d]">
+            Kelola informasi pribadi, email, kata sandi, dan sesi akun Anda.
+          </p>
+        </div>
+        <div className="flex items-center justify-center py-12">
+          <span className="text-body-sm text-[#6d665d]">Memuat profil…</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-5">
@@ -123,6 +188,10 @@ export default function ProfileSettingsPage() {
           Kelola informasi pribadi, email, kata sandi, dan sesi akun Anda.
         </p>
       </div>
+
+      {profileError && (
+        <FormStatus tone="alert" message={profileError} />
+      )}
 
       <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-2">
         {/* Kolom Kiri */}
@@ -134,12 +203,12 @@ export default function ProfileSettingsPage() {
             </div>
             <div className="flex min-w-0 flex-1 flex-col gap-0.5">
               <div className="flex items-center gap-2">
-                <h2 className="truncate text-[16px] font-semibold text-[#171717]">{displayName}</h2>
+                <h2 className="truncate text-[16px] font-semibold text-[#171717]">{displayName || 'Memuat…'}</h2>
                 <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700 ring-1 ring-emerald-200">
                   Terverifikasi
                 </span>
               </div>
-              <p className="truncate text-body-sm text-[#6d665d]">{email}</p>
+              <p className="truncate text-body-sm text-[#6d665d]">{email || '—'}</p>
             </div>
           </div>
 
@@ -176,7 +245,7 @@ export default function ProfileSettingsPage() {
               <div className="flex items-center justify-between gap-3 rounded-lg border border-[#e6dfd4] bg-[#fbf8f2] p-3">
                 <div className="flex flex-col min-w-0">
                   <span className="text-[11px] font-medium text-[#8a8379]">Email utama</span>
-                  <span className="truncate text-[13px] font-medium text-[#171717]">{email}</span>
+                  <span className="truncate text-[13px] font-medium text-[#171717]">{email || '—'}</span>
                 </div>
                 {!showEmailForm && (
                   <Button
