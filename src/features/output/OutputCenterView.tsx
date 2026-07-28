@@ -14,6 +14,9 @@ export function OutputCenterView({ assessmentId }: { assessmentId: string }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [feedbackRating, setFeedbackRating] = useState<number | null>(null);
+  const [feedbackSending, setFeedbackSending] = useState(false);
+  const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -42,6 +45,34 @@ export function OutputCenterView({ assessmentId }: { assessmentId: string }) {
       window.setTimeout(() => setCopied(false), 2000);
     } catch {
       setCopied(false);
+    }
+  };
+
+  const submitAiFeedback = async (rating: number) => {
+    setFeedbackRating(rating);
+    setFeedbackSending(true);
+    setFeedbackMessage(null);
+    try {
+      const res = await fetch('/v1/ai/feedback', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          promptTemplateId: 'assessment_output',
+          rating,
+          comment: `Feedback output assessment ${assessmentId}`,
+          tags: [output?.status ?? 'ready', `version:${output?.versionId ?? 'unknown'}`],
+        }),
+      });
+      const json = await res.json().catch(() => null);
+      if (!res.ok) {
+        throw new Error(json?.error?.message ?? 'Gagal mengirim feedback AI');
+      }
+      setFeedbackMessage('Feedback terkirim. AI akan belajar dari rating ini.');
+    } catch (err) {
+      setFeedbackMessage(err instanceof Error ? err.message : 'Gagal mengirim feedback AI');
+    } finally {
+      setFeedbackSending(false);
     }
   };
 
@@ -135,6 +166,34 @@ export function OutputCenterView({ assessmentId }: { assessmentId: string }) {
             >
               Kembali ke tinjauan
             </Link>
+          </div>
+
+          <div className="rounded-md border border-brand-line px-3 py-3">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-body-sm font-medium text-brand-ink">Nilai hasil AI ini</p>
+                <p className="text-body-xs text-brand-ink-muted">
+                  Rating ini masuk ke learning loop Hermes Education.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Button
+                    key={star}
+                    variant={feedbackRating === star ? 'primary' : 'secondary'}
+                    onClick={() => void submitAiFeedback(star)}
+                    disabled={feedbackSending}
+                  >
+                    {star}
+                  </Button>
+                ))}
+              </div>
+            </div>
+            {feedbackMessage ? (
+              <p className="mt-2 text-body-xs text-brand-ink-muted" role="status">
+                {feedbackMessage}
+              </p>
+            ) : null}
           </div>
         </div>
       </Panel>
