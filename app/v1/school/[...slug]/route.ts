@@ -68,6 +68,25 @@ async function handleProxy(request: NextRequest, context: { params: Promise<{ sl
     fullPath = `${path}${search}${sep}workspaceId=${encodeURIComponent(workspaceId)}`;
   }
 
+  // Ponytail: many BE school routes (members, audit, notifications) read
+  // workspaceId from query string. Inject it whenever we have one and the
+  // caller forgot, so the BFF stays 200 without forcing every callsite to
+  // pass it.
+  if (
+    workspaceId &&
+    !fullPath.includes('workspaceId=') &&
+    (fullPath.startsWith('/v1/school/members') ||
+      fullPath.startsWith('/v1/school/audit') ||
+      fullPath.startsWith('/v1/school/notifications') ||
+      fullPath.startsWith('/v1/school/undangan') ||
+      fullPath.startsWith('/v1/school/library') ||
+      fullPath.startsWith('/v1/school/usage') ||
+      fullPath.startsWith('/v1/school/pengaturan'))
+  ) {
+    const sep = fullPath.includes('?') ? '&' : '?';
+    fullPath = `${fullPath}${sep}workspaceId=${encodeURIComponent(workspaceId)}`;
+  }
+
   let body: unknown = undefined;
   if (request.method !== 'GET' && request.method !== 'HEAD') {
     try {
@@ -81,8 +100,10 @@ async function handleProxy(request: NextRequest, context: { params: Promise<{ sl
   const extraHeaders: Record<string, string> = {
     'x-user-role': userRole,
   };
-  if (userId) extraHeaders['x-tenant-id'] = userId;
   if (workspaceId) extraHeaders['x-workspace-id'] = workspaceId;
+  // Ponytail: BE keys plan rows by workspace; align tenant with workspace
+  // instead of userId so school mutations route to the correct tenant.
+  if (workspaceId) extraHeaders['x-tenant-id'] = workspaceId;
 
   const upstream = await backendFetch(fullPath, {
     method: request.method,
