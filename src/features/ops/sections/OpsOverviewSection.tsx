@@ -200,15 +200,15 @@ export function OpsOverviewSection({
                 render: (row) => <AdminPill tone={jobTone(row.status)}>{row.status}</AdminPill>,
               },
               {
-                key: 'progress',
-                header: 'Progress',
+                key: 'attempt',
+                header: 'Attempt',
                 render: (row) => {
-                  const num = parseInt(row.progress, 10);
+                  const num = row.attempt ?? 0;
                   const hasPct = !isNaN(num) && num >= 0 && num <= 100;
                   return (
                     <div className="flex items-center gap-2">
                       <span className="font-semibold tabular-nums text-[#171717] text-[12px]">
-                        {row.progress}
+                        {row.attempt}
                       </span>
                       {hasPct ? (
                         <div className="w-12 h-1.5 bg-[#f4ede4] rounded-full overflow-hidden hidden sm:block">
