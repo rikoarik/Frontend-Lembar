@@ -75,16 +75,8 @@ export default async function LiveStatusPage() {
   const initialLogs = await loadLogs();
 
   return (
-    <main className="relative min-h-[100dvh] overflow-hidden bg-zinc-950 text-zinc-100">
-      <div
-        aria-hidden
-        className="pointer-events-none fixed inset-0 z-0 opacity-[0.07]"
-        style={{
-          backgroundImage:
-            'radial-gradient(circle at 20% 0%, rgb(244 244 245 / 0.6), transparent 38%), radial-gradient(circle at 80% 100%, rgb(244 244 245 / 0.4), transparent 44%)',
-        }}
-      />
+    <div className="bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100" style={{ colorScheme: 'light dark' }}>
       <StatusBoard doc={doc} initialLogs={initialLogs} />
-    </main>
+    </div>
   );
 }
