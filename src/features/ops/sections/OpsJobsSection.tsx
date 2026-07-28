@@ -217,7 +217,7 @@ export function OpsJobsSection({
             header: 'Status',
             render: (row) => <AdminPill tone={jobTone(row.status)}>{row.status}</AdminPill>,
           },
-          { key: 'progress', header: 'Progress', render: (row) => <span className="tabular-nums text-[12px]">{row.progress}</span> },
+          { key: 'attempt', header: 'Attempt', render: (row) => <span className="tabular-nums text-[12px]">{row.attempt}</span> },
           { key: 'updated', header: 'Update', render: (row) => <span className="text-[11px] text-[#6d665d]">{row.updatedAt}</span> },
         ]}
         rowActions={(row) => (
