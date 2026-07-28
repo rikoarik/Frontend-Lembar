@@ -18,7 +18,7 @@ export default defineConfig({
       'src/**/__tests__/**/*.{test,spec}.{ts,tsx}',
       '**/*.{test,spec}.{ts,tsx}',
     ],
-    exclude: ['node_modules/**', '.next/**', 'e2e/**', 'tests/e2e/**', 'scripts/gates/**'],
+    exclude: ['node_modules/**', '.next/**', '.worktrees/**', 'e2e/**', 'tests/e2e/**', 'scripts/gates/**'],
     css: false,
     clearMocks: true,
   },

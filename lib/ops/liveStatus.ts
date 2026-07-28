@@ -359,7 +359,7 @@ function eventSummary(event: EventRow, taskTitle: string): string {
   }
 }
 
-function gateSteps(percent: number): Array<{ label: string; state: GateState }> {
+function gateSteps(percent: number, isRunning: boolean): Array<{ label: string; state: GateState }> {
   const steps = [
     { label: 'Coding', threshold: 25 },
     { label: 'Commit', threshold: 50 },
@@ -372,7 +372,7 @@ function gateSteps(percent: number): Array<{ label: string; state: GateState }> 
   return steps.map((step, index) => {
     if (percent >= step.threshold) return { label: step.label, state: 'completed' };
     const prev = index === 0 ? 10 : steps[index - 1]!.threshold;
-    if (percent >= prev) return { label: step.label, state: 'running' };
+    if (isRunning && percent >= prev) return { label: step.label, state: 'running' };
     return { label: step.label, state: 'pending' };
   });
 }
@@ -441,7 +441,7 @@ export async function buildLiveStatus(): Promise<LiveStatusDoc | null> {
       storyPoints: storyPoints(task.body),
       assignee: task.assignee ?? 'unassigned',
       phase: taskPhase(percent, task.status),
-      latestEvidence: task.result ?? currentAction(events, task.id),
+      latestEvidence: task.last_failure_error ?? task.result ?? currentAction(events, task.id),
       dependency: task.status === 'blocked' ? 'Terhambat' : '—',
       lastUpdate: iso(task.last_heartbeat_at ?? task.completed_at ?? task.started_at ?? task.created_at),
     });
@@ -450,7 +450,11 @@ export async function buildLiveStatus(): Promise<LiveStatusDoc | null> {
   const totalPoints = items.reduce((sum, item) => sum + item.storyPoints, 0);
   const completedPoints = items.reduce((sum, item) => sum + (item.storyPoints * item.percent) / 100, 0);
   const overallPercent = totalPoints ? Math.round((completedPoints / totalPoints) * 100) : 0;
-  const activeTask = tasks.find((task) => task.status === 'running') ?? tasks[0]!;
+  const activeTask =
+    tasks.find((task) => task.status === 'running') ??
+    tasks.find((task) => task.status === 'blocked') ??
+    tasks.find((task) => task.status !== 'done') ??
+    tasks[0]!;
   const activeItem = items.find((item) => item.id === activeTask.id) ?? items[0]!;
 
   const boardStatus: LiveStatusDoc['board']['status'] =
@@ -571,9 +575,9 @@ export async function buildLiveStatus(): Promise<LiveStatusDoc | null> {
       worker: activeItem.assignee,
       workingForSeconds: activeTask.started_at ? Math.max(0, Math.floor(Date.now() / 1000 - activeTask.started_at)) : 0,
       currentAction: currentAction(events, activeTask.id),
-      latestEvidence: activeItem.latestEvidence,
+      latestEvidence: activeTask.last_failure_error ?? activeTask.result ?? currentAction(events, activeTask.id),
       nextRequiredGate: activeItem.percent < 25 ? 'First file change' : activeItem.percent < 50 ? 'Commit' : activeItem.percent < 65 ? 'Tests' : activeItem.percent < 75 ? 'Review' : activeItem.percent < 85 ? 'QA' : activeItem.percent < 95 ? 'Deploy' : 'Public verification',
-      steps: gateSteps(activeItem.percent),
+      steps: gateSteps(activeItem.percent, activeTask.status === 'running'),
     },
     readiness: [
       { label: 'Product flow', percent: Math.round((flowStatus('Generate Assessment', items, pm2.services) === 'Passed' ? 100 : flowStatus('Generate Assessment', items, pm2.services) === 'In Progress' ? 60 : 0 + (flowStatus('Status', items, pm2.services) === 'In Progress' ? 60 : 0)) / 2) || 0 },
