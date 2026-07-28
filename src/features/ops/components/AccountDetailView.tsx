@@ -8,6 +8,7 @@ import {
   type AdminAccountRow,
   type AdminAccountDetail,
   type AdminAccountAuditItem,
+  type AdminAccountPatchResult,
 } from '@/src/services/admin/adminService';
 
 export function AccountDetailView({
@@ -52,8 +53,9 @@ export function AccountDetailView({
       .updateAccount(accountId, { name: editName, phone: editPhone })
       .then((res) => {
         if (res.ok) {
-          setDetail(res.value);
-          setToast(`Detail akun ${res.value.name} berhasil diperbarui.`);
+          const patch = res.value;
+          setDetail((prev) => prev ? { ...prev, name: patch.name, email: patch.email, phone: patch.phone } : prev);
+          setToast(`Detail akun ${patch.name} berhasil diperbarui.`);
           onUpdated();
         } else {
           setToast(`Gagal memperbarui: ${res.error.safeMessage}`);
@@ -400,7 +402,12 @@ export function AccountRowActions({
                   setIsOpen(false);
                   adminService.resetPassword(row.id).then((res) => {
                     if (res.ok) {
-                      setToast(`Reset sandi berhasil dikirim ke ${row.email}.`);
+                      const details = [res.value.token, res.value.resetUrl].filter(Boolean).join(' · ');
+                      setToast(
+                        details
+                          ? `Reset sandi untuk ${row.email}: ${details}`
+                          : `Reset sandi berhasil dikirim ke ${row.email}.`,
+                      );
                     } else {
                       setToast(`Gagal: ${res.error.safeMessage}`);
                     }
