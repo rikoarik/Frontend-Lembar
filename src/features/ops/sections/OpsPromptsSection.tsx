@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { Button } from '@/app/components/ui';
 import {
   AdminPageHeader,
@@ -47,9 +48,11 @@ export function OpsPromptsSection({
   setCreatePromptLoading: (v: boolean) => void;
   search: string;
   setSearch: (v: string) => void;
-  loadPrompts: () => void;
+  loadPrompts: (status?: AdminPromptRow['status']) => void;
   setToast: (msg: string) => void;
 }) {
+  const [statusFilter, setStatusFilter] = useState<'' | AdminPromptRow['status']>('');
+
   return (
     <>
       <div className="flex items-center justify-between px-1 py-1">
@@ -158,13 +161,13 @@ export function OpsPromptsSection({
         searchPlaceholder="Cari nama prompt / slug / owner"
         filters={
           <>
-            {(['', 'active', 'draft'] as const).map((s) => (
+            {(['', 'active', 'draft', 'archived'] as const).map((s) => (
               <AdminFilterChip
                 key={s || 'all'}
-                active={search === '' && s === ''}
+                active={statusFilter === s}
                 onClick={() => {
-                  if (s) setSearch(s);
-                  else setSearch('');
+                  setStatusFilter(s);
+                  loadPrompts(s || undefined);
                 }}
               >
                 {s || 'Semua'}
@@ -177,7 +180,8 @@ export function OpsPromptsSection({
       <AdminDataTable
         rows={promptsData.filter((p) => {
           const q = search.trim().toLowerCase();
-          return !q || p.name.toLowerCase().includes(q) || p.owner?.toLowerCase().includes(q) || (p as any).slug?.toLowerCase().includes(q);
+          const matchesSearch = !q || p.name.toLowerCase().includes(q) || p.owner?.toLowerCase().includes(q) || (p as any).slug?.toLowerCase().includes(q);
+          return matchesSearch && (!statusFilter || p.status === statusFilter);
         })}
         emptyLabel="Belum ada prompt."
         emptyHint="Belum ada prompt yang tersimpan."
@@ -213,7 +217,7 @@ export function OpsPromptsSection({
             render: (row) => {
               const r = row as any;
               const latency = r.avgLatencyMs ? `${Number(r.avgLatencyMs).toFixed(0)}ms` : null;
-              const success = r.successRate ? `${(Number(r.successRate) * 100).toFixed(0)}%` : null;
+              const success = r.successRate != null ? `${Math.round(Number(r.successRate))}%` : null;
               const runs = r.totalRuns ? `${r.totalRuns}×` : null;
               const cost = r.avgCostUsd ? `$${Number(r.avgCostUsd).toFixed(4)}` : null;
               if (!latency && !success && !runs) return <span className="text-[11px] text-[#b0a89f]">—</span>;
