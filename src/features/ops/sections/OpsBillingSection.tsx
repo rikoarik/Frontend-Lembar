@@ -284,14 +284,14 @@ export function OpsBillingSection({
               {
                 key: 'school',
                 header: 'Workspace',
-                render: (row: any) => <span className="font-semibold">{row.school || row.workspaceId}</span>,
+                render: (row: any) => <span className="font-semibold">{row.workspaceId}</span>,
               },
               {
                 key: 'amount',
                 header: 'Amount',
                 render: (row: any) => (
                   <span className="tabular-nums">
-                    {row.currency} {Number(row.amount).toLocaleString('id-ID')}
+                    {row.currency} {(Number(row.amountCents) / 100).toLocaleString('id-ID', { minimumFractionDigits: 0 })}
                   </span>
                 ),
               },
@@ -310,11 +310,7 @@ export function OpsBillingSection({
                   return <AdminPill tone={tone}>{row.status}</AdminPill>;
                 },
               },
-              {
-                key: 'gateway',
-                header: 'Gateway',
-                render: (row: any) => <span className="text-[12px] text-[#6d665d]">{row.gateway}</span>,
-              },
+
               {
                 key: 'createdAt',
                 header: 'Tanggal',
