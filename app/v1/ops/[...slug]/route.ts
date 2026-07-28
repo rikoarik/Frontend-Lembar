@@ -49,10 +49,12 @@ async function handleProxy(request: NextRequest, context: { params: Promise<{ sl
     }
   }
 
+  const ifMatch = request.headers.get('if-match');
   const upstream = await backendFetch(fullPath, {
     method: request.method,
     token,
     body: body !== undefined ? JSON.stringify(body) : undefined,
+    headers: ifMatch ? { 'If-Match': ifMatch } : undefined,
   });
 
   const payload = await upstream.json().catch(() => null);
