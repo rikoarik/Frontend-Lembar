@@ -181,8 +181,8 @@ export function OpsContentSection({
               onClick={() => {
                 const action =
                   row.status === 'published'
-                    ? adminService.unpublishPage(row.slug)
-                    : adminService.publishPage(row.slug);
+                    ? adminService.unpublishPage(row.slug, row.revision)
+                    : adminService.publishPage(row.slug, row.revision);
                 action.then((res) => {
                   if (res.ok) {
                     setToast(`${row.status === 'published' ? 'Unpublish' : 'Publish'} ${row.slug} berhasil.`);
