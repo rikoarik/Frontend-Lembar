@@ -10,10 +10,15 @@ type StatusItem = {
 
 type StatusDoc = {
   updatedAt: string;
+  startedAt?: string;
+  workMode?: string;
   phase: string;
   headline: string;
   overallPercent: number;
   currentTask: string;
+  nextAction?: string;
+  blockers?: string[];
+  evidence?: string[];
   items: StatusItem[];
   latestBackendCommits: string[];
   latestFrontendCommits: string[];
@@ -356,7 +361,7 @@ export function StatusBoard({ doc, initialLogs }: { doc: StatusDoc | null; initi
                   }`}
                 />
                 <p className="text-[10.5px] font-medium uppercase tracking-[0.22em] text-zinc-500">
-                  Lembar Live Status
+                  Progress kerja live
                 </p>
               </div>
               <h1 className="text-2xl font-semibold leading-[1.05] tracking-tight text-zinc-900 lg:text-[32px] dark:text-zinc-50">
@@ -375,7 +380,7 @@ export function StatusBoard({ doc, initialLogs }: { doc: StatusDoc | null; initi
                 Overall progress
               </span>
               <span className="text-[12.5px] text-zinc-600 dark:text-zinc-400">
-                Fokus: <span className="text-zinc-900 dark:text-zinc-100">{latest.currentTask}</span>
+                Dikerjakan: <span className="text-zinc-900 dark:text-zinc-100">{latest.currentTask}</span>
               </span>
             </div>
             <span className="font-mono text-5xl font-semibold tabular-nums leading-none text-emerald-700 lg:text-6xl dark:text-emerald-300">
@@ -387,7 +392,7 @@ export function StatusBoard({ doc, initialLogs }: { doc: StatusDoc | null; initi
           <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-3">
             <div className="flex items-center justify-between">
               <h2 className="text-[10.5px] font-medium uppercase tracking-[0.22em] text-zinc-500">
-                Item kerja
+                Antrian kerja
               </h2>
               <span className="font-mono text-[10.5px] text-zinc-500">
                 {latest.items.filter((i) => i.status === 'done').length} / {latest.items.length} done
@@ -422,7 +427,7 @@ export function StatusBoard({ doc, initialLogs }: { doc: StatusDoc | null; initi
           <header className="flex items-center justify-between">
             <div>
               <p className="text-[10.5px] font-medium uppercase tracking-[0.22em] text-zinc-500">
-                Snapshot
+                Terakhir diperbarui
               </p>
               <code className="mt-1 inline-block rounded-md border border-zinc-200 bg-zinc-100 px-2 py-0.5 font-mono text-[10px] text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900/60 dark:text-zinc-300">
                 {latest.updatedAt}
@@ -446,6 +451,28 @@ export function StatusBoard({ doc, initialLogs }: { doc: StatusDoc | null; initi
           <section className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <CommitPanel title="Backend origin/dev" commits={latest.latestBackendCommits} accent="emerald" />
             <CommitPanel title="Frontend origin/dev" commits={latest.latestFrontendCommits} accent="amber" />
+          </section>
+
+          <section className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900/30">
+              <h2 className="mb-2 text-[10.5px] font-medium uppercase tracking-[0.22em] text-zinc-500">Alur otomatis</h2>
+              <dl className="space-y-2 text-[12.5px]">
+                <div><dt className="text-zinc-500">Mode</dt><dd>{latest.workMode ?? 'Lanjut otomatis sampai blocker material'}</dd></div>
+                <div><dt className="text-zinc-500">Mulai</dt><dd className="font-mono text-[11px]">{latest.startedAt ?? '—'}</dd></div>
+                <div><dt className="text-zinc-500">Setelah ini</dt><dd>{latest.nextAction ?? 'Ambil item pending berikutnya'}</dd></div>
+              </dl>
+            </div>
+            <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900/30">
+              <h2 className="mb-2 text-[10.5px] font-medium uppercase tracking-[0.22em] text-zinc-500">Blocker & bukti</h2>
+              <p className="text-[12.5px] text-zinc-700 dark:text-zinc-300">
+                {(latest.blockers?.length ?? 0) > 0 ? latest.blockers?.join(' · ') : 'Tidak ada blocker.'}
+              </p>
+              {(latest.evidence?.length ?? 0) > 0 && (
+                <ul className="mt-2 space-y-1 font-mono text-[10.5px] text-zinc-500">
+                  {latest.evidence?.slice(0, 4).map((item) => <li key={item}>{item}</li>)}
+                </ul>
+              )}
+            </div>
           </section>
 
           <section className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900/30">

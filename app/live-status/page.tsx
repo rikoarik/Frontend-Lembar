@@ -20,10 +20,15 @@ type StatusItem = {
 
 type StatusDoc = {
   updatedAt: string;
+  startedAt?: string;
+  workMode?: string;
   phase: string;
   headline: string;
   overallPercent: number;
   currentTask: string;
+  nextAction?: string;
+  blockers?: string[];
+  evidence?: string[];
   items: StatusItem[];
   latestBackendCommits: string[];
   latestFrontendCommits: string[];
