@@ -92,40 +92,33 @@ function SectionRingkasan({
 
   if (loading) return <AdminContentLoading />;
 
-  const stats = dashboard?.stats;
-  const quotaUsed = stats?.quotaUsed ?? 0;
-  const quotaLimit = stats?.quotaLimit ?? 0;
+  const activeMembers = dashboard?.members?.filter((m) => m.state === 'active').length ?? 0;
+  const quotaLimit = dashboard?.usage?.monthlyLimit ?? 0;
+  const quotaUsed = dashboard?.usage?.generationsUsedThisMonth ?? 0;
   const pct =
-    quotaLimit > 0
+    dashboard && quotaLimit > 0
       ? Math.round((quotaUsed / quotaLimit) * 100)
       : 0;
-
   return (
     <AdminStatCards
       items={[
         {
           label: 'Anggota aktif',
-          value: String(stats?.activeMembers ?? '—'),
-          hint: `dari ${stats?.totalMembers ?? 0} total`,
+          value: String(activeMembers || '—'),
+          hint: `dari ${dashboard?.memberCount ?? 0} total`,
           tone: 'ok',
         },
         {
           label: 'Kuota terpakai',
-          value: `${quotaUsed} / ${quotaLimit}`,
+          value: `${quotaUsed} / ${quotaLimit ?? '∞'}`,
           hint: `${pct}% periode ini`,
           tone: pct >= 90 ? 'bad' : pct >= 70 ? 'warn' : 'info',
           delta: `${pct}%`,
         },
         {
-          label: 'Lembar final',
-          value: String(stats?.totalAssessments ?? '—'),
-          hint: 'total workspace',
-          tone: 'ok',
-        },
-        {
           label: 'Sekolah',
           value: dashboard?.workspace.name ?? '—',
-          hint: `${dashboard?.workspace.plan ?? ''} · ${dashboard?.workspace.level ?? ''}`,
+          hint: `${dashboard?.usage?.plan ?? ''} · ${dashboard?.workspace.level ?? ''}`,
           tone: 'neutral',
         },
       ]}
@@ -202,7 +195,7 @@ function SectionGuru({
     setActionId(member.id);
     const res = await schoolService.memberSuspend(member.id);
     if (res.ok) {
-      setToast(`${member.name} ditangguhkan`);
+      setToast(`${member.name ?? member.email} ditangguhkan`);
       fetchMembers(search, filter, page);
     } else {
       setToast(`Gagal menangguhkan: ${res.error.safeMessage}`);
@@ -214,7 +207,7 @@ function SectionGuru({
     setActionId(member.id);
     const res = await schoolService.memberUnsuspend(member.id);
     if (res.ok) {
-      setToast(`${member.name} diaktifkan kembali`);
+      setToast(`${member.name ?? member.email} diaktifkan kembali`);
       fetchMembers(search, filter, page);
     } else {
       setToast(`Gagal mengaktifkan: ${res.error.safeMessage}`);
@@ -228,7 +221,7 @@ function SectionGuru({
     setActionId(member.id);
     const res = await schoolService.removeMember(member.id);
     if (res.ok) {
-      setToast(`${member.name} dihapus`);
+      setToast(`${member.name ?? member.email} dihapus`);
       fetchMembers(search, filter, page);
     } else {
       setToast(`Gagal menghapus: ${res.error.safeMessage}`);
@@ -274,9 +267,9 @@ function SectionGuru({
               header: 'Anggota',
               render: (row) => (
                 <div className="flex items-center gap-3">
-                  <AdminAvatar name={row.name} />
+                  <AdminAvatar name={row.name ?? row.email} />
                   <div>
-                    <div className="font-medium text-sm">{row.name}</div>
+                    <div className="font-medium text-sm">{row.name ?? row.email}</div>
                     <div className="text-xs text-neutral-400">{row.email}</div>
                   </div>
                 </div>
@@ -370,7 +363,7 @@ function SectionGuru({
       <AdminConfirmModal
         open={!!confirmRemoveMember}
         title="Hapus Anggota Sekolah"
-        description={`Apakah Anda yakin ingin menghapus ${confirmRemoveMember?.name} dari sekolah ini?`}
+        description={`Apakah Anda yakin ingin menghapus ${confirmRemoveMember?.name ?? confirmRemoveMember?.email} dari sekolah ini?`}
         confirmLabel="Ya, Hapus Anggota"
         cancelLabel="Batal"
         variant="danger"
@@ -490,12 +483,9 @@ function SectionPenggunaan({
     );
   }
 
-  const quotaUsed = usage?.quotaUsed ?? 0;
-  const quotaLimit = usage?.quotaLimit ?? 0;
-  const pct =
-    quotaLimit > 0
-      ? Math.round((quotaUsed / Math.max(quotaLimit, 1)) * 100)
-      : 0;
+  const pct = Math.round(
+    (usage.quotaUsed / Math.max(usage.quotaLimit, 1)) * 100,
+  );
 
   return (
     <div className="space-y-6">
@@ -503,7 +493,7 @@ function SectionPenggunaan({
         <div className="flex justify-between text-sm mb-2">
           <span className="font-medium">Kuota terpakai</span>
           <span className="text-neutral-500">
-            {quotaUsed} / {quotaLimit} ({pct}%)
+            {usage.quotaUsed} / {usage.quotaLimit} ({pct}%)
           </span>
         </div>
         <div className="h-2 rounded-full bg-neutral-100 dark:bg-neutral-800">
@@ -530,9 +520,9 @@ function SectionPenggunaan({
               header: 'Guru',
               render: (row) => (
                 <div className="flex items-center gap-3">
-                  <AdminAvatar name={row.name} />
+                  <AdminAvatar name={row.name ?? row.email} />
                   <div>
-                    <div className="font-medium text-sm">{row.name}</div>
+                    <div className="font-medium text-sm">{row.name ?? row.email}</div>
                     <div className="text-xs text-neutral-400">{row.email}</div>
                   </div>
                 </div>
@@ -1095,12 +1085,12 @@ function SectionAudit({
             {
               key: 'createdAt',
               header: 'Waktu',
-              render: (row) => fmtDate(row.createdAt),
+              render: (row) => fmtDate(row.at),
             },
             {
               key: 'actorEmail',
               header: 'Aktor',
-              render: (row) => row.actorEmail,
+              render: (row) => row.actor,
             },
             {
               key: 'action',
@@ -1108,12 +1098,9 @@ function SectionAudit({
               render: (row) => row.action,
             },
             {
-              key: 'targetType',
+              key: 'target',
               header: 'Target',
-              render: (row) =>
-                row.targetType
-                  ? `${row.targetType}${row.targetId ? ` #${row.targetId}` : ''}`
-                  : '—',
+              render: (row) => row.target ?? '—',
             },
           ]}
         />
