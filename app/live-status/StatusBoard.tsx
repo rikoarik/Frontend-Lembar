@@ -137,7 +137,97 @@ function ItemRow({ item }: { item: StatusItem }) {
   );
 }
 
-export function StatusBoard({ doc }: { doc: StatusDoc | null }) {
+function parseLogLine(line: string) {
+  const match = /^(\d{4}-\d{2}-\d{2}T[\d:.+\-Z]+)\s+\[(FE|BE|GLOBAL)\]\s+(.*)$/.exec(line);
+  if (!match) return null;
+  return { ts: match[1] ?? '', lane: match[2] ?? 'GLOBAL', msg: match[3] ?? line };
+}
+
+function LogFeed({ initialLines }: { initialLines: string[] }) {
+  const [lines, setLines] = useState<string[]>(initialLines);
+
+  useEffect(() => {
+    let cancelled = false;
+    const seenTs = new Set(initialLines);
+
+    async function tick() {
+      try {
+        const res = await fetch('/live-status/activity.json', { cache: 'no-store' });
+        if (!res.ok) return;
+        const json = (await res.json()) as { lines: string[] };
+        if (cancelled || !json.lines?.length) return;
+        const fresh = json.lines.slice(-200);
+        const newLines = fresh.filter((l) => !seenTs.has(l));
+        if (newLines.length > 0) {
+          for (const l of newLines) seenTs.add(l);
+          setLines(fresh);
+        }
+      } catch {
+        /* ignore */
+      }
+    }
+
+    const id = setInterval(tick, 4000);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+  }, [initialLines]);
+
+  if (lines.length === 0) {
+    return (
+      <div className="rounded-2xl border border-zinc-800 bg-zinc-900/30 p-5 text-sm text-zinc-400">
+        Belum ada log. Tiap saya push commit / build / restart / live verify, satu baris akan masuk
+        ke sini.
+      </div>
+    );
+  }
+
+  return (
+    <div className="overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950/60 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
+      <div className="flex items-center justify-between border-b border-zinc-800 bg-zinc-900/60 px-5 py-3">
+        <h2 className="text-[11px] font-medium uppercase tracking-[0.22em] text-zinc-500">
+          Activity log
+        </h2>
+        <span className="font-mono text-[11px] text-zinc-500">
+          {lines.length} baris · stream terbuka
+        </span>
+      </div>
+      <div className="max-h-[420px] overflow-y-auto px-5 py-4 font-mono text-[12px] leading-relaxed">
+        {lines.map((raw, idx) => {
+          const parsed = parseLogLine(raw);
+          if (!parsed) {
+            return (
+              <div key={`raw-${idx}`} className="flex gap-3 text-zinc-400">
+                <span className="w-12 shrink-0 text-right text-zinc-600">·</span>
+                <span className="whitespace-pre-wrap break-words">{raw}</span>
+              </div>
+            );
+          }
+          const laneTone =
+            parsed.lane === 'FE'
+              ? 'text-amber-300'
+              : parsed.lane === 'BE'
+                ? 'text-emerald-300'
+                : 'text-zinc-500';
+          return (
+            <div key={`${parsed.ts}-${idx}`} className="flex gap-3">
+              <span className="w-24 shrink-0 truncate text-right text-zinc-600">
+                {parsed.ts.split('T')[1]?.slice(0, 8) ?? parsed.ts}
+              </span>
+              <span className={`w-12 shrink-0 ${laneTone}`}>[{parsed.lane}]</span>
+              <span className="whitespace-pre-wrap break-words text-zinc-200">
+                {parsed.msg}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+export function StatusBoard({ doc, initialLogs }: { doc: StatusDoc | null; initialLogs: string[] }) {
   const [latest, setLatest] = useState<StatusDoc | null>(doc);
   const [pulse, setPulse] = useState<number>(0);
 
@@ -280,6 +370,16 @@ export function StatusBoard({ doc }: { doc: StatusDoc | null }) {
             </li>
           ))}
         </ul>
+      </section>
+
+      <section className="flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-[11px] font-medium uppercase tracking-[0.22em] text-zinc-500">
+            Activity log (FE + BE)
+          </h2>
+          <span className="font-mono text-[11px] text-zinc-500">live / tail -f</span>
+        </div>
+        <LogFeed initialLines={initialLogs} />
       </section>
 
       <footer className="flex flex-wrap items-center justify-between gap-3 text-[11px] uppercase tracking-[0.18em] text-zinc-500">

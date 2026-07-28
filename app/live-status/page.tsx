@@ -31,6 +31,8 @@ type StatusDoc = {
   notes: string[];
 };
 
+type LogLine = { line: string };
+
 const STATUS_PATH = path.join(
   process.env.HOME || '/home/hermes',
   'Workspace',
@@ -47,11 +49,30 @@ async function loadStatus(): Promise<StatusDoc | null> {
   }
 }
 
+async function loadLogs(): Promise<string[]> {
+  try {
+    const logPath = path.join(
+      process.env.HOME || '/home/hermes',
+      'Workspace',
+      'Deliverables',
+      'lembar-activity.log',
+    );
+    const raw = await fs.readFile(logPath, 'utf8');
+    return raw
+      .split('\n')
+      .filter((line) => line.trim().length > 0)
+      .slice(-200);
+  } catch {
+    return [];
+  }
+}
+
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export default async function LiveStatusPage() {
   const doc = await loadStatus();
+  const initialLogs = await loadLogs();
 
   return (
     <main className="relative min-h-[100dvh] overflow-hidden bg-zinc-950 text-zinc-100">
@@ -63,7 +84,7 @@ export default async function LiveStatusPage() {
             'radial-gradient(circle at 20% 0%, rgb(244 244 245 / 0.6), transparent 38%), radial-gradient(circle at 80% 100%, rgb(244 244 245 / 0.4), transparent 44%)',
         }}
       />
-      <StatusBoard doc={doc} />
+      <StatusBoard doc={doc} initialLogs={initialLogs} />
     </main>
   );
 }
