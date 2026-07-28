@@ -8,22 +8,27 @@ type StatusItem = {
   percent: number;
 };
 
+type ServiceState = 'online' | 'offline' | 'degraded' | 'unknown';
+
 type StatusDoc = {
+  generatedAt: string;
   updatedAt: string;
   startedAt?: string;
-  workMode?: string;
+  workMode: string;
   phase: string;
   headline: string;
   overallPercent: number;
   currentTask: string;
-  nextAction?: string;
-  blockers?: string[];
-  evidence?: string[];
+  nextAction: string;
+  blockers: string[];
+  evidence: string[];
   items: StatusItem[];
   latestBackendCommits: string[];
   latestFrontendCommits: string[];
-  services: { lembarApi: string; lembarFrontend: string; lembarWorker: string };
+  services: { lembarApi: ServiceState; lembarFrontend: ServiceState; lembarWorker: ServiceState };
   notes: string[];
+  board: { name: string; taskId: string; status: string };
+  worker: { assignee: string; lastHeartbeatAt: string | null; heartbeatAgeSeconds: number | null };
 };
 
 const STATUS_PATH = '/live-status/status.json';
@@ -342,10 +347,12 @@ export function StatusBoard({ doc, initialLogs }: { doc: StatusDoc | null; initi
     );
   }
 
-  const connected =
-    latest.services.lembarApi === 'online' &&
-    latest.services.lembarFrontend === 'online' &&
-    latest.services.lembarWorker === 'online';
+  const allServices = Object.values(latest.services);
+  const offlineCount = allServices.filter((state) => state === 'offline').length;
+  const degradedCount = allServices.filter((state) => state === 'degraded' || state === 'unknown').length;
+  const connected = offlineCount === 0 && degradedCount === 0;
+  const heartbeatStale =
+    latest.worker.heartbeatAgeSeconds !== null && latest.worker.heartbeatAgeSeconds > 600;
 
   return (
     <div className="h-[100dvh] w-screen overflow-hidden bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100">
@@ -361,7 +368,7 @@ export function StatusBoard({ doc, initialLogs }: { doc: StatusDoc | null; initi
                   }`}
                 />
                 <p className="text-[10.5px] font-medium uppercase tracking-[0.22em] text-zinc-500">
-                  Progress kerja live
+                  Progress kerja live · board {latest.board.name} · {latest.board.taskId}
                 </p>
               </div>
               <h1 className="text-2xl font-semibold leading-[1.05] tracking-tight text-zinc-900 lg:text-[32px] dark:text-zinc-50">
@@ -369,6 +376,10 @@ export function StatusBoard({ doc, initialLogs }: { doc: StatusDoc | null; initi
               </h1>
               <p className="max-w-xl text-[13px] leading-relaxed text-zinc-600 dark:text-zinc-300">
                 {latest.headline}
+              </p>
+              <p className="font-mono text-[11px] text-zinc-500">
+                Heartbeat {latest.worker.lastHeartbeatAt ?? '—'} · worker {latest.worker.assignee}
+                {heartbeatStale ? ' · stale' : ''}
               </p>
             </div>
             <ThemeToggle theme={theme} onToggle={toggle} />
@@ -384,7 +395,7 @@ export function StatusBoard({ doc, initialLogs }: { doc: StatusDoc | null; initi
               </span>
             </div>
             <span className="font-mono text-5xl font-semibold tabular-nums leading-none text-emerald-700 lg:text-6xl dark:text-emerald-300">
-              {latest.overallPercent.toString().padStart(2, '0')}
+              {Math.min(100, Math.max(0, latest.overallPercent)).toString().padStart(2, '0')}
               <span className="text-base text-zinc-400 dark:text-zinc-600">%</span>
             </span>
           </div>
@@ -427,8 +438,11 @@ export function StatusBoard({ doc, initialLogs }: { doc: StatusDoc | null; initi
           <header className="flex items-center justify-between">
             <div>
               <p className="text-[10.5px] font-medium uppercase tracking-[0.22em] text-zinc-500">
-                Terakhir diperbarui
+                generated · updated
               </p>
+              <code className="mt-1 inline-block rounded-md border border-zinc-200 bg-zinc-100 px-2 py-0.5 font-mono text-[10px] text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900/60 dark:text-zinc-300">
+                {latest.generatedAt}
+              </code>
               <code className="mt-1 inline-block rounded-md border border-zinc-200 bg-zinc-100 px-2 py-0.5 font-mono text-[10px] text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900/60 dark:text-zinc-300">
                 {latest.updatedAt}
               </code>
