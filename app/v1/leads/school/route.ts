@@ -39,7 +39,11 @@ function fail(
 
 export async function POST(request: Request) {
   if (process.env.NEXT_PUBLIC_API_MODE === 'live') {
-    return fail('RESOURCE_NOT_FOUND', 'Sumber tidak ditemukan.', 404);
+    return fail(
+      'FEATURE_UNAVAILABLE',
+      'Form lead sekolah belum tersambung ke backend live. Hubungi tim kami via WhatsApp untuk demo sekolah.',
+      501,
+    );
   }
 
   const body = (await request.json()) as LeadPayload;
