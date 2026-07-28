@@ -49,6 +49,7 @@ async function request<T>(
   path: string,
   method: 'GET' | 'POST' | 'PATCH' | 'DELETE' = 'GET',
   body?: unknown,
+  headers?: Record<string, string>,
 ): Promise<Result<T, AdminError>> {
   try {
     const response = await fetch(resolveApiUrl(path), {
@@ -57,6 +58,7 @@ async function request<T>(
       headers: {
         'Content-Type': 'application/json',
         'Accept-Language': 'id',
+        ...(headers ?? {}),
       },
       body: body === undefined ? undefined : JSON.stringify(body),
     });
@@ -93,7 +95,9 @@ export type AdminJobRow = {
   type: string;
   tenant: string;
   status: 'queued' | 'running' | 'failed' | 'succeeded';
-  progress: string;
+  attempt: number;
+  workspaceId?: string;
+  createdAt?: string;
   updatedAt: string;
 };
 
@@ -142,6 +146,15 @@ export type AdminAccountDetail = {
   auditLog?: AdminAccountAuditItem[];
 };
 
+/** PATCH /v1/admin/accounts/:id returns a narrower shape than GET */
+export type AdminAccountPatchResult = {
+  id: string;
+  email: string;
+  name: string;
+  phone: string | null;
+  updated_at: string;
+};
+
 export type AdminSchoolRow = {
   id: string;
   name: string;
@@ -170,12 +183,17 @@ export type AdminBillingRow = {
 
 export type PaymentOrder = {
   id: string;
+  tenantId: string;
   workspaceId: string;
-  school: string;
-  amount: number;
+  idempotencyKey?: string;
+  externalOrderId?: string;
+  fromPlan?: string;
+  toPlan?: string;
+  amountCents: number;
   currency: string;
   status: 'pending' | 'paid' | 'failed' | 'expired' | 'cancelled';
-  gateway: string;
+  gatewayPayload?: Record<string, unknown>;
+  paidAt?: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -188,11 +206,18 @@ export type AdminFlagRow = {
   scope: 'global' | 'pilot';
 };
 
+/** POST /v1/admin/flags returns a narrower shape — no id, no description */
+export type CreateFlagResult = {
+  key: string;
+  enabled: boolean;
+  scope: string;
+};
+
 export type AdminPromptRow = {
   id: string;
   name: string;
   owner: string;
-  status: 'active' | 'draft';
+  status: 'active' | 'draft' | 'archived';
 };
 
 export type AdminAuditRow = {
@@ -208,6 +233,7 @@ export type AdminContentRow = {
   slug: string;
   title: string;
   status: 'published' | 'draft';
+  revision?: number;
   updatedAt: string;
 };
 
@@ -227,6 +253,15 @@ export type AdminAuditDetail = {
   target: string;
   metadata: Record<string, unknown>;
   at: string;
+};
+
+/** Returned by plan upgrade, downgrade, and entitlement set */
+export type PlanChangeResult = {
+  workspaceId: string;
+  previousPlan: string;
+  newPlan: string;
+  orderId?: string;
+  transitionedAt?: string;
 };
 
 // ── Service ────────────────────────────────────────────────────────────────
@@ -266,12 +301,20 @@ export const adminService = {
     }>(`/v1/admin/accounts${qs ? `?${qs}` : ''}`);
   },
 
+  invite(payload: {
+    email: string;
+    name?: string;
+    role?: string;
+  }): Promise<Result<{ invited: true; accountId: string; token?: string; welcomeUrl?: string; expiresAt?: string }, AdminError>> {
+    return request<{ invited: true; accountId: string; token?: string; welcomeUrl?: string; expiresAt?: string }>('/v1/admin/accounts/invite', 'POST', payload);
+  },
+
   inviteAccount(payload: {
     email: string;
     name?: string;
     role?: string;
-  }): Promise<Result<{ email: string; invited: boolean }, AdminError>> {
-    return request<{ email: string; invited: boolean }>('/v1/admin/accounts/invite', 'POST', payload);
+  }): Promise<Result<{ invited: true; accountId: string; token?: string; welcomeUrl?: string; expiresAt?: string }, AdminError>> {
+    return adminService.invite(payload);
   },
 
   suspendAccount(id: string): Promise<Result<{ id: string; suspended: boolean }, AdminError>> {
@@ -289,8 +332,8 @@ export const adminService = {
   updateAccount(
     id: string,
     payload: { name?: string; phone?: string },
-  ): Promise<Result<AdminAccountDetail, AdminError>> {
-    return request<AdminAccountDetail>(`/v1/admin/accounts/${id}`, 'PATCH', payload);
+  ): Promise<Result<AdminAccountPatchResult, AdminError>> {
+    return request<AdminAccountPatchResult>(`/v1/admin/accounts/${id}`, 'PATCH', payload);
   },
 
   deleteAccount(id: string): Promise<Result<{ id: string; deleted: boolean; email: string }, AdminError>> {
@@ -334,8 +377,8 @@ export const adminService = {
     }>(`/v1/admin/accounts/${id}/impersonate`, 'POST');
   },
 
-  resetPassword(id: string): Promise<Result<{ id: string; resetSent: boolean }, AdminError>> {
-    return request<{ id: string; resetSent: boolean }>(`/v1/admin/accounts/${id}/reset-password`, 'POST');
+  resetPassword(id: string): Promise<Result<{ id: string; sent: true; token?: string; resetUrl?: string; expiresAt?: string }, AdminError>> {
+    return request<{ id: string; sent: true; token?: string; resetUrl?: string; expiresAt?: string }>(`/v1/admin/accounts/${id}/reset-password`, 'POST');
   },
 
   updateRoles(id: string, roles: string[]): Promise<Result<{ id: string; roles: string[] }, AdminError>> {
@@ -411,13 +454,16 @@ export const adminService = {
     return request(`/v1/admin/flags/${key}`, 'DELETE');
   },
 
-  createFlag(data: { key: string; description?: string; scope?: string }): Promise<Result<AdminFlagRow, AdminError>> {
-    return request<AdminFlagRow>('/v1/admin/flags', 'POST', data);
+  createFlag(data: { key: string; description?: string; scope?: string }): Promise<Result<CreateFlagResult, AdminError>> {
+    return request<CreateFlagResult>('/v1/admin/flags', 'POST', data);
   },
 
   // Prompts
-  prompts(): Promise<Result<AdminPromptRow[], AdminError>> {
-    return request<AdminPromptRow[]>('/v1/admin/prompts');
+  prompts(params?: { status?: AdminPromptRow['status'] }): Promise<Result<AdminPromptRow[], AdminError>> {
+    const qs = new URLSearchParams();
+    if (params?.status) qs.set('status', params.status);
+    const q = qs.toString();
+    return request<AdminPromptRow[]>(`/v1/admin/prompts${q ? `?${q}` : ''}`);
   },
 
   activatePrompt(id: string): Promise<Result<{ id: string; status: string }, AdminError>> {
@@ -470,20 +516,20 @@ export const adminService = {
   },
 
   // Payment orders
-  paymentOrders(params?: { workspaceId?: string; status?: string; page?: number; limit?: number }): Promise<Result<{ data: PaymentOrder[]; meta: AdminMeta }, AdminError>> {
+  paymentOrders(params?: { workspaceId?: string; status?: string; page?: number; limit?: number }): Promise<Result<PaymentOrder[], AdminError>> {
     const qs = new URLSearchParams();
     if (params?.workspaceId) qs.set('workspaceId', params.workspaceId);
     if (params?.status) qs.set('status', params.status);
     if (params?.page) qs.set('page', String(params.page));
     if (params?.limit) qs.set('limit', String(params.limit));
     const q = qs.toString();
-    return request<{ data: PaymentOrder[]; meta: AdminMeta }>(`/v1/payment/orders${q ? `?${q}` : ''}`);
+    return request<PaymentOrder[]>(`/v1/payment/orders${q ? `?${q}` : ''}`);
   },
-  upgradeWorkspace(workspaceId: string): Promise<Result<{ workspaceId: string; plan: string }, AdminError>> {
-    return request<{ workspaceId: string; plan: string }>(`/v1/me/plan/upgrade`, 'POST', { workspaceId });
+  upgradeWorkspace(workspaceId: string): Promise<Result<PlanChangeResult, AdminError>> {
+    return request<PlanChangeResult>(`/v1/me/plan/upgrade`, 'POST', { workspaceId });
   },
-  downgradeWorkspace(workspaceId: string): Promise<Result<{ workspaceId: string; plan: string }, AdminError>> {
-    return request<{ workspaceId: string; plan: string }>(`/v1/me/plan/downgrade`, 'POST', { workspaceId });
+  downgradeWorkspace(workspaceId: string): Promise<Result<PlanChangeResult, AdminError>> {
+    return request<PlanChangeResult>(`/v1/me/plan/downgrade`, 'POST', { workspaceId });
   },
 
   // Dashboard trends
@@ -540,24 +586,24 @@ export const adminService = {
     return request(`/v1/admin/prompts/${id}`);
   },
 
-  promptVersions(id: string): Promise<Result<{ data: unknown[] }, AdminError>> {
-    return request(`/v1/admin/prompts/${id}/versions`);
+  promptVersions(id: string): Promise<Result<unknown[], AdminError>> {
+    return request<unknown[]>(`/v1/admin/prompts/${id}/versions`);
   },
 
   activatePromptVersion(id: string, version: number): Promise<Result<unknown, AdminError>> {
     return request(`/v1/admin/prompts/${id}/versions/${version}/activate`, 'PATCH');
   },
 
-  promptEvalCases(id: string): Promise<Result<{ data: unknown[] }, AdminError>> {
-    return request(`/v1/admin/prompts/${id}/eval-cases`);
+  promptEvalCases(id: string): Promise<Result<unknown[], AdminError>> {
+    return request<unknown[]>(`/v1/admin/prompts/${id}/eval-cases`);
   },
 
   promptMetrics(id: string): Promise<Result<Record<string, unknown>, AdminError>> {
     return request(`/v1/admin/prompts/${id}/metrics`);
   },
 
-  learningSignals(): Promise<Result<{ data: { prompt_template_id: string; pattern: string; frequency: number; avg_rating: number; suggested_action: string }[] }, AdminError>> {
-    return request('/v1/admin/learning-signals');
+  learningSignals(): Promise<Result<{ prompt_template_id: string; pattern: string; frequency: number; avg_rating: number; suggested_action: string }[], AdminError>> {
+    return request<{ prompt_template_id: string; pattern: string; frequency: number; avg_rating: number; suggested_action: string }[]>('/v1/admin/learning-signals');
   },
 
   createPrompt(data: { name: string; slug: string; description?: string; promptText?: string; contextWindow?: string }): Promise<Result<Record<string, unknown>, AdminError>> {
@@ -565,17 +611,27 @@ export const adminService = {
   },
 
   // Set entitlement (plan) for a workspace
-  setEntitlement(workspaceId: string, data: { plan: 'free' | 'pro' }): Promise<Result<{ workspaceId: string; plan: string }, AdminError>> {
-    return request(`/v1/admin/entitlements/${workspaceId}`, 'POST', data);
+  setEntitlement(workspaceId: string, data: { plan: 'free' | 'pro' }): Promise<Result<PlanChangeResult, AdminError>> {
+    return request<PlanChangeResult>(`/v1/admin/entitlements/${workspaceId}`, 'POST', data);
   },
 
   // Marketing CMS publish/unpublish
-  publishPage(slug: string): Promise<Result<unknown, AdminError>> {
-    return request(`/v1/ops/marketing/pages/${encodeURIComponent(slug)}/publish`, 'POST');
+  publishPage(slug: string, revision?: number): Promise<Result<unknown, AdminError>> {
+    return request(
+      `/v1/ops/marketing/pages/${encodeURIComponent(slug)}/publish`,
+      'POST',
+      undefined,
+      revision !== undefined ? { 'If-Match': String(revision) } : undefined,
+    );
   },
 
-  unpublishPage(slug: string): Promise<Result<unknown, AdminError>> {
-    return request(`/v1/ops/marketing/pages/${encodeURIComponent(slug)}/unpublish`, 'POST');
+  unpublishPage(slug: string, revision?: number): Promise<Result<unknown, AdminError>> {
+    return request(
+      `/v1/ops/marketing/pages/${encodeURIComponent(slug)}/unpublish`,
+      'POST',
+      undefined,
+      revision !== undefined ? { 'If-Match': String(revision) } : undefined,
+    );
   },
 
   // Create marketing content page
