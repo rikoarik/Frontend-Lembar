@@ -369,10 +369,13 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
     });
   };
 
-  const loadPrompts = () => {
+  const loadPrompts = (status?: AdminPromptRow['status']) => {
     setPromptsLoading(true);
-    adminService.prompts().then((res) => {
-      if (res.ok) setPromptsData(res.value);
+    adminService.prompts({ status }).then((res) => {
+      if (res.ok) {
+        const val = res.value as AdminPromptRow[] | { data?: AdminPromptRow[] };
+        setPromptsData(Array.isArray(val) ? val : (val.data ?? []));
+      }
       setPromptsLoading(false);
     });
   };
