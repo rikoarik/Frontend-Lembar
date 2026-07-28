@@ -583,6 +583,7 @@ export function LiveStatusBoard({ initialDoc, initialActivity }: { initialDoc: L
         />
         <MobileNav active={section} onChange={setSection} />
         <main className="flex-1 space-y-6 px-4 py-6 sm:px-6 lg:px-8">
+          {section !== 'overview' && <ActiveTaskPanel doc={safeDoc} />}
           {section === 'overview' && <OverviewSection doc={safeDoc} />}
           {section === 'kanban' && <KanbanBoard groups={safeDoc.taskGroups} />}
           {section === 'workers' && (
