@@ -40,8 +40,11 @@ export async function POST(request: Request) {
     method: 'POST',
     token,
     headers: {
+      // Ponytail: current BE subscription/payment stack keys plan rows by
+      // workspaceId. Use workspaceId for tenant+workspace to avoid routing
+      // the upgrade through the acting user's id.
       'x-workspace-id': workspaceId,
-      'x-tenant-id': userId,
+      'x-tenant-id': workspaceId,
       'x-actor-id': userId,
     },
     body: JSON.stringify(body),
