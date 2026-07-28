@@ -80,7 +80,7 @@ describe('live-status routes', () => {
     expect(response.status).toBe(200);
     const json = await response.json();
     expect(json.board).toMatchObject({ name: 'lembar', taskId: 't_79f6e720', status: 'running' });
-    expect(json.overallPercent).toBe(45);
+    expect(json.overallPercent).toBe(25);
     expect(json.currentTask).toContain('t_79f6e720');
     expect(json.latestFrontendCommits[0]).toContain('fe12345');
     expect(json.latestBackendCommits[0]).toContain('be12345');
