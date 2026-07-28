@@ -135,7 +135,12 @@ export function OpsAccountsSection({
               })
               .then((res) => {
                 if (res.ok) {
-                  setToast(`Undangan terkirim ke ${inviteEmail}.`);
+                  const details = [res.value.token, res.value.welcomeUrl].filter(Boolean).join(' · ');
+                  setToast(
+                    details
+                      ? `Undangan terkirim ke ${inviteEmail}. ${details}`
+                      : `Undangan terkirim ke ${inviteEmail}.`,
+                  );
                   setInviteEmail('');
                   setInviteName('');
                   setInviteRole('');
