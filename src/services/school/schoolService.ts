@@ -101,11 +101,21 @@ async function request<T>(
       }
       return ok(json.data);
     }
+
+    if (process.env.NODE_ENV === 'production') {
+      return err(await parseError(response));
+    }
   } catch {
-    // Network/Offline fallback during development or testing
+    if (process.env.NODE_ENV === 'production') {
+      return err({
+        code: 'NETWORK',
+        safeMessage: 'Tidak dapat terhubung. Periksa koneksi Anda.',
+        retryable: true,
+      });
+    }
   }
 
-  // Fallbacks for endpoints when backend endpoint is not yet connected
+  // Ponytail: keep local mock fallback for development/testing only.
   if (path.startsWith('/v1/school/members')) {
     const url = new URL(path, 'http://localhost');
     const q = url.searchParams.get('q')?.toLowerCase();
