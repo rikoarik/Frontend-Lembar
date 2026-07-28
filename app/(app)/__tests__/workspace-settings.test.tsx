@@ -1,15 +1,47 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import WorkspaceSettingsPage from '../app/pengaturan/workspace/page';
 
+const MOCK_WORKSPACES = [
+  { id: 'ws-1', name: 'Workspace Pribadi', type: 'personal', role: 'owner', permissions: [] },
+  { id: 'ws-2', name: 'SD Negeri 01 Maju', type: 'school', role: 'admin', permissions: [] },
+  { id: 'ws-3', name: 'Tim Guru Matematika', type: 'school', role: 'member', permissions: [] },
+];
+
+function mockFetch() {
+  const fetchSpy = vi.fn().mockImplementation((url: string) => {
+    if (url === '/v1/me') {
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ data: { workspaces: MOCK_WORKSPACES } }),
+      });
+    }
+    if (url === '/v1/auth/workspace/switch') {
+      // Return failure so the page shows error status instead of reloading
+      return Promise.resolve({ ok: false, status: 500 });
+    }
+    return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+  });
+  vi.stubGlobal('fetch', fetchSpy);
+  return fetchSpy;
+}
+
 describe('F2-07 workspace settings — /app/pengaturan/workspace', () => {
   beforeEach(() => {
+    mockFetch();
+  });
+
+  afterEach(() => {
     vi.restoreAllMocks();
   });
 
-  it('renders membership list with role labels and active indicator', () => {
+  it('renders membership list with role labels and active indicator', async () => {
     render(<WorkspaceSettingsPage />);
+
+    await waitFor(() => {
+      expect(screen.queryByText(/memuat…/i)).not.toBeInTheDocument();
+    });
 
     expect(screen.getByRole('heading', { level: 1, name: /workspace/i })).toBeInTheDocument();
 
@@ -29,6 +61,10 @@ describe('F2-07 workspace settings — /app/pengaturan/workspace', () => {
     const user = userEvent.setup();
     render(<WorkspaceSettingsPage />);
 
+    await waitFor(() => {
+      expect(screen.queryByText(/memuat…/i)).not.toBeInTheDocument();
+    });
+
     const switchButtons = screen.getAllByRole('button', { name: /pilih/i });
     await user.click(switchButtons[0]);
 
@@ -37,9 +73,13 @@ describe('F2-07 workspace settings — /app/pengaturan/workspace', () => {
     expect(screen.getByRole('button', { name: /batal/i })).toBeInTheDocument();
   });
 
-  it('shows success status after confirming switch (mock)', async () => {
+  it('shows error status when switch fails', async () => {
     const user = userEvent.setup();
     render(<WorkspaceSettingsPage />);
+
+    await waitFor(() => {
+      expect(screen.queryByText(/memuat…/i)).not.toBeInTheDocument();
+    });
 
     const switchButtons = screen.getAllByRole('button', { name: /pilih/i });
     await user.click(switchButtons[0]);
@@ -54,6 +94,10 @@ describe('F2-07 workspace settings — /app/pengaturan/workspace', () => {
     const user = userEvent.setup();
     render(<WorkspaceSettingsPage />);
 
+    await waitFor(() => {
+      expect(screen.queryByText(/memuat…/i)).not.toBeInTheDocument();
+    });
+
     const leaveButtons = screen.getAllByRole('button', { name: /^keluar$/i });
     await user.click(leaveButtons[0]);
 
@@ -61,26 +105,33 @@ describe('F2-07 workspace settings — /app/pengaturan/workspace', () => {
     expect(screen.getByRole('button', { name: /ya, keluar/i })).toBeInTheDocument();
   });
 
-  it('shows success status after confirming leave (mock)', async () => {
+  it('shows unavailable status after confirming leave', async () => {
     const user = userEvent.setup();
     render(<WorkspaceSettingsPage />);
+
+    await waitFor(() => {
+      expect(screen.queryByText(/memuat…/i)).not.toBeInTheDocument();
+    });
 
     const leaveButtons = screen.getAllByRole('button', { name: /^keluar$/i });
     await user.click(leaveButtons[0]);
     await user.click(screen.getByRole('button', { name: /ya, keluar/i }));
 
     await waitFor(() => {
-      expect(screen.getByRole('status')).toHaveTextContent(/telah keluar dari workspace/i);
+      expect(screen.getByRole('status')).toHaveTextContent(/belum tersedia/i);
     });
   });
 
-  it('does not show leave button for personal workspace', () => {
+  it('does not show leave button for personal workspace', async () => {
     render(<WorkspaceSettingsPage />);
+
+    await waitFor(() => {
+      expect(screen.queryByText(/memuat…/i)).not.toBeInTheDocument();
+    });
 
     // "Workspace Pribadi" is personal + owner — no Keluar button.
     // "SD Negeri 01 Maju" is non-personal admin — Keluar shown.
     // "Tim Guru Matematika" is non-personal member — Keluar shown.
-    // Personal workspace owner is excluded; both non-personal non-owner roles get Keluar.
     const leaveButtons = screen.queryAllByRole('button', { name: /^keluar$/i });
     expect(leaveButtons).toHaveLength(2);
   });
