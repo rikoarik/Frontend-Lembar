@@ -1,8 +1,31 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { RoleSwitcher } from '@/src/features/admin/RoleSwitcher';
+
+type PlanUsage = {
+  generationsUsedThisMonth: number;
+  monthlyLimit: number | null;
+};
+
+export function formatQuota(plan: PlanUsage): { label: string; percent: number } {
+  const { generationsUsedThisMonth: used, monthlyLimit: limit } = plan;
+  return {
+    label: `${used}/${limit ?? '∞'}`,
+    percent: limit ? Math.min(100, Math.round((used / limit) * 100)) : 0,
+  };
+}
+
+function isPlanUsage(value: unknown): value is PlanUsage {
+  if (!value || typeof value !== 'object') return false;
+  const plan = value as Record<string, unknown>;
+  return (
+    typeof plan['generationsUsedThisMonth'] === 'number' &&
+    (typeof plan['monthlyLimit'] === 'number' || plan['monthlyLimit'] === null)
+  );
+}
 
 type TopBarProps = {
   workspaceName: string;
@@ -38,6 +61,21 @@ export function TopBar({
 }: TopBarProps) {
   const pathname = usePathname() ?? '/app';
   const title = titleFromPath(pathname);
+  const [plan, setPlan] = useState<PlanUsage | null>(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch('/v1/me/plan', { credentials: 'include', signal: controller.signal })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((body: unknown) => {
+        const data = (body as { data?: unknown } | null)?.data;
+        if (isPlanUsage(data)) setPlan(data);
+      })
+      .catch(() => undefined);
+    return () => controller.abort();
+  }, [workspaceName]);
+
+  const quota = plan ? formatQuota(plan) : null;
 
   return (
     <header
@@ -94,25 +132,30 @@ export function TopBar({
 
       <div className="flex items-center gap-2">
         <RoleSwitcher />
-        <Link
-          href="/app/pengaturan/langganan"
-          className="hidden h-9 items-center gap-2 rounded-lg border border-[#e6dfd4] bg-white px-3 text-[12px] font-medium text-[#171717] hover:bg-[#f3eee6] sm:inline-flex"
-          aria-label="Kuota: 12 dari 50 lembar terpakai"
-        >
-          <span aria-hidden="true" className="material-symbols-outlined text-[16px] text-[#8a8379]">
-            data_usage
-          </span>
-          <span className="text-[#8a8379]">12/50</span>
-          <span
-            className="h-1.5 w-16 rounded-full bg-[#e6dfd4] overflow-hidden"
-            role="progressbar"
-            aria-valuenow={12}
-            aria-valuemin={0}
-            aria-valuemax={50}
+        {quota ? (
+          <Link
+            href="/app/pengaturan/langganan"
+            className="hidden h-9 items-center gap-2 rounded-lg border border-[#e6dfd4] bg-white px-3 text-[12px] font-medium text-[#171717] hover:bg-[#f3eee6] sm:inline-flex"
+            aria-label={`Kuota: ${quota.label} lembar terpakai`}
           >
-            <span className="block h-full w-[24%] rounded-full bg-[#a3202b]" />
-          </span>
-        </Link>
+            <span aria-hidden="true" className="material-symbols-outlined text-[16px] text-[#8a8379]">
+              data_usage
+            </span>
+            <span className="text-[#8a8379]">{quota.label}</span>
+            <span
+              className="h-1.5 w-16 rounded-full bg-[#e6dfd4] overflow-hidden"
+              role="progressbar"
+              aria-valuenow={plan?.generationsUsedThisMonth}
+              aria-valuemin={0}
+              aria-valuemax={plan?.monthlyLimit ?? undefined}
+            >
+              <span
+                className="block h-full rounded-full bg-[#a3202b]"
+                style={{ width: `${quota.percent}%` }}
+              />
+            </span>
+          </Link>
+        ) : null}
         <div
           className="hidden h-9 max-w-[180px] items-center gap-1.5 rounded-lg border border-[#e6dfd4] bg-white px-2.5 text-[12px] font-medium text-[#171717] md:inline-flex md:max-w-[220px]"
         >
