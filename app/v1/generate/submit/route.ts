@@ -6,6 +6,12 @@ import {
   SESSION_COOKIE,
   TRIAL_DEVICE_COOKIE,
 } from '@/src/lib/api/session';
+import {
+  normalizeQuestionTypeCounts,
+  QUESTION_TYPES,
+  type QuestionType,
+  type QuestionTypeCounts,
+} from '@/src/features/generate/types';
 
 function claims(token: string): { userId?: string; workspaceId?: string } {
   try {
@@ -13,6 +19,33 @@ function claims(token: string): { userId?: string; workspaceId?: string } {
   } catch {
     return {};
   }
+}
+
+function toQuestionTypeCounts(value: unknown): QuestionTypeCounts {
+  const raw = value as Partial<Record<QuestionType, unknown>> | null | undefined;
+  return {
+    multiple_choice: Number(raw?.multiple_choice) || 0,
+    short_answer: Number(raw?.short_answer) || 0,
+    essay: Number(raw?.essay) || 0,
+    true_false: Number(raw?.true_false) || 0,
+  };
+}
+
+function buildBlueprintItems(body: Record<string, unknown>, count: number, difficulty: string) {
+  const normalizedCounts = normalizeQuestionTypeCounts(count, toQuestionTypeCounts(body.questionTypeCounts));
+  let sequence = 0;
+
+  return QUESTION_TYPES.flatMap((questionType) =>
+    Array.from({ length: normalizedCounts[questionType] }, () => ({
+      sequence: sequence++,
+      questionType,
+      difficulty,
+      cognitiveLevel: null,
+      topicHint: String(body.teacherFocus || body.subjectId || ''),
+      outcomeId: null,
+      sourceUploadId: typeof body.sourceId === 'string' && body.sourceId ? body.sourceId : null,
+    })),
+  );
 }
 
 export async function POST(request: NextRequest) {
@@ -66,15 +99,7 @@ export async function POST(request: NextRequest) {
   const count = Math.min(200, Math.max(1, Number(body.questionCount) || 1));
   const rawDifficulty = String(body.difficulty || 'medium');
   const difficulty = rawDifficulty === 'mixed' ? 'medium' : rawDifficulty;
-  const blueprintItems = Array.from({ length: count }, (_, sequence) => ({
-    sequence,
-    questionType: 'multiple_choice',
-    difficulty,
-    cognitiveLevel: null,
-    topicHint: String(body.teacherFocus || body.subjectId || ''),
-    outcomeId: null,
-    sourceUploadId: typeof body.sourceId === 'string' && body.sourceId ? body.sourceId : null,
-  }));
+  const blueprintItems = buildBlueprintItems(body, count, difficulty);
 
   const assessmentResponse = await backendFetch(
     `/v1/workspaces/${encodeURIComponent(workspaceId)}/assessments`,
