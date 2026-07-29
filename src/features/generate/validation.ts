@@ -1,4 +1,5 @@
 import type { CompositionValues, CompositionValidationResult, CompositionFailure } from './types';
+import { sumQuestionTypeCounts } from './types';
 
 export function validateComposition(values: CompositionValues): CompositionValidationResult {
   const failures: CompositionFailure[] = [];
@@ -32,6 +33,9 @@ export function validateComposition(values: CompositionValues): CompositionValid
   }
   if (values.questionCount < 1 || values.questionCount > 200) {
     failures.push({ field: 'questionCount', message: 'Jumlah soal antara 1–200.' });
+  }
+  if (sumQuestionTypeCounts(values.questionTypeCounts) !== values.questionCount) {
+    failures.push({ field: 'questionTypeCounts', message: 'Distribusi tipe soal harus sama dengan jumlah soal.' });
   }
   if (!values.reviewMode) {
     failures.push({ field: 'reviewMode', message: 'Pilih mode review.' });

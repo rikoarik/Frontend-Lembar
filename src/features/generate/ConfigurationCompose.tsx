@@ -20,8 +20,19 @@ import type {
   AssessmentType,
   Difficulty,
   ReviewMode,
+  QuestionType,
 } from './types';
-import { INITIAL_COMPOSITION_VALUES } from './types';
+import {
+  INITIAL_COMPOSITION_VALUES,
+  QUESTION_TYPES,
+  buildEvenQuestionTypeCounts,
+  clampQuestionCount,
+  ensureCompositionValues,
+  getQuestionTypeLabel,
+  parseQuestionCountInput,
+  parseQuestionTypeCountInput,
+  rebalanceQuestionTypeCounts,
+} from './types';
 
 type CatalogOption = components['schemas']['CatalogOption'];
 
@@ -55,9 +66,6 @@ const REVIEW_MODE_OPTIONS: { value: ReviewMode; label: string; desc: string }[] 
 const MIN_QUESTIONS = 1;
 const MAX_QUESTIONS = 200;
 
-const clampQuestionCount = (raw: number): number =>
-  Math.min(MAX_QUESTIONS, Math.max(MIN_QUESTIONS, raw || MIN_QUESTIONS));
-
 const LABELS: Record<CompositionFieldKey, string> = {
   sourceMode: 'Sumber materi',
   curriculumVersionId: 'Kurikulum',
@@ -68,6 +76,7 @@ const LABELS: Record<CompositionFieldKey, string> = {
   assessmentType: 'Jenis Lembar',
   difficulty: 'Tingkat Kesulitan',
   questionCount: 'Jumlah Soal',
+  questionTypeCounts: 'Distribusi tipe soal',
   reviewMode: 'Mode Review',
   teacherFocus: 'Fokus / Tujuan Guru',
   exampleQuestion: 'Contoh Soal',
@@ -113,7 +122,7 @@ export default function ConfigurationCompose() {
         setTemplateStatus('Template tidak ditemukan atau tidak dapat dimuat.');
         return;
       }
-      setValues({ ...INITIAL_COMPOSITION_VALUES, ...template.config, sourceId: '' });
+      setValues(ensureCompositionValues({ ...INITIAL_COMPOSITION_VALUES, ...template.config, sourceId: '' }));
       setTemplateName(template.name ?? '');
       setTemplateStatus(`Template “${template.name}” diterapkan.`);
     })();
@@ -271,6 +280,13 @@ export default function ConfigurationCompose() {
           ann = 'Mata pelajaran diperbarui. Materi dihapus.';
         }
 
+        if (key === 'questionCount') {
+          next.questionTypeCounts = rebalanceQuestionTypeCounts(
+            value as number,
+            prev.questionTypeCounts,
+          );
+        }
+
         if (ann) {
           setAnnouncement(ann);
           setTimeout(() => setAnnouncement(''), 2000);
@@ -298,7 +314,22 @@ export default function ConfigurationCompose() {
     [compositionError, permissionState, successState],
   );
 
-  const toggleMaterial = useCallback((materialId: string) => {
+  const updateQuestionTypeCount = useCallback(
+    (type: QuestionType, rawValue: number) => {
+      setValues((prev) => {
+        const sanitized = parseQuestionTypeCountInput(String(rawValue));
+        const nextCounts = rebalanceQuestionTypeCounts(
+          prev.questionCount,
+          { ...prev.questionTypeCounts, [type]: sanitized },
+          type,
+        );
+        return { ...prev, questionTypeCounts: nextCounts };
+      });
+    },
+    [],
+  );
+
+const toggleMaterial = useCallback((materialId: string) => {
     setValues((prev) => {
       const ids = prev.materialIds.includes(materialId)
         ? prev.materialIds.filter((id) => id !== materialId)
@@ -813,10 +844,10 @@ export default function ConfigurationCompose() {
                     max={MAX_QUESTIONS}
                     value={values.questionCount}
                     onChange={(e) =>
-                      update('questionCount', clampQuestionCount(Number(e.target.value)))
+                      update('questionCount', clampQuestionCount(parseQuestionCountInput(e.target.value)))
                     }
                     onBlur={(e) =>
-                      update('questionCount', clampQuestionCount(Number(e.target.value)))
+                      update('questionCount', clampQuestionCount(parseQuestionCountInput(e.target.value)))
                     }
                     className={fieldClass}
                     aria-invalid={localErrors.questionCount ? true : undefined}
@@ -831,6 +862,36 @@ export default function ConfigurationCompose() {
                     </p>
                   ) : null}
                 </div>
+
+                <fieldset>
+                  <legend className={labelClass}>Distribusi tipe soal</legend>
+                  <p className={`${helpClass} mt-0.5`}>
+                    Total tiap tipe harus sama dengan jumlah soal.
+                  </p>
+                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                    {QUESTION_TYPES.map((type) => (
+                      <div key={type} className="flex flex-col gap-2">
+                        <label htmlFor={`compose-questionTypeCounts-${type}`} className={labelClass}>
+                          {getQuestionTypeLabel(type)}
+                        </label>
+                        <input
+                          id={`compose-questionTypeCounts-${type}`}
+                          type="number"
+                          min={0}
+                          max={MAX_QUESTIONS}
+                          value={values.questionTypeCounts[type]}
+                          onChange={(e) =>
+                            updateQuestionTypeCount(type, parseQuestionTypeCountInput(e.target.value))
+                          }
+                          onBlur={(e) =>
+                            updateQuestionTypeCount(type, parseQuestionTypeCountInput(e.target.value))
+                          }
+                          className={fieldClass}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </fieldset>
 
                 <fieldset>
                   <legend className={`${labelClass} mb-2`}>
