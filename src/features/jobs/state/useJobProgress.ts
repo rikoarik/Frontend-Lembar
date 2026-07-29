@@ -35,8 +35,12 @@ export function useJobProgress({
   const [error, setError] = useState<JobError | undefined>();
   const [cancelling, setCancelling] = useState(false);
   const terminalNotified = useRef(false);
+  const activeJobId = useRef(jobId);
   const onTerminalRef = useRef(onTerminal);
-  onTerminalRef.current = onTerminal;
+
+  useEffect(() => {
+    onTerminalRef.current = onTerminal;
+  }, [onTerminal]);
 
   const refresh = useCallback(async () => {
     if (!jobId) return;
@@ -59,11 +63,15 @@ export function useJobProgress({
   }, [jobId, workspaceId]);
 
   useEffect(() => {
+    const changedJob = activeJobId.current !== jobId;
+    activeJobId.current = jobId;
     terminalNotified.current = false;
-    setLoading(true);
-    setError(undefined);
-    setJob(undefined);
-    void refresh();
+    void Promise.resolve().then(() => {
+      if (changedJob) setLoading(true);
+      setError(undefined);
+      if (changedJob) setJob(undefined);
+      return refresh();
+    });
   }, [jobId, refresh]);
 
   useEffect(() => {

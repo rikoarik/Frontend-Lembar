@@ -103,7 +103,7 @@ export function reviewStateLabel(state: QuestionReviewState): string {
 export function lifecycleLabel(lifecycle: AssessmentLifecycle): string {
   switch (lifecycle) {
     case 'draft':
-      return 'Draft';
+      return 'Draf';
     case 'generating':
       return 'Diproses';
     case 'review':

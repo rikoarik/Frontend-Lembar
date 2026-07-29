@@ -1,12 +1,42 @@
 'use client';
 
 import Link from 'next/link';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Button, Panel, StatusBadge } from '@/app/components/ui';
 import type { StatusLabel } from '@/app/components/ui';
 import { assessmentService } from '@/src/services/assessments/assessmentService';
 import type { AssessmentLifecycle, AssessmentSummary } from '@/src/features/review/types';
-import { lifecycleLabel } from '@/src/features/review/types';
+
+const DEFAULT_REFRESH_MS = 10_000;
+const KNOWN_LABELS: Record<string, string> = {
+  practice: 'Latihan',
+};
+
+function titleCase(value: string): string {
+  return value.replace(/(^|\s)\p{L}/gu, (letter) => letter.toUpperCase());
+}
+
+export function humanizeAssessmentLabel(value: string): string {
+  return value
+    .split(/\s*·\s*/)
+    .map((part) => {
+      const normalized = part.trim().toLowerCase();
+      if (KNOWN_LABELS[normalized]) return KNOWN_LABELS[normalized];
+      const grade = normalized.match(/^official-grade-(sd-mi|smp-mts|sma-ma|smk|slb)-(\d+)$/);
+      if (grade) return `Kelas ${grade[2]} ${grade[1].toUpperCase().replace('-', '/')}`;
+      const legacyGrade = normalized.match(/^official-grade-(\d+)-(sd-mi|smp-mts|sma-ma|smk|slb)$/);
+      if (legacyGrade)
+        return `Kelas ${legacyGrade[1]} ${legacyGrade[2].toUpperCase().replace('-', '/')}`;
+      const subject = normalized.match(
+        /^official-subject-(?:sd-mi|smp-mts|sma-ma|smk|slb|paud)-(?:[a-f]|fondasi)-(.*)$/,
+      );
+      if (subject?.[1]) return titleCase(subject[1].replaceAll('-', ' '));
+      if (normalized.startsWith('official-subject-')) return 'Mata pelajaran';
+      if (normalized.startsWith('official-grade-')) return 'Kelas';
+      return part;
+    })
+    .join(' · ');
+}
 
 function badge(lifecycle: AssessmentLifecycle): StatusLabel {
   switch (lifecycle) {
@@ -19,53 +49,72 @@ function badge(lifecycle: AssessmentLifecycle): StatusLabel {
     case 'archived':
       return 'Kedaluwarsa';
     default:
-      return 'Draft';
+      return 'Draf';
   }
 }
 
 function formatDate(value: string): string {
-  try {
-    return new Intl.DateTimeFormat('id-ID', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-    }).format(new Date(value));
-  } catch {
-    return value;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime())
+    ? value
+    : new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }).format(
+        date,
+      );
+}
+
+function lifecycleCopy(item: AssessmentSummary): string {
+  switch (item.lifecycle) {
+    case 'review':
+      return item.questionCount > 0
+        ? `Siap ditinjau${item.reviewedCount > 0 ? ` · ${item.reviewedCount}/${item.questionCount} ditinjau` : ''}`
+        : 'Siap ditinjau';
+    case 'final':
+      return 'Selesai dan siap digunakan';
+    case 'archived':
+      return 'Diarsipkan';
+    default:
+      return item.questionCount > 0 ? `Draf · ${item.questionCount} soal` : 'Draf belum berisi soal';
   }
 }
 
-export function HistoryView() {
+export function HistoryView({ refreshIntervalMs = DEFAULT_REFRESH_MS }: { refreshIntervalMs?: number }) {
   const [items, setItems] = useState<AssessmentSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [q, setQ] = useState('');
   const [lifecycle, setLifecycle] = useState<AssessmentLifecycle | 'all'>('all');
+  const loaded = useRef(false);
 
   const load = useCallback(async () => {
-    setLoading(true);
+    if (!loaded.current) setLoading(true);
     const result = await assessmentService.list({ q, lifecycle });
+    loaded.current = true;
+    setLoading(false);
     if (!result.ok) {
       setError(result.error.safeMessage);
-      setItems([]);
-      setLoading(false);
       return;
     }
     setItems(result.value);
     setError(null);
-    setLoading(false);
   }, [q, lifecycle]);
 
   useEffect(() => {
-    void load();
+    loaded.current = false;
+    void Promise.resolve().then(load);
   }, [load]);
+
+  useEffect(() => {
+    if (!items.some((item) => item.lifecycle === 'generating')) return;
+    const id = window.setInterval(() => void load(), refreshIntervalMs);
+    return () => window.clearInterval(id);
+  }, [items, load, refreshIntervalMs]);
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
         <h1 className="text-h1 font-semibold text-brand-ink">Riwayat lembar</h1>
         <p className="text-body-sm text-brand-ink-muted">
-          Cari dan buka draft, tinjauan, atau output sesuai statusnya.
+          Cari dan buka draf, tinjauan, atau output sesuai statusnya.
         </p>
       </div>
 
@@ -75,7 +124,7 @@ export function HistoryView() {
             <span className="text-label-semibold">Cari</span>
             <input
               value={q}
-              onChange={(e) => setQ(e.target.value)}
+              onChange={(event) => setQ(event.target.value)}
               placeholder="Judul, mapel, atau kelas"
               className="min-h-[var(--control-md)] rounded-md border border-brand-line px-3"
             />
@@ -84,11 +133,11 @@ export function HistoryView() {
             <span className="text-label-semibold">Status</span>
             <select
               value={lifecycle}
-              onChange={(e) => setLifecycle(e.target.value as AssessmentLifecycle | 'all')}
+              onChange={(event) => setLifecycle(event.target.value as AssessmentLifecycle | 'all')}
               className="min-h-[var(--control-md)] rounded-md border border-brand-line px-3"
             >
               <option value="all">Semua</option>
-              <option value="draft">Draft</option>
+              <option value="draft">Draf</option>
               <option value="review">Perlu ditinjau</option>
               <option value="final">Final</option>
               <option value="generating">Diproses</option>
@@ -99,15 +148,12 @@ export function HistoryView() {
 
       {loading ? (
         <div className="h-40 animate-pulse rounded-md bg-brand-line" aria-busy="true" />
-      ) : error ? (
+      ) : error && items.length === 0 ? (
         <Panel title="Riwayat gagal dimuat" description={error}>
           <Button onClick={() => void load()}>Coba lagi</Button>
         </Panel>
       ) : items.length === 0 ? (
-        <Panel
-          title="Belum ada lembar"
-          description="Mulai dari generate untuk membuat draft pertama."
-        >
+        <Panel title="Belum ada lembar" description="Mulai dari generate untuk membuat draf pertama.">
           <Link
             href="/app/generate"
             className="inline-flex min-h-[var(--control-md)] items-center rounded-md bg-brand-accent px-4 text-white"
@@ -120,39 +166,40 @@ export function HistoryView() {
           {items.map((item) => (
             <li key={item.id}>
               <Panel
-                title={item.title}
-                description={`${item.subject} · ${item.gradeLabel} · Diperbarui ${formatDate(item.updatedAt)}`}
+                title={humanizeAssessmentLabel(item.title)}
+                description={`${humanizeAssessmentLabel(item.subject)} · ${humanizeAssessmentLabel(item.gradeLabel)} · Diperbarui ${formatDate(item.updatedAt)}`}
                 actions={<StatusBadge label={badge(item.lifecycle)} />}
               >
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <p className="text-body-sm text-brand-ink-muted">
-                    {lifecycleLabel(item.lifecycle)} · {item.reviewedCount}/{item.questionCount}{' '}
-                    ditinjau
+                    {item.lifecycle === 'generating' ? (
+                      <><span className="font-medium text-brand-ink">Sedang membuat soal</span>{' · Proses tetap aktif meski halaman ini ditinggalkan.'}</>
+                    ) : lifecycleCopy(item)}
                     {item.warningCount > 0 ? ` · ${item.warningCount} peringatan` : ''}
                   </p>
                   <div className="flex flex-wrap gap-2">
-                    {item.canReview ? (
+                    {item.lifecycle === 'review' && item.canReview ? (
                       <Link
                         href={`/app/review/${item.id}`}
                         className="inline-flex min-h-[var(--control-md)] items-center rounded-md bg-brand-accent px-4 text-body-sm font-medium text-white"
                       >
-                        Buka tinjauan
+                        Tinjau soal
                       </Link>
                     ) : null}
-                    {item.canOpenOutput ? (
+                    {item.lifecycle === 'final' && item.canOpenOutput ? (
                       <Link
                         href={`/app/output/${item.id}`}
-                        className="inline-flex min-h-[var(--control-md)] items-center rounded-md border border-brand-line px-4 text-body-sm"
+                        className="inline-flex min-h-[var(--control-md)] items-center rounded-md bg-brand-accent px-4 text-body-sm font-medium text-white"
                       >
-                        Buka output
+                        Buka hasil
                       </Link>
                     ) : null}
-                    {!item.canReview && !item.canOpenOutput ? (
+                    {item.lifecycle === 'draft' ? (
                       <Link
                         href={`/app/review/${item.id}`}
                         className="inline-flex min-h-[var(--control-md)] items-center rounded-md border border-brand-line px-4 text-body-sm"
                       >
-                        Buka
+                        Lanjutkan draf
                       </Link>
                     ) : null}
                   </div>

@@ -5,6 +5,7 @@ import { Button, Panel, StatusBadge } from '@/app/components/ui';
 import type { StatusLabel } from '@/app/components/ui';
 import {
   isTerminalJobStatus,
+  formatJobTiming,
   jobStageLabel,
   jobStatusLabel,
   type JobSnapshot,
@@ -30,7 +31,7 @@ function badgeLabelFor(status: JobStatus): StatusLabel {
     case 'failed':
       return 'Gagal';
     case 'cancelled':
-      return 'Draft';
+      return 'Draf';
     default:
       return 'Diproses';
   }
@@ -95,6 +96,7 @@ export function JobProgressPanel({
     typeof job.progressPercent === 'number'
       ? Math.max(0, Math.min(100, Math.round(job.progressPercent)))
       : undefined;
+  const timing = formatJobTiming(job);
 
   return (
     <Panel
@@ -108,7 +110,6 @@ export function JobProgressPanel({
             {jobStatusLabel(job.status)}
           </p>
           {stage ? <p className="text-body-sm text-brand-ink-muted">{stage}</p> : null}
-          <p className="text-caption text-brand-ink-muted">ID pekerjaan: {job.jobId}</p>
         </div>
 
         {!terminal ? (
@@ -131,9 +132,11 @@ export function JobProgressPanel({
             </div>
             <p className="text-body-sm text-brand-ink-muted">
               {percent === undefined
-                ? 'Sedang menyiapkan soal. Progress ditampilkan secara netral.'
+                ? 'Proses sedang aktif.'
                 : `${percent}% selesai`}
             </p>
+            {timing.elapsed ? <p className="text-body-sm text-brand-ink-muted">{timing.elapsed}</p> : null}
+            <p className="text-body-sm text-brand-ink-muted">{timing.eta}</p>
           </div>
         ) : null}
 

@@ -3,7 +3,7 @@ import type { HTMLAttributes, ReactNode } from 'react';
 /**
  * StatusBadge — compact label for document/job state.
  * Allowed labels (per DESIGN-SYSTEM.md §"Status badge"):
- *   Draft | Diproses | Perlu ditinjau | Final | Gagal | Kedaluwarsa
+ *   Draf | Diproses | Perlu ditinjau | Final | Gagal | Kedaluwarsa
  * Badge never replaces surrounding explanatory state. Color is reinforced by the
  * label and (when meaningful) a leading dot, not by color alone (DESIGN-SYSTEM.md
  * §"Accessibility").
@@ -11,6 +11,7 @@ import type { HTMLAttributes, ReactNode } from 'react';
 
 export type StatusLabel =
   | 'Draft'
+  | 'Draf'
   | 'Diproses'
   | 'Perlu ditinjau'
   | 'Final'
@@ -29,6 +30,7 @@ const toneClass: Record<Tone, string> = {
 
 const toneFor: Record<StatusLabel, Tone> = {
   Draft: 'neutral',
+  Draf: 'neutral',
   Diproses: 'info',
   'Perlu ditinjau': 'warning',
   Final: 'success',

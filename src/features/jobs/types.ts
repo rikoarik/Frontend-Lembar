@@ -86,3 +86,25 @@ export function jobStageLabel(stage?: JobStage): string | undefined {
       return undefined;
   }
 }
+
+export function formatJobTiming(
+  job: Pick<JobSnapshot, 'createdAt' | 'progressPercent'>,
+  now = Date.now(),
+): { elapsed?: string; eta: string } {
+  const createdAt = Date.parse(job.createdAt);
+  const elapsedMinutes = Number.isFinite(createdAt)
+    ? Math.max(0, Math.floor((now - createdAt) / 60_000))
+    : undefined;
+  const elapsed = elapsedMinutes === undefined ? undefined : `Berjalan ${elapsedMinutes} menit`;
+  const progress = job.progressPercent;
+  if (progress === undefined || progress <= 0 || progress >= 100 || elapsedMinutes === undefined) {
+    return { elapsed, eta: 'Biasanya selesai dalam beberapa menit' };
+  }
+  if (progress >= 95) return { elapsed, eta: 'Hampir selesai' };
+
+  const estimate = (elapsedMinutes * (100 - progress)) / progress;
+  if (!Number.isFinite(estimate) || estimate < 1) return { elapsed, eta: 'Hampir selesai' };
+  const low = Math.max(1, Math.floor(estimate * 0.75));
+  const high = Math.max(low + 1, Math.ceil(estimate * 1.5));
+  return { elapsed, eta: `Perkiraan tersisa ${low}–${high} menit` };
+}

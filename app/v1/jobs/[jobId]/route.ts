@@ -51,6 +51,12 @@ async function proxy(request: NextRequest, jobId: string, cancel: boolean) {
           : ['preparing', 'generating', 'validating', 'rendering'].includes(rawStatus)
             ? 'running'
             : rawStatus;
+    const progressCurrent = Number(data.progressCurrent);
+    const progressTotal = Number(data.progressTotal);
+    const progressPercent =
+      Number.isFinite(progressCurrent) && Number.isFinite(progressTotal) && progressTotal > 0
+        ? Math.round((progressCurrent / progressTotal) * 100)
+        : undefined;
     return NextResponse.json({
       data: {
         jobId: data.id ?? jobId,
@@ -59,6 +65,7 @@ async function proxy(request: NextRequest, jobId: string, cancel: boolean) {
         reviewMode: data.reviewMode,
         status,
         stage: rawStatus === 'completed' ? 'finalizing' : rawStatus,
+        ...(progressPercent === undefined ? {} : { progressPercent }),
         createdAt: data.createdAt,
         updatedAt: data.updatedAt,
         canCancel: !['succeeded', 'partially_succeeded', 'failed', 'cancelled'].includes(status),

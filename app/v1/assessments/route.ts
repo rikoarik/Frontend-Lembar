@@ -18,21 +18,29 @@ export async function GET(request: NextRequest) {
     headers: { 'x-workspace-id': auth.claims.workspaceId },
   });
   const payload = (await upstream.json().catch(() => null)) as {
-    data?: { items?: Array<{ id?: string }> };
+    data?: { items?: Array<{ id?: string; status?: string }> };
     error?: unknown;
   } | null;
   if (!upstream.ok) return NextResponse.json(payload, { status: upstream.status });
 
+  const historyItems = payload?.data?.items ?? [];
   const details = await Promise.all(
-    (payload?.data?.items ?? []).flatMap((item) =>
+    historyItems.flatMap((item) =>
       item.id
-        ? [loadLiveAssessment(auth.token, auth.claims.workspaceId, item.id)]
+        ? [
+            loadLiveAssessment(auth.token, auth.claims.workspaceId, item.id).then((result) => ({
+              result,
+              historyStatus: item.status,
+            })),
+          ]
         : [],
     ),
   );
-  let items = details.flatMap((result) => {
+  let items: Record<string, unknown>[] = details.flatMap(({ result, historyStatus }) => {
     const data = (result.payload as { data?: Record<string, unknown> } | null)?.data;
-    return result.status === 200 && data ? [data] : [];
+    return result.status === 200 && data
+      ? [{ ...data, ...(historyStatus === 'generating' ? { lifecycle: 'generating' } : {}) }]
+      : [];
   });
   const q = request.nextUrl.searchParams.get('q')?.trim().toLowerCase();
   const lifecycle = request.nextUrl.searchParams.get('lifecycle');
