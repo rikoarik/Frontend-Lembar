@@ -23,6 +23,8 @@ const PRIMARY_NAV = [
 const LIBRARY_NAV = [
   { href: '/app/bank-soal', label: 'Bank soal', icon: 'inventory_2' },
   { href: '/app/template', label: 'Template', icon: 'description' },
+  { href: '/app/kelas', label: 'Kelas', icon: 'groups' },
+  { href: '/app/analitik', label: 'Analitik', icon: 'monitoring' },
 ] as const;
 
 const SUPPORT_NAV = [{ href: '/app/bantuan', label: 'Bantuan', icon: 'help' }] as const;
