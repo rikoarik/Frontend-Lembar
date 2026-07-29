@@ -4,7 +4,8 @@ import { type NextRequest, NextResponse } from 'next/server';
  * Name of the session cookie set by the backend on login/register.
  * Must stay in sync with the backend session configuration.
  */
-const SESSION_COOKIE = 'lembar_session';
+const JWT_COOKIE = 'lembar_token';
+const LEGACY_SESSION_COOKIE = 'lembar_session';
 const ROLES_COOKIE = 'lembar_roles';
 const ACTIVE_ROLE_COOKIE = 'lembar_active_role';
 
@@ -20,6 +21,15 @@ function redirectTo(request: NextRequest, pathname: string): NextResponse {
   url.pathname = pathname;
   url.search = '';
   return NextResponse.redirect(url);
+}
+
+function isFreshJwt(jwt: string): boolean {
+  try {
+    const payload = JSON.parse(atob(jwt.split('.')[1]!.replace(/-/g, '+').replace(/_/g, '/')));
+    return typeof payload.exp === 'number' && payload.exp * 1000 > Date.now();
+  } catch {
+    return false;
+  }
 }
 
 function parseRolesFromJwt(jwt: string): string[] {
@@ -96,11 +106,24 @@ function getActiveRole(request: NextRequest, session: string, roles: string[]): 
  */
 export function middleware(request: NextRequest): NextResponse {
   const { pathname } = request.nextUrl;
-  const session = request.cookies.get(SESSION_COOKIE)?.value;
+  const session =
+    request.cookies.get(JWT_COOKIE)?.value ??
+    request.cookies.get(LEGACY_SESSION_COOKIE)?.value;
 
   const isApp = pathname.startsWith('/app');
   const isSchool = pathname.startsWith('/school');
   const isOps = pathname.startsWith('/ops');
+  const isAuthPage = pathname === '/masuk' || pathname === '/daftar';
+
+  if (isAuthPage && session && isFreshJwt(session)) {
+    const roles = getRolesFromCookies(request, session);
+    const target = roles.includes('superadmin')
+      ? '/ops'
+      : roles.includes('school_admin')
+        ? '/school'
+        : '/app';
+    return redirectTo(request, target);
+  }
 
   if (!isApp && !isSchool && !isOps) {
     return NextResponse.next();
@@ -142,5 +165,5 @@ export function middleware(request: NextRequest): NextResponse {
 }
 
 export const config = {
-  matcher: ['/app/:path*', '/school/:path*', '/ops/:path*'],
+  matcher: ['/app/:path*', '/school/:path*', '/ops/:path*', '/masuk', '/daftar'],
 };

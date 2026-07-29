@@ -2,6 +2,7 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import { fetchMarketingPage } from '@/src/lib/marketing/fetchMarketingPage';
 import { BlockRenderer } from '@/app/components/marketing/BlockRenderer';
+import { getMarketingSession } from '@/src/lib/api/marketingSession';
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://lembar.id'),
@@ -49,6 +50,9 @@ export const metadata: Metadata = {
 };
 
 export default async function LandingPage() {
+  const session = await getMarketingSession();
+  const primaryHref = session?.homePath ?? '/daftar';
+  const primaryLabel = session ? 'Buka workspace' : 'Buat soal gratis sekarang';
   const cmsDoc = await fetchMarketingPage('home');
   if (cmsDoc) {
     return <BlockRenderer blocks={cmsDoc.blocks} />;
@@ -73,9 +77,9 @@ export default async function LandingPage() {
               <div className="flex flex-wrap gap-4 mt-4">
                 <Link
                   className="font-label-semibold text-label-semibold bg-burgundy text-white px-6 py-3 rounded h-[44px] flex items-center justify-center transition-colors hover:bg-primary shadow-sm"
-                  href="/daftar"
+                  href={primaryHref}
                 >
-                  Buat soal gratis sekarang
+                  {primaryLabel}
                 </Link>
                 <a
                   className="font-label-semibold text-label-semibold text-ink border border-ink px-6 py-3 rounded h-[44px] flex items-center justify-center transition-colors hover:bg-surface-container-highest"
@@ -283,9 +287,9 @@ export default async function LandingPage() {
             </p>
             <Link
               className="inline-flex font-label-semibold text-label-semibold bg-burgundy text-white px-8 py-4 rounded h-[52px] items-center justify-center transition-colors hover:bg-primary shadow-sm"
-              href="/daftar"
+              href={primaryHref}
             >
-              Daftar & buat soal gratis
+              {session ? 'Buka workspace' : 'Daftar & buat soal gratis'}
             </Link>
           </div>
         </section>

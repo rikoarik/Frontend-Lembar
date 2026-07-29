@@ -13,7 +13,11 @@ function isActive(item: MarketingNavItem, pathname: string): boolean {
   return pathname === item.href || pathname.startsWith(`${item.href}/`);
 }
 
-export default function MarketingNavbar() {
+export default function MarketingNavbar({
+  session,
+}: {
+  session: { displayName: string; homePath: string } | null;
+}) {
   const pathname = usePathname() ?? '/';
   const [mobileOpen, setMobileOpen] = useState(false);
   const menuId = useId();
@@ -95,18 +99,31 @@ export default function MarketingNavbar() {
         </nav>
 
         <div className="flex shrink-0 items-center gap-unit-2">
-          <Link
-            href={loginCta.href}
-            className="inline-flex h-control-md items-center rounded-md px-unit-2 text-label-semibold text-brand-ink hover:text-brand-accent sm:px-unit-3"
-          >
-            {loginCta.label}
-          </Link>
-          <Link
-            href={tryFreeCta.href}
-            className="inline-flex h-control-md items-center rounded-md bg-brand-accent px-unit-3 text-label-semibold text-white hover:bg-brand-accent-hover sm:px-unit-4"
-          >
-            {tryFreeCta.label}
-          </Link>
+          {session ? (
+            <Link
+              href={session.homePath}
+              className="inline-flex h-control-md items-center gap-unit-2 rounded-md bg-brand-accent px-unit-3 text-label-semibold text-white hover:bg-brand-accent-hover sm:px-unit-4"
+              title={session.displayName}
+            >
+              <span className="material-symbols-outlined text-[18px]" aria-hidden="true">account_circle</span>
+              Buka workspace
+            </Link>
+          ) : (
+            <>
+              <Link
+                href={loginCta.href}
+                className="inline-flex h-control-md items-center rounded-md px-unit-2 text-label-semibold text-brand-ink hover:text-brand-accent sm:px-unit-3"
+              >
+                {loginCta.label}
+              </Link>
+              <Link
+                href={tryFreeCta.href}
+                className="inline-flex h-control-md items-center rounded-md bg-brand-accent px-unit-3 text-label-semibold text-white hover:bg-brand-accent-hover sm:px-unit-4"
+              >
+                {tryFreeCta.label}
+              </Link>
+            </>
+          )}
 
           <button
             ref={toggleRef}
@@ -155,20 +172,20 @@ export default function MarketingNavbar() {
 
             <div className="my-unit-2 border-t border-brand-line" />
 
-            <Link
-              href={loginCta.href}
-              onClick={closeMobile}
-              className="inline-flex min-h-[var(--control-lg)] items-center rounded-md px-unit-3 text-label-semibold text-brand-ink hover:bg-brand-paper"
-            >
-              {loginCta.label}
-            </Link>
-            <Link
-              href={tryFreeCta.href}
-              onClick={closeMobile}
-              className="inline-flex min-h-[var(--control-lg)] items-center justify-center rounded-md bg-brand-accent px-unit-4 text-label-semibold text-white hover:bg-brand-accent-hover"
-            >
-              {tryFreeCta.label}
-            </Link>
+            {session ? (
+              <Link
+                href={session.homePath}
+                onClick={closeMobile}
+                className="inline-flex min-h-[var(--control-lg)] items-center justify-center rounded-md bg-brand-accent px-unit-4 text-label-semibold text-white hover:bg-brand-accent-hover"
+              >
+                Buka workspace
+              </Link>
+            ) : (
+              <>
+                <Link href={loginCta.href} onClick={closeMobile} className="inline-flex min-h-[var(--control-lg)] items-center rounded-md px-unit-3 text-label-semibold text-brand-ink hover:bg-brand-paper">{loginCta.label}</Link>
+                <Link href={tryFreeCta.href} onClick={closeMobile} className="inline-flex min-h-[var(--control-lg)] items-center justify-center rounded-md bg-brand-accent px-unit-4 text-label-semibold text-white hover:bg-brand-accent-hover">{tryFreeCta.label}</Link>
+              </>
+            )}
           </nav>
         </div>
       ) : null}
