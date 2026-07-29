@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Button, Panel, StatusBadge } from '@/app/components/ui';
 import type { StatusLabel } from '@/app/components/ui';
 import {
+  ASSESSMENT_HANDOFF_TIMEOUT_MESSAGE,
   isTerminalJobStatus,
   formatJobTiming,
   jobStageLabel,
@@ -172,18 +173,30 @@ export function JobProgressPanel({
             <Button onClick={onRetry}>Coba generate lagi</Button>
           ) : null}
 
-          {(job.status === 'succeeded' || job.status === 'partially_succeeded') && (
+          {(job.status === 'succeeded' || job.status === 'partially_succeeded') &&
+          job.assessmentId ? (
             <Link
               href={
                 job.reviewMode === 'detail'
-                  ? `/app/review/${job.assessmentId ?? job.jobId}?mode=detail`
-                  : `/app/review/${job.assessmentId ?? job.jobId}`
+                  ? `/app/review/${job.assessmentId}?mode=detail`
+                  : `/app/review/${job.assessmentId}`
               }
               className="inline-flex min-h-[var(--control-md)] items-center rounded-md bg-brand-accent px-4 text-body-default font-medium text-white"
             >
               Buka tinjauan
             </Link>
-          )}
+          ) : null}
+
+          {(job.status === 'succeeded' || job.status === 'partially_succeeded') &&
+          !job.assessmentId ? (
+            <p
+              role="status"
+              data-testid="assessment-handoff-pending"
+              className="text-body-sm text-brand-ink-muted"
+            >
+              {ASSESSMENT_HANDOFF_TIMEOUT_MESSAGE}
+            </p>
+          ) : null}
 
           <Link
             href="/app"

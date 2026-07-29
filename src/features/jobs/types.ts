@@ -32,6 +32,16 @@ export type JobSnapshot = {
   };
 };
 
+/**
+ * After a terminal-success status without an `assessmentId`, the FE keeps
+ * polling for the backend to attach one. If none arrives within this window,
+ * the hook surfaces a blocking `assessment-id-timeout` error and the panel
+ * stops building any review link from the jobId.
+ */
+export const ASSESSMENT_HANDOFF_TIMEOUT_MS = 5_000;
+export const ASSESSMENT_HANDOFF_TIMEOUT_MESSAGE = 'Belum dapat assessmentId, coba lagi';
+export const ASSESSMENT_HANDOFF_TIMEOUT_CODE = 'ASSESSMENT_HANDOFF_TIMEOUT';
+
 export type GenerateSubmitResult = {
   status: 'accepted';
   jobId: string;
