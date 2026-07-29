@@ -38,6 +38,10 @@ function matchesFilter(question: ReviewQuestion, filter: FilterKey): boolean {
   return ['accepted', 'edited'].includes(question.reviewState);
 }
 
+function canAccept(question: ReviewQuestion): boolean {
+  return question.reviewState === 'unreviewed' || question.reviewState === 'needs_attention';
+}
+
 export function QuickReviewView({
   assessmentId,
   mode = 'quick',
@@ -67,10 +71,13 @@ export function QuickReviewView({
       return;
     }
     setAssessment(result.value);
+    setSelected(new Set());
     setLoading(false);
   }, [assessmentId]);
 
   useEffect(() => {
+    // Existing async load owns the component's request state.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void load();
   }, [load]);
 
@@ -78,9 +85,15 @@ export function QuickReviewView({
     if (!assessment) return [];
     return assessment.questions.filter((q) => matchesFilter(q, filter));
   }, [assessment, filter]);
+  const visibleActionableQuestions = useMemo(() => questions.filter(canAccept), [questions]);
+  const allVisibleSelected =
+    visibleActionableQuestions.length > 0 &&
+    visibleActionableQuestions.every((question) => selected.has(question.id));
 
   useEffect(() => {
     if (mode !== 'detail') return;
+    // Detail navigation and editor fields mirror the newly filtered question.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (detailIndex >= questions.length) setDetailIndex(0);
     const current = questions[detailIndex];
     if (current) {
@@ -96,6 +109,34 @@ export function QuickReviewView({
       else next.add(id);
       return next;
     });
+  };
+
+  const toggleSelectVisible = () => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      visibleActionableQuestions.forEach((question) => {
+        if (allVisibleSelected) next.delete(question.id);
+        else next.add(question.id);
+      });
+      return next;
+    });
+  };
+
+  const changeFilter = (nextFilter: FilterKey) => {
+    setFilter(nextFilter);
+    if (!assessment) return;
+    const actionableIds = new Set(
+      assessment.questions
+        .filter((question) => matchesFilter(question, nextFilter) && canAccept(question))
+        .map((question) => question.id),
+    );
+    setSelected((prev) => new Set([...prev].filter((id) => actionableIds.has(id))));
+  };
+
+  const selectAllUnreviewed = () => {
+    if (!assessment) return;
+    setFilter('unreviewed');
+    setSelected(new Set(assessment.questions.filter(canAccept).map((question) => question.id)));
   };
 
   const setState = async (questionId: string, reviewState: QuestionReviewState) => {
@@ -116,6 +157,7 @@ export function QuickReviewView({
 
   const onBulkAccept = async () => {
     if (selected.size === 0) return;
+    if (!window.confirm(`Terima ${selected.size} soal terpilih?`)) return;
     setBusy(true);
     const result = await assessmentService.bulkAccept(assessmentId, Array.from(selected));
     setBusy(false);
@@ -217,7 +259,7 @@ export function QuickReviewView({
           <button
             key={key}
             type="button"
-            onClick={() => setFilter(key)}
+            onClick={() => changeFilter(key)}
             className={`inline-flex min-h-[var(--control-md)] items-center rounded-md border px-3 text-body-sm ${
               filter === key
                 ? 'border-brand-accent bg-brand-accent-soft text-brand-accent'
@@ -238,12 +280,36 @@ export function QuickReviewView({
       {mode === 'quick' ? (
         <>
           <div className="flex flex-wrap items-center gap-2">
+            <label className="inline-flex items-center gap-2 text-body-sm text-brand-ink">
+              <input
+                type="checkbox"
+                aria-label="Pilih semua soal yang dapat diterima di tampilan ini"
+                checked={allVisibleSelected}
+                disabled={
+                  visibleActionableQuestions.length === 0 ||
+                  busy ||
+                  assessment.lifecycle === 'final'
+                }
+                onChange={toggleSelectVisible}
+                className="h-4 w-4"
+              />
+              Pilih semua di tampilan ini
+            </label>
+            <Button
+              variant="secondary"
+              disabled={
+                !assessment.questions.some(canAccept) || busy || assessment.lifecycle === 'final'
+              }
+              onClick={selectAllUnreviewed}
+            >
+              Pilih semua soal belum ditinjau
+            </Button>
             <Button
               variant="secondary"
               disabled={selected.size === 0 || busy || assessment.lifecycle === 'final'}
               onClick={() => void onBulkAccept()}
             >
-              Terima terpilih ({selected.size})
+              Terima {selected.size} soal
             </Button>
             <p className="text-body-sm text-brand-ink-muted">
               Finalisasi tetap butuh konfirmasi terpisah.
@@ -257,14 +323,20 @@ export function QuickReviewView({
                   title={`Soal ${question.number}`}
                   description={`${reviewStateLabel(question.reviewState)} · ${question.topic}`}
                   actions={
-                    <input
-                      type="checkbox"
-                      aria-label={`Pilih soal ${question.number}`}
-                      checked={selected.has(question.id)}
-                      disabled={assessment.lifecycle === 'final'}
-                      onChange={() => toggleSelect(question.id)}
-                      className="h-4 w-4"
-                    />
+                    canAccept(question) ? (
+                      <input
+                        type="checkbox"
+                        aria-label={`Pilih soal ${question.number}`}
+                        checked={selected.has(question.id)}
+                        disabled={busy || assessment.lifecycle === 'final'}
+                        onChange={() => toggleSelect(question.id)}
+                        className="h-4 w-4"
+                      />
+                    ) : (
+                      <span className="text-label-semibold text-brand-ink-muted">
+                        {reviewStateLabel(question.reviewState)}
+                      </span>
+                    )
                   }
                 >
                   <div className="flex flex-col gap-3">
@@ -296,21 +368,36 @@ export function QuickReviewView({
                       </div>
                     ) : null}
                     <div className="flex flex-wrap gap-2">
-                      <Button
-                        size="sm"
-                        disabled={busy || assessment.lifecycle === 'final'}
-                        onClick={() => void setState(question.id, 'accepted')}
-                      >
-                        Terima
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        disabled={busy || assessment.lifecycle === 'final'}
-                        onClick={() => void setState(question.id, 'needs_attention')}
-                      >
-                        Tandai perhatian
-                      </Button>
+                      {canAccept(question) && assessment.lifecycle !== 'final' ? (
+                        <Button
+                          size="sm"
+                          disabled={busy}
+                          onClick={() => void setState(question.id, 'accepted')}
+                        >
+                          Terima
+                        </Button>
+                      ) : null}
+                      {canAccept(question) && assessment.lifecycle !== 'final' ? (
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          disabled={busy}
+                          onClick={() => void setState(question.id, 'needs_attention')}
+                        >
+                          Tandai perhatian
+                        </Button>
+                      ) : null}
+                      {['accepted', 'edited'].includes(question.reviewState) &&
+                      assessment.lifecycle !== 'final' ? (
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          disabled={busy}
+                          onClick={() => void setState(question.id, 'needs_attention')}
+                        >
+                          Ubah keputusan
+                        </Button>
+                      ) : null}
                       <Link
                         href={`/app/review/${assessment.id}?mode=detail&q=${question.number}`}
                         className="inline-flex min-h-[var(--control-sm)] items-center rounded-md border border-brand-line px-3 text-body-sm"
