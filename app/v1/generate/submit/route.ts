@@ -97,6 +97,7 @@ export async function POST(request: NextRequest) {
       payload: {
         assessmentId: assessmentPayload.assessment.id,
         assessmentVersionId: assessmentPayload.version.id,
+        reviewMode: body.reviewMode === 'detail' ? 'detail' : 'quick',
         blueprintSchemaVersion: '1.0',
         blueprintItems,
       },

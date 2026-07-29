@@ -36,7 +36,45 @@ async function proxy(request: NextRequest, jobId: string, cancel: boolean) {
     headers: { 'x-workspace-id': workspaceId },
     ...(cancel ? { body: '{}' } : {}),
   });
-  const payload = await upstream.json().catch(() => null);
+  const payload = (await upstream.json().catch(() => null)) as {
+    data?: Record<string, unknown>;
+    error?: unknown;
+  } | null;
+  if (upstream.ok && payload?.data) {
+    const data = payload.data;
+    const rawStatus = String(data.status ?? 'queued');
+    const status =
+      rawStatus === 'completed'
+        ? 'succeeded'
+        : rawStatus === 'partially_failed'
+          ? 'partially_succeeded'
+          : ['preparing', 'generating', 'validating', 'rendering'].includes(rawStatus)
+            ? 'running'
+            : rawStatus;
+    return NextResponse.json({
+      data: {
+        jobId: data.id ?? jobId,
+        assessmentId: data.assessmentId,
+        compositionId: data.compositionId,
+        reviewMode: data.reviewMode,
+        status,
+        stage: rawStatus === 'completed' ? 'finalizing' : rawStatus,
+        createdAt: data.createdAt,
+        updatedAt: data.updatedAt,
+        canCancel: !['succeeded', 'partially_succeeded', 'failed', 'cancelled'].includes(status),
+        canRetry: status === 'failed',
+        ...(data.failureCode
+          ? {
+              error: {
+                code: data.failureCode,
+                safeMessage: 'Pembuatan soal gagal. Silakan coba kembali.',
+                retryable: true,
+              },
+            }
+          : {}),
+      },
+    });
+  }
   return NextResponse.json(
     payload ?? { error: { code: 'UPSTREAM_ERROR', message: 'Respons backend tidak valid.' } },
     { status: upstream.status },
