@@ -27,22 +27,18 @@ export default function LoginPage() {
 
   const submit = useAuthSubmit<{ identifier: string; password: string }>({
     submit: (input, idempotencyKey) => {
-      console.log('[Login Client] Submitting login request:', { identifier: input.identifier, idempotencyKey });
       return authService.login(input, idempotencyKey);
     },
     onSuccess: (value) => {
       const payload = value as { homePath?: string; activeRole?: string; workspaceId?: string } | null;
-      console.log('[Login Client Success] Logged in successfully. Redirecting to:', payload?.homePath || '/app');
       window.location.href = payload?.homePath || '/app';
     },
   });
 
   const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log('[Login Client] Form onSubmit triggered with identifier:', identifier.trim());
     const validation = validateLogin({ identifier, password });
     if (!validation.ok) {
-      console.warn('[Login Client Validation Error]:', validation.failures);
       const next: Partial<Record<FieldKey, string>> = {};
       for (const failure of validation.failures) {
         if (failure.field === 'identifier' || failure.field === 'password') {

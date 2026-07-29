@@ -35,24 +35,23 @@ export async function POST(request: Request) {
   }
 
   if (isMockApiMode()) {
-    console.log('[Login BFF] Mode is MOCK. Identifier:', identifier);
     const account = findMockAccount(identifier, password);
     if (!account) {
-      console.warn('[Login BFF] Mock login failed for identifier:', identifier);
+
       return mockFail(
         'INVALID_CREDENTIALS',
         'Username/email/phone dan kata sandi tidak cocok.',
         401,
       );
     }
-    console.log('[Login BFF] Mock login success for account:', account.accountId, account.roles);
+
     return mockOk(authSuccessFor(account), {
       setSession: account.session,
       setRoles: account.roles,
     });
   }
 
-  console.log('[Login BFF] Mode is LIVE. Fetching upstream login from backend...');
+
   const upstream = await backendFetch('/v1/auth/login', {
     method: 'POST',
     body: JSON.stringify({
@@ -64,7 +63,7 @@ export async function POST(request: Request) {
 
   if (!upstream.ok) {
     const payload = await upstream.json().catch(() => null);
-    console.error('[Login BFF] Upstream login failed with status:', upstream.status, payload);
+
     const message =
       payload?.error?.message ||
       (upstream.status === 401
@@ -80,7 +79,7 @@ export async function POST(request: Request) {
   const raw = await upstream.json();
   const token = raw?.token ?? raw?.data?.token;
   if (!token) {
-    console.error('[Login BFF] Token missing in backend payload:', JSON.stringify(raw).slice(0, 300));
+
     return mockFail('UNKNOWN', 'Respons autentikasi tidak valid.', 502);
   }
 
@@ -88,16 +87,7 @@ export async function POST(request: Request) {
   const user = raw?.user ?? raw?.data?.user ?? raw?.data;
   const roles = normalizeRoles(user);
 
-  console.log(
-    '[Login BFF Success] Logged in user:',
-    user?.email || user?.id,
-    'roles:',
-    roles,
-    'activeRole:',
-    successPayload.activeRole,
-    'homePath:',
-    successPayload.homePath,
-  );
+
   const response = NextResponse.json({ data: successPayload }, { status: 200 });
   response.cookies.set(jwtCookieOptions(token));
   response.cookies.set({ name: SESSION_COOKIE, value: '', path: '/', maxAge: 0 });
