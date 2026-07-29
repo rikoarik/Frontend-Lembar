@@ -153,7 +153,7 @@ export function OutputCenterView({ assessmentId }: { assessmentId: string }) {
               href={output.downloadHref}
               className="inline-flex min-h-[var(--control-md)] items-center rounded-md border border-brand-line px-4"
             >
-              Unduh PDF (mock)
+              Unduh dokumen HTML
             </a>
             {output.shareToken ? (
               <Button variant="secondary" onClick={() => void onCopyShare()}>

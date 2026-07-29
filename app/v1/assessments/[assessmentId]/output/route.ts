@@ -63,7 +63,7 @@ export async function GET(
       answerKeyLabel: 'Kunci jawaban',
       explanationLabel: 'Pembahasan',
       printHref: `/app/output/${assessmentId}/print`,
-      downloadHref: payload?.data?.downloadUrl ?? '#',
+      downloadHref: `/v1/assessments/${assessmentId}/download`,
       updatedAt: artifact?.createdAt ?? new Date().toISOString(),
     },
   });
