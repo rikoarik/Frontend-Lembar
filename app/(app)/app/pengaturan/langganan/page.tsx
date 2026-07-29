@@ -139,53 +139,11 @@ export default function PlanUsageSettingsPage() {
     setSubscribeModalOpen(true);
   };
 
-  const handleConfirmPay = async () => {
+  const handleConfirmPay = () => {
     setSubscribeModalOpen(false);
-    setSubscribeSuccess('Memproses langganan...');
-    const idem =
-      typeof crypto !== 'undefined' && 'randomUUID' in crypto
-        ? crypto.randomUUID()
-        : `idem-${Date.now()}`;
-    try {
-      const res = await fetch('/v1/payment/orders', {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'content-type': 'application/json',
-          'x-idempotency-key': idem,
-        },
-        body: JSON.stringify({ workspaceId: plan.workspaceId, toPlan: 'pro', amountCents: 0 }),
-      });
-      const json = await res.json().catch(() => null) as { data?: { orderId?: string } ; error?: { message?: string } } | null;
-      const orderId = json?.data?.orderId;
-      if (!res.ok || !orderId) {
-        setSubscribeSuccess(`Gagal: ${json?.error?.message ?? 'Tidak dapat memproses.'}`);
-        return;
-      }
-      // Auto-confirm by upgrading the plan (Ponytail: demo bypass without
-      // payment gateway. Re-render to show 'Pro Aktif'.
-      const upgradeRes = await fetch('/v1/me/plan/upgrade', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ orderId }),
-      });
-      if (!upgradeRes.ok) {
-        setSubscribeSuccess('Pembayaran dicatat, namun upgrade gagal. Coba lagi sebentar.');
-        return;
-      }
-      const refresh = await fetch('/v1/me/plan', { credentials: 'include' });
-      const refreshed = await refresh.json().catch(() => null);
-      if (refresh.ok && refreshed?.data) {
-        setPlan(refreshed.data);
-      }
-      setSubscribeSuccess(`Selamat! Paket ${selectedTier} sudah aktif.`);
-      setTimeout(() => setSubscribeSuccess(''), 3000);
-    } catch (err) {
-      setSubscribeSuccess(
-        `Gagal: ${err instanceof Error ? err.message : 'Tidak dapat memproses.'}`,
-      );
-    }
+    setSubscribeSuccess(
+      `Pembayaran ${selectedTier ?? 'paket'} belum tersedia. Harga dan penyedia pembayaran belum dikonfigurasi.`,
+    );
   };
 
   return (
