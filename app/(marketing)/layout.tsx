@@ -4,6 +4,7 @@ import Container from '../components/marketing/Container';
 import AnnouncementBanner from '../components/marketing/AnnouncementBanner';
 import MarketingNavbar from '../components/marketing/MarketingNavbar';
 import MarketingFooter from '../components/marketing/MarketingFooter';
+import SupportChat from '../components/marketing/SupportChat';
 import { getMarketingSession } from '@/src/lib/api/marketingSession';
 
 export default async function MarketingLayout({ children }: { children: ReactNode }) {
@@ -14,6 +15,7 @@ export default async function MarketingLayout({ children }: { children: ReactNod
       <MarketingNavbar session={session} />
       <main id="main">{children}</main>
       <MarketingFooter />
+      <SupportChat />
     </MotionProviders>
   );
 }
