@@ -27,7 +27,7 @@ export async function GET(
     );
   }
 
-  const path = `/v1/assessments/${encodeURIComponent(versionId)}/output`;
+  const path = `/v1/assessments/${encodeURIComponent(assessmentId)}/output`;
   let upstream = await backendFetch(path, {
     method: 'GET',
     token: auth.token,
