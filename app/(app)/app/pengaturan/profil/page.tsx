@@ -90,11 +90,7 @@ export default function ProfileSettingsPage() {
       setNameError('Nama tampilan wajib diisi.');
       return;
     }
-    setNameError('');
-    setNameBusy(true);
-    await new Promise((r) => setTimeout(r, 300));
-    setNameBusy(false);
-    setNameStatus('Nama akan diperbarui setelah endpoint tersedia');
+    setNameError('Perubahan nama belum tersedia di backend.');
   };
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
@@ -103,14 +99,7 @@ export default function ProfileSettingsPage() {
       setEmailError('Masukkan alamat email yang valid.');
       return;
     }
-    setEmailError('');
-    setEmailBusy(true);
-    await new Promise((r) => setTimeout(r, 400));
-    setEmailBusy(false);
-    setEmail(newEmail);
-    setNewEmail('');
-    setShowEmailForm(false);
-    setEmailStatus('Email akan diperbarui setelah endpoint tersedia');
+    setEmailError('Perubahan email belum tersedia di backend.');
   };
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
@@ -127,15 +116,7 @@ export default function ProfileSettingsPage() {
       setPasswordError('Konfirmasi kata sandi tidak cocok.');
       return;
     }
-    setPasswordError('');
-    setPasswordBusy(true);
-    await new Promise((r) => setTimeout(r, 500));
-    setPasswordBusy(false);
-    setCurrentPassword('');
-    setNewPassword('');
-    setConfirmPassword('');
-    setShowPasswordForm(false);
-    setPasswordStatus('Kata sandi akan diperbarui setelah endpoint tersedia');
+    setPasswordError('Perubahan kata sandi belum tersedia di backend.');
   };
 
   const handleLogoutAll = async () => {
@@ -159,10 +140,7 @@ export default function ProfileSettingsPage() {
     }
   };
 
-  const handleSavePreferences = () => {
-    setPrefStatus('Preferensi notifikasi disimpan.');
-    setTimeout(() => setPrefStatus(''), 3000);
-  };
+  const handleSavePreferences = () => setPrefStatus('Penyimpanan preferensi belum tersedia di backend.');
 
   if (profileLoading) {
     return (

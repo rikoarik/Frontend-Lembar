@@ -22,6 +22,10 @@ interface MeWorkspace {
   permissions?: string[];
 }
 
+interface MeResponse {
+  data?: { activeWorkspaceId?: string; workspaces?: MeWorkspace[] };
+}
+
 const ROLE_LABEL: Record<WorkspaceRole, string> = {
   owner: 'Pemilik',
   admin: 'Admin',
@@ -47,24 +51,18 @@ export default function WorkspaceSettingsPage() {
       try {
         const res = await fetch('/v1/me', { credentials: 'include' });
         if (!res.ok) throw new Error('Gagal memuat data workspace');
-        const json = await res.json();
-        const raw: MeWorkspace[] = json?.data?.workspaces ?? [];
+        const json = await res.json() as MeResponse;
+        const raw = json.data?.workspaces ?? [];
+        const activeWorkspaceId = json.data?.activeWorkspaceId;
         const mapped: WorkspaceMembership[] = raw.map((w) => ({
           id: w.id,
           name: w.name,
           role: mapRole(w.role),
-          isActive: false, // will be set below
+          isActive: w.id === activeWorkspaceId,
           isPersonal: w.type === 'personal',
         }));
 
-        // Determine active workspace from the backend: the one whose role is 'owner'
-        // OR we match by the first personal workspace. If backend provides activeWorkspace
-        // context via a cookie/header, we'll use that. For now, mark the personal one as active
-        // if exactly one is personal, otherwise leave first as active.
-        const personalWs = mapped.filter((w) => w.isPersonal);
-        if (personalWs.length === 1) {
-          personalWs[0].isActive = true;
-        } else if (mapped.length > 0) {
+        if (!mapped.some((workspace) => workspace.isActive) && mapped.length > 0) {
           mapped[0].isActive = true;
         }
 

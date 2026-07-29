@@ -12,6 +12,7 @@ import {
   SESSION_COOKIE,
   type BackendUser,
 } from '@/src/lib/api/session';
+import { loadLiveAssessment } from '@/src/lib/api/liveAssessment';
 
 export async function GET() {
   if (isMockApiMode()) {
@@ -43,5 +44,33 @@ export async function GET() {
     return mockFail('AUTH_REQUIRED', 'Sesi tidak valid. Masuk ulang.', 401);
   }
 
-  return mockOk(dashboardSummaryFromBackendUser(user));
+  const summary = dashboardSummaryFromBackendUser(user);
+  const workspaceId = summary.workspace.id;
+  const history = await backendFetch('/v1/history?limit=100', {
+    method: 'GET',
+    token,
+    headers: { 'x-workspace-id': workspaceId },
+  });
+  if (history.ok) {
+    const historyPayload = (await history.json().catch(() => null)) as {
+      data?: { items?: Array<{ id?: string }> };
+    } | null;
+    const details = await Promise.all(
+      (historyPayload?.data?.items ?? []).flatMap((item) =>
+        item.id ? [loadLiveAssessment(token, workspaceId, item.id)] : [],
+      ),
+    );
+    const lifecycles = details.flatMap((result) => {
+      const data = (result.payload as { data?: { lifecycle?: string } } | null)?.data;
+      return result.status === 200 && data?.lifecycle ? [data.lifecycle] : [];
+    });
+    summary.metrics.assessments = {
+      total: lifecycles.length,
+      draft: lifecycles.filter((value) => value === 'draft').length,
+      inReview: lifecycles.filter((value) => value === 'review').length,
+      final: lifecycles.filter((value) => value === 'final').length,
+    };
+    summary.emptyState.isEmpty = lifecycles.length === 0;
+  }
+  return mockOk(summary);
 }
