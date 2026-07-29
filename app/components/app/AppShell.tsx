@@ -32,7 +32,7 @@ export function AppShell({ children }: AppShellProps) {
   );
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden bg-[#f3eee6] text-[#171717]">
+    <div className="fixed inset-0 flex h-dvh flex-col overflow-hidden bg-[#f3eee6] text-[#171717]">
       <ImpersonationBanner />
       <a
         href="#konten-utama"
