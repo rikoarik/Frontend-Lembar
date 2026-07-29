@@ -10,7 +10,7 @@ import type {
   QuestionReviewState,
   ReviewQuestion,
 } from '@/src/features/review/types';
-import { reviewStateLabel } from '@/src/features/review/types';
+import { mapReviewStateFromBackend, reviewStateLabel } from '@/src/features/review/types';
 
 type FilterKey = 'all' | 'unreviewed' | 'warnings' | 'accepted';
 
@@ -71,7 +71,13 @@ export function QuickReviewView({
       setLoading(false);
       return;
     }
-    setAssessment(result.value);
+    setAssessment({
+      ...result.value,
+      questions: result.value.questions.map((question) => ({
+        ...question,
+        reviewState: mapReviewStateFromBackend(String(question.reviewState)),
+      })),
+    });
     setConflictMessage(null);
     setSelected(new Set());
     setLoading(false);

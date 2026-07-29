@@ -5,6 +5,37 @@ export type QuestionReviewState =
   | 'rejected'
   | 'needs_attention';
 
+export type BackendReviewState =
+  | 'pending'
+  | 'accepted'
+  | 'rejected'
+  | 'edited'
+  | 'needs_attention';
+
+const BACKEND_TO_FRONTEND: Record<BackendReviewState, QuestionReviewState> = {
+  pending: 'unreviewed',
+  accepted: 'accepted',
+  rejected: 'rejected',
+  edited: 'edited',
+  needs_attention: 'needs_attention',
+};
+
+const FRONTEND_TO_BACKEND: Record<QuestionReviewState, BackendReviewState> = {
+  unreviewed: 'pending',
+  accepted: 'accepted',
+  rejected: 'rejected',
+  edited: 'edited',
+  needs_attention: 'needs_attention',
+};
+
+export function mapReviewStateFromBackend(value: string): QuestionReviewState {
+  return BACKEND_TO_FRONTEND[value as BackendReviewState] ?? 'unreviewed';
+}
+
+export function mapReviewStateToBackend(value: QuestionReviewState): BackendReviewState {
+  return FRONTEND_TO_BACKEND[value];
+}
+
 export type AssessmentLifecycle = 'draft' | 'generating' | 'review' | 'final' | 'archived';
 
 export type QuestionWarning = {

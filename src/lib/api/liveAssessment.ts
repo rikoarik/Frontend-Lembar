@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers';
 import { backendFetch, JWT_COOKIE, SESSION_COOKIE } from '@/src/lib/api/session';
+import { mapReviewStateFromBackend } from '@/src/features/review/types';
 
 export type LiveClaims = { userId: string; workspaceId: string };
 
@@ -60,12 +61,7 @@ export async function loadLiveAssessment(token: string, workspaceId: string, ass
     topic: '',
     difficulty: question.difficulty ?? 'medium',
     sourceLabel: Array.isArray(question.sourceIds) && question.sourceIds.length ? 'Sumber terlampir' : 'Tanpa sumber',
-    reviewState:
-      question.status === 'accepted'
-        ? 'accepted'
-        : question.status === 'rejected'
-          ? 'rejected'
-          : 'unreviewed',
+    reviewState: mapReviewStateFromBackend(String(question.status ?? '')),
     warnings: [],
     updatedAt: String(question.updatedAt ?? assessment.updatedAt ?? new Date().toISOString()),
   }));
