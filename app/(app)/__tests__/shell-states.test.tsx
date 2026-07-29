@@ -6,6 +6,7 @@ import {
   ShellLoading,
   ShellNotFound,
 } from '@/app/components/app/ShellStates';
+import AppError from '../error';
 
 describe('Shell states', () => {
   it('renders loading skeleton with busy state', () => {
@@ -17,6 +18,12 @@ describe('Shell states', () => {
     render(<ShellError requestId="req-123" />);
     expect(screen.getByText('Workspace belum bisa dimuat')).toBeInTheDocument();
     expect(screen.getByText(/req-123/)).toBeInTheDocument();
+  });
+
+  it('uses the real Next error digest instead of a demo request id', () => {
+    render(<AppError error={Object.assign(new Error('failed'), { digest: 'req-live-123' })} />);
+    expect(screen.getByText(/req-live-123/)).toBeInTheDocument();
+    expect(screen.queryByText(/demo-shell-request/)).not.toBeInTheDocument();
   });
 
   it('renders forbidden state guidance', () => {

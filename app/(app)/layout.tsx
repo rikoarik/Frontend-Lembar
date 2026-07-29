@@ -31,8 +31,10 @@ async function fetchMeData() {
 export default async function AppLayout({ children }: { children: ReactNode }) {
   const me = await fetchMeData();
 
+  if (!me) redirect('/masuk');
+
   // No active workspace → send to onboarding
-  if (me && !me.activeWorkspace && me.workspaces.length === 0) {
+  if (!me.activeWorkspace && me.workspaces.length === 0) {
     redirect('/app/onboarding');
   }
 
