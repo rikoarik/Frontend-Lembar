@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
-import { JWT_COOKIE, SESSION_COOKIE } from '@/src/lib/api/session';
+import { authCookieOptions, JWT_COOKIE, SESSION_COOKIE } from '@/src/lib/api/session';
 
 export async function POST() {
   const jar = await cookies();
@@ -12,29 +12,9 @@ export async function POST() {
 
   const activeToken = impersonatorToken || 'ops';
 
-  response.cookies.set({
-    name: JWT_COOKIE,
-    value: activeToken,
-    path: '/',
-    sameSite: 'lax',
-    httpOnly: true,
-  });
-
-  response.cookies.set({
-    name: SESSION_COOKIE,
-    value: activeToken,
-    path: '/',
-    sameSite: 'lax',
-    httpOnly: true,
-  });
-
-  response.cookies.set({
-    name: 'lembar_roles',
-    value: 'superadmin',
-    path: '/',
-    sameSite: 'lax',
-    httpOnly: true,
-  });
+  response.cookies.set(authCookieOptions(JWT_COOKIE, activeToken));
+  response.cookies.set({ name: SESSION_COOKIE, value: '', path: '/', maxAge: 0 });
+  response.cookies.set(authCookieOptions('lembar_roles', 'superadmin'));
 
   // Delete impersonation tracking cookies
   response.cookies.set({

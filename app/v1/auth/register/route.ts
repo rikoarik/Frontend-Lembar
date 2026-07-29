@@ -4,6 +4,7 @@ import {
   authSuccessFromBackend,
   backendFetch,
   jwtCookieOptions,
+  SESSION_COOKIE,
   type BackendAuthResponse,
 } from '@/src/lib/api/session';
 
@@ -108,14 +109,6 @@ export async function POST(request: Request) {
 
   const response = NextResponse.json({ data: authSuccessFromBackend(auth) }, { status: 201 });
   response.cookies.set(jwtCookieOptions(auth.token));
-  response.cookies.set({
-    name: 'lembar_session',
-    value: auth.token,
-    path: '/',
-    sameSite: 'lax',
-    httpOnly: true,
-    secure: process.env.NEXT_PUBLIC_APP_URL?.startsWith('https://') ?? false,
-    maxAge: 60 * 60 * 24 * 7,
-  });
+  response.cookies.set({ name: SESSION_COOKIE, value: '', path: '/', maxAge: 0 });
   return response;
 }

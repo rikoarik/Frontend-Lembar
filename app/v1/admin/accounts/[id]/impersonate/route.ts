@@ -2,6 +2,7 @@ import { cookies } from 'next/headers';
 import { NextResponse, type NextRequest } from 'next/server';
 import {
   backendFetch,
+  authCookieOptions,
   homePathForRoles,
   JWT_COOKIE,
   SESSION_COOKIE,
@@ -80,14 +81,12 @@ export async function POST(
     const homePath = payload?.data?.homePath || homePathForRoles(roles);
     const displayName = targetName || targetEmail || 'Pengguna Impersonasi';
 
-    const response = NextResponse.json({
-      data: { token, homePath, displayName },
-    });
+    const response = NextResponse.json({ data: { homePath, displayName } });
 
-    response.cookies.set({ name: 'lembar_impersonator', value: currentToken, path: '/', sameSite: 'lax', httpOnly: true });
-    response.cookies.set({ name: JWT_COOKIE, value: token, path: '/', sameSite: 'lax', httpOnly: true, maxAge: 60 * 60 });
-    response.cookies.set({ name: SESSION_COOKIE, value: token, path: '/', sameSite: 'lax', httpOnly: true, maxAge: 60 * 60 });
-    response.cookies.set({ name: 'lembar_roles', value: roles.join(','), path: '/', sameSite: 'lax', httpOnly: true });
+    response.cookies.set(authCookieOptions('lembar_impersonator', currentToken, 60 * 60));
+    response.cookies.set(authCookieOptions(JWT_COOKIE, token, 60 * 60));
+    response.cookies.set({ name: SESSION_COOKIE, value: '', path: '/', maxAge: 0 });
+    response.cookies.set(authCookieOptions('lembar_roles', roles.join(','), 60 * 60));
     response.cookies.set({ name: 'lembar_is_impersonating', value: '1', path: '/', sameSite: 'lax', httpOnly: false, maxAge: 60 * 60 });
     response.cookies.set({ name: 'lembar_impersonated_name', value: displayName, path: '/', sameSite: 'lax', httpOnly: false, maxAge: 60 * 60 });
 

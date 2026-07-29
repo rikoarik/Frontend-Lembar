@@ -241,16 +241,20 @@ export async function readJwtFromCookies(): Promise<string | null> {
   return jar.get(JWT_COOKIE)?.value || jar.get(SESSION_COOKIE)?.value || null;
 }
 
-export function jwtCookieOptions(token: string) {
+export function authCookieOptions(name: string, value: string, maxAge = 60 * 60 * 24 * 7) {
   return {
-    name: JWT_COOKIE,
-    value: token,
+    name,
+    value,
     path: '/',
     sameSite: 'lax' as const,
     httpOnly: true,
-    secure: process.env.NEXT_PUBLIC_APP_URL?.startsWith('https://') ?? false,
-    maxAge: 60 * 60 * 24 * 7,
+    secure: process.env.NODE_ENV === 'production',
+    maxAge,
   };
+}
+
+export function jwtCookieOptions(token: string) {
+  return authCookieOptions(JWT_COOKIE, token);
 }
 
 export function clearJwtCookieOptions() {

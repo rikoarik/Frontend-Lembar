@@ -65,8 +65,7 @@ export function mockOk<T>(
       path: '/',
       sameSite: 'lax',
       httpOnly: true,
-      // Preview is often plain HTTP on the VPS; secure only when the app URL is https.
-      secure: process.env.NEXT_PUBLIC_APP_URL?.startsWith('https://') ?? false,
+      secure: process.env.NODE_ENV === 'production',
     });
   }
   if (init?.setRoles && init.setRoles.length > 0) {
@@ -76,7 +75,7 @@ export function mockOk<T>(
       path: '/',
       sameSite: 'lax',
       httpOnly: true,
-      secure: process.env.NEXT_PUBLIC_APP_URL?.startsWith('https://') ?? false,
+      secure: process.env.NODE_ENV === 'production',
     });
   }
   return response;

@@ -2,9 +2,11 @@ import { NextResponse } from 'next/server';
 import { isMockApiMode, mockFail } from '@/src/lib/mock-api/preview';
 import {
   authSuccessFromBackend,
+  authCookieOptions,
   backendFetch,
   jwtCookieOptions,
   normalizeRoles,
+  SESSION_COOKIE,
   type BackendAuthResponse,
 } from '@/src/lib/api/session';
 
@@ -62,35 +64,11 @@ export async function POST(request: Request) {
 
   const response = NextResponse.json({ data: successPayload }, { status: 200 });
   response.cookies.set(jwtCookieOptions(token));
-  response.cookies.set({
-    name: 'lembar_session',
-    value: token,
-    path: '/',
-    sameSite: 'lax',
-    httpOnly: true,
-    secure: process.env.NEXT_PUBLIC_APP_URL?.startsWith('https://') ?? false,
-    maxAge: 60 * 60 * 24 * 7,
-  });
+  response.cookies.set({ name: SESSION_COOKIE, value: '', path: '/', maxAge: 0 });
 
   if (roles.length > 0) {
-    response.cookies.set({
-      name: 'lembar_roles',
-      value: roles.join(','),
-      path: '/',
-      sameSite: 'lax',
-      httpOnly: true,
-      secure: process.env.NEXT_PUBLIC_APP_URL?.startsWith('https://') ?? false,
-      maxAge: 60 * 60 * 24 * 7,
-    });
+    response.cookies.set(authCookieOptions('lembar_roles', roles.join(',')));
   }
-  response.cookies.set({
-    name: 'lembar_active_role',
-    value: successPayload.activeRole,
-    path: '/',
-    sameSite: 'lax',
-    httpOnly: true,
-    secure: process.env.NEXT_PUBLIC_APP_URL?.startsWith('https://') ?? false,
-    maxAge: 60 * 60 * 24 * 7,
-  });
+  response.cookies.set(authCookieOptions('lembar_active_role', successPayload.activeRole));
   return response;
 }
