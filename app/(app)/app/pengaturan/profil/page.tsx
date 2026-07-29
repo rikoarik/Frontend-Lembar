@@ -140,7 +140,8 @@ export default function ProfileSettingsPage() {
     }
   };
 
-  const handleSavePreferences = () => setPrefStatus('Penyimpanan preferensi belum tersedia di backend.');
+  const handleSavePreferences = () =>
+    setPrefStatus('Penyimpanan preferensi belum tersedia di backend.');
 
   if (profileLoading) {
     return (
@@ -167,9 +168,7 @@ export default function ProfileSettingsPage() {
         </p>
       </div>
 
-      {profileError && (
-        <FormStatus tone="alert" message={profileError} />
-      )}
+      {profileError && <FormStatus tone="alert" message={profileError} />}
 
       <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-2">
         {/* Kolom Kiri */}
@@ -181,9 +180,11 @@ export default function ProfileSettingsPage() {
             </div>
             <div className="flex min-w-0 flex-1 flex-col gap-0.5">
               <div className="flex items-center gap-2">
-                <h2 className="truncate text-[16px] font-semibold text-[#171717]">{displayName || 'Memuat…'}</h2>
-                <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700 ring-1 ring-emerald-200">
-                  Terverifikasi
+                <h2 className="truncate text-[16px] font-semibold text-[#171717]">
+                  {displayName || 'Memuat…'}
+                </h2>
+                <span className="rounded-full bg-neutral-50 px-2 py-0.5 text-[10px] font-medium text-neutral-600 ring-1 ring-neutral-200">
+                  Akun aktif
                 </span>
               </div>
               <p className="truncate text-body-sm text-[#6d665d]">{email || '—'}</p>
@@ -223,7 +224,9 @@ export default function ProfileSettingsPage() {
               <div className="flex items-center justify-between gap-3 rounded-lg border border-[#e6dfd4] bg-[#fbf8f2] p-3">
                 <div className="flex flex-col min-w-0">
                   <span className="text-[11px] font-medium text-[#8a8379]">Email utama</span>
-                  <span className="truncate text-[13px] font-medium text-[#171717]">{email || '—'}</span>
+                  <span className="truncate text-[13px] font-medium text-[#171717]">
+                    {email || '—'}
+                  </span>
                 </div>
                 {!showEmailForm && (
                   <Button
