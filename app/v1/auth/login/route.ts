@@ -12,6 +12,7 @@ import {
 } from '@/src/lib/api/session';
 
 export async function POST(request: Request) {
+  const clientIp = request.headers.get('x-forwarded-for')?.split(',').at(-1)?.trim();
   let body: { identifier?: string; password?: string; email?: string } = {};
   try {
     body = (await request.json()) as typeof body;
@@ -54,6 +55,7 @@ export async function POST(request: Request) {
 
   const upstream = await backendFetch('/v1/auth/login', {
     method: 'POST',
+    headers: clientIp ? { 'x-forwarded-for': clientIp } : undefined,
     body: JSON.stringify({
       identifier,
       email: identifier.includes('@') ? identifier : undefined,
