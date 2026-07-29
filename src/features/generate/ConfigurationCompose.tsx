@@ -558,10 +558,10 @@ const toggleMaterial = useCallback((materialId: string) => {
         </div>
       )}
 
-      <div className="flex flex-col gap-6 lg:flex-row">
+      <div className="grid min-w-0 grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-start">
         <form
           onSubmit={onSubmitForm}
-          className="min-w-0 flex-1"
+          className="min-w-0"
           noValidate
           aria-busy={isAnyLoading ? true : undefined}
         >
@@ -1068,7 +1068,7 @@ const toggleMaterial = useCallback((materialId: string) => {
           </div>
         </form>
 
-        <aside className="hidden w-72 shrink-0 self-start lg:block lg:sticky lg:top-6">
+        <aside className="hidden min-w-0 self-start lg:block lg:sticky lg:top-6">
           <div className="rounded-md border border-brand-line bg-brand-surface-raised px-4 py-4">
             <h3 className="text-label-semibold text-brand-ink">Ringkasan Konfigurasi</h3>
             <p className={`${helpClass} mb-3`}>Kesiapan: {readinessLabel}</p>

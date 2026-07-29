@@ -20,7 +20,7 @@ function GeneratePageFallback() {
 
 export default function GeneratePage() {
   return (
-    <div className="flex flex-col gap-4">
+    <div className="min-w-0 flex flex-col gap-4">
       <Link
         href="/app"
         className="text-body-sm text-brand-accent hover:text-brand-accent-hover w-fit"
