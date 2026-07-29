@@ -1,6 +1,11 @@
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
-import { backendFetch, JWT_COOKIE, SESSION_COOKIE } from '@/src/lib/api/session';
+import {
+  backendFetch,
+  JWT_COOKIE,
+  SESSION_COOKIE,
+  TRIAL_DEVICE_COOKIE,
+} from '@/src/lib/api/session';
 
 function decodeJwtPayload(token: string): Record<string, unknown> | null {
   try {
@@ -16,10 +21,8 @@ function decodeJwtPayload(token: string): Record<string, unknown> | null {
 
 export async function GET() {
   const jar = await cookies();
-  const token =
-    jar.get(JWT_COOKIE)?.value ||
-    jar.get(SESSION_COOKIE)?.value ||
-    jar.get('token')?.value;
+  const token = jar.get(JWT_COOKIE)?.value || jar.get(SESSION_COOKIE)?.value;
+  const trialDeviceToken = jar.get(TRIAL_DEVICE_COOKIE)?.value;
 
   if (!token) {
     return NextResponse.json(
@@ -30,8 +33,6 @@ export async function GET() {
 
   const payload = decodeJwtPayload(token);
   const workspaceId = (payload?.['workspaceId'] as string) || '';
-  const userId = (payload?.['userId'] as string) || (payload?.['sub'] as string) || '';
-
   const upstream = await backendFetch('/v1/me/plan', {
     method: 'GET',
     token,
@@ -39,6 +40,7 @@ export async function GET() {
       'x-workspace-id': workspaceId,
       // Ponytail: current BE plan/payment stack keys rows by workspaceId.
       'x-tenant-id': workspaceId,
+      ...(trialDeviceToken ? { 'x-trial-device-token': trialDeviceToken } : {}),
     },
   });
 

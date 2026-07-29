@@ -2,6 +2,7 @@ import { cookies } from 'next/headers';
 
 export const SESSION_COOKIE = 'lembar_session';
 export const JWT_COOKIE = 'lembar_token';
+export const TRIAL_DEVICE_COOKIE = '__Host-lembar_trial_device';
 
 export function isMockApiMode(): boolean {
   return process.env.NEXT_PUBLIC_API_MODE !== 'live';
