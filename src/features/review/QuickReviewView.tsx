@@ -59,6 +59,7 @@ export function QuickReviewView({
   const [editStem, setEditStem] = useState('');
   const [editExplanation, setEditExplanation] = useState('');
   const [statusNote, setStatusNote] = useState('');
+  const [conflictMessage, setConflictMessage] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -71,6 +72,7 @@ export function QuickReviewView({
       return;
     }
     setAssessment(result.value);
+    setConflictMessage(null);
     setSelected(new Set());
     setLoading(false);
   }, [assessmentId]);
@@ -171,16 +173,26 @@ export function QuickReviewView({
   };
 
   const onSaveEdit = async (questionId: string) => {
+    if (!assessment) return;
     setBusy(true);
-    const result = await assessmentService.updateQuestionContent(assessmentId, questionId, {
-      stem: editStem,
-      explanation: editExplanation,
-    });
+    const expectedEtag = assessment.etag;
+    const result = await assessmentService.updateQuestionContent(
+      assessmentId,
+      questionId,
+      { stem: editStem, explanation: editExplanation },
+      expectedEtag ? { expectedEtag } : {},
+    );
     setBusy(false);
     if (!result.ok) {
+      if (result.error.code === 'STATE_CONFLICT') {
+        setStatusNote('');
+        setConflictMessage(result.error.safeMessage);
+        return;
+      }
       setStatusNote(result.error.safeMessage);
       return;
     }
+    setConflictMessage(null);
     setAssessment(result.value);
     setStatusNote('Perubahan soal disimpan.');
   };
@@ -211,6 +223,13 @@ export function QuickReviewView({
   }
 
   const current = questions[detailIndex];
+  const canFinalize = assessment.canFinalize;
+  const canOpenOutput = assessment.canOpenOutput;
+  const lifecycleSubtitle = canOpenOutput
+    ? 'Output siap dibuka.'
+    : assessment.lifecycle === 'final'
+      ? 'Output belum tersedia.'
+      : null;
 
   return (
     <div className="flex flex-col gap-4">
@@ -221,6 +240,7 @@ export function QuickReviewView({
             <StatusBadge label={badgeForLifecycle(assessment.lifecycle)} />
           </div>
           <p className="text-body-sm text-brand-ink-muted">
+            {lifecycleSubtitle ? <span data-testid="lifecycle-subtitle">{lifecycleSubtitle}</span> : null}{' '}
             {assessment.subject} · {assessment.gradeLabel} · {assessment.reviewedCount}/
             {assessment.questionCount} ditinjau · {assessment.warningCount} peringatan
           </p>
@@ -238,12 +258,24 @@ export function QuickReviewView({
           >
             Mode detail
           </Link>
-          <Link
-            href={`/app/review/${assessment.id}/finalize`}
-            className="inline-flex min-h-[var(--control-md)] items-center rounded-md bg-brand-accent px-4 text-body-default font-medium text-white"
-          >
-            Finalisasi
-          </Link>
+          {canFinalize ? (
+            <Button
+              disabled={busy}
+              onClick={() => {
+                window.location.assign(`/app/review/${assessment.id}/finalize`);
+              }}
+            >
+              Finalisasi
+            </Button>
+          ) : null}
+          {canOpenOutput ? (
+            <Link
+              href={`/app/output/${assessment.id}`}
+              className="inline-flex min-h-[var(--control-md)] items-center rounded-md bg-brand-accent px-4 text-body-default font-medium text-white"
+            >
+              Buka output
+            </Link>
+          ) : null}
         </div>
       </div>
 
@@ -275,6 +307,18 @@ export function QuickReviewView({
         <p className="text-body-sm text-brand-ink-muted" role="status" aria-live="polite">
           {statusNote}
         </p>
+      ) : null}
+      {conflictMessage ? (
+        <div
+          data-testid="state-conflict-alert"
+          role="alert"
+          className="flex flex-wrap items-center gap-2 rounded-md border border-brand-warning/30 bg-brand-warning-soft px-3 py-2"
+        >
+          <span className="text-body-sm text-brand-ink">{conflictMessage}</span>
+          <Button size="sm" variant="secondary" onClick={() => void load()}>
+            Muat ulang
+          </Button>
+        </div>
       ) : null}
 
       {mode === 'quick' ? (

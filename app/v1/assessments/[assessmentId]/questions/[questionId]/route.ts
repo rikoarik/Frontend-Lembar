@@ -32,10 +32,13 @@ export async function PATCH(
     ...(status ? { status } : {}),
   };
   const base = `/v1/workspaces/${encodeURIComponent(auth.claims.workspaceId)}/assessments/${encodeURIComponent(assessmentId)}/versions/${encodeURIComponent(data.versionId)}/questions/${encodeURIComponent(questionId)}`;
+  const ifMatch = request.headers.get('if-match');
+  const upstreamHeaders: Record<string, string> = { 'x-actor-user-id': auth.claims.userId };
+  if (ifMatch) upstreamHeaders['If-Match'] = ifMatch;
   const upstream = await backendFetch(base, {
     method: 'PATCH',
     token: auth.token,
-    headers: { 'x-actor-user-id': auth.claims.userId },
+    headers: upstreamHeaders,
     body: JSON.stringify(patch),
   });
   if (!upstream.ok) {

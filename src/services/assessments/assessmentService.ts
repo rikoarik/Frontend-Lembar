@@ -4,6 +4,7 @@ import type {
   AssessmentSummary,
   FinalizeResult,
   OutputPackage,
+  QuestionContentPatch,
   QuestionReviewState,
   ReviewQuestion,
 } from '@/src/features/review/types';
@@ -19,14 +20,22 @@ export type AssessmentError = {
   cause?: unknown;
 };
 
+const STATE_CONFLICT_MESSAGE =
+  'Versi soal berubah, muat ulang untuk melihat perubahan terbaru.';
+
 async function parseError(response: Response): Promise<AssessmentError> {
   try {
     const body = (await response.json()) as {
       error?: { code?: string; message?: string; retryable?: boolean; blockers?: string[] };
     };
+    const code = body.error?.code ?? 'UNKNOWN';
+    const safeMessage =
+      code === 'STATE_CONFLICT'
+        ? STATE_CONFLICT_MESSAGE
+        : body.error?.message ?? 'Tidak dapat menyelesaikan permintaan saat ini.';
     return {
-      code: body.error?.code ?? 'UNKNOWN',
-      safeMessage: body.error?.message ?? 'Tidak dapat menyelesaikan permintaan saat ini.',
+      code,
+      safeMessage,
       retryable: body.error?.retryable ?? response.status >= 500,
       blockers: body.error?.blockers,
       cause: body.error,
@@ -45,6 +54,7 @@ async function request<T>(
   path: string,
   method: 'GET' | 'POST' | 'PATCH' = 'GET',
   body?: unknown,
+  headers?: Record<string, string>,
 ): Promise<Result<T, AssessmentError>> {
   try {
     const response = await fetch(`${API_BASE}${path}`, {
@@ -53,6 +63,7 @@ async function request<T>(
       headers: {
         'Content-Type': 'application/json',
         'Accept-Language': 'id',
+        ...(headers ?? {}),
       },
       body: body === undefined ? undefined : JSON.stringify(body),
     });
@@ -71,6 +82,10 @@ async function request<T>(
   }
 }
 
+export type QuestionEditOptions = {
+  expectedEtag?: string;
+};
+
 export const assessmentService = {
   list(params?: { q?: string; lifecycle?: AssessmentLifecycle | 'all' }) {
     const search = new URLSearchParams();
@@ -82,11 +97,18 @@ export const assessmentService = {
   get(assessmentId: string) {
     return request<AssessmentDetail>(`/assessments/${encodeURIComponent(assessmentId)}`);
   },
-  updateQuestionState(assessmentId: string, questionId: string, reviewState: QuestionReviewState) {
+  updateQuestionState(
+    assessmentId: string,
+    questionId: string,
+    reviewState: QuestionReviewState,
+    options: QuestionEditOptions = {},
+  ) {
+    const headers = options.expectedEtag ? { 'If-Match': options.expectedEtag } : undefined;
     return request<AssessmentDetail>(
       `/assessments/${encodeURIComponent(assessmentId)}/questions/${encodeURIComponent(questionId)}`,
       'PATCH',
       { reviewState },
+      headers,
     );
   },
   bulkAccept(assessmentId: string, questionIds: string[]) {
@@ -99,12 +121,15 @@ export const assessmentService = {
   updateQuestionContent(
     assessmentId: string,
     questionId: string,
-    patch: Partial<Pick<ReviewQuestion, 'stem' | 'explanation' | 'answerKey'>>,
+    patch: QuestionContentPatch,
+    options: QuestionEditOptions = {},
   ) {
+    const headers = options.expectedEtag ? { 'If-Match': options.expectedEtag } : undefined;
     return request<AssessmentDetail>(
       `/assessments/${encodeURIComponent(assessmentId)}/questions/${encodeURIComponent(questionId)}`,
       'PATCH',
       patch,
+      headers,
     );
   },
   finalize(assessmentId: string, acknowledged: boolean) {

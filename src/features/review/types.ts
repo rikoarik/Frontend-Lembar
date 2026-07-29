@@ -34,6 +34,10 @@ export type ReviewQuestion = {
   updatedAt: string;
 };
 
+export type QuestionContentPatch = Partial<
+  Pick<ReviewQuestion, 'stem' | 'explanation' | 'answerKey' | 'options'>
+>;
+
 export type AssessmentSummary = {
   id: string;
   title: string;
@@ -55,6 +59,7 @@ export type AssessmentDetail = AssessmentSummary & {
   questions: ReviewQuestion[];
   finalizeBlockers: string[];
   teacherResponsibilityNote: string;
+  etag?: string;
 };
 
 export type HistoryFilters = {
