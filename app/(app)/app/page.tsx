@@ -229,12 +229,12 @@ export default function AppDashboardPage() {
         <MetricCard
           label="Total asesmen"
           value={<span data-testid="metric-assessments-total">{metrics.assessments.total}</span>}
-          hint={
-            <span>
-              {metrics.assessments.draft} draft ·{' '}
-              <span data-testid="metric-assessments-final">{metrics.assessments.final}</span> final
-            </span>
-          }
+          hint="Semua lembar workspace aktif"
+        />
+        <MetricCard
+          label="Draft"
+          value={metrics.assessments.draft}
+          hint="Belum memiliki soal final"
         />
         <MetricCard
           label="Perlu ditinjau"
@@ -244,14 +244,9 @@ export default function AppDashboardPage() {
           hint="Siap dicek sebelum final"
         />
         <MetricCard
-          label="Sumber siap"
-          value={<span data-testid="metric-sources-ready">{metrics.sources.ready}</span>}
-          hint={`${metrics.sources.processing} diproses · ${metrics.sources.failed} gagal`}
-        />
-        <MetricCard
-          label="Job aktif"
-          value={<span data-testid="metric-jobs-active">{metrics.jobs.active}</span>}
-          hint={`${metrics.jobs.failed} gagal · ${metrics.jobs.total} total`}
+          label="Final"
+          value={<span data-testid="metric-assessments-final">{metrics.assessments.final}</span>}
+          hint="Siap dicetak atau diunduh"
         />
       </section>
 
