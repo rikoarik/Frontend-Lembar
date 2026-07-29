@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { catalogService } from '@/src/services/catalog/catalogService';
 import { useWorkspace } from '@/src/features/workspace/workspaceContext';
 import { PrivatePdfSource } from '@/src/features/pdf-source';
@@ -75,10 +75,14 @@ const LABELS: Record<CompositionFieldKey, string> = {
 
 export default function ConfigurationCompose() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { activeWorkspace } = useWorkspace();
   const workspaceId = activeWorkspace.id;
 
   const [values, setValues] = useState<CompositionValues>(INITIAL_COMPOSITION_VALUES);
+  const [templateName, setTemplateName] = useState('');
+  const [templateStatus, setTemplateStatus] = useState('');
+  const [templateBusy, setTemplateBusy] = useState(false);
   const [localErrors, setLocalErrors] = useState<Partial<Record<CompositionFieldKey, string>>>({});
   const [submitted, setSubmitted] = useState(false);
   const [summaryOpen, setSummaryOpen] = useState(false);
@@ -95,6 +99,26 @@ export default function ConfigurationCompose() {
   const [compositionError, setCompositionError] = useState<CompositionError | null>(null);
   const [permissionState, setPermissionState] = useState(false);
   const [successState, setSuccessState] = useState(false);
+
+  useEffect(() => {
+    const templateId = searchParams.get('templateId');
+    if (!templateId) return;
+    let cancelled = false;
+    void (async () => {
+      const response = await fetch('/v1/templates', { credentials: 'include' });
+      const payload = await response.json().catch(() => null);
+      const template = payload?.data?.find((item: { id?: string }) => item.id === templateId);
+      if (cancelled) return;
+      if (!response.ok || !template?.config) {
+        setTemplateStatus('Template tidak ditemukan atau tidak dapat dimuat.');
+        return;
+      }
+      setValues({ ...INITIAL_COMPOSITION_VALUES, ...template.config, sourceId: '' });
+      setTemplateName(template.name ?? '');
+      setTemplateStatus(`Template “${template.name}” diterapkan.`);
+    })();
+    return () => { cancelled = true; };
+  }, [searchParams]);
 
   const loadGrades = useCallback(async () => {
     setLoading((prev) => ({ ...prev, gradeId: true }));
@@ -317,6 +341,26 @@ export default function ConfigurationCompose() {
     },
     [values, workspaceId, generateSubmit],
   );
+
+  const saveTemplate = useCallback(async () => {
+    const name = templateName.trim();
+    if (!name) { setTemplateStatus('Nama template wajib diisi.'); return; }
+    setTemplateBusy(true);
+    setTemplateStatus('');
+    const response = await fetch('/v1/templates', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ name, config: { ...values, sourceId: '' } }),
+    });
+    const payload = await response.json().catch(() => null);
+    setTemplateBusy(false);
+    if (!response.ok) {
+      setTemplateStatus(payload?.error?.message ?? 'Gagal menyimpan template.');
+      return;
+    }
+    setTemplateStatus(`Template “${name}” tersimpan.`);
+  }, [templateName, values]);
 
   const summaryItems = useMemo(() => {
     const items: { label: string; value: string }[] = [];
@@ -893,6 +937,22 @@ export default function ConfigurationCompose() {
             </Panel>
 
             <OutputSettings />
+
+            <Panel title="Simpan sebagai template" description="Gunakan kembali konfigurasi ini tanpa memilih ulang pengaturan.">
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <input
+                  value={templateName}
+                  onChange={(event) => setTemplateName(event.target.value)}
+                  maxLength={100}
+                  placeholder="Nama template, mis. UH Matematika Kelas 5"
+                  className={`${fieldClass} flex-1`}
+                />
+                <Button type="button" variant="secondary" onClick={() => void saveTemplate()} disabled={templateBusy || !templateName.trim()}>
+                  {templateBusy ? 'Menyimpan…' : 'Simpan template'}
+                </Button>
+              </div>
+              {templateStatus ? <p className="mt-2 text-body-sm text-brand-ink-muted" role="status">{templateStatus}</p> : null}
+            </Panel>
 
             {submitted && !validateComposition(values).ok && (
               <div
