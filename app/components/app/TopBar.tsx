@@ -6,11 +6,24 @@ import Link from 'next/link';
 import { RoleSwitcher } from '@/src/features/admin/RoleSwitcher';
 
 type PlanUsage = {
+  plan: 'free' | 'pro';
   generationsUsedThisMonth: number;
   monthlyLimit: number | null;
+  trial: {
+    eligible: boolean;
+    claimed: boolean;
+  };
 };
 
-export function formatQuota(plan: PlanUsage): { label: string; percent: number } {
+export function entitlementCta(plan: Pick<PlanUsage, 'plan' | 'trial'>) {
+  if (plan.plan === 'pro') return { label: 'Pro', icon: 'verified' };
+  if (plan.trial.eligible && !plan.trial.claimed) return { label: 'Klaim Trial', icon: 'redeem' };
+  return { label: 'Upgrade Pro', icon: 'workspace_premium' };
+}
+
+export function formatQuota(
+  plan: Pick<PlanUsage, 'generationsUsedThisMonth' | 'monthlyLimit'>,
+): { label: string; percent: number } {
   const { generationsUsedThisMonth: used, monthlyLimit: limit } = plan;
   return {
     label: `${used}/${limit ?? '∞'}`,
@@ -22,8 +35,12 @@ function isPlanUsage(value: unknown): value is PlanUsage {
   if (!value || typeof value !== 'object') return false;
   const plan = value as Record<string, unknown>;
   return (
+    (plan['plan'] === 'free' || plan['plan'] === 'pro') &&
     typeof plan['generationsUsedThisMonth'] === 'number' &&
-    (typeof plan['monthlyLimit'] === 'number' || plan['monthlyLimit'] === null)
+    (typeof plan['monthlyLimit'] === 'number' || plan['monthlyLimit'] === null) &&
+    Boolean(plan['trial']) &&
+    typeof (plan['trial'] as Record<string, unknown>)['eligible'] === 'boolean' &&
+    typeof (plan['trial'] as Record<string, unknown>)['claimed'] === 'boolean'
   );
 }
 
@@ -76,6 +93,7 @@ export function TopBar({
   }, [workspaceName]);
 
   const quota = plan ? formatQuota(plan) : null;
+  const entitlement = plan ? entitlementCta(plan) : null;
 
   return (
     <header
@@ -156,14 +174,17 @@ export function TopBar({
             </span>
           </Link>
         ) : null}
-        <div
-          className="hidden h-9 max-w-[180px] items-center gap-1.5 rounded-lg border border-[#e6dfd4] bg-white px-2.5 text-[12px] font-medium text-[#171717] md:inline-flex md:max-w-[220px]"
-        >
-          <span aria-hidden="true" className="material-symbols-outlined text-[16px] text-[#8a8379]">
-            person
-          </span>
-          <span className="truncate">{workspaceName}</span>
-        </div>
+        {entitlement ? (
+          <Link
+            href="/app/pengaturan/langganan"
+            className="hidden h-9 max-w-[180px] items-center gap-1.5 rounded-lg border border-[#e6dfd4] bg-white px-2.5 text-[12px] font-medium text-[#171717] hover:bg-[#f3eee6] md:inline-flex md:max-w-[220px]"
+          >
+            <span aria-hidden="true" className="material-symbols-outlined text-[16px] text-[#8a8379]">
+              {entitlement.icon}
+            </span>
+            <span className="truncate">{entitlement.label}</span>
+          </Link>
+        ) : null}
         <button
           type="button"
           onClick={onOpenMobileNav}
