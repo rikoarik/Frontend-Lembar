@@ -76,34 +76,46 @@ export function OutputCenterContent({ assessmentId }: { assessmentId: string }) 
         <p className="text-body-sm text-brand-ink-muted">{dto.title} · {dto.questionCount} soal</p>
       </header>
 
-      <div className="flex flex-wrap gap-2" aria-label="Kontrol bagian output">
-        <Toggle label="Lembar siswa" show={visible.student} onClick={() => toggle('student')} />
-        <Toggle label="Kunci guru" show={visible.teacher} onClick={() => toggle('teacher')} />
-        <Toggle label="Metadata" show={visible.metadata} onClick={() => toggle('metadata')} />
+      <div
+        data-testid="output-center-layout"
+        className="grid gap-4 lg:grid-cols-[minmax(18rem,24rem)_minmax(0,1fr)]"
+      >
+        <aside aria-label="Kontrol output" className="order-1 flex flex-col gap-4 lg:order-none">
+          <div className="flex flex-wrap gap-2" aria-label="Kontrol bagian output">
+            <Toggle label="Lembar siswa" show={visible.student} onClick={() => toggle('student')} />
+            <Toggle label="Kunci guru" show={visible.teacher} onClick={() => toggle('teacher')} />
+            <Toggle label="Metadata" show={visible.metadata} onClick={() => toggle('metadata')} />
+          </div>
+
+          {visible.metadata ? (
+            <section aria-label="Metadata" className="rounded-md border border-brand-line p-4">
+              <MetadataForm
+                value={metadata}
+                onChange={setMetadata}
+                onSave={setMetadata}
+                onCancel={() => setMetadata(dto.metadata ?? blankMetadata)}
+              />
+            </section>
+          ) : null}
+        </aside>
+
+        <section
+          aria-label="Pratinjau output"
+          className="order-2 flex flex-col gap-4 lg:sticky lg:top-4 lg:self-start"
+        >
+          {visible.student ? (
+            <section aria-label="Lembar siswa" className="rounded-md border border-brand-line p-4">
+              <StudentWorksheetRenderer dto={dtoWithMetadata} />
+            </section>
+          ) : null}
+
+          {visible.teacher ? (
+            <section aria-label="Kunci guru" className="rounded-md border border-brand-line p-4">
+              <TeacherKeyRenderer dto={dtoWithMetadata} />
+            </section>
+          ) : null}
+        </section>
       </div>
-
-      {visible.student ? (
-        <section aria-label="Lembar siswa" className="rounded-md border border-brand-line p-4">
-          <StudentWorksheetRenderer dto={dtoWithMetadata} />
-        </section>
-      ) : null}
-
-      {visible.teacher ? (
-        <section aria-label="Kunci guru" className="rounded-md border border-brand-line p-4">
-          <TeacherKeyRenderer dto={dtoWithMetadata} />
-        </section>
-      ) : null}
-
-      {visible.metadata ? (
-        <section aria-label="Metadata" className="rounded-md border border-brand-line p-4">
-          <MetadataForm
-            value={metadata}
-            onChange={setMetadata}
-            onSave={setMetadata}
-            onCancel={() => setMetadata(dto.metadata ?? blankMetadata)}
-          />
-        </section>
-      ) : null}
     </main>
   );
 }
