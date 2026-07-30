@@ -660,8 +660,8 @@ export function AdminShell({
   const [collapsed, setCollapsed] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const isOps = brand.includes('ops');
-  const resolvedActorName = actorName ?? (isOps ? 'Ops Superadmin' : 'Admin Sekolah');
-  const resolvedActorMeta = actorMeta ?? (isOps ? 'platform · least privilege' : 'SDN Contoh 01');
+  const resolvedActorName = actorName ?? (isOps ? 'Ops Superadmin' : 'Admin');
+  const resolvedActorMeta = actorMeta ?? (isOps ? 'platform · least privilege' : 'Sekolah');
   const profileMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -837,7 +837,7 @@ export function AdminShell({
                       {resolvedActorName}
                     </div>
                     <div className="truncate text-[11px] text-white/60">
-                      {isOps ? 'ops@lembar.id' : 'admin@sekolah.sch.id'}
+                      {resolvedActorMeta}
                     </div>
                   </div>
                 </div>

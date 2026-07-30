@@ -17,7 +17,15 @@ function titleFromPath(pathname: string, root: '/school' | '/ops', nav: typeof S
   return match?.label ?? section;
 }
 
-export function SchoolAdminShell({ children }: { children: ReactNode }) {
+export function SchoolAdminShell({
+  actorMeta,
+  actorName,
+  children,
+}: {
+  actorMeta?: string;
+  actorName?: string;
+  children: ReactNode;
+}) {
   const pathname = usePathname() ?? '/school';
   const title = titleFromPath(pathname, '/school', SCHOOL_NAV);
 
@@ -40,8 +48,8 @@ export function SchoolAdminShell({ children }: { children: ReactNode }) {
                 </span>
               </div>
             }
-            actorName="Admin Sekolah"
-            actorMeta="SDN Contoh 01"
+            actorName={actorName}
+            actorMeta={actorMeta}
           >
             {children}
           </AdminShell>
