@@ -714,8 +714,8 @@ const toggleMaterial = useCallback((materialId: string) => {
                       ) : null}
                     </div>
 
-                    <div className="flex flex-col gap-2">
-                      <fieldset>
+                    <div className="flex min-w-0 flex-col gap-2">
+                      <fieldset className="min-w-0">
                         <legend className={labelClass}>
                           Materi <span className="text-brand-danger">*</span>
                           <p className={`${helpClass} mt-0.5`}>Pilih minimal satu materi</p>
