@@ -9,15 +9,10 @@ type PlanUsage = {
   plan: 'free' | 'pro';
   generationsUsedThisMonth: number;
   monthlyLimit: number | null;
-  trial: {
-    eligible: boolean;
-    claimed: boolean;
-  };
 };
 
-export function entitlementCta(plan: Pick<PlanUsage, 'plan' | 'trial'>) {
+export function entitlementCta(plan: Pick<PlanUsage, 'plan'>) {
   if (plan.plan === 'pro') return { label: 'Pro', icon: 'verified' };
-  if (plan.trial.eligible && !plan.trial.claimed) return { label: 'Klaim Trial', icon: 'redeem' };
   return { label: 'Upgrade Pro', icon: 'workspace_premium' };
 }
 
@@ -37,10 +32,7 @@ function isPlanUsage(value: unknown): value is PlanUsage {
   return (
     (plan['plan'] === 'free' || plan['plan'] === 'pro') &&
     typeof plan['generationsUsedThisMonth'] === 'number' &&
-    (typeof plan['monthlyLimit'] === 'number' || plan['monthlyLimit'] === null) &&
-    Boolean(plan['trial']) &&
-    typeof (plan['trial'] as Record<string, unknown>)['eligible'] === 'boolean' &&
-    typeof (plan['trial'] as Record<string, unknown>)['claimed'] === 'boolean'
+    (typeof plan['monthlyLimit'] === 'number' || plan['monthlyLimit'] === null)
   );
 }
 

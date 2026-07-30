@@ -2,10 +2,15 @@ import { act, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { HistoryView, humanizeAssessmentLabel } from '@/src/features/history/HistoryView';
 import { assessmentService } from '@/src/services/assessments/assessmentService';
+import * as activeJobStorageModule from '@/src/features/jobs/activeJobStorage';
 import type { AssessmentSummary } from '@/src/features/review/types';
 
 vi.mock('@/src/services/assessments/assessmentService', () => ({
   assessmentService: { list: vi.fn() },
+}));
+
+vi.mock('@/src/features/workspace/workspaceContext', () => ({
+  useWorkspace: () => ({ activeWorkspace: { id: 'ws_demo' } }),
 }));
 
 const base: AssessmentSummary = {
@@ -34,6 +39,7 @@ afterEach(() => vi.useRealTimers());
 describe('history lifecycle UX', () => {
   it('shows generating lifecycle truthfully and refreshes without replacing the list with a skeleton', async () => {
     vi.useFakeTimers();
+    vi.spyOn(activeJobStorageModule, 'readActiveJob').mockReturnValue(null);
     vi.mocked(assessmentService.list).mockResolvedValue({ ok: true, value: [base] });
     render(<HistoryView refreshIntervalMs={10_000} />);
 
@@ -46,6 +52,29 @@ describe('history lifecycle UX', () => {
     expect(assessmentService.list).toHaveBeenCalledTimes(2);
     expect(screen.getByText('Latihan Seni Tari')).toBeInTheDocument();
     expect(document.querySelector('[aria-busy="true"]')).toBeNull();
+  });
+
+  it('shows Lihat progres link for generating item when activeJobId is available', async () => {
+    vi.spyOn(activeJobStorageModule, 'readActiveJob').mockReturnValue({
+      jobId: 'job_abc123',
+      workspaceId: 'ws_demo',
+      savedAt: new Date().toISOString(),
+    });
+    vi.mocked(assessmentService.list).mockResolvedValue({ ok: true, value: [base] });
+    render(<HistoryView />);
+    await waitFor(() => expect(screen.getByText('Sedang membuat soal')).toBeInTheDocument());
+    expect(within(row(base.title)).getByRole('link', { name: 'Lihat progres' })).toHaveAttribute(
+      'href',
+      '/app/jobs/job_abc123',
+    );
+  });
+
+  it('hides Lihat progres link for generating item when no activeJobId stored', async () => {
+    vi.spyOn(activeJobStorageModule, 'readActiveJob').mockReturnValue(null);
+    vi.mocked(assessmentService.list).mockResolvedValue({ ok: true, value: [base] });
+    render(<HistoryView />);
+    await waitFor(() => expect(screen.getByText('Sedang membuat soal')).toBeInTheDocument());
+    expect(screen.queryByRole('link', { name: 'Lihat progres' })).not.toBeInTheDocument();
   });
 
   it('shows succeeded review copy and CTA', async () => {

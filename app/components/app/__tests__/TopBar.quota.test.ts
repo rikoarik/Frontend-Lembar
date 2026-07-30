@@ -18,21 +18,14 @@ describe('formatQuota', () => {
 });
 
 describe('entitlementCta', () => {
-  it('offers trial only when the server marks it eligible and unclaimed', () => {
-    expect(
-      entitlementCta({ plan: 'free', trial: { eligible: true, claimed: false } }),
-    ).toEqual({ label: 'Klaim Trial', icon: 'redeem' });
+  it('shows Upgrade Pro for free plan', () => {
+    expect(entitlementCta({ plan: 'free' })).toEqual({
+      label: 'Upgrade Pro',
+      icon: 'workspace_premium',
+    });
   });
 
-  it('offers upgrade after trial is claimed or unavailable', () => {
-    expect(
-      entitlementCta({ plan: 'free', trial: { eligible: false, claimed: true } }),
-    ).toEqual({ label: 'Upgrade Pro', icon: 'workspace_premium' });
-  });
-
-  it('shows Pro without an upsell for active entitlement', () => {
-    expect(
-      entitlementCta({ plan: 'pro', trial: { eligible: false, claimed: true } }),
-    ).toEqual({ label: 'Pro', icon: 'verified' });
+  it('shows Pro for active pro plan', () => {
+    expect(entitlementCta({ plan: 'pro' })).toEqual({ label: 'Pro', icon: 'verified' });
   });
 });

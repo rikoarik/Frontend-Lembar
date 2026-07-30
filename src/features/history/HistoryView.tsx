@@ -4,8 +4,10 @@ import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Button, Panel, StatusBadge } from '@/app/components/ui';
 import type { StatusLabel } from '@/app/components/ui';
+import { readActiveJob } from '@/src/features/jobs/activeJobStorage';
 import { assessmentService } from '@/src/services/assessments/assessmentService';
 import type { AssessmentLifecycle, AssessmentSummary } from '@/src/features/review/types';
+import { useWorkspace } from '@/src/features/workspace/workspaceContext';
 
 const DEFAULT_REFRESH_MS = 10_000;
 const KNOWN_LABELS: Record<string, string> = {
@@ -83,7 +85,14 @@ export function HistoryView({ refreshIntervalMs = DEFAULT_REFRESH_MS }: { refres
   const [error, setError] = useState<string | null>(null);
   const [q, setQ] = useState('');
   const [lifecycle, setLifecycle] = useState<AssessmentLifecycle | 'all'>('all');
+  const [activeJobId, setActiveJobId] = useState<string | null>(null);
   const loaded = useRef(false);
+  const { activeWorkspace } = useWorkspace();
+
+  useEffect(() => {
+    const stored = readActiveJob(activeWorkspace.id);
+    setActiveJobId(stored?.jobId ?? null);
+  }, [activeWorkspace.id]);
 
   const load = useCallback(async () => {
     if (!loaded.current) setLoading(true);
@@ -184,6 +193,14 @@ export function HistoryView({ refreshIntervalMs = DEFAULT_REFRESH_MS }: { refres
                         className="inline-flex min-h-[var(--control-md)] items-center rounded-md bg-brand-accent px-4 text-body-sm font-medium text-white"
                       >
                         Tinjau soal
+                      </Link>
+                    ) : null}
+                    {item.lifecycle === 'generating' && activeJobId ? (
+                      <Link
+                        href={`/app/jobs/${activeJobId}`}
+                        className="inline-flex min-h-[var(--control-md)] items-center rounded-md border border-brand-line px-4 text-body-sm"
+                      >
+                        Lihat progres
                       </Link>
                     ) : null}
                     {item.lifecycle === 'final' && item.canOpenOutput ? (
