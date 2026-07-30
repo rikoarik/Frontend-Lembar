@@ -376,12 +376,12 @@ export function QuickReviewView({
             </p>
           </div>
 
-          <ul className="flex flex-col gap-3" role="list">
+          <ul className="flex flex-col gap-2" role="list">
             {questions.map((question) => (
               <li key={question.id}>
                 <Panel
                   title={`Soal ${question.number}`}
-                  description={`${reviewStateLabel(question.reviewState)} · ${question.topic}`}
+                  description={`${reviewStateLabel(question.reviewState)} · ${question.topic} · ${question.difficulty} · ${question.sourceLabel}`}
                   actions={
                     canAccept(question) ? (
                       <input
@@ -399,8 +399,8 @@ export function QuickReviewView({
                     )
                   }
                 >
-                  <div className="flex flex-col gap-3">
-                    <p className="text-body-default text-brand-ink">{question.stem}</p>
+                  <div className="flex flex-col gap-2">
+                    <p className="text-body-sm text-brand-ink">{question.stem}</p>
                     {question.questionType === 'short_answer' ? (
                       <p className="text-body-sm text-brand-ink-muted">Jawaban singkat</p>
                     ) : question.questionType === 'essay' ? (
