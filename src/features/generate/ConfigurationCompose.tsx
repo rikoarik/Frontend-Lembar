@@ -721,7 +721,7 @@ const toggleMaterial = useCallback((materialId: string) => {
                           <p className={`${helpClass} mt-0.5`}>Pilih minimal satu materi</p>
                         </legend>
                         <div
-                          className="mt-2 max-h-48 overflow-y-auto rounded-md border border-brand-line bg-brand-surface-raised"
+                          className="mt-2 max-h-48 overflow-hidden overflow-y-auto rounded-md border border-brand-line bg-brand-surface-raised"
                           role="group"
                           aria-label="Pilih materi"
                         >
