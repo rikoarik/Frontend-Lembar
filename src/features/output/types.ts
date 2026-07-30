@@ -19,7 +19,16 @@ export type PrintQuestion = {
   rubric?: PrintRubricCriterion[];
 };
 
-export type PrintMetadata = Record<string, unknown>;
+export type PrintMetadata = {
+  schoolName: string;
+  teacherName: string;
+  subject: string;
+  class: string;
+  date: string;
+  duration: string;
+  instructions: string;
+  maxScore?: number;
+};
 
 export type PrintDTO = {
   assessmentId: string;
@@ -49,6 +58,23 @@ type BEPrintPayload = {
   metadata?: Record<string, unknown>;
 };
 
+function mapPrintMetadata(metadata?: Record<string, unknown>): PrintMetadata | undefined {
+  if (!metadata) return undefined;
+  if (!('schoolName' in metadata) && !('teacherName' in metadata)) return metadata as PrintMetadata;
+  const maxScore = Number(metadata.maxScore);
+  return {
+    ...metadata,
+    schoolName: String(metadata.schoolName ?? ''),
+    teacherName: String(metadata.teacherName ?? ''),
+    subject: String(metadata.subject ?? ''),
+    class: String(metadata.class ?? ''),
+    date: String(metadata.date ?? ''),
+    duration: String(metadata.duration ?? ''),
+    instructions: String(metadata.instructions ?? ''),
+    ...(Number.isFinite(maxScore) ? { maxScore } : {}),
+  };
+}
+
 export function mapToPrintDTO(assessmentId: string, be: BEPrintPayload): PrintDTO {
   const config = be.version?.configSnapshot ?? {};
   const questions: PrintQuestion[] = (be.questions ?? []).map((q, i) => {
@@ -71,6 +97,6 @@ export function mapToPrintDTO(assessmentId: string, be: BEPrintPayload): PrintDT
     gradeLabel: String(config.gradeLabel ?? ''),
     questionCount: questions.length,
     questions,
-    ...(be.metadata ? { metadata: be.metadata } : {}),
+    ...(be.metadata ? { metadata: mapPrintMetadata(be.metadata) } : {}),
   };
 }
