@@ -50,6 +50,8 @@ export type QuestionOption = {
   text: string;
 };
 
+export type QuestionType = 'multiple_choice' | 'true_false' | 'short_answer' | 'essay';
+
 export type ReviewQuestion = {
   id: string;
   number: number;
@@ -63,6 +65,7 @@ export type ReviewQuestion = {
   reviewState: QuestionReviewState;
   warnings: QuestionWarning[];
   updatedAt: string;
+  questionType?: QuestionType;
 };
 
 export type QuestionContentPatch = Partial<

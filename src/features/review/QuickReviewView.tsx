@@ -58,6 +58,7 @@ export function QuickReviewView({
   const [detailIndex, setDetailIndex] = useState(0);
   const [editStem, setEditStem] = useState('');
   const [editExplanation, setEditExplanation] = useState('');
+  const [editAnswerKey, setEditAnswerKey] = useState('');
   const [statusNote, setStatusNote] = useState('');
   const [conflictMessage, setConflictMessage] = useState<string | null>(null);
 
@@ -107,8 +108,18 @@ export function QuickReviewView({
     if (current) {
       setEditStem(current.stem);
       setEditExplanation(current.explanation);
+      setEditAnswerKey(current.answerKey);
     }
   }, [mode, questions, detailIndex]);
+
+  useEffect(() => {
+    if (selected.size === 0) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setSelected(new Set());
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [selected.size]);
 
   const toggleSelect = (id: string) => {
     setSelected((prev) => {
@@ -185,7 +196,13 @@ export function QuickReviewView({
     const result = await assessmentService.updateQuestionContent(
       assessmentId,
       questionId,
-      { stem: editStem, explanation: editExplanation },
+      {
+        stem: editStem,
+        explanation: editExplanation,
+        ...(current?.questionType === 'short_answer' || current?.questionType === 'essay'
+          ? { answerKey: editAnswerKey }
+          : {}),
+      },
       expectedEtag ? { expectedEtag } : {},
     );
     setBusy(false);
@@ -354,13 +371,6 @@ export function QuickReviewView({
             >
               Pilih semua soal belum ditinjau
             </Button>
-            <Button
-              variant="secondary"
-              disabled={selected.size === 0 || busy || assessment.lifecycle === 'final'}
-              onClick={() => void onBulkAccept()}
-            >
-              Terima {selected.size} soal
-            </Button>
             <p className="text-body-sm text-brand-ink-muted">
               Finalisasi tetap butuh konfirmasi terpisah.
             </p>
@@ -391,23 +401,31 @@ export function QuickReviewView({
                 >
                   <div className="flex flex-col gap-3">
                     <p className="text-body-default text-brand-ink">{question.stem}</p>
-                    <ul className="grid gap-1 sm:grid-cols-2">
-                      {question.options.map((option) => (
-                        <li
-                          key={option.id}
-                          className={`rounded-md border px-3 py-2 text-body-sm ${
-                            option.id === question.answerKey
-                              ? 'border-brand-accent bg-brand-accent-soft'
-                              : 'border-brand-line'
-                          }`}
-                        >
-                          <span className="font-semibold">{option.label}.</span> {option.text}
-                        </li>
-                      ))}
-                    </ul>
-                    <p className="text-body-sm text-brand-ink-muted">
-                      Kunci: {question.answerKey.toUpperCase()} · Sumber: {question.sourceLabel}
-                    </p>
+                    {question.questionType === 'short_answer' ? (
+                      <p className="text-body-sm text-brand-ink-muted">Jawaban singkat</p>
+                    ) : question.questionType === 'essay' ? (
+                      <p className="text-body-sm text-brand-ink-muted">Esai</p>
+                    ) : (
+                      <>
+                      <ul className="grid gap-1 sm:grid-cols-2">
+                        {question.options.map((option) => (
+                          <li
+                            key={option.id}
+                            className={`rounded-md border px-3 py-2 text-body-sm ${
+                              option.id === question.answerKey
+                                ? 'border-brand-accent bg-brand-accent-soft'
+                                : 'border-brand-line'
+                            }`}
+                          >
+                            <span className="font-semibold">{option.label}.</span> {option.text}
+                          </li>
+                        ))}
+                      </ul>
+                      <p className="text-body-sm text-brand-ink-muted">
+                        Kunci: {question.answerKey.toUpperCase()} · Sumber: {question.sourceLabel}
+                      </p>
+                      </>
+                    )}
                     {question.warnings.length > 0 ? (
                       <div className="rounded-md border border-brand-warning/30 bg-brand-warning-soft px-3 py-2">
                         {question.warnings.map((warning) => (
@@ -460,6 +478,26 @@ export function QuickReviewView({
               </li>
             ))}
           </ul>
+
+          {selected.size > 0 ? (
+            <section
+              aria-label="Tindakan soal terpilih"
+              className="sticky bottom-0 flex flex-wrap items-center gap-3 rounded-t-md border border-brand-line bg-brand-surface px-4 py-3 shadow-lg"
+            >
+              <span className="flex-1 text-body-sm font-medium text-brand-ink">
+                {selected.size} soal dipilih
+              </span>
+              <Button
+                disabled={busy || assessment.lifecycle === 'final'}
+                onClick={() => void onBulkAccept()}
+              >
+                Terima {selected.size} soal
+              </Button>
+              <Button variant="secondary" onClick={() => setSelected(new Set())}>
+                Batal
+              </Button>
+            </section>
+          ) : null}
         </>
       ) : (
         <Panel
@@ -508,6 +546,18 @@ export function QuickReviewView({
                   onChange={(e) => setEditExplanation(e.target.value)}
                 />
               </label>
+              {(current.questionType === 'short_answer' || current.questionType === 'essay') &&
+              assessment.lifecycle !== 'final' ? (
+                <label className="flex flex-col gap-1">
+                  <span className="text-label-semibold">Kunci / pedoman jawaban</span>
+                  <textarea
+                    className="min-h-20 rounded-md border border-brand-line px-3 py-2"
+                    value={editAnswerKey}
+                    disabled={busy}
+                    onChange={(e) => setEditAnswerKey(e.target.value)}
+                  />
+                </label>
+              ) : null}
               <p className="text-body-sm text-brand-ink-muted">
                 Kunci: {current.answerKey.toUpperCase()} · Sumber: {current.sourceLabel} ·
                 Kesulitan: {current.difficulty}
