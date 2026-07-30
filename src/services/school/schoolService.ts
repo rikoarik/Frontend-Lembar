@@ -46,35 +46,6 @@ async function parseError(response: Response): Promise<SchoolError> {
   }
 }
 
-const MOCK_MEMBERS: SchoolMember[] = [
-  {
-    id: 'mem_1',
-    name: 'Siti Aminah',
-    email: 'siti@sdn1.sch.id',
-    role: 'school_admin',
-    state: 'active',
-    joinedAt: '2026-01-15T08:00:00Z',
-    lastActiveAt: '2026-07-25T14:30:00Z',
-  },
-  {
-    id: 'mem_2',
-    name: 'Rina Kartika',
-    email: 'rina@sdn1.sch.id',
-    role: 'teacher',
-    state: 'active',
-    joinedAt: '2026-02-01T09:15:00Z',
-    lastActiveAt: '2026-07-24T11:20:00Z',
-  },
-  {
-    id: 'mem_3',
-    name: 'Budi Santoso',
-    email: 'budi@sdn1.sch.id',
-    role: 'teacher',
-    state: 'active',
-    joinedAt: '2026-03-10T10:00:00Z',
-    lastActiveAt: '2026-07-20T16:45:00Z',
-  },
-];
 
 async function request<T>(
   path: string,
@@ -95,49 +66,30 @@ async function request<T>(
       if (response.status === 204) {
         return ok(undefined as unknown as T);
       }
-      const json = (await response.json()) as { data: T; meta?: unknown };
+      const json = (await response.json()) as {
+        data: T;
+        meta?: Record<string, unknown>;
+      };
       if (json && typeof json === 'object' && 'meta' in json && json.meta !== undefined) {
-        return ok({ data: json.data, meta: json.meta } as unknown as T);
+        // Normalize totalPages → pages so callers always see meta.pages.
+        const meta = { ...json.meta };
+        if ('totalPages' in meta && !('pages' in meta)) {
+          meta.pages = meta.totalPages;
+          delete meta.totalPages;
+        }
+        return ok({ data: json.data, meta } as unknown as T);
       }
       return ok(json.data);
     }
 
-    if (process.env.NODE_ENV === 'production') {
-      return err(await parseError(response));
-    }
+    return err(await parseError(response));
   } catch {
-    if (process.env.NODE_ENV === 'production') {
-      return err({
-        code: 'NETWORK',
-        safeMessage: 'Tidak dapat terhubung. Periksa koneksi Anda.',
-        retryable: true,
-      });
-    }
+    return err({
+      code: 'NETWORK',
+      safeMessage: 'Tidak dapat terhubung. Periksa koneksi Anda.',
+      retryable: true,
+    });
   }
-
-  // Ponytail: keep local mock fallback for development/testing only.
-  if (path.startsWith('/v1/school/members')) {
-    const url = new URL(path, 'http://localhost');
-    const q = url.searchParams.get('q')?.toLowerCase();
-    const filtered = q ? MOCK_MEMBERS.filter((m) => (m.name ?? m.email).toLowerCase().includes(q)) : MOCK_MEMBERS;
-    return ok({
-      data: filtered,
-      meta: { page: 1, limit: 10, total: filtered.length, totalPages: 1 },
-    } as unknown as T);
-  }
-
-  if (path === '/v1/school/dashboard' || path.startsWith('/v1/school/dashboard')) {
-    return ok({
-      stats: { totalMembers: 3, activeMembers: 3, quotaUsed: 10, quotaLimit: 50, totalAssessments: 17 },
-      workspace: { name: 'SDN Contoh 01', plan: 'school', level: 'SD' },
-    } as unknown as T);
-  }
-
-  return err({
-    code: 'NETWORK',
-    safeMessage: 'Tidak dapat terhubung. Periksa koneksi Anda.',
-    retryable: true,
-  });
 }
 
 // ── Types ────────────────────────────────────────────────────────────────────
