@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Panel, StatusBadge } from '@/app/components/ui';
 import type { StatusLabel } from '@/app/components/ui';
 import { assessmentService } from '@/src/services/assessments/assessmentService';
@@ -59,6 +59,9 @@ export function QuickReviewView({
   const [editStem, setEditStem] = useState('');
   const [editExplanation, setEditExplanation] = useState('');
   const [editAnswerKey, setEditAnswerKey] = useState('');
+  const [editOptions, setEditOptions] = useState<{ id: string; label: string; text: string }[]>([]);
+  const [editOptionsAnswerKey, setEditOptionsAnswerKey] = useState('');
+  const optionCounterRef = useRef(0);
   const [statusNote, setStatusNote] = useState('');
   const [conflictMessage, setConflictMessage] = useState<string | null>(null);
 
@@ -109,6 +112,8 @@ export function QuickReviewView({
       setEditStem(current.stem);
       setEditExplanation(current.explanation);
       setEditAnswerKey(current.answerKey);
+      setEditOptions(current.options);
+      setEditOptionsAnswerKey(current.answerKey);
     }
   }, [mode, questions, detailIndex]);
 
@@ -201,7 +206,10 @@ export function QuickReviewView({
         explanation: editExplanation,
         ...(current?.questionType === 'short_answer' || current?.questionType === 'essay'
           ? { answerKey: editAnswerKey }
-          : {}),
+          : {
+              options: editOptions.length > 0 ? editOptions : (current?.options ?? []),
+              answerKey: editOptionsAnswerKey || current?.answerKey || '',
+            }),
       },
       expectedEtag ? { expectedEtag } : {},
     );
@@ -246,6 +254,7 @@ export function QuickReviewView({
   }
 
   const current = questions[detailIndex];
+  const visibleEditOptions = editOptions.length > 0 ? editOptions : (current?.options ?? []);
   const canFinalize = assessment.canFinalize;
   const canOpenOutput = assessment.canOpenOutput;
   const lifecycleSubtitle = canOpenOutput
@@ -523,20 +532,124 @@ export function QuickReviewView({
                   onChange={(e) => setEditStem(e.target.value)}
                 />
               </label>
-              <div className="grid gap-2 sm:grid-cols-2">
-                {current.options.map((option) => (
-                  <div
-                    key={option.id}
-                    className={`rounded-md border px-3 py-2 text-body-sm ${
-                      option.id === current.answerKey
-                        ? 'border-brand-accent bg-brand-accent-soft'
-                        : 'border-brand-line'
-                    }`}
+              {(current.questionType === 'short_answer' || current.questionType === 'essay') ? null : (
+                <fieldset
+                  role="group"
+                  aria-label="Daftar pilihan"
+                  className="flex flex-col gap-2 rounded-md border border-brand-line p-3"
+                >
+                  <legend className="text-label-semibold">Daftar pilihan</legend>
+                  <ul className="flex flex-col gap-2" role="list">
+                    {visibleEditOptions.map((option, index) => (
+                      <li
+                        key={option.id}
+                        data-option-id={option.id}
+                        className="flex flex-col gap-2 rounded-md border border-brand-line px-3 py-2 sm:flex-row sm:items-center"
+                      >
+                        <label className="flex min-w-0 flex-1 items-center gap-2">
+                          <span className="text-label-semibold">{option.label}.</span>
+                          <input
+                            type="text"
+                            className="min-w-0 flex-1 rounded-md border border-brand-line px-3 py-2"
+                            value={option.text}
+                            disabled={assessment.lifecycle === 'final' || busy}
+                            onChange={(e) =>
+                              setEditOptions((opts) =>
+                                (opts.length > 0 ? opts : visibleEditOptions).map((item) =>
+                                  item.id === option.id ? { ...item, text: e.target.value } : item,
+                                ),
+                              )
+                            }
+                          />
+                        </label>
+                        <label className="inline-flex items-center gap-2 text-body-sm">
+                          <input
+                            type="radio"
+                            name={`answer-${current.id}`}
+                            aria-label={`Kunci jawaban ${option.label}`}
+                            checked={(editOptionsAnswerKey || current.answerKey) === option.id}
+                            disabled={assessment.lifecycle === 'final' || busy}
+                            onChange={() => setEditOptionsAnswerKey(option.id)}
+                          />
+                          Kunci
+                        </label>
+                        <div className="flex flex-wrap gap-1">
+                          <button
+                            type="button"
+                            aria-label="Pindah ke atas"
+                            disabled={index === 0 || assessment.lifecycle === 'final' || busy}
+                            onClick={() =>
+                              setEditOptions((opts) => {
+                                const next = [...(opts.length > 0 ? opts : visibleEditOptions)];
+                                [next[index - 1], next[index]] = [next[index], next[index - 1]];
+                                return next;
+                              })
+                            }
+                            className="rounded-md border border-brand-line px-2 py-1 text-body-sm disabled:opacity-60"
+                          >
+                            ↑
+                          </button>
+                          <button
+                            type="button"
+                            aria-label="Pindah ke bawah"
+                            disabled={
+                              index === visibleEditOptions.length - 1 ||
+                              assessment.lifecycle === 'final' ||
+                              busy
+                            }
+                            onClick={() =>
+                              setEditOptions((opts) => {
+                                const next = [...(opts.length > 0 ? opts : visibleEditOptions)];
+                                [next[index], next[index + 1]] = [next[index + 1], next[index]];
+                                return next;
+                              })
+                            }
+                            className="rounded-md border border-brand-line px-2 py-1 text-body-sm disabled:opacity-60"
+                          >
+                            ↓
+                          </button>
+                          <button
+                            type="button"
+                            aria-label="Hapus pilihan"
+                            disabled={
+                              visibleEditOptions.length <= 2 || assessment.lifecycle === 'final' || busy
+                            }
+                            onClick={() =>
+                              setEditOptions((opts) => {
+                                const base = opts.length > 0 ? opts : visibleEditOptions;
+                                const next = base.filter((item) => item.id !== option.id);
+                                if ((editOptionsAnswerKey || current.answerKey) === option.id) {
+                                  setEditOptionsAnswerKey(next[0]?.id ?? '');
+                                }
+                                return next;
+                              })
+                            }
+                            className="rounded-md border border-brand-line px-2 py-1 text-body-sm disabled:opacity-60"
+                          >
+                            Hapus
+                          </button>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                  <button
+                    type="button"
+                    aria-label="Tambah pilihan"
+                    disabled={visibleEditOptions.length >= 6 || assessment.lifecycle === 'final' || busy}
+                    onClick={() => {
+                      const label = String.fromCharCode(65 + visibleEditOptions.length);
+                      optionCounterRef.current += 1;
+                      setEditOptions((opts) => [
+                        ...(opts.length > 0 ? opts : visibleEditOptions),
+                        { id: `${current.id}-option-${optionCounterRef.current}`, label, text: '' },
+                      ]);
+                    }}
+                    className="self-start rounded-md border border-brand-line px-3 py-2 text-body-sm disabled:opacity-60"
                   >
-                    <span className="font-semibold">{option.label}.</span> {option.text}
-                  </div>
-                ))}
-              </div>
+                    Tambah pilihan
+                  </button>
+                </fieldset>
+              )}
               <label className="flex flex-col gap-1">
                 <span className="text-label-semibold">Pembahasan</span>
                 <textarea
