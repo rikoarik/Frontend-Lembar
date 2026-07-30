@@ -50,6 +50,12 @@ export type QuestionOption = {
   text: string;
 };
 
+export type QuestionRubricCriterion = {
+  id: string;
+  description: string;
+  maxScore: number;
+};
+
 export type QuestionType = 'multiple_choice' | 'true_false' | 'short_answer' | 'essay';
 
 export type ReviewQuestion = {
@@ -66,10 +72,11 @@ export type ReviewQuestion = {
   warnings: QuestionWarning[];
   updatedAt: string;
   questionType?: QuestionType;
+  rubric?: QuestionRubricCriterion[];
 };
 
 export type QuestionContentPatch = Partial<
-  Pick<ReviewQuestion, 'stem' | 'explanation' | 'answerKey' | 'options'>
+  Pick<ReviewQuestion, 'stem' | 'explanation' | 'answerKey' | 'options' | 'rubric'>
 >;
 
 export type AssessmentSummary = {

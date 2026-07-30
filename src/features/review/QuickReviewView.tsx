@@ -7,6 +7,7 @@ import type { StatusLabel } from '@/app/components/ui';
 import { assessmentService } from '@/src/services/assessments/assessmentService';
 import type {
   AssessmentDetail,
+  QuestionRubricCriterion,
   QuestionReviewState,
   ReviewQuestion,
 } from '@/src/features/review/types';
@@ -61,6 +62,8 @@ export function QuickReviewView({
   const [editAnswerKey, setEditAnswerKey] = useState('');
   const [editOptions, setEditOptions] = useState<{ id: string; label: string; text: string }[]>([]);
   const [editOptionsAnswerKey, setEditOptionsAnswerKey] = useState('');
+  const [editRubric, setEditRubric] = useState<QuestionRubricCriterion[]>([]);
+  const rubricCounterRef = useRef(0);
   const optionCounterRef = useRef(0);
   const [statusNote, setStatusNote] = useState('');
   const [conflictMessage, setConflictMessage] = useState<string | null>(null);
@@ -114,6 +117,7 @@ export function QuickReviewView({
       setEditAnswerKey(current.answerKey);
       setEditOptions(current.options);
       setEditOptionsAnswerKey(current.answerKey);
+      setEditRubric(current.rubric ?? []);
     }
   }, [mode, questions, detailIndex]);
 
@@ -205,7 +209,7 @@ export function QuickReviewView({
         stem: editStem,
         explanation: editExplanation,
         ...(current?.questionType === 'short_answer' || current?.questionType === 'essay'
-          ? { answerKey: editAnswerKey }
+          ? { answerKey: editAnswerKey, rubric: current?.questionType === 'essay' ? editRubric : undefined }
           : {
               options: editOptions.length > 0 ? editOptions : (current?.options ?? []),
               answerKey: editOptionsAnswerKey || current?.answerKey || '',
@@ -413,7 +417,11 @@ export function QuickReviewView({
                     {question.questionType === 'short_answer' ? (
                       <p className="text-body-sm text-brand-ink-muted">Jawaban singkat</p>
                     ) : question.questionType === 'essay' ? (
-                      <p className="text-body-sm text-brand-ink-muted">Esai</p>
+                      <p className="text-body-sm text-brand-ink-muted">
+                        {question.rubric && question.rubric.length > 0
+                          ? `Esai · ${question.rubric.length} kriteria rubrik`
+                          : 'Esai'}
+                      </p>
                     ) : (
                       <>
                       <ul className="grid gap-1 sm:grid-cols-2">
@@ -670,6 +678,91 @@ export function QuickReviewView({
                     onChange={(e) => setEditAnswerKey(e.target.value)}
                   />
                 </label>
+              ) : null}
+              {current.questionType === 'essay' && assessment.lifecycle !== 'final' ? (
+                <fieldset
+                  role="group"
+                  aria-label="Rubrik penilaian"
+                  className="flex flex-col gap-2 rounded-md border border-brand-line p-3"
+                >
+                  <legend className="text-label-semibold">Rubrik penilaian</legend>
+                  <ul className="flex flex-col gap-2" role="list">
+                    {editRubric.map((criterion, index) => (
+                      <li
+                        key={criterion.id}
+                        className="flex flex-wrap items-center gap-2 rounded-md border border-brand-line px-3 py-2"
+                      >
+                        <label className="flex min-w-0 flex-1 flex-col gap-1">
+                          <span className="sr-only">Deskripsi kriteria {index + 1}</span>
+                          <input
+                            type="text"
+                            aria-label={`Deskripsi kriteria ${index + 1}`}
+                            className="min-w-0 flex-1 rounded-md border border-brand-line px-3 py-2"
+                            value={criterion.description}
+                            disabled={busy}
+                            onChange={(e) =>
+                              setEditRubric((rows) =>
+                                rows.map((r) =>
+                                  r.id === criterion.id ? { ...r, description: e.target.value } : r,
+                                ),
+                              )
+                            }
+                          />
+                        </label>
+                        <label className="flex items-center gap-1">
+                          <span className="sr-only">Skor maksimum kriteria {index + 1}</span>
+                          <input
+                            type="number"
+                            aria-label={`Skor maksimum kriteria ${index + 1}`}
+                            className="w-20 rounded-md border border-brand-line px-3 py-2"
+                            value={criterion.maxScore}
+                            min={0}
+                            disabled={busy}
+                            onChange={(e) =>
+                              setEditRubric((rows) =>
+                                rows.map((r) =>
+                                  r.id === criterion.id
+                                    ? { ...r, maxScore: Number(e.target.value) }
+                                    : r,
+                                ),
+                              )
+                            }
+                          />
+                        </label>
+                        <button
+                          type="button"
+                          aria-label="Hapus kriteria"
+                          disabled={busy}
+                          className="rounded-md border border-brand-line px-2 py-1 text-body-sm"
+                          onClick={() =>
+                            setEditRubric((rows) => rows.filter((r) => r.id !== criterion.id))
+                          }
+                        >
+                          Hapus
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                  <button
+                    type="button"
+                    aria-label="Tambah kriteria"
+                    disabled={busy}
+                    className="self-start rounded-md border border-brand-line px-3 py-1 text-body-sm"
+                    onClick={() => {
+                      rubricCounterRef.current += 1;
+                      setEditRubric((rows) => [
+                        ...rows,
+                        {
+                          id: `rubric-new-${rubricCounterRef.current}`,
+                          description: '',
+                          maxScore: 0,
+                        },
+                      ]);
+                    }}
+                  >
+                    Tambah kriteria
+                  </button>
+                </fieldset>
               ) : null}
               <p className="text-body-sm text-brand-ink-muted">
                 Kunci: {current.answerKey.toUpperCase()} · Sumber: {current.sourceLabel} ·
