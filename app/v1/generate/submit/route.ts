@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
         'x-actor-user-id': actorId,
       },
       body: JSON.stringify({
-        title: `${String(body.assessmentType || 'practice')} · ${String(body.subjectId || 'Lembar soal')}`,
+        title: `${String(body.subjectLabel || body.subjectId || 'Lembar soal')} ${String(body.gradeLabel || body.gradeId || '')}`.trim(),
         curriculumVersionId: String(
           body.curriculumVersionId || '11111111-1111-1111-1111-111111111111',
         ),

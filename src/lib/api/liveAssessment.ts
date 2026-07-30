@@ -76,8 +76,8 @@ export async function loadLiveAssessment(token: string, workspaceId: string, ass
       data: {
         id: String(assessment.id),
         title: String(assessment.title ?? 'Lembar soal'),
-        subject: String(config.subjectId ?? 'Mata pelajaran'),
-        gradeLabel: String(config.gradeId ?? 'Kelas'),
+        subject: String((config as Record<string, unknown>).subjectLabel ?? config.subjectId ?? 'Mata pelajaran'),
+        gradeLabel: String((config as Record<string, unknown>).gradeLabel ?? config.gradeId ?? 'Kelas'),
         lifecycle: finalized ? 'final' : questions.length ? 'review' : 'draft',
         questionCount: questions.length,
         reviewedCount,

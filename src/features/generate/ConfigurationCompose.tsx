@@ -71,6 +71,8 @@ const LABELS: Record<CompositionFieldKey, string> = {
   curriculumVersionId: 'Kurikulum',
   gradeId: 'Kelas',
   subjectId: 'Mata Pelajaran',
+  gradeLabel: 'Kelas',
+  subjectLabel: 'Mata Pelajaran',
   materialIds: 'Materi',
   sourceId: 'Sumber PDF',
   assessmentType: 'Jenis Lembar',
@@ -368,7 +370,9 @@ const toggleMaterial = useCallback((materialId: string) => {
         return;
       }
       setLocalErrors({});
-      void generateSubmit.submit(values, workspaceId);
+      const gradeLabel = grades.find((g) => g.id === values.gradeId)?.label;
+      const subjectLabel = subjects.find((s) => s.id === values.subjectId)?.label;
+      void generateSubmit.submit({ ...values, gradeLabel, subjectLabel }, workspaceId);
     },
     [values, workspaceId, generateSubmit],
   );

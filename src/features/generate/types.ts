@@ -152,6 +152,10 @@ export type CompositionValues = {
   curriculumVersionId: string;
   gradeId: string;
   subjectId: string;
+  /** Human-readable grade label, e.g. "Kelas 8 SMP/MTs". Populated before submit. */
+  gradeLabel?: string;
+  /** Human-readable subject label, e.g. "Informatika". Populated before submit. */
+  subjectLabel?: string;
   materialIds: string[];
   sourceId: string;
   assessmentType: AssessmentType;
