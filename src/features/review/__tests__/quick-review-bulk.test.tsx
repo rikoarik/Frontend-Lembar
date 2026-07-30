@@ -106,7 +106,9 @@ describe('QuickReviewView bulk acceptance', () => {
     expect(confirm).toHaveBeenCalledWith('Terima 2 soal terpilih?');
     expect(assessmentService.bulkAccept).toHaveBeenCalledWith('assessment-1', ['q-1', 'q-2']);
     await waitFor(() =>
-      expect(screen.getByRole('button', { name: 'Terima 0 soal' })).toBeDisabled(),
+      expect(
+        screen.queryByRole('region', { name: 'Tindakan soal terpilih' }),
+      ).not.toBeInTheDocument(),
     );
     expect(screen.queryByRole('checkbox', { name: 'Pilih soal 1' })).not.toBeInTheDocument();
   });
@@ -117,7 +119,9 @@ describe('QuickReviewView bulk acceptance', () => {
     await user.click(await screen.findByRole('checkbox', { name: 'Pilih soal 1' }));
     await user.click(screen.getByRole('button', { name: 'Sudah ditinjau' }));
     await waitFor(() =>
-      expect(screen.getByRole('button', { name: 'Terima 0 soal' })).toBeDisabled(),
+      expect(
+        screen.queryByRole('region', { name: 'Tindakan soal terpilih' }),
+      ).not.toBeInTheDocument(),
     );
   });
 
