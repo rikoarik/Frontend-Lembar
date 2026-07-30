@@ -152,12 +152,14 @@ function SectionGuru({
   const [meta, setMeta] = useState<SchoolMembersResult['meta'] | null>(null);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [actionId, setActionId] = useState<string | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const fetchMembers = useCallback(
     (q: string, role: string, pg: number) => {
       setLoading(true);
+      setFetchError(null);
       schoolService
         .members({
           q: q || undefined,
@@ -175,12 +177,12 @@ function SectionGuru({
             setMembers(result.data ?? []);
             setMeta(result.meta ?? null);
           } else {
-            setToast(`Gagal memuat anggota: ${res.error.safeMessage}`);
+            setFetchError(res.error.safeMessage);
           }
           setLoading(false);
         });
     },
-    [setToast],
+    [],
   );
 
   useEffect(() => {
@@ -263,11 +265,56 @@ function SectionGuru({
         }
       />
       {loading ? (
-        <AdminContentLoading />
+        <div
+          role="status"
+          aria-label="Memuat daftar anggota sekolah"
+          aria-busy="true"
+          className="space-y-3 rounded-2xl border border-[#ddd4c8]/70 bg-white p-4"
+        >
+          <AdminContentLoading label="Memuat daftar anggota sekolah…" />
+          {[0, 1, 2].map((row) => (
+            <div key={row} className="flex animate-pulse items-center gap-3">
+              <div className="h-8 w-8 rounded-full bg-[#f0ebe3]" />
+              <div className="flex-1 space-y-2">
+                <div className="h-3 w-1/3 rounded bg-[#f0ebe3]" />
+                <div className="h-2 w-1/4 rounded bg-[#f0ebe3]" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : fetchError ? (
+        <div
+          role="alert"
+          aria-label="Gagal memuat anggota sekolah"
+          className="rounded-xl border border-brand-danger/30 bg-brand-danger-soft px-6 py-5 text-sm text-brand-danger"
+        >
+          <p className="font-semibold text-[#171717]">Gagal memuat anggota sekolah</p>
+          <p className="mt-1 text-[13px]">{fetchError}</p>
+          <Button
+            size="sm"
+            variant="secondary"
+            className="mt-3"
+            onClick={() => fetchMembers(search, filter, page)}
+          >
+            Coba lagi
+          </Button>
+        </div>
+      ) : members.length === 0 ? (
+        <div
+          role="status"
+          aria-label="Belum ada anggota sekolah"
+          className="rounded-xl border border-dashed border-[#ddd4c8] bg-white px-6 py-14 text-center"
+        >
+          <p className="text-[13px] font-semibold text-[#171717]">
+            Belum ada anggota sekolah
+          </p>
+          <p className="mx-auto mt-1 max-w-md text-[12px] text-[#57534e]">
+            Undang guru pertama agar mereka bisa mulai memakai workspace sekolah.
+          </p>
+        </div>
       ) : (
         <AdminDataTable
           rows={members}
-          emptyLabel="Tidak ada anggota"
           columns={[
             {
               key: 'name',
@@ -350,7 +397,7 @@ function SectionGuru({
             <Button
               size="sm"
               variant="secondary"
-              disabled={page <= 1}
+              disabled={meta.page <= 1}
               onClick={() => setPage((p) => p - 1)}
             >
               ‹ Sebelumnya
@@ -358,7 +405,7 @@ function SectionGuru({
             <Button
               size="sm"
               variant="secondary"
-              disabled={page >= meta.pages}
+              disabled={meta.page >= meta.pages}
               onClick={() => setPage((p) => p + 1)}
             >
               Berikutnya ›
@@ -400,7 +447,7 @@ function SectionUndang({ setToast }: { setToast: (msg: string) => void }) {
     setLoading(true);
     const res = await schoolService.inviteMember({ email: trimmed, role });
     if (res.ok) {
-      setToast(`Undangan dikirim ke ${trimmed}`);
+      setToast(`Undangan dikirim ke ${res.value.email}`);
       setEmail('');
     } else {
       setToast(`Gagal mengirim undangan: ${res.error.safeMessage}`);
