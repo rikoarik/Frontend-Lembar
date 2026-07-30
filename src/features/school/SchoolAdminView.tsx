@@ -92,20 +92,27 @@ function SectionRingkasan({
 
   if (loading) return <AdminContentLoading />;
 
-  const activeMembers = dashboard?.members?.filter((m) => m.state === 'active').length ?? 0;
-  const quotaLimit = dashboard?.usage?.monthlyLimit ?? 0;
-  const quotaUsed = dashboard?.usage?.generationsUsedThisMonth ?? 0;
-  const pct =
-    dashboard && quotaLimit > 0
-      ? Math.round((quotaUsed / quotaLimit) * 100)
-      : 0;
+  if (!dashboard) {
+    return (
+      <div className="text-sm text-neutral-400 py-8 text-center">
+        Data ringkasan tidak tersedia
+      </div>
+    );
+  }
+
+  const activeMembers = dashboard.members.filter((m) => m.state === 'active').length;
+  const quotaLimit = dashboard.usage.monthlyLimit;
+  const quotaUsed = dashboard.usage.generationsUsedThisMonth;
+  const pct = quotaLimit && quotaLimit > 0 ? Math.round((quotaUsed / quotaLimit) * 100) : 0;
+  const schoolHint = [dashboard.usage.plan, dashboard.workspace.level].filter(Boolean).join(' · ');
+
   return (
     <AdminStatCards
       items={[
         {
           label: 'Anggota aktif',
-          value: String(activeMembers || '—'),
-          hint: `dari ${dashboard?.memberCount ?? 0} total`,
+          value: String(activeMembers),
+          hint: `dari ${dashboard.memberCount} total`,
           tone: 'ok',
         },
         {
@@ -117,8 +124,8 @@ function SectionRingkasan({
         },
         {
           label: 'Sekolah',
-          value: dashboard?.workspace.name ?? '—',
-          hint: `${dashboard?.usage?.plan ?? ''} · ${dashboard?.workspace.level ?? ''}`,
+          value: dashboard.workspace.name || '—',
+          hint: schoolHint,
           tone: 'neutral',
         },
       ]}
