@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useEffect, useState } from 'react';
+import { use, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { MetadataForm } from '@/src/features/output/MetadataForm';
 import { StudentWorksheetRenderer } from '@/src/features/output/StudentWorksheetRenderer';
@@ -27,6 +27,8 @@ export default function OutputPage({ params }: Params) {
 
 export function OutputCenterContent({ assessmentId }: { assessmentId: string }) {
   const router = useRouter();
+  // ponytail: ref prevents router identity churn from re-firing the fetch effect
+  const routerRef = useRef(router);
   const [dto, setDto] = useState<PrintDTO | null>(null);
   const [metadata, setMetadata] = useState<PrintMetadata>(blankMetadata);
   const [error, setError] = useState('');
@@ -37,11 +39,15 @@ export function OutputCenterContent({ assessmentId }: { assessmentId: string }) 
   });
 
   useEffect(() => {
+    routerRef.current = router;
+  }, [router]);
+
+  useEffect(() => {
     let active = true;
     void fetch(`/v1/assessments/${encodeURIComponent(assessmentId)}/print`, { credentials: 'include' })
       .then(async (response) => {
         if (response.status === 401) {
-          router.replace('/masuk');
+          routerRef.current.replace('/masuk');
           return null;
         }
         const body = (await response.json().catch(() => null)) as { data?: PrintDTO; error?: { message?: string } } | null;
@@ -59,7 +65,7 @@ export function OutputCenterContent({ assessmentId }: { assessmentId: string }) 
     return () => {
       active = false;
     };
-  }, [assessmentId, router]);
+  }, [assessmentId]);
 
   const toggle = (key: SectionKey) =>
     setVisible((current) => ({ ...current, [key]: !current[key] }));
@@ -67,7 +73,7 @@ export function OutputCenterContent({ assessmentId }: { assessmentId: string }) 
   if (error) return <p role="alert">{error}</p>;
   if (!dto) return <div aria-busy="true">Memuat output…</div>;
 
-  const dtoWithMetadata = { ...dto, metadata };
+  const dtoWithMetadata = { ...dto, ...(visible.metadata ? { metadata } : {}) };
 
   return (
     <main className="flex flex-col gap-4">
