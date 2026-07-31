@@ -13,9 +13,12 @@ export type StatusLabel =
   | 'Draft'
   | 'Draf'
   | 'Diproses'
+  | 'Sedang dibuat'
   | 'Perlu ditinjau'
+  | 'Siap ditinjau'
   | 'Final'
   | 'Gagal'
+  | 'Dibatalkan'
   | 'Kedaluwarsa';
 
 type Tone = 'neutral' | 'info' | 'warning' | 'success' | 'danger';
@@ -32,9 +35,12 @@ const toneFor: Record<StatusLabel, Tone> = {
   Draft: 'neutral',
   Draf: 'neutral',
   Diproses: 'info',
+  'Sedang dibuat': 'info',
   'Perlu ditinjau': 'warning',
+  'Siap ditinjau': 'warning',
   Final: 'success',
   Gagal: 'danger',
+  Dibatalkan: 'neutral',
   Kedaluwarsa: 'danger',
 };
 

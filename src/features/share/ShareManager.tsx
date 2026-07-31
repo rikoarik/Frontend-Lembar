@@ -3,7 +3,15 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { Button, Panel, StatusBadge } from '@/app/components/ui';
-import type { ShareLink } from '@/src/features/share/mockShareStore';
+
+type ShareLink = {
+  id: string;
+  token: string;
+  assessmentId: string;
+  expiresAt: string | null;
+  revokedAt: string | null;
+  createdAt: string;
+};
 
 async function api<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`/v1${path}`, {
@@ -63,7 +71,7 @@ export function ShareManager({ assessmentId, title }: { assessmentId: string; ti
     setMessage('');
     try {
       const updated = await api<ShareLink>(`/shares/${encodeURIComponent(token)}/revoke`, {
-        method: 'POST',
+        method: 'DELETE',
         body: '{}',
       });
       setItems((prev) => prev.map((item) => (item.token === token ? updated : item)));
@@ -116,19 +124,14 @@ export function ShareManager({ assessmentId, title }: { assessmentId: string; ti
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <code className="text-body-sm">{item.token}</code>
-                    <StatusBadge
-                      label={
-                        item.status === 'active'
-                          ? 'Final'
-                          : item.status === 'expired'
-                            ? 'Kedaluwarsa'
-                            : 'Gagal'
-                      }
-                    />
+                    <StatusBadge label={item.revokedAt ? 'Dibatalkan' : 'Final'} />
                   </div>
                   <p className="text-caption text-brand-ink-muted">
-                    Status {item.status} · kedaluwarsa{' '}
-                    {new Date(item.expiresAt).toLocaleDateString('id-ID')}
+                    {item.revokedAt
+                      ? `Dicabut ${new Date(item.revokedAt).toLocaleDateString('id-ID')}`
+                      : item.expiresAt
+                        ? `Berlaku hingga ${new Date(item.expiresAt).toLocaleDateString('id-ID')}`
+                        : 'Tidak ada kedaluwarsa'}
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -144,7 +147,7 @@ export function ShareManager({ assessmentId, title }: { assessmentId: string; ti
                   <Button
                     size="sm"
                     variant="danger"
-                    disabled={item.status !== 'active' || busy}
+                    disabled={!!item.revokedAt || busy}
                     onClick={() => void onRevoke(item.token)}
                   >
                     Cabut
