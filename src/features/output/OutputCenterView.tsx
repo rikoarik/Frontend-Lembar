@@ -4,47 +4,34 @@ import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { Button, Panel, StatusBadge } from '@/app/components/ui';
 import { assessmentService } from '@/src/services/assessments/assessmentService';
-import type { OutputPackage } from '@/src/features/review/types';
-import A4PreviewFrame from '@/app/components/print/A4PreviewFrame';
-import OutputPackagePreview from '@/app/components/print/OutputPackagePreview';
-
+import { ShareManager } from '@/src/features/share/ShareManager';
+import type { OutputPackage, AssessmentDetail } from '@/src/features/review/types';
 
 export function OutputCenterView({ assessmentId }: { assessmentId: string }) {
   const [output, setOutput] = useState<OutputPackage | null>(null);
+  const [detail, setDetail] = useState<AssessmentDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
-    const result = await assessmentService.getOutput(assessmentId);
-    if (!result.ok) {
-      setError(result.error.safeMessage);
+    const [outResult, detailResult] = await Promise.all([
+      assessmentService.getOutput(assessmentId),
+      assessmentService.get(assessmentId),
+    ]);
+    if (!outResult.ok) {
+      setError(outResult.error.safeMessage);
       setOutput(null);
       setLoading(false);
       return;
     }
-    setOutput(result.value);
+    setOutput(outResult.value);
+    if (detailResult.ok) setDetail(detailResult.value);
     setError(null);
     setLoading(false);
   }, [assessmentId]);
 
-  useEffect(() => {
-    void load();
-  }, [load]);
-
-  const onCopyShare = async () => {
-    if (!output?.shareToken) return;
-    const url = `${window.location.origin}/bagikan/${output.shareToken}`;
-    try {
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 2000);
-    } catch {
-      setCopied(false);
-    }
-  };
-
+  useEffect(() => { void load(); }, [load]);
 
   if (loading) {
     return <div className="h-48 animate-pulse rounded-md bg-brand-line" aria-busy="true" />;
@@ -53,8 +40,8 @@ export function OutputCenterView({ assessmentId }: { assessmentId: string }) {
   if (error || !output) {
     return (
       <Panel
-        title="Output belum tersedia"
-        description={error ?? 'Finalisasi lembar dulu untuk membuka output.'}
+        title="Hasil belum tersedia"
+        description={error ?? 'Finalisasi lembar dulu untuk membuka hasil.'}
       >
         <div className="flex flex-wrap gap-3">
           <Button onClick={() => void load()}>Coba lagi</Button>
@@ -72,121 +59,80 @@ export function OutputCenterView({ assessmentId }: { assessmentId: string }) {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
-        <h1 className="text-h1 font-semibold text-brand-ink">Pusat output</h1>
+        <h1 className="text-h1 font-semibold text-brand-ink">Lihat hasil</h1>
         <p className="text-body-sm text-brand-ink-muted">
-          Print, unduh, dan bagikan memakai artifact yang sama.
+          Tinjau, unduh, dan bagikan lembar yang sudah selesai.
         </p>
       </div>
 
-      <Panel
-        title="Paket asesmen"
-        description={`Versi ${output.versionId}`}
-        actions={
+      {/* Actions */}
+      <Panel title="Aksi" description="Unduh atau cetak lembar ini.">
+        <div className="flex flex-wrap gap-3">
+          <Link
+            href={`/app/output/${assessmentId}/print`}
+            className="inline-flex min-h-[var(--control-md)] items-center rounded-md bg-brand-accent px-4 text-body-sm font-medium text-white"
+          >
+            Unduh PDF
+          </Link>
+          <Link
+            href={`/app/review/${assessmentId}`}
+            className="inline-flex min-h-[var(--control-md)] items-center rounded-md border border-brand-line px-4 text-body-sm"
+          >
+            Edit soal
+          </Link>
           <StatusBadge
             label={
               output.status === 'ready'
                 ? 'Final'
                 : output.status === 'failed'
                   ? 'Gagal'
-                  : 'Diproses'
+                  : 'Sedang dibuat'
             }
           />
-        }
-      >
-        <div className="flex flex-col gap-3">
-          <ul className="grid gap-2 sm:grid-cols-3">
-            <li className="rounded-md border border-brand-line px-3 py-3 text-body-sm">
-              {output.studentSheetLabel}
-            </li>
-            <li className="rounded-md border border-brand-line px-3 py-3 text-body-sm">
-              {output.answerKeyLabel}
-            </li>
-            <li className="rounded-md border border-brand-line px-3 py-3 text-body-sm">
-              {output.explanationLabel}
-            </li>
-          </ul>
+        </div>
+      </Panel>
 
-          {output.failureMessage ? (
-            <p className="text-body-sm text-brand-danger" role="alert">
-              {output.failureMessage}
-            </p>
-          ) : null}
-
-          <div className="flex flex-wrap gap-2">
-            <Link
-              href={output.printHref}
-              className="inline-flex min-h-[var(--control-md)] items-center rounded-md bg-brand-accent px-4 text-white"
-            >
-              Print preview A4
-            </Link>
-            <a
-              href={output.downloadHref}
-              className="inline-flex min-h-[var(--control-md)] items-center rounded-md border border-brand-line px-4"
-            >
-              Unduh dokumen HTML
-            </a>
-            {output.shareToken ? (
-              <Button variant="secondary" onClick={() => void onCopyShare()}>
-                {copied ? 'Tautan disalin' : 'Salin tautan bagikan'}
-              </Button>
-            ) : null}
-            <Link
-              href={`/app/review/${assessmentId}`}
-              className="inline-flex min-h-[var(--control-md)] items-center rounded-md border border-brand-line px-4"
-            >
-              Kembali ke tinjauan
-            </Link>
-          </div>
-
-          <div className="rounded-md border border-brand-line px-3 py-3">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="text-body-sm font-medium text-brand-ink">Nilai hasil AI ini</p>
-                <p className="text-body-xs text-brand-ink-muted">
+      {/* Daftar soal */}
+      {detail && detail.questions.length > 0 ? (
+        <Panel title="Daftar soal" description={`${detail.questions.length} soal`}>
+          <ol className="flex flex-col gap-4">
+            {detail.questions.map((q) => (
+              <li key={q.id} className="flex flex-col gap-2 border-b border-brand-line pb-4 last:border-0 last:pb-0">
+                <p className="text-body-default font-medium text-brand-ink">
+                  {q.number}. {q.stem}
                 </p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <Button
-                    key={star}
-                  >
-                    {star}
-                  </Button>
-                ))}
-              </div>
-            </div>
-              <p className="mt-2 text-body-xs text-brand-ink-muted" role="status">
-              </p>
-            ) : null}
-          </div>
-        </div>
-      </Panel>
+                {q.options.length > 0 && (
+                  <ol className="ml-4 flex flex-col gap-1" type="A">
+                    {q.options.map((opt) => (
+                      <li
+                        key={opt.id}
+                        className={`text-body-sm ${opt.label === q.answerKey ? 'font-semibold text-brand-accent' : 'text-brand-ink-muted'}`}
+                      >
+                        {opt.label}. {opt.text}
+                        {opt.label === q.answerKey ? ' ✓' : null}
+                      </li>
+                    ))}
+                  </ol>
+                )}
+                {q.options.length === 0 && q.answerKey ? (
+                  <p className="ml-4 text-body-sm text-brand-ink-muted">
+                    Jawaban: {q.answerKey}
+                  </p>
+                ) : null}
+              </li>
+            ))}
+          </ol>
+        </Panel>
+      ) : (
+        <Panel title="Daftar soal" description="Memuat soal…">
+          <p className="text-body-sm text-brand-ink-muted">
+            {loading ? 'Sedang memuat…' : 'Soal belum tersedia.'}
+          </p>
+        </Panel>
+      )}
 
-      <Panel
-        title="Tautan bagikan"
-        description="Belum tersedia sampai penyimpanan dan revoke share backend tersambung."
-      />
-
-      <Panel title="Pratinjau paket" description="Urutan paket: lembar siswa, kunci, pembahasan.">
-        <div className="overflow-auto">
-          <A4PreviewFrame>
-            <OutputPackagePreview
-              sections={['lembar-soal', 'kunci-jawaban', 'pembahasan']}
-              content={{
-                'lembar-soal': (
-                  <p className="text-body-sm text-brand-ink">{output.studentSheetLabel}</p>
-                ),
-                'kunci-jawaban': (
-                  <p className="text-body-sm text-brand-ink">{output.answerKeyLabel}</p>
-                ),
-                pembahasan: (
-                  <p className="text-body-sm text-brand-ink">{output.explanationLabel}</p>
-                ),
-              }}
-            />
-          </A4PreviewFrame>
-        </div>
-      </Panel>
+      {/* Share */}
+      <ShareManager assessmentId={assessmentId} title={output.studentSheetLabel} />
     </div>
   );
 }
