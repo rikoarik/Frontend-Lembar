@@ -11,12 +11,12 @@ type MetadataFormProps = {
 };
 
 const textFields: Array<{ name: keyof Omit<PrintMetadata, 'instructions' | 'maxScore'>; label: string; type?: string }> = [
-  { name: 'schoolName', label: 'School name' },
-  { name: 'teacherName', label: 'Teacher name' },
-  { name: 'subject', label: 'Subject' },
-  { name: 'class', label: 'Class' },
-  { name: 'date', label: 'Date', type: 'date' },
-  { name: 'duration', label: 'Duration' },
+  { name: 'schoolName', label: 'Nama sekolah' },
+  { name: 'teacherName', label: 'Nama guru' },
+  { name: 'subject', label: 'Mata pelajaran' },
+  { name: 'class', label: 'Kelas' },
+  { name: 'date', label: 'Tanggal', type: 'date' },
+  { name: 'duration', label: 'Waktu pengerjaan' },
 ];
 
 export function MetadataForm({ value, onChange, onSave, onCancel }: MetadataFormProps) {
@@ -33,7 +33,7 @@ export function MetadataForm({ value, onChange, onSave, onCancel }: MetadataForm
 
   const save = () => {
     if (!draft.schoolName.trim() || !draft.teacherName.trim()) {
-      setError('School name and teacher name are required.');
+      setError('Nama sekolah dan nama guru wajib diisi.');
       return;
     }
     onSave(draft);
@@ -68,7 +68,7 @@ export function MetadataForm({ value, onChange, onSave, onCancel }: MetadataForm
         ))}
 
         <label className="grid gap-1 text-body-sm text-brand-ink">
-          <span>Max score</span>
+          <span>Nilai maksimal</span>
           <input
             className="min-h-[var(--control-md)] rounded-md border border-brand-line px-3 text-brand-ink"
             name="maxScore"
@@ -82,7 +82,7 @@ export function MetadataForm({ value, onChange, onSave, onCancel }: MetadataForm
       </div>
 
       <label className="grid gap-1 text-body-sm text-brand-ink">
-        <span>Instructions</span>
+        <span>Instruksi pengerjaan</span>
         <textarea
           className="min-h-24 rounded-md border border-brand-line px-3 py-2 text-brand-ink"
           name="instructions"
@@ -96,14 +96,14 @@ export function MetadataForm({ value, onChange, onSave, onCancel }: MetadataForm
           className="inline-flex min-h-[var(--control-md)] items-center rounded-md bg-brand-accent px-4 text-white"
           type="submit"
         >
-          Save
+          Simpan
         </button>
         <button
           className="inline-flex min-h-[var(--control-md)] items-center rounded-md border border-brand-line px-4"
           type="button"
           onClick={onCancel}
         >
-          Cancel
+          Batal
         </button>
       </div>
     </form>

@@ -29,9 +29,9 @@ export default function GeneratePage() {
       </Link>
 
       <div className="flex flex-col gap-2">
-        <h1 className="text-h1 text-brand-ink font-semibold">Generate Lembar (AI)</h1>
+        <h1 className="text-h1 text-brand-ink font-semibold">Buat lembar</h1>
         <p className="text-body-sm text-brand-ink-muted">
-          Atur materi, pengaturan soal, dan konteks untuk membuat draft lembar baru.
+          Atur materi, jenis soal, dan identitas lembar untuk membuat draft baru.
         </p>
       </div>
 
