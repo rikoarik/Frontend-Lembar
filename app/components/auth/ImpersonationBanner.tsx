@@ -1,9 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 function readCookie(name: string) {
-  if (typeof document === 'undefined') return null;
   const match = document.cookie
     .split(';')
     .map((cookie) => cookie.trim())
@@ -13,11 +12,13 @@ function readCookie(name: string) {
 }
 
 export function ImpersonationBanner() {
-  const [impersonatedName] = useState<string | null>(() => {
-    if (readCookie('lembar_is_impersonating') !== '1') return null;
-    return readCookie('lembar_impersonated_name') || 'Pengguna Impersonasi';
-  });
+  const [impersonatedName, setImpersonatedName] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (readCookie('lembar_is_impersonating') !== '1') return;
+    setImpersonatedName(readCookie('lembar_impersonated_name') || 'Pengguna Impersonasi');
+  }, []);
 
   if (!impersonatedName) return null;
 

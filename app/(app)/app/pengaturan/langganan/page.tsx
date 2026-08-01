@@ -13,23 +13,6 @@ interface PlanData {
   monthlyLimit: number | null;
   billingCycleStartedAt: string;
   entitlementSource?: 'free' | 'paid' | 'trial';
-  trial: {
-    eligible: boolean;
-    claimed: boolean;
-    activeOnThisDevice: boolean;
-    startsAt: string | null;
-    endsAt: string | null;
-    remainingDays: number | null;
-  };
-}
-
-function trialEndLabel(value: string) {
-  return new Intl.DateTimeFormat('id-ID', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-    timeZone: 'UTC',
-  }).format(new Date(value));
 }
 
 const STATE_COPY: Record<EntitlementState, { heading: string; body: string }> = {
@@ -91,9 +74,7 @@ export default function PlanUsageSettingsPage() {
   const [subscribeModalOpen, setSubscribeModalOpen] = useState(false);
   const [selectedTier, setSelectedTier] = useState<string | null>(null);
   const [subscribeSuccess, setSubscribeSuccess] = useState('');
-  const [claimingTrial, setClaimingTrial] = useState(false);
-  const [trialMessage, setTrialMessage] = useState('');
-  const [trialError, setTrialError] = useState('');
+
 
   useEffect(() => {
     let cancelled = false;
@@ -159,31 +140,7 @@ export default function PlanUsageSettingsPage() {
     );
   };
 
-  const handleClaimTrial = async () => {
-    setClaimingTrial(true);
-    setTrialError('');
-    try {
-      const response = await fetch('/v1/me/plan/trial/claim', {
-        method: 'POST',
-        credentials: 'include',
-      });
-      const json = await response.json().catch(() => null);
-      if (!response.ok) {
-        throw new Error(
-          json?.error?.message ||
-            (response.status === 409
-              ? 'Trial tidak dapat diklaim karena akun atau perangkat ini sudah pernah menggunakannya.'
-              : 'Gagal mengaktifkan trial.'),
-        );
-      }
-      setPlan(json?.data ?? plan);
-      setTrialMessage('Trial berhasil diaktifkan.');
-    } catch (claimError) {
-      setTrialError(claimError instanceof Error ? claimError.message : 'Gagal mengaktifkan trial.');
-    } finally {
-      setClaimingTrial(false);
-    }
-  };
+
 
   return (
     <div className="flex flex-col gap-6 w-full">
@@ -231,40 +188,6 @@ export default function PlanUsageSettingsPage() {
               </Button>
             )}
           </div>
-        </div>
-      </Panel>
-
-      <Panel
-        title="Trial Guru Pro"
-        description="Coba akses Guru Pro selama 2 bulan. Identitas perangkat dikelola aman oleh server."
-      >
-        <div className="flex flex-col items-start gap-3">
-          {plan.trial.claimed && plan.trial.endsAt ? (
-            <p className="text-body-sm text-brand-ink">
-              {plan.trial.activeOnThisDevice ? 'Trial aktif' : 'Trial terikat ke perangkat lain'}{' '}
-              hingga {trialEndLabel(plan.trial.endsAt)}
-              {plan.trial.remainingDays !== null && ` · ${plan.trial.remainingDays} hari tersisa`}.
-            </p>
-          ) : plan.trial.eligible ? (
-            <>
-              <p className="text-body-sm text-brand-ink">Akun Anda memenuhi syarat trial.</p>
-              <Button size="sm" onClick={handleClaimTrial} disabled={claimingTrial}>
-                {claimingTrial ? 'Mengaktifkan trial…' : 'Klaim trial 2 bulan'}
-              </Button>
-            </>
-          ) : (
-            <p className="text-body-sm text-brand-muted">Akun ini tidak memenuhi syarat trial.</p>
-          )}
-          {trialMessage && (
-            <p role="status" className="text-body-sm text-emerald-700">
-              {trialMessage}
-            </p>
-          )}
-          {trialError && (
-            <p role="alert" className="text-body-sm text-red-700">
-              {trialError}
-            </p>
-          )}
         </div>
       </Panel>
 
