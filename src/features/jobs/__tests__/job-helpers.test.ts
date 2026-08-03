@@ -5,7 +5,7 @@ import {
   readActiveJob,
   writeActiveJob,
 } from '@/src/features/jobs/activeJobStorage';
-import { isTerminalJobStatus, jobStatusLabel, type JobStatus } from '@/src/features/jobs/types';
+import { formatJobTiming, isTerminalJobStatus, jobStatusLabel, type JobStatus } from '@/src/features/jobs/types';
 
 describe('job helpers', () => {
   const store = new Map<string, string>();
@@ -53,5 +53,13 @@ describe('job helpers', () => {
     expect(jobStatusLabel('running')).toMatch(/menyiapkan/i);
     expect(jobStatusLabel('succeeded')).toMatch(/ditinjau/i);
     expect(jobStatusLabel('failed')).toMatch(/gagal/i);
+  });
+
+  it('does not show a misleading zero-minute duration', () => {
+    const result = formatJobTiming(
+      { createdAt: '2026-08-03T10:00:00.000Z', progressPercent: undefined },
+      Date.parse('2026-08-03T10:00:30.000Z'),
+    );
+    expect(result.elapsed).toBe('Baru saja dimulai');
   });
 });

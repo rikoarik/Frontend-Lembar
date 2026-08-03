@@ -58,6 +58,7 @@ export function OpsJobsSection({
         <h2 className="text-[18px] font-bold text-[#171717]">Jobs</h2>
         <Button
           size="sm"
+          disabled={!jobsData.some((job) => job.status === 'failed')}
           onClick={() => {
             const failedIds = jobsData.filter((j) => j.status === 'failed').map((j) => j.id);
             if (failedIds.length === 0) {
@@ -184,7 +185,7 @@ export function OpsJobsSection({
         searchPlaceholder="Cari job / tenant / status"
         filters={
           <>
-            {(['', 'running', 'queued', 'failed', 'succeeded'] as const).map((status) => (
+            {(['', 'running', 'queued', 'retry_wait', 'failed', 'succeeded'] as const).map((status) => (
               <AdminFilterChip
                 key={status || 'all'}
                 active={filterJobStatus === status}

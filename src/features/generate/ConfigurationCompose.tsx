@@ -477,7 +477,7 @@ const toggleMaterial = useCallback((materialId: string) => {
           className="rounded-md border border-brand-line bg-brand-paper p-6 text-center"
         >
           <p className="text-body-sm text-brand-ink-muted">
-            Belum ada konfigurasi. Pilih sumber materi dan pengaturan untuk memulai.
+            Konfigurasi belum lengkap. Pilih sumber materi dan pengaturan untuk memulai.
           </p>
         </div>
       )}

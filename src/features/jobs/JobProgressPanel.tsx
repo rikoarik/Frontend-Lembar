@@ -102,7 +102,7 @@ export function JobProgressPanel({
   return (
     <Panel
       title="Progres generate"
-      description="Anda boleh meninggalkan halaman ini; status tetap dapat dilanjutkan."
+      description="Proses tetap berjalan meski kamu meninggalkan halaman ini."
       actions={<StatusBadge label={badgeLabelFor(job.status)} />}
     >
       <div className="flex flex-col gap-4" aria-live="polite">
@@ -125,7 +125,7 @@ export function JobProgressPanel({
             >
               <div
                 className={[
-                  'h-full rounded-full bg-brand-accent transition-[width] duration-500',
+                  'h-full rounded-full bg-sky-600 transition-[width] duration-500',
                   percent === undefined ? 'w-1/3 animate-pulse' : '',
                 ].join(' ')}
                 style={percent === undefined ? undefined : { width: `${percent}%` }}
