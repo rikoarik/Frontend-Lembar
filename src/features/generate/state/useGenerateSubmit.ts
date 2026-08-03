@@ -58,7 +58,11 @@ export function useGenerateSubmit(options?: UseGenerateSubmitOptions): UseGenera
       }
 
       const genError: GenerateError = result.error ?? mapEnvelopeToGenerateError(null);
-      if (genError.code === 'RATE_LIMITED') {
+      if (
+        genError.code === 'ENTITLEMENT_REQUIRED' ||
+        genError.code === 'SUBSCRIPTION_INACTIVE' ||
+        genError.code === 'QUOTA_EXHAUSTED'
+      ) {
         options?.onPermissionError?.();
       }
       setError(genError);

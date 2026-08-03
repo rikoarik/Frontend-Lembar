@@ -353,7 +353,7 @@ const toggleMaterial = useCallback((materialId: string) => {
   );
 
   const onSubmitForm = useCallback(
-    (event: React.FormEvent<HTMLFormElement>) => {
+    async (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
       setSubmitted(true);
       const validation = validateComposition(values);
@@ -372,7 +372,10 @@ const toggleMaterial = useCallback((materialId: string) => {
       setLocalErrors({});
       const gradeLabel = grades.find((g) => g.id === values.gradeId)?.label;
       const subjectLabel = subjects.find((s) => s.id === values.subjectId)?.label;
-      void generateSubmit.submit({ ...values, gradeLabel, subjectLabel }, workspaceId);
+      const result = await generateSubmit.submit({ ...values, gradeLabel, subjectLabel }, workspaceId);
+      if (!result.ok && !['ENTITLEMENT_REQUIRED', 'SUBSCRIPTION_INACTIVE', 'QUOTA_EXHAUSTED'].includes(result.error.code)) {
+        setCompositionError(result.error);
+      }
     },
     [values, workspaceId, generateSubmit],
   );

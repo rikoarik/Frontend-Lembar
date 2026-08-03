@@ -95,6 +95,7 @@ function getActiveRole(request: NextRequest, session: string, roles: string[]): 
   }
   if (roles.includes('superadmin')) return 'superadmin';
   if (roles.includes('school_admin')) return 'school_admin';
+  if (roles.includes('subscriber')) return 'subscriber';
   return 'teacher';
 }
 

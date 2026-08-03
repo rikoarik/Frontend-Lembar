@@ -1,6 +1,6 @@
 export type WorkspaceKind = 'personal' | 'school';
 
-export type ActiveRole = 'teacher' | 'school_admin' | 'superadmin';
+export type ActiveRole = 'teacher' | 'subscriber' | 'school_admin' | 'superadmin';
 
 export type LoginInput = {
   identifier: string;

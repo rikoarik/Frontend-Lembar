@@ -1,6 +1,9 @@
 export type GenerateErrorCode =
   | 'VALIDATION_FAILED'
   | 'RATE_LIMITED'
+  | 'ENTITLEMENT_REQUIRED'
+  | 'SUBSCRIPTION_INACTIVE'
+  | 'QUOTA_EXHAUSTED'
   | 'NETWORK'
   | 'TIMEOUT'
   | 'UNKNOWN';
@@ -20,6 +23,9 @@ export type GenerateError = {
 export const GENERATE_ERROR_CODES: readonly GenerateErrorCode[] = [
   'VALIDATION_FAILED',
   'RATE_LIMITED',
+  'ENTITLEMENT_REQUIRED',
+  'SUBSCRIPTION_INACTIVE',
+  'QUOTA_EXHAUSTED',
   'NETWORK',
   'TIMEOUT',
   'UNKNOWN',

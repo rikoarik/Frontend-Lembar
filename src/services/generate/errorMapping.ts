@@ -12,9 +12,22 @@ const COPY: Record<GenerateErrorCode, ErrorCopy> = {
     retryable: false,
   },
   RATE_LIMITED: {
-    safeMessage: 'Buat lembar tidak tersedia. Hubungi admin atau tingkatkan paket Anda.',
-    hint: 'Kuota pembuatan lembar telah habis untuk periode ini.',
+    safeMessage: 'Terlalu banyak permintaan. Tunggu sebentar lalu coba lagi.',
+    hint: 'Ini bukan status kuota paket Anda.',
     retryable: true,
+  },
+  ENTITLEMENT_REQUIRED: {
+    safeMessage: 'Paket aktif diperlukan untuk membuat lembar.',
+    retryable: false,
+  },
+  SUBSCRIPTION_INACTIVE: {
+    safeMessage: 'Paket Anda sedang tidak aktif.',
+    hint: 'Kelola paket atau hubungi admin workspace.',
+    retryable: false,
+  },
+  QUOTA_EXHAUSTED: {
+    safeMessage: 'Kuota pembuatan lembar telah habis.',
+    retryable: false,
   },
   NETWORK: {
     safeMessage: 'Tidak dapat terhubung. Periksa koneksi Anda.',

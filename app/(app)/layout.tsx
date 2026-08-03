@@ -47,7 +47,9 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
         ? 'school_admin'
         : ws.role === 'superadmin'
           ? 'superadmin'
-          : 'teacher',
+          : ws.role === 'subscriber'
+            ? 'subscriber'
+            : 'teacher',
   }));
 
   const initialActiveId = me?.activeWorkspace?.id ?? me?.activeWorkspaceId;
