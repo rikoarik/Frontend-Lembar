@@ -12,6 +12,7 @@ export function OutputCenterView({ assessmentId }: { assessmentId: string }) {
   const [detail, setDetail] = useState<AssessmentDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [errorStatus, setErrorStatus] = useState<number | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -21,6 +22,7 @@ export function OutputCenterView({ assessmentId }: { assessmentId: string }) {
     ]);
     if (!outResult.ok) {
       setError(outResult.error.safeMessage);
+      setErrorStatus(outResult.error.httpStatus ?? null);
       setOutput(null);
       setLoading(false);
       return;
@@ -28,6 +30,7 @@ export function OutputCenterView({ assessmentId }: { assessmentId: string }) {
     setOutput(outResult.value);
     if (detailResult.ok) setDetail(detailResult.value);
     setError(null);
+    setErrorStatus(null);
     setLoading(false);
   }, [assessmentId]);
 
@@ -45,12 +48,14 @@ export function OutputCenterView({ assessmentId }: { assessmentId: string }) {
       >
         <div className="flex flex-wrap gap-3">
           <Button onClick={() => void load()}>Coba lagi</Button>
-          <Link
-            href={`/app/review/${assessmentId}/finalize`}
-            className="inline-flex min-h-[var(--control-md)] items-center rounded-md border border-brand-line px-4"
-          >
-            Ke finalisasi
-          </Link>
+          {errorStatus !== 401 && errorStatus !== 403 ? (
+            <Link
+              href={`/app/review/${assessmentId}/finalize`}
+              className="inline-flex min-h-[var(--control-md)] items-center rounded-md border border-brand-line px-4"
+            >
+              Ke finalisasi
+            </Link>
+          ) : null}
         </div>
       </Panel>
     );

@@ -16,6 +16,7 @@ export type AssessmentError = {
   code: string;
   safeMessage: string;
   retryable: boolean;
+  httpStatus?: number;
   blockers?: string[];
   cause?: unknown;
 };
@@ -37,6 +38,7 @@ async function parseError(response: Response): Promise<AssessmentError> {
       code,
       safeMessage,
       retryable: body.error?.retryable ?? response.status >= 500,
+      httpStatus: response.status,
       blockers: body.error?.blockers,
       cause: body.error,
     };
