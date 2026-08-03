@@ -1,4 +1,4 @@
-/** Canonical job statuses from docs/contracts/STATE-MACHINES.md */
+/** Canonical frontend statuses normalized by the jobs BFF. */
 export type JobStatus =
   | 'queued'
   | 'running'
@@ -10,6 +10,7 @@ export type JobStatus =
   | 'cancelled';
 
 /** Presentation stage — not a status. */
+
 export type JobStage = 'preparing' | 'generating' | 'validating' | 'finalizing';
 
 export type JobSnapshot = {
@@ -60,24 +61,15 @@ export function isTerminalJobStatus(status: JobStatus): boolean {
 
 export function jobStatusLabel(status: JobStatus): string {
   switch (status) {
-    case 'queued':
-      return 'Dalam antrean';
-    case 'running':
-      return 'Sedang menyiapkan soal';
-    case 'retry_wait':
-      return 'Menunggu coba ulang';
-    case 'succeeded':
-      return 'Draft siap ditinjau';
-    case 'partially_succeeded':
-      return 'Draft sebagian siap';
-    case 'failed':
-      return 'Gagal menyiapkan soal';
-    case 'cancellation_requested':
-      return 'Membatalkan…';
-    case 'cancelled':
-      return 'Dibatalkan';
-    default:
-      return 'Status tidak dikenal';
+    case 'queued': return 'Dalam antrean';
+    case 'running': return 'Sedang menyiapkan soal';
+    case 'retry_wait': return 'Menunggu coba ulang';
+    case 'succeeded': return 'Draft siap ditinjau';
+    case 'partially_succeeded': return 'Draft sebagian siap';
+    case 'failed': return 'Gagal menyiapkan soal';
+    case 'cancellation_requested': return 'Membatalkan…';
+    case 'cancelled': return 'Dibatalkan';
+    default: return 'Sedang diproses';
   }
 }
 

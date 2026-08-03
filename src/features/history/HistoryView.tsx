@@ -74,6 +74,8 @@ function lifecycleCopy(item: AssessmentSummary): string {
       return 'Selesai dan siap digunakan';
     case 'archived':
       return 'Diarsipkan';
+    case 'failed':
+      return 'Gagal dibuat';
     default:
       return item.questionCount > 0 ? `Draf · ${item.questionCount} soal` : 'Draf belum berisi soal';
   }

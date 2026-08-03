@@ -62,4 +62,8 @@ export const jobService = {
   cancelJob(jobId: string): Promise<Result<JobSnapshot, JobError>> {
     return requestJson<JobSnapshot>(`/jobs/${encodeURIComponent(jobId)}/cancel`, 'POST', {});
   },
+
+  recoverJob(jobId: string): Promise<Result<JobSnapshot, JobError>> {
+    return requestJson<JobSnapshot>(`/jobs/${encodeURIComponent(jobId)}/recover`, 'POST', {});
+  },
 };

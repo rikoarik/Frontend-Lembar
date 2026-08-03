@@ -6,6 +6,7 @@ import { JobProgressPanel } from '@/src/features/jobs/JobProgressPanel';
 import { useJobProgress } from '@/src/features/jobs/state/useJobProgress';
 import { useWorkspace } from '@/src/features/workspace/workspaceContext';
 import { clearActiveJob } from '@/src/features/jobs/activeJobStorage';
+import { jobService } from '@/src/services/jobs/jobService';
 
 type JobProgressViewProps = {
   jobId: string;
@@ -21,10 +22,15 @@ export function JobProgressView({ jobId }: JobProgressViewProps) {
     workspaceId,
   });
 
-  const onRetry = useCallback(() => {
-    clearActiveJob(workspaceId);
-    router.push('/app/generate');
-  }, [router, workspaceId]);
+  const onRetry = useCallback(async () => {
+    const result = await jobService.recoverJob(jobId);
+    if (result.ok) {
+      void refresh();
+    } else {
+      clearActiveJob(workspaceId);
+      router.push('/app/generate');
+    }
+  }, [jobId, workspaceId, refresh, router]);
 
   return (
     <div className="flex flex-col gap-4">
