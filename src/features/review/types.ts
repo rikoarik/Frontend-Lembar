@@ -36,7 +36,7 @@ export function mapReviewStateToBackend(value: QuestionReviewState): BackendRevi
   return FRONTEND_TO_BACKEND[value];
 }
 
-export type AssessmentLifecycle = 'draft' | 'generating' | 'review' | 'final' | 'archived';
+export type AssessmentLifecycle = 'draft' | 'generating' | 'review' | 'final' | 'archived' | 'failed';
 
 export type QuestionWarning = {
   code: string;

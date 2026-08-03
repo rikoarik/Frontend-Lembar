@@ -22,7 +22,7 @@ describe('MarketingNavbar mobile menu', () => {
 
   it('opens burger menu with section links and login on mobile', async () => {
     const user = userEvent.setup();
-    render(<MarketingNavbar />);
+    render(<MarketingNavbar session={null} />);
 
     const toggle = screen.getByRole('button', { name: /buka menu navigasi/i });
     expect(toggle).toHaveAttribute('aria-expanded', 'false');
@@ -45,7 +45,7 @@ describe('MarketingNavbar mobile menu', () => {
 
   it('closes mobile menu with Escape', async () => {
     const user = userEvent.setup();
-    render(<MarketingNavbar />);
+    render(<MarketingNavbar session={null} />);
 
     await user.click(screen.getByRole('button', { name: /buka menu navigasi/i }));
     expect(screen.getByRole('navigation', { name: /navigasi seluler/i })).toBeInTheDocument();

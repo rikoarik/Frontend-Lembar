@@ -15,47 +15,9 @@ function formatDayLabel(dateStr: string) {
   }
 }
 
-export function DashboardTrendsChart() {
-  const [trends, setTrends] = useState<{
-    jobs: { day: string; count: number }[];
-    quality: { day: string; count: number }[];
-  } | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [hoveredJobsIdx, setHoveredJobsIdx] = useState<number | null>(null);
-  const [hoveredQualityIdx, setHoveredQualityIdx] = useState<number | null>(null);
+const BAR_H = 56;
 
-  useEffect(() => {
-    let cancelled = false;
-    if (typeof adminService?.dashboardTrends === 'function') {
-      adminService.dashboardTrends().then((res) => {
-        if (cancelled) return;
-        if (res.ok) setTrends(res.value as any);
-        setLoading(false);
-      }).catch(() => {
-        if (!cancelled) setLoading(false);
-      });
-    } else {
-      setLoading(false);
-    }
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  if (loading)
-    return (
-      <div className="rounded-2xl border border-[#ddd4c8]/70 bg-white p-5">
-        <AdminContentLoading />
-      </div>
-    );
-
-  if (!trends || (trends.jobs.length === 0 && trends.quality.length === 0)) return null;
-
-  const maxJobs = Math.max(...trends.jobs.map((d) => d.count), 1);
-  const maxQuality = Math.max(...trends.quality.map((d) => d.count), 1);
-  const BAR_H = 56;
-
-  function MiniBar({
+function MiniBar({
     data,
     max,
     color,
@@ -126,6 +88,43 @@ export function DashboardTrendsChart() {
     );
   }
 
+export function DashboardTrendsChart() {
+  const [trends, setTrends] = useState<{
+    jobs: { day: string; count: number }[];
+    quality: { day: string; count: number }[];
+  } | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [hoveredJobsIdx, setHoveredJobsIdx] = useState<number | null>(null);
+  const [hoveredQualityIdx, setHoveredQualityIdx] = useState<number | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    adminService
+      .dashboardTrends()
+      .then((res) => {
+        if (cancelled) return;
+        if (res.ok) setTrends(res.value as any);
+        setLoading(false);
+      })
+      .catch(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (loading)
+    return (
+      <div className="rounded-2xl border border-[#ddd4c8]/70 bg-white p-5">
+        <AdminContentLoading />
+      </div>
+    );
+
+  if (!trends || (trends.jobs.length === 0 && trends.quality.length === 0)) return null;
+
+  const maxJobs = Math.max(...trends.jobs.map((d) => d.count), 1);
+  const maxQuality = Math.max(...trends.quality.map((d) => d.count), 1);
   return (
     <div className="grid gap-4 sm:grid-cols-2">
       <div className="rounded-2xl border border-[#ddd4c8]/80 bg-white p-5 shadow-[0_2px_12px_rgba(23,23,23,0.01),0_1px_2px_rgba(23,23,23,0.02)] transition-all duration-200 hover:shadow-[0_8px_24px_rgba(23,23,23,0.04)]">
