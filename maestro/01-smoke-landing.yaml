@@ -1,0 +1,5 @@
+url: https://app.lembar.web.id
+---
+- launchApp
+- assertVisible: "lembar"
+- takeScreenshot: "01-landing"

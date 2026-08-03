@@ -28,7 +28,7 @@ export function AppShell({ children }: AppShellProps) {
   );
 
   const accountMenu = (
-    <AccountMenu displayName={displayName} planLabel="Paket Guru" compact={collapsed} />
+    <AccountMenu displayName={displayName} planLabel="Akun guru" compact={collapsed} />
   );
 
   return (
