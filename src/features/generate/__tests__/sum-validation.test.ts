@@ -7,25 +7,32 @@
  */
 import { describe, expect, it } from 'vitest';
 import { validateComposition } from '../validation';
-import { INITIAL_COMPOSITION_VALUES } from '../types';
+import { INITIAL_COMPOSITION_VALUES, rebalanceQuestionTypeCounts } from '../types';
 import type { CompositionValues } from '../types';
 
 // ── helpers ──
 
 function valid(overrides: Partial<CompositionValues> = {}): CompositionValues {
-  return {
+  const values = {
     ...INITIAL_COMPOSITION_VALUES,
     // fully-specified katalog source so the base case always passes
-    sourceMode: 'katalog',
+    sourceMode: 'katalog' as const,
     curriculumVersionId: 'kurmer-2',
     gradeId: 'g-4',
     subjectId: 's-4',
     materialIds: ['m-10'],
-    assessmentType: 'practice',
-    difficulty: 'medium',
+    assessmentType: 'practice' as const,
+    difficulty: 'medium' as const,
     questionCount: 20,
-    reviewMode: 'quick',
+    reviewMode: 'quick' as const,
     ...overrides,
+  };
+  return {
+    ...values,
+    questionTypeCounts: overrides.questionTypeCounts ?? rebalanceQuestionTypeCounts(
+      values.questionCount,
+      INITIAL_COMPOSITION_VALUES.questionTypeCounts,
+    ),
   };
 }
 
