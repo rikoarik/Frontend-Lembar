@@ -23,8 +23,6 @@ const PRIMARY_NAV = [
 const LIBRARY_NAV = [
   { href: '/app/bank-soal', label: 'Bank soal', icon: 'inventory_2' },
   { href: '/app/template', label: 'Template', icon: 'description' },
-  { href: '/app/kelas', label: 'Kelas', icon: 'groups' },
-  { href: '/app/analitik', label: 'Analitik', icon: 'monitoring' },
 ] as const;
 
 const SUPPORT_NAV = [{ href: '/app/bantuan', label: 'Bantuan', icon: 'help' }] as const;
@@ -131,7 +129,9 @@ export function LeftRail({
   onToggleCollapse,
 }: LeftRailProps) {
   const pathname = usePathname() ?? '/app';
-  const schoolItems = SCHOOL_ONLY_NAV.filter((item) => roleAllows(activeRole, item.entitlement));
+  const schoolItems = activeWorkspaceKind === 'school'
+    ? SCHOOL_ONLY_NAV.filter((item) => roleAllows(activeRole, item.entitlement))
+    : [];
 
   const isActive = (href: string) =>
     href === '/app' ? pathname === '/app' : pathname.startsWith(href);
@@ -177,7 +177,21 @@ export function LeftRail({
           ))}
         </NavSection>
 
-
+        {schoolItems.length > 0 ? (
+          <NavSection label="Sekolah" collapsed={collapsed}>
+            {schoolItems.map((item) => (
+              <NavLink
+                key={item.href}
+                href={item.href}
+                label={item.label}
+                icon={item.icon}
+                active={isActive(item.href)}
+                collapsed={collapsed}
+                onNavigate={onNavigate}
+              />
+            ))}
+          </NavSection>
+        ) : null}
 
         <NavSection label="Bantuan" collapsed={collapsed}>
           {SUPPORT_NAV.map((item) => (
