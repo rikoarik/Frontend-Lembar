@@ -9,6 +9,7 @@ type EntitlementState = 'free' | 'active' | 'grace' | 'blocked' | 'expired';
 interface PlanData {
   workspaceId: string;
   plan: 'free' | 'pro';
+  entitlementState?: EntitlementState;
   generationsUsedThisMonth: number;
   monthlyLimit: number | null;
   billingCycleStartedAt: string;
@@ -124,7 +125,7 @@ export default function PlanUsageSettingsPage() {
   const isUnlimited = plan.monthlyLimit === null;
   const limit = plan.monthlyLimit ?? 0;
   const used = plan.generationsUsedThisMonth;
-  const state: EntitlementState = plan.plan === 'pro' ? 'active' : 'free';
+  const state: EntitlementState = plan.entitlementState ?? (plan.plan === 'pro' ? 'active' : 'free');
   const stateCopy = STATE_COPY[state];
   const planLabel = plan.plan === 'pro' ? 'Guru Pro' : 'Paket Gratis';
 
@@ -166,7 +167,7 @@ export default function PlanUsageSettingsPage() {
                   : 'bg-neutral-50 text-neutral-600 ring-neutral-200'
               }`}
             >
-              {plan.plan === 'pro' ? 'Pro Aktif' : 'Gratis'}
+              {state === 'active' ? (plan.plan === 'pro' ? 'Pro Aktif' : 'Aktif') : STATE_COPY[state].heading}
             </span>
           </div>
 
