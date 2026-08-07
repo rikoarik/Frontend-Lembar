@@ -38,7 +38,7 @@ export default function MarketingFooter() {
                 className="font-caption text-caption text-secondary hover:text-burgundy hover:underline transition-all duration-200"
                 href="/"
               >
-                Produk
+                Beranda
               </a>
               <a
                 className="font-caption text-caption text-secondary hover:text-burgundy hover:underline transition-all duration-200"

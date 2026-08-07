@@ -107,6 +107,18 @@ function getActiveRole(request: NextRequest, session: string, roles: string[]): 
  */
 export function middleware(request: NextRequest): NextResponse {
   const { pathname } = request.nextUrl;
+
+  // --- Legacy URL redirects (301-equivalent) ---
+  const LEGACY_REDIRECTS: Record<string, string> = {
+    '/login': '/masuk',
+    '/register': '/daftar',
+    '/signup': '/daftar',
+    '/signin': '/masuk',
+  };
+  if (LEGACY_REDIRECTS[pathname]) {
+    return redirectTo(request, LEGACY_REDIRECTS[pathname]!);
+  }
+
   const session =
     request.cookies.get(JWT_COOKIE)?.value ??
     request.cookies.get(LEGACY_SESSION_COOKIE)?.value;
@@ -166,5 +178,5 @@ export function middleware(request: NextRequest): NextResponse {
 }
 
 export const config = {
-  matcher: ['/app/:path*', '/school/:path*', '/ops/:path*', '/masuk', '/daftar'],
+  matcher: ['/app/:path*', '/school/:path*', '/ops/:path*', '/masuk', '/daftar', '/login', '/register', '/signup', '/signin'],
 };

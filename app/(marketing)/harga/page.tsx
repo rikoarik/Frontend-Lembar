@@ -43,7 +43,7 @@ export default async function HargaPage() {
       <div className="min-h-screen">
         <header className="py-unit-16 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto text-center">
           <div className="inline-block px-unit-3 py-unit-1 bg-secondary-fixed text-on-secondary-fixed-variant rounded-full font-label-semibold text-caption mb-unit-6">
-            Pricing Plans
+            Paket Harga
           </div>
           <h1 className="font-h1 text-h1 text-ink mb-unit-4 max-w-[800px] mx-auto">
             Pilih paket yang sesuai untuk kebutuhan mengajar Anda.

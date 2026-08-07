@@ -142,6 +142,9 @@ export default function RegisterPage() {
             onChange={setPhone}
             error={localErrors.phone ?? fieldError(submit.fieldErrors, 'phone')}
           />
+          <p className="font-caption text-caption text-secondary -mt-2">
+            Untuk notifikasi penting dan verifikasi akun dari sekolah.
+          </p>
           <PasswordField
             label="Kata sandi"
             value={password}

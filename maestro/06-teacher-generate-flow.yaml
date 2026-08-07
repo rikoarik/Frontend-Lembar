@@ -1,0 +1,51 @@
+url: https://app.lembar.web.id/masuk
+---
+- launchApp:
+    clearState: true
+- assertVisible: "Masuk ke lembar"
+- tapOn: "Username, email, atau nomor telepon"
+- inputText: ${QA_EMAIL}
+- tapOn: "Kata sandi"
+- inputText: ${QA_PASSWORD}
+- tapOn:
+    text: "Masuk"
+    index: 0
+- assertVisible: "Buat lembar"
+
+# Buka form generate
+- openLink: https://app.lembar.web.id/app/generate
+- assertVisible: "Materi Ujian"
+- takeScreenshot: "06-01-generate-form"
+
+# Pilih Kurikulum 2013
+- tapOn: "Pilih kurikulum"
+- tapOn: "Kurikulum 2013"
+- takeScreenshot: "06-02-kurikulum-selected"
+
+# Pilih Kelas 1
+- tapOn:
+    css: "#compose-gradeId"
+- tapOn:
+    css: "#compose-gradeId option[value='official-grade-sd-mi-1']"
+- takeScreenshot: "06-03-kelas-selected"
+
+# Pilih Mata Pelajaran
+- tapOn: "Pilih mata pelajaran"
+- tapOn: "Bahasa Inggris"
+- takeScreenshot: "06-04-mapel-selected"
+
+# Pilih Materi (ambil yang pertama muncul)
+- tapOn: "Pilih materi"
+- takeScreenshot: "06-05-materi-dropdown"
+- tapOn:
+    index: 0
+    childOf: "Pilih materi"
+- takeScreenshot: "06-06-materi-selected"
+
+# Submit
+- tapOn: "Buat draft"
+- takeScreenshot: "06-07-submit"
+
+# Halaman progress job
+- assertVisible: "Diproses"
+- takeScreenshot: "06-08-job-progress"

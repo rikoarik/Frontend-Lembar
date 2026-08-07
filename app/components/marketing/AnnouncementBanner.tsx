@@ -26,7 +26,10 @@ export default function AnnouncementBanner() {
         <span className="material-symbols-outlined text-[16px]">campaign</span>
         <span>
           <strong>Pengumuman:</strong> Selamat datang di lembar! Uji coba gratis kini tersedia untuk
-          institusi pendidikan.
+          institusi pendidikan.{' '}
+          <a href="/untuk-sekolah" className="underline font-semibold hover:opacity-80 transition-opacity">
+            Pelajari lebih lanjut →
+          </a>
         </span>
       </div>
       <button
