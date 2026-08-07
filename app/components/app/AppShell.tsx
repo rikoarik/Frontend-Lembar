@@ -28,7 +28,7 @@ export function AppShell({ children }: AppShellProps) {
   );
 
   const accountMenu = (
-    <AccountMenu displayName={displayName} planLabel="Akun guru" compact={collapsed} />
+    <AccountMenu displayName={displayName} planLabel={activeWorkspace.activeRole === 'subscriber' ? 'Guru Pro' : 'Paket Gratis'} compact={collapsed} />
   );
 
   return (

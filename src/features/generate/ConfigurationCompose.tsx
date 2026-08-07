@@ -516,20 +516,26 @@ const toggleMaterial = useCallback((materialId: string) => {
         >
           <p className="text-body-sm text-brand-warning font-medium">Kuota habis</p>
           <p className="mt-1 text-body-sm text-brand-ink-muted">
-            Anda telah mencapai batas lembar yang dapat dibuat. Hubungi admin atau tingkatkan paket
-            Anda.
+            Anda telah mencapai batas lembar yang dapat dibuat bulan ini.
           </p>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => {
-              setPermissionState(false);
-              void loadGrades();
-            }}
-            className="mt-3"
-          >
-            Coba lagi
-          </Button>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => {
+                setPermissionState(false);
+                void loadGrades();
+              }}
+            >
+              Coba lagi
+            </Button>
+            <a
+              href="/app/pengaturan/langganan"
+              className="inline-flex items-center rounded-md border border-brand-accent px-3 py-1.5 text-body-sm font-medium text-brand-accent hover:bg-brand-accent/5 transition-colors"
+            >
+              Tingkatkan paket →
+            </a>
+          </div>
         </div>
       )}
 

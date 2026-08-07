@@ -130,6 +130,25 @@ export function QuickReviewView({
     return () => document.removeEventListener('keydown', handler);
   }, [selected.size]);
 
+  // Keyboard navigation for detail mode: ArrowLeft/ArrowRight to move between questions
+  useEffect(() => {
+    if (mode !== 'detail') return;
+    const handler = (e: KeyboardEvent) => {
+      // Skip if user is typing inside an input/textarea
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        setDetailIndex((i) => Math.min(i + 1, questions.length - 1));
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        setDetailIndex((i) => Math.max(i - 1, 0));
+      }
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [mode, questions.length]);
+
   const toggleSelect = (id: string) => {
     setSelected((prev) => {
       const next = new Set(prev);

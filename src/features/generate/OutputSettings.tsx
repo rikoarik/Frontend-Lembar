@@ -9,12 +9,6 @@ export function OutputSettings() {
       description="Konfigurasi format dan layout lembar yang dihasilkan."
     >
       <div className="flex flex-col gap-4">
-        <div className="rounded-md border border-brand-line bg-brand-paper p-4">
-          <p className="text-body-sm text-brand-ink-muted">
-            Pengaturan output akan tersedia setelah kontrak backend final. Saat ini, lembar akan
-            menggunakan format default.
-          </p>
-        </div>
         <div className="flex flex-col gap-3 opacity-60" aria-disabled="true">
           <div className="flex items-center justify-between">
             <span className="text-body-sm text-brand-ink">Ukuran kertas</span>
@@ -29,8 +23,8 @@ export function OutputSettings() {
             <span className="text-body-sm text-brand-ink-muted">Inter (default)</span>
           </div>
         </div>
-        <p className="text-body-sm text-brand-ink-muted italic">
-          Pengaturan ini bersifat placeholder dan belum dapat diubah.
+        <p className="text-body-sm text-brand-ink-muted">
+          Format default: A4, Portrait, Inter. Pengaturan lanjutan segera hadir.
         </p>
       </div>
     </Panel>

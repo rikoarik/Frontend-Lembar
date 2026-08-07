@@ -57,6 +57,9 @@ function titleFromPath(pathname: string): string {
   if (pathname.startsWith('/app/pengaturan')) return 'Pengaturan';
   if (pathname.startsWith('/app/kelas')) return 'Kelas';
   if (pathname.startsWith('/app/analitik')) return 'Analitik';
+  if (pathname.startsWith('/app/jobs')) return 'Progres generate';
+  if (pathname.startsWith('/app/onboarding')) return 'Selamat datang';
+  if (pathname.startsWith('/app/assessments')) return 'Asesmen';
   return 'lembar';
 }
 

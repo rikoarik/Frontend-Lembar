@@ -27,15 +27,15 @@ const STATE_COPY: Record<EntitlementState, { heading: string; body: string }> = 
   },
   grace: {
     heading: 'Masa tenggang',
-    body: 'Paket Anda memasuki masa tenggang. Fitur tetap aktif sementara. Hubungi tim kami untuk perpanjangan.',
+    body: 'Paket Anda memasuki masa tenggang. Fitur tetap aktif sementara. Hubungi tim kami di wa.me/6285784255112 untuk perpanjangan.',
   },
   blocked: {
     heading: 'Akses ditangguhkan',
-    body: 'Akses ke fitur berbayar ditangguhkan. Hubungi tim kami untuk memulihkan akses.',
+    body: 'Akses ke fitur berbayar ditangguhkan. Hubungi tim kami di wa.me/6285784255112 untuk memulihkan akses.',
   },
   expired: {
     heading: 'Paket berakhir',
-    body: 'Paket Anda telah berakhir. Untuk melanjutkan, hubungi tim kami.',
+    body: 'Paket Anda telah berakhir. Hubungi tim kami di wa.me/6285784255112 untuk melanjutkan.',
   },
 };
 
@@ -137,7 +137,7 @@ export default function PlanUsageSettingsPage() {
   const handleConfirmPay = () => {
     setSubscribeModalOpen(false);
     setSubscribeSuccess(
-      `Pembayaran ${selectedTier ?? 'paket'} belum tersedia. Harga dan penyedia pembayaran belum dikonfigurasi.`,
+      `Terima kasih! Tim kami akan menghubungi Anda segera untuk menyelesaikan proses berlangganan ${selectedTier ?? 'paket'}.`,
     );
   };
 
