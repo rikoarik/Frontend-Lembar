@@ -6,7 +6,7 @@ import { Button } from '@/app/components/ui';
 import { apiClient } from '@/src/lib/api/client';
 import type { components } from '@/src/lib/api/schema';
 import { useWorkspace } from '@/src/features/workspace/workspaceContext';
-import { getActiveJob } from '@/src/features/jobs/activeJobStorage';
+import { readActiveJob } from '@/src/features/jobs/activeJobStorage';
 import { jobService } from '@/src/services/jobs/jobService';
 
 type DashboardData = components['schemas']['DashboardSummaryResponse']['data'];
@@ -90,7 +90,7 @@ export default function AppDashboardPage() {
 
   // Poll active job dari sessionStorage
   useEffect(() => {
-    const stored = getActiveJob(activeWorkspace.id);
+    const stored = readActiveJob(activeWorkspace.id);
     if (!stored?.jobId) { setActiveJob(null); return; }
     setActiveJob({ jobId: stored.jobId });
     let cancelled = false;
