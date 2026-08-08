@@ -39,9 +39,9 @@ export default function LenisProvider({ children }: { children: React.ReactNode 
     if (!isMarketingPath(pathname)) return;
 
     const lenis = new Lenis({
-      duration: 1.05,
-      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      touchMultiplier: 1.6,
+      duration: 0.7,
+      easing: (t: number) => 1 - Math.pow(1 - t, 3),
+      touchMultiplier: 2.0,
       // Keep nested overflow / form controls on native scroll.
       prevent: (node: HTMLElement) => {
         if (
