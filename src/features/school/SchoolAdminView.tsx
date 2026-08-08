@@ -880,7 +880,13 @@ function SectionBilling({
 
       {/* Invoices Table */}
       <div className="space-y-3">
-        <h3 className="text-[15px] font-bold text-[#171717]">Riwayat Pembayaran & Faktur</h3>
+        <div className="flex items-center gap-2">
+          <h3 className="text-[15px] font-bold text-[#171717]">Riwayat Pembayaran & Faktur</h3>
+          <AdminPill tone="warn">Data contoh</AdminPill>
+        </div>
+        <p className="text-[12px] text-[#9c8f83]">
+          Riwayat faktur aktual akan tersedia setelah integrasi portal billing selesai. Data di bawah adalah contoh tampilan.
+        </p>
         <AdminDataTable
           rows={SAMPLE_INVOICES}
           columns={[
