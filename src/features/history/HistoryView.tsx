@@ -74,6 +74,8 @@ function lifecycleCopy(item: AssessmentSummary): string {
       return 'Selesai dan siap digunakan';
     case 'archived':
       return 'Diarsipkan';
+    case 'generating':
+      return 'Sedang dibuat…';
     case 'failed':
       return 'Gagal dibuat';
     default:
