@@ -659,3 +659,42 @@ export const adminService = {
     return request<{ id: string; archived: boolean }>(`/v1/admin/catalog/subjects/${id}`, 'DELETE');
   },
 };
+
+// ── AI Provider config ──────────────────────────────────────────────────────
+
+export type AiProviderConfig = {
+  driver: 'mock' | 'openai' | 'hermes';
+  primaryBaseUrl: string;
+  primaryApiKey: string;
+  primaryModelId: string;
+  fallbackBaseUrl: string;
+  fallbackApiKey: string;
+  fallbackModelId: string;
+  timeoutMs: number;
+  apiKeyPresent: boolean;
+};
+
+export type AiProviderUpdatePayload = Partial<Omit<AiProviderConfig, 'apiKeyPresent'>>;
+
+export type AiProviderTestResult = {
+  ok: boolean;
+  status: number;
+  message: string;
+};
+
+export const aiProviderService = {
+  getAiProvider(): Promise<Result<AiProviderConfig, AdminError>> {
+    return request<AiProviderConfig>('/v1/admin/ai-provider', 'GET');
+  },
+  updateAiProvider(payload: AiProviderUpdatePayload): Promise<Result<{ updated: boolean; fields?: string[] }, AdminError>> {
+    return request<{ updated: boolean; fields?: string[] }>('/v1/admin/ai-provider', 'PATCH', payload);
+  },
+  testAiProvider(payload: {
+    target: 'primary' | 'fallback';
+    baseUrl?: string;
+    apiKey?: string;
+    modelId?: string;
+  }): Promise<Result<AiProviderTestResult, AdminError>> {
+    return request<AiProviderTestResult>('/v1/admin/ai-provider/test', 'POST', payload);
+  },
+};

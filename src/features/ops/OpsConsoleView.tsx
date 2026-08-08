@@ -40,6 +40,7 @@ import { OpsFlagsSection } from './sections/OpsFlagsSection';
 import { OpsContentSection } from './sections/OpsContentSection';
 import { OpsLearningSignalsSection } from './sections/OpsLearningSignalsSection';
 import { OpsProfileSection } from './sections/OpsProfileSection';
+import { OpsAiProviderSection } from './sections/OpsAiProviderSection';
 
 type AccountRow = AdminAccountRow;
 type SchoolRow = AdminSchoolRow;
@@ -873,6 +874,10 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
 
       {key === 'profile' ? <OpsProfileSection setToast={setToast} /> : null}
 
+      {key === 'ai-provider' ? (
+        <OpsAiProviderSection setToast={setToast} />
+      ) : null}
+
       {key !== '' &&
       !key.startsWith('accounts/') &&
       ![
@@ -888,6 +893,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
         'flags',
         'content',
         'profile',
+        'ai-provider',
       ].includes(key) ? (
         <AdminPageHeader
           title={`Section ${key}`}
