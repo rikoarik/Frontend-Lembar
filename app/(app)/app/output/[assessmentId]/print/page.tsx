@@ -27,6 +27,7 @@ export default function OutputPrintPage({ params }: { params: Promise<{ assessme
   const [showForm, setShowForm] = useState(true);
   const [shareUrl, setShareUrl] = useState('');
   const [sharing, setSharing] = useState(false);
+  const [printing, setPrinting] = useState(false);
 
   useEffect(() => {
     void assessmentService.get(assessmentId).then((result) => {
@@ -107,11 +108,23 @@ export default function OutputPrintPage({ params }: { params: Promise<{ assessme
           </button>
           <button
             type="button"
-            onClick={() => window.print()}
-            disabled={!assessment}
-            className="inline-flex min-h-[var(--control-md)] items-center rounded-md bg-brand-accent px-4 text-white disabled:opacity-50"
+            onClick={() => {
+              setPrinting(true);
+              // Beri waktu browser render sebelum dialog print terbuka
+              setTimeout(() => {
+                window.print();
+                setPrinting(false);
+              }, 300);
+            }}
+            disabled={!assessment || printing}
+            className="inline-flex min-h-[var(--control-md)] items-center gap-2 rounded-md bg-brand-accent px-4 text-white disabled:opacity-50"
           >
-            Print
+            {printing ? (
+              <>
+                <span className="material-symbols-outlined animate-spin text-[16px]">progress_activity</span>
+                Menyiapkan…
+              </>
+            ) : 'Unduh / Print'}
           </button>
           <Link
             href={`/app/output/${assessmentId}`}

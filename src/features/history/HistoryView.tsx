@@ -50,6 +50,7 @@ function badge(lifecycle: AssessmentLifecycle): StatusLabel {
       return 'Gagal';
     case 'archived':
       return 'Dibatalkan';
+    case 'draft':
     default:
       return 'Draf';
   }
@@ -78,8 +79,9 @@ function lifecycleCopy(item: AssessmentSummary): string {
       return 'Sedang dibuat…';
     case 'failed':
       return 'Gagal dibuat';
+    case 'draft':
     default:
-      return item.questionCount > 0 ? `Draf · ${item.questionCount} soal` : 'Draf belum berisi soal';
+      return item.questionCount > 0 ? `Draf · ${item.questionCount} soal` : 'Draf';
   }
 }
 
