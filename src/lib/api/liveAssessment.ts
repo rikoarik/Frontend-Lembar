@@ -78,7 +78,15 @@ export async function loadLiveAssessment(token: string, workspaceId: string, ass
         title: String(assessment.title ?? 'Lembar soal'),
         subject: String((config as Record<string, unknown>).subjectLabel ?? config.subjectId ?? 'Mata pelajaran'),
         gradeLabel: String((config as Record<string, unknown>).gradeLabel ?? config.gradeId ?? 'Kelas'),
-        lifecycle: finalized ? 'final' : questions.length ? 'review' : 'draft',
+        lifecycle: finalized
+          ? 'final'
+          : (() => {
+              const s = String(assessment.status ?? 'draft');
+              if (s === 'generating') return 'generating';
+              if (s === 'failed') return 'failed';
+              if (s === 'archived') return 'archived';
+              return questions.length > 0 ? 'review' : 'draft';
+            })(),
         questionCount: questions.length,
         reviewedCount,
         warningCount: 0,
