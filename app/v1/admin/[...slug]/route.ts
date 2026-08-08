@@ -28,11 +28,7 @@ async function handleProxy(request: NextRequest, context: { params: Promise<{ sl
   const jar = await cookies();
   const token = extractToken(request, jar);
 
-  console.log(`[Admin Proxy ${request.method}] Path:`, fullPath);
-  console.log('[Admin Proxy] Token found:', token ? `${token.slice(0, 12)}...` : 'NONE');
-
   if (!token && !isMockApiMode()) {
-    console.warn('[Admin Proxy] Rejected 401: No token found in cookies or Authorization header.');
     return NextResponse.json(
       {
         error: {
