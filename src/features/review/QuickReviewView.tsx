@@ -204,7 +204,6 @@ export function QuickReviewView({
 
   const onBulkAccept = async () => {
     if (selected.size === 0) return;
-    if (!window.confirm(`Terima ${selected.size} soal terpilih?`)) return;
     setBusy(true);
     const result = await assessmentService.bulkAccept(assessmentId, Array.from(selected));
     setBusy(false);
@@ -518,7 +517,7 @@ export function QuickReviewView({
           {selected.size > 0 ? (
             <section
               aria-label="Tindakan soal terpilih"
-              className="sticky bottom-0 flex flex-wrap items-center gap-3 rounded-t-md border border-brand-line bg-brand-surface px-4 py-3 shadow-lg"
+              className="sticky bottom-0 flex flex-wrap items-center gap-3 rounded-t-md border border-brand-line bg-brand-surface px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] shadow-lg"
             >
               <span className="flex-1 text-body-sm font-medium text-brand-ink">
                 {selected.size} soal dipilih

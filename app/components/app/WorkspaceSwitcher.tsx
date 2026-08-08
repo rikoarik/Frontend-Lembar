@@ -119,7 +119,9 @@ export function WorkspaceSwitcher({
                     <span className="truncate text-[13px] font-semibold text-[#171717]">
                       {workspace.name}
                     </span>
-                    <span className="text-[11px] text-[#6d665d]">Pribadi</span>
+                    <span className="text-[11px] text-[#6d665d]">
+                      {workspace.kind === 'school' ? 'Sekolah' : 'Pribadi'}
+                    </span>
                   </span>
                   {isActive ? (
                     <span

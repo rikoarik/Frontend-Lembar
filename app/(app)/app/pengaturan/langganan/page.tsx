@@ -177,6 +177,19 @@ export default function PlanUsageSettingsPage() {
             unit={isUnlimited ? 'lembar (unlimited)' : 'lembar / bulan'}
           />
 
+          {plan.billingCycleStartedAt ? (
+            <p className="text-body-sm text-brand-ink-muted">
+              Siklus tagihan mulai:{' '}
+              <span className="font-medium text-brand-ink">
+                {new Date(plan.billingCycleStartedAt).toLocaleDateString('id-ID', {
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric',
+                })}
+              </span>
+            </p>
+          ) : null}
+
           <div className="flex flex-col sm:flex-row gap-2 pt-1">
             {plan.plan === 'free' && (
               <Button size="sm" onClick={() => handleSubscribe('Guru Pro')}>
