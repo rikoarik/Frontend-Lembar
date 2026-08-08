@@ -4,45 +4,68 @@ import { FormEvent, useEffect, useId, useRef, useState } from 'react';
 
 const WHATSAPP_URL = 'https://wa.me/6285784255112';
 
-type Reply = { answered: boolean; message: string };
+type Reply = { answered: boolean; message: string; whatsappUrl?: string };
+type Message = { role: 'user' | 'bot'; text: string; whatsappUrl?: string };
 
 export default function SupportChat() {
   const [open, setOpen] = useState(false);
-  const [message, setMessage] = useState('');
-  const [reply, setReply] = useState<Reply | null>(null);
+  const [input, setInput] = useState('');
+  const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
-  const launcherRef = useRef<HTMLButtonElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const restoreFocusRef = useRef(false);
+  const bottomRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
-  const descriptionId = useId();
 
+  // Detect mobile
   useEffect(() => {
-    if (!open) {
-      if (restoreFocusRef.current) {
-        launcherRef.current?.focus();
-        restoreFocusRef.current = false;
-      }
-      return;
+    const check = () => setIsMobile(window.innerWidth < 640);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+
+  // Focus input on open
+  useEffect(() => {
+    if (open) {
+      setTimeout(() => inputRef.current?.focus(), 100);
     }
-    inputRef.current?.focus();
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        restoreFocusRef.current = true;
-        setOpen(false);
-      }
-    };
-    document.addEventListener('keydown', closeOnEscape);
-    return () => document.removeEventListener('keydown', closeOnEscape);
   }, [open]);
 
-  async function submit(event: FormEvent) {
-    event.preventDefault();
-    const trimmed = message.trim();
-    if (!trimmed || trimmed.length > 500) return;
+  // Scroll to bottom on new message
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, loading]);
 
+  // Close on Escape
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [open]);
+
+  // Lock body scroll on mobile when open
+  useEffect(() => {
+    if (isMobile && open) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [isMobile, open]);
+
+  async function submit(e: FormEvent) {
+    e.preventDefault();
+    const trimmed = input.trim();
+    if (!trimmed || loading) return;
+
+    setMessages((prev) => [...prev, { role: 'user', text: trimmed }]);
+    setInput('');
     setLoading(true);
-    setReply(null);
+
     try {
       const response = await fetch('/v1/public/support/chat', {
         method: 'POST',
@@ -51,108 +74,210 @@ export default function SupportChat() {
       });
       const body = await response.json().catch(() => null);
       if (!response.ok || typeof body?.data?.message !== 'string') throw new Error();
-      setReply({ answered: body.data.answered === true, message: body.data.message });
+      const reply: Reply = body.data;
+      setMessages((prev) => [
+        ...prev,
+        { role: 'bot', text: reply.message, whatsappUrl: reply.whatsappUrl },
+      ]);
     } catch {
-      setReply({
-        answered: false,
-        message: 'Maaf, kami tidak dapat menghubungi layanan chat saat ini.',
-      });
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'bot',
+          text: 'Maaf, layanan chat sedang tidak tersedia.',
+          whatsappUrl: WHATSAPP_URL,
+        },
+      ]);
     } finally {
       setLoading(false);
+      setTimeout(() => inputRef.current?.focus(), 50);
     }
   }
 
-  return (
-    <div className="fixed bottom-4 right-4 z-[60] sm:bottom-6 sm:right-6">
-      {open ? (
-        <section
-          role="dialog"
-          aria-modal="false"
-          aria-labelledby={titleId}
-          aria-describedby={descriptionId}
-          className="flex max-h-[calc(100dvh-2rem)] w-[calc(100vw-2rem)] max-w-sm flex-col overflow-auto rounded-2xl border border-brand-line bg-brand-paper p-4 text-brand-ink shadow-xl sm:p-5"
+  function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      void submit(e as unknown as FormEvent);
+    }
+  }
+
+  const chatWindow = (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={titleId}
+      className={
+        isMobile
+          ? 'fixed inset-0 z-[70] flex flex-col bg-white'
+          : 'flex flex-col overflow-hidden rounded-2xl border border-[#e6dfd4] bg-white shadow-2xl'
+      }
+      style={isMobile ? {} : { width: 360, height: 520 }}
+    >
+      {/* Header */}
+      <div className="flex items-center gap-3 border-b border-[#e6dfd4] bg-[#a3202b] px-4 py-3">
+        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/20">
+          <span className="material-symbols-outlined text-[20px] text-white">support_agent</span>
+        </div>
+        <div className="flex-1 min-w-0">
+          <p id={titleId} className="text-[14px] font-semibold text-white leading-tight">Tanya Lembar</p>
+          <p className="text-[11px] text-white/70 leading-tight">Biasanya membalas dalam hitungan detik</p>
+        </div>
+        <button
+          type="button"
+          aria-label="Tutup chat"
+          onClick={() => setOpen(false)}
+          className="flex h-8 w-8 items-center justify-center rounded-full text-white/80 hover:bg-white/20 transition-colors"
         >
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <h2 id={titleId} className="text-lg font-semibold">
-                Tanya Lembar
-              </h2>
-              <p id={descriptionId} className="mt-1 text-sm leading-5 text-brand-muted">
-                Chat ini hanya menjawab pertanyaan tentang Lembar. Chat ini tidak dapat menjawab
-                topik coding atau topik umum.
+          <span className="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </div>
+
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 bg-[#faf8f5]">
+        {/* Welcome bubble */}
+        {messages.length === 0 && (
+          <div className="flex items-start gap-2">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#a3202b]">
+              <span className="material-symbols-outlined text-[14px] text-white">smart_toy</span>
+            </div>
+            <div className="max-w-[260px] rounded-2xl rounded-tl-sm bg-white px-3 py-2.5 shadow-sm border border-[#e6dfd4]">
+              <p className="text-[13px] text-[#171717] leading-relaxed">
+                Halo! Saya asisten Lembar 👋<br />
+                Ada yang bisa saya bantu tentang platform Lembar?
               </p>
             </div>
-            <button
-              type="button"
-              aria-label="Tutup chat"
-              onClick={() => {
-                restoreFocusRef.current = true;
-                setOpen(false);
-              }}
-              className="min-h-11 min-w-11 rounded-xl border border-brand-line text-xl hover:bg-brand-surface focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-            >
-              ×
-            </button>
           </div>
+        )}
 
-          {reply && (
-            <div
-              role={reply.answered ? 'status' : 'alert'}
-              aria-live="polite"
-              className="mt-4 rounded-xl bg-brand-surface p-3 text-sm leading-5"
-            >
-              <p className="whitespace-pre-wrap">{reply.message}</p>
-              {!reply.answered && (
+        {messages.map((msg, i) => (
+          <div key={i} className={`flex items-end gap-2 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
+            {msg.role === 'bot' && (
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#a3202b]">
+                <span className="material-symbols-outlined text-[14px] text-white">smart_toy</span>
+              </div>
+            )}
+            <div className={`max-w-[260px] ${msg.role === 'user' ? 'items-end' : 'items-start'} flex flex-col gap-1.5`}>
+              <div
+                className={`rounded-2xl px-3 py-2.5 text-[13px] leading-relaxed ${
+                  msg.role === 'user'
+                    ? 'rounded-br-sm bg-[#a3202b] text-white'
+                    : 'rounded-bl-sm bg-white text-[#171717] shadow-sm border border-[#e6dfd4]'
+                }`}
+              >
+                <p className="whitespace-pre-wrap">{msg.text}</p>
+              </div>
+              {msg.whatsappUrl && (
                 <a
-                  href={WHATSAPP_URL}
+                  href={msg.whatsappUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="mt-3 inline-flex min-h-11 items-center rounded-xl bg-brand-ink px-4 font-semibold text-brand-paper hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-[#25d366] px-3 py-2 text-[12px] font-semibold text-white hover:bg-[#20bc5a] transition-colors"
                 >
+                  <span className="material-symbols-outlined text-[14px]">chat</span>
                   Lanjutkan di WhatsApp
                 </a>
               )}
             </div>
+          </div>
+        ))}
+
+        {loading && (
+          <div className="flex items-end gap-2">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#a3202b]">
+              <span className="material-symbols-outlined text-[14px] text-white">smart_toy</span>
+            </div>
+            <div className="rounded-2xl rounded-bl-sm bg-white px-4 py-3 shadow-sm border border-[#e6dfd4]">
+              <div className="flex gap-1 items-center">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#8a8379] animate-bounce" style={{ animationDelay: '0ms' }} />
+                <span className="h-1.5 w-1.5 rounded-full bg-[#8a8379] animate-bounce" style={{ animationDelay: '150ms' }} />
+                <span className="h-1.5 w-1.5 rounded-full bg-[#8a8379] animate-bounce" style={{ animationDelay: '300ms' }} />
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div ref={bottomRef} />
+      </div>
+
+      {/* Input */}
+      <div className="border-t border-[#e6dfd4] bg-white px-3 py-3">
+        <form onSubmit={submit} className="flex items-end gap-2">
+          <textarea
+            ref={inputRef}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Ketik pertanyaan Anda…"
+            maxLength={500}
+            rows={1}
+            disabled={loading}
+            className="flex-1 resize-none rounded-xl border border-[#e6dfd4] bg-[#faf8f5] px-3 py-2.5 text-[13px] text-[#171717] placeholder:text-[#8a8379] focus:border-[#a3202b] focus:outline-none focus:ring-2 focus:ring-[#a3202b]/20 disabled:opacity-60 max-h-[96px] overflow-y-auto"
+            style={{ lineHeight: '1.5' }}
+          />
+          <button
+            type="submit"
+            disabled={loading || !input.trim()}
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#a3202b] text-white hover:bg-[#851925] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            aria-label="Kirim pesan"
+          >
+            <span className="material-symbols-outlined text-[18px]">send</span>
+          </button>
+        </form>
+        <p className="mt-1.5 text-center text-[10px] text-[#8a8379]">
+          Ditenagai AI · Tidak bisa menjawab topik umum
+        </p>
+      </div>
+    </div>
+  );
+
+  return (
+    <>
+      {/* Mobile: fullscreen overlay */}
+      {isMobile && open && (
+        <div className="fixed inset-0 z-[70]">
+          {chatWindow}
+        </div>
+      )}
+
+      {/* Desktop: floating window */}
+      {!isMobile && open && (
+        <div className="fixed bottom-20 right-4 z-[60] sm:right-6 animate-in slide-in-from-bottom-4 fade-in duration-200">
+          {chatWindow}
+        </div>
+      )}
+
+      {/* Launcher button */}
+      <div className="fixed bottom-4 right-4 z-[60] sm:bottom-6 sm:right-6">
+        <button
+          type="button"
+          aria-label={open ? 'Tutup chat' : 'Buka chat bantuan'}
+          onClick={() => setOpen((v) => !v)}
+          className="group relative flex h-14 w-14 items-center justify-center rounded-full bg-[#a3202b] text-white shadow-lg hover:bg-[#851925] active:scale-95 transition-all duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#a3202b]"
+        >
+          <span
+            className={`material-symbols-outlined text-[26px] transition-all duration-200 ${open ? 'rotate-90 opacity-0 absolute' : 'rotate-0 opacity-100'}`}
+          >
+            chat
+          </span>
+          <span
+            className={`material-symbols-outlined text-[26px] transition-all duration-200 ${open ? 'rotate-0 opacity-100' : '-rotate-90 opacity-0 absolute'}`}
+          >
+            close
+          </span>
+
+          {/* Pulse ring — hanya saat tutup */}
+          {!open && (
+            <span className="absolute inset-0 rounded-full bg-[#a3202b] animate-ping opacity-20" />
           )}
 
-          <form onSubmit={submit} className="mt-4">
-            <label htmlFor={`${titleId}-message`} className="text-sm font-medium">
-              Pertanyaan
-            </label>
-            <textarea
-              ref={inputRef}
-              id={`${titleId}-message`}
-              value={message}
-              onChange={(event) => setMessage(event.target.value)}
-              maxLength={500}
-              rows={3}
-              required
-              disabled={loading}
-              className="mt-2 block w-full resize-none rounded-xl border border-brand-line bg-brand-paper px-3 py-2 text-sm focus:border-brand-ink focus:outline-none focus:ring-2 focus:ring-brand-ink/20 disabled:opacity-60"
-            />
-            <div className="mt-2 flex items-center justify-between gap-3">
-              <span className="text-xs text-brand-muted">{message.length}/500</span>
-              <button
-                type="submit"
-                disabled={loading || !message.trim()}
-                className="min-h-11 rounded-xl bg-brand-ink px-5 text-sm font-semibold text-brand-paper hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {loading ? 'Mengirim...' : 'Kirim'}
-              </button>
-            </div>
-          </form>
-        </section>
-      ) : (
-        <button
-          ref={launcherRef}
-          type="button"
-          aria-label="Buka chat layanan pelanggan"
-          onClick={() => setOpen(true)}
-          className="min-h-12 rounded-full border border-brand-line bg-brand-ink px-5 font-semibold text-brand-paper shadow-lg hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-        >
-          Tanya Lembar
+          {/* Tooltip */}
+          {!open && (
+            <span className="absolute right-16 whitespace-nowrap rounded-lg bg-[#171717] px-2.5 py-1.5 text-[12px] font-medium text-white opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-md">
+              Tanya Lembar
+            </span>
+          )}
         </button>
-      )}
-    </div>
+      </div>
+    </>
   );
 }
