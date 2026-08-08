@@ -1,36 +1,21 @@
-import { NextResponse } from 'next/server';
-import {
-  createShare,
-  getShare,
-  listShares,
-  revokeShare,
-} from '@/src/features/share/mockShareStore';
-import { isMockApiMode, mockFail, mockNotFound, mockOk } from '@/src/lib/mock-api/preview';
+import { NextResponse, type NextRequest } from 'next/server';
+import { backendFetch } from '@/src/lib/api/session';
+import { liveClaims } from '@/src/lib/api/liveAssessment';
 
-export async function GET(request: Request) {
-  if (!isMockApiMode()) return mockNotFound();
+async function proxy(request: NextRequest) {
+  const auth = await liveClaims();
+  if (!auth) return NextResponse.json({ error: { code: 'AUTH_REQUIRED', message: 'Silakan masuk terlebih dahulu.' } }, { status: 401 });
   const url = new URL(request.url);
-  const assessmentId = url.searchParams.get('assessmentId') ?? undefined;
-  return mockOk(listShares(assessmentId));
+  const upstream = await backendFetch(`/v1/shares${url.search}`, {
+    method: request.method,
+    token: auth.token,
+    ...(request.method !== 'GET' ? { body: await request.text() } : {}),
+  });
+  return new NextResponse(await upstream.text(), {
+    status: upstream.status,
+    headers: { 'content-type': upstream.headers.get('content-type') ?? 'application/json' },
+  });
 }
 
-export async function POST(request: Request) {
-  if (!isMockApiMode()) return mockNotFound();
-  let body: { assessmentId?: string; title?: string; daysValid?: number } = {};
-  try {
-    body = (await request.json()) as typeof body;
-  } catch {
-    return mockFail('VALIDATION_FAILED', 'Periksa kembali isian formulir.', 400);
-  }
-  if (!body.assessmentId || !body.title) {
-    return mockFail('VALIDATION_FAILED', 'assessmentId dan title wajib.', 400);
-  }
-  return mockOk(
-    createShare({
-      assessmentId: body.assessmentId,
-      title: body.title,
-      daysValid: body.daysValid,
-    }),
-    { status: 201 },
-  );
-}
+export const GET = proxy;
+export const POST = proxy;

@@ -1,29 +1,33 @@
-import { getShare } from '@/src/features/share/mockShareStore';
-import { isMockApiMode, mockFail, mockNotFound, mockOk } from '@/src/lib/mock-api/preview';
+import { NextResponse, type NextRequest } from 'next/server';
+import { backendFetch } from '@/src/lib/api/session';
+import { liveClaims } from '@/src/lib/api/liveAssessment';
 
-export async function GET(_request: Request, context: { params: Promise<{ token: string }> }) {
-  if (!isMockApiMode()) {
-    return mockFail(
-      'FEATURE_UNAVAILABLE',
-      'Tautan bagikan publik belum tersambung ke backend live.',
-      501,
-    );
-  }
+async function proxy(request: NextRequest, context: { params: Promise<{ token: string }> }) {
   const { token } = await context.params;
-  const share = getShare(token);
-  if (!share) return mockFail('RESOURCE_NOT_FOUND', 'Tautan bagikan tidak ditemukan.', 404);
-  if (share.status === 'revoked') {
-    return mockFail('SHARE_REVOKED', 'Tautan bagikan sudah dicabut.', 410);
+
+  // Public GET — no auth required
+  if (request.method === 'GET') {
+    const upstream = await backendFetch(`/v1/shares/${encodeURIComponent(token)}`, {
+      method: 'GET',
+    });
+    return new NextResponse(await upstream.text(), {
+      status: upstream.status,
+      headers: { 'content-type': upstream.headers.get('content-type') ?? 'application/json' },
+    });
   }
-  if (share.status === 'expired') {
-    return mockFail('SHARE_EXPIRED', 'Tautan bagikan sudah kedaluwarsa.', 410);
-  }
-  return mockOk({
-    title: share.title,
-    sheets: share.packageLabels.map((label, index) => ({
-      id: `s${index + 1}`,
-      label,
-      url: '#',
-    })),
+
+  const auth = await liveClaims();
+  if (!auth) return NextResponse.json({ error: { code: 'AUTH_REQUIRED', message: 'Silakan masuk terlebih dahulu.' } }, { status: 401 });
+  const upstream = await backendFetch(`/v1/shares/${encodeURIComponent(token)}`, {
+    method: request.method,
+    token: auth.token,
+    body: await request.text(),
+  });
+  return new NextResponse(await upstream.text(), {
+    status: upstream.status,
+    headers: { 'content-type': upstream.headers.get('content-type') ?? 'application/json' },
   });
 }
+
+export const GET = proxy;
+export const DELETE = proxy;
