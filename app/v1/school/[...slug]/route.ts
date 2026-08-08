@@ -81,6 +81,7 @@ async function handleProxy(request: NextRequest, context: { params: Promise<{ sl
       fullPath.startsWith('/v1/school/undangan') ||
       fullPath.startsWith('/v1/school/library') ||
       fullPath.startsWith('/v1/school/usage') ||
+      fullPath.startsWith('/v1/school/billing') ||
       fullPath.startsWith('/v1/school/pengaturan'))
   ) {
     const sep = fullPath.includes('?') ? '&' : '?';
