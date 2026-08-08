@@ -177,7 +177,7 @@ export default function PlanUsageSettingsPage() {
             unit={isUnlimited ? 'lembar (unlimited)' : 'lembar / bulan'}
           />
 
-          {plan.billingCycleStartedAt ? (
+          {plan.billingCycleStartedAt && plan.plan === 'pro' ? (
             <p className="text-body-sm text-brand-ink-muted">
               Siklus tagihan mulai:{' '}
               <span className="font-medium text-brand-ink">
@@ -187,6 +187,10 @@ export default function PlanUsageSettingsPage() {
                   year: 'numeric',
                 })}
               </span>
+            </p>
+          ) : plan.plan === 'free' ? (
+            <p className="text-body-sm text-brand-ink-muted">
+              Kuota direset setiap tanggal 1.
             </p>
           ) : null}
 
