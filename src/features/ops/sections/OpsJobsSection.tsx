@@ -58,9 +58,9 @@ export function OpsJobsSection({
         <h2 className="text-[18px] font-bold text-[#171717]">Jobs</h2>
         <Button
           size="sm"
-          disabled={!jobsData.some((job) => job.status === 'failed')}
+          disabled={!jobsData.some((job) => job.status === 'failed' || job.status === 'dead_letter')}
           onClick={() => {
-            const failedIds = jobsData.filter((j) => j.status === 'failed').map((j) => j.id);
+            const failedIds = jobsData.filter((j) => j.status === 'failed' || j.status === 'dead_letter').map((j) => j.id);
             if (failedIds.length === 0) {
               setToast('Tidak ada job failed.');
               return;
@@ -238,7 +238,7 @@ export function OpsJobsSection({
             >
               Detail
             </Button>
-            {row.status === 'failed' ? (
+            {(row.status === 'failed' || row.status === 'dead_letter') ? (
               <Button
                 size="sm"
                 onClick={() => {

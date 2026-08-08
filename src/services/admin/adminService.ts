@@ -94,7 +94,7 @@ export type AdminJobRow = {
   id: string;
   type: string;
   tenant: string;
-  status: 'queued' | 'running' | 'retry_wait' | 'failed' | 'succeeded';
+  status: 'queued' | 'running' | 'retry_wait' | 'failed' | 'dead_letter' | 'succeeded';
   attempt: number;
   workspaceId?: string;
   createdAt?: string;
