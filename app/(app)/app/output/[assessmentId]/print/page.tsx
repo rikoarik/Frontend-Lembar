@@ -8,6 +8,7 @@ import { StudentWorksheetRenderer } from '@/src/features/output/StudentWorksheet
 import type { PrintDTO, PrintMetadata } from '@/src/features/output/types';
 import { assessmentService } from '@/src/services/assessments/assessmentService';
 import type { AssessmentDetail } from '@/src/features/review/types';
+import { humanizeAssessmentLabel } from '@/src/features/history/HistoryView';
 
 const EMPTY_METADATA: PrintMetadata = {
   schoolName: '',
@@ -87,7 +88,9 @@ export default function OutputPrintPage({ params }: { params: Promise<{ assessme
         <div>
           <h1 className="text-h1 font-semibold text-brand-ink">Print preview A4</h1>
           <p className="text-body-sm text-brand-ink-muted">
-            {assessment ? `${assessment.title} · ${assessment.questionCount} soal` : error || 'Memuat dokumen final…'}
+            {assessment
+              ? `${humanizeAssessmentLabel(assessment.title)} · ${humanizeAssessmentLabel(assessment.subject ?? '')}${assessment.gradeLabel ? ` · ${humanizeAssessmentLabel(assessment.gradeLabel)}` : ''} · ${assessment.questionCount} soal`
+              : error || 'Memuat dokumen final…'}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">

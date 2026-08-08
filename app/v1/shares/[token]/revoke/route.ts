@@ -9,6 +9,7 @@ export async function POST(request: NextRequest, context: { params: Promise<{ to
   const upstream = await backendFetch(`/v1/shares/${encodeURIComponent(token)}/revoke`, {
     method: 'POST',
     token: auth.token,
+    headers: { 'x-workspace-id': auth.claims.workspaceId },
     body: '{}',
   });
   return new NextResponse(await upstream.text(), {

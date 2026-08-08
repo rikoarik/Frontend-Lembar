@@ -9,6 +9,7 @@ async function proxy(request: NextRequest) {
   const upstream = await backendFetch(`/v1/shares${url.search}`, {
     method: request.method,
     token: auth.token,
+    headers: { 'x-workspace-id': auth.claims.workspaceId },
     ...(request.method !== 'GET' ? { body: await request.text() } : {}),
   });
   return new NextResponse(await upstream.text(), {
