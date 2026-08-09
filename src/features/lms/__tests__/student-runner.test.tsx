@@ -1,262 +1,83 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import StudentRunner from '../StudentRunner';
 
-// Mock the BFF fetch calls
-const mockFetch = vi.fn();
-vi.stubGlobal('fetch', mockFetch);
-
-const ASSESSMENT_ID = 'asm_test_001';
-
-const MOCK_QUESTIONS = {
-  data: {
-    assessmentId: ASSESSMENT_ID,
-    title: 'Ulangan Harian Matematika',
-    subject: 'Matematika',
-    gradeLabel: 'Kelas 7',
-    questionCount: 2,
-    questions: [
-      {
-        number: 1,
-        stem: 'Berapakah 2 + 2?',
-        questionType: 'multiple_choice',
-        options: [
-          { key: 'a', text: '3' },
-          { key: 'b', text: '4' },
-          { key: 'c', text: '5' },
-        ],
-      },
-      {
-        number: 2,
-        stem: 'Sebutkan contoh bilangan prima!',
-        questionType: 'essay',
-      },
-    ],
-  },
-};
-
-const MOCK_ATTEMPT = {
-  data: {
-    id: 'attempt_001',
-    assessmentId: ASSESSMENT_ID,
-    guestName: 'Budi',
-    guestClass: '7A',
-    startedAt: new Date().toISOString(),
-    answers: [],
-  },
-};
-
-const MOCK_SUBMIT_OK = {
-  data: {
-    id: 'attempt_001',
-    submittedAt: new Date().toISOString(),
-  },
-};
-
-function makeOkResponse(body: unknown) {
-  return Promise.resolve(
-    new Response(JSON.stringify(body), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    }),
-  );
-}
-
-function makeErrorResponse(status: number, code: string, message: string) {
-  return Promise.resolve(
-    new Response(JSON.stringify({ error: { code, message } }), {
-      status,
-      headers: { 'Content-Type': 'application/json' },
-    }),
-  );
-}
+const fetchMock = vi.fn();
+vi.stubGlobal('fetch', fetchMock);
+const resolved = { data: { assessmentId: 'asm-1', title: 'Ulangan', questions: [
+  { id: 'q-uuid-1', number: 1, stem: 'Dua tambah dua?', questionType: 'multiple_choice', options: [{ key: 'A', text: '3' }, { key: 'B', text: '4' }] },
+  { id: 'q-uuid-2', number: 2, stem: 'Jelaskan', questionType: 'essay', options: [] },
+  { id: 'q-uuid-3', number: 3, stem: 'Benar?', questionType: 'true_false', options: [] },
+] } };
+const response = (body: unknown, status = 200) => Promise.resolve(new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } }));
 
 beforeEach(() => {
   vi.clearAllMocks();
-  // Default happy-path: questions load, attempt starts, submit succeeds
-  mockFetch.mockImplementation((url: string, init?: RequestInit) => {
-    // GET questions
-    if (typeof url === 'string' && url.includes('/lms/attempts') && (!init?.method || init.method === 'GET')) {
-      return makeOkResponse(MOCK_QUESTIONS);
-    }
-    // POST start attempt
-    if (typeof url === 'string' && url.includes('/lms/attempts') && init?.method === 'POST') {
-      return makeOkResponse(MOCK_ATTEMPT);
-    }
-    // PUT submit
-    if (typeof url === 'string' && url.includes('/lms/attempts') && init?.method === 'PUT') {
-      return makeOkResponse(MOCK_SUBMIT_OK);
-    }
-    return makeErrorResponse(404, 'NOT_FOUND', 'Not found');
+  fetchMock.mockImplementation((url: string, init?: RequestInit) => {
+    if (url === '/v1/public/shares/token-1' && !init?.method) return response(resolved);
+    if (url.endsWith('/attempts') && init?.method === 'POST') return response({ data: { id: 'attempt-1' } });
+    if (url.endsWith('/answers') && init?.method === 'PUT') return response({ data: {} });
+    if (url.endsWith('/submit') && init?.method === 'POST') return response({ data: { submittedAt: '2026-08-09' } });
+    return response({ error: { message: 'Tidak ditemukan' } }, 404);
   });
 });
 
-describe('StudentRunner — identitas form', () => {
-  it('shows identity form before starting', () => {
-    render(<StudentRunner assessmentId={ASSESSMENT_ID} />);
-    expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
-    expect(screen.getByLabelText(/nama/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/kelas/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /mulai/i })).toBeInTheDocument();
+describe('StudentRunner token publik', () => {
+  it('resolve dulu lalu meminta identitas tanpa membocorkan jawaban', async () => {
+    render(<StudentRunner token="token-1" />);
+    expect(await screen.findByText('Ulangan')).toBeInTheDocument();
+    expect(screen.getByLabelText('Nama')).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledWith('/v1/public/shares/token-1', undefined);
+    expect(screen.queryByText(/penjelasan|kunci jawaban/i)).not.toBeInTheDocument();
   });
 
-  it('disables mulai button when nama is empty', () => {
-    render(<StudentRunner assessmentId={ASSESSMENT_ID} />);
-    expect(screen.getByRole('button', { name: /mulai/i })).toBeDisabled();
-  });
-
-  it('enables mulai button when nama is filled', async () => {
-    const user = userEvent.setup();
-    render(<StudentRunner assessmentId={ASSESSMENT_ID} />);
-    await user.type(screen.getByLabelText(/nama/i), 'Budi');
-    expect(screen.getByRole('button', { name: /mulai/i })).not.toBeDisabled();
-  });
-
-  it('requires only nama — kelas is optional', async () => {
-    const user = userEvent.setup();
-    render(<StudentRunner assessmentId={ASSESSMENT_ID} />);
-    await user.type(screen.getByLabelText(/nama/i), 'Budi');
-    expect(screen.getByRole('button', { name: /mulai/i })).not.toBeDisabled();
-  });
-});
-
-describe('StudentRunner — loading soal', () => {
-  it('shows loading state after submitting identity', async () => {
-    const user = userEvent.setup();
-    // Make questions fetch hang so we can catch the loading state
-    mockFetch.mockImplementation(() => new Promise(() => {}));
-    render(<StudentRunner assessmentId={ASSESSMENT_ID} />);
-    await user.type(screen.getByLabelText(/nama/i), 'Budi');
+  it('memulai attempt sesudah resolve dan memakai UUID untuk autosave', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    render(<StudentRunner token="token-1" />);
+    await screen.findByText('Ulangan');
+    await user.type(screen.getByLabelText('Nama'), 'Budi');
     await user.click(screen.getByRole('button', { name: /mulai/i }));
-    await waitFor(() => {
-      expect(screen.getByText(/memuat/i)).toBeInTheDocument();
+    await screen.findByText(/Dua tambah dua/);
+    await user.click(screen.getByRole('radio', { name: /B\. 4/ }));
+    vi.advanceTimersByTime(700);
+    await waitFor(() => expect(fetchMock.mock.calls.some(([url, init]) => url.endsWith('/answers') && init.method === 'PUT' && init.body === JSON.stringify({ answers: { 'q-uuid-1': 'B' } }))).toBe(true));
+    vi.useRealTimers();
+  });
+
+  it('merender true false sebagai pilihan dan esai sebagai textarea', async () => {
+    const user = userEvent.setup();
+    render(<StudentRunner token="token-1" />);
+    await screen.findByText('Ulangan');
+    await user.type(screen.getByLabelText('Nama'), 'Budi');
+    await user.click(screen.getByRole('button', { name: /mulai/i }));
+    expect(await screen.findByRole('textbox', { name: /soal 2/i })).toBeInTheDocument();
+    expect(screen.getAllByRole('radio')).toHaveLength(4);
+  });
+
+  it('submit gagal tetap menampilkan soal, jawaban, dan tombol coba lagi', async () => {
+    fetchMock.mockImplementation((url: string, init?: RequestInit) => {
+      if (url === '/v1/public/shares/token-1') return response(resolved);
+      if (url.endsWith('/attempts')) return response({ data: { id: 'attempt-1' } });
+      if (url.endsWith('/submit')) return response({ error: { message: 'Koneksi putus' } }, 500);
+      return response({ data: {} });
     });
-  });
-
-  it('renders questions after fetch succeeds', async () => {
     const user = userEvent.setup();
-    render(<StudentRunner assessmentId={ASSESSMENT_ID} />);
-    await user.type(screen.getByLabelText(/nama/i), 'Budi');
-    await user.type(screen.getByLabelText(/kelas/i), '7A');
+    render(<StudentRunner token="token-1" />);
+    await screen.findByText('Ulangan');
+    await user.type(screen.getByLabelText('Nama'), 'Budi');
     await user.click(screen.getByRole('button', { name: /mulai/i }));
-    await waitFor(() => {
-      expect(screen.getByText(/berapakah 2 \+ 2/i)).toBeInTheDocument();
-    });
-  });
-
-  it('shows fetch error when BFF fails', async () => {
-    const user = userEvent.setup();
-    mockFetch.mockResolvedValue(
-      new Response(JSON.stringify({ error: { code: 'NOT_FOUND', message: 'Lembar tidak ditemukan.' } }), {
-        status: 404,
-        headers: { 'Content-Type': 'application/json' },
-      }),
-    );
-    render(<StudentRunner assessmentId={ASSESSMENT_ID} />);
-    await user.type(screen.getByLabelText(/nama/i), 'Budi');
-    await user.click(screen.getByRole('button', { name: /mulai/i }));
-    await waitFor(() => {
-      expect(screen.getByRole('alert')).toBeInTheDocument();
-    });
-  });
-});
-
-describe('StudentRunner — menjawab soal', () => {
-  async function startRunner() {
-    const user = userEvent.setup();
-    render(<StudentRunner assessmentId={ASSESSMENT_ID} />);
-    await user.type(screen.getByLabelText(/nama/i), 'Budi');
-    await user.type(screen.getByLabelText(/kelas/i), '7A');
-    await user.click(screen.getByRole('button', { name: /mulai/i }));
-    await waitFor(() => screen.getByText(/berapakah 2 \+ 2/i));
-    return user;
-  }
-
-  it('renders all questions on screen', async () => {
-    await startRunner();
-    expect(screen.getByText(/berapakah 2 \+ 2/i)).toBeInTheDocument();
-    expect(screen.getByText(/contoh bilangan prima/i)).toBeInTheDocument();
-  });
-
-  it('renders multiple choice options as radio inputs', async () => {
-    await startRunner();
-    const radios = screen.getAllByRole('radio');
-    expect(radios.length).toBeGreaterThanOrEqual(3);
-  });
-
-  it('renders essay question as textarea', async () => {
-    await startRunner();
-    expect(screen.getByRole('textbox', { name: /soal 2/i })).toBeInTheDocument();
-  });
-
-  it('selecting a radio option records the answer', async () => {
-    const user = await startRunner();
-    const option = screen.getByRole('radio', { name: /^b/i });
-    await user.click(option);
-    expect(option).toBeChecked();
-  });
-
-  it('typing in essay textarea records the answer', async () => {
-    const user = await startRunner();
-    const textarea = screen.getByRole('textbox', { name: /soal 2/i });
-    await user.type(textarea, '2, 3, 5, 7');
-    expect(textarea).toHaveValue('2, 3, 5, 7');
-  });
-});
-
-describe('StudentRunner — submit', () => {
-  async function fillAndStart() {
-    const user = userEvent.setup();
-    render(<StudentRunner assessmentId={ASSESSMENT_ID} />);
-    await user.type(screen.getByLabelText(/nama/i), 'Budi');
-    await user.type(screen.getByLabelText(/kelas/i), '7A');
-    await user.click(screen.getByRole('button', { name: /mulai/i }));
-    await waitFor(() => screen.getByText(/berapakah 2 \+ 2/i));
-    return user;
-  }
-
-  it('shows submit button when questions are loaded', async () => {
-    await fillAndStart();
-    expect(screen.getByRole('button', { name: /kirim/i })).toBeInTheDocument();
-  });
-
-  it('calls PUT /lms/attempts on submit', async () => {
-    const user = await fillAndStart();
+    await user.type(await screen.findByRole('textbox', { name: /soal 2/i }), 'Jawaban saya');
     await user.click(screen.getByRole('button', { name: /kirim/i }));
-    await waitFor(() => {
-      const putCall = mockFetch.mock.calls.find(
-        ([, init]) => (init as RequestInit)?.method === 'PUT',
-      );
-      expect(putCall).toBeDefined();
-    });
+    expect(await screen.findByRole('alert')).toHaveTextContent('Koneksi putus');
+    expect(screen.getByRole('textbox', { name: /soal 2/i })).toHaveValue('Jawaban saya');
+    expect(screen.getByRole('button', { name: /coba kirim lagi/i })).toBeInTheDocument();
   });
 
-  it('shows konfirmasi after successful submit', async () => {
-    const user = await fillAndStart();
-    await user.click(screen.getByRole('button', { name: /kirim/i }));
-    await waitFor(() => {
-      expect(screen.getByText(/berhasil/i)).toBeInTheDocument();
-    });
-  });
-
-  it('shows error alert when submit fails', async () => {
-    mockFetch.mockImplementation((url: string, init?: RequestInit) => {
-      if (typeof url === 'string' && url.includes('/lms/attempts') && (!init?.method || init.method === 'GET')) {
-        return makeOkResponse(MOCK_QUESTIONS);
-      }
-      if (typeof url === 'string' && url.includes('/lms/attempts') && init?.method === 'POST') {
-        return makeOkResponse(MOCK_ATTEMPT);
-      }
-      if (typeof url === 'string' && url.includes('/lms/attempts') && init?.method === 'PUT') {
-        return makeErrorResponse(500, 'SERVER_ERROR', 'Gagal menyimpan jawaban.');
-      }
-      return makeErrorResponse(404, 'NOT_FOUND', 'Not found');
-    });
-    const user = await fillAndStart();
-    await user.click(screen.getByRole('button', { name: /kirim/i }));
-    await waitFor(() => {
-      expect(screen.getByRole('alert')).toBeInTheDocument();
-    });
+  it('membedakan tautan kedaluwarsa dan dicabut', async () => {
+    fetchMock.mockReturnValueOnce(response({ error: { code: 'SHARE_REVOKED' } }, 410));
+    render(<StudentRunner token="token-1" />);
+    expect(await screen.findByRole('alert')).toHaveTextContent(/dicabut/i);
   });
 });
