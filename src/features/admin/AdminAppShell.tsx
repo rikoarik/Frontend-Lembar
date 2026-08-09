@@ -6,7 +6,6 @@ import { AdminBadge, AdminShell } from '@/src/features/admin/AdminChrome';
 import { AdminPanelProvider } from '@/src/features/admin/adminPanelState';
 import { OPS_NAV, SCHOOL_NAV, sectionFromPath } from '@/src/features/admin/types';
 import { RoleSwitcher } from '@/src/features/admin/RoleSwitcher';
-import { ImpersonationBanner } from '@/app/components/auth/ImpersonationBanner';
 
 function titleFromPath(pathname: string, root: '/school' | '/ops', nav: typeof SCHOOL_NAV): string {
   const exact = nav.find((item) => item.href === pathname);
@@ -32,7 +31,6 @@ export function SchoolAdminShell({
   return (
     <AdminPanelProvider panelId="school">
       <div className="flex h-dvh flex-col">
-        <ImpersonationBanner />
         <div className="min-h-0 flex-1">
           <AdminShell
             brand="lembar school"
@@ -66,7 +64,6 @@ export function OpsAdminShell({ children }: { children: ReactNode }) {
   return (
     <AdminPanelProvider panelId="ops">
       <div className="flex h-dvh flex-col">
-        <ImpersonationBanner />
         <div className="min-h-0 flex-1">
           <AdminShell
             brand="Lembar ops"

@@ -12,10 +12,14 @@ vi.mock('next/navigation', () => ({
 
 vi.mock('@/src/services/school/schoolService', () => ({
   schoolService: {
+    audit: vi.fn(),
+    billing: vi.fn(),
+    dashboard: vi.fn(),
     members: vi.fn(),
     memberSuspend: vi.fn(),
     memberUnsuspend: vi.fn(),
     removeMember: vi.fn(),
+    usage: vi.fn(),
   },
 }));
 
@@ -87,5 +91,96 @@ describe('SchoolAdminView guru data states', () => {
     expect(
       await screen.findByRole('status', { name: /belum ada anggota sekolah/i }),
     ).toBeInTheDocument();
+  });
+});
+
+describe('SchoolAdminView honest contract rendering', () => {
+  it('keeps billing failure visible without active or paid claims', async () => {
+    vi.mocked(schoolService.billing).mockResolvedValue({
+      ok: false,
+      error: { code: 'NETWORK', safeMessage: 'Billing tidak dapat dijangkau.', retryable: true },
+    });
+
+    render(
+      <AdminPanelProvider panelId="school-billing-test">
+        <SchoolAdminView section="billing" />
+      </AdminPanelProvider>,
+    );
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Billing tidak dapat dijangkau.');
+    expect(screen.queryByText(/lunas \/ aktif/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/status: aktif/i)).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /unduh faktur/i })).not.toBeInTheDocument();
+  });
+
+  it('renders billing seat count and cycle start using the actual billing contract', async () => {
+    vi.mocked(schoolService.billing).mockResolvedValue({
+      ok: true,
+      value: {
+        workspaceId: 'workspace-1',
+        plan: 'pro',
+        seatCount: 7,
+        generationsUsedThisMonth: 18,
+        monthlyLimit: null,
+        billingCycleStartedAt: '2026-08-01T00:00:00.000Z',
+      },
+    });
+
+    render(
+      <AdminPanelProvider panelId="school-billing-contract-test">
+        <SchoolAdminView section="billing" />
+      </AdminPanelProvider>,
+    );
+
+    expect(await screen.findByText('7 Guru')).toBeInTheDocument();
+    expect(screen.getByText('Mulai Siklus Billing')).toBeInTheDocument();
+    expect(screen.getByText(/tidak terbatas/i)).toBeInTheDocument();
+  });
+
+  it('renders unlimited usage without a misleading progress bar', async () => {
+    vi.mocked(schoolService.usage).mockResolvedValue({
+      ok: true,
+      value: { quotaUsed: 12, quotaLimit: 0, breakdown: [], trend: [] },
+    });
+
+    render(
+      <AdminPanelProvider panelId="school-usage-test">
+        <SchoolAdminView section="penggunaan" />
+      </AdminPanelProvider>,
+    );
+
+    expect(await screen.findByText(/12 \/ tidak terbatas/i)).toBeInTheDocument();
+    expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+  });
+
+  it('shows a safe fallback for an unknown section', () => {
+    render(
+      <AdminPanelProvider panelId="school-unknown-test">
+        <SchoolAdminView section="tidak-ada" />
+      </AdminPanelProvider>,
+    );
+
+    expect(screen.getByRole('alert')).toHaveTextContent(/halaman tidak ditemukan/i);
+  });
+
+  it('renders a non-string audit target safely', async () => {
+    vi.mocked(schoolService.audit).mockResolvedValue({
+      ok: true,
+      value: {
+        data: [{
+          id: 'audit-1', at: '2026-08-01', actor: 'Admin', action: 'update',
+          target: { id: 'member-1' } as unknown as string, metadata: null,
+        }],
+        meta: { total: 1, page: 1, limit: 20, pages: 1 },
+      },
+    });
+
+    render(
+      <AdminPanelProvider panelId="school-audit-safe-test">
+        <SchoolAdminView section="audit" />
+      </AdminPanelProvider>,
+    );
+
+    expect(await screen.findByText('{"id":"member-1"}')).toBeInTheDocument();
   });
 });

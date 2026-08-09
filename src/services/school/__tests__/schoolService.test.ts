@@ -46,6 +46,21 @@ describe('schoolService', () => {
     });
   });
 
+  it('loads the actual school billing endpoint', async () => {
+    mockFetch(Response.json({ data: { plan: 'pro', seatCount: 4, monthlyLimit: null } }));
+
+    const result = await schoolService.billing();
+
+    expect(fetch).toHaveBeenCalledWith(
+      '/v1/school/billing',
+      expect.objectContaining({ method: 'GET', credentials: 'include' }),
+    );
+    expect(result).toEqual({
+      ok: true,
+      value: { plan: 'pro', seatCount: 4, monthlyLimit: null },
+    });
+  });
+
   it('normalizes paginated meta totalPages to pages', async () => {
     mockFetch(
       Response.json({

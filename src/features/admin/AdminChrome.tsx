@@ -170,6 +170,7 @@ export function AdminFilterChip({
   return (
     <button
       type="button"
+      aria-pressed={active}
       onClick={onClick}
       className={`inline-flex min-h-[34px] items-center rounded-lg border px-3 text-[12px] font-medium transition-colors ${
         active
@@ -263,6 +264,18 @@ export function AdminConfirmModal({
   onConfirm: () => void;
   onCancel: () => void;
 }) {
+  const cancelRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    cancelRef.current?.focus();
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onCancel();
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [open, onCancel]);
+
   if (!open) return null;
 
   return (
@@ -297,7 +310,7 @@ export function AdminConfirmModal({
         </div>
 
         <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#eee6da]/60">
-          <Button size="sm" variant="secondary" onClick={onCancel} disabled={loading}>
+          <Button ref={cancelRef} size="sm" variant="secondary" onClick={onCancel} disabled={loading}>
             {cancelLabel}
           </Button>
           <Button
@@ -844,7 +857,7 @@ export function AdminShell({
 
                 <div className="mt-2 space-y-1">
                   <Link
-                    href="/ops/profile"
+                    href={isOps ? '/ops/profile' : '/school/pengaturan'}
                     onClick={() => setProfileOpen(false)}
                     className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[12px] font-medium text-white/80 hover:bg-white/10 hover:text-white transition-colors"
                   >

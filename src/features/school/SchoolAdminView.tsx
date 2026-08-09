@@ -63,6 +63,16 @@ function fmtDate(iso: string | null | undefined): string {
   }
 }
 
+function safeText(value: unknown): string {
+  if (value == null) return '—';
+  if (typeof value === 'string') return value;
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return '—';
+  }
+}
+
 // ── Section: Ringkasan ────────────────────────────────────────────────────────
 
 function SectionRingkasan({
@@ -537,9 +547,8 @@ function SectionPenggunaan({
     );
   }
 
-  const pct = Math.round(
-    (usage.quotaUsed / Math.max(usage.quotaLimit, 1)) * 100,
-  );
+  const unlimited = usage.quotaLimit === 0;
+  const pct = unlimited ? 0 : Math.round((usage.quotaUsed / usage.quotaLimit) * 100);
 
   return (
     <div className="space-y-6">
@@ -547,10 +556,17 @@ function SectionPenggunaan({
         <div className="flex justify-between text-sm mb-2">
           <span className="font-medium">Kuota terpakai</span>
           <span className="text-neutral-500">
-            {usage.quotaUsed} / {usage.quotaLimit} ({pct}%)
+            {usage.quotaUsed} / {unlimited ? 'Tidak terbatas' : `${usage.quotaLimit} (${pct}%)`}
           </span>
         </div>
-        <div className="h-2 rounded-full bg-neutral-100 dark:bg-neutral-800">
+        {!unlimited && <div
+          role="progressbar"
+          aria-label="Kuota terpakai"
+          aria-valuemin={0}
+          aria-valuemax={usage.quotaLimit}
+          aria-valuenow={Math.min(usage.quotaUsed, usage.quotaLimit)}
+          className="h-2 rounded-full bg-neutral-100 dark:bg-neutral-800"
+        >
           <div
             className={`h-2 rounded-full transition-all ${
               pct >= 90
@@ -561,7 +577,7 @@ function SectionPenggunaan({
             }`}
             style={{ width: `${Math.min(pct, 100)}%` }}
           />
-        </div>
+        </div>}
       </div>
 
       {usage.breakdown.length > 0 && (
@@ -695,266 +711,46 @@ function SectionPengaturan({
 
 // ── Section: Billing ──────────────────────────────────────────────────────────
 
-type SchoolInvoice = {
-  id: string;
-  date: string;
-  description: string;
-  amount: number;
-  paymentMethod: string;
-  status: 'paid' | 'pending' | 'failed';
-};
-
-const SAMPLE_INVOICES: SchoolInvoice[] = [
-  {
-    id: 'INV-SCH-2026-001',
-    date: '2026-01-10',
-    description: 'Langganan Paket Sekolah Pro (25 Lisensi Guru)',
-    amount: 4500000,
-    paymentMethod: 'Transfer Bank BCA',
-    status: 'paid',
-  },
-  {
-    id: 'INV-SCH-2025-001',
-    date: '2025-01-10',
-    description: 'Langganan Paket Sekolah Pro (15 Lisensi Guru)',
-    amount: 2700000,
-    paymentMethod: 'Transfer Bank BCA',
-    status: 'paid',
-  },
-];
-
-function SectionBilling({
-  setToast,
-}: {
-  setToast: (msg: string) => void;
-}) {
-  const [settings, setSettings] = useState<SchoolSettings | null>(null);
+function SectionBilling() {
+  const [billing, setBilling] = useState<import('@/src/services/school/schoolService').SchoolBilling | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
-    schoolService.settings().then((res) => {
+    schoolService.billing().then((res) => {
       if (cancelled) return;
-      if (res.ok) {
-        setSettings(res.value);
-      } else {
-        setToast(`Gagal memuat billing: ${res.error.safeMessage}`);
-      }
+      if (res.ok) setBilling(res.value);
+      else setError(res.error.safeMessage);
       setLoading(false);
     });
-    return () => {
-      cancelled = true;
-    };
-  }, [setToast]);
+    return () => { cancelled = true; };
+  }, []);
 
   if (loading) return <AdminContentLoading />;
-
-  const planLabel =
-    settings?.plan === 'pro_sekolah' || settings?.plan === 'school_pro'
-      ? 'Paket Sekolah Pro'
-      : settings?.plan === 'enterprise'
-        ? 'Paket Enterprise'
-        : 'Paket Sekolah Basic';
+  if (error || !billing) {
+    return (
+      <div role="alert" className="rounded-xl border border-brand-danger/30 bg-brand-danger-soft px-6 py-5 text-sm text-brand-danger">
+        <p className="font-semibold text-[#171717]">Gagal memuat billing sekolah</p>
+        <p className="mt-1">{error ?? 'Data billing tidak tersedia.'}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
-      {/* Header & Status Card */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-[18px] font-bold text-[#171717]">Langganan & Tagihan Sekolah</h2>
-          <p className="text-[13px] text-[#6d665d] mt-0.5">
-            Kelola paket langganan, alokasi lisensi guru, dan riwayat tagihan faktur sekolah.
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            size="sm"
-            variant="secondary"
-            onClick={() => setToast('Permintaan unduh faktur terakhir sedang diproses.')}
-          >
-            <span className="material-symbols-outlined text-[16px] mr-1" aria-hidden>
-              download
-            </span>
-            Unduh Faktur Terakhir
-          </Button>
-          <Button
-            size="sm"
-            onClick={() =>
-              setToast(
-                'Silakan hubungi Account Manager Lembar di sales@lembar.id untuk penambahan kursi.',
-              )
-            }
-          >
-            <span className="material-symbols-outlined text-[16px] mr-1" aria-hidden>
-              add_circle
-            </span>
-            Tambah Lisensi Guru
-          </Button>
-        </div>
+      <div>
+        <h2 className="text-[18px] font-bold text-[#171717]">Langganan & Tagihan Sekolah</h2>
+        <p className="mt-0.5 text-[13px] text-[#6d665d]">Ringkasan paket aktual dari layanan billing.</p>
       </div>
-
-      {/* Overview Stat Cards */}
-      <AdminStatCards
-        items={[
-          {
-            label: 'Paket Langganan',
-            value: planLabel,
-            hint: `ID Sekolah: ${settings?.slug ?? '—'}`,
-            tone: 'ok',
-          },
-          {
-            label: 'Lisensi Guru (Seats)',
-            value: `${settings?.seats ?? 0} Guru`,
-            hint: 'Kapasitas akun guru aktif',
-            tone: 'info',
-          },
-          {
-            label: 'Perpanjangan Berikutnya',
-            value: fmtDate(settings?.renewsAt),
-            hint: 'Perpanjangan otomatis tahunan',
-            tone: 'neutral',
-          },
-          {
-            label: 'Status Pembayaran',
-            value: 'Lunas / Aktif',
-            hint: 'Tidak ada tagihan tertunggak',
-            tone: 'ok',
-          },
-        ]}
-      />
-
-      {/* Billing Overview Box */}
-      <div className="rounded-2xl border border-[#ddd4c8]/70 bg-white p-6 shadow-sm space-y-4">
-        <div className="flex items-center justify-between border-b border-[#eee6da]/70 pb-3">
-          <h3 className="text-[15px] font-bold text-[#171717]">Detail Langganan Sekolah</h3>
-          <AdminPill tone="ok">Status: Aktif</AdminPill>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-[13px]">
-          <div>
-            <span className="block text-[#6d665d] text-[11px] font-semibold uppercase tracking-wider">
-              Nama Instansi
-            </span>
-            <span className="font-bold text-[#171717]">{settings?.name ?? '—'}</span>
-          </div>
-          <div>
-            <span className="block text-[#6d665d] text-[11px] font-semibold uppercase tracking-wider">
-              Jenjang Sekolah
-            </span>
-            <span className="font-semibold text-[#171717] uppercase">
-              {settings?.level ?? 'SD / SMP / SMA'}
-            </span>
-          </div>
-          <div>
-            <span className="block text-[#6d665d] text-[11px] font-semibold uppercase tracking-wider">
-              Batas AI Per Bulan
-            </span>
-            <span className="font-semibold text-brand-accent">Unlimited Terpusat</span>
-          </div>
-          <div>
-            <span className="block text-[#6d665d] text-[11px] font-semibold uppercase tracking-wider">
-              Metode Tagihan
-            </span>
-            <span className="font-medium text-[#171717]">Faktur Tahunan (Invoice)</span>
-          </div>
-        </div>
-
-        <div className="rounded-xl bg-[#faf7f2] border border-[#eee6da] p-4 text-[12px] leading-relaxed text-[#57534e] space-y-1">
-          <div className="font-semibold text-[#171717] flex items-center gap-1.5">
-            <span className="material-symbols-outlined text-[16px] text-brand-accent">
-              verified
-            </span>
-            Manfaat Paket Sekolah Pro Aktif:
-          </div>
-          <ul className="list-disc list-inside space-y-0.5 text-[#6d665d] pl-1">
-            <li>
-              Akses penuh Pembuat Soal AI untuk seluruh {settings?.seats ?? 0} akun guru terdaftar
-            </li>
-            <li>Bank Soal Terpusat & Sinkronisasi Kurikulum Sekolah</li>
-            <li>Dashboard Analitik & Audit Log Aktivitas Guru</li>
-            <li>Dukungan Prioritas & Account Manager Khusus</li>
-          </ul>
-        </div>
-      </div>
-
-      {/* Invoices Table */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-2">
-          <h3 className="text-[15px] font-bold text-[#171717]">Riwayat Pembayaran & Faktur</h3>
-          <AdminPill tone="warn">Data contoh</AdminPill>
-        </div>
-        <p className="text-[12px] text-[#9c8f83]">
-          Riwayat faktur aktual akan tersedia setelah integrasi portal billing selesai. Data di bawah adalah contoh tampilan.
-        </p>
-        <AdminDataTable
-          rows={SAMPLE_INVOICES}
-          columns={[
-            {
-              key: 'id',
-              header: 'No. Faktur',
-              render: (row) => (
-                <span className="font-mono font-semibold text-[#171717]">{row.id}</span>
-              ),
-            },
-            {
-              key: 'date',
-              header: 'Tanggal',
-              render: (row) => (
-                <span className="text-[12px] text-[#6d665d]">{fmtDate(row.date)}</span>
-              ),
-            },
-            {
-              key: 'description',
-              header: 'Deskripsi Paket',
-              render: (row) => (
-                <span className="font-medium text-[#171717]">{row.description}</span>
-              ),
-            },
-            {
-              key: 'amount',
-              header: 'Nominal',
-              align: 'right',
-              render: (row) => (
-                <span className="font-bold text-[#171717] tabular-nums">
-                  Rp {row.amount.toLocaleString('id-ID')}
-                </span>
-              ),
-            },
-            {
-              key: 'paymentMethod',
-              header: 'Metode',
-              render: (row) => <span className="text-[12px] text-[#6d665d]">{row.paymentMethod}</span>,
-            },
-            {
-              key: 'status',
-              header: 'Status',
-              align: 'center',
-              render: (row) => (
-                <AdminPill tone={row.status === 'paid' ? 'ok' : 'warn'}>
-                  {row.status === 'paid' ? 'Lunas' : 'Menunggu'}
-                </AdminPill>
-              ),
-            },
-            {
-              key: 'action',
-              header: 'Aksi',
-              align: 'right',
-              render: (row) => (
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  onClick={() => setToast(`Mengunduh faktur PDF ${row.id}...`)}
-                >
-                  <span className="material-symbols-outlined text-[15px] mr-1" aria-hidden>
-                    picture_as_pdf
-                  </span>
-                  Unduh Faktur
-                </Button>
-              ),
-            },
-          ]}
-        />
+      <AdminStatCards items={[
+        { label: 'Paket', value: billing.plan, tone: 'neutral' },
+        { label: 'Lisensi Guru', value: `${billing.seatCount} Guru`, hint: 'Anggota aktif', tone: 'info' },
+        { label: 'Penggunaan Bulan Ini', value: `${billing.generationsUsedThisMonth} / ${billing.monthlyLimit ?? 'Tidak terbatas'}`, tone: 'neutral' },
+        { label: 'Mulai Siklus Billing', value: fmtDate(billing.billingCycleStartedAt), hint: 'Tanggal mulai siklus, bukan tanggal perpanjangan', tone: 'neutral' },
+      ]} />
+      <div role="status" className="rounded-xl border border-[#ddd4c8] bg-white px-5 py-4 text-sm text-[#57534e]">
+        Riwayat dan unduhan faktur belum tersedia.
       </div>
     </div>
   );
@@ -1160,7 +956,7 @@ function SectionAudit({
             {
               key: 'target',
               header: 'Target',
-              render: (row) => row.target ?? '—',
+              render: (row) => safeText(row.target),
             },
           ]}
         />
@@ -1419,6 +1215,7 @@ function SectionNotifikasi({ setToast }: { setToast: (msg: string) => void }) {
           </span>
           <div className="flex gap-1">
             <button
+              aria-label="Halaman notifikasi sebelumnya"
               disabled={page <= 1}
               onClick={() => setPage((p) => p - 1)}
               className="px-3 py-1 rounded-lg border border-[#ddd4c8] text-[12px] disabled:opacity-40"
@@ -1426,6 +1223,7 @@ function SectionNotifikasi({ setToast }: { setToast: (msg: string) => void }) {
               ‹
             </button>
             <button
+              aria-label="Halaman notifikasi berikutnya"
               disabled={page >= meta.pages}
               onClick={() => setPage((p) => p + 1)}
               className="px-3 py-1 rounded-lg border border-[#ddd4c8] text-[12px] disabled:opacity-40"
@@ -1473,7 +1271,7 @@ export function SchoolAdminView({ section = '' }: { section?: string }) {
       ) : null}
 
       {current === 'billing' ? (
-        <SectionBilling setToast={setToast} />
+        <SectionBilling />
       ) : null}
 
       {current === 'pengaturan' ? (
@@ -1498,6 +1296,15 @@ export function SchoolAdminView({ section = '' }: { section?: string }) {
 
       {current === 'notifikasi' ? (
         <SectionNotifikasi setToast={setToast} />
+      ) : null}
+
+      {![
+        '', 'guru', 'undang', 'undangan', 'penggunaan', 'billing', 'pengaturan',
+        'library', 'audit', 'notifikasi',
+      ].includes(current) ? (
+        <div role="alert" className="rounded-xl border border-[#ddd4c8] bg-white px-6 py-8 text-center">
+          Halaman tidak ditemukan.
+        </div>
       ) : null}
     </div>
   );

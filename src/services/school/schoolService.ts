@@ -165,6 +165,15 @@ export type SchoolUsage = {
   trend: SchoolUsageTrendItem[];
 };
 
+export type SchoolBilling = {
+  workspaceId: string;
+  plan: string;
+  seatCount: number;
+  generationsUsedThisMonth: number;
+  monthlyLimit: number | null;
+  billingCycleStartedAt: string;
+};
+
 export type SchoolLibraryItem = {
   id: string;
   title: string;
@@ -316,6 +325,10 @@ export const schoolService = {
   // Usage
   usage(): Promise<Result<SchoolUsage, SchoolError>> {
     return request<SchoolUsage>('/v1/school/usage');
+  },
+
+  billing(): Promise<Result<SchoolBilling, SchoolError>> {
+    return request<SchoolBilling>('/v1/school/billing');
   },
 
   // Library — server-side search + pagination

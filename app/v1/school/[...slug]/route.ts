@@ -16,24 +16,9 @@ function extractToken(request: NextRequest, jar: Awaited<ReturnType<typeof cooki
   return cookieToken?.trim() || null;
 }
 
-/** Decode JWT payload without verifying signature (server-side only). */
-function decodeJwtPayload(token: string): Record<string, unknown> | null {
-  try {
-    const parts = token.split('.');
-    if (parts.length !== 3) return null;
-    const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
-    const json = Buffer.from(base64, 'base64').toString('utf-8');
-    return JSON.parse(json) as Record<string, unknown>;
-  } catch {
-    return null;
-  }
-}
-
 async function handleProxy(request: NextRequest, context: { params: Promise<{ slug: string[] }> }) {
   const { slug } = await context.params;
-  const path = `/v1/school/${slug.join('/')}`;
-  const search = request.nextUrl.search;
-  let fullPath = `${path}${search}`;
+  const fullPath = `/v1/school/${slug.join('/')}${request.nextUrl.search}`;
 
   const jar = await cookies();
   const token = extractToken(request, jar);
@@ -51,43 +36,6 @@ async function handleProxy(request: NextRequest, context: { params: Promise<{ sl
     );
   }
 
-  // Decode JWT to extract userId + workspaceId + roles for required headers
-  const jwtPayload = decodeJwtPayload(token);
-  const userId = (jwtPayload?.['userId'] as string) || (jwtPayload?.['sub'] as string) || '';
-  const workspaceId = (jwtPayload?.['workspaceId'] as string) || '';
-  const roles = (jwtPayload?.['roles'] as string[]) ?? [];
-  const userRole = roles.includes('school_admin')
-    ? 'school_admin'
-    : roles.includes('superadmin')
-      ? 'superadmin'
-      : 'teacher';
-
-  // dashboard endpoint needs workspaceId as query param
-  if (path === '/v1/school/dashboard' && workspaceId && !request.nextUrl.searchParams.get('workspaceId')) {
-    const sep = search ? '&' : '?';
-    fullPath = `${path}${search}${sep}workspaceId=${encodeURIComponent(workspaceId)}`;
-  }
-
-  // Ponytail: many BE school routes (members, audit, notifications) read
-  // workspaceId from query string. Inject it whenever we have one and the
-  // caller forgot, so the BFF stays 200 without forcing every callsite to
-  // pass it.
-  if (
-    workspaceId &&
-    !fullPath.includes('workspaceId=') &&
-    (fullPath.startsWith('/v1/school/members') ||
-      fullPath.startsWith('/v1/school/audit') ||
-      fullPath.startsWith('/v1/school/notifications') ||
-      fullPath.startsWith('/v1/school/undangan') ||
-      fullPath.startsWith('/v1/school/library') ||
-      fullPath.startsWith('/v1/school/usage') ||
-      fullPath.startsWith('/v1/school/billing') ||
-      fullPath.startsWith('/v1/school/pengaturan'))
-  ) {
-    const sep = fullPath.includes('?') ? '&' : '?';
-    fullPath = `${fullPath}${sep}workspaceId=${encodeURIComponent(workspaceId)}`;
-  }
-
   let body: unknown = undefined;
   if (request.method !== 'GET' && request.method !== 'HEAD') {
     try {
@@ -97,19 +45,9 @@ async function handleProxy(request: NextRequest, context: { params: Promise<{ sl
     }
   }
 
-  // Build headers — backendFetch accepts standard RequestInit headers
-  const extraHeaders: Record<string, string> = {
-    'x-user-role': userRole,
-  };
-  if (workspaceId) extraHeaders['x-workspace-id'] = workspaceId;
-  // Ponytail: BE keys plan rows by workspace; align tenant with workspace
-  // instead of userId so school mutations route to the correct tenant.
-  if (workspaceId) extraHeaders['x-tenant-id'] = workspaceId;
-
   const upstream = await backendFetch(fullPath, {
     method: request.method,
     token,
-    headers: extraHeaders,
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
 
