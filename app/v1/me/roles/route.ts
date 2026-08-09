@@ -1,10 +1,16 @@
 import { cookies } from 'next/headers';
+import { NextResponse } from 'next/server';
 import { findMockAccountBySession } from '@/src/lib/mock-api/accounts';
 import { isMockApiMode, mockFail, mockOk } from '@/src/lib/mock-api/preview';
 import { JWT_COOKIE, SESSION_COOKIE } from '@/src/lib/api/session';
 
 const ROLES_COOKIE = 'lembar_roles';
 const ACTIVE_ROLE_COOKIE = 'lembar_active_role';
+const ROLE_PATHS: Record<string, string> = {
+  teacher: '/app',
+  school_admin: '/school',
+  superadmin: '/ops',
+};
 
 function parseRolesFromJwt(jwt: string): string[] {
   try {
@@ -22,7 +28,11 @@ function parseRolesFromJwt(jwt: string): string[] {
     const rawRoles =
       payload.roles ?? payload.role ?? payload.workspace?.role ?? payload.activeWorkspace?.role;
     if (Array.isArray(rawRoles)) return rawRoles;
-    if (typeof rawRoles === 'string') return rawRoles.split(',').map((r) => r.trim()).filter(Boolean);
+    if (typeof rawRoles === 'string')
+      return rawRoles
+        .split(',')
+        .map((r) => r.trim())
+        .filter(Boolean);
     return [];
   } catch {
     return [];
@@ -69,4 +79,36 @@ export async function GET() {
   if (session === 'ops') return mockOk({ roles: ['superadmin'] });
   if (session === 'admin') return mockOk({ roles: ['school_admin'] });
   return mockOk({ roles: ['teacher'] });
+}
+
+export async function POST(request: Request) {
+  const jar = await cookies();
+  const session = jar.get(SESSION_COOKIE)?.value || jar.get(JWT_COOKIE)?.value;
+  if (!session) return mockFail('AUTH_REQUIRED', 'Silakan masuk terlebih dahulu.', 401);
+
+  const role = String((await request.formData()).get('role') ?? '');
+  const cookieRoles =
+    jar
+      .get(ROLES_COOKIE)
+      ?.value?.split(',')
+      .map((value) => value.trim()) ?? [];
+  const roles = isMockApiMode()
+    ? (findMockAccountBySession(session)?.roles ?? ['teacher'])
+    : [...new Set([...cookieRoles, ...parseRolesFromJwt(session)])];
+
+  if (!ROLE_PATHS[role] || !roles.includes(role)) {
+    return mockFail('ROLE_FORBIDDEN', 'Role tidak tersedia untuk akun ini.', 403);
+  }
+
+  const response = NextResponse.redirect(new URL(ROLE_PATHS[role], request.url), 303);
+  response.cookies.set({
+    name: ACTIVE_ROLE_COOKIE,
+    value: role,
+    path: '/',
+    sameSite: 'lax',
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 60 * 60 * 24 * 7,
+  });
+  return response;
 }

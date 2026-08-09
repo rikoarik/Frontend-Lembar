@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { useRoles, activeRoleFromPathname, roleLabel, rolePath, type Role } from './useRoles';
+import { useRoles, activeRoleFromPathname, roleLabel, type Role } from './useRoles';
 
 /**
  * Compact pill-bar role switcher.
@@ -26,22 +26,20 @@ export function RoleSwitcher() {
       {availableRoles.map((role) => {
         const isActive = role === activeRole;
         return (
-          <a
-            key={role}
-            href={rolePath(role)}
-            onClick={(e) => {
-              e.preventDefault();
-              document.cookie = `lembar_active_role=${role}; path=/; max-age=${60 * 60 * 24 * 7}`;
-              window.location.href = rolePath(role);
-            }}
-            className={`px-2.5 py-1 text-[11px] font-semibold rounded-full transition-all ${
-              isActive
-                ? 'bg-[#171717] text-white shadow-sm'
-                : 'text-[#57534e] hover:text-[#171717] hover:bg-[#f0ebe3]'
-            }`}
-          >
-            {roleLabel(role)}
-          </a>
+          <form key={role} action="/v1/me/roles" method="post">
+            <button
+              type="submit"
+              name="role"
+              value={role}
+              className={`px-2.5 py-1 text-[11px] font-semibold rounded-full transition-all ${
+                isActive
+                  ? 'bg-[#171717] text-white shadow-sm'
+                  : 'text-[#57534e] hover:text-[#171717] hover:bg-[#f0ebe3]'
+              }`}
+            >
+              {roleLabel(role)}
+            </button>
+          </form>
         );
       })}
     </div>
