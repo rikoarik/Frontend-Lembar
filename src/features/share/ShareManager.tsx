@@ -55,10 +55,10 @@ export function ShareManager({ assessmentId, title }: { assessmentId: string; ti
     try {
       const created = await api<ShareLink>('/shares', {
         method: 'POST',
-        body: JSON.stringify({ assessmentId, title, daysValid: 30 }),
+        body: JSON.stringify({ assessmentId, title, ttlSeconds: 30 * 24 * 60 * 60 }),
       });
-      setItems((prev) => [created, ...prev]);
-      setMessage(`Tautan dibuat: /bagikan/${created.token}`);
+      setItems((prev) => [created, ...prev.filter((item) => item.token !== created.token)]);
+      setMessage(`Asesmen diterbitkan: /attempt/${created.token}`);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Gagal membuat tautan.');
     } finally {
@@ -70,9 +70,8 @@ export function ShareManager({ assessmentId, title }: { assessmentId: string; ti
     setBusy(true);
     setMessage('');
     try {
-      const updated = await api<ShareLink>(`/shares/${encodeURIComponent(token)}/revoke`, {
-        method: 'POST',
-        body: '{}',
+      const updated = await api<ShareLink>(`/shares/${encodeURIComponent(token)}`, {
+        method: 'DELETE',
       });
       setItems((prev) => prev.map((item) => (item.token === token ? updated : item)));
       setMessage('Tautan dicabut.');
@@ -84,7 +83,7 @@ export function ShareManager({ assessmentId, title }: { assessmentId: string; ti
   };
 
   const onCopy = async (token: string) => {
-    const url = `${window.location.origin}/bagikan/${token}`;
+    const url = `${window.location.origin}/attempt/${token}`;
     try {
       await navigator.clipboard.writeText(url);
       setMessage('Tautan disalin.');
@@ -95,13 +94,13 @@ export function ShareManager({ assessmentId, title }: { assessmentId: string; ti
 
   return (
     <Panel
-      title="Tautan bagikan terkontrol"
-      description="Buat, salin, atau cabut tautan read-only."
+      title="Terbitkan asesmen"
+      description="Bagikan tautan agar siswa dapat mengerjakan asesmen."
     >
       <div className="flex flex-col gap-3">
         <div className="flex flex-wrap gap-2">
           <Button loading={busy} loadingLabel="Membuat…" onClick={() => void onCreate()}>
-            Buat tautan 30 hari
+            Terbitkan asesmen
           </Button>
           <Button variant="secondary" onClick={() => void load()}>
             Muat ulang
@@ -136,10 +135,10 @@ export function ShareManager({ assessmentId, title }: { assessmentId: string; ti
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <Link
-                    href={`/bagikan/${item.token}`}
+                    href={`/attempt/${item.token}`}
                     className="inline-flex min-h-[var(--control-sm)] items-center rounded-md border border-brand-line px-3 text-body-sm"
                   >
-                    Buka viewer
+                    Buka asesmen
                   </Link>
                   <Button size="sm" variant="secondary" onClick={() => void onCopy(item.token)}>
                     Salin
