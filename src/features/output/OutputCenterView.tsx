@@ -85,6 +85,12 @@ export function OutputCenterView({ assessmentId }: { assessmentId: string }) {
           >
             Edit soal
           </Link>
+          <Link
+            href={`/app/output/${assessmentId}/results`}
+            className="inline-flex min-h-[var(--control-md)] items-center rounded-md border border-brand-line px-4 text-body-sm"
+          >
+            Lihat hasil siswa
+          </Link>
           <StatusBadge
             label={
               output.status === 'ready'
