@@ -73,6 +73,17 @@ function safeText(value: unknown): string {
   }
 }
 
+function neutralMetadataLabel(value: string): string {
+  return value.toLowerCase() === 'unknown' ? 'Belum tersedia' : value;
+}
+
+function notificationStatusLabel(status: string): string {
+  if (status === 'pending') return 'Menunggu';
+  if (status === 'delivered') return 'Terkirim';
+  if (status === 'failed') return 'Gagal';
+  return status;
+}
+
 // ── Section: Ringkasan ────────────────────────────────────────────────────────
 
 function SectionRingkasan({
@@ -114,7 +125,10 @@ function SectionRingkasan({
   const quotaLimit = dashboard.usage.monthlyLimit;
   const quotaUsed = dashboard.usage.generationsUsedThisMonth;
   const pct = quotaLimit && quotaLimit > 0 ? Math.round((quotaUsed / quotaLimit) * 100) : 0;
-  const schoolHint = [dashboard.usage.plan, dashboard.workspace.level].filter(Boolean).join(' · ');
+  const schoolHint = [dashboard.usage.plan, dashboard.workspace.level]
+    .filter(Boolean)
+    .map(neutralMetadataLabel)
+    .join(' · ');
 
   return (
     <AdminStatCards
@@ -325,6 +339,7 @@ function SectionGuru({
       ) : (
         <AdminDataTable
           rows={members}
+          footerNote=""
           columns={[
             {
               key: 'name',
@@ -334,7 +349,9 @@ function SectionGuru({
                   <AdminAvatar name={row.name ?? row.email} />
                   <div>
                     <div className="font-medium text-sm">{row.name ?? row.email}</div>
-                    <div className="text-xs text-neutral-400">{row.email}</div>
+                    {row.name && row.name !== row.email ? (
+                      <div className="text-xs text-neutral-400">{row.email}</div>
+                    ) : null}
                   </div>
                 </div>
               ),
@@ -583,6 +600,7 @@ function SectionPenggunaan({
       {usage.breakdown.length > 0 && (
         <AdminDataTable
           rows={usage.breakdown.map((b) => ({ ...b, id: b.userId }))}
+          footerNote=""
           emptyLabel="Tidak ada data"
           columns={[
             {
@@ -694,8 +712,8 @@ function SectionPengaturan({
           <div>
             Slug: <span className="font-mono">{settings.slug}</span>
           </div>
-          <div>Level: {settings.level}</div>
-          <div>Paket: {settings.plan}</div>
+          <div>Level: {neutralMetadataLabel(settings.level)}</div>
+          <div>Paket: {neutralMetadataLabel(settings.plan)}</div>
           <div>Kursi: {settings.seats}</div>
           {settings.renewsAt && (
             <div>Perpanjang: {fmtDate(settings.renewsAt)}</div>
@@ -1033,7 +1051,7 @@ function SectionUndangan({ setToast }: { setToast: (msg: string) => void }) {
     <>
       <AdminDataTable
         rows={invitations}
-        emptyLabel="Tidak ada undangan pending"
+        emptyLabel="Tidak ada undangan menunggu"
         columns={[
           {
             key: 'email',
@@ -1153,7 +1171,7 @@ function SectionNotifikasi({ setToast }: { setToast: (msg: string) => void }) {
                 : 'bg-white text-[#6d665d] border-[#ddd4c8] hover:bg-[#faf8f5]'
             }`}
           >
-            {s || 'Semua'}
+            {s ? notificationStatusLabel(s) : 'Semua'}
           </button>
         ))}
         <button
@@ -1183,7 +1201,7 @@ function SectionNotifikasi({ setToast }: { setToast: (msg: string) => void }) {
             {
               key: 'status',
               header: 'Status',
-              render: (row) => <AdminPill tone={notifTone(row.status)}>{row.status}</AdminPill>,
+              render: (row) => <AdminPill tone={notifTone(row.status)}>{notificationStatusLabel(row.status)}</AdminPill>,
             },
             {
               key: 'attempt',

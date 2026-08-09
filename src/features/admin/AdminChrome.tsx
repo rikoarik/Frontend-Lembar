@@ -774,7 +774,7 @@ export function AdminShell({
 
           <nav
             aria-label="Navigasi panel"
-            className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto p-3"
+            className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto p-3 pb-6"
           >
             {!collapsed ? (
               <div className="px-2.5 pb-1.5 pt-1 text-[10px] font-bold uppercase tracking-[0.12em] text-white/30">
