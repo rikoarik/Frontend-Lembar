@@ -31,7 +31,7 @@ describe('POST /v1/me/roles', () => {
     );
 
     expect(response.status).toBe(303);
-    expect(response.headers.get('location')).toBe('http://localhost/app');
+    expect(response.headers.get('location')).toBe('/app');
     expect(response.headers.get('set-cookie')).toMatch(/lembar_active_role=teacher/);
     expect(response.headers.get('set-cookie')).toMatch(/HttpOnly/i);
   });

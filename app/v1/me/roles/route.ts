@@ -100,7 +100,10 @@ export async function POST(request: Request) {
     return mockFail('ROLE_FORBIDDEN', 'Role tidak tersedia untuk akun ini.', 403);
   }
 
-  const response = NextResponse.redirect(new URL(ROLE_PATHS[role], request.url), 303);
+  const response = new NextResponse(null, {
+    status: 303,
+    headers: { Location: ROLE_PATHS[role] },
+  });
   response.cookies.set({
     name: ACTIVE_ROLE_COOKIE,
     value: role,
