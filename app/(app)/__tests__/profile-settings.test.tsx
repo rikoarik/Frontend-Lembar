@@ -6,6 +6,21 @@ import ProfileSettingsPage from '../app/pengaturan/profil/page';
 describe('F2-06 profile settings — /app/pengaturan/profil', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          data: { account: { displayName: 'All Roles', email: 'allroles@test.com' } },
+        }),
+      }),
+    );
+  });
+
+  it('menampilkan email akun dari /v1/me', async () => {
+    render(<ProfileSettingsPage />);
+
+    expect(await screen.findAllByText('allroles@test.com')).toHaveLength(2);
   });
 
   it('renders display-name form, password-change entry, and log-out-everywhere CTA', async () => {

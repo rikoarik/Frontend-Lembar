@@ -166,9 +166,11 @@ export function authSuccessFromBackend(auth: any) {
   };
 }
 
-export function mePayloadFromBackendUser(user: BackendUser) {
+export function mePayloadFromBackendUser(user: BackendUser, activeRole?: string) {
   const roles = normalizeRoles(user);
-  const role = activeRoleForRoles(roles);
+  const role = activeRole && roles.includes(activeRole)
+    ? activeRoleForRoles([activeRole])
+    : activeRoleForRoles(roles);
   const userId = user?.id ?? 'demo';
   const workspaceId = user?.workspaceId ?? `ws_${userId.slice(0, 8)}`;
   const workspaceName =
@@ -189,6 +191,7 @@ export function mePayloadFromBackendUser(user: BackendUser) {
     account: {
       id: user.id,
       displayName: user.name || user.email,
+      email: user.email,
     },
     activeWorkspaceId: workspaceId,
     activeWorkspace: {

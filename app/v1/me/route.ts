@@ -48,5 +48,5 @@ export async function GET() {
     return mockFail('AUTH_REQUIRED', 'Sesi tidak valid. Masuk ulang.', 401);
   }
 
-  return mockOk(mePayloadFromBackendUser(user));
+  return mockOk(mePayloadFromBackendUser(user, jar.get('lembar_active_role')?.value));
 }
