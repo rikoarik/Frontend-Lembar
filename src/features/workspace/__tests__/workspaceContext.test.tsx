@@ -74,7 +74,7 @@ describe('WorkspaceContext — F2-03 real data injection', () => {
     expect(screen.getByTestId('display-name')).toHaveTextContent('Demo Guru');
   });
 
-  it('switches workspace and clears cache', async () => {
+  it('menolak switch kosmetik dan mempertahankan workspace serta cache aktif', async () => {
     const user = userEvent.setup();
     render(
       <WorkspaceProvider
@@ -89,9 +89,9 @@ describe('WorkspaceContext — F2-03 real data injection', () => {
     await user.click(screen.getByRole('button', { name: 'register' }));
     await user.click(screen.getByRole('button', { name: 'switch' }));
 
-    expect(window.localStorage.getItem('cleared')).toBe('yes');
-    expect(screen.getByTestId('workspace-id')).toHaveTextContent('ws-2');
-    expect(screen.getByTestId('cache-key')).toHaveTextContent('ws-2:dashboard');
+    expect(window.localStorage.getItem('cleared')).toBeNull();
+    expect(screen.getByTestId('workspace-id')).toHaveTextContent('ws-1');
+    expect(screen.getByTestId('cache-key')).toHaveTextContent('ws-1:dashboard');
   });
 
   it('scopes cache keys by active workspace id', () => {

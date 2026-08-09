@@ -54,6 +54,13 @@ describe('role-based mock login', () => {
 });
 
 describe('authSuccessFromBackend role normalization', () => {
+  it('tidak menaikkan role hanya karena workspace bertipe school', async () => {
+    const { authSuccessFromBackend } = await import('@/src/lib/api/session');
+    const res = authSuccessFromBackend({ data: { workspace: { type: 'school' } } });
+    expect(res.activeRole).toBe('teacher');
+    expect(res.homePath).toBe('/app');
+  });
+
   it('correctly resolves school_admin from nested workspace.role payload', async () => {
     const { authSuccessFromBackend } = await import('@/src/lib/api/session');
     const rawBackendPayload = {

@@ -65,7 +65,7 @@ export type BackendAuthResponse = {
  * - `roles: "superadmin,school_admin"` (comma-separated)
  * - `role: "superadmin"` (singular field)
  * - `workspace: { role: "school_admin" }` or `activeWorkspace: { role: "school_admin" }`
- * - `workspaces: [{ role: "school_admin" }]` or `workspace: { type: "school" }`
+ * - `workspaces: [{ role: "school_admin" }]`
  */
 export function normalizeRoles(user: any): string[] {
   if (!user) return [];
@@ -97,17 +97,12 @@ export function normalizeRoles(user: any): string[] {
   const wsRole = user.workspace?.role ?? user.activeWorkspace?.role;
   check(wsRole);
 
-  const wsType = user.workspace?.type ?? user.activeWorkspace?.type;
-  if (wsType === 'school') {
-    found.add('school_admin');
-  }
-
   // 4. Check workspaces array
   if (Array.isArray(user.workspaces)) {
     for (const ws of user.workspaces) {
       if (ws && typeof ws === 'object') {
         if (typeof ws.role === 'string') check(ws.role);
-        if (ws.type === 'school') found.add('school_admin');
+
       }
     }
   }

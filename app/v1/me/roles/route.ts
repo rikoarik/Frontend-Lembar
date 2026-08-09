@@ -23,7 +23,6 @@ function parseRolesFromJwt(jwt: string): string[] {
       payload.roles ?? payload.role ?? payload.workspace?.role ?? payload.activeWorkspace?.role;
     if (Array.isArray(rawRoles)) return rawRoles;
     if (typeof rawRoles === 'string') return rawRoles.split(',').map((r) => r.trim()).filter(Boolean);
-    if (payload.workspace?.type === 'school') return ['school_admin'];
     return [];
   } catch {
     return [];

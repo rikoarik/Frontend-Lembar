@@ -71,7 +71,7 @@ export function ShareManager({ assessmentId, title }: { assessmentId: string; ti
     setMessage('');
     try {
       const updated = await api<ShareLink>(`/shares/${encodeURIComponent(token)}/revoke`, {
-        method: 'DELETE',
+        method: 'POST',
         body: '{}',
       });
       setItems((prev) => prev.map((item) => (item.token === token ? updated : item)));

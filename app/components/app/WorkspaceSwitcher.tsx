@@ -21,11 +21,7 @@ export function WorkspaceSwitcher({
   const wrapperRef = useRef<HTMLDivElement>(null);
   const active = workspaces.find((workspace) => workspace.id === activeWorkspaceId);
 
-  // Filter workspaces to match current active workspace kind (e.g. personal in /app)
-  // so school admin workspaces never mix into the /app workspace switcher.
-  const relevantWorkspaces = workspaces.filter(
-    (w) => w.kind === (active?.kind ?? 'personal'),
-  );
+  const relevantWorkspaces = workspaces;
   const hasMultiple = relevantWorkspaces.length > 1;
 
   const handleBlur = (e: React.FocusEvent<HTMLDivElement>) => {
@@ -106,6 +102,8 @@ export function WorkspaceSwitcher({
                   type="button"
                   role="option"
                   aria-selected={isActive}
+                  disabled={!isActive}
+                  title={!isActive ? 'Beralih workspace belum tersedia' : undefined}
                   onClick={() => {
                     onSelect(workspace.id);
                     setOpen(false);

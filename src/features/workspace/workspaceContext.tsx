@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
+import { createContext, useCallback, useContext, useMemo, useRef } from 'react';
 import type { ActiveRole, WorkspaceKind } from '@/src/types/auth';
 
 type Workspace = {
@@ -67,26 +67,15 @@ export function WorkspaceProvider({
   const firstWorkspace = workspaceList[0];
   const resolvedActiveId = initialActiveId ?? firstWorkspace?.id ?? '';
 
-  const [activeWorkspaceId, setActiveWorkspaceId] = useState(resolvedActiveId);
-  const [announcement, setAnnouncement] = useState(() => {
-    const ws = workspaceList.find((w) => w.id === resolvedActiveId) ?? firstWorkspace;
-    return ws ? `Workspace aktif: ${labelFor(ws)}` : '';
-  });
+  const activeWorkspaceId = resolvedActiveId;
+  const ws = workspaceList.find((w) => w.id === resolvedActiveId) ?? firstWorkspace;
+  const announcement = ws ? `Workspace aktif: ${labelFor(ws)}` : '';
   const cacheRef = useRef(new Map<string, CacheEntry>());
 
   const activeWorkspace =
     workspaceList.find((workspace) => workspace.id === activeWorkspaceId) ??
     firstWorkspace ??
     DEMO_WORKSPACES[0];
-
-  const clearCacheFor = useCallback((workspaceId: string) => {
-    for (const [key, entry] of cacheRef.current) {
-      if (key.startsWith(`${workspaceId}:`)) {
-        entry.clear();
-        cacheRef.current.delete(key);
-      }
-    }
-  }, []);
 
   const getCacheKey = useCallback(
     (key: string) => `${activeWorkspaceId}:${key}`,
@@ -102,17 +91,8 @@ export function WorkspaceProvider({
     [activeWorkspaceId],
   );
 
-  const switchWorkspace = useCallback(
-    (workspaceId: string) => {
-      const nextWorkspace = workspaceList.find((workspace) => workspace.id === workspaceId);
-      if (!nextWorkspace || workspaceId === activeWorkspaceId) return false;
-      clearCacheFor(activeWorkspaceId);
-      setActiveWorkspaceId(workspaceId);
-      setAnnouncement(`Workspace aktif: ${labelFor(nextWorkspace)}`);
-      return true;
-    },
-    [activeWorkspaceId, clearCacheFor, workspaceList],
-  );
+  // Backend belum menyediakan kontrak switch yang terverifikasi; jangan palsukan konteks aktif.
+  const switchWorkspace = useCallback((_workspaceId: string) => false, []);
 
   const value = useMemo<WorkspaceContextValue>(
     () => ({
