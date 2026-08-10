@@ -10,7 +10,7 @@ async function api<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(path, { ...init, credentials: 'include', headers: { 'content-type': 'application/json', ...init?.headers } });
   const payload = await response.json().catch(() => null);
   if (!response.ok) throw new Error(payload?.error?.message ?? 'Permintaan gagal');
-  return payload.data as T;
+  return (response.status === 204 ? undefined : payload.data) as T;
 }
 
 export default function KelasPage() {
@@ -45,6 +45,17 @@ export default function KelasPage() {
     finally { setBusy(false); }
   };
 
+  const deleteClass = async (room: ClassRoom) => {
+    if (!confirm(`Hapus kelas "${room.name}" dan semua siswa? Tindakan ini tidak dapat dibatalkan.`)) return;
+    setBusy(true); setError('');
+    try {
+      await api<void>(`/v1/classes/${room.id}`, { method: 'DELETE' });
+      if (selected?.id === room.id) { setSelected(null); setStudents([]); }
+      await loadClasses();
+    } catch (reason) { setError(reason instanceof Error ? reason.message : 'Gagal menghapus kelas'); }
+    finally { setBusy(false); }
+  };
+
   const addStudent = async (event: React.FormEvent) => {
     event.preventDefault(); if (!selected) return; setBusy(true); setError('');
     try {
@@ -68,7 +79,7 @@ export default function KelasPage() {
       </Panel>
       <div className="grid gap-4 lg:grid-cols-[1fr_1.4fr]">
         <Panel title="Daftar kelas" description={`${classes.length} rombel`}>
-          {classes.length === 0 ? <p className="text-body-sm text-brand-ink-muted">Belum ada kelas.</p> : <ul className="space-y-2">{classes.map((room) => <li key={room.id}><button type="button" onClick={() => void openClass(room)} className={`w-full rounded-md border p-3 text-left ${selected?.id === room.id ? 'border-brand-accent bg-brand-paper' : 'border-brand-line'}`}><strong>{room.name}</strong><p className="text-body-xs text-brand-ink-muted">{room.gradeLabel || 'Jenjang belum diisi'} · {room.studentCount} siswa</p></button></li>)}</ul>}
+          {classes.length === 0 ? <p className="text-body-sm text-brand-ink-muted">Belum ada kelas.</p> : <ul className="space-y-2">{classes.map((room) => <li key={room.id} className="flex gap-2"><button type="button" onClick={() => void openClass(room)} className={`flex-1 rounded-md border p-3 text-left ${selected?.id === room.id ? 'border-brand-accent bg-brand-paper' : 'border-brand-line'}`}><strong>{room.name}</strong><p className="text-body-xs text-brand-ink-muted">{room.gradeLabel || 'Jenjang belum diisi'} · {room.studentCount} siswa</p></button><Button type="button" onClick={() => void deleteClass(room)} disabled={busy}>Hapus</Button></li>)}</ul>}
         </Panel>
         <Panel title={selected ? `Siswa ${selected.name}` : 'Daftar siswa'} description={selected ? `${students.length} siswa terdaftar` : 'Pilih kelas untuk membuka roster.'}>
           {selected ? <div className="space-y-4"><form onSubmit={addStudent} className="flex flex-col gap-2 sm:flex-row"><input required maxLength={120} value={studentName} onChange={(e) => setStudentName(e.target.value)} placeholder="Nama siswa" className="min-h-10 flex-1 rounded-md border border-brand-line px-3"/><input maxLength={50} value={studentNumber} onChange={(e) => setStudentNumber(e.target.value)} placeholder="NIS (opsional)" className="min-h-10 rounded-md border border-brand-line px-3"/><Button type="submit" disabled={busy || !studentName.trim()}>Tambah</Button></form>{students.length ? <ul className="divide-y divide-brand-line">{students.map((student) => <li key={student.id} className="flex justify-between py-2 text-body-sm"><span>{student.name}</span><span className="text-brand-ink-muted">{student.studentNumber || '—'}</span></li>)}</ul> : <p className="text-body-sm text-brand-ink-muted">Belum ada siswa.</p>}</div> : null}
