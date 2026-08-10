@@ -70,7 +70,7 @@ export function ShareManager({ assessmentId, title }: { assessmentId: string; ti
     setBusy(true);
     setMessage('');
     try {
-      const updated = await api<ShareLink>(`/shares/${encodeURIComponent(token)}`, {
+      const updated = await api<ShareLink>(`/shares/${encodeURIComponent(token)}/revoke`, {
         method: 'DELETE',
       });
       setItems((prev) => prev.map((item) => (item.token === token ? updated : item)));

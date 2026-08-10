@@ -20,6 +20,9 @@ describe('ShareManager', () => {
     await userEvent.click(screen.getAllByRole('button', { name: 'Cabut' }).find((button) => !button.hasAttribute('disabled'))!);
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3));
-    expect(fetchMock.mock.calls[2][1]).toMatchObject({ method: 'DELETE' });
+    expect(fetchMock.mock.calls[2]).toEqual([
+      '/v1/shares/tok-1/revoke',
+      expect.objectContaining({ method: 'DELETE' }),
+    ]);
   });
 });
