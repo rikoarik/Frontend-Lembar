@@ -165,6 +165,8 @@ export type CompositionValues = {
   reviewMode: ReviewMode;
   teacherFocus: string;
   exampleQuestion: string;
+  /** Duration in minutes shown to students on the attempt page. 0 = no limit. */
+  durationMinutes: number;
 };
 
 export type CompositionFieldKey = keyof CompositionValues;
@@ -183,6 +185,7 @@ export const INITIAL_COMPOSITION_VALUES: CompositionValues = {
   reviewMode: 'quick',
   teacherFocus: '',
   exampleQuestion: '',
+  durationMinutes: 60,
 };
 
 export type CompositionState =

@@ -78,6 +78,7 @@ const LABELS: Record<CompositionFieldKey, string> = {
   assessmentType: 'Jenis Lembar',
   difficulty: 'Tingkat Kesulitan',
   questionCount: 'Jumlah Soal',
+  durationMinutes: 'Waktu pengerjaan',
   questionTypeCounts: 'Distribusi tipe soal',
   reviewMode: 'Mode Review',
   teacherFocus: 'Fokus / Tujuan Guru',
@@ -875,6 +876,25 @@ const toggleMaterial = useCallback((materialId: string) => {
                       {localErrors.questionCount}
                     </p>
                   ) : null}
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="compose-durationMinutes" className={labelClass}>
+                    Waktu pengerjaan
+                  </label>
+                  <input
+                    id="compose-durationMinutes"
+                    type="number"
+                    min={0}
+                    max={480}
+                    value={values.durationMinutes}
+                    onChange={(e) => update('durationMinutes', Math.min(480, Math.max(0, Number(e.target.value) || 0)))}
+                    className={fieldClass}
+                    aria-describedby="compose-durationMinutes-help"
+                  />
+                  <p className={helpClass} id="compose-durationMinutes-help">
+                    Menit. Isi 0 jika tanpa batas waktu.
+                  </p>
                 </div>
 
                 <fieldset>

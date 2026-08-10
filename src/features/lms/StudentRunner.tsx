@@ -9,7 +9,7 @@ type Question = {
   questionType: 'multiple_choice' | 'true_false' | 'short_answer' | 'essay';
   options?: { key: string; text: string }[];
 };
-type Assessment = { assessmentId: string; title: string; questions: Question[] };
+type Assessment = { assessmentId: string; title: string; durationMinutes?: number; questions: Question[] };
 
 async function call<T>(url: string, init?: RequestInit) {
   const r = await fetch(url, init);
@@ -130,7 +130,10 @@ export default function StudentRunner({ token }: { token: string }) {
       <main className="min-h-[100dvh] flex flex-col items-center justify-center bg-brand-paper px-4 py-12">
         <div className="w-full max-w-md">
           <p className="mb-1 text-label-sm font-semibold uppercase tracking-widest text-brand-accent">Asesmen</p>
-          <h1 className="mb-8 text-h2 font-semibold text-brand-ink">{data?.title}</h1>
+          <h1 className="mb-2 text-h2 font-semibold text-brand-ink">{data?.title}</h1>
+          {data?.durationMinutes ? (
+            <p className="mb-8 text-body-sm text-brand-ink-muted">Waktu pengerjaan: {data.durationMinutes} menit</p>
+          ) : <div className="mb-6" />}
           <div className="flex flex-col gap-4">
             <label className="flex flex-col gap-1.5">
               <span className="text-label-sm font-medium text-brand-ink">Nama</span>
@@ -188,7 +191,10 @@ export default function StudentRunner({ token }: { token: string }) {
         <div className="mx-auto flex max-w-2xl items-center justify-between gap-4 px-4 py-3">
           <div className="min-w-0">
             <p className="truncate text-label-sm font-medium text-brand-ink">{data?.title}</p>
-            <p className="text-label-xs text-brand-ink-muted">{answered} dari {questions.length} soal terjawab</p>
+            <p className="text-label-xs text-brand-ink-muted">
+              {answered} dari {questions.length} soal terjawab
+              {data?.durationMinutes ? ` · ${data.durationMinutes} menit` : ''}
+            </p>
           </div>
           <span className="shrink-0 text-label-xs text-brand-ink-muted" aria-live="polite" aria-atomic="true">
             {saveStatus === 'saving' ? 'Menyimpan…' : saveStatus === 'saved' ? 'Jawaban tersimpan' : ''}
