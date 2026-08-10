@@ -46,6 +46,22 @@ describe('StudentRunner token publik', () => {
     vi.useRealTimers();
   });
 
+  it('menampilkan progres jawaban dan status autosave tanpa scroll library', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    render(<StudentRunner token="token-1" />);
+    await screen.findByText('Ulangan');
+    await user.type(screen.getByLabelText('Nama'), 'Budi');
+    await user.click(screen.getByRole('button', { name: /mulai/i }));
+    expect(await screen.findByText('0 dari 3 soal terjawab')).toBeInTheDocument();
+    await user.click(screen.getByRole('radio', { name: /B\. 4/ }));
+    expect(screen.getByText('1 dari 3 soal terjawab')).toBeInTheDocument();
+    vi.advanceTimersByTime(700);
+    expect(await screen.findByText('Jawaban tersimpan')).toBeInTheDocument();
+    expect(document.querySelector('[data-lenis]')).not.toBeInTheDocument();
+    vi.useRealTimers();
+  });
+
   it('merender true false sebagai pilihan dan esai sebagai textarea', async () => {
     const user = userEvent.setup();
     render(<StudentRunner token="token-1" />);
