@@ -207,10 +207,12 @@ export default function StudentRunner({ token }: { token: string }) {
             const isObjective = q.questionType === 'multiple_choice' || q.questionType === 'true_false';
             return (
               <li key={q.id} className="rounded-xl border border-brand-line bg-white p-5 shadow-sm">
-                <p className="mb-4 text-body-sm font-medium text-brand-ink leading-relaxed">
-                  <span className="mr-1.5 font-bold text-brand-accent">{q.number}.</span>
-                  {q.stem}
-                </p>
+                <div className="mb-4 flex items-start gap-3">
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-accent-soft text-label-sm font-semibold text-brand-accent" aria-label={`Soal ${q.number}`}>
+                    {q.number}
+                  </span>
+                  <p className="pt-0.5 text-body-sm font-medium leading-relaxed text-brand-ink">{q.stem}</p>
+                </div>
                 {isObjective ? (
                   <fieldset>
                     <legend className="sr-only">Pilihan jawaban soal {q.number}</legend>

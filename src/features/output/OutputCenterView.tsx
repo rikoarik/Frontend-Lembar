@@ -108,10 +108,12 @@ export function OutputCenterView({ assessmentId }: { assessmentId: string }) {
         <Panel title="Daftar soal" description={`${detail.questions.length} soal`}>
           <ol className="flex flex-col gap-4">
             {detail.questions.map((q) => (
-              <li key={q.id} className="flex flex-col gap-2 border-b border-brand-line pb-4 last:border-0 last:pb-0">
-                <p className="text-body-default font-medium text-brand-ink">
-                  {q.number}. {q.stem}
-                </p>
+              <li key={q.id} className="flex gap-3 border-b border-brand-line pb-4 last:border-0 last:pb-0">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-accent-soft text-label-sm font-semibold text-brand-accent" aria-label={`Soal ${q.number}`}>
+                  {q.number}
+                </span>
+                <div className="min-w-0 flex-1">
+                <p className="text-body-default font-medium text-brand-ink">{q.stem}</p>
                 {q.options.length > 0 && (
                   <ol className="ml-4 flex flex-col gap-1" type="A">
                     {q.options.map((opt) => (
@@ -130,6 +132,7 @@ export function OutputCenterView({ assessmentId }: { assessmentId: string }) {
                     Jawaban: {q.answerKey}
                   </p>
                 ) : null}
+                </div>
               </li>
             ))}
           </ol>
