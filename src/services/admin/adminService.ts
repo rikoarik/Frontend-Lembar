@@ -47,7 +47,7 @@ async function parseError(response: Response): Promise<AdminError> {
 
 async function request<T>(
   path: string,
-  method: 'GET' | 'POST' | 'PATCH' | 'DELETE' = 'GET',
+  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' = 'GET',
   body?: unknown,
   headers?: Record<string, string>,
 ): Promise<Result<T, AdminError>> {
@@ -282,12 +282,34 @@ export type AdminAuditRow = {
   target: string;
 };
 
+export type MarketingPageSlug = 'home' | 'harga' | 'untuk-sekolah';
+
+export type MarketingOpsSummary = {
+  slug: MarketingPageSlug;
+  locale: string;
+  state: 'draft' | 'published' | 'unpublished';
+  revision: number;
+  publishedVersion: number | null;
+  updatedAt: string;
+};
+
+export type MarketingDraft = {
+  schemaVersion: number;
+  blocks: unknown[];
+  seo: unknown;
+};
+
+export type MarketingOpsPage = {
+  summary: MarketingOpsSummary;
+  draft: MarketingDraft | null;
+};
+
 export type AdminContentRow = {
-  id: string;
-  slug: string;
-  title: string;
-  status: 'published' | 'draft';
-  revision?: number;
+  slug: MarketingPageSlug;
+  locale: string;
+  state: 'draft' | 'published' | 'unpublished';
+  revision: number;
+  publishedVersion: number | null;
   updatedAt: string;
 };
 
@@ -624,6 +646,19 @@ export const adminService = {
     return request<AdminContentRow[]>('/v1/ops/marketing/pages');
   },
 
+  marketingPage(slug: MarketingPageSlug): Promise<Result<MarketingOpsPage, AdminError>> {
+    return request<MarketingOpsPage>(`/v1/ops/marketing/pages/${encodeURIComponent(slug)}`);
+  },
+
+  saveMarketingDraft(slug: MarketingPageSlug, draft: unknown, revision: number): Promise<Result<MarketingOpsPage, AdminError>> {
+    return request<MarketingOpsPage>(
+      `/v1/ops/marketing/pages/${encodeURIComponent(slug)}/draft`,
+      'PUT',
+      draft,
+      { 'If-Match': String(revision) },
+    );
+  },
+
   // Create school/tenant
   createSchool(data: { name: string; slug?: string }): Promise<Result<{ id: string; name: string; slug: string }, AdminError>> {
     return request('/v1/admin/schools', 'POST', data);
@@ -706,7 +741,7 @@ export const adminService = {
   },
 
   // Marketing CMS publish/unpublish
-  publishPage(slug: string, revision?: number): Promise<Result<unknown, AdminError>> {
+  publishPage(slug: MarketingPageSlug, revision: number): Promise<Result<MarketingOpsPage, AdminError>> {
     return request(
       `/v1/ops/marketing/pages/${encodeURIComponent(slug)}/publish`,
       'POST',
@@ -715,8 +750,8 @@ export const adminService = {
     );
   },
 
-  unpublishPage(slug: string, revision?: number): Promise<Result<unknown, AdminError>> {
-    return request(
+  unpublishPage(slug: MarketingPageSlug, revision: number): Promise<Result<MarketingOpsPage, AdminError>> {
+    return request<MarketingOpsPage>(
       `/v1/ops/marketing/pages/${encodeURIComponent(slug)}/unpublish`,
       'POST',
       undefined,

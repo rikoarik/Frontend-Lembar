@@ -19,7 +19,6 @@ import {
   type AdminFlagRow,
   type AdminPromptRow,
   type AdminAuditRow,
-  type AdminContentRow,
   type AdminMeta,
   type AdminAuditDetail,
 } from '@/src/services/admin/adminService';
@@ -49,7 +48,6 @@ type JobRow = AdminJobRow;
 type QualityRow = AdminQualityRow;
 type BillingRow = AdminBillingRow;
 type FlagRow = AdminFlagRow;
-type ContentRow = AdminContentRow;
 
 export function OpsConsoleView({ section = '' }: { section?: string }) {
   const key = section || '';
@@ -68,7 +66,6 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
   const [filterJobStatus, setFilterJobStatus] = useState<'' | JobRow['status']>('');
   const [filterQuality, setFilterQuality] = useState<'' | QualityRow['status']>('');
   const [filterBilling, setFilterBilling] = useState<'' | BillingRow['state']>('');
-  const [filterContent, setFilterContent] = useState<'' | ContentRow['status']>('');
 
   const [page, setPage] = useState(1);
   const [impersonatingId, setImpersonatingId] = useState<string | null>(null);
@@ -171,10 +168,6 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
   const [auditPage, setAuditPage] = useState(1);
   const [auditLoading, setAuditLoading] = useState(false);
 
-  const [contentData, setContentData] = useState<ContentRow[]>([]);
-  const [contentLoading, setContentLoading] = useState(false);
-  const [contentPage, setContentPage] = useState(1);
-  const [contentMeta, setContentMeta] = useState({ total: 0, pages: 1 });
 
   // Audit detail modal state
   const [auditDetailId, setAuditDetailId] = useState<string | null>(null);
@@ -398,14 +391,6 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
     });
   };
 
-  const loadContent = () => {
-    setContentLoading(true);
-    adminService.marketingPages().then((res) => {
-      if (res.ok) setContentData(res.value);
-      setContentLoading(false);
-    });
-  };
-
   // ── Fetch on section change ──────────────────────────────────────────
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
@@ -462,10 +447,6 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
   useEffect(() => { if (key === 'flags') loadFlags(); }, [key]);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { if (key === 'prompts') loadPrompts(); }, [key]);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { if (key === 'content') loadContent(); }, [key]);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { if (key === 'content') loadContent(); }, [contentPage]);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (key === 'catalog') {
@@ -537,7 +518,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
 
   useEffect(() => {
     setPage(1);
-  }, [search, filterRole, filterStatus, filterBilling, filterContent, key]);
+  }, [search, filterRole, filterStatus, filterBilling, key]);
 
   const accounts = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -556,16 +537,6 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
   const schools = useMemo(() => schoolsData, [schoolsData]);
   const jobs = useMemo(() => jobsData, [jobsData]);
   const quality = useMemo(() => qualityData, [qualityData]);
-
-  const content = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    return contentData.filter((row) => {
-      const matchSearch =
-        !q || row.slug.includes(q) || row.title.toLowerCase().includes(q) || row.status.includes(q);
-      const matchStatus = filterContent === '' || row.status === filterContent;
-      return matchSearch && matchStatus;
-    });
-  }, [contentData, search, filterContent]);
 
   const clearSelection = () => setSelectedIds([]);
 
@@ -840,29 +811,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
         />
       ) : null}
 
-      {key === 'content' ? (
-        <OpsContentSection
-          content={content}
-          contentLoading={contentLoading}
-          createSchoolOpen={createSchoolOpen}
-          setCreateSchoolOpen={setCreateSchoolOpen}
-          createSchoolName={createSchoolName}
-          setCreateSchoolName={setCreateSchoolName}
-          createSchoolSlug={createSchoolSlug}
-          setCreateSchoolSlug={setCreateSchoolSlug}
-          createSchoolLoading={createSchoolLoading}
-          setCreateSchoolLoading={setCreateSchoolLoading}
-          search={search}
-          setSearch={setSearch}
-          filterContent={filterContent}
-          setFilterContent={setFilterContent}
-          contentPage={contentPage}
-          setContentPage={setContentPage}
-          contentMeta={contentMeta}
-          loadContent={loadContent}
-          setToast={setToast}
-        />
-      ) : null}
+      {key === 'content' ? <OpsContentSection setToast={setToast} /> : null}
 
       {key === 'learning-signals' ? (
         <OpsLearningSignalsSection

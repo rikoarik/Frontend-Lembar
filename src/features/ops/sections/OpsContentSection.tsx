@@ -1,210 +1,75 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { Button } from '@/app/components/ui';
-import {
-  AdminPageHeader,
-  AdminPill,
-  AdminToolbar,
-  AdminFilterChip,
-  AdminDataTable,
-  AdminContentLoading,
-} from '@/src/features/admin/AdminChrome';
-import { AdminPagination } from '../components/AdminPagination';
-import { adminService, type AdminContentRow } from '@/src/services/admin/adminService';
+import { AdminContentLoading, AdminPageHeader, AdminPill } from '@/src/features/admin/AdminChrome';
+import { adminService, type MarketingOpsPage, type MarketingPageSlug } from '@/src/services/admin/adminService';
 
-export function OpsContentSection({
-  content,
-  contentLoading,
-  createSchoolOpen,
-  setCreateSchoolOpen,
-  createSchoolName,
-  setCreateSchoolName,
-  createSchoolSlug,
-  setCreateSchoolSlug,
-  createSchoolLoading,
-  setCreateSchoolLoading,
-  search,
-  setSearch,
-  filterContent,
-  setFilterContent,
-  contentPage,
-  setContentPage,
-  contentMeta,
-  loadContent,
-  setToast,
-}: {
-  content: AdminContentRow[];
-  contentLoading: boolean;
-  createSchoolOpen: boolean;
-  setCreateSchoolOpen: (v: boolean) => void;
-  createSchoolName: string;
-  setCreateSchoolName: (v: string) => void;
-  createSchoolSlug: string;
-  setCreateSchoolSlug: (v: string) => void;
-  createSchoolLoading: boolean;
-  setCreateSchoolLoading: (v: boolean) => void;
-  search: string;
-  setSearch: (v: string) => void;
-  filterContent: '' | AdminContentRow['status'];
-  setFilterContent: (v: '' | AdminContentRow['status']) => void;
-  contentPage: number;
-  setContentPage: (p: number) => void;
-  contentMeta: { total: number; pages: number };
-  loadContent: () => void;
-  setToast: (msg: string) => void;
-}) {
-  return (
-    <>
-      <div className="flex items-center justify-between px-1 py-1">
-        <h2 className="text-[18px] font-bold text-[#171717]">Konten</h2>
-        <Button size="sm" onClick={() => setCreateSchoolOpen(true)}>
-          Draft baru
-        </Button>
+const PAGES: { slug: MarketingPageSlug; label: string; href: string }[] = [
+  { slug: 'home', label: 'Beranda', href: '/' },
+  { slug: 'harga', label: 'Harga', href: '/harga' },
+  { slug: 'untuk-sekolah', label: 'Untuk sekolah', href: '/untuk-sekolah' },
+];
+
+export function OpsContentSection({ setToast }: { setToast: (message: string) => void }) {
+  const [selected, setSelected] = useState<MarketingPageSlug>('home');
+  const [page, setPage] = useState<MarketingOpsPage | null>(null);
+  const [draftJson, setDraftJson] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  const load = (slug = selected) => {
+    setLoading(true);
+    adminService.marketingPage(slug).then((result) => {
+      if (result.ok) {
+        setPage(result.value);
+        setDraftJson(result.value.draft ? JSON.stringify(result.value.draft, null, 2) : '');
+      } else setToast(`Gagal memuat konten: ${result.error.safeMessage}`);
+      setLoading(false);
+    });
+  };
+
+  useEffect(() => { load(selected); }, [selected]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const save = () => {
+    if (!page) return;
+    let draft: unknown;
+    try { draft = JSON.parse(draftJson); } catch { setToast('JSON draft tidak valid.'); return; }
+    setSaving(true);
+    adminService.saveMarketingDraft(selected, draft, page.summary.revision).then((result) => {
+      setSaving(false);
+      if (result.ok) { setPage(result.value); setDraftJson(JSON.stringify(result.value.draft, null, 2)); setToast('Draft tersimpan.'); }
+      else setToast(result.error.code === 'STATE_CONFLICT' ? 'Draft berubah di tempat lain. Muat ulang sebelum menyimpan.' : `Gagal menyimpan: ${result.error.safeMessage}`);
+    });
+  };
+
+  const changePublication = (action: 'publish' | 'unpublish') => {
+    if (!page || !window.confirm(`${action === 'publish' ? 'Terbitkan' : 'Tarik'} halaman ini?`)) return;
+    setSaving(true);
+    adminService[action === 'publish' ? 'publishPage' : 'unpublishPage'](selected, page.summary.revision).then((result) => {
+      setSaving(false);
+      if (result.ok) { setPage(result.value); setToast(action === 'publish' ? 'Halaman diterbitkan.' : 'Halaman ditarik dari publik.'); }
+      else setToast(result.error.code === 'STATE_CONFLICT' ? 'Versi sudah berubah. Muat ulang sebelum melanjutkan.' : `Gagal: ${result.error.safeMessage}`);
+    });
+  };
+
+  return <div className="space-y-4">
+    <AdminPageHeader title="Konten marketing" description="Hanya tiga halaman yang memang tersedia pada situs publik dapat diedit." />
+    <div className="flex flex-wrap gap-2" role="tablist" aria-label="Halaman marketing">
+      {PAGES.map((item) => <Button key={item.slug} size="sm" variant={selected === item.slug ? undefined : 'secondary'} onClick={() => setSelected(item.slug)}>{item.label}</Button>)}
+    </div>
+    {loading ? <AdminContentLoading /> : <>
+      <div className="flex flex-wrap items-center gap-2 rounded-xl border border-[#ddd4c8] bg-white p-3">
+        <AdminPill tone={page?.summary.state === 'published' ? 'ok' : 'neutral'}>{page?.summary.state ?? 'draft'}</AdminPill>
+        <span className="text-xs text-[#6d665d]">Revisi {page?.summary.revision ?? '—'}</span>
+        <a className="ml-auto text-xs font-semibold underline" href={PAGES.find((item) => item.slug === selected)?.href} target="_blank" rel="noreferrer">Pratinjau publik</a>
+        <Button size="sm" variant="secondary" disabled={saving} onClick={() => load()}>{'Muat ulang'}</Button>
+        {page?.summary.state === 'published' ? <Button size="sm" variant="secondary" disabled={saving} onClick={() => changePublication('unpublish')}>Tarik publikasi</Button> : <Button size="sm" disabled={saving || !page?.draft} onClick={() => changePublication('publish')}>Terbitkan</Button>}
       </div>
-      {contentLoading ? <AdminContentLoading /> : null}
-
-      {/* Inline create content form */}
-      {createSchoolOpen ? (
-        <div className="rounded-2xl border border-[#ddd4c8]/70 bg-white p-4 space-y-3 shadow-sm">
-          <h4 className="text-[13px] font-bold text-[#171717]">Draft halaman baru</h4>
-          <div className="flex flex-wrap items-end gap-3">
-            <div>
-              <label htmlFor="create-content-slug" className="block text-[11px] font-semibold text-[#6d665d] mb-1">
-                Slug * (cth: tentang-kami)
-              </label>
-              <input
-                id="create-content-slug"
-                type="text"
-                value={createSchoolName}
-                onChange={(e) => setCreateSchoolName(e.target.value)}
-                placeholder="tentang-kami"
-                className="h-9 w-52 rounded-xl border border-[#ddd4c8] bg-white px-3 text-[12px] text-[#171717] placeholder:text-[#b0a89f] focus:outline-none focus:ring-2 focus:ring-[#171717]/20"
-              />
-            </div>
-            <div>
-              <label htmlFor="create-content-title" className="block text-[11px] font-semibold text-[#6d665d] mb-1">
-                Judul
-              </label>
-              <input
-                id="create-content-title"
-                type="text"
-                value={createSchoolSlug}
-                onChange={(e) => setCreateSchoolSlug(e.target.value)}
-                placeholder="Tentang Kami"
-                className="h-9 w-64 rounded-xl border border-[#ddd4c8] bg-white px-3 text-[12px] text-[#171717] placeholder:text-[#b0a89f] focus:outline-none focus:ring-2 focus:ring-[#171717]/20"
-              />
-            </div>
-            <Button
-              size="sm"
-              disabled={createSchoolLoading || !createSchoolName.trim()}
-              onClick={() => {
-                setCreateSchoolLoading(true);
-                adminService
-                  .createMarketingPage({
-                    slug: createSchoolName.trim(),
-                    title: createSchoolSlug.trim() || createSchoolName.trim(),
-                  })
-                  .then((res) => {
-                    if (res.ok) {
-                      setToast(`Draft "${createSchoolSlug || createSchoolName}" berhasil dibuat.`);
-                      setCreateSchoolName('');
-                      setCreateSchoolSlug('');
-                      setCreateSchoolOpen(false);
-                      loadContent();
-                    } else {
-                      setToast(`Gagal: ${res.error.safeMessage}`);
-                    }
-                    setCreateSchoolLoading(false);
-                  });
-              }}
-            >
-              {createSchoolLoading ? 'Menyimpan...' : 'Buat draft'}
-            </Button>
-            <Button
-              size="sm"
-              variant="secondary"
-              onClick={() => {
-                setCreateSchoolOpen(false);
-                setCreateSchoolName('');
-                setCreateSchoolSlug('');
-              }}
-            >
-              Batal
-            </Button>
-          </div>
-        </div>
-      ) : null}
-
-      <AdminToolbar
-        search={search}
-        onSearchChange={setSearch}
-        searchPlaceholder="Cari slug / judul / status"
-        filters={
-          <>
-            {(['', 'published', 'draft'] as const).map((status) => (
-              <AdminFilterChip
-                key={status || 'all'}
-                active={filterContent === status}
-                onClick={() => setFilterContent(status)}
-              >
-                {status || 'Semua status'}
-              </AdminFilterChip>
-            ))}
-          </>
-        }
-      />
-      <AdminDataTable
-        rows={content}
-        emptyLabel="Tidak ada konten yang cocok."
-        columns={[
-          { key: 'slug', header: 'Slug', render: (row) => <span className="font-mono text-[11px]">{row.slug}</span> },
-          { key: 'title', header: 'Judul', render: (row) => row.title },
-          {
-            key: 'status',
-            header: 'Status',
-            render: (row) => (
-              <AdminPill tone={row.status === 'published' ? 'ok' : 'neutral'}>
-                {row.status}
-              </AdminPill>
-            ),
-          },
-          { key: 'updated', header: 'Update', render: (row) => <span className="text-[11px] text-[#6d665d]">{row.updatedAt}</span> },
-        ]}
-        rowActions={(row) => (
-          <div className="flex items-center gap-1.5">
-            <Button size="sm" variant="secondary" onClick={() => window.open(`/ops/content/${row.slug}`, '_blank')}>
-              Edit
-            </Button>
-            <Button
-              size="sm"
-              variant={row.status === 'published' ? 'secondary' : undefined}
-              onClick={() => {
-                const action =
-                  row.status === 'published'
-                    ? adminService.unpublishPage(row.slug, row.revision)
-                    : adminService.publishPage(row.slug, row.revision);
-                action.then((res) => {
-                  if (res.ok) {
-                    setToast(`${row.status === 'published' ? 'Unpublish' : 'Publish'} ${row.slug} berhasil.`);
-                    loadContent();
-                  } else {
-                    setToast(`Gagal: ${res.error.safeMessage}`);
-                  }
-                });
-              }}
-            >
-              {row.status === 'published' ? 'Unpublish' : 'Publish'}
-            </Button>
-          </div>
-        )}
-      />
-      <AdminPagination
-        currentPage={contentPage}
-        totalPages={contentMeta.pages}
-        totalItems={contentMeta.total}
-        pageSize={10}
-        onPageChange={setContentPage}
-      />
-    </>
-  );
+      <label className="block space-y-2" htmlFor="marketing-draft-json"><span className="text-sm font-semibold">Draft terstruktur (JSON)</span><span className="block text-xs text-[#6d665d]">Sunting schemaVersion, seo, dan blocks yang didukung; HTML bebas tidak didukung.</span>
+        <textarea id="marketing-draft-json" className="min-h-[420px] w-full rounded-xl border border-[#ddd4c8] bg-white p-3 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-[#171717]/20" value={draftJson} onChange={(event) => setDraftJson(event.target.value)} placeholder={'{\n  "schemaVersion": 1,\n  "seo": { "title": "", "description": "" },\n  "blocks": []\n}'} />
+      </label>
+      <div className="flex gap-2"><Button disabled={saving || !draftJson.trim()} onClick={save}>{saving ? 'Menyimpan…' : 'Simpan draft'}</Button></div>
+    </>}
+  </div>;
 }
