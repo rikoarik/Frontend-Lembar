@@ -694,7 +694,10 @@ export const adminService = {
     return request(`/v1/admin/quality-reports/${id}`);
   },
 
-  updateQualityNotes(id: string, data: { notes?: string; status?: string }): Promise<Result<unknown, AdminError>> {
+  updateQualityNotes(
+    id: string,
+    data: { notes?: string; status?: 'triaged' | 'closed'; expectedStatus?: 'open' | 'triaged' | 'closed' },
+  ): Promise<Result<unknown, AdminError>> {
     return request(`/v1/admin/quality-reports/${id}`, 'PATCH', data);
   },
 

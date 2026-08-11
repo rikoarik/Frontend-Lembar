@@ -158,7 +158,10 @@ export function OpsQualitySection({
                       size="sm"
                       variant="secondary"
                       onClick={() => {
-                        adminService.updateQualityNotes(qualityDetailId, { status: 'triaged' }).then((res) => {
+                        adminService.updateQualityNotes(qualityDetailId, {
+                          status: 'triaged',
+                          expectedStatus: qualityDetailData.status as 'open' | 'triaged' | 'closed',
+                        }).then((res) => {
                           if (res.ok) {
                             setToast('Report ditriage.');
                             setQualityDetailData({ ...qualityDetailData, status: 'triaged' });
@@ -174,7 +177,10 @@ export function OpsQualitySection({
                     <Button
                       size="sm"
                       onClick={() => {
-                        adminService.updateQualityNotes(qualityDetailId, { status: 'closed' }).then((res) => {
+                        adminService.updateQualityNotes(qualityDetailId, {
+                          status: 'closed',
+                          expectedStatus: qualityDetailData.status as 'open' | 'triaged' | 'closed',
+                        }).then((res) => {
                           if (res.ok) {
                             setToast('Report ditutup.');
                             setQualityDetailData({ ...qualityDetailData, status: 'closed' });
@@ -246,29 +252,7 @@ export function OpsQualitySection({
             >
               Detail
             </Button>
-            <Button
-              size="sm"
-              variant="secondary"
-              onClick={() => {
-                adminService.triageReport(row.id, 'triaged').then((res) => {
-                  setToast(res.ok ? `Report ditriage.` : `Gagal triage: ${res.error.safeMessage}`);
-                  loadQuality();
-                });
-              }}
-            >
-              Triage
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => {
-                adminService.triageReport(row.id, 'closed').then((res) => {
-                  setToast(res.ok ? `Report ditutup.` : `Gagal tutup: ${res.error.safeMessage}`);
-                  loadQuality();
-                });
-              }}
-            >
-              Tutup
-            </Button>
+
           </div>
         )}
       />
