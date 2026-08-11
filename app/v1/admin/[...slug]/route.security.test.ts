@@ -23,10 +23,11 @@ describe('admin BFF logging', () => {
     const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
     backendFetch.mockResolvedValue(new Response(JSON.stringify({ data: [] }), { status: 200 }));
 
-    const request = new Request('http://localhost/v1/admin/schools', {
+    const requestUrl = 'http://localhost/v1/admin/schools';
+    const request = new Request(requestUrl, {
       headers: { authorization: 'Bearer sensitive-token-must-not-be-logged' },
     }) as never;
-    Object.defineProperty(request, 'nextUrl', { value: new URL(request.url) });
+    Object.defineProperty(request, 'nextUrl', { value: new URL(requestUrl) });
     const response = await GET(request, { params: Promise.resolve({ slug: ['schools'] }) });
 
     expect(response.status).toBe(200);

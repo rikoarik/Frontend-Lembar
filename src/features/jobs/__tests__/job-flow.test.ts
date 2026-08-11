@@ -29,6 +29,7 @@ describe('F3-04 mock generate job flow', () => {
         reviewMode: 'quick' as const,
         teacherFocus: '',
         exampleQuestion: '',
+        durationMinutes: 0,
       };
 
       const first = await generateService.submitConfiguration(values, 'ws_demo', 'idem-1');
@@ -67,6 +68,7 @@ describe('F3-04 mock generate job flow', () => {
         reviewMode: 'detail' as const,
         teacherFocus: '',
         exampleQuestion: '',
+        durationMinutes: 0,
       };
       const submitted = await generateService.submitConfiguration(values, 'ws_demo', 'idem-cancel');
       expect(submitted.ok).toBe(true);
