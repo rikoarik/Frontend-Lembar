@@ -9,29 +9,16 @@ import {
   type PublicPlan,
 } from '@/src/lib/api/plans';
 
-export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://lembar.id'),
-  title: 'Harga lembar — paket untuk guru dan sekolah',
-  description:
-    'Paket Coba Gratis, Guru Pro, dan Sekolah & Institusi. Bandingkan kuota token, hak pakai, dan fitur kolaborasi untuk guru serta tim sekolah.',
-  alternates: { canonical: '/harga' },
-  openGraph: {
+import { marketingMetadata } from '@/src/lib/marketing/marketingMetadata';
+
+export async function generateMetadata(): Promise<Metadata> {
+  return marketingMetadata('harga', {
     title: 'Harga lembar — paket untuk guru dan sekolah',
-    description: 'Bandingkan paket Coba Gratis, Guru Pro, dan Sekolah & Institusi. Tidak ada biaya tersembunyi.',
-    url: '/harga',
-    siteName: 'lembar',
-    locale: 'id_ID',
-    type: 'website',
-    images: ['/og-image.svg'],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Harga lembar — paket untuk guru dan sekolah',
-    description: 'Coba Gratis, Guru Pro, dan Sekolah & Institusi.',
-    images: ['/og-image.svg'],
-  },
-  robots: { index: true, follow: true },
-};
+    description:
+      'Paket Coba Gratis, Guru Pro, dan Sekolah & Institusi. Bandingkan kuota token, hak pakai, dan fitur kolaborasi untuk guru serta tim sekolah.',
+    canonical: '/harga',
+  });
+}
 
 function CheckIcon() {
   return (

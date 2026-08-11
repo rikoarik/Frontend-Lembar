@@ -4,50 +4,34 @@ import { fetchMarketingPage } from '@/src/lib/marketing/fetchMarketingPage';
 import { BlockRenderer } from '@/app/components/marketing/BlockRenderer';
 import { getMarketingSession } from '@/src/lib/api/marketingSession';
 
-export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://lembar.id'),
-  title: 'Generator Soal AI untuk Guru — lembar',
-  description:
-    'Generator soal otomatis berbasis AI untuk guru Indonesia. Buat soal ujian, ulangan, dan latihan dari materi kurikulum atau PDF Anda. Draft AI ditinjau guru, gratis tanpa batas.',
-  keywords: [
-    'generator soal',
-    'generator soal ai',
-    'pembuat soal otomatis',
-    'generator soal gratis',
-    'membuat soal dengan ai',
-    'generator ujian',
-    'buat soal otomatis',
-    'generator soal kurikulum merdeka',
-    'ai untuk guru',
-    'generator soal untuk guru',
-    'aplikasi buat soal',
-    'software generator soal',
-  ],
-  alternates: {
+import { marketingMetadata } from '@/src/lib/marketing/marketingMetadata';
+
+export async function generateMetadata(): Promise<Metadata> {
+  const metadata = await marketingMetadata('home', {
+    title: 'Generator Soal AI untuk Guru — lembar',
+    description:
+      'Generator soal otomatis berbasis AI untuk guru Indonesia. Buat soal ujian, ulangan, dan latihan dari materi kurikulum atau PDF Anda. Draft AI ditinjau guru, gratis tanpa batas.',
     canonical: '/',
-  },
-  openGraph: {
-    title: 'Generator Soal AI untuk Guru — lembar',
-    description:
-      'Generator soal otomatis berbasis AI. Buat soal ujian, ulangan, dan latihan dari materi kurikulum atau PDF. Gratis untuk guru Indonesia.',
-    url: '/',
-    siteName: 'lembar',
-    locale: 'id_ID',
-    type: 'website',
-    images: ['/og-image.svg'],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Generator Soal AI untuk Guru — lembar',
-    description:
-      'Generator soal otomatis berbasis AI. Buat soal dari kurikulum atau PDF, tinjau draft, cetak gratis.',
-    images: ['/og-image.svg'],
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
-};
+  });
+
+  return {
+    ...metadata,
+    keywords: [
+      'generator soal',
+      'generator soal ai',
+      'pembuat soal otomatis',
+      'generator soal gratis',
+      'membuat soal dengan ai',
+      'generator ujian',
+      'buat soal otomatis',
+      'generator soal kurikulum merdeka',
+      'ai untuk guru',
+      'generator soal untuk guru',
+      'aplikasi buat soal',
+      'software generator soal',
+    ],
+  };
+}
 
 export default async function LandingPage() {
   const session = await getMarketingSession();
