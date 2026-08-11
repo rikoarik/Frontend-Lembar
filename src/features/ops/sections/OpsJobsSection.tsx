@@ -58,21 +58,23 @@ export function OpsJobsSection({
         <h2 className="text-[18px] font-bold text-[#171717]">Jobs</h2>
         <Button
           size="sm"
-          disabled={!jobsData.some((job) => job.status === 'failed' || job.status === 'dead_letter')}
           onClick={() => {
-            const failedIds = jobsData.filter((j) => j.status === 'failed' || j.status === 'dead_letter').map((j) => j.id);
-            if (failedIds.length === 0) {
-              setToast('Tidak ada job failed.');
-              return;
-            }
-            Promise.all(failedIds.map((id) => adminService.retryJob(id))).then((results) => {
-              const ok = results.filter((r) => r.ok).length;
-              setToast(`${ok} dari ${failedIds.length} job failed di-retry.`);
+            const status = filterJobStatus === 'failed' || filterJobStatus === 'dead_letter'
+              ? filterJobStatus
+              : undefined;
+            const scope = status === 'failed' ? 'failed' : status === 'dead_letter' ? 'dead-letter' : 'failed & dead-letter';
+            if (!window.confirm(`Retry semua job ${scope} yang sesuai filter saat ini? Job running, queued, dan succeeded tidak akan diubah.`)) return;
+            adminService.retryJobsBulk({ ...(status ? { status } : {}), ...(search.trim() ? { q: search.trim() } : {}) }).then((result) => {
+              if (!result.ok) {
+                setToast(`Gagal retry: ${result.error.safeMessage}`);
+                return;
+              }
+              setToast(`${result.value.retried} job di-retry; ${result.value.skipped} dilewati.`);
               loadJobs();
             });
           }}
         >
-          Retry semua failed
+          Retry failed & dead-letter
         </Button>
       </div>
       {jobsLoading ? <AdminContentLoading /> : null}
@@ -152,7 +154,7 @@ export function OpsJobsSection({
                     </pre>
                   </div>
                 ) : null}
-                {jobDetailData.status === 'failed' ? (
+                {jobDetailData.status === 'failed' || jobDetailData.status === 'dead_letter' ? (
                   <Button
                     size="sm"
                     onClick={() => {
@@ -185,7 +187,7 @@ export function OpsJobsSection({
         searchPlaceholder="Cari job / tenant / status"
         filters={
           <>
-            {(['', 'running', 'queued', 'retry_wait', 'failed', 'succeeded'] as const).map((status) => (
+            {(['', 'running', 'queued', 'retry_wait', 'failed', 'dead_letter', 'succeeded'] as const).map((status) => (
               <AdminFilterChip
                 key={status || 'all'}
                 active={filterJobStatus === status}

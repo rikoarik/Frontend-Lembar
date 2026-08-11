@@ -470,6 +470,13 @@ export const adminService = {
     return request(`/v1/admin/jobs/${id}/retry`, 'POST');
   },
 
+  retryJobsBulk(params?: {
+    status?: Extract<AdminJobRow['status'], 'failed' | 'dead_letter'>;
+    q?: string;
+  }): Promise<Result<{ retried: number; skipped: number }, AdminError>> {
+    return request('/v1/admin/jobs/retry-bulk', 'POST', params);
+  },
+
   // Quality reports
   qualityReports(params?: {
     status?: string;
