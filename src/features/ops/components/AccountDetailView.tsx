@@ -29,8 +29,15 @@ export function AccountDetailView({
   const [saving, setSaving] = useState(false);
   const [rolesEditing, setRolesEditing] = useState(false);
   const [rolesSaving, setRolesSaving] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<'free' | 'pro'>('free');
+  const [entitlementConfirmOpen, setEntitlementConfirmOpen] = useState(false);
+  const [entitlementSaving, setEntitlementSaving] = useState(false);
+  const [entitlementMessage, setEntitlementMessage] = useState<string | null>(null);
   const AVAILABLE_ROLES = ['teacher', 'school_admin', 'subscriber'] as const;
   const [editRoles, setEditRoles] = useState<string[]>([]);
+
+  const currentPlan = detail?.billing?.plan === 'pro' ? 'pro' : 'free';
+  const planLabel = (plan: 'free' | 'pro') => (plan === 'pro' ? 'Pro' : 'Free');
 
   useEffect(() => {
     setLoading(true);
@@ -39,6 +46,7 @@ export function AccountDetailView({
         setDetail(res.value);
         setEditName(res.value.name || res.value.displayName || '');
         setEditPhone(res.value.phone || '');
+        setSelectedPlan(res.value.billing?.plan === 'pro' ? 'pro' : 'free');
       } else {
         setToast(`Gagal memuat detail: ${res.error.safeMessage}`);
       }
@@ -54,7 +62,9 @@ export function AccountDetailView({
       .then((res) => {
         if (res.ok) {
           const patch = res.value;
-          setDetail((prev) => prev ? { ...prev, name: patch.name, email: patch.email, phone: patch.phone } : prev);
+          setDetail((prev) =>
+            prev ? { ...prev, name: patch.name, email: patch.email, phone: patch.phone } : prev,
+          );
           setToast(`Detail akun ${patch.name} berhasil diperbarui.`);
           onUpdated();
         } else {
@@ -62,6 +72,40 @@ export function AccountDetailView({
         }
       })
       .finally(() => setSaving(false));
+  };
+
+  const handleSetEntitlement = () => {
+    if (!detail?.workspaceId) return;
+    setEntitlementSaving(true);
+    setEntitlementMessage(null);
+    adminService
+      .setEntitlement(detail.workspaceId, { plan: selectedPlan })
+      .then((res) => {
+        if (res.ok) {
+          const newPlan = res.value.newPlan === 'pro' ? 'pro' : 'free';
+          setDetail((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  billing: {
+                    state: prev.billing?.state ?? newPlan,
+                    plan: newPlan,
+                    seats: prev.billing?.seats ?? 0,
+                    renewsAt: prev.billing?.renewsAt,
+                  },
+                }
+              : prev,
+          );
+          setSelectedPlan(newPlan);
+          setEntitlementMessage(`Entitlement berhasil diubah ke ${planLabel(newPlan)}.`);
+          setToast(`Entitlement workspace diubah ke ${planLabel(newPlan)}.`);
+          onUpdated();
+          setEntitlementConfirmOpen(false);
+        } else {
+          setEntitlementMessage(`Gagal mengubah entitlement: ${res.error.safeMessage}`);
+        }
+      })
+      .finally(() => setEntitlementSaving(false));
   };
 
   return (
@@ -100,11 +144,19 @@ export function AccountDetailView({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Left / Main Column: Edit Profile Form */}
           <div className="lg:col-span-2 space-y-4">
-            <form onSubmit={handleSave} className="rounded-2xl border border-[#ddd4c8]/70 bg-white p-5 shadow-sm space-y-4">
+            <form
+              onSubmit={handleSave}
+              className="rounded-2xl border border-[#ddd4c8]/70 bg-white p-5 shadow-sm space-y-4"
+            >
               <h3 className="text-[15px] font-bold text-[#171717]">Edit Profil Akun</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="account-edit-name" className="block text-[12px] font-medium text-[#6d665d] mb-1.5">Nama Lengkap</label>
+                  <label
+                    htmlFor="account-edit-name"
+                    className="block text-[12px] font-medium text-[#6d665d] mb-1.5"
+                  >
+                    Nama Lengkap
+                  </label>
                   <input
                     id="account-edit-name"
                     type="text"
@@ -115,7 +167,12 @@ export function AccountDetailView({
                   />
                 </div>
                 <div>
-                  <label htmlFor="account-edit-phone" className="block text-[12px] font-medium text-[#6d665d] mb-1.5">No. Telepon</label>
+                  <label
+                    htmlFor="account-edit-phone"
+                    className="block text-[12px] font-medium text-[#6d665d] mb-1.5"
+                  >
+                    No. Telepon
+                  </label>
                   <input
                     type="text"
                     value={editPhone}
@@ -135,7 +192,9 @@ export function AccountDetailView({
             {/* Audit Log Timeline */}
             {detail.auditLog && detail.auditLog.length > 0 && (
               <div className="rounded-2xl border border-[#ddd4c8]/70 bg-white p-5 shadow-sm space-y-3">
-                <h3 className="text-[15px] font-bold text-[#171717]">Log Audit Riwayat Aktivitas</h3>
+                <h3 className="text-[15px] font-bold text-[#171717]">
+                  Log Audit Riwayat Aktivitas
+                </h3>
                 <div className="rounded-xl border border-[#ddd4c8] bg-white overflow-hidden text-[12px]">
                   <table className="w-full text-left">
                     <thead className="border-b border-[#ddd4c8]/60 bg-[#faf7f2] text-[11px] text-[#6d665d]">
@@ -148,7 +207,9 @@ export function AccountDetailView({
                     <tbody className="divide-y divide-[#ddd4c8]/40">
                       {detail.auditLog.map((log: AdminAccountAuditItem) => (
                         <tr key={log.id}>
-                          <td className="px-3.5 py-2.5 font-mono text-[11px] text-[#171717]">{log.action}</td>
+                          <td className="px-3.5 py-2.5 font-mono text-[11px] text-[#171717]">
+                            {log.action}
+                          </td>
                           <td className="px-3.5 py-2.5">{log.by}</td>
                           <td className="px-3.5 py-2.5 text-[#6d665d]">{log.at}</td>
                         </tr>
@@ -165,19 +226,29 @@ export function AccountDetailView({
             <div className="rounded-2xl border border-[#ddd4c8]/70 bg-white p-5 shadow-sm space-y-4 text-[13px]">
               <div className="flex items-center justify-between border-b border-[#eee6da]/70 pb-3">
                 <h3 className="text-[15px] font-bold text-[#171717]">Informasi Sistem</h3>
-                <AdminPill tone={detail.billing?.state === 'active' || detail.billing?.state === 'pro' ? 'ok' : 'neutral'}>
+                <AdminPill
+                  tone={
+                    detail.billing?.state === 'active' || detail.billing?.state === 'pro'
+                      ? 'ok'
+                      : 'neutral'
+                  }
+                >
                   {detail.billing?.state || 'free'}
                 </AdminPill>
               </div>
-              
+
               <div className="space-y-3">
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-[#6d665d] text-[12px] font-medium shrink-0">Username</span>
-                  <span className="font-semibold text-[#171717] truncate">{detail.username || '—'}</span>
+                  <span className="font-semibold text-[#171717] truncate">
+                    {detail.username || '—'}
+                  </span>
                 </div>
 
                 <div className="space-y-1 pt-1 border-t border-[#eee6da]/50">
-                  <span className="text-[#6d665d] text-[12px] font-medium block">Sekolah / Instansi</span>
+                  <span className="text-[#6d665d] text-[12px] font-medium block">
+                    Sekolah / Instansi
+                  </span>
                   <div className="p-2 rounded-xl bg-[#faf7f2] border border-[#eee6da] text-[12px] text-[#171717] font-medium break-all leading-snug">
                     {detail.school || detail.schoolSlug || '—'}
                   </div>
@@ -207,7 +278,9 @@ export function AccountDetailView({
 
                 <div className="grid grid-cols-2 gap-2 pt-2 border-t border-[#eee6da]/50 text-[12px]">
                   <div className="p-2.5 rounded-xl bg-[#faf7f2] border border-[#eee6da]/60">
-                    <span className="block text-[11px] text-[#6d665d] font-medium">Kuota Terpakai</span>
+                    <span className="block text-[11px] text-[#6d665d] font-medium">
+                      Kuota Terpakai
+                    </span>
                     <span className="text-[14px] font-bold text-[#171717] tabular-nums mt-0.5 block">
                       {detail.stats?.quotaUsed ?? 0}
                     </span>
@@ -221,6 +294,74 @@ export function AccountDetailView({
                 </div>
               </div>
             </div>
+
+            <section
+              className="rounded-2xl border border-amber-200 bg-amber-50/50 p-5 shadow-sm space-y-3 text-[13px]"
+              aria-labelledby="entitlement-heading"
+            >
+              <div>
+                <h3 id="entitlement-heading" className="text-[15px] font-bold text-[#171717]">
+                  Entitlement Workspace
+                </h3>
+                <p className="mt-1 text-[12px] leading-relaxed text-[#6d665d]">
+                  Ubah paket akses workspace ini. Tindakan ini tidak mengubah kuota pemakaian yang
+                  sudah tercatat.
+                </p>
+              </div>
+
+              {detail.workspaceId ? (
+                <>
+                  <div className="rounded-xl border border-amber-200/80 bg-white/80 p-3 space-y-1">
+                    <p className="font-semibold text-[#171717]">
+                      Paket saat ini: {planLabel(currentPlan)}
+                    </p>
+                    <p className="text-[12px] text-[#6d665d]">
+                      Kuota terpakai: {detail.stats?.quotaUsed ?? 0}
+                    </p>
+                  </div>
+                  <label
+                    htmlFor="workspace-entitlement-plan"
+                    className="block text-[12px] font-medium text-[#57534e]"
+                  >
+                    Paket baru
+                  </label>
+                  <select
+                    id="workspace-entitlement-plan"
+                    value={selectedPlan}
+                    onChange={(event) => {
+                      setSelectedPlan(event.target.value as 'free' | 'pro');
+                      setEntitlementMessage(null);
+                    }}
+                    disabled={entitlementSaving}
+                    className="h-10 w-full rounded-xl border border-[#ddd4c8] bg-white px-3 text-[13px] text-[#171717] focus:outline-none focus:ring-2 focus:ring-[#171717]/20 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    <option value="free">Free</option>
+                    <option value="pro">Pro</option>
+                  </select>
+                  {entitlementMessage ? (
+                    <p
+                      role={entitlementMessage.startsWith('Gagal') ? 'alert' : 'status'}
+                      className="text-[12px] text-[#57534e]"
+                    >
+                      {entitlementMessage}
+                    </p>
+                  ) : null}
+                  <Button
+                    size="sm"
+                    variant="danger"
+                    disabled={entitlementSaving || selectedPlan === currentPlan}
+                    onClick={() => setEntitlementConfirmOpen(true)}
+                  >
+                    Ubah entitlement
+                  </Button>
+                </>
+              ) : (
+                <p className="rounded-xl border border-[#ddd4c8] bg-white/80 p-3 text-[12px] text-[#6d665d]">
+                  Workspace ID tidak tersedia, sehingga entitlement tidak dapat diubah dari akun
+                  ini.
+                </p>
+              )}
+            </section>
 
             {/* Role Editor Card */}
             <div className="rounded-2xl border border-[#ddd4c8]/70 bg-white p-5 shadow-sm space-y-3 text-[13px]">
@@ -243,14 +384,19 @@ export function AccountDetailView({
               {!rolesEditing ? (
                 <div className="flex flex-wrap gap-1.5">
                   {(detail.roles ?? [detail.role]).map((r) => (
-                    <AdminPill key={r} tone={r === 'superadmin' ? 'bad' : r === 'school_admin' ? 'info' : 'neutral'}>
+                    <AdminPill
+                      key={r}
+                      tone={r === 'superadmin' ? 'bad' : r === 'school_admin' ? 'info' : 'neutral'}
+                    >
                       {r}
                     </AdminPill>
                   ))}
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <div className="text-[11px] text-[#6d665d]">Pilih role untuk akun ini. Perubahan langsung disimpan.</div>
+                  <div className="text-[11px] text-[#6d665d]">
+                    Pilih role untuk akun ini. Perubahan langsung disimpan.
+                  </div>
                   <div className="space-y-1.5">
                     {AVAILABLE_ROLES.map((r) => (
                       <label key={r} className="flex items-center gap-2 cursor-pointer select-none">
@@ -279,7 +425,11 @@ export function AccountDetailView({
                         adminService.updateRoles(accountId, editRoles).then((res) => {
                           if (res.ok) {
                             setToast(`Role akun diperbarui: ${res.value.roles.join(', ')}`);
-                            setDetail({ ...detail, roles: res.value.roles, role: (res.value.roles[0] as typeof detail.role) ?? detail.role });
+                            setDetail({
+                              ...detail,
+                              roles: res.value.roles,
+                              role: (res.value.roles[0] as typeof detail.role) ?? detail.role,
+                            });
                             setRolesEditing(false);
                             onUpdated();
                           } else {
@@ -291,7 +441,9 @@ export function AccountDetailView({
                     >
                       {rolesSaving ? 'Menyimpan...' : 'Simpan role'}
                     </Button>
-                    <Button size="sm" variant="secondary" onClick={() => setRolesEditing(false)}>Batal</Button>
+                    <Button size="sm" variant="secondary" onClick={() => setRolesEditing(false)}>
+                      Batal
+                    </Button>
                   </div>
                 </div>
               )}
@@ -299,6 +451,17 @@ export function AccountDetailView({
           </div>
         </div>
       ) : null}
+
+      <AdminConfirmModal
+        open={entitlementConfirmOpen}
+        title="Ubah entitlement workspace?"
+        description={`Paket workspace akan diubah dari ${planLabel(currentPlan)} ke ${planLabel(selectedPlan)}. Kuota pemakaian yang sudah tercatat tidak akan diubah.`}
+        confirmLabel={`Ya, ubah ke ${planLabel(selectedPlan)}`}
+        variant="danger"
+        loading={entitlementSaving}
+        onConfirm={handleSetEntitlement}
+        onCancel={() => !entitlementSaving && setEntitlementConfirmOpen(false)}
+      />
     </div>
   );
 }
@@ -366,7 +529,10 @@ export function AccountRowActions({
           aria-expanded={isOpen}
           aria-haspopup="menu"
         >
-          Aksi <span className="text-[10px] ml-0.5" aria-hidden>▼</span>
+          Aksi{' '}
+          <span className="text-[10px] ml-0.5" aria-hidden>
+            ▼
+          </span>
         </Button>
 
         {isOpen && coords && (
@@ -402,7 +568,9 @@ export function AccountRowActions({
                   setIsOpen(false);
                   adminService.resetPassword(row.id).then((res) => {
                     if (res.ok) {
-                      const details = [res.value.token, res.value.resetUrl].filter(Boolean).join(' · ');
+                      const details = [res.value.token, res.value.resetUrl]
+                        .filter(Boolean)
+                        .join(' · ');
                       setToast(
                         details
                           ? `Reset sandi untuk ${row.email}: ${details}`
@@ -443,7 +611,10 @@ export function AccountRowActions({
                       });
                     }}
                   >
-                    <span className="material-symbols-outlined text-[16px] text-[#6d665d]" aria-hidden>
+                    <span
+                      className="material-symbols-outlined text-[16px] text-[#6d665d]"
+                      aria-hidden
+                    >
                       {isSuspended ? 'check_circle' : 'block'}
                     </span>
                     <span className="truncate">{isSuspended ? 'Aktifkan' : 'Suspend'}</span>
@@ -460,7 +631,10 @@ export function AccountRowActions({
                       setConfirmDeleteOpen(true);
                     }}
                   >
-                    <span className="material-symbols-outlined text-[16px] text-red-500" aria-hidden>
+                    <span
+                      className="material-symbols-outlined text-[16px] text-red-500"
+                      aria-hidden
+                    >
                       delete
                     </span>
                     <span className="truncate">Hapus</span>
