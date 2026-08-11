@@ -282,7 +282,6 @@ async function handleProxy(request: NextRequest, context: { params: Promise<{ sl
     }
   }
 
-  console.log(`[Admin Proxy] Forwarding to backend: Authorization Bearer ${token?.slice(0, 10)}...`);
   const upstream = await backendFetch(fullPath, {
     method: request.method,
     token,
@@ -290,10 +289,8 @@ async function handleProxy(request: NextRequest, context: { params: Promise<{ sl
   });
 
   const payload = await upstream.json().catch(() => null);
-  console.log('[Admin Proxy] Backend response status:', upstream.status);
 
   if (!upstream.ok) {
-    console.error('[Admin Proxy] Backend error response:', payload);
     return NextResponse.json(
       payload ?? { error: { code: 'UPSTREAM_ERROR', message: 'Gagal mengambil data dari server.' } },
       { status: upstream.status },

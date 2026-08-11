@@ -43,24 +43,12 @@ export async function POST(request: Request) {
   const raw = await upstream.json();
   const token = raw?.token ?? raw?.data?.token;
   if (!token) {
-    console.error('[Google Callback BFF] Token missing in backend payload:', JSON.stringify(raw).slice(0, 300));
     return mockFail('UNKNOWN', 'Respons Google OAuth tidak valid.', 502);
   }
 
   const successPayload = authSuccessFromBackend(raw);
   const user = raw?.user ?? raw?.data?.user ?? raw?.data;
   const roles = normalizeRoles(user);
-
-  console.log(
-    '[Google Callback BFF] Success. User:',
-    user?.email || user?.id,
-    'roles:',
-    roles,
-    'activeRole:',
-    successPayload.activeRole,
-    'homePath:',
-    successPayload.homePath,
-  );
 
   const response = NextResponse.json({ data: successPayload }, { status: 200 });
   response.cookies.set(jwtCookieOptions(token));
