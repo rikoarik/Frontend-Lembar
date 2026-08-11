@@ -32,6 +32,8 @@ describe('marketingMetadata', () => {
       description: 'Bandingkan paket terbaru untuk kebutuhan mengajar.',
       url: '/harga',
     });
+    expect(metadata.metadataBase?.toString()).toBe('https://app.lembar.web.id/');
+    expect(metadata.alternates).toEqual({ canonical: '/harga' });
     expect(metadata.twitter).toMatchObject({
       title: 'Paket terbaru lembar',
       description: 'Bandingkan paket terbaru untuk kebutuhan mengajar.',

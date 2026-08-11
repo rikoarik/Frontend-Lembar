@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { fetchMarketingPage, type MarketingSlug } from './fetchMarketingPage';
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://lembar.id';
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://app.lembar.web.id';
 
 type MarketingMetadataFallback = {
   title: string;
