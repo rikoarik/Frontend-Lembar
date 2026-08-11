@@ -22,6 +22,7 @@ const detail = {
   status: 'aktif' as const,
   workspaceId: 'workspace-1',
   billing: { state: 'active', plan: 'pro', seats: 4 },
+  workspacePlan: { planKey: 'pro', tokenUsedThisMonth: 12500, tokenMonthlyLimit: null },
   stats: { quotaUsed: 7, jobsTotal: 12 },
 };
 
@@ -49,7 +50,10 @@ describe('AccountDetailView entitlement control', () => {
 
     expect(await screen.findByText('Entitlement Workspace')).toBeInTheDocument();
     expect(screen.getByText('Paket saat ini: Pro')).toBeInTheDocument();
-    expect(screen.getByText('Kuota terpakai: 7')).toBeInTheDocument();
+    expect(
+      screen.getByText('Token terpakai bulan ini: 12.500 / Tidak terbatas'),
+    ).toBeInTheDocument();
+    expect(screen.queryByText('Kuota terpakai: 7')).not.toBeInTheDocument();
 
     await user.selectOptions(screen.getByLabelText('Paket baru'), 'free');
     await user.click(screen.getByRole('button', { name: 'Ubah entitlement' }));

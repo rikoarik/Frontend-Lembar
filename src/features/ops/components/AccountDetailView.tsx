@@ -38,6 +38,15 @@ export function AccountDetailView({
 
   const currentPlan = detail?.billing?.plan === 'pro' ? 'pro' : 'free';
   const planLabel = (plan: 'free' | 'pro') => (plan === 'pro' ? 'Pro' : 'Free');
+  const tokenUsage = detail?.workspacePlan ?? null;
+  const formatTokens = (value: number) => new Intl.NumberFormat('id-ID').format(value);
+  const tokenUsageLabel = tokenUsage
+    ? `${formatTokens(tokenUsage.tokenUsedThisMonth)} / ${
+        tokenUsage.tokenMonthlyLimit === null
+          ? 'Tidak terbatas'
+          : formatTokens(tokenUsage.tokenMonthlyLimit)
+      }`
+    : 'Data penggunaan token belum tersedia';
 
   useEffect(() => {
     setLoading(true);
@@ -279,10 +288,10 @@ export function AccountDetailView({
                 <div className="grid grid-cols-2 gap-2 pt-2 border-t border-[#eee6da]/50 text-[12px]">
                   <div className="p-2.5 rounded-xl bg-[#faf7f2] border border-[#eee6da]/60">
                     <span className="block text-[11px] text-[#6d665d] font-medium">
-                      Kuota Terpakai
+                      Token Bulan Ini
                     </span>
                     <span className="text-[14px] font-bold text-[#171717] tabular-nums mt-0.5 block">
-                      {detail.stats?.quotaUsed ?? 0}
+                      {tokenUsageLabel}
                     </span>
                   </div>
                   <div className="p-2.5 rounded-xl bg-[#faf7f2] border border-[#eee6da]/60">
@@ -316,7 +325,7 @@ export function AccountDetailView({
                       Paket saat ini: {planLabel(currentPlan)}
                     </p>
                     <p className="text-[12px] text-[#6d665d]">
-                      Kuota terpakai: {detail.stats?.quotaUsed ?? 0}
+                      Token terpakai bulan ini: {tokenUsageLabel}
                     </p>
                   </div>
                   <label

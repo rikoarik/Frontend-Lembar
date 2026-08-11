@@ -136,6 +136,11 @@ export type AdminAccountDetail = {
     seats: number;
     renewsAt?: string | null;
   };
+  workspacePlan?: {
+    planKey: string;
+    tokenUsedThisMonth: number;
+    tokenMonthlyLimit: number | null;
+  } | null;
   stats?: {
     jobsTotal: number;
     quotaUsed: number;
