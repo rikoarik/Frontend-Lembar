@@ -28,7 +28,7 @@ describe('F2-06 profile settings — /app/pengaturan/profil', () => {
 
     expect(screen.getByRole('heading', { level: 1, name: /profil/i })).toBeInTheDocument();
 
-    expect(screen.getByLabelText(/nama tampilan/i)).toBeInTheDocument();
+    expect(await screen.findByLabelText(/nama tampilan/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /simpan nama/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /ubah kata sandi/i })).toHaveAttribute(
       'href',
@@ -43,24 +43,24 @@ describe('F2-06 profile settings — /app/pengaturan/profil', () => {
     const user = userEvent.setup();
     render(<ProfileSettingsPage />);
 
-    const input = screen.getByLabelText(/nama tampilan/i);
+    const input = await screen.findByLabelText(/nama tampilan/i);
     await user.clear(input);
     await user.click(screen.getByRole('button', { name: /simpan nama/i }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent(/nama tampilan wajib diisi/i);
   });
 
-  it('shows saved status after successful display-name save (mock)', async () => {
+  it('shows an honest unavailable status after a display-name save attempt', async () => {
     const user = userEvent.setup();
     render(<ProfileSettingsPage />);
 
-    const input = screen.getByLabelText(/nama tampilan/i);
+    const input = await screen.findByLabelText(/nama tampilan/i);
     await user.clear(input);
     await user.type(input, 'Guru Demo');
     await user.click(screen.getByRole('button', { name: /simpan nama/i }));
 
     await waitFor(() => {
-      expect(screen.getByRole('status')).toHaveTextContent(/nama tampilan disimpan/i);
+      expect(screen.getByRole('alert')).toHaveTextContent(/perubahan nama belum tersedia di backend/i);
     });
   });
 
@@ -68,7 +68,7 @@ describe('F2-06 profile settings — /app/pengaturan/profil', () => {
     const user = userEvent.setup();
     render(<ProfileSettingsPage />);
 
-    await user.click(screen.getByRole('button', { name: /keluar dari semua perangkat/i }));
+    await user.click(await screen.findByRole('button', { name: /keluar dari semua perangkat/i }));
     expect(screen.getByText(/semua sesi aktif akan diakhiri/i)).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: /ya, keluarkan semua/i }));

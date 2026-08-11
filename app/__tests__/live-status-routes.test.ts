@@ -79,9 +79,11 @@ describe('live-status routes', () => {
     const response = await route.GET();
     expect(response.status).toBe(200);
     const json = await response.json();
-    expect(json.board).toMatchObject({ name: 'lembar', taskId: 't_79f6e720', status: 'running' });
+    expect(json.board).toMatchObject({ name: 'lembar', status: 'In Progress' });
+    expect(json.current.id).toBe('t_79f6e720');
+    expect(json.current.externalId).toBe('OPS-LIVE-001');
     expect(json.overallPercent).toBe(25);
-    expect(json.currentTask).toContain('t_79f6e720');
+    expect(json.currentTask).toContain('OPS-LIVE-001');
     expect(json.latestFrontendCommits[0]).toContain('fe12345');
     expect(json.latestBackendCommits[0]).toContain('be12345');
     expect(json.evidence.some((line: string) => line.includes('PM2 lembar-frontend'))).toBe(true);
@@ -92,7 +94,8 @@ describe('live-status routes', () => {
     const response = await route.GET();
     expect(response.status).toBe(200);
     const json = await response.json();
-    expect(json.lines).toHaveLength(2);
-    expect(json.lines.some((line: string) => line.includes('heartbeat t_79f6e720'))).toBe(true);
+    // Heartbeats are intentionally filtered from human activity; durable task lifecycle events remain.
+    expect(json.lines).toHaveLength(1);
+    expect(json.lines[0]).toContain('Task dibuat');
   });
 });

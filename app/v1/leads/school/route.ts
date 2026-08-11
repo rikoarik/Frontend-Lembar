@@ -42,7 +42,7 @@ export async function POST(request: Request) {
     return fail(
       'FEATURE_UNAVAILABLE',
       'Form lead sekolah belum tersambung ke backend live. Hubungi tim kami via WhatsApp untuk demo sekolah.',
-      501,
+      404,
     );
   }
 

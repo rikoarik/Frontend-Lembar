@@ -291,9 +291,9 @@ export default function AppDashboardPage() {
           hint="Semua lembar workspace aktif"
         />
         <MetricCard
-          label="Draft"
-          value={metrics.assessments.draft}
-          hint="Belum memiliki soal final"
+          label="Sumber siap"
+          value={<span data-testid="metric-sources-ready">{metrics.sources.ready}</span>}
+          hint={`${metrics.sources.total} sumber di workspace aktif`}
         />
         <MetricCard
           label="Perlu ditinjau"

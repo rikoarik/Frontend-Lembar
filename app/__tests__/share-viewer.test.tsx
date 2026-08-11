@@ -5,6 +5,41 @@ import ShareViewer from '../(share)/bagikan/[token]/ShareViewer';
 describe('F1-11 share viewer — /bagikan/[token]', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+    vi.stubGlobal(
+      'fetch',
+      vi.fn((url: string) => {
+        if (url.includes('revoked-test')) return Promise.resolve(new Response(null, { status: 404 }));
+        if (url.includes('expired-test')) {
+          return Promise.resolve(
+            new Response(JSON.stringify({ error: { code: 'SHARE_EXPIRED' } }), { status: 410 }),
+          );
+        }
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              data: {
+                assessmentId: 'assessment-1',
+                title: 'Ujian Matematika',
+                expiresAt: '2099-01-01T00:00:00.000Z',
+                questions: [
+                  {
+                    id: 'question-1',
+                    blueprintSequence: 1,
+                    questionType: 'multiple_choice',
+                    difficulty: 'easy',
+                    stem: '2 + 2 = ?',
+                    options: [{ key: 'A', text: '4' }],
+                    answer: 'A',
+                    explanation: 'Penjumlahan dasar.',
+                  },
+                ],
+              },
+            }),
+            { status: 200, headers: { 'Content-Type': 'application/json' } },
+          ),
+        );
+      }),
+    );
   });
 
   afterEach(() => {
@@ -23,9 +58,9 @@ describe('F1-11 share viewer — /bagikan/[token]', () => {
       expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/ujian matematika/i);
     });
 
-    expect(screen.getByText(/lembar soal/i)).toBeInTheDocument();
-    expect(screen.getByText(/kunci jawaban/i)).toBeInTheDocument();
-    expect(screen.getAllByRole('button', { name: /lihat/i })).toHaveLength(2);
+    expect(screen.getByText('2 + 2 = ?')).toBeInTheDocument();
+    expect(screen.getByText('A.')).toBeInTheDocument();
+    expect(screen.getByText('4')).toBeInTheDocument();
   });
 
   it('shows revoked state without leaking assessment metadata', async () => {

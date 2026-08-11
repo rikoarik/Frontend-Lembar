@@ -1,4 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
+
+vi.mock('@/src/lib/api/marketingSession', () => ({
+  getMarketingSession: vi.fn().mockResolvedValue(null),
+}));
 import { render, screen, within } from '@testing-library/react';
 import MarketingLayout from '../(marketing)/layout';
 
@@ -13,7 +17,8 @@ import PricingPage from '../(marketing)/harga/page';
 
 async function renderWithLayout(Page: () => Promise<React.ReactElement>) {
   const content = await Page();
-  return render(<MarketingLayout>{content}</MarketingLayout>);
+  const layout = await MarketingLayout({ children: content });
+  return render(layout);
 }
 
 describe('marketing routes — baseline', () => {
@@ -70,17 +75,16 @@ describe('marketing routes — baseline', () => {
     const planCards = document.querySelectorAll('.bento-card');
     expect(planCards.length).toBe(3);
     expect(
-      within(planCards[0] as HTMLElement).getByRole('heading', { name: 'Coba Gratis' }),
+      within(planCards[0] as HTMLElement).getByRole('heading', { name: 'Free' }),
     ).toBeInTheDocument();
     expect(
-      within(planCards[1] as HTMLElement).getByRole('heading', { name: 'Guru Pro' }),
+      within(planCards[1] as HTMLElement).getByRole('heading', { name: 'Pro' }),
     ).toBeInTheDocument();
     expect(
       within(planCards[2] as HTMLElement).getByRole('heading', { name: 'Sekolah & Institusi' }),
     ).toBeInTheDocument();
 
-    expect(screen.getByText('Catatan Transparansi')).toBeInTheDocument();
-    expect(screen.getByText('Pertanyaan Seputar Tagihan')).toBeInTheDocument();
-    expect(screen.getByText('PALING POPULER')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Pertanyaan umum' })).toBeInTheDocument();
+    expect(screen.getByText('Populer')).toBeInTheDocument();
   });
 });

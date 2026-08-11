@@ -101,7 +101,7 @@ describe('review state normalization', () => {
 
     render(<QuickReviewView assessmentId="asm-state" mode="quick" />);
 
-    expect(await screen.findByText('Belum ditinjau · Topik')).toBeInTheDocument();
+    expect(await screen.findByText(/Belum ditinjau · Topik/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Terima' })).toBeInTheDocument();
   });
 

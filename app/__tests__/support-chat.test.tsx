@@ -93,8 +93,36 @@ describe('SupportChat', () => {
     expect(await screen.findByText('Belum dapat dijawab.')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /lanjutkan di whatsapp/i })).toHaveAttribute(
       'href',
-      'https://wa.me/6285784255112',
+      'https://wa.me/other',
     );
+  });
+
+  it('renders a valid rate-limit fallback returned by the BFF instead of replacing it with a generic outage', async () => {
+    const user = userEvent.setup();
+    vi.mocked(fetch).mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          data: {
+            answered: false,
+            message: 'Bantuan manusia tersedia.',
+            whatsappUrl: 'https://wa.me/rate-limited',
+          },
+        }),
+        { status: 429 },
+      ),
+    );
+    render(<SupportChat />);
+
+    await user.click(screen.getByRole('button', { name: /buka chat/i }));
+    await user.type(screen.getByLabelText(/pertanyaan/i), 'halo');
+    await user.click(screen.getByRole('button', { name: /kirim/i }));
+
+    expect(await screen.findByText('Bantuan manusia tersedia.')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /lanjutkan di whatsapp/i })).toHaveAttribute(
+      'href',
+      'https://wa.me/rate-limited',
+    );
+    expect(screen.queryByText(/layanan chat sedang tidak tersedia/i)).not.toBeInTheDocument();
   });
 
   it('shows a clear loading state and fallback on request errors', async () => {

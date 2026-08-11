@@ -89,21 +89,21 @@ describe('QuickReviewView bulk acceptance', () => {
     expect(within(editedCard).queryByRole('button', { name: 'Terima' })).not.toBeInTheDocument();
   });
 
-  it('confirms bulk acceptance, uses bulkAccept, then clears selection and updates the UI', async () => {
+  it('uses bulkAccept without a browser confirmation, then clears selection and updates the UI', async () => {
     const user = userEvent.setup();
     const updated = assessment();
     updated.questions = updated.questions.map((item) =>
       ['q-1', 'q-2'].includes(item.id) ? { ...item, reviewState: 'accepted' } : item,
     );
     vi.mocked(assessmentService.bulkAccept).mockResolvedValue({ ok: true, value: updated });
-    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true);
+    const confirm = vi.spyOn(window, 'confirm');
     render(<QuickReviewView assessmentId="assessment-1" />);
 
     await screen.findByText('Pertanyaan 1');
     await user.click(screen.getByRole('button', { name: 'Pilih semua soal belum ditinjau' }));
     await user.click(screen.getByRole('button', { name: 'Terima 2 soal' }));
 
-    expect(confirm).toHaveBeenCalledWith('Terima 2 soal terpilih?');
+    expect(confirm).not.toHaveBeenCalled();
     expect(assessmentService.bulkAccept).toHaveBeenCalledWith('assessment-1', ['q-1', 'q-2']);
     await waitFor(() =>
       expect(

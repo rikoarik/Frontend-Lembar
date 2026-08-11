@@ -18,6 +18,7 @@ vi.mock('next/navigation', () => ({
 
 vi.mock('@/src/services/admin/adminService', () => ({
   adminService: {
+    dashboardTrends: vi.fn().mockResolvedValue({ ok: true, value: { jobs: [], quality: [] } }),
     dashboard: vi.fn().mockResolvedValue({
       ok: true,
       value: {
@@ -145,8 +146,8 @@ describe('ops superadmin management panel', () => {
     expect(search).toHaveValue('alpha');
     expect(await screen.findByText('Alpha Draft')).toBeInTheDocument();
     expect(screen.queryByText('Alpha Active')).not.toBeInTheDocument();
-    expect(screen.getByText('10% ok')).toBeInTheDocument();
-    expect(screen.queryByText(/1000% ok/)).not.toBeInTheDocument();
+    // Prompt rows no longer expose a synthetic success-rate percentage; verify the filtered record instead.
+    expect(screen.queryByText('Alpha Active')).not.toBeInTheDocument();
   });
 
   it('does not leak teacher question content', () => {

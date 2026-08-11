@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Button, Panel, StatusBadge } from '@/app/components/ui';
 import type { StatusLabel } from '@/app/components/ui';
 import { assessmentService } from '@/src/services/assessments/assessmentService';
@@ -105,7 +105,7 @@ export function QuickReviewView({
     visibleActionableQuestions.length > 0 &&
     visibleActionableQuestions.every((question) => selected.has(question.id));
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (mode !== 'detail') return;
     // Detail navigation and editor fields mirror the newly filtered question.
     // eslint-disable-next-line react-hooks/set-state-in-effect

@@ -12,7 +12,9 @@ export default function SupportChat() {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
+  const [requestError, setRequestError] = useState('');
   const [isMobile, setIsMobile] = useState(false);
+  const launcherRef = useRef<HTMLButtonElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
@@ -34,14 +36,17 @@ export default function SupportChat() {
 
   // Scroll to bottom on new message
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    bottomRef.current?.scrollIntoView?.({ behavior: 'smooth' });
   }, [messages, loading]);
 
   // Close on Escape
   useEffect(() => {
     if (!open) return;
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false);
+      if (e.key === 'Escape') {
+        setOpen(false);
+        requestAnimationFrame(() => launcherRef.current?.focus());
+      }
     };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
@@ -62,6 +67,7 @@ export default function SupportChat() {
     const trimmed = input.trim();
     if (!trimmed || loading) return;
 
+    setRequestError('');
     setMessages((prev) => [...prev, { role: 'user', text: trimmed }]);
     setInput('');
     setLoading(true);
@@ -73,13 +79,16 @@ export default function SupportChat() {
         body: JSON.stringify({ message: trimmed }),
       });
       const body = await response.json().catch(() => null);
-      if (!response.ok || typeof body?.data?.message !== 'string') throw new Error();
+      // The BFF intentionally returns a structured support fallback on 429/502.
+      // Render that response instead of discarding it as a transport outage.
+      if (typeof body?.data?.message !== 'string') throw new Error();
       const reply: Reply = body.data;
       setMessages((prev) => [
         ...prev,
         { role: 'bot', text: reply.message, whatsappUrl: reply.whatsappUrl },
       ]);
     } catch {
+      setRequestError('Tidak dapat menghubungi layanan chat.');
       setMessages((prev) => [
         ...prev,
         {
@@ -145,6 +154,9 @@ export default function SupportChat() {
                 Halo! Saya asisten Lembar 👋<br />
                 Ada yang bisa saya bantu tentang platform Lembar?
               </p>
+              <p className="mt-2 text-[12px] text-[#6d665d]">
+                Hanya menjawab pertanyaan tentang Lembar dan tidak dapat menjawab topik coding atau topik umum.
+              </p>
             </div>
           </div>
         )}
@@ -181,6 +193,8 @@ export default function SupportChat() {
           </div>
         ))}
 
+        {requestError ? <p role="alert" className="text-[12px] text-[#a3202b]">{requestError}</p> : null}
+
         {loading && (
           <div className="flex items-end gap-2">
             <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#a3202b]">
@@ -204,6 +218,7 @@ export default function SupportChat() {
         <form onSubmit={submit} className="flex items-end gap-2">
           <textarea
             ref={inputRef}
+            aria-label="Pertanyaan"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -218,7 +233,7 @@ export default function SupportChat() {
             type="submit"
             disabled={loading || !input.trim()}
             className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#a3202b] text-white hover:bg-[#851925] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-            aria-label="Kirim pesan"
+            aria-label={loading ? 'Mengirim pesan' : 'Kirim pesan'}
           >
             <span className="material-symbols-outlined text-[18px]">send</span>
           </button>
@@ -249,8 +264,9 @@ export default function SupportChat() {
       {/* Launcher button */}
       <div className="fixed bottom-4 right-4 z-[60] sm:bottom-6 sm:right-6">
         <button
+          ref={launcherRef}
           type="button"
-          aria-label={open ? 'Tutup chat' : 'Buka chat bantuan'}
+          aria-label={open ? 'Tutup chat' : 'Buka chat layanan pelanggan'}
           onClick={() => setOpen((v) => !v)}
           className="group relative flex h-14 w-14 items-center justify-center rounded-full bg-[#a3202b] text-white shadow-lg hover:bg-[#851925] active:scale-95 transition-all duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#a3202b]"
         >

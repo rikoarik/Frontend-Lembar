@@ -67,13 +67,15 @@ describe('history lifecycle UX', () => {
     );
   });
 
-  it('shows an explicit draft state for zero questions without a review ratio', async () => {
+  it('shows the compact draft state for zero questions without a review ratio', async () => {
     vi.mocked(assessmentService.list).mockResolvedValue({
       ok: true,
       value: [{ ...base, lifecycle: 'draft' }],
     });
     render(<HistoryView />);
-    await waitFor(() => expect(screen.getByText('Draf belum berisi soal')).toBeInTheDocument());
+    await waitFor(() =>
+      expect(within(row(base.title)).getByText('Draf', { selector: 'p' })).toBeInTheDocument(),
+    );
     expect(screen.queryByText(/0\/0/)).not.toBeInTheDocument();
   });
 
