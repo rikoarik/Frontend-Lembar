@@ -16,24 +16,24 @@ const base: PrintMetadata = {
 };
 
 describe('MetadataForm', () => {
-  it('renders all PrintMetadata fields with accessible labels', () => {
+  it('merender semua field PrintMetadata dengan label aksesibel berbahasa Indonesia', () => {
     render(<MetadataForm value={base} onChange={vi.fn()} onSave={vi.fn()} onCancel={vi.fn()} />);
 
-    expect(screen.getByLabelText(/school name/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/teacher name/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/subject/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/class/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/date/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/duration/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/instructions/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/max score/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/nama sekolah/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/nama guru/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/mata pelajaran/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/kelas/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/tanggal/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/waktu pengerjaan/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/instruksi pengerjaan/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/nilai maksimal/i)).toBeInTheDocument();
   });
 
-  it('renders save and cancel buttons', () => {
+  it('merender tombol simpan dan batal', () => {
     render(<MetadataForm value={base} onChange={vi.fn()} onSave={vi.fn()} onCancel={vi.fn()} />);
 
-    expect(screen.getByRole('button', { name: /save/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /cancel/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /simpan/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /batal/i })).toBeInTheDocument();
   });
 
   it('calls onChange with updated value when a field changes', async () => {
@@ -41,7 +41,7 @@ describe('MetadataForm', () => {
     const onChange = vi.fn();
     render(<MetadataForm value={base} onChange={onChange} onSave={vi.fn()} onCancel={vi.fn()} />);
 
-    await user.type(screen.getByLabelText(/school name/i), 'SDN 1');
+    await user.type(screen.getByLabelText(/nama sekolah/i), 'SDN 1');
 
     expect(onChange).toHaveBeenLastCalledWith(
       expect.objectContaining({ schoolName: 'SDN 1' }),
@@ -53,7 +53,7 @@ describe('MetadataForm', () => {
     const onChange = vi.fn();
     render(<MetadataForm value={base} onChange={onChange} onSave={vi.fn()} onCancel={vi.fn()} />);
 
-    await user.type(screen.getByLabelText(/teacher name/i), 'Bu Sari');
+    await user.type(screen.getByLabelText(/nama guru/i), 'Bu Sari');
 
     expect(onChange).toHaveBeenLastCalledWith(
       expect.objectContaining({ teacherName: 'Bu Sari' }),
@@ -65,7 +65,7 @@ describe('MetadataForm', () => {
     const onSave = vi.fn();
     render(<MetadataForm value={base} onChange={vi.fn()} onSave={onSave} onCancel={vi.fn()} />);
 
-    await user.click(screen.getByRole('button', { name: /save/i }));
+    await user.click(screen.getByRole('button', { name: /simpan/i }));
 
     expect(screen.getByRole('alert')).toBeInTheDocument();
     expect(onSave).not.toHaveBeenCalled();
@@ -77,7 +77,7 @@ describe('MetadataForm', () => {
     const withSchool: PrintMetadata = { ...base, schoolName: 'SDN 1' };
     render(<MetadataForm value={withSchool} onChange={vi.fn()} onSave={onSave} onCancel={vi.fn()} />);
 
-    await user.click(screen.getByRole('button', { name: /save/i }));
+    await user.click(screen.getByRole('button', { name: /simpan/i }));
 
     expect(screen.getByRole('alert')).toBeInTheDocument();
     expect(onSave).not.toHaveBeenCalled();
@@ -89,7 +89,7 @@ describe('MetadataForm', () => {
     const filled: PrintMetadata = { ...base, schoolName: 'SDN 1', teacherName: 'Bu Sari' };
     render(<MetadataForm value={filled} onChange={vi.fn()} onSave={onSave} onCancel={vi.fn()} />);
 
-    await user.click(screen.getByRole('button', { name: /save/i }));
+    await user.click(screen.getByRole('button', { name: /simpan/i }));
 
     expect(onSave).toHaveBeenCalledWith(filled);
   });
@@ -99,7 +99,7 @@ describe('MetadataForm', () => {
     const onCancel = vi.fn();
     render(<MetadataForm value={base} onChange={vi.fn()} onSave={vi.fn()} onCancel={onCancel} />);
 
-    await user.click(screen.getByRole('button', { name: /cancel/i }));
+    await user.click(screen.getByRole('button', { name: /batal/i }));
 
     expect(onCancel).toHaveBeenCalledOnce();
   });
@@ -117,13 +117,13 @@ describe('MetadataForm', () => {
     };
     render(<MetadataForm value={filled} onChange={vi.fn()} onSave={vi.fn()} onCancel={vi.fn()} />);
 
-    expect(screen.getByLabelText(/school name/i)).toHaveValue('SDN 1');
-    expect(screen.getByLabelText(/teacher name/i)).toHaveValue('Bu Sari');
-    expect(screen.getByLabelText(/subject/i)).toHaveValue('Matematika');
-    expect(screen.getByLabelText(/class/i)).toHaveValue('Kelas 4');
-    expect(screen.getByLabelText(/date/i)).toHaveValue('2025-07-30');
-    expect(screen.getByLabelText(/duration/i)).toHaveValue('90');
-    expect(screen.getByLabelText(/instructions/i)).toHaveValue('Kerjakan sendiri.');
-    expect(screen.getByLabelText(/max score/i)).toHaveValue(100);
+    expect(screen.getByLabelText(/nama sekolah/i)).toHaveValue('SDN 1');
+    expect(screen.getByLabelText(/nama guru/i)).toHaveValue('Bu Sari');
+    expect(screen.getByLabelText(/mata pelajaran/i)).toHaveValue('Matematika');
+    expect(screen.getByLabelText(/kelas/i)).toHaveValue('Kelas 4');
+    expect(screen.getByLabelText(/tanggal/i)).toHaveValue('2025-07-30');
+    expect(screen.getByLabelText(/waktu pengerjaan/i)).toHaveValue('90');
+    expect(screen.getByLabelText(/instruksi pengerjaan/i)).toHaveValue('Kerjakan sendiri.');
+    expect(screen.getByLabelText(/nilai maksimal/i)).toHaveValue(100);
   });
 });

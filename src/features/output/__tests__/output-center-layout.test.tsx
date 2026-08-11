@@ -48,7 +48,7 @@ describe('P1-Q2 OutputCenterContent layout', () => {
 
     const controls = screen.getByRole('complementary', { name: /kontrol output/i });
     expect(controls).toHaveClass('order-1', 'lg:order-none');
-    expect(controls).toContainElement(screen.getByLabelText('School name'));
+    expect(controls).toContainElement(screen.getByLabelText('Nama sekolah'));
     expect(controls).toContainElement(screen.getByRole('button', { name: /sembunyikan lembar siswa/i }));
 
     const preview = screen.getByRole('region', { name: /pratinjau output/i });

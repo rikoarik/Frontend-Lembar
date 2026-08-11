@@ -71,7 +71,7 @@ describe('P1-Q3 OutputCenterContent live preview', () => {
     render(<OutputCenterContent assessmentId="asm_1" />);
 
     const preview = await screen.findByRole('region', { name: /pratinjau output/i });
-    const school = screen.getByLabelText('School name');
+    const school = screen.getByLabelText('Nama sekolah');
     await user.clear(school);
     await user.type(school, 'SDN 2');
 

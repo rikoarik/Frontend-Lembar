@@ -81,7 +81,7 @@ describe('P1-Q OutputCenterContent', () => {
     expect(within(teacher).getByText('Model answer')).toBeInTheDocument();
 
     const metadata = screen.getByRole('region', { name: /metadata/i });
-    expect(within(metadata).getByLabelText('School name')).toHaveValue('SDN 1');
+    expect(within(metadata).getByLabelText('Nama sekolah')).toHaveValue('SDN 1');
   });
 
   it('section toggles control visibility', async () => {
