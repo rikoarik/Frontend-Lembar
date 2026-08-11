@@ -234,6 +234,41 @@ export type AdminPromptRow = {
   status: 'active' | 'draft' | 'archived';
 };
 
+export type AdminPromptVersion = {
+  id: string;
+  version: number;
+  promptText: string;
+  schemaVersion: number;
+  status: 'active' | 'archived';
+  createdBy?: string;
+  notes?: string;
+  createdAt?: string;
+};
+
+export type AdminPromptDetail = {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  descriptionLong?: string;
+  status: 'active' | 'draft' | 'archived';
+  version: number;
+  activeVersion: number;
+  contextWindow?: string;
+  schemaId?: string | null;
+  owner?: string;
+  versions: AdminPromptVersion[];
+};
+
+/** Fields accepted by PATCH /v1/admin/prompts/:id. */
+export type AdminPromptMetadataUpdate = {
+  name?: string;
+  description?: string;
+  description_long?: string;
+  context_window?: string;
+  schema_id?: string | null;
+};
+
 export type AdminAuditRow = {
   id: string;
   at: string;
@@ -617,12 +652,20 @@ export const adminService = {
   },
 
   // Prompt detail + versions + eval cases + learning signals
-  promptDetail(id: string): Promise<Result<Record<string, unknown>, AdminError>> {
-    return request(`/v1/admin/prompts/${id}`);
+  promptDetail(id: string): Promise<Result<AdminPromptDetail, AdminError>> {
+    return request<AdminPromptDetail>(`/v1/admin/prompts/${id}`);
   },
 
-  promptVersions(id: string): Promise<Result<unknown[], AdminError>> {
-    return request<unknown[]>(`/v1/admin/prompts/${id}/versions`);
+  updatePromptMetadata(id: string, data: AdminPromptMetadataUpdate): Promise<Result<{ id: string } & AdminPromptMetadataUpdate, AdminError>> {
+    return request<{ id: string } & AdminPromptMetadataUpdate>(`/v1/admin/prompts/${id}`, 'PATCH', data);
+  },
+
+  promptVersions(id: string): Promise<Result<AdminPromptVersion[], AdminError>> {
+    return request<AdminPromptVersion[]>(`/v1/admin/prompts/${id}/versions`);
+  },
+
+  createPromptVersion(id: string, data: { prompt_text: string; notes?: string; schema_version?: number }): Promise<Result<{ id: string; version: number; status: string }, AdminError>> {
+    return request<{ id: string; version: number; status: string }>(`/v1/admin/prompts/${id}/versions`, 'POST', data);
   },
 
   activatePromptVersion(id: string, version: number): Promise<Result<unknown, AdminError>> {
