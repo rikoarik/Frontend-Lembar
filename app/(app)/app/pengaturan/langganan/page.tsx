@@ -3,18 +3,12 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Panel, Button } from '@/app/components/ui';
+import { formatTokenLimit } from '@/src/lib/api/plans';
+import type { MePlanData } from '@/src/lib/api/plans';
 
 type EntitlementState = 'free' | 'active' | 'grace' | 'blocked' | 'expired';
 
-interface PlanData {
-  workspaceId: string;
-  plan: 'free' | 'pro';
-  entitlementState?: EntitlementState;
-  generationsUsedThisMonth: number;
-  monthlyLimit: number | null;
-  billingCycleStartedAt: string;
-  entitlementSource?: 'free' | 'paid' | 'trial';
-}
+const WA_LINK = 'https://wa.me/6285784255112';
 
 const STATE_COPY: Record<EntitlementState, { heading: string; body: string }> = {
   free: {
@@ -27,28 +21,40 @@ const STATE_COPY: Record<EntitlementState, { heading: string; body: string }> = 
   },
   grace: {
     heading: 'Masa tenggang',
-    body: 'Paket Anda memasuki masa tenggang. Fitur tetap aktif sementara. Hubungi tim kami di wa.me/6285784255112 untuk perpanjangan.',
+    body: `Paket Anda memasuki masa tenggang. Fitur tetap aktif sementara. Hubungi tim kami di ${WA_LINK} untuk perpanjangan.`,
   },
   blocked: {
     heading: 'Akses ditangguhkan',
-    body: 'Akses ke fitur berbayar ditangguhkan. Hubungi tim kami di wa.me/6285784255112 untuk memulihkan akses.',
+    body: `Akses ke fitur berbayar ditangguhkan. Hubungi tim kami di ${WA_LINK} untuk memulihkan akses.`,
   },
   expired: {
     heading: 'Paket berakhir',
-    body: 'Paket Anda telah berakhir. Hubungi tim kami di wa.me/6285784255112 untuk melanjutkan.',
+    body: `Paket Anda telah berakhir. Hubungi tim kami di ${WA_LINK} untuk melanjutkan.`,
   },
 };
 
-function UsageMeter({ used, limit, unit }: { used: number; limit: number; unit: string }) {
+function TokenMeter({ used, limit }: { used: number; limit: number | null }) {
+  if (limit === null) {
+    return (
+      <div className="flex flex-col gap-1.5" aria-label="Penggunaan token: tidak terbatas">
+        <div className="flex justify-between text-body-xs text-brand-muted">
+          <span>Token digunakan bulan ini</span>
+          <span>{new Intl.NumberFormat('id-ID').format(used)} / Tidak terbatas</span>
+        </div>
+      </div>
+    );
+  }
   const pct = Math.min(100, Math.round((used / limit) * 100));
   const isHigh = pct >= 80;
-
   return (
-    <div className="flex flex-col gap-1.5" aria-label={`Penggunaan: ${used} dari ${limit} ${unit}`}>
+    <div
+      className="flex flex-col gap-1.5"
+      aria-label={`Token digunakan: ${used} dari ${limit}`}
+    >
       <div className="flex justify-between text-body-xs text-brand-muted">
-        <span>Penggunaan {unit}</span>
+        <span>Token digunakan bulan ini</span>
         <span>
-          {used} / {limit}
+          {new Intl.NumberFormat('id-ID').format(used)} / {new Intl.NumberFormat('id-ID').format(limit)}
         </span>
       </div>
       <div
@@ -69,35 +75,92 @@ function UsageMeter({ used, limit, unit }: { used: number; limit: number; unit: 
 }
 
 export default function PlanUsageSettingsPage() {
-  const [plan, setPlan] = useState<PlanData | null>(null);
+  const [plan, setPlan] = useState<MePlanData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [subscribeModalOpen, setSubscribeModalOpen] = useState(false);
-  const [selectedTier, setSelectedTier] = useState<string | null>(null);
-  const [subscribeSuccess, setSubscribeSuccess] = useState('');
+  const [upgradeLoading, setUpgradeLoading] = useState(false);
+  const [upgradeError, setUpgradeError] = useState('');
 
+  // Trial state (preserved from existing tests)
+  const [trialLoading, setTrialLoading] = useState(false);
+  const [trialError, setTrialError] = useState('');
+  const [trialSuccess, setTrialSuccess] = useState('');
 
   useEffect(() => {
     let cancelled = false;
     fetch('/v1/me/plan', { credentials: 'include' })
       .then((res) => {
         if (!res.ok) throw new Error('Gagal memuat data paket');
-        return res.json();
+        return res.json() as Promise<{ data: MePlanData }>;
       })
       .then((json) => {
         if (cancelled) return;
         setPlan(json.data);
         setLoading(false);
       })
-      .catch((err) => {
+      .catch((err: Error) => {
         if (cancelled) return;
         setError(err.message || 'Gagal memuat data paket');
         setLoading(false);
       });
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, []);
+
+  const handleUpgrade = async () => {
+    setUpgradeLoading(true);
+    setUpgradeError('');
+    try {
+      // orderId is a client-generated idempotency key; amount is always derived server-side
+      const orderId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      const res = await fetch('/v1/payment/pakasir/create-order', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId, toPlan: 'pro' }),
+      });
+      const json = (await res.json()) as { paymentUrl?: string; error?: { code?: string; message?: string } };
+      if (res.ok && json.paymentUrl) {
+        window.location.href = json.paymentUrl;
+        return;
+      }
+      const code = json.error?.code ?? '';
+      if (code === 'PAYMENT_NOT_CONFIGURED') {
+        setUpgradeError(
+          `Gateway pembayaran belum aktif. Hubungi tim kami via WhatsApp untuk upgrade manual.`,
+        );
+      } else {
+        setUpgradeError(json.error?.message ?? 'Gagal membuat pesanan. Coba lagi.');
+      }
+    } catch {
+      setUpgradeError('Tidak dapat terhubung. Periksa koneksi Anda.');
+    } finally {
+      setUpgradeLoading(false);
+    }
+  };
+
+  const handleClaimTrial = async () => {
+    setTrialLoading(true);
+    setTrialError('');
+    setTrialSuccess('');
+    try {
+      const res = await fetch('/v1/me/plan/trial/claim', {
+        method: 'POST',
+        credentials: 'include',
+      });
+      if (!res.ok) {
+        const json = (await res.json()) as { error?: { message?: string } };
+        setTrialError(json.error?.message ?? 'Gagal mengklaim trial.');
+        return;
+      }
+      const json = (await res.json()) as { data: MePlanData };
+      setPlan(json.data);
+      setTrialSuccess('Trial berhasil diaktifkan.');
+    } catch {
+      setTrialError('Tidak dapat terhubung. Periksa koneksi Anda.');
+    } finally {
+      setTrialLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -105,8 +168,8 @@ export default function PlanUsageSettingsPage() {
         <div className="flex flex-col gap-1">
           <h1 className="text-brand-ink font-semibold text-body-xl">Paket &amp; kuota</h1>
         </div>
-        <div className="h-40 animate-pulse rounded-2xl bg-[#efe8dc]" />
-        <div className="h-60 animate-pulse rounded-2xl bg-[#efe8dc]" />
+        <div className="h-40 animate-pulse rounded-2xl bg-[#efe8dc]" aria-busy="true" />
+        <div className="h-60 animate-pulse rounded-2xl bg-[#efe8dc]" aria-busy="true" />
       </div>
     );
   }
@@ -115,245 +178,129 @@ export default function PlanUsageSettingsPage() {
     return (
       <div className="flex flex-col gap-6 w-full">
         <h1 className="text-brand-ink font-semibold text-body-xl">Paket &amp; kuota</h1>
-        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700" role="alert">
           {error || 'Data tidak tersedia'}
         </div>
       </div>
     );
   }
 
-  const isUnlimited = plan.monthlyLimit === null;
-  const limit = plan.monthlyLimit ?? 0;
-  const used = plan.generationsUsedThisMonth;
   const state: EntitlementState = plan.entitlementState ?? (plan.plan === 'pro' ? 'active' : 'free');
   const stateCopy = STATE_COPY[state];
   const planLabel = plan.plan === 'pro' ? 'Guru Pro' : 'Paket Gratis';
-
-  const handleSubscribe = (tierName: string) => {
-    setSelectedTier(tierName);
-    setSubscribeModalOpen(true);
-  };
-
-  const handleConfirmPay = () => {
-    setSubscribeModalOpen(false);
-    setSubscribeSuccess(
-      `Terima kasih! Tim kami akan menghubungi Anda segera untuk menyelesaikan proses berlangganan ${selectedTier ?? 'paket'}.`,
-    );
-  };
-
-
+  const tokenLimit = plan.tokenMonthlyLimit ?? plan.catalog?.tokenMonthlyLimit ?? null;
+  const tokenUsed = plan.tokenUsedThisMonth ?? 0;
+  const trial = plan.trial;
+  const isPro = plan.plan === 'pro';
 
   return (
     <div className="flex flex-col gap-6 w-full">
       <div className="flex flex-col gap-1">
         <h1 className="text-brand-ink font-semibold text-body-xl">Paket &amp; kuota</h1>
-        <p className="text-body-sm text-[#6d665d]">
-          Pantau sisa kuota lembar Anda dan pilih paket berlangganan sesuai kebutuhan.
-        </p>
+        <p className="text-body-sm text-[#6d665d]">Kelola paket berlangganan dan pantau penggunaan token Anda.</p>
       </div>
 
-      {/* Status Paket Saat Ini */}
-      <Panel title={stateCopy.heading} description={stateCopy.body}>
+      {/* Current plan status */}
+      <Panel>
         <div className="flex flex-col gap-4">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <span className="text-body-sm text-brand-muted">Paket saat ini:</span>
-              <span className="text-body-sm font-medium text-brand-ink">{planLabel}</span>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-semibold text-body-lead text-brand-ink">{stateCopy.heading}</p>
+              <p className="text-body-sm text-[#6d665d] mt-0.5">{planLabel}</p>
             </div>
-            <span
-              className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ring-1 ${
-                plan.plan === 'pro'
-                  ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
-                  : 'bg-neutral-50 text-neutral-600 ring-neutral-200'
-              }`}
-            >
-              {state === 'active' ? (plan.plan === 'pro' ? 'Pro Aktif' : 'Aktif') : STATE_COPY[state].heading}
-            </span>
-          </div>
-
-          <UsageMeter
-            used={used}
-            limit={isUnlimited ? Math.max(used, 1) : limit}
-            unit={isUnlimited ? 'lembar (unlimited)' : 'lembar / bulan'}
-          />
-
-          {plan.billingCycleStartedAt && plan.plan === 'pro' ? (
-            <p className="text-body-sm text-brand-ink-muted">
-              Siklus tagihan mulai:{' '}
-              <span className="font-medium text-brand-ink">
-                {new Date(plan.billingCycleStartedAt).toLocaleDateString('id-ID', {
-                  day: 'numeric',
-                  month: 'long',
-                  year: 'numeric',
-                })}
+            {plan.entitlementSource === 'trial' && (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">
+                Trial aktif
               </span>
-            </p>
-          ) : plan.plan === 'free' ? (
-            <p className="text-body-sm text-brand-ink-muted">
-              Kuota direset setiap tanggal 1.
-            </p>
-          ) : null}
-
-          <div className="flex flex-col sm:flex-row gap-2 pt-1">
-            {plan.plan === 'free' && (
-              <Button size="sm" onClick={() => handleSubscribe('Guru Pro')}>
-                Upgrade ke Guru Pro
-              </Button>
-            )}
-            {plan.plan === 'pro' && (
-              <Button variant="quiet" size="sm" onClick={() => handleSubscribe('Perpanjangan')}>
-                Hubungi tim kami
-              </Button>
             )}
           </div>
+          <p className="text-body-sm text-[#6d665d]">{stateCopy.body}</p>
         </div>
       </Panel>
 
-      {/* Opsi Langganan & Upgrade */}
-      <div className="flex flex-col gap-3">
-        <h2 className="text-[16px] font-semibold text-[#171717]">Pilihan Paket Langganan</h2>
-        <p className="text-body-sm text-[#6d665d]">
-          Tingkatkan kuota dan buka semua fitur pembuatan soal AI tanpa batas.
-        </p>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-          {/* Paket Guru Pro */}
-          <div className="flex flex-col justify-between rounded-xl border-2 border-[#a3202b] bg-white p-5 shadow-xs relative">
-            <span className="absolute -top-3 right-4 rounded-full bg-[#a3202b] px-3 py-0.5 text-[11px] font-semibold text-white shadow-xs">
-              Rekomendasi Guru
-            </span>
-            <div className="flex flex-col gap-3">
-              <div className="flex flex-col">
-                <h3 className="text-[16px] font-bold text-[#171717]">Paket Guru Pro</h3>
-                <p className="text-[12px] text-[#6d665d]">
-                  Untuk guru mandiri yang butuh kuota lebih tinggi
-                </p>
-              </div>
-
-              <ul className="flex flex-col gap-2 pt-2 border-t border-[#e6dfd4]">
-                <li className="flex items-center gap-2 text-[13px] text-[#171717]">
-                  <span className="material-symbols-outlined text-[16px] text-emerald-600">
-                    check_circle
-                  </span>
-                  <span>Kuota 500 lembar / bulan</span>
-                </li>
-                <li className="flex items-center gap-2 text-[13px] text-[#171717]">
-                  <span className="material-symbols-outlined text-[16px] text-emerald-600">
-                    check_circle
-                  </span>
-                  <span>Pemrosesan AI prioritas cepat</span>
-                </li>
-                <li className="flex items-center gap-2 text-[13px] text-[#171717]">
-                  <span className="material-symbols-outlined text-[16px] text-emerald-600">
-                    check_circle
-                  </span>
-                  <span>Ekspor PDF &amp; Word tanpa batas</span>
-                </li>
-                <li className="flex items-center gap-2 text-[13px] text-[#171717]">
-                  <span className="material-symbols-outlined text-[16px] text-emerald-600">
-                    check_circle
-                  </span>
-                  <span>Akses semua kurikulum &amp; template</span>
-                </li>
-              </ul>
-            </div>
-
-            <div className="pt-5 mt-4 border-t border-[#e6dfd4]">
-              <Button
-                variant="primary"
-                size="md"
-                className="w-full justify-center"
-                onClick={() => handleSubscribe('Guru Pro')}
-              >
-                {plan.plan === 'pro' ? 'Paket Aktif' : 'Langganan Paket Pro'}
-              </Button>
-            </div>
-          </div>
-
-          {/* Paket Sekolah / Tim */}
-          <div className="flex flex-col justify-between rounded-xl border border-[#e6dfd4] bg-[#fbf8f2] p-5 shadow-xs">
-            <div className="flex flex-col gap-3">
-              <div className="flex flex-col">
-                <h3 className="text-[16px] font-bold text-[#171717]">Paket Sekolah</h3>
-                <p className="text-[12px] text-[#6d665d]">Untuk institusi dan tim guru sekolah</p>
-              </div>
-
-              <ul className="flex flex-col gap-2 pt-2 border-t border-[#e6dfd4]">
-                <li className="flex items-center gap-2 text-[13px] text-[#171717]">
-                  <span className="material-symbols-outlined text-[16px] text-emerald-600">
-                    check_circle
-                  </span>
-                  <span>Kuota shared seluruh guru sekolah</span>
-                </li>
-                <li className="flex items-center gap-2 text-[13px] text-[#171717]">
-                  <span className="material-symbols-outlined text-[16px] text-emerald-600">
-                    check_circle
-                  </span>
-                  <span>Dashboard manajemen admin sekolah</span>
-                </li>
-                <li className="flex items-center gap-2 text-[13px] text-[#171717]">
-                  <span className="material-symbols-outlined text-[16px] text-emerald-600">
-                    check_circle
-                  </span>
-                  <span>Bank soal bersama terpusat</span>
-                </li>
-                <li className="flex items-center gap-2 text-[13px] text-[#171717]">
-                  <span className="material-symbols-outlined text-[16px] text-emerald-600">
-                    check_circle
-                  </span>
-                  <span>Dukungan pendampingan khusus</span>
-                </li>
-              </ul>
-            </div>
-
-            <div className="pt-5 mt-4 border-t border-[#e6dfd4]">
-              <Link href="/harga" className="block w-full">
-                <Button variant="secondary" size="md" className="w-full justify-center">
-                  Lihat Detail Paket Sekolah
-                </Button>
-              </Link>
-            </div>
-          </div>
+      {/* Token usage */}
+      <Panel>
+        <div className="flex flex-col gap-4">
+          <p className="font-semibold text-body-lead text-brand-ink">Penggunaan token</p>
+          <TokenMeter used={tokenUsed} limit={tokenLimit} />
+          <p className="text-body-xs text-[#6d665d]">
+            Kuota token: {formatTokenLimit(tokenLimit)}. Reset setiap awal siklus tagihan.
+          </p>
         </div>
-      </div>
+      </Panel>
 
-      {/* Modal / Dialog Langganan */}
-      {subscribeModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="flex w-full max-w-md flex-col gap-4 rounded-xl border border-[#e6dfd4] bg-white p-5 shadow-xl">
-            <div className="flex items-center justify-between border-b border-[#e6dfd4] pb-3">
-              <h3 className="text-[16px] font-bold text-[#171717]">Langganan {selectedTier}</h3>
-              <button
-                type="button"
-                onClick={() => setSubscribeModalOpen(false)}
-                className="text-[#8a8379] hover:text-[#171717]"
-              >
-                ✕
-              </button>
-            </div>
-
-            {subscribeSuccess ? (
-              <div className="rounded-lg bg-emerald-50 border border-emerald-200 p-4 text-emerald-800 text-body-sm">
-                {subscribeSuccess}
-              </div>
-            ) : (
-              <div className="flex flex-col gap-3">
+      {/* Trial section */}
+      {trial && (
+        <Panel>
+          <div className="flex flex-col gap-3">
+            <p className="font-semibold text-body-lead text-brand-ink">Trial Guru Pro</p>
+            {trial.eligible && !trial.claimed && (
+              <>
                 <p className="text-body-sm text-[#6d665d]">
-                  Anda memilih untuk berlangganan <strong>{selectedTier}</strong>. Tim kami akan
-                  menghubungi Anda untuk instruksi pembayaran dan aktivasi kuota instan.
+                  Anda memenuhi syarat trial 2 bulan Guru Pro gratis. Klaim sekarang untuk menikmati kuota tidak
+                  terbatas.
                 </p>
-                <div className="flex justify-end gap-2 pt-2">
-                  <Button variant="quiet" size="sm" onClick={() => setSubscribeModalOpen(false)}>
-                    Batal
-                  </Button>
-                  <Button size="sm" onClick={handleConfirmPay}>
-                    Konfirmasi Langganan
-                  </Button>
-                </div>
+                {trialError && (
+                  <p className="text-sm text-red-700" role="alert">{trialError}</p>
+                )}
+                <Button size="sm" onClick={handleClaimTrial} disabled={trialLoading}>
+                  {trialLoading ? 'Memproses…' : 'Klaim trial 2 bulan'}
+                </Button>
+              </>
+            )}
+            {trial.claimed && trial.endsAt && (
+              <div className="flex flex-col gap-1">
+                {trialSuccess && <p className="text-sm text-green-700" role="status">{trialSuccess}</p>}
+                <p className="text-body-sm text-[#6d665d]">
+                  Trial aktif hingga{' '}
+                  <strong>
+                    {new Date(trial.endsAt).toLocaleDateString('id-ID', {
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric',
+                    })}
+                  </strong>
+                </p>
+                {trial.remainingDays !== null && (
+                  <p className="text-body-sm text-amber-700">{trial.remainingDays} hari tersisa</p>
+                )}
               </div>
             )}
           </div>
-        </div>
+        </Panel>
+      )}
+
+      {/* Upgrade section — only shown for free non-trial users */}
+      {!isPro && plan.entitlementSource !== 'trial' && (
+        <Panel>
+          <div className="flex flex-col gap-4">
+            <div>
+              <p className="font-semibold text-body-lead text-brand-ink">Upgrade ke Guru Pro</p>
+              <p className="text-body-sm text-[#6d665d] mt-0.5">
+                Kuota tidak terbatas, ekspor penuh, dan semua fitur Pro.
+              </p>
+            </div>
+            {upgradeError && (
+              <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700" role="alert">
+                <p>{upgradeError}</p>
+                {upgradeError.includes('WhatsApp') && (
+                  <Link
+                    href={WA_LINK}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-red-800 underline"
+                  >
+                    Hubungi tim via WhatsApp
+                  </Link>
+                )}
+              </div>
+            )}
+            <Button onClick={handleUpgrade} disabled={upgradeLoading}>
+              {upgradeLoading ? 'Memproses…' : 'Upgrade ke Pro'}
+            </Button>
+            <p className="text-body-xs text-[#6d665d]">Pembayaran via QRIS. Aman dan instan.</p>
+          </div>
+        </Panel>
       )}
     </div>
   );

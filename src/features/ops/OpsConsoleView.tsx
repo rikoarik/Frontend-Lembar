@@ -41,6 +41,7 @@ import { OpsContentSection } from './sections/OpsContentSection';
 import { OpsLearningSignalsSection } from './sections/OpsLearningSignalsSection';
 import { OpsProfileSection } from './sections/OpsProfileSection';
 import { OpsAiProviderSection } from './sections/OpsAiProviderSection';
+import { OpsPlanHargaSection } from './sections/OpsPlanHargaSection';
 
 type AccountRow = AdminAccountRow;
 type SchoolRow = AdminSchoolRow;
@@ -878,7 +879,10 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
         <OpsAiProviderSection setToast={setToast} />
       ) : null}
 
+      {key === 'plans' ? <OpsPlanHargaSection setToast={setToast} /> : null}
+
       {key !== '' &&
+
       !key.startsWith('accounts/') &&
       ![
         'accounts',
@@ -890,6 +894,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
         'quality',
         'audit',
         'billing',
+        'plans',
         'flags',
         'content',
         'profile',

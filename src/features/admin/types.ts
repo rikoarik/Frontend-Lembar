@@ -39,6 +39,7 @@ export const OPS_NAV: AdminNavItem[] = [
   { href: '/ops/quality', label: 'Quality', icon: 'verified' },
   { href: '/ops/audit', label: 'Audit', icon: 'policy' },
   { href: '/ops/billing', label: 'Billing', icon: 'payments' },
+  { href: '/ops/plans', label: 'Plan & Harga', icon: 'sell' },
   { href: '/ops/flags', label: 'Flags', icon: 'toggle_on' },
   { href: '/ops/content', label: 'Marketing CMS', icon: 'web' },
   { href: '/ops/ai-provider', label: 'Konfigurasi AI', icon: 'smart_toy' },

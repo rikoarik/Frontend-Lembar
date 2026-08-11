@@ -198,6 +198,20 @@ export type PaymentOrder = {
   updatedAt: string;
 };
 
+export type AdminPlanRow = {
+  key: string;
+  displayName: string;
+  priceAmount: number;
+  currency: string;
+  billingPeriod: 'monthly' | 'yearly' | null;
+  tokenMonthlyLimit: number | null;
+  features: string[];
+  active: boolean;
+  revision: number;
+  updatedAt?: string;
+  updatedBy?: string;
+};
+
 export type AdminFlagRow = {
   id: string;
   key: string;
@@ -494,6 +508,27 @@ export const adminService = {
 
   auditDetail(id: string): Promise<Result<AdminAuditDetail, AdminError>> {
     return request<AdminAuditDetail>(`/v1/admin/audit/${id}`);
+  },
+
+  // Plan catalog — GET /v1/admin/plans, PATCH /v1/admin/plans/:key
+  listPlans(): Promise<Result<AdminPlanRow[], AdminError>> {
+    return request<AdminPlanRow[]>('/v1/admin/plans');
+  },
+  updatePlan(
+    key: string,
+    data: {
+      displayName?: string;
+      priceAmount?: number;
+      tokenMonthlyLimit?: number | null;
+      billingPeriod?: string | null;
+      features?: string[];
+      active?: boolean;
+    },
+    revision: number,
+  ): Promise<Result<AdminPlanRow, AdminError>> {
+    return request<AdminPlanRow>(`/v1/admin/plans/${key}`, 'PATCH', data, {
+      'If-Match': String(revision),
+    });
   },
 
   // Billing
