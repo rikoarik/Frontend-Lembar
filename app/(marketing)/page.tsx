@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { fetchMarketingPage } from '@/src/lib/marketing/fetchMarketingPage';
 import { BlockRenderer } from '@/app/components/marketing/BlockRenderer';
 import { getMarketingSession } from '@/src/lib/api/marketingSession';
-
+import JsonLd from '@/app/components/marketing/JsonLd';
 import { marketingMetadata } from '@/src/lib/marketing/marketingMetadata';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -43,6 +43,25 @@ export default async function LandingPage() {
   }
   return (
     <>
+      <JsonLd schema={[
+        {
+          '@type': 'SoftwareApplication',
+          '@id': 'https://app.lembar.web.id/#app',
+          name: 'lembar',
+          applicationCategory: 'EducationApplication',
+          operatingSystem: 'Web',
+          url: 'https://app.lembar.web.id',
+          description: 'Generator soal otomatis berbasis AI untuk guru Indonesia. Buat soal ujian, ulangan, dan latihan dari materi kurikulum atau PDF.',
+          offers: { '@type': 'Offer', price: '0', priceCurrency: 'IDR', description: 'Gratis tanpa batas untuk guru' },
+          inLanguage: 'id',
+        },
+        {
+          '@type': 'Organization',
+          '@id': 'https://app.lembar.web.id/#org',
+          name: 'lembar',
+          url: 'https://app.lembar.web.id',
+        },
+      ]} />
       <main className="flex-grow">
         <section className="py-24 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto overflow-hidden">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-center">
