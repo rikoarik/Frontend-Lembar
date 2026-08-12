@@ -41,6 +41,7 @@ import { OpsLearningSignalsSection } from './sections/OpsLearningSignalsSection'
 import { OpsProfileSection } from './sections/OpsProfileSection';
 import { OpsAiProviderSection } from './sections/OpsAiProviderSection';
 import { OpsPlanHargaSection } from './sections/OpsPlanHargaSection';
+import { OpsWaGatewaySection } from './sections/OpsWaGatewaySection';
 
 type AccountRow = AdminAccountRow;
 type SchoolRow = AdminSchoolRow;
@@ -830,6 +831,8 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
 
       {key === 'plans' ? <OpsPlanHargaSection setToast={setToast} /> : null}
 
+      {key === 'wa-gateway' ? <OpsWaGatewaySection setToast={setToast} /> : null}
+
       {key !== '' &&
 
       !key.startsWith('accounts/') &&
@@ -848,6 +851,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
         'content',
         'profile',
         'ai-provider',
+        'wa-gateway',
       ].includes(key) ? (
         <AdminPageHeader
           title={`Section ${key}`}

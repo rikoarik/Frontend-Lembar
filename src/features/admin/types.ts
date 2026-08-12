@@ -43,6 +43,7 @@ export const OPS_NAV: AdminNavItem[] = [
   { href: '/ops/flags', label: 'Flags', icon: 'toggle_on' },
   { href: '/ops/content', label: 'Marketing CMS', icon: 'web' },
   { href: '/ops/ai-provider', label: 'Konfigurasi AI', icon: 'smart_toy' },
+  { href: '/ops/wa-gateway', label: 'WA Gateway', icon: 'chat' },
 ];
 
 export function isAdminNavActive(href: string, currentPath: string): boolean {
