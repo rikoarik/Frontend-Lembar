@@ -2,14 +2,25 @@ import Link from 'next/link';
 import { fetchMarketingPage } from '@/src/lib/marketing/fetchMarketingPage';
 import { BlockRenderer } from '@/app/components/marketing/BlockRenderer';
 import { HoverCard } from './HoverCard';
+import JsonLd from '@/app/components/marketing/JsonLd';
 
 export default async function UntukSekolahPage() {
   const cmsDoc = await fetchMarketingPage('untuk-sekolah');
+  const sekolahSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    '@id': 'https://app.lembar.web.id/untuk-sekolah#webpage',
+    url: 'https://app.lembar.web.id/untuk-sekolah',
+    name: 'lembar untuk sekolah — workspace organisasi guru',
+    description: 'Sentralisasi pembuatan soal dan manajemen akun guru dalam satu dasbor sekolah.',
+    inLanguage: 'id',
+  };
   if (cmsDoc) {
-    return <BlockRenderer blocks={cmsDoc.blocks} />;
+    return <><JsonLd schema={sekolahSchema} /><BlockRenderer blocks={cmsDoc.blocks} /></>;
   }
   return (
     <>
+      <JsonLd schema={sekolahSchema} />
       <div>
         <section className="pt-unit-16 pb-unit-16 px-margin-mobile md:px-margin-desktop bg-paper overflow-hidden">
           <div className="max-w-container-max mx-auto grid grid-cols-1 lg:grid-cols-12 gap-unit-12 items-center">

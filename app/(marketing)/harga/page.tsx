@@ -10,6 +10,7 @@ import {
 } from '@/src/lib/api/plans';
 
 import { marketingMetadata } from '@/src/lib/marketing/marketingMetadata';
+import JsonLd from '@/app/components/marketing/JsonLd';
 
 export async function generateMetadata(): Promise<Metadata> {
   return marketingMetadata('harga', {
@@ -109,8 +110,17 @@ function PlanCard({
 
 export default async function HargaPage() {
   const cmsDoc = await fetchMarketingPage('harga');
+  const hargaSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    '@id': 'https://app.lembar.web.id/harga#webpage',
+    url: 'https://app.lembar.web.id/harga',
+    name: 'Harga lembar — paket untuk guru dan sekolah',
+    description: 'Paket Coba Gratis, Guru Pro, dan Sekolah & Institusi.',
+    inLanguage: 'id',
+  };
   if (cmsDoc) {
-    return <BlockRenderer blocks={cmsDoc.blocks} />;
+    return <><JsonLd schema={hargaSchema} /><BlockRenderer blocks={cmsDoc.blocks} /></>;
   }
 
   // Fetch canonical catalog server-side; falls back to CANONICAL_FALLBACK if unreachable
@@ -120,6 +130,7 @@ export default async function HargaPage() {
 
   return (
     <>
+      <JsonLd schema={hargaSchema} />
       <div className="min-h-screen">
         <header className="py-unit-16 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto text-center">
           <div className="inline-block px-unit-3 py-unit-1 bg-secondary-fixed text-on-secondary-fixed-variant rounded-full font-label-semibold text-caption mb-unit-6">
