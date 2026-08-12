@@ -13,6 +13,7 @@ function extractToken(request: NextRequest, jar: Awaited<ReturnType<typeof cooki
   const cookieToken =
     jar.get(JWT_COOKIE)?.value ||
     jar.get(SESSION_COOKIE)?.value ||
+    jar.get('__Host-lembar_session')?.value ||
     jar.get('token')?.value ||
     jar.get('jwt')?.value;
 
@@ -27,8 +28,11 @@ async function handleProxy(request: NextRequest, context: { params: Promise<{ sl
 
   const jar = await cookies();
   const token = extractToken(request, jar);
+  // wa-gateway uses session-based auth on BE — forward cookie as Bearer fallback
+  const sessionCookie = jar.get('__Host-lembar_session')?.value ?? null;
+  const effectiveToken = token || sessionCookie;
 
-  if (!token && !isMockApiMode()) {
+  if (!effectiveToken && !isMockApiMode()) {
     return NextResponse.json(
       {
         error: {
@@ -284,7 +288,7 @@ async function handleProxy(request: NextRequest, context: { params: Promise<{ sl
 
   const upstream = await backendFetch(fullPath, {
     method: request.method,
-    token,
+    token: effectiveToken,
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
 
