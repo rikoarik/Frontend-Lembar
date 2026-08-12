@@ -1,11 +1,28 @@
 'use client';
 
+import { Component, type ReactNode } from 'react';
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { Button, Panel, StatusBadge } from '@/app/components/ui';
 import { assessmentService } from '@/src/services/assessments/assessmentService';
 import { ShareManager } from '@/src/features/share/ShareManager';
 import type { OutputPackage, AssessmentDetail } from '@/src/features/review/types';
+
+// ponytail: no reset button — add reset prop + this.setState when retry UX is needed
+class ErrorBoundary extends Component<{ children: ReactNode }, { caught: boolean }> {
+  state = { caught: false };
+  static getDerivedStateFromError() { return { caught: true }; }
+  render() {
+    if (this.state.caught) {
+      return (
+        <div role="alert" className="rounded-lg border border-brand-danger/30 bg-brand-danger/5 px-4 py-3 text-body-sm text-brand-danger">
+          Terjadi kesalahan tak terduga. Muat ulang halaman untuk mencoba lagi.
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 export function OutputCenterView({ assessmentId }: { assessmentId: string }) {
   const [output, setOutput] = useState<OutputPackage | null>(null);
@@ -62,6 +79,7 @@ export function OutputCenterView({ assessmentId }: { assessmentId: string }) {
   }
 
   return (
+    <ErrorBoundary>
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
         <h1 className="text-h1 font-semibold text-brand-ink">Lihat hasil</h1>
@@ -148,5 +166,6 @@ export function OutputCenterView({ assessmentId }: { assessmentId: string }) {
       {/* Share */}
       <ShareManager assessmentId={assessmentId} title={output.studentSheetLabel} />
     </div>
+  </ErrorBoundary>
   );
 }

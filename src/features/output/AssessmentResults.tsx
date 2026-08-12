@@ -1,6 +1,22 @@
 'use client';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { Component, useEffect, useState, type ReactNode } from 'react';
+
+// ponytail: no reset — add reset prop + this.setState when retry UX needed
+class ErrorBoundary extends Component<{ children: ReactNode }, { caught: boolean }> {
+  state = { caught: false };
+  static getDerivedStateFromError() { return { caught: true }; }
+  render() {
+    if (this.state.caught) {
+      return (
+        <div role="alert" className="rounded-lg border border-brand-danger/30 bg-brand-danger/5 px-4 py-3 text-body-sm text-brand-danger">
+          Terjadi kesalahan tak terduga. Muat ulang halaman untuk mencoba lagi.
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 type Row = {
   id: string;
@@ -38,6 +54,7 @@ export default function AssessmentResults({ assessmentId }: { assessmentId: stri
   const submitted = rows.filter(r => r.status === 'submitted').length;
 
   return (
+    <ErrorBoundary>
     <div className="flex flex-col gap-6">
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -136,5 +153,6 @@ export default function AssessmentResults({ assessmentId }: { assessmentId: stri
         </div>
       )}
     </div>
+  </ErrorBoundary>
   );
 }
