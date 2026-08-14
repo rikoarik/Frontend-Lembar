@@ -30,24 +30,8 @@ async function handleProxy(request: NextRequest, context: { params: Promise<{ sl
   const token = extractToken(request, jar);
   const sessionCookie = jar.get('__Host-lembar_session')?.value ?? null;
   const effectiveToken = token || sessionCookie;
-  const isWaGateway = path.startsWith('/v1/admin/wa-gateway');
 
-  if (!effectiveToken && !isWaGateway && !isMockApiMode()) {
-    return NextResponse.json(
-      {
-        error: {
-          code: 'AUTH_REQUIRED',
-          message: 'Token autentikasi tidak ditemukan. Silakan masuk terlebih dahulu.',
-          retryable: false,
-        },
-      },
-      { status: 401 },
-    );
-  }
-
-  const proxyToken = isWaGateway ? sessionCookie || token : effectiveToken;
-
-  if (!proxyToken && !isWaGateway && !isMockApiMode()) {
+  if (!effectiveToken && !isMockApiMode()) {
     return NextResponse.json(
       {
         error: {
