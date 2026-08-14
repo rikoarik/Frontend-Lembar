@@ -28,11 +28,11 @@ async function handleProxy(request: NextRequest, context: { params: Promise<{ sl
 
   const jar = await cookies();
   const token = extractToken(request, jar);
-  // wa-gateway uses session-based auth on BE — forward cookie as Bearer fallback
   const sessionCookie = jar.get('__Host-lembar_session')?.value ?? null;
   const effectiveToken = token || sessionCookie;
+  const isWaGateway = path.startsWith('/v1/admin/wa-gateway');
 
-  if (!effectiveToken && !isMockApiMode()) {
+  if (!effectiveToken && !isWaGateway && !isMockApiMode()) {
     return NextResponse.json(
       {
         error: {
