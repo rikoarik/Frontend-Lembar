@@ -45,6 +45,21 @@ async function handleProxy(request: NextRequest, context: { params: Promise<{ sl
     );
   }
 
+  const proxyToken = isWaGateway ? sessionCookie || token : effectiveToken;
+
+  if (!proxyToken && !isWaGateway && !isMockApiMode()) {
+    return NextResponse.json(
+      {
+        error: {
+          code: 'AUTH_REQUIRED',
+          message: 'Token autentikasi tidak ditemukan. Silakan masuk terlebih dahulu.',
+          retryable: false,
+        },
+      },
+      { status: 401 },
+    );
+  }
+
   // ── Mock API Fallback ────────────────────────────────────────────────
   if (isMockApiMode()) {
     console.log('[Admin Proxy] Mock API Mode active. Returning mock response for path:', path);
