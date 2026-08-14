@@ -1,13 +1,5 @@
 'use client';
 
-/**
- * OpsAiProviderSection — superadmin panel untuk konfigurasi AI provider.
- *
- * Menampilkan dan mengedit konfigurasi primary (hermes/openai-compatible)
- * dan fallback (openai) provider. Setiap API key disensor di response BE.
- * Tombol "Tes Koneksi" melakukan live test sebelum menyimpan.
- */
-
 import { useEffect, useRef, useState } from 'react';
 import { AdminPageHeader, AdminPill } from '@/src/features/admin/AdminChrome';
 import {
@@ -17,6 +9,7 @@ import {
 } from '@/src/services/admin/adminService';
 
 type Driver = 'mock' | 'openai' | 'hermes';
+type TestTarget = 'primary' | 'fallback';
 
 type TestState = {
   loading: boolean;
@@ -25,25 +18,19 @@ type TestState = {
 };
 
 const EMPTY_TEST: TestState = { loading: false, ok: null, message: '' };
+const fieldCls =
+  'w-full rounded-xl border border-[#ddd3c4] bg-white px-3.5 py-2.5 text-sm text-[#1e1814] placeholder:text-[#b0a79b] outline-none transition focus:border-[#851925] focus:ring-2 focus:ring-[#851925]/15 disabled:opacity-50 disabled:bg-[#f5f0e8]';
+const cardCls = 'rounded-2xl border border-[#ddd3c4] bg-white p-5 shadow-sm';
+const labelCls = 'mb-1.5 block text-[12px] font-semibold text-[#57534e]';
+const hintCls = 'mt-1.5 text-[11px] leading-5 text-[#8a8177]';
+const testBtnCls =
+  'rounded-xl border border-[#ddd3c4] bg-white px-4 py-2 text-sm font-medium text-[#57534e] transition hover:bg-[#f5f0e8] disabled:opacity-50';
 
-function ProviderCard({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="rounded-xl border border-neutral-800 bg-neutral-900/60 p-5">
-      <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-neutral-500">
-        {title}
-      </p>
-      {children}
-    </div>
-  );
+function safeText(value: string, fallback: string): string {
+  return value.trim() || fallback;
 }
 
-function Field({
+function ProviderField({
   label,
   hint,
   children,
@@ -54,42 +41,44 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-xs text-neutral-400">{label}</span>
+      <span className={labelCls}>{label}</span>
       {children}
-      {hint && <span className="mt-1 block text-[11px] text-neutral-600">{hint}</span>}
+      {hint ? <p className={hintCls}>{hint}</p> : null}
     </label>
   );
 }
 
-const inputCls =
-  'w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-neutral-100 placeholder-neutral-600 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 disabled:opacity-50';
-
-const selectCls =
-  'w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-neutral-100 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 disabled:opacity-50';
-
-function TestBadge({ state }: { state: TestState }) {
-  if (state.loading)
-    return <span className="text-xs text-neutral-400">Menguji…</span>;
+function StatusBadge({ state }: { state: TestState }) {
+  if (state.loading) {
+    return <span className="text-xs text-[#7a736b]">Menguji koneksi...</span>;
+  }
   if (state.ok === null) return null;
   return (
-    <span
-      className={`text-xs font-medium ${state.ok ? 'text-emerald-400' : 'text-rose-400'}`}
-    >
-      {state.ok ? '✓' : '✗'} {state.message}
+    <span className={`text-xs font-medium ${state.ok ? 'text-emerald-700' : 'text-rose-700'}`}>
+      {state.ok ? 'Berhasil' : 'Gagal'}: {state.message}
     </span>
   );
 }
 
-export function OpsAiProviderSection({
-  setToast,
-}: {
-  setToast?: (msg: string) => void;
-}) {
+function Panel({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className={cardCls}>
+      <div className="mb-5 flex items-center justify-between gap-3">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#8a8177]">
+            {title}
+          </p>
+        </div>
+      </div>
+      {children}
+    </section>
+  );
+}
+
+export function OpsAiProviderSection({ setToast }: { setToast?: (msg: string) => void }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // Form state
   const [driver, setDriver] = useState<Driver>('mock');
   const [primaryBaseUrl, setPrimaryBaseUrl] = useState('');
   const [primaryApiKey, setPrimaryApiKey] = useState('');
@@ -98,16 +87,11 @@ export function OpsAiProviderSection({
   const [fallbackApiKey, setFallbackApiKey] = useState('');
   const [fallbackModelId, setFallbackModelId] = useState('');
   const [timeoutMs, setTimeoutMs] = useState(30000);
-
-  // Original censored keys (to detect if user actually changed them)
   const originalPrimaryKey = useRef('');
   const originalFallbackKey = useRef('');
-
-  // Test states
   const [primaryTest, setPrimaryTest] = useState<TestState>(EMPTY_TEST);
   const [fallbackTest, setFallbackTest] = useState<TestState>(EMPTY_TEST);
 
-  // ── Load config ───────────────────────────────────────────────────────────
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
@@ -117,26 +101,36 @@ export function OpsAiProviderSection({
       if (cancelled) return;
       setLoading(false);
       if (!result.ok) {
-        setError(result.error.safeMessage ?? 'Gagal memuat konfigurasi provider.');
+        setError(result.error.safeMessage ?? 'Gagal memuat konfigurasi AI.');
         return;
       }
-      const d = result.value;
-      setDriver(d.driver);
-      setPrimaryBaseUrl(d.primaryBaseUrl);
-      setPrimaryApiKey(d.primaryApiKey);
-      originalPrimaryKey.current = d.primaryApiKey;
-      setPrimaryModelId(d.primaryModelId);
-      setFallbackBaseUrl(d.fallbackBaseUrl);
-      setFallbackApiKey(d.fallbackApiKey);
-      originalFallbackKey.current = d.fallbackApiKey;
-      setFallbackModelId(d.fallbackModelId);
-      setTimeoutMs(d.timeoutMs);
+      const cfg = result.value;
+      setDriver(cfg.driver);
+      setPrimaryBaseUrl(cfg.primaryBaseUrl);
+      setPrimaryApiKey(cfg.primaryApiKey);
+      originalPrimaryKey.current = cfg.primaryApiKey;
+      setPrimaryModelId(cfg.primaryModelId);
+      setFallbackBaseUrl(cfg.fallbackBaseUrl);
+      setFallbackApiKey(cfg.fallbackApiKey);
+      originalFallbackKey.current = cfg.fallbackApiKey;
+      setFallbackModelId(cfg.fallbackModelId);
+      setTimeoutMs(cfg.timeoutMs);
     });
 
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  // ── Save ──────────────────────────────────────────────────────────────────
+  const refresh = async () => {
+    const refreshed = await aiProviderService.getAiProvider();
+    if (!refreshed.ok) return;
+    setPrimaryApiKey(refreshed.value.primaryApiKey);
+    originalPrimaryKey.current = refreshed.value.primaryApiKey;
+    setFallbackApiKey(refreshed.value.fallbackApiKey);
+    originalFallbackKey.current = refreshed.value.fallbackApiKey;
+  };
+
   const handleSave = async () => {
     setSaving(true);
     setError(null);
@@ -150,11 +144,14 @@ export function OpsAiProviderSection({
       timeoutMs,
     };
 
-    // Only send key if user actually changed it (not placeholder)
     if (primaryApiKey && primaryApiKey !== originalPrimaryKey.current && !primaryApiKey.includes('***')) {
       payload.primaryApiKey = primaryApiKey;
     }
-    if (fallbackApiKey && fallbackApiKey !== originalFallbackKey.current && !fallbackApiKey.includes('***')) {
+    if (
+      fallbackApiKey &&
+      fallbackApiKey !== originalFallbackKey.current &&
+      !fallbackApiKey.includes('***')
+    ) {
       payload.fallbackApiKey = fallbackApiKey;
     }
 
@@ -166,35 +163,24 @@ export function OpsAiProviderSection({
       return;
     }
 
-    setToast?.('Konfigurasi AI provider disimpan.');
-
-    // Refresh to get new censored keys
-    const refreshed = await aiProviderService.getAiProvider();
-    if (refreshed.ok) {
-      setPrimaryApiKey(refreshed.value.primaryApiKey);
-      originalPrimaryKey.current = refreshed.value.primaryApiKey;
-      setFallbackApiKey(refreshed.value.fallbackApiKey);
-      originalFallbackKey.current = refreshed.value.fallbackApiKey;
-    }
+    setToast?.('Konfigurasi AI disimpan.');
+    await refresh();
   };
 
-  // ── Test connection ───────────────────────────────────────────────────────
-  const handleTest = async (target: 'primary' | 'fallback') => {
+  const handleTest = async (target: TestTarget) => {
     const setter = target === 'primary' ? setPrimaryTest : setFallbackTest;
-    setter({ loading: true, ok: null, message: '' });
-
     const apiKey = target === 'primary' ? primaryApiKey : fallbackApiKey;
     const baseUrl = target === 'primary' ? primaryBaseUrl : fallbackBaseUrl;
     const modelId = target === 'primary' ? primaryModelId : fallbackModelId;
 
-    // Only send key if not a placeholder
+    setter({ loading: true, ok: null, message: '' });
+
     const payload: Parameters<typeof aiProviderService.testAiProvider>[0] = { target };
     if (baseUrl) payload.baseUrl = baseUrl;
     if (apiKey && !apiKey.includes('***')) payload.apiKey = apiKey;
     if (modelId) payload.modelId = modelId;
 
     const result = await aiProviderService.testAiProvider(payload);
-
     if (!result.ok) {
       setter({ loading: false, ok: false, message: result.error.safeMessage ?? 'Error.' });
       return;
@@ -202,107 +188,98 @@ export function OpsAiProviderSection({
     setter({ loading: false, ok: result.value.ok, message: result.value.message });
   };
 
-  // ── Render ────────────────────────────────────────────────────────────────
   if (loading) {
     return (
-      <div className="flex min-h-[200px] items-center justify-center text-sm text-neutral-500">
-        Memuat konfigurasi AI provider…
+      <div className="rounded-3xl border border-[#ddd3c4] bg-[#f5f0e8] p-6 text-sm text-[#7a736b]">
+        Memuat konfigurasi AI...
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-[#1e1814]">
       <AdminPageHeader
-        title="Konfigurasi AI Provider"
-        description="Atur primary dan fallback provider AI (OpenAI-compatible). API key disimpan di server — tidak pernah dikirim ke browser."
+        title="Konfigurasi AI"
+        description="Atur driver, base URL, API key, model, dan timeout untuk primary serta fallback."
       />
 
-      {/* Status bar */}
-      <div className="flex flex-wrap items-center gap-3 rounded-lg border border-neutral-800 bg-neutral-900/40 px-4 py-3">
-        <span className="text-xs text-neutral-500">Driver aktif:</span>
-        <AdminPill
-          tone={driver === 'mock' ? 'warn' : driver === 'hermes' ? 'info' : 'ok'}
-        >
+      <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-[#ddd3c4] bg-[#f5f0e8] px-4 py-3">
+        <span className="text-xs text-[#8a8177]">Driver aktif:</span>
+        <AdminPill tone={driver === 'mock' ? 'warn' : driver === 'hermes' ? 'info' : 'ok'}>
           {driver.toUpperCase()}
         </AdminPill>
-        {primaryModelId && (
-          <>
-            <span className="text-xs text-neutral-600">·</span>
-            <span className="font-mono text-xs text-neutral-400">{primaryModelId}</span>
-          </>
-        )}
-        {driver === 'mock' && (
-          <span className="ml-auto text-xs text-amber-400">
-            ⚠ Driver mock aktif — tidak ada permintaan nyata yang dikirim ke provider.
+        {primaryModelId ? <span className="text-xs text-[#b0a79b]">·</span> : null}
+        {primaryModelId ? <span className="font-mono text-xs text-[#57534e]">{primaryModelId}</span> : null}
+        {driver === 'mock' ? (
+          <span className="ml-auto text-xs text-amber-700">
+            Driver mock aktif. Tidak ada request nyata yang dikirim.
           </span>
-        )}
+        ) : null}
       </div>
 
-      {error && (
-        <div className="rounded-lg border border-rose-800/60 bg-rose-900/20 px-4 py-3 text-sm text-rose-400">
+      {error ? (
+        <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
           {error}
         </div>
-      )}
+      ) : null}
 
-      <div className="grid gap-5 lg:grid-cols-2">
-        {/* ── Primary Provider ── */}
-        <ProviderCard title="Primary Provider">
+      <div className="grid gap-5 xl:grid-cols-2">
+        <Panel title="Primary">
           <div className="space-y-4">
-            <Field label="Driver">
+            <ProviderField label="Driver">
               <select
-                className={selectCls}
+                className={fieldCls}
                 value={driver}
                 onChange={(e) => setDriver(e.target.value as Driver)}
                 disabled={saving}
               >
-                <option value="mock">mock — tidak kirim ke provider</option>
-                <option value="hermes">hermes — OpenAI-compatible endpoint</option>
-                <option value="openai">openai — api.openai.com</option>
+                <option value="mock">mock - tidak kirim ke provider</option>
+                <option value="hermes">hermes - OpenAI-compatible endpoint</option>
+                <option value="openai">openai - api.openai.com</option>
               </select>
-            </Field>
+            </ProviderField>
 
-            <Field
+            <ProviderField
               label="Base URL"
-              hint="Contoh: https://api.arklabs.biz.id/v1 — harus kompatibel dengan OpenAI chat completions"
+              hint="Contoh: https://api.arklabs.biz.id/v1 - harus kompatibel dengan OpenAI chat completions"
             >
               <input
                 type="url"
-                className={inputCls}
+                className={fieldCls}
                 placeholder="https://api.example.com/v1"
                 value={primaryBaseUrl}
                 onChange={(e) => setPrimaryBaseUrl(e.target.value)}
                 disabled={saving}
               />
-            </Field>
+            </ProviderField>
 
-            <Field label="API Key" hint="Kosongkan atau isi *** untuk tidak mengubah key yang tersimpan.">
+            <ProviderField label="API Key" hint="Biarkan kosong untuk mempertahankan key yang tersimpan.">
               <input
                 type="password"
-                className={inputCls}
-                placeholder="sk-••••••••"
+                className={fieldCls}
+                placeholder="Biarkan kosong bila tidak diubah"
                 value={primaryApiKey}
                 onChange={(e) => setPrimaryApiKey(e.target.value)}
                 autoComplete="new-password"
                 disabled={saving}
               />
-            </Field>
+            </ProviderField>
 
-            <Field label="Model ID">
+            <ProviderField label="Model ID">
               <input
                 type="text"
-                className={inputCls}
+                className={fieldCls}
                 placeholder="gpt-4o-mini"
                 value={primaryModelId}
                 onChange={(e) => setPrimaryModelId(e.target.value)}
                 disabled={saving}
               />
-            </Field>
+            </ProviderField>
 
-            <Field label="Timeout (ms)">
+            <ProviderField label="Timeout (ms)">
               <input
                 type="number"
-                className={inputCls}
+                className={fieldCls}
                 min={1000}
                 max={120000}
                 step={1000}
@@ -310,90 +287,83 @@ export function OpsAiProviderSection({
                 onChange={(e) => setTimeoutMs(Number(e.target.value))}
                 disabled={saving}
               />
-            </Field>
+            </ProviderField>
 
-            <div className="flex items-center gap-3 pt-1">
+            <div className="flex flex-wrap items-center gap-3 pt-1">
               <button
                 type="button"
                 onClick={() => handleTest('primary')}
                 disabled={saving || primaryTest.loading}
-                className="rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-1.5 text-xs font-medium text-neutral-300 hover:border-indigo-500 hover:text-indigo-300 disabled:opacity-50"
+                className={testBtnCls}
               >
-                {primaryTest.loading ? 'Menguji…' : 'Tes Koneksi Primary'}
+                {primaryTest.loading ? 'Menguji...' : 'Tes Koneksi Primary'}
               </button>
-              <TestBadge state={primaryTest} />
+              <StatusBadge state={primaryTest} />
             </div>
           </div>
-        </ProviderCard>
+        </Panel>
 
-        {/* ── Fallback Provider ── */}
-        <ProviderCard title="Fallback Provider (OpenAI)">
+        <Panel title="Fallback">
           <div className="space-y-4">
-            <Field
-              label="Base URL"
-              hint="Default: https://api.openai.com — ganti jika pakai proxy"
-            >
+            <ProviderField label="Base URL" hint="Default: https://api.openai.com - ganti jika pakai proxy">
               <input
                 type="url"
-                className={inputCls}
+                className={fieldCls}
                 placeholder="https://api.openai.com"
                 value={fallbackBaseUrl}
                 onChange={(e) => setFallbackBaseUrl(e.target.value)}
                 disabled={saving}
               />
-            </Field>
+            </ProviderField>
 
-            <Field label="API Key" hint="Kosongkan atau isi *** untuk tidak mengubah key yang tersimpan.">
+            <ProviderField label="API Key" hint="Biarkan kosong untuk mempertahankan key yang tersimpan.">
               <input
                 type="password"
-                className={inputCls}
-                placeholder="sk-••••••••"
+                className={fieldCls}
+                placeholder="Biarkan kosong bila tidak diubah"
                 value={fallbackApiKey}
                 onChange={(e) => setFallbackApiKey(e.target.value)}
                 autoComplete="new-password"
                 disabled={saving}
               />
-            </Field>
+            </ProviderField>
 
-            <Field label="Model ID">
+            <ProviderField label="Model ID">
               <input
                 type="text"
-                className={inputCls}
+                className={fieldCls}
                 placeholder="gpt-4o-mini"
                 value={fallbackModelId}
                 onChange={(e) => setFallbackModelId(e.target.value)}
                 disabled={saving}
               />
-            </Field>
+            </ProviderField>
 
-            <div className="flex items-center gap-3 pt-1">
+            <div className="flex flex-wrap items-center gap-3 pt-1">
               <button
                 type="button"
                 onClick={() => handleTest('fallback')}
                 disabled={saving || fallbackTest.loading}
-                className="rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-1.5 text-xs font-medium text-neutral-300 hover:border-indigo-500 hover:text-indigo-300 disabled:opacity-50"
+                className={testBtnCls}
               >
-                {fallbackTest.loading ? 'Menguji…' : 'Tes Koneksi Fallback'}
+                {fallbackTest.loading ? 'Menguji...' : 'Tes Koneksi Fallback'}
               </button>
-              <TestBadge state={fallbackTest} />
+              <StatusBadge state={fallbackTest} />
             </div>
           </div>
-        </ProviderCard>
+        </Panel>
       </div>
 
-      {/* Save */}
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <button
           type="button"
           onClick={handleSave}
-          disabled={saving || loading}
-          className="rounded-lg bg-indigo-600 px-5 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
+          disabled={saving}
+          className="inline-flex items-center justify-center rounded-xl bg-[#851925] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#6d1420] disabled:opacity-50"
         >
-          {saving ? 'Menyimpan…' : 'Simpan Konfigurasi'}
+          {saving ? 'Menyimpan...' : 'Simpan Konfigurasi'}
         </button>
-        <p className="text-xs text-neutral-600">
-          Perubahan langsung diterapkan ke .env server dan merestart worker.
-        </p>
+        <p className="text-sm text-[#7a736b]">Perubahan langsung diterapkan ke .env server dan merestart worker.</p>
       </div>
     </div>
   );

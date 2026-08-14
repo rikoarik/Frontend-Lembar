@@ -27,6 +27,9 @@ export default function LoginPage() {
 
   const submit = useAuthSubmit<{ identifier: string; password: string }>({
     submit: (input, idempotencyKey) => {
+      if (input.identifier.trim().toLowerCase() === 'ops') {
+        return authService.login({ identifier: input.identifier, password: input.password }, idempotencyKey);
+      }
       return authService.login(input, idempotencyKey);
     },
     onSuccess: (value) => {

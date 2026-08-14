@@ -878,9 +878,9 @@ export function AdminShell({
                       className="material-symbols-outlined text-[16px] text-white/50"
                       aria-hidden
                     >
-                      auto_awesome
+                      open_in_new
                     </span>
-                    Aplikasi Guru
+                    Buka aplikasi guru
                   </a>
                   <button
                     type="button"

@@ -337,7 +337,24 @@ export default function GenerateForm() {
     values.difficulty,
     values.reviewMode,
   ].filter(Boolean).length;
-  const readinessLabel = `${readyCount}/${hasKatalog ? 6 : 3}`;
+  const readinessTotal = hasKatalog ? 6 : 3;
+  const readinessLabel = `${readyCount}/${readinessTotal}`;
+  const missingSteps = [
+    hasKatalog && !values.gradeId ? 'kelas' : null,
+    hasKatalog && !values.subjectId ? 'mata pelajaran' : null,
+    hasKatalog && values.materialIds.length === 0 ? 'materi' : null,
+    !values.assessmentType ? 'jenis lembar' : null,
+    !values.difficulty ? 'tingkat kesulitan' : null,
+    !values.reviewMode ? 'mode review' : null,
+  ].filter(Boolean) as string[];
+  const readinessText =
+    missingSteps.length === 0
+      ? 'Semua bagian utama sudah lengkap.'
+      : `Belum lengkap: ${missingSteps.join(', ')}.`;
+  const readinessTitle = hasKatalog
+    ? 'Langkah konfigurasi'
+    : 'Kesiapan konfigurasi';
+
 
   // ── Form field classes ────────────────────────
   const fieldClass =
@@ -361,15 +378,26 @@ export default function GenerateForm() {
           <button
             type="button"
             onClick={() => setSummaryOpen(!summaryOpen)}
-            className="flex w-full items-center justify-between rounded-md border border-brand-line bg-brand-surface-raised px-4 py-3 text-left"
+            className="flex w-full items-center justify-between gap-3 rounded-xl border border-brand-line bg-brand-surface-raised px-4 py-3 text-left"
             aria-expanded={summaryOpen}
+            aria-label="Status konfigurasi"
           >
-            <span className="text-label-semibold text-brand-ink">Ringkasan ({readinessLabel})</span>
-            <span className="text-brand-ink-muted">{summaryOpen ? 'Sembunyikan' : 'Lihat'}</span>
+            <div className="min-w-0 flex-1">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-ink-muted">
+                {readinessTitle}
+              </p>
+              <p className="mt-0.5 text-body-sm text-brand-ink">{readinessText}</p>
+            </div>
+            <div className="flex shrink-0 items-center gap-3">
+              <span className="rounded-full border border-brand-line bg-brand-paper px-2.5 py-1 text-[12px] font-semibold text-brand-ink">
+                {readinessLabel}
+              </span>
+              <span className="text-brand-ink-muted">{summaryOpen ? 'Sembunyikan' : 'Lihat'}</span>
+            </div>
           </button>
           {summaryOpen && (
-            <div className="mt-2 rounded-md border border-brand-line bg-brand-paper px-4 py-3">
-              <SummaryContent items={summaryItems} readinessLabel={readinessLabel} />
+            <div className="mt-2 rounded-xl border border-brand-line bg-brand-paper px-4 py-3">
+              <SummaryContent items={summaryItems} readinessLabel={readinessLabel} readinessText={readinessText} />
             </div>
           )}
         </div>
@@ -817,13 +845,17 @@ export default function GenerateForm() {
 function SummaryContent({
   items,
   readinessLabel,
+  readinessText,
 }: {
   items: { label: string; value: string }[];
   readinessLabel: string;
+  readinessText: string;
 }) {
   return (
     <>
-      <p className="text-body-sm text-brand-ink-muted mb-2">Kesiapan: {readinessLabel}</p>
+      <p className="text-body-sm text-brand-ink-muted mb-2">
+        Kesiapan: {readinessLabel}. {readinessText}
+      </p>
       {items.length > 0 ? (
         <ul className="flex flex-col gap-1">
           {items.map((item) => (

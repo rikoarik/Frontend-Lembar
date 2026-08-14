@@ -20,9 +20,37 @@ const manrope = Manrope({
 });
 
 export const metadata = {
-  title: 'lembar',
+  metadataBase: new URL('https://app.lembar.web.id'),
+  title: {
+    default: 'lembar',
+    template: '%s · lembar',
+  },
   description:
     'lembar — workspace asesmen untuk guru. Buat draft, tinjau, dan finalkan lembar soal.',
+  openGraph: {
+    title: 'lembar',
+    description:
+      'Workspace asesmen untuk guru. Buat draft, tinjau, dan finalkan lembar soal.',
+    url: 'https://app.lembar.web.id',
+    siteName: 'lembar',
+    images: [
+      {
+        url: '/og/lembar-home',
+        width: 1200,
+        height: 630,
+        alt: 'lembar — workspace asesmen untuk guru',
+      },
+    ],
+    locale: 'id_ID',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'lembar',
+    description:
+      'Workspace asesmen untuk guru. Buat draft, tinjau, dan finalkan lembar soal.',
+    images: ['/og/lembar-home.jpg'],
+  },
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

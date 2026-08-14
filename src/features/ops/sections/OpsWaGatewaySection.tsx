@@ -139,9 +139,9 @@ export function OpsWaGatewaySection({ setToast }: { setToast?: (msg: string) => 
       />
 
       {/* New session form */}
-      <div className="flex gap-2 items-center">
+      <div className="flex flex-wrap gap-2 items-center">
         <input
-          className="rounded border border-white/20 bg-white/5 px-3 py-1.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-white/30"
+          className="w-full sm:w-auto min-w-[240px] rounded-xl border border-[#ddd3c4] bg-white px-3.5 py-2.5 text-sm text-[#1e1814] placeholder:text-[#b0a79b] outline-none transition focus:border-[#851925] focus:ring-2 focus:ring-[#851925]/20"
           placeholder="ID session baru (mis. lembar-wa-1)"
           value={newId}
           onChange={e => setNewId(e.target.value)}
@@ -152,14 +152,14 @@ export function OpsWaGatewaySection({ setToast }: { setToast?: (msg: string) => 
         <button
           onClick={() => void handleCreate()}
           disabled={creating || !newId.trim()}
-          className="rounded bg-white/10 px-4 py-1.5 text-sm text-white hover:bg-white/20 disabled:opacity-40"
+          className="rounded-xl bg-[#851925] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#6d1420] disabled:opacity-50 transition-colors"
           aria-busy={creating}
         >
           {creating ? 'Membuat…' : 'Tambah Session'}
         </button>
         <button
           onClick={() => void load()}
-          className="rounded bg-white/5 px-3 py-1.5 text-sm text-white/60 hover:text-white hover:bg-white/10"
+          className="rounded-xl border border-[#ddd3c4] bg-white px-3 py-2.5 text-sm text-[#6d665d] hover:bg-[#faf8f5] transition-colors"
           aria-label="Muat ulang"
         >
           ↻
@@ -171,13 +171,13 @@ export function OpsWaGatewaySection({ setToast }: { setToast?: (msg: string) => 
         <div
           role="dialog"
           aria-label="Scan QR WhatsApp"
-          className="rounded-lg border border-white/10 bg-white/5 p-4 space-y-2"
+          className="rounded-xl border border-[#e6dfd4] bg-white p-4 shadow-sm space-y-2"
         >
-          <p className="text-sm text-white/70">
+          <p className="text-sm text-[#1e1814]">
             Scan QR di WhatsApp untuk session <strong>{qr.sessionId}</strong>
           </p>
           {qr.timedOut ? (
-            <p className="text-sm text-red-400">Waktu habis. Mulai ulang session secara manual.</p>
+            <p className="text-sm text-[#a3202b]">Waktu habis. Mulai ulang session secara manual.</p>
           ) : qr.qrCode ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -186,11 +186,11 @@ export function OpsWaGatewaySection({ setToast }: { setToast?: (msg: string) => 
               className="w-48 h-48 rounded"
             />
           ) : (
-            <p className="text-sm text-white/40 animate-pulse">Menunggu QR…</p>
+            <p className="text-sm text-[#8a8177] animate-pulse">Menunggu QR…</p>
           )}
           <button
             onClick={() => { stopPoll(); setQr(null); }}
-            className="text-xs text-white/40 hover:text-white/70"
+            className="text-xs text-[#8a8177] hover:text-[#1e1814]"
           >
             Tutup
           </button>
@@ -199,32 +199,32 @@ export function OpsWaGatewaySection({ setToast }: { setToast?: (msg: string) => 
 
       {/* Session list */}
       {loading ? (
-        <p className="text-sm text-white/40 animate-pulse">Memuat sessions…</p>
+        <p className="text-sm text-[#8a8177] animate-pulse">Memuat sessions…</p>
       ) : sessions.length === 0 ? (
-        <p className="text-sm text-white/40">Belum ada session. Tambah session di atas.</p>
+        <p className="text-sm text-[#8a8177]">Belum ada session. Tambah session di atas.</p>
       ) : (
         <ul className="space-y-2" aria-label="Daftar WA session">
           {sessions.map(s => (
             <li
               key={s.id}
-              className="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-4 py-3"
+              className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#e6dfd4] bg-white px-4 py-3 shadow-sm"
             >
-              <div className="flex items-center gap-3">
-                <span className="text-sm text-white font-mono">{s.id}</span>
+              <div className="flex flex-wrap items-center gap-3 min-w-0">
+                <span className="text-sm font-mono text-[#1e1814] break-all">{s.id}</span>
                 <AdminPill tone={STATUS_TONE[s.status] ?? 'neutral'}>{s.status}</AdminPill>
               </div>
               <div className="flex gap-2">
                 {s.status !== 'ready' && (
                   <button
                     onClick={() => startQrPoll(s.id)}
-                    className="text-xs rounded bg-white/10 px-3 py-1 text-white hover:bg-white/20"
+                    className="text-xs rounded-lg border border-[#ddd3c4] bg-white px-3 py-1.5 font-medium text-[#1e1814] hover:bg-[#faf8f5] transition-colors"
                   >
                     Lihat QR
                   </button>
                 )}
                 <button
                   onClick={() => void handleDelete(s.id)}
-                  className="text-xs rounded bg-red-500/20 px-3 py-1 text-red-300 hover:bg-red-500/40"
+                  className="text-xs rounded-lg bg-[#fdeaea] px-3 py-1.5 font-medium text-[#a3202b] hover:bg-[#fbd6d6] transition-colors"
                   aria-label={`Hapus session ${s.id}`}
                 >
                   Hapus

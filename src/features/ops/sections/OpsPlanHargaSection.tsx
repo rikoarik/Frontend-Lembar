@@ -34,6 +34,46 @@ function toEditRow(p: AdminPlanRow): EditRow {
   };
 }
 
+function PlanListItem({
+  plan,
+  active,
+  onEdit,
+}: {
+  plan: AdminPlanRow;
+  active: boolean;
+  onEdit: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onEdit}
+      className={`w-full rounded-xl border px-4 py-3 text-left transition-colors ${
+        active ? 'border-[#851925] bg-[#fff8f8]' : 'border-[#e2ddd6] bg-white hover:bg-[#faf8f5]'
+      }`}
+    >
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0">
+          <p className="font-semibold text-[#171717]">{plan.displayName}</p>
+          <p className="text-body-xs text-[#6d665d]">
+            {plan.key} · {formatPrice({ ...plan, key: plan.key })} · {formatTokenLimit(plan.tokenMonthlyLimit)}
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="rounded-full border border-[#ddd4c8] bg-white px-2.5 py-1 text-[11px] font-semibold text-[#6d665d]">
+            {plan.features.length} fitur
+          </span>
+          <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${plan.active ? 'bg-emerald-50 text-emerald-700' : 'bg-[#f3ede5] text-[#6d665d]'}`}>
+            {plan.active ? 'aktif' : 'nonaktif'}
+          </span>
+          <span className="rounded-full bg-[#851925] px-2.5 py-1 text-[11px] font-semibold text-white">
+            Edit
+          </span>
+        </div>
+      </div>
+    </button>
+  );
+}
+
 function PlanEditor({
   plan,
   onSaved,
@@ -46,6 +86,12 @@ function PlanEditor({
   const [edit, setEdit] = useState<EditRow>(toEditRow(plan));
   const [saveState, setSaveState] = useState<SaveState>('idle');
   const [saveError, setSaveError] = useState('');
+
+  useEffect(() => {
+    setEdit(toEditRow(plan));
+    setSaveState('idle');
+    setSaveError('');
+  }, [plan]);
 
   const handleSave = async () => {
     setSaveState('saving');
@@ -91,19 +137,19 @@ function PlanEditor({
   };
 
   const field = (label: string, key: keyof EditRow, hint?: string) => (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-1.5">
       <label className="text-body-xs font-semibold text-[#6d665d]" htmlFor={`${plan.key}-${key}`}>
         {label}
       </label>
-      {key === 'active' ? null : (
+      {key !== 'active' ? (
         <input
           id={`${plan.key}-${key}`}
-          className="rounded border border-[#e2ddd6] bg-white px-2.5 py-1.5 text-body-sm text-[#171717] focus:outline-none focus:ring-2 focus:ring-burgundy/40"
+          className="rounded-xl border border-[#e2ddd6] bg-white px-3 py-2 text-body-sm text-[#171717] focus:outline-none focus:ring-2 focus:ring-[#851925]/25"
           value={edit[key] as string}
           onChange={(e) => setEdit((prev) => ({ ...prev, [key]: e.target.value }))}
           aria-describedby={hint ? `${plan.key}-${key}-hint` : undefined}
         />
-      )}
+      ) : null}
       {hint && (
         <p id={`${plan.key}-${key}-hint`} className="text-[11px] text-[#6d665d]">
           {hint}
@@ -113,14 +159,13 @@ function PlanEditor({
   );
 
   return (
-    <div className="rounded-xl border border-[#e2ddd6] bg-white p-5 flex flex-col gap-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+    <div className="rounded-2xl border border-[#e2ddd6] bg-white p-5 shadow-sm">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="font-semibold text-body-lead text-[#171717]">{plan.key}</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#8a8177]">Sedang diedit</p>
+          <h3 className="text-body-lead font-semibold text-[#171717]">{plan.displayName}</h3>
           <p className="text-body-xs text-[#6d665d]">
-            Tampil: <strong>{plan.displayName}</strong> · Harga: {formatPrice({ ...plan, key: plan.key })} ·
-            Token: {formatTokenLimit(plan.tokenMonthlyLimit)} · Revisi #{plan.revision}
+            {plan.key} · {formatPrice({ ...plan, key: plan.key })} · {formatTokenLimit(plan.tokenMonthlyLimit)} · Revisi #{plan.revision}
           </p>
         </div>
         <label className="flex items-center gap-2 cursor-pointer select-none">
@@ -135,24 +180,23 @@ function PlanEditor({
         </label>
       </div>
 
-      {/* Fields */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {field('Nama tampil', 'displayName')}
-        {field('Harga (IDR, angka)', 'priceAmount')}
-        {field('Batas token / bulan', 'tokenMonthlyLimit', 'Kosongkan = tidak terbatas')}
-        {field('Periode tagihan', 'billingPeriod', 'monthly, yearly, atau kosong')}
-        {field('Fitur (pisah koma)', 'features')}
+      <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+        {field('Nama tampil', 'displayName', 'Dipakai di landing, langganan, dan label admin.')}
+        {field('Harga (IDR)', 'priceAmount', 'Server memakai angka ini saat bikin order dan entitlement.')}
+        {field('Kuota token per bulan', 'tokenMonthlyLimit', 'Kosongkan jika paket tidak dibatasi.')}
+        {field('Periode tagihan', 'billingPeriod', 'monthly, yearly, atau kosong.')}
+        {field('Fitur paket', 'features', 'Pisahkan dengan koma. Dipakai untuk copy publik dan akses fitur.')}
       </div>
 
-      {/* Save */}
       {saveError && (
-        <p className="text-sm text-red-700 rounded bg-red-50 border border-red-200 px-3 py-2" role="alert">
+        <p className="mt-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
           {saveError}
         </p>
       )}
-      <div className="flex items-center gap-3">
+
+      <div className="mt-4 flex flex-wrap items-center gap-3">
         <Button size="sm" onClick={handleSave} disabled={saveState === 'saving'}>
-          {saveState === 'saving' ? 'Menyimpan…' : 'Simpan'}
+          {saveState === 'saving' ? 'Menyimpan…' : 'Simpan perubahan'}
         </Button>
         {saveState === 'saved' && (
           <span className="text-body-xs text-green-700" aria-live="polite">
@@ -163,6 +207,7 @@ function PlanEditor({
     </div>
   );
 }
+
 
 export function OpsPlanHargaSection({ setToast }: { setToast: (msg: string) => void }) {
   const [plans, setPlans] = useState<AdminPlanRow[]>([]);
@@ -188,8 +233,11 @@ export function OpsPlanHargaSection({ setToast }: { setToast: (msg: string) => v
     setPlans((prev) => prev.map((p) => (p.key === updated.key ? updated : p)));
   };
 
+  const [editingKey, setEditingKey] = useState<string | null>(null);
+  const activePlan = plans.find((plan) => plan.key === editingKey) ?? plans[0];
+
   return (
-    <div className="flex flex-col gap-6 w-full">
+    <div className="flex w-full flex-col gap-6">
       <AdminPageHeader
         title="Plan & Harga"
         description="Kelola katalog paket harga yang menjadi sumber kebenaran di seluruh platform."
@@ -200,36 +248,43 @@ export function OpsPlanHargaSection({ setToast }: { setToast: (msg: string) => v
         }
       />
 
-      {loading && (
-        <div className="flex flex-col gap-4" aria-busy="true" aria-label="Memuat data paket">
-          <div className="h-40 animate-pulse rounded-xl bg-[#f3ede5]" />
-          <div className="h-40 animate-pulse rounded-xl bg-[#f3ede5]" />
+      {loading ? (
+        <div className="flex flex-col gap-3" aria-busy="true" aria-label="Memuat data paket">
+          <div className="h-16 animate-pulse rounded-xl bg-[#f3ede5]" />
+          <div className="h-16 animate-pulse rounded-xl bg-[#f3ede5]" />
+          <div className="h-16 animate-pulse rounded-xl bg-[#f3ede5]" />
         </div>
-      )}
-
-      {!loading && loadError && (
-        <div
-          className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700"
-          role="alert"
-        >
+      ) : loadError ? (
+        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700" role="alert">
           {loadError}
-          <button
-            className="ml-3 underline text-red-800 font-semibold"
-            onClick={load}
-          >
+          <button className="ml-3 underline font-semibold text-red-800" onClick={load}>
             Coba lagi
           </button>
         </div>
-      )}
-
-      {!loading && !loadError && plans.length === 0 && (
+      ) : plans.length === 0 ? (
         <p className="text-body-sm text-[#6d665d]">Tidak ada paket ditemukan.</p>
-      )}
+      ) : (
+        <div className="grid gap-4 lg:grid-cols-[1fr_1.1fr]">
+          <div className="space-y-3">
+            <div className="rounded-xl border border-[#ddd4c8] bg-white p-3 text-sm text-[#6d665d]">
+              Pilih paket untuk diedit. Perubahan ini dipakai di landing harga, langganan, dan batas token.
+            </div>
+            {plans.map((plan) => (
+              <PlanListItem
+                key={plan.key}
+                plan={plan}
+                active={plan.key === (editingKey ?? plans[0]?.key)}
+                onEdit={() => setEditingKey(plan.key)}
+              />
+            ))}
+          </div>
 
-      {!loading &&
-        plans.map((p) => (
-          <PlanEditor key={p.key} plan={p} onSaved={handleSaved} setToast={setToast} />
-        ))}
+          {activePlan ? (
+            <PlanEditor key={activePlan.key} plan={activePlan} onSaved={handleSaved} setToast={setToast} />
+          ) : null}
+        </div>
+      )}
     </div>
   );
 }
+

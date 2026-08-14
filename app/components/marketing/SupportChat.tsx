@@ -56,10 +56,18 @@ export default function SupportChat() {
   useEffect(() => {
     if (isMobile && open) {
       document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
     } else {
       document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
     }
-    return () => { document.body.style.overflow = ''; };
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+    };
   }, [isMobile, open]);
 
   async function submit(e: FormEvent) {
@@ -117,7 +125,7 @@ export default function SupportChat() {
       aria-labelledby={titleId}
       className={
         isMobile
-          ? 'fixed inset-0 z-[70] flex flex-col bg-white'
+          ? 'fixed inset-0 z-[80] flex flex-col bg-white overscroll-contain'
           : 'flex flex-col overflow-hidden rounded-2xl border border-[#e6dfd4] bg-white shadow-2xl'
       }
       style={isMobile ? {} : { width: 360, height: 520 }}
@@ -249,7 +257,7 @@ export default function SupportChat() {
     <>
       {/* Mobile: fullscreen overlay */}
       {isMobile && open && (
-        <div className="fixed inset-0 z-[70]">
+        <div className="fixed inset-0 z-[80]">
           {chatWindow}
         </div>
       )}

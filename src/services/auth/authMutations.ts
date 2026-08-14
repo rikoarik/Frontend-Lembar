@@ -86,6 +86,11 @@ export const authMutations = {
       idempotencyKey,
     });
   },
+  adminLogin(input: { email: string; password: string }, idempotencyKey: string) {
+    return request<AuthSuccessPayload>('/admin/login', 'POST', input, {
+      idempotencyKey,
+    });
+  },
   register(input: RegisterInput, idempotencyKey: string) {
     return request<AuthSuccessPayload>('/auth/register', 'POST', input, {
       idempotencyKey,
