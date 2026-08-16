@@ -22,6 +22,7 @@ export async function GET(
     );
   }
   const { assessmentId } = await context.params;
+  const copy = new URL(_request.url).searchParams.get('copy') === 'student' ? 'student' : 'teacher';
   const upstream = await backendFetch(`/v1/assessments/${encodeURIComponent(assessmentId)}/print`, {
     method: 'GET',
     token: auth.token,
@@ -48,7 +49,9 @@ export async function GET(
   const questionHtml = questions.map((question, index) => `<section><p><strong>${index + 1}.</strong> ${escape(question.stem)}</p><ol type="A">${(question.options ?? []).map((option) => `<li>${escape(option.text)}</li>`).join('')}</ol></section>`).join('');
   const answers = questions.map((question, index) => `<li>${index + 1}. ${escape(question.answer)}</li>`).join('');
   const explanations = questions.map((question, index) => `<section><strong>${index + 1}.</strong> ${escape(question.explanation)}</section>`).join('');
-  const html = `<!doctype html><html lang="id"><head><meta charset="utf-8"><title>${title}</title><style>body{font:16px/1.5 sans-serif;max-width:800px;margin:40px auto;padding:0 20px}section{margin:0 0 24px}h1,h2{page-break-after:avoid}@media print{body{margin:0}}</style></head><body><h1>${title}</h1>${questionHtml}<hr><h2>Kunci jawaban</h2><ol>${answers}</ol><hr><h2>Pembahasan</h2>${explanations}</body></html>`;
+  const teacherOnly = copy === 'teacher' ? `<hr><h2>Kunci jawaban</h2><ol>${answers}</ol><hr><h2>Pembahasan</h2>${explanations}` : '';
+  const copyLabel = copy === 'student' ? 'Lembar soal siswa' : 'Kunci guru';
+  const html = `<!doctype html><html lang="id"><head><meta charset="utf-8"><title>${title} — ${copyLabel}</title><style>body{font:16px/1.5 sans-serif;max-width:800px;margin:40px auto;padding:0 20px}section{margin:0 0 24px}h1,h2{page-break-after:avoid}@media print{body{margin:0}}</style></head><body><h1>${title}</h1><p>${copyLabel}</p>${questionHtml}${teacherOnly}</body></html>`;
   return new NextResponse(html, {
     headers: {
       'content-type': 'text/html; charset=utf-8',

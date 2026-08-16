@@ -28,7 +28,8 @@ export default function OutputPrintPage({ params }: { params: Promise<{ assessme
   const [showForm, setShowForm] = useState(true);
   const [shareUrl, setShareUrl] = useState('');
   const [sharing, setSharing] = useState(false);
-  const [printing, setPrinting] = useState(false);
+  const [printing, setPrinting] = useState<'student' | 'teacher' | null>(null);
+  const [printCopy, setPrintCopy] = useState<'student' | 'teacher'>('student');
 
   useEffect(() => {
     void assessmentService.get(assessmentId).then((result) => {
@@ -112,22 +113,32 @@ export default function OutputPrintPage({ params }: { params: Promise<{ assessme
           <button
             type="button"
             onClick={() => {
-              setPrinting(true);
-              // Beri waktu browser render sebelum dialog print terbuka
+              setPrintCopy('student');
+              setPrinting('student');
               setTimeout(() => {
                 window.print();
-                setPrinting(false);
+                setPrinting(null);
               }, 300);
             }}
-            disabled={!assessment || printing}
+            disabled={!assessment || printing !== null}
             className="inline-flex min-h-[var(--control-md)] items-center gap-2 rounded-md bg-brand-accent px-4 text-white disabled:opacity-50"
           >
-            {printing ? (
-              <>
-                <span className="material-symbols-outlined animate-spin text-[16px]">progress_activity</span>
-                Menyiapkan…
-              </>
-            ) : 'Unduh / Print'}
+            {printing === 'student' ? 'Menyiapkan…' : 'Cetak lembar siswa'}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setPrintCopy('teacher');
+              setPrinting('teacher');
+              setTimeout(() => {
+                window.print();
+                setPrinting(null);
+              }, 300);
+            }}
+            disabled={!assessment || printing !== null}
+            className="inline-flex min-h-[var(--control-md)] items-center rounded-md border border-brand-line px-4 disabled:opacity-50"
+          >
+            {printing === 'teacher' ? 'Menyiapkan…' : 'Cetak kunci guru'}
           </button>
           <Link
             href={`/app/output/${assessmentId}`}
@@ -170,7 +181,7 @@ export default function OutputPrintPage({ params }: { params: Promise<{ assessme
 
       {/* Preview */}
       <OutputPackagePreview
-        sections={['lembar-soal', 'kunci-jawaban', 'pembahasan']}
+        sections={printCopy === 'student' ? ['lembar-soal'] : ['kunci-jawaban', 'pembahasan']}
         content={{
           'lembar-soal': dto ? (
             <StudentWorksheetRenderer dto={dto} />
