@@ -9,16 +9,11 @@ vi.mock('@/src/lib/api/liveAssessment', () => ({
 }));
 vi.mock('@/src/lib/api/session', () => ({ backendFetch }));
 
-const upstream = {
-  data: {
-    meta: { title: 'Pecahan' },
-    questions: [{ sequence: 1, stem: '1/2 + 1/4 = ...', options: [{ key: 'A', text: '3/4' }], answer: 'A', explanation: 'Samakan penyebut.' }],
-  },
-};
+const pdf = Buffer.from('%PDF-1.7\ntest\n%%EOF');
 
 describe('GET /v1/assessments/:id/download', () => {
-  it('keeps answer material out of the student copy', async () => {
-    backendFetch.mockResolvedValue(new Response(JSON.stringify(upstream), { status: 200 }));
+  it('streams the student PDF copy from the authorized backend endpoint', async () => {
+    backendFetch.mockResolvedValue(new Response(pdf, { status: 200, headers: { 'content-type': 'application/pdf' } }));
     const { GET } = await import('./route');
 
     const response = await GET(new Request('http://localhost/v1/assessments/asm_1/download?copy=student'), {
@@ -26,22 +21,20 @@ describe('GET /v1/assessments/:id/download', () => {
     });
 
     expect(response.status).toBe(200);
-    const html = await response.text();
-    expect(html).toContain('1/2 + 1/4');
-    expect(html).not.toContain('Kunci jawaban');
-    expect(html).not.toContain('Samakan penyebut.');
+    expect(response.headers.get('content-type')).toBe('application/pdf');
+    expect(Buffer.from(await response.arrayBuffer()).subarray(0, 5).toString()).toBe('%PDF-');
+    expect(backendFetch).toHaveBeenCalledWith('/v1/assessments/asm_1/pdf?copy=student', expect.any(Object));
   });
 
-  it('includes key and explanation only in the teacher copy', async () => {
-    backendFetch.mockResolvedValue(new Response(JSON.stringify(upstream), { status: 200 }));
+  it('defaults to the teacher PDF copy', async () => {
+    backendFetch.mockResolvedValue(new Response(pdf, { status: 200 }));
     const { GET } = await import('./route');
 
-    const response = await GET(new Request('http://localhost/v1/assessments/asm_1/download?copy=teacher'), {
+    const response = await GET(new Request('http://localhost/v1/assessments/asm_1/download'), {
       params: Promise.resolve({ assessmentId: 'asm_1' }),
     });
 
-    const html = await response.text();
-    expect(html).toContain('Kunci jawaban');
-    expect(html).toContain('Samakan penyebut.');
+    expect(response.headers.get('content-disposition')).toContain('lembar-asm_1-teacher.pdf');
+    expect(backendFetch).toHaveBeenCalledWith('/v1/assessments/asm_1/pdf?copy=teacher', expect.any(Object));
   });
 });

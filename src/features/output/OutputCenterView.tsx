@@ -91,12 +91,18 @@ export function OutputCenterView({ assessmentId }: { assessmentId: string }) {
       {/* Actions */}
       <Panel title="Aksi" description="Unduh atau cetak lembar ini.">
         <div className="flex flex-wrap gap-3">
-          <Link
-            href={`/app/output/${assessmentId}/print`}
+          <a
+            href={`/v1/assessments/${assessmentId}/download?copy=student`}
             className="inline-flex min-h-[var(--control-md)] items-center rounded-md bg-brand-accent px-4 text-body-sm font-medium text-white"
           >
-            Unduh PDF
-          </Link>
+            Unduh lembar siswa (PDF)
+          </a>
+          <a
+            href={`/v1/assessments/${assessmentId}/download?copy=teacher`}
+            className="inline-flex min-h-[var(--control-md)] items-center rounded-md border border-brand-line px-4 text-body-sm"
+          >
+            Unduh kunci guru (PDF)
+          </a>
           <Link
             href={`/app/review/${assessmentId}`}
             className="inline-flex min-h-[var(--control-md)] items-center rounded-md border border-brand-line px-4 text-body-sm"

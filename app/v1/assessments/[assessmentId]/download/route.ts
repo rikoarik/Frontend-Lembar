@@ -2,16 +2,8 @@ import { NextResponse } from 'next/server';
 import { backendFetch } from '@/src/lib/api/session';
 import { liveClaims } from '@/src/lib/api/liveAssessment';
 
-function escape(value: unknown): string {
-  return String(value ?? '')
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;');
-}
-
 export async function GET(
-  _request: Request,
+  request: Request,
   context: { params: Promise<{ assessmentId: string }> },
 ) {
   const auth = await liveClaims();
@@ -22,40 +14,18 @@ export async function GET(
     );
   }
   const { assessmentId } = await context.params;
-  const copy = new URL(_request.url).searchParams.get('copy') === 'student' ? 'student' : 'teacher';
-  const upstream = await backendFetch(`/v1/assessments/${encodeURIComponent(assessmentId)}/print`, {
-    method: 'GET',
-    token: auth.token,
-    headers: { 'x-workspace-id': auth.claims.workspaceId },
-  });
-  const payload = (await upstream.json().catch(() => null)) as {
-    data?: {
-      meta?: { title?: string };
-      questions?: Array<{
-        sequence?: number;
-        stem?: string;
-        options?: Array<{ key?: string; text?: string }>;
-        answer?: string;
-        explanation?: string;
-      }>;
-    };
-    error?: unknown;
-  } | null;
-  if (!upstream.ok || !payload?.data) {
-    return NextResponse.json(payload, { status: upstream.status });
+  const copy = new URL(request.url).searchParams.get('copy') === 'student' ? 'student' : 'teacher';
+  const upstream = await backendFetch(
+    `/v1/assessments/${encodeURIComponent(assessmentId)}/pdf?copy=${copy}`,
+    { method: 'GET', token: auth.token, headers: { 'x-workspace-id': auth.claims.workspaceId } },
+  );
+  if (!upstream.ok) {
+    return NextResponse.json(await upstream.json().catch(() => null), { status: upstream.status });
   }
-  const title = escape(payload.data.meta?.title ?? 'Lembar soal');
-  const questions = payload.data.questions ?? [];
-  const questionHtml = questions.map((question, index) => `<section><p><strong>${index + 1}.</strong> ${escape(question.stem)}</p><ol type="A">${(question.options ?? []).map((option) => `<li>${escape(option.text)}</li>`).join('')}</ol></section>`).join('');
-  const answers = questions.map((question, index) => `<li>${index + 1}. ${escape(question.answer)}</li>`).join('');
-  const explanations = questions.map((question, index) => `<section><strong>${index + 1}.</strong> ${escape(question.explanation)}</section>`).join('');
-  const teacherOnly = copy === 'teacher' ? `<hr><h2>Kunci jawaban</h2><ol>${answers}</ol><hr><h2>Pembahasan</h2>${explanations}` : '';
-  const copyLabel = copy === 'student' ? 'Lembar soal siswa' : 'Kunci guru';
-  const html = `<!doctype html><html lang="id"><head><meta charset="utf-8"><title>${title} — ${copyLabel}</title><style>body{font:16px/1.5 sans-serif;max-width:800px;margin:40px auto;padding:0 20px}section{margin:0 0 24px}h1,h2{page-break-after:avoid}@media print{body{margin:0}}</style></head><body><h1>${title}</h1><p>${copyLabel}</p>${questionHtml}${teacherOnly}</body></html>`;
-  return new NextResponse(html, {
+  return new NextResponse(await upstream.arrayBuffer(), {
     headers: {
-      'content-type': 'text/html; charset=utf-8',
-      'content-disposition': `attachment; filename="lembar-${assessmentId}.html"`,
+      'content-type': 'application/pdf',
+      'content-disposition': `attachment; filename="lembar-${assessmentId}-${copy}.pdf"`,
       'cache-control': 'private, no-store',
     },
   });
