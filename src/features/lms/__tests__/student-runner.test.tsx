@@ -15,6 +15,11 @@ const resolved = {
         number: 1,
         stem: 'Dua tambah dua?',
         questionType: 'multiple_choice',
+        image: {
+          dataUrl: 'data:image/png;base64,aW1hZ2U=',
+          alt: 'Diagram dua ditambah dua',
+          mimeType: 'image/png',
+        },
         options: [
           { key: 'A', text: '3' },
           { key: 'B', text: '4' },
@@ -64,6 +69,18 @@ describe('StudentRunner token publik', () => {
     expect(screen.getByLabelText('Nama')).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledWith('/v1/public/shares/token-1', undefined);
     expect(screen.queryByText(/penjelasan|kunci jawaban/i)).not.toBeInTheDocument();
+  });
+
+  it('menampilkan gambar pendukung soal setelah attempt dimulai', async () => {
+    const user = userEvent.setup();
+    render(<StudentRunner token="token-1" />);
+    await screen.findByText('Ulangan');
+    await user.type(screen.getByLabelText('Nama'), 'Budi');
+    await user.click(screen.getByRole('button', { name: /mulai/i }));
+
+    expect(
+      await screen.findByRole('img', { name: 'Diagram dua ditambah dua' }),
+    ).toBeInTheDocument();
   });
 
   it('memulai attempt sesudah resolve dan memakai UUID untuk autosave', async () => {

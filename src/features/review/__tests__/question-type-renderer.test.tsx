@@ -91,6 +91,42 @@ describe('QuickReviewView quick mode — per-questionType renderer', () => {
     vi.clearAllMocks();
   });
 
+  it('renders a generated image in quick mode', async () => {
+    setup(
+      makeAssessment([
+        {
+          image: {
+            dataUrl: 'data:image/png;base64,aW1hZ2U=',
+            alt: 'Diagram siklus air',
+            mimeType: 'image/png',
+          },
+        },
+      ]),
+    );
+    render(<QuickReviewView assessmentId="a1" mode="quick" />);
+
+    expect(await screen.findByRole('img', { name: 'Diagram siklus air' })).toBeInTheDocument();
+  });
+
+  it('renders a generated image in detail mode', async () => {
+    setup(
+      makeAssessment([
+        {
+          image: {
+            dataUrl: 'data:image/webp;base64,aW1hZ2U=',
+            alt: 'Ilustrasi rantai makanan',
+            mimeType: 'image/webp',
+          },
+        },
+      ]),
+    );
+    render(<QuickReviewView assessmentId="a1" mode="detail" />);
+
+    expect(
+      await screen.findByRole('img', { name: 'Ilustrasi rantai makanan' }),
+    ).toBeInTheDocument();
+  });
+
   it('shows options list for multiple_choice', async () => {
     setup(makeAssessment([{ questionType: 'multiple_choice' }]));
     render(<QuickReviewView assessmentId="a1" mode="quick" />);

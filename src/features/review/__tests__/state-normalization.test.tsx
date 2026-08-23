@@ -130,6 +130,12 @@ describe('review state normalization', () => {
               {
                 id: 'q-1',
                 stem: 'Apa jawaban yang benar?',
+                image: {
+                  dataUrl: 'data:image/webp;base64,aW1hZ2U=',
+                  alt: 'Diagram pilihan jawaban',
+                  mimeType: 'image/webp',
+                  providerModelId: 'image-model-1',
+                },
                 options: [
                   { key: 'A', text: 'Pilihan A' },
                   { key: 'B', text: 'Pilihan B' },
@@ -150,7 +156,15 @@ describe('review state normalization', () => {
     const result = await loadLiveAssessment('token', 'ws-1', 'asm-live');
     const payload = result.payload as {
       data: {
-        questions: Array<{ reviewState: string }>;
+        questions: Array<{
+          reviewState: string;
+          image: {
+            dataUrl: string;
+            alt: string;
+            mimeType: string;
+            providerModelId?: string;
+          } | null;
+        }>;
         lifecycle: string;
         canOpenOutput: boolean;
       };
@@ -158,6 +172,12 @@ describe('review state normalization', () => {
 
     expect(result.status).toBe(200);
     expect(payload.data.questions[0]?.reviewState).toBe('unreviewed');
+    expect(payload.data.questions[0]?.image).toEqual({
+      dataUrl: 'data:image/webp;base64,aW1hZ2U=',
+      alt: 'Diagram pilihan jawaban',
+      mimeType: 'image/webp',
+      providerModelId: 'image-model-1',
+    });
     expect(payload.data.lifecycle).toBe('final');
     expect(payload.data.canOpenOutput).toBe(true);
   });

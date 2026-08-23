@@ -1,3 +1,5 @@
+import type { QuestionImage } from '@/src/types/questionImage';
+
 export type QuestionReviewState =
   | 'unreviewed'
   | 'accepted'
@@ -63,6 +65,7 @@ export type ReviewQuestion = {
   id: string;
   number: number;
   stem: string;
+  image?: QuestionImage | null;
   options: QuestionOption[];
   answerKey: string;
   explanation: string;

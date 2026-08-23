@@ -4,6 +4,7 @@ import {
   type PrintRubricCriterion,
 } from '@/src/features/output/types';
 import { DocumentLetterhead } from '@/src/features/output/DocumentLetterhead';
+import { QuestionImageDisplay } from '@/src/features/questions/QuestionImageDisplay';
 
 export function TeacherKeyRenderer({ dto }: { dto: PrintDTO }) {
   return (
@@ -19,6 +20,11 @@ export function TeacherKeyRenderer({ dto }: { dto: PrintDTO }) {
               </span>
               <div className="flex-1">
                 <p className="text-body text-brand-ink print:text-black">{question.stem}</p>
+                <QuestionImageDisplay
+                  image={question.image}
+                  fallbackAlt={`Gambar pendukung soal ${question.number}`}
+                  className="mt-3 max-h-80 print:max-h-64"
+                />
                 <AnswerSection question={question} />
               </div>
             </div>

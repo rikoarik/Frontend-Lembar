@@ -1,3 +1,6 @@
+import type { QuestionImage } from '@/src/types/questionImage';
+import { toQuestionImage } from '@/src/types/questionImage';
+
 export type PrintOption = {
   key: string;
   text: string;
@@ -13,6 +16,7 @@ export type PrintQuestion = {
   number: number;
   stem: string;
   questionType: string;
+  image?: QuestionImage | null;
   options?: PrintOption[];
   answerKey?: string;
   explanation?: string;
@@ -79,6 +83,7 @@ export function formatExamContext(dto: Pick<PrintDTO, 'subject' | 'gradeLabel'>)
 type BEQuestion = {
   stem?: unknown;
   questionType?: unknown;
+  image?: unknown;
   options?: Array<{ key?: unknown; text?: unknown }>;
   answer?: unknown;
   explanation?: unknown;
@@ -162,6 +167,7 @@ export function mapToPrintDTO(assessmentId: string, be: BEPrintPayload): PrintDT
       stem: String(q.stem ?? ''),
       questionType: String(q.questionType ?? 'multiple_choice'),
     };
+    if ('image' in q) out.image = toQuestionImage(q.image);
     if (q.options?.length)
       out.options = q.options.map((o) => ({
         key: String(o.key ?? ''),

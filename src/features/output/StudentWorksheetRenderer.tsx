@@ -1,5 +1,6 @@
 import { type PrintDTO, type PrintQuestion } from '@/src/features/output/types';
 import { DocumentLetterhead } from '@/src/features/output/DocumentLetterhead';
+import { QuestionImageDisplay } from '@/src/features/questions/QuestionImageDisplay';
 
 export function StudentWorksheetRenderer({ dto }: { dto: PrintDTO }) {
   return (
@@ -18,6 +19,11 @@ export function StudentWorksheetRenderer({ dto }: { dto: PrintDTO }) {
               </span>
               <div className="flex-1">
                 <p className="text-body text-brand-ink print:text-black">{question.stem}</p>
+                <QuestionImageDisplay
+                  image={question.image}
+                  fallbackAlt={`Gambar pendukung soal ${question.number}`}
+                  className="mt-3 max-h-80 print:max-h-64"
+                />
                 <AnswerArea question={question} />
               </div>
             </div>
@@ -27,7 +33,6 @@ export function StudentWorksheetRenderer({ dto }: { dto: PrintDTO }) {
     </article>
   );
 }
-
 
 function AnswerArea({ question }: { question: PrintQuestion }) {
   if (question.questionType === 'multiple_choice' || question.questionType === 'true_false') {

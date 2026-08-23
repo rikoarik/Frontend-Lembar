@@ -91,6 +91,45 @@ describe('ConfigurationCompose — distribution controls', () => {
     );
   });
 
+  it('defaults image generation to off and explains its cost', async () => {
+    render(<ConfigurationCompose />, { wrapper: Wrapper });
+
+    const toggle = await screen.findByRole('checkbox', {
+      name: /Tambahkan gambar jika membantu/i,
+    });
+
+    expect(toggle).not.toBeChecked();
+    expect(screen.getByText(/Gambar hanya dibuat bila relevan/i)).toBeInTheDocument();
+    expect(screen.getByText(/lebih lambat dan memakai kuota tambahan/i)).toBeInTheDocument();
+    expect(document.getElementById('compose-imageMaxCount')).not.toBeInTheDocument();
+    expect(document.getElementById('compose-imageStyle')).not.toBeInTheDocument();
+  });
+
+  it('shows image controls when enabled and submits their values', async () => {
+    const user = userEvent.setup();
+    render(<ConfigurationCompose />, { wrapper: Wrapper });
+
+    await fillKatalogRequired(user);
+    await user.click(screen.getByRole('checkbox', { name: /Tambahkan gambar jika membantu/i }));
+
+    const maxCount = document.getElementById('compose-imageMaxCount') as HTMLInputElement;
+    const style = document.getElementById('compose-imageStyle') as HTMLSelectElement;
+    expect(maxCount).toHaveValue(2);
+    expect(style).toHaveValue('auto');
+
+    await user.clear(maxCount);
+    await user.type(maxCount, '5');
+    await user.selectOptions(style, 'diagram');
+    await user.click(screen.getByRole('button', { name: /Buat draft/i }));
+
+    await waitFor(() => expect(mockSubmitConfiguration).toHaveBeenCalledOnce());
+    expect(mockSubmitConfiguration.mock.calls[0]![0]).toMatchObject({
+      imageMode: 'auto',
+      imageMaxCount: 5,
+      imageStyle: 'diagram',
+    });
+  });
+
   it('renders a count input for every supported question type', async () => {
     render(<ConfigurationCompose />, { wrapper: Wrapper });
 

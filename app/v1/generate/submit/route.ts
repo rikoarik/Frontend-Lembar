@@ -31,18 +31,70 @@ function toQuestionTypeCounts(value: unknown): QuestionTypeCounts {
   };
 }
 
-function buildBlueprintItems(body: Record<string, unknown>, count: number, difficulty: string) {
+function sanitizeGenerationContext(body: Record<string, unknown>) {
+  const sourceMode =
+    body.sourceMode === 'pdf'
+      ? 'pdf'
+      : body.sourceMode === 'katalog+pdf'
+        ? 'catalog_and_pdf'
+        : 'catalog';
+  const materialIds = Array.isArray(body.materialIds)
+    ? body.materialIds.filter((id): id is string => typeof id === 'string' && id.length > 0).slice(0, 50)
+    : [];
+
+  return {
+    sourceMode,
+    materialIds,
+    teacherFocus: typeof body.teacherFocus === 'string' ? body.teacherFocus.trim().slice(0, 500) : '',
+    exampleQuestion:
+      typeof body.exampleQuestion === 'string' ? body.exampleQuestion.trim().slice(0, 2_000) : '',
+  };
+}
+
+function sanitizeImageGeneration(body: Record<string, unknown>) {
+  const rawMaxImages = Number(body.imageMaxCount);
+  const maxImages = Math.min(
+    5,
+    Math.max(1, Number.isFinite(rawMaxImages) ? Math.floor(rawMaxImages) : 2),
+  );
+  const style =
+    body.imageStyle === 'diagram' || body.imageStyle === 'illustration' ? body.imageStyle : 'auto';
+
+  return {
+    mode: body.imageMode === 'auto' ? 'auto' : 'none',
+    maxImages,
+    style,
+  };
+}
+
+function buildDifficultyDistribution(count: number, requested: string) {
+  if (requested !== 'mixed') return Array.from({ length: count }, () => requested);
+
+  // Keep a stable 30/40/30 mix so repeated generation is reproducible while
+  // preserving a slightly larger middle band for the default teacher workflow.
+  const easyCount = Math.round(count * 0.3);
+  const hardCount = Math.round(count * 0.3);
+  const mediumCount = count - easyCount - hardCount;
+  return [
+    ...Array.from({ length: easyCount }, () => 'easy'),
+    ...Array.from({ length: mediumCount }, () => 'medium'),
+    ...Array.from({ length: hardCount }, () => 'hard'),
+  ];
+}
+
+function buildBlueprintItems(body: Record<string, unknown>, count: number, requestedDifficulty: string) {
   const normalizedCounts = normalizeQuestionTypeCounts(
     count,
     toQuestionTypeCounts(body.questionTypeCounts),
   );
+  const difficulties = buildDifficultyDistribution(count, requestedDifficulty);
   let sequence = 0;
 
   return QUESTION_TYPES.flatMap((questionType) =>
     Array.from({ length: normalizedCounts[questionType] }, () => ({
-      sequence: sequence++,
+      sequence,
       questionType,
-      difficulty,
+      difficulty: difficulties[sequence++] ?? 'medium',
       cognitiveLevel: null,
       topicHint: String(body.teacherFocus || body.subjectId || ''),
       outcomeId: null,
@@ -100,9 +152,10 @@ export async function POST(request: NextRequest) {
 
   const idempotencyKey = request.headers.get('idempotency-key') || crypto.randomUUID();
   const count = Math.min(200, Math.max(1, Number(body.questionCount) || 1));
-  const rawDifficulty = String(body.difficulty || 'medium');
-  const difficulty = rawDifficulty === 'mixed' ? 'medium' : rawDifficulty;
-  const blueprintItems = buildBlueprintItems(body, count, difficulty);
+  const requestedDifficulty = String(body.difficulty || 'medium');
+  const blueprintItems = buildBlueprintItems(body, count, requestedDifficulty);
+  const generationContext = sanitizeGenerationContext(body);
+  const imageGeneration = sanitizeImageGeneration(body);
 
   const assessmentResponse = await backendFetch(
     `/v1/workspaces/${encodeURIComponent(workspaceId)}/assessments`,
@@ -129,7 +182,9 @@ export async function POST(request: NextRequest) {
           ? Number(body.durationMinutes)
           : undefined,
         sourceUploadIds: typeof body.sourceId === 'string' && body.sourceId ? [body.sourceId] : [],
+        generationContext,
         blueprintItems,
+        imageGeneration,
       }),
     },
   );
@@ -166,6 +221,8 @@ export async function POST(request: NextRequest) {
         reviewMode: body.reviewMode === 'detail' ? 'detail' : 'quick',
         blueprintSchemaVersion: '1.0',
         blueprintItems,
+        generationContext,
+        imageGeneration,
       },
     }),
   });

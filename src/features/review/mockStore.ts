@@ -385,7 +385,7 @@ export function bulkAccept(assessmentId: string, questionIds: string[]): Assessm
 export function updateQuestionContent(
   assessmentId: string,
   questionId: string,
-  patch: Partial<Pick<ReviewQuestion, 'stem' | 'explanation' | 'answerKey'>>,
+  patch: Partial<Pick<ReviewQuestion, 'stem' | 'explanation' | 'answerKey' | 'options' | 'rubric'>>,
 ): AssessmentDetail | null {
   const item = getAssessment(assessmentId);
   if (!item || item.lifecycle === 'final') return null;

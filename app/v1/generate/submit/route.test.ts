@@ -66,8 +66,14 @@ describe('POST /v1/generate/submit blueprint distribution', () => {
           essay: 2,
           true_false: 1,
         },
+        sourceMode: 'katalog+pdf',
+        materialIds: ['material-1', 'material-2'],
         teacherFocus: 'pecahan',
+        exampleQuestion: 'Gunakan konteks pembagian kue yang berbeda.',
         sourceId: 'upload-1',
+        imageMode: 'auto',
+        imageMaxCount: 4,
+        imageStyle: 'diagram',
       }),
     });
 
@@ -94,6 +100,13 @@ describe('POST /v1/generate/submit blueprint distribution', () => {
       gradeLabel: 'Kelas 4',
       subjectLabel: 'Matematika',
       durationMinutes: 90,
+      imageGeneration: { mode: 'auto', maxImages: 4, style: 'diagram' },
+      generationContext: {
+        sourceMode: 'catalog_and_pdf',
+        materialIds: ['material-1', 'material-2'],
+        teacherFocus: 'pecahan',
+        exampleQuestion: 'Gunakan konteks pembagian kue yang berbeda.',
+      },
     });
     expect(assessmentBody.blueprintItems).toHaveLength(7);
     expect(
@@ -113,6 +126,66 @@ describe('POST /v1/generate/submit blueprint distribution', () => {
       ),
     ).toBe(true);
     expect(jobBody.payload.blueprintItems).toEqual(assessmentBody.blueprintItems);
+    expect(jobBody.payload.generationContext).toEqual(assessmentBody.generationContext);
+    expect(jobBody.payload.imageGeneration).toEqual({
+      mode: 'auto',
+      maxImages: 4,
+      style: 'diagram',
+    });
+  });
+
+  it('creates a deterministic easy/medium/hard mix instead of collapsing mixed difficulty to medium', async () => {
+    const { POST } = await import('./route');
+
+    backendFetch
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({ assessment: { id: 'assessment-mixed' }, version: { id: 'version-mixed' } }),
+          { status: 201, headers: { 'content-type': 'application/json' } },
+        ),
+      )
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ jobId: 'job-mixed', status: 'queued' }), {
+          status: 202,
+          headers: { 'content-type': 'application/json' },
+        }),
+      );
+
+    await POST(
+      new Request('http://localhost/api/v1/generate/submit', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          curriculumVersionId: 'cv-1',
+          gradeId: 'grade-1',
+          subjectId: 'subject-1',
+          questionCount: 10,
+          difficulty: 'mixed',
+          questionTypeCounts: {
+            multiple_choice: 10,
+            short_answer: 0,
+            essay: 0,
+            true_false: 0,
+          },
+        }),
+      }) as never,
+    );
+
+    const assessmentBody = JSON.parse(
+      String((backendFetch.mock.calls[0]?.[1] as RequestInit).body),
+    );
+    expect(assessmentBody.blueprintItems.map((item: { difficulty: string }) => item.difficulty)).toEqual([
+      'easy',
+      'easy',
+      'easy',
+      'medium',
+      'medium',
+      'medium',
+      'medium',
+      'hard',
+      'hard',
+      'hard',
+    ]);
   });
 
   it('clamps questionCount and keeps a single surviving type when counts collapse to one type', async () => {
@@ -148,6 +221,9 @@ describe('POST /v1/generate/submit blueprint distribution', () => {
           essay: 1,
           true_false: 0,
         },
+        imageMode: 'unsupported',
+        imageMaxCount: 0,
+        imageStyle: 'photo',
       }),
     });
 
@@ -164,5 +240,12 @@ describe('POST /v1/generate/submit blueprint distribution', () => {
         sourceUploadId: null,
       }),
     ]);
+    expect(assessmentBody.imageGeneration).toEqual({
+      mode: 'none',
+      maxImages: 1,
+      style: 'auto',
+    });
+    const jobBody = JSON.parse(String((backendFetch.mock.calls[1]?.[1] as RequestInit).body));
+    expect(jobBody.payload.imageGeneration).toEqual(assessmentBody.imageGeneration);
   });
 });

@@ -12,6 +12,7 @@ import type {
   ReviewQuestion,
 } from '@/src/features/review/types';
 import { mapReviewStateFromBackend, reviewStateLabel } from '@/src/features/review/types';
+import { QuestionImageDisplay } from '@/src/features/questions/QuestionImageDisplay';
 
 type FilterKey = 'all' | 'unreviewed' | 'warnings' | 'accepted';
 
@@ -443,6 +444,11 @@ export function QuickReviewView({
                 >
                   <div className="flex flex-col gap-2">
                     <p className="text-body-sm text-brand-ink">{question.stem}</p>
+                    <QuestionImageDisplay
+                      image={question.image}
+                      fallbackAlt={`Gambar pendukung soal ${question.number}`}
+                      className="my-2"
+                    />
                     {question.questionType === 'short_answer' ? (
                       <p className="text-body-sm text-brand-ink-muted">Jawaban singkat</p>
                     ) : question.questionType === 'essay' ? (
@@ -569,6 +575,10 @@ export function QuickReviewView({
                   onChange={(e) => setEditStem(e.target.value)}
                 />
               </label>
+              <QuestionImageDisplay
+                image={current.image}
+                fallbackAlt={`Gambar pendukung soal ${current.number}`}
+              />
               {current.questionType === 'short_answer' ||
               current.questionType === 'essay' ? null : (
                 <fieldset

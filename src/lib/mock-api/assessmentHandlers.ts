@@ -9,7 +9,11 @@ import {
   updateQuestionContent,
   updateQuestionState,
 } from '@/src/features/review/mockStore';
-import type { AssessmentLifecycle, QuestionReviewState } from '@/src/features/review/types';
+import type {
+  AssessmentLifecycle,
+  QuestionReviewState,
+  ReviewQuestion,
+} from '@/src/features/review/types';
 import { isMockApiMode, mockFail, mockNotFound, mockOk } from '@/src/lib/mock-api/preview';
 
 function requireMock() {
@@ -54,6 +58,8 @@ export async function patchQuestionHandler(
     stem?: string;
     explanation?: string;
     answerKey?: string;
+    options?: ReviewQuestion['options'];
+    rubric?: ReviewQuestion['rubric'];
   } = {};
   try {
     body = (await request.json()) as typeof body;
@@ -71,6 +77,8 @@ export async function patchQuestionHandler(
     stem: body.stem,
     explanation: body.explanation,
     answerKey: body.answerKey,
+    options: body.options,
+    rubric: body.rubric,
   });
   if (!next) return mockFail('STATE_CONFLICT', 'Soal tidak dapat diubah.', 409);
   return mockOk(next);

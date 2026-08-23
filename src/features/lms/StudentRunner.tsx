@@ -2,12 +2,15 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Button } from '@/app/components/ui';
+import { QuestionImageDisplay } from '@/src/features/questions/QuestionImageDisplay';
+import type { QuestionImage } from '@/src/types/questionImage';
 
 type Question = {
   id: string;
   number: number;
   stem: string;
   questionType: 'multiple_choice' | 'true_false' | 'short_answer' | 'essay';
+  image?: QuestionImage | null;
   options?: { key: string; text: string }[];
 };
 
@@ -532,6 +535,11 @@ export default function StudentRunner({ token }: { token: string }) {
                     <h1 className="mt-4 text-body-lg font-semibold leading-relaxed text-brand-ink">
                       {currentQuestion.stem}
                     </h1>
+                    <QuestionImageDisplay
+                      image={currentQuestion.image}
+                      fallbackAlt={`Gambar pendukung soal ${currentQuestion.number}`}
+                      className="mt-4"
+                    />
                   </div>
 
                   <div className="px-5 py-5 sm:px-7 sm:py-6">

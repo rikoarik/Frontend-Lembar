@@ -2,6 +2,8 @@ export type SourceMode = 'katalog' | 'pdf' | 'katalog+pdf';
 export type AssessmentType = 'practice' | 'daily' | 'midterm' | 'final' | 'tka' | 'promotion';
 export type Difficulty = 'easy' | 'medium' | 'hard' | 'mixed';
 export type ReviewMode = 'quick' | 'detail';
+export type ImageMode = 'none' | 'auto';
+export type ImageStyle = 'auto' | 'diagram' | 'illustration';
 export type QuestionType = 'multiple_choice' | 'short_answer' | 'essay' | 'true_false';
 export type QuestionTypeCounts = Record<QuestionType, number>;
 
@@ -155,6 +157,11 @@ export function clampQuestionCount(raw: number): number {
   return Math.min(200, Math.max(1, raw || 1));
 }
 
+export function clampImageMaxCount(raw: number): number {
+  const value = Number.isFinite(raw) ? Math.floor(raw) : 2;
+  return Math.min(5, Math.max(1, value));
+}
+
 export function parseQuestionTypeCountInput(value: string): number {
   if (value.trim() === '') return 0;
   const parsed = Number(value);
@@ -178,6 +185,9 @@ export type CompositionValues = {
   difficulty: Difficulty;
   questionCount: number;
   questionTypeCounts: QuestionTypeCounts;
+  imageMode: ImageMode;
+  imageMaxCount: number;
+  imageStyle: ImageStyle;
   reviewMode: ReviewMode;
   teacherFocus: string;
   exampleQuestion: string;
@@ -199,6 +209,9 @@ export const INITIAL_COMPOSITION_VALUES: CompositionValues = {
   difficulty: 'medium',
   questionCount: 20,
   questionTypeCounts: buildEvenQuestionTypeCounts(20),
+  imageMode: 'none',
+  imageMaxCount: 2,
+  imageStyle: 'auto',
   reviewMode: 'quick',
   teacherFocus: '',
   exampleQuestion: '',
@@ -233,11 +246,22 @@ export function ensureCompositionValues(values: Partial<CompositionValues>): Com
   const questionCount = clampQuestionCount(
     Number(values.questionCount ?? INITIAL_COMPOSITION_VALUES.questionCount),
   );
+  const imageMaxCount = clampImageMaxCount(
+    Number(values.imageMaxCount ?? INITIAL_COMPOSITION_VALUES.imageMaxCount),
+  );
+  const imageMode = values.imageMode === 'auto' ? 'auto' : 'none';
+  const imageStyle =
+    values.imageStyle === 'diagram' || values.imageStyle === 'illustration'
+      ? values.imageStyle
+      : 'auto';
 
   return {
     ...INITIAL_COMPOSITION_VALUES,
     ...values,
     questionCount,
+    imageMode,
+    imageMaxCount,
+    imageStyle,
     questionTypeCounts: normalizeQuestionTypeCounts(
       questionCount,
       values.questionTypeCounts ?? INITIAL_COMPOSITION_VALUES.questionTypeCounts,

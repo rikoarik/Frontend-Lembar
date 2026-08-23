@@ -22,11 +22,13 @@ import type {
   Difficulty,
   ReviewMode,
   QuestionType,
+  ImageStyle,
 } from './types';
 import {
   INITIAL_COMPOSITION_VALUES,
   QUESTION_TYPES,
   buildEvenQuestionTypeCounts,
+  clampImageMaxCount,
   clampQuestionCount,
   ensureCompositionValues,
   getQuestionTypeLabel,
@@ -65,6 +67,12 @@ const REVIEW_MODE_OPTIONS: { value: ReviewMode; label: string; desc: string }[] 
   { value: 'detail', label: 'Detail', desc: 'Tinjau satu per satu' },
 ];
 
+const IMAGE_STYLE_OPTIONS: { value: ImageStyle; label: string }[] = [
+  { value: 'auto', label: 'Otomatis' },
+  { value: 'diagram', label: 'Diagram' },
+  { value: 'illustration', label: 'Ilustrasi' },
+];
+
 const MIN_QUESTIONS = 1;
 const MAX_QUESTIONS = 200;
 
@@ -83,6 +91,9 @@ const LABELS: Record<CompositionFieldKey, string> = {
   questionCount: 'Jumlah Soal',
   durationMinutes: 'Waktu pengerjaan',
   questionTypeCounts: 'Distribusi tipe soal',
+  imageMode: 'Gambar soal',
+  imageMaxCount: 'Jumlah maksimum gambar',
+  imageStyle: 'Gaya gambar',
   reviewMode: 'Mode Review',
   teacherFocus: 'Fokus / Tujuan Guru',
   exampleQuestion: 'Contoh Soal',
@@ -456,6 +467,13 @@ export default function ConfigurationCompose() {
     const diff = DIFFICULTY_OPTIONS.find((d) => d.value === values.difficulty);
     if (diff) items.push({ label: 'Kesulitan', value: diff.label });
     items.push({ label: 'Jumlah Soal', value: String(values.questionCount) });
+    if (values.imageMode === 'auto') {
+      const imageStyle = IMAGE_STYLE_OPTIONS.find((style) => style.value === values.imageStyle);
+      items.push({
+        label: 'Gambar',
+        value: `Maksimal ${values.imageMaxCount} · ${imageStyle?.label ?? 'Otomatis'}`,
+      });
+    }
     const rm = REVIEW_MODE_OPTIONS.find((r) => r.value === values.reviewMode);
     if (rm) items.push({ label: 'Mode Review', value: rm.label });
     return items;
@@ -995,6 +1013,78 @@ export default function ConfigurationCompose() {
                       </div>
                     ))}
                   </div>
+                </fieldset>
+
+                <fieldset className="rounded-md border border-brand-line p-4">
+                  <legend className="px-1 text-label-semibold text-brand-ink">Gambar soal</legend>
+                  <label className="flex cursor-pointer items-start gap-3">
+                    <input
+                      id="compose-imageMode"
+                      type="checkbox"
+                      checked={values.imageMode === 'auto'}
+                      onChange={(event) =>
+                        update('imageMode', event.target.checked ? 'auto' : 'none')
+                      }
+                      className="mt-0.5 h-4 w-4 rounded border-brand-line text-brand-accent focus:ring-brand-accent"
+                    />
+                    <span className="flex flex-col gap-1">
+                      <span className="text-body-default font-medium text-brand-ink">
+                        Tambahkan gambar jika membantu
+                      </span>
+                      <span className={helpClass}>
+                        Gambar hanya dibuat bila relevan. Proses lebih lambat dan memakai kuota
+                        tambahan.
+                      </span>
+                    </span>
+                  </label>
+
+                  {values.imageMode === 'auto' ? (
+                    <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                      <div className="flex flex-col gap-2">
+                        <label htmlFor="compose-imageMaxCount" className={labelClass}>
+                          Jumlah maksimum gambar
+                        </label>
+                        <input
+                          id="compose-imageMaxCount"
+                          type="number"
+                          min={1}
+                          max={5}
+                          value={values.imageMaxCount}
+                          onChange={(event) =>
+                            update('imageMaxCount', clampImageMaxCount(Number(event.target.value)))
+                          }
+                          onBlur={(event) =>
+                            update('imageMaxCount', clampImageMaxCount(Number(event.target.value)))
+                          }
+                          className={fieldClass}
+                          aria-describedby="compose-imageMaxCount-help"
+                        />
+                        <p id="compose-imageMaxCount-help" className={helpClass}>
+                          Antara 1–5 gambar per asesmen.
+                        </p>
+                      </div>
+
+                      <div className="flex flex-col gap-2">
+                        <label htmlFor="compose-imageStyle" className={labelClass}>
+                          Gaya gambar
+                        </label>
+                        <select
+                          id="compose-imageStyle"
+                          value={values.imageStyle}
+                          onChange={(event) =>
+                            update('imageStyle', event.target.value as ImageStyle)
+                          }
+                          className={selectClass}
+                        >
+                          {IMAGE_STYLE_OPTIONS.map((style) => (
+                            <option key={style.value} value={style.value}>
+                              {style.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                  ) : null}
                 </fieldset>
 
                 <fieldset>

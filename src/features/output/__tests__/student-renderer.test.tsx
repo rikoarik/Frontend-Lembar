@@ -40,6 +40,29 @@ describe('StudentWorksheetRenderer', () => {
     expect(screen.getByText('Pertanyaan kedua')).toBeInTheDocument();
   });
 
+  it('renders a generated question image with meaningful alt text', () => {
+    const dto: PrintDTO = {
+      ...base,
+      questionCount: 1,
+      questions: [
+        {
+          number: 1,
+          stem: 'Amati diagram berikut.',
+          questionType: 'short_answer',
+          image: {
+            dataUrl: 'data:image/png;base64,aW1hZ2U=',
+            alt: 'Diagram pecahan lingkaran',
+            mimeType: 'image/png',
+          },
+        },
+      ],
+    };
+
+    render(<StudentWorksheetRenderer dto={dto} />);
+
+    expect(screen.getByRole('img', { name: 'Diagram pecahan lingkaran' })).toBeInTheDocument();
+  });
+
   it('renders multiple_choice options', () => {
     const dto: PrintDTO = {
       ...base,

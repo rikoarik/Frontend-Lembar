@@ -26,10 +26,30 @@ export async function PATCH(
   const reviewState = body.reviewState;
   const status =
     reviewState === 'accepted' ? 'accepted' : reviewState === 'rejected' ? 'rejected' : undefined;
+  const rawOptions = Array.isArray(body.options) ? body.options : undefined;
+  const options = rawOptions?.flatMap((option) => {
+    if (!option || typeof option !== 'object') return [];
+    const value = option as Record<string, unknown>;
+    if (typeof value.id !== 'string' || typeof value.text !== 'string') return [];
+    return [{ key: value.id, text: value.text }];
+  });
+  if (rawOptions && options && (options.length !== rawOptions.length || options.length === 0)) {
+    return NextResponse.json(
+      {
+        error: {
+          code: 'VALIDATION_FAILED',
+          message: 'Pilihan jawaban tidak valid.',
+          retryable: false,
+        },
+      },
+      { status: 400 },
+    );
+  }
   const patch = {
     ...(typeof body.stem === 'string' ? { stem: body.stem } : {}),
     ...(typeof body.explanation === 'string' ? { explanation: body.explanation } : {}),
     ...(typeof body.answerKey === 'string' ? { answer: body.answerKey } : {}),
+    ...(options !== undefined ? { options } : {}),
     ...(status ? { status } : {}),
   };
   const base = `/v1/workspaces/${encodeURIComponent(auth.claims.workspaceId)}/assessments/${encodeURIComponent(assessmentId)}/versions/${encodeURIComponent(data.versionId)}/questions/${encodeURIComponent(questionId)}`;

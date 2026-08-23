@@ -40,6 +40,32 @@ describe('TeacherKeyRenderer', () => {
     expect(screen.getByText('Pertanyaan kedua')).toBeInTheDocument();
   });
 
+  it('renders a generated question image with meaningful alt text', () => {
+    render(
+      <TeacherKeyRenderer
+        dto={{
+          ...base,
+          questionCount: 1,
+          questions: [
+            {
+              number: 1,
+              stem: 'Amati ilustrasi berikut.',
+              questionType: 'short_answer',
+              image: {
+                dataUrl: 'data:image/webp;base64,aW1hZ2U=',
+                alt: 'Ilustrasi proses fotosintesis',
+                mimeType: 'image/webp',
+              },
+              answerKey: 'Fotosintesis',
+            },
+          ],
+        }}
+      />,
+    );
+
+    expect(screen.getByRole('img', { name: 'Ilustrasi proses fotosintesis' })).toBeInTheDocument();
+  });
+
   it('highlights the correct multiple-choice option and shows explanation', () => {
     render(
       <TeacherKeyRenderer

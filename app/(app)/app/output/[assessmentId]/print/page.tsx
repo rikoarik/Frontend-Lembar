@@ -89,6 +89,7 @@ export default function OutputPrintPage({ params }: { params: Promise<{ assessme
           number: q.number ?? i + 1,
           stem: q.stem,
           questionType: q.questionType ?? 'multiple_choice',
+          image: q.image ?? null,
           options: q.options?.map((o) => ({ key: o.label ?? o.id, text: o.text })),
           answerKey: q.answerKey,
           explanation: q.explanation,

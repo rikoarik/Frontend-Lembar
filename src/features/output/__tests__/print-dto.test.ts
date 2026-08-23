@@ -17,6 +17,12 @@ describe('PrintDTO', () => {
         {
           stem: '1/2 + 1/4 = ...',
           questionType: 'multiple_choice',
+          image: {
+            dataUrl: 'data:image/png;base64,aW1hZ2U=',
+            alt: 'Diagram pecahan',
+            mimeType: 'image/png',
+            providerModelId: 'image-model-1',
+          },
           options: [{ key: 'A', text: '3/4' }],
           answer: 'A',
           explanation: 'Samakan penyebut.',
@@ -37,6 +43,12 @@ describe('PrintDTO', () => {
           number: 1,
           stem: '1/2 + 1/4 = ...',
           questionType: 'multiple_choice',
+          image: {
+            dataUrl: 'data:image/png;base64,aW1hZ2U=',
+            alt: 'Diagram pecahan',
+            mimeType: 'image/png',
+            providerModelId: 'image-model-1',
+          },
           options: [{ key: 'A', text: '3/4' }],
           answerKey: 'A',
           explanation: 'Samakan penyebut.',
