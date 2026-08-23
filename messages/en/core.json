@@ -1,0 +1,26 @@
+{
+  "common": {
+    "brand": "lembar",
+    "language": {
+      "label": "Language",
+      "id": "Indonesia",
+      "en": "English"
+    },
+    "loading": "Loading…",
+    "retry": "Retry",
+    "cancel": "Cancel",
+    "save": "Save",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous"
+  },
+  "workspace": {
+    "personalLabel": "Personal",
+    "schoolLabel": "School",
+    "activeAnnouncement": "Active workspace: {name} · {kind}",
+    "personalName": "Personal space",
+    "fallbackUser": "User",
+    "fallbackWorkspace": "Workspace"
+  }
+}

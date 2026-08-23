@@ -1,4 +1,6 @@
 import type { ReactNode } from 'react';
+import { NextIntlClientProvider } from 'next-intl';
+import { getLocale, getMessages } from 'next-intl/server';
 import { Inter, Manrope } from 'next/font/google';
 import './globals.css';
 import LenisProvider from './components/marketing/LenisProvider';
@@ -53,9 +55,11 @@ export const metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  const locale = await getLocale();
+  const messages = await getMessages();
   return (
-    <html lang="id" className={`${inter.variable} ${manrope.variable}`}>
+    <html lang={locale} className={`${inter.variable} ${manrope.variable}`}>
       <head>
         {/* Preconnect for Google Fonts */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -80,9 +84,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         suppressHydrationWarning
         className="antialiased min-h-screen flex flex-col font-body-default text-body-default bg-paper text-on-background selection:bg-primary-fixed selection:text-on-primary-fixed"
       >
-        <QueryProvider>
-          <LenisProvider>{children}</LenisProvider>
-        </QueryProvider>
+        <NextIntlClientProvider messages={messages}>
+          <QueryProvider>
+            <LenisProvider>{children}</LenisProvider>
+          </QueryProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

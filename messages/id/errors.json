@@ -1,0 +1,164 @@
+{
+  "auth": {
+    "invalidCredentials": {
+      "message": "Username, email, atau nomor telepon dan kata sandi tidak cocok.",
+      "hint": "Coba lagi atau pulihkan kata sandi."
+    },
+    "rateLimited": {
+      "message": "Terlalu banyak percobaan. Coba lagi dalam beberapa saat.",
+      "hint": "Permintaan akan dibuka kembali otomatis."
+    },
+    "accountLocked": {
+      "message": "Akun Anda dikunci sementara untuk keamanan. Coba lagi nanti.",
+      "hint": "Jika merasa ini keliru, hubungi bantuan."
+    },
+    "accountNotVerified": {
+      "message": "Akun Anda belum aktif. Cek email untuk langkah verifikasi.",
+      "hint": "Tidak menemukan pesan? Periksa folder spam atau kirim ulang."
+    },
+    "providerNotReady": {
+      "message": "Sedang ada gangguan masuk. Coba lagi dalam beberapa menit."
+    },
+    "passwordRecoveryRequired": {
+      "message": "Kata sandi perlu diatur ulang sebelum masuk.",
+      "hint": "Gunakan tautan pemulihan dari email Anda."
+    },
+    "captchaRequired": {
+      "message": "Verifikasi tambahan diperlukan untuk melanjutkan."
+    },
+    "network": {
+      "message": "Tidak dapat terhubung. Periksa koneksi Anda."
+    },
+    "timeout": {
+      "message": "Permintaan memakan waktu terlalu lama. Coba lagi."
+    },
+    "validationFailed": {
+      "message": "Periksa kembali isian formulir."
+    },
+    "duplicateResource": {
+      "message": "Email atau nomor telepon sudah terdaftar.",
+      "hint": "Gunakan identitas lain atau pulihkan akun."
+    },
+    "recoveryTokenInvalid": {
+      "message": "Tautan pemulihan tidak valid.",
+      "hint": "Minta tautan baru untuk melanjutkan."
+    },
+    "invitationInvalid": {
+      "message": "Undangan tidak lagi aktif.",
+      "hint": "Hubungi admin sekolah untuk undangan baru."
+    },
+    "registrationUnavailable": {
+      "message": "Pendaftaran sedang ditutup untuk sementara."
+    },
+    "verificationRequired": {
+      "message": "Verifikasi tambahan diperlukan."
+    },
+    "unknown": {
+      "message": "Tidak dapat menyelesaikan permintaan saat ini.",
+      "hint": "Coba lagi beberapa saat lagi."
+    },
+    "recoveryRequest": {
+      "message": "Jika akun ditemukan, kami akan mengirimkan langkah berikutnya."
+    }
+  },
+  "catalog": {
+    "validationFailed": {
+      "message": "Periksa kembali isian formulir."
+    },
+    "rateLimited": {
+      "message": "Terlalu banyak permintaan. Coba lagi dalam beberapa saat."
+    },
+    "network": {
+      "message": "Tidak dapat terhubung. Periksa koneksi Anda.",
+      "hint": "Pastikan perangkat terhubung ke internet."
+    },
+    "timeout": {
+      "message": "Permintaan memakan waktu terlalu lama. Coba lagi."
+    },
+    "unknown": {
+      "message": "Tidak dapat menyelesaikan permintaan saat ini.",
+      "hint": "Coba lagi beberapa saat lagi."
+    }
+  },
+  "generate": {
+    "validationFailed": {
+      "message": "Periksa kembali isian formulir."
+    },
+    "rateLimited": {
+      "message": "Terlalu banyak permintaan. Tunggu sebentar lalu coba lagi.",
+      "hint": "Ini bukan status kuota paket Anda."
+    },
+    "entitlementRequired": {
+      "message": "Paket aktif diperlukan untuk membuat lembar."
+    },
+    "subscriptionInactive": {
+      "message": "Paket Anda sedang tidak aktif.",
+      "hint": "Kelola paket atau hubungi admin workspace."
+    },
+    "quotaExhausted": {
+      "message": "Kuota pembuatan lembar telah habis."
+    },
+    "network": {
+      "message": "Tidak dapat terhubung. Periksa koneksi Anda.",
+      "hint": "Pastikan perangkat terhubung ke internet."
+    },
+    "timeout": {
+      "message": "Permintaan memakan waktu terlalu lama. Coba lagi."
+    },
+    "unknown": {
+      "message": "Tidak dapat menyelesaikan permintaan saat ini.",
+      "hint": "Coba lagi beberapa saat lagi."
+    }
+  },
+  "jobs": {
+    "resourceNotFound": {
+      "message": "Pekerjaan tidak ditemukan.",
+      "hint": "Periksa tautan atau kembali ke dashboard."
+    },
+    "stateConflict": {
+      "message": "Status pekerjaan sudah berubah.",
+      "hint": "Muat ulang untuk melihat status terbaru."
+    },
+    "permissionDenied": {
+      "message": "Anda tidak memiliki akses ke pekerjaan ini."
+    },
+    "network": {
+      "message": "Tidak dapat terhubung. Periksa koneksi Anda.",
+      "hint": "Pastikan perangkat terhubung ke internet."
+    },
+    "timeout": {
+      "message": "Permintaan memakan waktu terlalu lama. Coba lagi."
+    },
+    "unknown": {
+      "message": "Tidak dapat memuat status pekerjaan saat ini.",
+      "hint": "Coba lagi beberapa saat lagi."
+    }
+  },
+  "leads": {
+    "validationFailed": {
+      "message": "Periksa kembali isian formulir.",
+      "hint": "Pastikan nama, sekolah, peran, kontak, dan persetujuan terisi."
+    },
+    "rateLimited": {
+      "message": "Terlalu banyak permintaan. Coba lagi beberapa saat lagi.",
+      "hint": "Permintaan akan dibuka kembali otomatis."
+    },
+    "maintenanceMode": {
+      "message": "Layanan sedang dalam pemeliharaan singkat.",
+      "hint": "Coba lagi setelah beberapa menit."
+    },
+    "network": {
+      "message": "Tidak dapat terhubung. Periksa koneksi Anda."
+    },
+    "timeout": {
+      "message": "Permintaan memakan waktu terlalu lama. Coba lagi."
+    },
+    "unknown": {
+      "message": "Tidak dapat menyelesaikan permintaan saat ini.",
+      "hint": "Coba lagi beberapa saat lagi."
+    },
+    "acknowledge": {
+      "message": "Jika data Anda memenuhi syarat, tim kami akan menindaklanjuti dalam 1–2 hari kerja."
+    }
+  }
+}

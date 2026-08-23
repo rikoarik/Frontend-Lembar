@@ -1,0 +1,164 @@
+{
+  "auth": {
+    "invalidCredentials": {
+      "message": "Username, email, or phone number and password don't match.",
+      "hint": "Try again or recover your password."
+    },
+    "rateLimited": {
+      "message": "Too many attempts. Try again in a few moments.",
+      "hint": "Access will be restored automatically."
+    },
+    "accountLocked": {
+      "message": "Your account is temporarily locked for security. Try again later.",
+      "hint": "If you believe this is a mistake, contact support."
+    },
+    "accountNotVerified": {
+      "message": "Your account isn't active yet. Check your email for verification steps.",
+      "hint": "Didn't get the message? Check your spam folder or resend."
+    },
+    "providerNotReady": {
+      "message": "Sign-in is currently disrupted. Try again in a few minutes."
+    },
+    "passwordRecoveryRequired": {
+      "message": "Your password needs to be reset before you can sign in.",
+      "hint": "Use the recovery link from your email."
+    },
+    "captchaRequired": {
+      "message": "Additional verification is required to continue."
+    },
+    "network": {
+      "message": "Can't connect. Check your connection."
+    },
+    "timeout": {
+      "message": "The request took too long. Try again."
+    },
+    "validationFailed": {
+      "message": "Please review the form fields."
+    },
+    "duplicateResource": {
+      "message": "This email or phone number is already registered.",
+      "hint": "Use another identity or recover your account."
+    },
+    "recoveryTokenInvalid": {
+      "message": "The recovery link is invalid.",
+      "hint": "Request a new link to continue."
+    },
+    "invitationInvalid": {
+      "message": "This invitation is no longer active.",
+      "hint": "Ask the school admin for a new invitation."
+    },
+    "registrationUnavailable": {
+      "message": "Registration is temporarily closed."
+    },
+    "verificationRequired": {
+      "message": "Additional verification is required."
+    },
+    "unknown": {
+      "message": "We couldn't complete your request right now.",
+      "hint": "Try again in a few moments."
+    },
+    "recoveryRequest": {
+      "message": "If an account is found, we'll send you the next steps."
+    }
+  },
+  "catalog": {
+    "validationFailed": {
+      "message": "Please review the form fields."
+    },
+    "rateLimited": {
+      "message": "Too many requests. Try again in a few moments."
+    },
+    "network": {
+      "message": "Can't connect. Check your connection.",
+      "hint": "Make sure your device is connected to the internet."
+    },
+    "timeout": {
+      "message": "The request took too long. Try again."
+    },
+    "unknown": {
+      "message": "We couldn't complete your request right now.",
+      "hint": "Try again in a few moments."
+    }
+  },
+  "generate": {
+    "validationFailed": {
+      "message": "Please review the form fields."
+    },
+    "rateLimited": {
+      "message": "Too many requests. Wait a moment and try again.",
+      "hint": "This isn't your plan's quota status."
+    },
+    "entitlementRequired": {
+      "message": "An active plan is required to generate worksheets."
+    },
+    "subscriptionInactive": {
+      "message": "Your plan is currently inactive.",
+      "hint": "Manage your plan or contact the workspace admin."
+    },
+    "quotaExhausted": {
+      "message": "Your worksheet generation quota has run out."
+    },
+    "network": {
+      "message": "Can't connect. Check your connection.",
+      "hint": "Make sure your device is connected to the internet."
+    },
+    "timeout": {
+      "message": "The request took too long. Try again."
+    },
+    "unknown": {
+      "message": "We couldn't complete your request right now.",
+      "hint": "Try again in a few moments."
+    }
+  },
+  "jobs": {
+    "resourceNotFound": {
+      "message": "Job not found.",
+      "hint": "Check the link or return to the dashboard."
+    },
+    "stateConflict": {
+      "message": "The job status has already changed.",
+      "hint": "Reload to see the latest status."
+    },
+    "permissionDenied": {
+      "message": "You don't have access to this job."
+    },
+    "network": {
+      "message": "Can't connect. Check your connection.",
+      "hint": "Make sure your device is connected to the internet."
+    },
+    "timeout": {
+      "message": "The request took too long. Try again."
+    },
+    "unknown": {
+      "message": "Couldn't load the job status right now.",
+      "hint": "Try again in a few moments."
+    }
+  },
+  "leads": {
+    "validationFailed": {
+      "message": "Please review the form fields.",
+      "hint": "Make sure name, school, role, contact, and consent are filled in."
+    },
+    "rateLimited": {
+      "message": "Too many requests. Try again in a few moments.",
+      "hint": "Access will be restored automatically."
+    },
+    "maintenanceMode": {
+      "message": "The service is briefly under maintenance.",
+      "hint": "Try again in a few minutes."
+    },
+    "network": {
+      "message": "Can't connect. Check your connection."
+    },
+    "timeout": {
+      "message": "The request took too long. Try again."
+    },
+    "unknown": {
+      "message": "We couldn't complete your request right now.",
+      "hint": "Try again in a few moments."
+    },
+    "acknowledge": {
+      "message": "If your details qualify, our team will follow up within 1–2 business days."
+    }
+  }
+}

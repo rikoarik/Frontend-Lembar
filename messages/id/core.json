@@ -1,0 +1,26 @@
+{
+  "common": {
+    "brand": "lembar",
+    "language": {
+      "label": "Bahasa",
+      "id": "Indonesia",
+      "en": "English"
+    },
+    "loading": "Memuat…",
+    "retry": "Coba lagi",
+    "cancel": "Batal",
+    "save": "Simpan",
+    "close": "Tutup",
+    "back": "Kembali",
+    "next": "Lanjut",
+    "previous": "Sebelumnya"
+  },
+  "workspace": {
+    "personalLabel": "Pribadi",
+    "schoolLabel": "Sekolah",
+    "activeAnnouncement": "Workspace aktif: {name} · {kind}",
+    "personalName": "Ruang pribadi",
+    "fallbackUser": "Pengguna",
+    "fallbackWorkspace": "Workspace"
+  }
+}
