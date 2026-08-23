@@ -118,6 +118,7 @@ export default function StudentRunner({ token }: { token: string }) {
   const [klass, setKlass] = useState('');
   const [attempt, setAttempt] = useState('');
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [startedAt, setStartedAt] = useState(0);
   const [remaining, setRemaining] = useState<number | null>(null);
   const [error, setError] = useState('');
@@ -414,138 +415,217 @@ export default function StudentRunner({ token }: { token: string }) {
   }
 
   const questions = data?.questions ?? [];
-  const answered = questions.filter(
-    (question) => answers[question.id] !== undefined && answers[question.id] !== '',
-  ).length;
+  const answered = questions.filter((question) => Boolean(answers[question.id]?.trim())).length;
+  const safeIndex = Math.min(currentIndex, Math.max(questions.length - 1, 0));
+  const currentQuestion = questions[safeIndex];
+  const currentAnswer = currentQuestion ? (answers[currentQuestion.id] ?? '') : '';
+  const questionTypeLabel = currentQuestion
+    ? {
+        multiple_choice: 'Pilihan ganda',
+        true_false: 'Benar atau salah',
+        short_answer: 'Jawaban singkat',
+        essay: 'Esai',
+      }[currentQuestion.questionType]
+    : '';
+  const choices = currentQuestion
+    ? currentQuestion.questionType === 'true_false'
+      ? currentQuestion.options?.length
+        ? currentQuestion.options
+        : TRUE_FALSE_DEFAULT
+      : currentQuestion.options
+    : undefined;
+  const isObjective =
+    currentQuestion?.questionType === 'multiple_choice' ||
+    currentQuestion?.questionType === 'true_false';
 
   return (
     <div className="min-h-[100dvh] bg-brand-paper">
-      <header className="sticky top-0 z-10 border-b border-brand-line bg-white/90 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-2xl items-center justify-between gap-4 px-4 py-3">
+      <header className="sticky top-0 z-10 border-b border-brand-line bg-white/95 backdrop-blur-sm">
+        <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3 md:px-6">
           <div className="min-w-0">
-            <p className="truncate text-label-sm font-medium text-brand-ink">{data?.title}</p>
+            <p className="truncate text-label-sm font-semibold text-brand-ink">{data?.title}</p>
             <p className="text-label-xs text-brand-ink-muted">
-              {answered} dari {questions.length} soal terjawab
-              {remaining !== null ? ` · Sisa ${formatRemaining(remaining)}` : ''}
+              <span>{name}{klass ? `, ${klass}` : ''} | </span>
+              <span>{`${answered} dari ${questions.length} soal terjawab`}</span>
             </p>
           </div>
-          <span
-            className={`shrink-0 text-label-xs ${saveStatus === 'error' ? 'text-brand-danger' : 'text-brand-ink-muted'}`}
-            aria-live="polite"
-            aria-atomic="true"
-          >
-            {saveStatus === 'saving'
-              ? 'Menyimpan…'
-              : saveStatus === 'saved'
-                ? 'Jawaban tersimpan'
-                : saveStatus === 'error'
-                  ? 'Gagal menyimpan'
-                  : ''}
-          </span>
+          <div className="flex shrink-0 items-center gap-4">
+            {remaining !== null ? (
+              <div className="text-right">
+                <p className="text-[10px] uppercase tracking-wide text-brand-ink-muted">Sisa waktu</p>
+                <p className={`font-mono text-body-sm font-semibold ${remaining <= 300 ? 'text-brand-danger' : 'text-brand-ink'}`}>
+                  {formatRemaining(remaining)}
+                </p>
+              </div>
+            ) : null}
+            <span
+              className={`hidden text-label-xs sm:inline ${saveStatus === 'error' ? 'text-brand-danger' : 'text-brand-ink-muted'}`}
+              aria-live="polite"
+              aria-atomic="true"
+            >
+              {saveStatus === 'saving'
+                ? 'Menyimpan...'
+                : saveStatus === 'saved'
+                  ? 'Jawaban tersimpan'
+                  : saveStatus === 'error'
+                    ? 'Gagal menyimpan'
+                    : ''}
+            </span>
+          </div>
         </div>
       </header>
 
-      <main className="mx-auto max-w-2xl px-4 py-8">
+      <main className="mx-auto grid max-w-5xl gap-5 px-4 py-5 md:grid-cols-[15rem_minmax(0,1fr)] md:px-6 md:py-8">
         {questions.length === 0 ? (
-          <div className="rounded-xl border border-brand-line bg-white p-6 text-center">
-            <p className="text-body-sm text-brand-ink-muted">
-              Belum ada soal yang dapat dikerjakan.
-            </p>
+          <div className="rounded-xl border border-brand-line bg-white p-6 text-center md:col-span-2">
+            <p className="text-body-sm text-brand-ink-muted">Belum ada soal yang dapat dikerjakan.</p>
           </div>
         ) : (
-          <ol className="flex flex-col gap-6">
-            {questions.map((question) => {
-              const choices =
-                question.questionType === 'true_false'
-                  ? question.options?.length
-                    ? question.options
-                    : TRUE_FALSE_DEFAULT
-                  : question.options;
-              const isObjective =
-                question.questionType === 'multiple_choice' ||
-                question.questionType === 'true_false';
-              return (
-                <li
-                  key={question.id}
-                  className="rounded-xl border border-brand-line bg-white p-5 shadow-sm"
-                >
-                  <div className="mb-4 flex items-start gap-3">
-                    <span
-                      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-accent-soft text-label-sm font-semibold text-brand-accent"
-                      aria-label={`Soal ${question.number}`}
-                    >
-                      {question.number}
-                    </span>
-                    <p className="pt-0.5 text-body-sm font-medium leading-relaxed text-brand-ink">
-                      {question.stem}
-                    </p>
+          <>
+            <aside className="md:sticky md:top-24 md:self-start" aria-label="Navigasi soal">
+              <div className="rounded-xl border border-brand-line bg-white p-4">
+                <div className="mb-3 flex items-center justify-between">
+                  <h2 className="text-body-sm font-semibold text-brand-ink">Nomor soal</h2>
+                  <span className="text-label-xs text-brand-ink-muted">{answered}/{questions.length}</span>
+                </div>
+                <div className="grid grid-cols-6 gap-2 sm:grid-cols-10 md:grid-cols-5">
+                  {questions.map((question, index) => {
+                    const isAnswered = Boolean(answers[question.id]?.trim());
+                    const isCurrent = index === safeIndex;
+                    return (
+                      <button
+                        key={question.id}
+                        type="button"
+                        aria-label={`Soal ${question.number}, ${isAnswered ? 'sudah dijawab' : 'belum dijawab'}`}
+                        aria-current={isCurrent ? 'step' : undefined}
+                        onClick={() => setCurrentIndex(index)}
+                        className={`aspect-square rounded-md border text-label-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-brand-accent ${
+                          isCurrent
+                            ? 'border-brand-accent bg-brand-accent text-white'
+                            : isAnswered
+                              ? 'border-brand-accent/30 bg-brand-accent-soft text-brand-accent'
+                              : 'border-brand-line bg-white text-brand-ink hover:bg-brand-paper'
+                        }`}
+                      >
+                        {question.number}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className="mt-4 grid grid-cols-2 gap-2 text-[11px] text-brand-ink-muted">
+                  <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm bg-brand-accent-soft" />Terjawab</span>
+                  <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm border border-brand-line bg-white" />Kosong</span>
+                </div>
+              </div>
+            </aside>
+
+            <section className="min-w-0" aria-label={`Soal ${currentQuestion?.number ?? ''}`}>
+              {currentQuestion ? (
+                <article className="rounded-xl border border-brand-line bg-white shadow-sm">
+                  <div className="border-b border-brand-line px-5 py-4 sm:px-7">
+                    <div className="flex items-center justify-between gap-4">
+                      <p className="text-label-sm font-semibold text-brand-accent">
+                        Soal {currentQuestion.number} dari {questions.length}
+                      </p>
+                      <span className="text-label-xs text-brand-ink-muted">{questionTypeLabel}</span>
+                    </div>
+                    <h1 className="mt-4 text-body-lg font-semibold leading-relaxed text-brand-ink">
+                      {currentQuestion.stem}
+                    </h1>
                   </div>
-                  {isObjective ? (
-                    <fieldset>
-                      <legend className="sr-only">Pilihan jawaban soal {question.number}</legend>
-                      <div className="flex flex-col gap-2">
-                        {choices?.map((option) => (
-                          <label
-                            key={option.key}
-                            className={`flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-3 text-body-sm transition-colors ${
-                              answers[question.id] === option.key
-                                ? 'border-brand-accent bg-brand-accent/5 font-medium text-brand-accent'
-                                : 'border-brand-line text-brand-ink hover:bg-brand-paper'
-                            }`}
-                          >
-                            <input
-                              type="radio"
-                              name={question.id}
-                              aria-label={`${option.key}. ${option.text}`}
-                              checked={answers[question.id] === option.key}
-                              onChange={() => updateAnswer(question.id, option.key)}
-                              className="sr-only"
-                            />
-                            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-current text-xs font-bold transition-colors">
-                              {answers[question.id] === option.key ? '✓' : option.key}
-                            </span>
-                            {option.text}
-                          </label>
-                        ))}
+
+                  <div className="px-5 py-5 sm:px-7 sm:py-6">
+                    {isObjective ? (
+                      <fieldset>
+                        <legend className="sr-only">Pilihan jawaban soal {currentQuestion.number}</legend>
+                        <div className="grid gap-3">
+                          {choices?.map((option) => (
+                            <label
+                              key={option.key}
+                              className={`flex cursor-pointer items-start gap-3 rounded-lg border px-4 py-3.5 text-body-sm transition-colors active:scale-[0.99] ${
+                                currentAnswer === option.key
+                                  ? 'border-brand-accent bg-brand-accent/5 font-medium text-brand-ink'
+                                  : 'border-brand-line text-brand-ink hover:bg-brand-paper'
+                              }`}
+                            >
+                              <input
+                                type="radio"
+                                name={currentQuestion.id}
+                                aria-label={`${option.key}. ${option.text}`}
+                                checked={currentAnswer === option.key}
+                                onChange={() => updateAnswer(currentQuestion.id, option.key)}
+                                className="sr-only"
+                              />
+                              <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md border text-xs font-bold ${currentAnswer === option.key ? 'border-brand-accent bg-brand-accent text-white' : 'border-brand-line bg-white text-brand-ink'}`}>
+                                {option.key}
+                              </span>
+                              <span className="pt-1 leading-relaxed">{option.text}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </fieldset>
+                    ) : (
+                      <div>
+                        <label htmlFor={`answer-${currentQuestion.id}`} className="mb-2 block text-label-sm font-medium text-brand-ink">
+                          {currentQuestion.questionType === 'essay' ? 'Jawaban esai' : 'Jawaban'}
+                        </label>
+                        <textarea
+                          id={`answer-${currentQuestion.id}`}
+                          aria-label={`Soal ${currentQuestion.number}`}
+                          rows={currentQuestion.questionType === 'essay' ? 10 : 3}
+                          value={currentAnswer}
+                          onChange={(event) => updateAnswer(currentQuestion.id, event.target.value)}
+                          className="w-full resize-y rounded-lg border border-brand-line bg-white px-4 py-3 text-body-sm leading-relaxed text-brand-ink placeholder:text-brand-ink-muted focus:outline-none focus:ring-2 focus:ring-brand-accent"
+                          placeholder={currentQuestion.questionType === 'essay' ? 'Tulis jawaban secara runtut dan lengkap.' : 'Tulis jawaban singkat.'}
+                        />
+                        <div className="mt-2 flex items-center justify-between gap-4 text-label-xs text-brand-ink-muted">
+                          <span>{currentQuestion.questionType === 'essay' ? 'Jawaban tersimpan otomatis saat kamu mengetik.' : 'Periksa kembali ejaan jawabanmu.'}</span>
+                          <span>{currentAnswer.length} karakter</span>
+                        </div>
                       </div>
-                    </fieldset>
-                  ) : (
-                    <textarea
-                      aria-label={`Soal ${question.number}`}
-                      rows={question.questionType === 'essay' ? 5 : 2}
-                      value={answers[question.id] ?? ''}
-                      onChange={(event) => updateAnswer(question.id, event.target.value)}
-                      className="w-full rounded-lg border border-brand-line bg-brand-paper px-3 py-2 text-body-sm focus:outline-none focus:ring-2 focus:ring-brand-accent"
-                      placeholder="Tulis jawabanmu di sini…"
-                    />
-                  )}
-                </li>
-              );
-            })}
-          </ol>
+                    )}
+                  </div>
+
+                  <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-brand-line px-5 py-4 sm:px-7">
+                    <Button
+                      variant="secondary"
+                      disabled={safeIndex === 0}
+                      onClick={() => setCurrentIndex((index) => Math.max(0, index - 1))}
+                    >
+                      Sebelumnya
+                    </Button>
+                    <div className="flex items-center gap-2">
+                      {safeIndex < questions.length - 1 ? (
+                        <Button onClick={() => setCurrentIndex((index) => Math.min(questions.length - 1, index + 1))}>
+                          Berikutnya
+                        </Button>
+                      ) : (
+                        <Button loading={submitting} disabled={submitting} onClick={() => void submit()}>
+                          {error ? 'Coba kirim lagi' : remaining === 0 ? 'Kirim sekarang' : 'Kirim jawaban'}
+                        </Button>
+                      )}
+                    </div>
+                  </footer>
+                </article>
+              ) : null}
+
+              {error ? (
+                <div role="alert" className="mt-4 rounded-lg border border-brand-danger/30 bg-brand-danger/5 px-4 py-3 text-body-sm text-brand-danger">
+                  {error}
+                </div>
+              ) : null}
+
+              {safeIndex < questions.length - 1 ? (
+                <div className="mt-5 flex items-center justify-between gap-4 rounded-lg border border-brand-line bg-white px-4 py-3">
+                  <p className="text-body-sm text-brand-ink-muted">Selesai lebih awal?</p>
+                  <Button variant="secondary" loading={submitting} disabled={submitting} onClick={() => void submit()}>
+                    {error ? 'Coba kirim lagi' : 'Kirim semua jawaban'}
+                  </Button>
+                </div>
+              ) : null}
+            </section>
+          </>
         )}
-
-        {error ? (
-          <div
-            role="alert"
-            className="mt-6 rounded-lg border border-brand-danger/30 bg-brand-danger/5 px-4 py-3 text-body-sm text-brand-danger"
-          >
-            {error}
-          </div>
-        ) : null}
-
-        <div className="mt-8 flex items-center justify-between gap-4">
-          <p className="text-body-sm text-brand-ink-muted">
-            {answered}/{questions.length} terjawab
-          </p>
-          <Button
-            loading={submitting}
-            disabled={questions.length === 0 || submitting}
-            onClick={() => void submit()}
-          >
-            {error ? 'Coba kirim lagi' : remaining === 0 ? 'Kirim sekarang' : 'Kirim jawaban'}
-          </Button>
-        </div>
       </main>
     </div>
   );

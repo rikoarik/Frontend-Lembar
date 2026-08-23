@@ -119,8 +119,9 @@ describe('StudentRunner token publik', () => {
     vi.advanceTimersByTime(700);
     await waitFor(() => expect(putCount).toBe(1));
 
+    await user.click(screen.getByRole('button', { name: /soal 3, belum dijawab/i }));
     await user.click(screen.getByRole('radio', { name: /true\. Benar/i }));
-    await user.click(screen.getByRole('button', { name: /kirim jawaban/i }));
+    await user.click(screen.getByRole('button', { name: /^kirim jawaban$/i }));
 
     expect(putCount).toBe(1);
     expect(fetchMock.mock.calls.some(([url]) => url.endsWith('/submit'))).toBe(false);
@@ -173,8 +174,11 @@ describe('StudentRunner token publik', () => {
     await screen.findByText('Ulangan');
     await user.type(screen.getByLabelText('Nama'), 'Budi');
     await user.click(screen.getByRole('button', { name: /mulai/i }));
-    expect(await screen.findByRole('textbox', { name: /soal 2/i })).toBeInTheDocument();
-    expect(screen.getAllByRole('radio')).toHaveLength(4);
+    await user.click(await screen.findByRole('button', { name: /soal 2, belum dijawab/i }));
+    expect(screen.getByRole('textbox', { name: /soal 2/i })).toBeInTheDocument();
+    expect(screen.getByText(/0 karakter/i)).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /soal 3, belum dijawab/i }));
+    expect(screen.getAllByRole('radio')).toHaveLength(2);
   });
 
   it('submit gagal tetap menampilkan soal, jawaban, dan tombol coba lagi', async () => {
@@ -189,8 +193,9 @@ describe('StudentRunner token publik', () => {
     await screen.findByText('Ulangan');
     await user.type(screen.getByLabelText('Nama'), 'Budi');
     await user.click(screen.getByRole('button', { name: /mulai/i }));
-    await user.type(await screen.findByRole('textbox', { name: /soal 2/i }), 'Jawaban saya');
-    await user.click(screen.getByRole('button', { name: /kirim/i }));
+    await user.click(await screen.findByRole('button', { name: /soal 2, belum dijawab/i }));
+    await user.type(screen.getByRole('textbox', { name: /soal 2/i }), 'Jawaban saya');
+    await user.click(screen.getByRole('button', { name: /kirim semua jawaban/i }));
     expect(await screen.findByRole('alert')).toHaveTextContent('Koneksi putus');
     expect(screen.getByRole('textbox', { name: /soal 2/i })).toHaveValue('Jawaban saya');
     expect(screen.getByRole('button', { name: /coba kirim lagi/i })).toBeInTheDocument();

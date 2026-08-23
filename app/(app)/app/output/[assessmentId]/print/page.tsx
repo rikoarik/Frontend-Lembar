@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+
 import { use, useEffect, useState } from 'react';
 import OutputPackagePreview from '@/app/components/print/OutputPackagePreview';
 import { MetadataForm } from '@/src/features/output/MetadataForm';
@@ -155,12 +155,12 @@ export default function OutputPrintPage({ params }: { params: Promise<{ assessme
           >
             {printing === 'teacher' ? 'Menyiapkan…' : 'Cetak kunci guru'}
           </button>
-          <Link
+          <a
             href={`/app/output/${assessmentId}`}
             className="inline-flex min-h-[var(--control-md)] items-center rounded-md border border-brand-line px-4"
           >
             Kembali
-          </Link>
+          </a>
         </div>
       </div>
 
