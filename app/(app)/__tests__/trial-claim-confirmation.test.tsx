@@ -111,6 +111,6 @@ describe('trial claim confirmation link', () => {
     expect(
       await screen.findByText(/trial atau tautan klaim tidak tersedia untuk akun ini/i),
     ).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /siapkan tautan baru/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /hubungi tim lembar/i })).toBeInTheDocument();
   });
 });

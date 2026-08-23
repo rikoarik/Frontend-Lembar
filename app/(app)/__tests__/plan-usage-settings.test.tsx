@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+
 import PlanUsageSettingsPage from '../app/pengaturan/langganan/page';
 
 const plan = {
@@ -29,7 +29,7 @@ const plan = {
   },
 };
 
-describe('one-time trial link — /app/pengaturan/langganan', () => {
+describe('admin-issued trial link - /app/pengaturan/langganan', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
     vi.stubGlobal(
@@ -43,51 +43,21 @@ describe('one-time trial link — /app/pengaturan/langganan', () => {
     );
   });
 
-  it('shows the catalog token quota and prepares a link instead of claiming directly', async () => {
+  it('shows the catalog quota and explains that only superadmin can issue the link', async () => {
     render(<PlanUsageSettingsPage />);
 
     expect(await screen.findByText('1.500 / 30.000')).toBeInTheDocument();
-    expect(screen.getByText(/hanya dapat diklaim satu kali/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /siapkan tautan klaim/i })).toBeEnabled();
+    expect(screen.getByText(/hanya dapat diterbitkan oleh superadmin/i)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /siapkan|terbitkan.*tautan/i })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /klaim trial 2 bulan/i })).not.toBeInTheDocument();
   });
 
-  it('issues a short-lived token and renders it as a non-prefetched claim link', async () => {
-    const user = userEvent.setup();
-    vi.mocked(fetch)
-      .mockResolvedValueOnce(
-        new Response(JSON.stringify({ data: plan }), {
-          status: 200,
-          headers: { 'content-type': 'application/json' },
-        }),
-      )
-      .mockResolvedValueOnce(
-        new Response(
-          JSON.stringify({
-            data: {
-              token: 'opaque-one-time-token-with-at-least-32-characters',
-              expiresAt: '2026-08-23T12:15:00.000Z',
-            },
-          }),
-          { status: 201, headers: { 'content-type': 'application/json' } },
-        ),
-      );
-
+  it('never calls the removed self-issue endpoint', async () => {
     render(<PlanUsageSettingsPage />);
-    await user.click(await screen.findByRole('button', { name: /siapkan tautan klaim/i }));
 
-    const link = await screen.findByRole('link', { name: /buka tautan klaim trial/i });
-    expect(link).toHaveAttribute(
-      'href',
-      '/app/pengaturan/langganan/trial/konfirmasi#token=opaque-one-time-token-with-at-least-32-characters',
-    );
-    expect(fetch).toHaveBeenNthCalledWith(2, '/v1/me/plan/trial/claim-links', {
-      method: 'POST',
-      credentials: 'include',
-    });
-    expect(
-      screen.getByText(/setelah digunakan, tautan tidak dapat dipakai lagi/i),
-    ).toBeInTheDocument();
+    await screen.findByText(/hanya dapat diterbitkan oleh superadmin/i);
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(fetch).toHaveBeenCalledWith('/v1/me/plan', { credentials: 'include' });
   });
 
   it('shows the trial end date and no new claim link after it has been claimed', async () => {
@@ -123,27 +93,5 @@ describe('one-time trial link — /app/pengaturan/langganan', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('renders errors returned while issuing a claim link', async () => {
-    const user = userEvent.setup();
-    vi.mocked(fetch)
-      .mockResolvedValueOnce(new Response(JSON.stringify({ data: plan }), { status: 200 }))
-      .mockResolvedValueOnce(
-        new Response(
-          JSON.stringify({
-            error: {
-              code: 'TRIAL_ALREADY_CLAIMED',
-              message: 'Trial atau tautan klaim tidak tersedia untuk akun ini.',
-            },
-          }),
-          { status: 409, headers: { 'content-type': 'application/json' } },
-        ),
-      );
 
-    render(<PlanUsageSettingsPage />);
-    await user.click(await screen.findByRole('button', { name: /siapkan tautan klaim/i }));
-
-    expect(
-      await screen.findByText(/trial atau tautan klaim tidak tersedia untuk akun ini/i),
-    ).toBeInTheDocument();
-  });
 });

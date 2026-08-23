@@ -137,7 +137,7 @@ export default function TrialClaimConfirmationPage() {
                 href="/app/pengaturan/langganan"
                 className="text-body-sm font-medium text-brand-accent underline underline-offset-4"
               >
-                Kembali dan siapkan tautan baru
+Kembali dan hubungi tim Lembar
               </Link>
             </div>
           )}

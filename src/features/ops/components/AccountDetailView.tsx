@@ -31,6 +31,9 @@ export function AccountDetailView({
   const [entitlementConfirmOpen, setEntitlementConfirmOpen] = useState(false);
   const [entitlementSaving, setEntitlementSaving] = useState(false);
   const [entitlementMessage, setEntitlementMessage] = useState<string | null>(null);
+  const [trialLinkLoading, setTrialLinkLoading] = useState(false);
+  const [trialLinkMessage, setTrialLinkMessage] = useState<string | null>(null);
+  const [trialClaimLink, setTrialClaimLink] = useState<{ url: string; expiresAt: string } | null>(null);
   const AVAILABLE_ROLES = ['teacher', 'school_admin', 'subscriber'] as const;
   const [editRoles, setEditRoles] = useState<string[]>([]);
 
@@ -97,6 +100,24 @@ export function AccountDetailView({
         }
       })
       .finally(() => setSaving(false));
+  };
+
+  const handleIssueTrialLink = () => {
+    setTrialLinkLoading(true);
+    setTrialLinkMessage(null);
+    adminService
+      .issueTrialClaimLink(accountId)
+      .then((res) => {
+        if (!res.ok) {
+          setTrialLinkMessage(`Gagal menerbitkan tautan: ${res.error.safeMessage}`);
+          return;
+        }
+        const url = `${window.location.origin}/trial/claim#token=${encodeURIComponent(res.value.token)}`;
+        setTrialClaimLink({ url, expiresAt: res.value.expiresAt });
+        setTrialLinkMessage('Tautan aktivasi siap dikirim ke pengguna.');
+        setToast('Tautan trial berhasil diterbitkan.');
+      })
+      .finally(() => setTrialLinkLoading(false));
   };
 
   const handleSetEntitlement = () => {
@@ -390,6 +411,82 @@ export function AccountDetailView({
                 <p className="rounded-xl border border-[#ddd4c8] bg-white/80 p-3 text-[12px] text-[#6d665d]">
                   Workspace ID tidak tersedia, sehingga entitlement tidak dapat diubah dari akun
                   ini.
+                </p>
+              )}
+            </section>
+
+            <section
+              className="rounded-2xl border border-[#ddd4c8]/70 bg-white p-5 shadow-sm space-y-3 text-[13px]"
+              aria-labelledby="trial-link-heading"
+            >
+              <div>
+                <h3 id="trial-link-heading" className="text-[15px] font-bold text-[#171717]">
+                  Tautan trial Guru Pro
+                </h3>
+                <p className="mt-1 text-[12px] leading-relaxed text-[#6d665d]">
+                  Terbitkan tautan satu kali untuk akun ini. Pengguna harus membuka tautan saat masuk
+                  ke akun yang sama, lalu mengonfirmasi aktivasi trial.
+                </p>
+              </div>
+              {currentPlan === 'free' &&
+              detail.workspaceId &&
+              detail.role !== 'superadmin' &&
+              detail.role !== 'school_admin' &&
+              !detail.roles?.includes('superadmin') &&
+              !detail.roles?.includes('school_admin') ? (
+                <>
+                  <Button size="sm" disabled={trialLinkLoading} onClick={handleIssueTrialLink}>
+                    {trialLinkLoading
+                      ? 'Menerbitkan...'
+                      : trialClaimLink
+                        ? 'Terbitkan tautan baru'
+                        : 'Terbitkan tautan trial'}
+                  </Button>
+                  {trialClaimLink ? (
+                    <div className="space-y-2 rounded-xl border border-[#ddd4c8] bg-[#faf7f2] p-3">
+                      <label htmlFor="trial-claim-link" className="block text-[12px] font-medium text-[#57534e]">
+                        Tautan aktivasi
+                      </label>
+                      <div className="flex gap-2">
+                        <input
+                          id="trial-claim-link"
+                          readOnly
+                          value={trialClaimLink.url}
+                          className="h-10 min-w-0 flex-1 rounded-lg border border-[#ddd4c8] bg-white px-3 font-mono text-[11px] text-[#171717]"
+                        />
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => {
+                            void navigator.clipboard.writeText(trialClaimLink.url);
+                            setToast('Tautan trial disalin.');
+                          }}
+                        >
+                          Salin
+                        </Button>
+                      </div>
+                      <p className="text-[11px] text-[#6d665d]">
+                        Berlaku sampai{' '}
+                        {new Date(trialClaimLink.expiresAt).toLocaleString('id-ID', {
+                          dateStyle: 'medium',
+                          timeStyle: 'short',
+                        })}
+                        . Tautan lama otomatis tidak berlaku ketika tautan baru diterbitkan.
+                      </p>
+                    </div>
+                  ) : null}
+                  {trialLinkMessage ? (
+                    <p
+                      role={trialLinkMessage.startsWith('Gagal') ? 'alert' : 'status'}
+                      className={`text-[12px] ${trialLinkMessage.startsWith('Gagal') ? 'text-red-700' : 'text-[#57534e]'}`}
+                    >
+                      {trialLinkMessage}
+                    </p>
+                  ) : null}
+                </>
+              ) : (
+                <p className="rounded-xl border border-[#ddd4c8] bg-[#faf7f2] p-3 text-[12px] text-[#6d665d]">
+                  Tautan trial hanya tersedia untuk akun guru pada paket Free.
                 </p>
               )}
             </section>

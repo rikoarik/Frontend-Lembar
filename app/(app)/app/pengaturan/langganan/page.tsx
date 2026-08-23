@@ -80,9 +80,6 @@ export default function PlanUsageSettingsPage() {
   const [upgradeError, setUpgradeError] = useState('');
   const [upgradePlan, setUpgradePlan] = useState<'pro' | 'plus'>('pro');
 
-  const [claimLinkLoading, setClaimLinkLoading] = useState(false);
-  const [claimLinkError, setClaimLinkError] = useState('');
-  const [claimLink, setClaimLink] = useState<{ token: string; expiresAt: string } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -141,29 +138,6 @@ export default function PlanUsageSettingsPage() {
     }
   };
 
-  const handlePrepareClaimLink = async () => {
-    setClaimLinkLoading(true);
-    setClaimLinkError('');
-    try {
-      const res = await fetch('/v1/me/plan/trial/claim-links', {
-        method: 'POST',
-        credentials: 'include',
-      });
-      const json = (await res.json()) as {
-        data?: { token?: string; expiresAt?: string };
-        error?: { message?: string };
-      };
-      if (!res.ok || !json.data?.token || !json.data.expiresAt) {
-        setClaimLinkError(json.error?.message ?? 'Gagal menyiapkan tautan klaim trial.');
-        return;
-      }
-      setClaimLink({ token: json.data.token, expiresAt: json.data.expiresAt });
-    } catch {
-      setClaimLinkError('Tidak dapat terhubung. Periksa koneksi Anda.');
-    } finally {
-      setClaimLinkLoading(false);
-    }
-  };
 
   if (loading) {
     return (
@@ -247,37 +221,13 @@ export default function PlanUsageSettingsPage() {
             {trial.eligible && !trial.claimed && (
               <>
                 <p className="text-body-sm text-[#6d665d]">
-                  Anda memenuhi syarat trial 2 bulan Guru Pro gratis. Trial hanya dapat diklaim satu
-                  kali melalui tautan pribadi yang berlaku selama 15 menit.
+                  Akun Anda memenuhi syarat trial 2 bulan Guru Pro. Tautan aktivasi hanya dapat
+                  diterbitkan oleh superadmin dan berlaku selama 15 menit.
                 </p>
-                {claimLinkError && (
-                  <p className="text-sm text-red-700" role="alert">
-                    {claimLinkError}
-                  </p>
-                )}
-                {claimLink ? (
-                  <div className="flex flex-col items-start gap-2">
-                    <Link
-                      href={`/app/pengaturan/langganan/trial/konfirmasi#token=${encodeURIComponent(claimLink.token)}`}
-                      prefetch={false}
-                      className="inline-flex min-h-9 items-center justify-center rounded-md bg-brand-accent px-3 text-body-sm font-medium text-white transition-colors hover:bg-brand-accent-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-focus"
-                    >
-                      Buka tautan klaim trial
-                    </Link>
-                    <p className="text-body-xs text-[#6d665d]">
-                      Tautan berlaku hingga{' '}
-                      {new Date(claimLink.expiresAt).toLocaleTimeString('id-ID', {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
-                      . Setelah digunakan, tautan tidak dapat dipakai lagi.
-                    </p>
-                  </div>
-                ) : (
-                  <Button size="sm" onClick={handlePrepareClaimLink} disabled={claimLinkLoading}>
-                    {claimLinkLoading ? 'Menyiapkan…' : 'Siapkan tautan klaim'}
-                  </Button>
-                )}
+                <div className="rounded-lg border border-[#e6dfd4] bg-[#fbf8f2] p-3 text-body-sm text-[#57534e]">
+                  Hubungi tim Lembar untuk meminta tautan aktivasi pribadi. Setelah menerima tautan,
+                  buka tautan tersebut saat sudah masuk ke akun ini lalu konfirmasi aktivasi trial.
+                </div>
               </>
             )}
             {trial.claimed && trial.endsAt && (

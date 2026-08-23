@@ -412,6 +412,15 @@ export const adminService = {
     return request<AdminAccountDetail>(`/v1/admin/accounts/${id}`);
   },
 
+  issueTrialClaimLink(
+    id: string,
+  ): Promise<Result<{ token: string; expiresAt: string }, AdminError>> {
+    return request<{ token: string; expiresAt: string }>(
+      `/v1/admin/accounts/${id}/trial-claim-links`,
+      'POST',
+    );
+  },
+
   updateAccount(
     id: string,
     payload: { name?: string; phone?: string },

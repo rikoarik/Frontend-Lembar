@@ -41,7 +41,9 @@ export default function LoginPage() {
         activeRole?: string;
         workspaceId?: string;
       } | null;
-      window.location.href = payload?.homePath || '/app';
+      const next = new URLSearchParams(window.location.search).get('next');
+      const safeNext = next?.startsWith('/') && !next.startsWith('//') ? next : null;
+      window.location.href = safeNext || payload?.homePath || '/app';
     },
   });
 

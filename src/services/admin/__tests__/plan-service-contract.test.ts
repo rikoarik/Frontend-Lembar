@@ -15,6 +15,27 @@ describe('admin plan route/method contract', () => {
     );
   });
 
+  it('POSTs the superadmin trial-link route for a target account', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          data: {
+            token: 'opaque-one-time-token-with-at-least-32-characters',
+            expiresAt: '2026-08-23T12:15:00.000Z',
+          },
+        }),
+        { status: 201 },
+      ),
+    );
+
+    await adminService.issueTrialClaimLink('account-1');
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      '/v1/admin/accounts/account-1/trial-claim-links',
+      expect.objectContaining({ method: 'POST' }),
+    );
+  });
+
   it('PATCHes a plan with If-Match revision', async () => {
     const fetchSpy = vi
       .spyOn(globalThis, 'fetch')
