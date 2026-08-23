@@ -1,0 +1,77 @@
+{
+  "pricing": {
+    "badge": "Paket harga",
+    "title": "Pilih paket yang sesuai dengan cara Anda mengajar.",
+    "description": "Mulai dengan Gratis, tingkatkan saat kuota bertambah, atau diskusikan kebutuhan sekolah bersama tim kami.",
+    "catalogUnavailableTitle": "Katalog harga sedang tidak tersedia",
+    "catalogUnavailableBody": "Kami tidak menampilkan harga atau kuota fallback. Coba lagi nanti atau hubungi tim untuk informasi paket yang sudah diverifikasi.",
+    "plans": {
+      "free": {
+        "name": "Gratis",
+        "subtitle": "Untuk mencoba fitur dasar kami.",
+        "cta": "Mulai Gratis"
+      },
+      "plus": {
+        "name": "Plus",
+        "subtitle": "Kuota besar untuk kebutuhan pembuatan soal yang lebih sering.",
+        "cta": "Mulai Plus"
+      },
+      "pro": {
+        "name": "Pro",
+        "subtitle": "Untuk guru aktif dengan kebutuhan penuh.",
+        "cta": "Mulai Pro"
+      }
+    },
+    "priceFree": "Gratis selamanya",
+    "perMonth": "per bulan",
+    "noCard": "Tanpa kartu kredit",
+    "tokenQuota": "{count} token generasi / bulan",
+    "quotaFromCatalog": "Kuota token mengikuti katalog aktif",
+    "popular": "Populer",
+    "landing": {
+      "emptyTitle": "Paket dan kuota yang transparan",
+      "emptyBody": "Harga sedang dimuat dari katalog aktif. Lihat halaman paket untuk informasi terbaru.",
+      "viewPlans": "Lihat paket",
+      "title": "Paket dan kuota yang transparan",
+      "body": "Harga dan batas token di bawah ini diambil langsung dari katalog paket aktif.",
+      "details": "Lihat detail paket dan fitur",
+      "freePrice": "Gratis",
+      "tokenQuota": "{count} token / bulan",
+      "quotaFromCatalog": "Kuota mengikuti katalog aktif",
+      "schoolName": "Sekolah & Institusi",
+      "schoolPrice": "Hubungi kami",
+      "schoolBody": "Harga, kapasitas, dan dukungan disesuaikan dengan kebutuhan institusi."
+    },
+    "catalogUpdate": {
+      "eyebrow": "Katalog diperbarui",
+      "name": "Plus",
+      "subtitle": "Untuk kebutuhan pembuatan soal yang lebih besar.",
+      "price": "Sedang disiapkan",
+      "body": "Harga dan kuota menunggu sinkronisasi katalog.",
+      "detail": "Paket Plus akan aktif otomatis di halaman ini setelah katalog paket diperbarui.",
+      "status": "Menunggu pembaruan katalog"
+    },
+    "school": {
+      "name": "Sekolah & Institusi",
+      "subtitle": "Untuk tim sekolah dan institusi pendidikan.",
+      "headline": "Mari bicara",
+      "price": "Penawaran disesuaikan kebutuhan.",
+      "body": "Kapasitas, dukungan, dan ketentuan layanan dikonfirmasi sesuai kebutuhan institusi sebelum penawaran dibuat.",
+      "cta": "Hubungi tim sekolah"
+    },
+    "faq": {
+      "title": "Pertanyaan umum",
+      "tokenQuestion": "Apa itu token generasi?",
+      "tokenAnswer": "Token adalah unit penggunaan saat Anda membuat soal. Batas setiap paket mengikuti katalog aktif yang ditampilkan di halaman ini.",
+      "billingQuestion": "Apakah ada biaya tersembunyi?",
+      "billingAnswer": "Detail harga dan metode pembayaran mengikuti informasi yang ditampilkan pada saat transaksi. Periksa ringkasan sebelum melanjutkan pembayaran.",
+      "upgradeQuestion": "Bagaimana cara upgrade ke Pro?",
+      "upgradeAnswer": "Masuk ke akun Anda → Pengaturan → Paket & Kuota, lalu pilih paket untuk melakukan pembayaran."
+    },
+    "cta": {
+      "title": "Siap untuk mulai merancang asesmen lebih baik?",
+      "register": "Daftar sekarang",
+      "contact": "Jadwalkan demo"
+    }
+  }
+}

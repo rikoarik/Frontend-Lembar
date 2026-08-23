@@ -1,0 +1,73 @@
+{
+  "pricing": {
+    "badge": "Pricing",
+    "title": "Choose a plan that fits the way you teach.",
+    "description": "Start with Free, upgrade as your usage grows, or discuss your school's needs with our team.",
+    "catalogUnavailableTitle": "The pricing catalog is unavailable",
+    "catalogUnavailableBody": "We do not show fallback prices or quotas. Try again later or contact our team for verified plan information.",
+    "plans": {
+      "free": { "name": "Free", "subtitle": "For trying the core features.", "cta": "Start Free" },
+      "plus": {
+        "name": "Plus",
+        "subtitle": "Higher capacity for creating assessments more often.",
+        "cta": "Start Plus"
+      },
+      "pro": {
+        "name": "Pro",
+        "subtitle": "For active teachers with broader needs.",
+        "cta": "Start Pro"
+      }
+    },
+    "priceFree": "Free forever",
+    "perMonth": "per month",
+    "noCard": "No credit card required",
+    "tokenQuota": "{count} generation tokens / month",
+    "quotaFromCatalog": "Token quota follows the active catalog",
+    "popular": "Popular",
+    "landing": {
+      "emptyTitle": "Transparent plans and quotas",
+      "emptyBody": "Pricing is loading from the active catalog. Visit the plans page for current information.",
+      "viewPlans": "View plans",
+      "title": "Transparent plans and quotas",
+      "body": "The prices and token limits below come directly from the active plan catalog.",
+      "details": "View plan details and features",
+      "freePrice": "Free",
+      "tokenQuota": "{count} tokens / month",
+      "quotaFromCatalog": "Quota follows the active catalog",
+      "schoolName": "Schools & Institutions",
+      "schoolPrice": "Contact us",
+      "schoolBody": "Pricing, capacity, and support are tailored to your institution's needs."
+    },
+    "catalogUpdate": {
+      "eyebrow": "Catalog update",
+      "name": "Plus",
+      "subtitle": "For larger assessment creation needs.",
+      "price": "Being prepared",
+      "body": "Pricing and quota are awaiting catalog synchronization.",
+      "detail": "The Plus plan will become active on this page once the plan catalog is updated.",
+      "status": "Waiting for catalog update"
+    },
+    "school": {
+      "name": "Schools & Institutions",
+      "subtitle": "For school teams and education institutions.",
+      "headline": "Let's talk",
+      "price": "A proposal tailored to your needs.",
+      "body": "Capacity, support, and service terms are confirmed based on your institution's needs before a proposal is made.",
+      "cta": "Contact the school team"
+    },
+    "faq": {
+      "title": "Frequently asked questions",
+      "tokenQuestion": "What are generation tokens?",
+      "tokenAnswer": "Tokens are consumed when you create questions. Each plan limit follows the active catalog shown on this page.",
+      "billingQuestion": "Are there hidden fees?",
+      "billingAnswer": "Pricing and payment methods follow the information shown at checkout. Review the summary before continuing payment.",
+      "upgradeQuestion": "How do I upgrade to Pro?",
+      "upgradeAnswer": "Sign in, open Settings → Plan & Quota, then choose a plan to continue to payment."
+    },
+    "cta": {
+      "title": "Ready to design better assessments?",
+      "register": "Register now",
+      "contact": "Schedule a demo"
+    }
+  }
+}

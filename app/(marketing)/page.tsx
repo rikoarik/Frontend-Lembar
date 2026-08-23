@@ -1,16 +1,18 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import { getLocale, getTranslations } from 'next-intl/server';
 import { fetchMarketingPage } from '@/src/lib/marketing/fetchMarketingPage';
 import { BlockRenderer } from '@/app/components/marketing/BlockRenderer';
 import { getMarketingSession } from '@/src/lib/api/marketingSession';
 import JsonLd from '@/app/components/marketing/JsonLd';
 import { marketingMetadata } from '@/src/lib/marketing/marketingMetadata';
+import { fetchPublicPlans, type PublicPlan } from '@/src/lib/api/plans';
 
 export async function generateMetadata(): Promise<Metadata> {
   const metadata = await marketingMetadata('home', {
     title: 'Generator Soal AI untuk Guru — lembar',
     description:
-      'Generator soal otomatis berbasis AI untuk guru Indonesia. Buat soal ujian, ulangan, dan latihan dari materi kurikulum atau PDF Anda. Draft AI ditinjau guru, gratis tanpa batas.',
+      'Generator soal otomatis berbasis AI untuk guru Indonesia. Buat draft ujian, ulangan, dan latihan dari materi atau PDF, lalu tinjau sebelum digunakan.',
     canonical: '/',
   });
 
@@ -20,7 +22,7 @@ export async function generateMetadata(): Promise<Metadata> {
       'generator soal',
       'generator soal ai',
       'pembuat soal otomatis',
-      'generator soal gratis',
+
       'membuat soal dengan ai',
       'generator ujian',
       'buat soal otomatis',
@@ -33,35 +35,157 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+type LandingPricingCopy = {
+  emptyTitle: string;
+  emptyBody: string;
+  viewPlans: string;
+  title: string;
+  body: string;
+  details: string;
+  freePrice: string;
+  tokenQuota: (values: { count: string }) => string;
+  quotaFromCatalog: string;
+  schoolName: string;
+  schoolPrice: string;
+  schoolBody: string;
+};
+
+function LivePlanCatalog({
+  plans,
+  copy,
+  locale,
+}: {
+  plans: PublicPlan[];
+  copy: LandingPricingCopy;
+  locale: string;
+}) {
+  if (plans.length === 0) {
+    return (
+      <section className="py-16 px-margin-mobile md:px-margin-desktop bg-surface-container">
+        <div className="max-w-container-max mx-auto text-center">
+          <h2 className="font-display-lg text-display-lg text-ink mb-4">{copy.emptyTitle}</h2>
+          <p className="text-body-lead text-secondary max-w-2xl mx-auto">{copy.emptyBody}</p>
+          <Link
+            href="/harga"
+            className="mt-6 inline-flex font-label-semibold text-burgundy underline"
+          >
+            {copy.viewPlans}
+          </Link>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="py-16 px-margin-mobile md:px-margin-desktop bg-surface-container">
+      <div className="max-w-container-max mx-auto">
+        <div className="text-center mb-10">
+          <h2 className="font-display-lg text-display-lg text-ink mb-4">{copy.title}</h2>
+          <p className="text-body-lead text-secondary max-w-2xl mx-auto">{copy.body}</p>
+        </div>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 max-w-container-max mx-auto">
+          {(['free', 'pro', 'plus'] as const).map((key) => {
+            const plan = plans.find((item) => item.key === key);
+            if (!plan) return null;
+            return (
+              <article
+                key={plan.key}
+                className="rounded-xl border border-border-subtle bg-surface p-5 text-left"
+              >
+                <h3 className="font-label-large text-label-large text-ink">{plan.displayName}</h3>
+                <p className="mt-2 font-h3 text-h3 text-ink">
+                  {plan.priceAmount === 0
+                    ? copy.freePrice
+                    : new Intl.NumberFormat(locale === 'id' ? 'id-ID' : 'en-US', {
+                        style: 'currency',
+                        currency: plan.currency,
+                        maximumFractionDigits: 0,
+                      }).format(plan.priceAmount)}
+                </p>
+                <p className="mt-2 text-body-sm text-secondary">
+                  {plan.tokenMonthlyLimit === null
+                    ? copy.quotaFromCatalog
+                    : copy.tokenQuota({
+                        count: new Intl.NumberFormat(locale === 'id' ? 'id-ID' : 'en-US').format(
+                          plan.tokenMonthlyLimit,
+                        ),
+                      })}
+                </p>
+              </article>
+            );
+          })}
+          <article className="rounded-xl border border-border-subtle bg-surface p-5 text-left">
+            <h3 className="font-label-large text-label-large text-ink">{copy.schoolName}</h3>
+            <p className="mt-2 font-h3 text-h3 text-ink">{copy.schoolPrice}</p>
+            <p className="mt-2 text-body-sm text-secondary">{copy.schoolBody}</p>
+          </article>
+        </div>
+        <div className="mt-8 text-center">
+          <Link href="/harga" className="font-label-semibold text-burgundy underline">
+            {copy.details}
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default async function LandingPage() {
-  const session = await getMarketingSession();
+  const [session, cmsDoc, plans, t, locale] = await Promise.all([
+    getMarketingSession(),
+    fetchMarketingPage('home'),
+    fetchPublicPlans(),
+    getTranslations('pricing.landing'),
+    getLocale(),
+  ]);
+  const pricingCopy: LandingPricingCopy = {
+    emptyTitle: t('emptyTitle'),
+    emptyBody: t('emptyBody'),
+    viewPlans: t('viewPlans'),
+    title: t('title'),
+    body: t('body'),
+    details: t('details'),
+    freePrice: t('freePrice'),
+    tokenQuota: ({ count }) => t('tokenQuota', { count }),
+    quotaFromCatalog: t('quotaFromCatalog'),
+    schoolName: t('schoolName'),
+    schoolPrice: t('schoolPrice'),
+    schoolBody: t('schoolBody'),
+  };
   const primaryHref = session?.homePath ?? '/daftar';
-  const primaryLabel = session ? 'Buka workspace' : 'Buat soal gratis sekarang';
-  const cmsDoc = await fetchMarketingPage('home');
+  const primaryLabel = session ? 'Buka workspace' : 'Mulai membuat soal';
   if (cmsDoc) {
-    return <BlockRenderer blocks={cmsDoc.blocks} />;
+    return (
+      <>
+        <BlockRenderer blocks={cmsDoc.blocks.filter((block) => block.type !== 'pricing')} />
+        <LivePlanCatalog plans={plans} copy={pricingCopy} locale={locale} />
+      </>
+    );
   }
   return (
     <>
-      <JsonLd schema={[
-        {
-          '@type': 'SoftwareApplication',
-          '@id': 'https://app.lembar.web.id/#app',
-          name: 'lembar',
-          applicationCategory: 'EducationApplication',
-          operatingSystem: 'Web',
-          url: 'https://app.lembar.web.id',
-          description: 'Generator soal otomatis berbasis AI untuk guru Indonesia. Buat soal ujian, ulangan, dan latihan dari materi kurikulum atau PDF.',
-          offers: { '@type': 'Offer', price: '0', priceCurrency: 'IDR', description: 'Gratis tanpa batas untuk guru' },
-          inLanguage: 'id',
-        },
-        {
-          '@type': 'Organization',
-          '@id': 'https://app.lembar.web.id/#org',
-          name: 'lembar',
-          url: 'https://app.lembar.web.id',
-        },
-      ]} />
+      <JsonLd
+        schema={[
+          {
+            '@type': 'SoftwareApplication',
+            '@id': 'https://app.lembar.web.id/#app',
+            name: 'lembar',
+            applicationCategory: 'EducationApplication',
+            operatingSystem: 'Web',
+            url: 'https://app.lembar.web.id',
+            description:
+              'Generator soal otomatis berbasis AI untuk guru Indonesia. Buat soal ujian, ulangan, dan latihan dari materi kurikulum atau PDF.',
+
+            inLanguage: 'id',
+          },
+          {
+            '@type': 'Organization',
+            '@id': 'https://app.lembar.web.id/#org',
+            name: 'lembar',
+            url: 'https://app.lembar.web.id',
+          },
+        ]}
+      />
       <main className="flex-grow">
         <section className="py-24 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto overflow-hidden">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-center">
@@ -75,7 +199,7 @@ export default async function LandingPage() {
               <p className="font-body-lead text-body-lead text-secondary max-w-md">
                 Generator soal berbasis AI yang menghasilkan draft ujian, ulangan, dan latihan dari
                 Buku Siswa atau materi Anda. Tinjau setiap butir soal sebelum cetak atau bagikan.
-                Gratis tanpa batas untuk guru.
+                Harga dan kuota mengikuti katalog paket yang sedang aktif.
               </p>
               <div className="flex flex-wrap gap-4 mt-4">
                 <Link
@@ -239,16 +363,17 @@ export default async function LandingPage() {
             Kenapa guru pilih generator soal lembar?
           </h2>
           <p className="text-body-lead text-secondary text-center max-w-2xl mx-auto mb-12">
-            Generator soal AI yang dirancang khusus untuk guru Indonesia, gratis tanpa batas
+            Generator soal AI yang dirancang khusus untuk guru Indonesia, dengan kuota yang jelas
+            untuk setiap paket.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="border border-border-subtle rounded-DEFAULT p-6 bg-surface">
               <h3 className="font-label-large text-label-large text-ink mb-2">
-                ✓ Gratis selamanya
+                ✓ Paket Gratis dengan kuota jelas
               </h3>
               <p className="text-body-medium text-secondary">
-                Generate soal tanpa batas, tidak ada trial, tidak ada hidden cost. Untuk guru
-                Indonesia.
+                Mulai tanpa kartu kredit. Kuota generasi per bulan dan opsi trial ditampilkan
+                transparan di halaman paket.
               </p>
             </div>
             <div className="border border-border-subtle rounded-DEFAULT p-6 bg-surface">
@@ -278,6 +403,8 @@ export default async function LandingPage() {
             </div>
           </div>
         </section>
+
+        <LivePlanCatalog plans={plans} copy={pricingCopy} locale={locale} />
 
         <section className="py-16 px-margin-mobile md:px-margin-desktop bg-surface-container">
           <div className="max-w-container-max mx-auto text-center">
