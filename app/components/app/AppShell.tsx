@@ -98,7 +98,6 @@ export function AppShell({ children }: AppShellProps) {
         <main
           id="konten-utama"
           className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain px-4 py-4 md:px-6 md:py-6"
-          data-lenis-prevent
         >
           {children}
         </main>

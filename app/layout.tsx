@@ -3,7 +3,6 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
 import { Inter, Manrope } from 'next/font/google';
 import './globals.css';
-import LenisProvider from './components/marketing/LenisProvider';
 import { QueryProvider } from './components/QueryProvider';
 
 // Optimized font loading with next/font/google
@@ -85,9 +84,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         className="antialiased min-h-screen flex flex-col font-body-default text-body-default bg-paper text-on-background selection:bg-primary-fixed selection:text-on-primary-fixed"
       >
         <NextIntlClientProvider messages={messages}>
-          <QueryProvider>
-            <LenisProvider>{children}</LenisProvider>
-          </QueryProvider>
+          <QueryProvider>{children}</QueryProvider>
         </NextIntlClientProvider>
       </body>
     </html>

@@ -248,6 +248,18 @@ export default async function HargaPage() {
                 copy={copy}
               />
             )}
+            {proPlan && (
+              <PlanCard
+                plan={proPlan}
+                isPopular
+                name={t('plans.pro.name')}
+                cta={t('plans.pro.cta')}
+                ctaHref="/daftar"
+                subtitle={t('plans.pro.subtitle')}
+                locale={locale}
+                copy={copy}
+              />
+            )}
             {plusPlan ? (
               <PlanCard
                 plan={plusPlan}
@@ -260,18 +272,6 @@ export default async function HargaPage() {
               />
             ) : (
               <CatalogUpdateCard copy={copy} />
-            )}
-            {proPlan && (
-              <PlanCard
-                plan={proPlan}
-                isPopular
-                name={t('plans.pro.name')}
-                cta={t('plans.pro.cta')}
-                ctaHref="/daftar"
-                subtitle={t('plans.pro.subtitle')}
-                locale={locale}
-                copy={copy}
-              />
             )}
 
             {/* School plan: always contact-custom, no executable quota */}

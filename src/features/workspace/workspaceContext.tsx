@@ -147,7 +147,7 @@ export function WorkspaceProvider({
         return false;
       }
     },
-    [activeWorkspaceId, workspaceList],
+    [activeWorkspaceId, workspaceList, setActiveWorkspaceId],
   );
 
   const value = useMemo<WorkspaceContextValue>(
@@ -166,7 +166,6 @@ export function WorkspaceProvider({
       workspaceList,
       initialDisplayName,
       announcement,
-      live,
       allowDemoSeed,
       tWorkspace,
       getCacheKey,
