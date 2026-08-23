@@ -35,6 +35,45 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+const HOME_SCHEMA = [
+  {
+    '@type': 'Organization',
+    '@id': 'https://app.lembar.web.id/#organization',
+    name: 'Lembar',
+    url: 'https://app.lembar.web.id',
+    logo: 'https://app.lembar.web.id/lembar/logo-mark.png',
+  },
+  {
+    '@type': 'WebSite',
+    '@id': 'https://app.lembar.web.id/#website',
+    name: 'Lembar',
+    url: 'https://app.lembar.web.id',
+    inLanguage: 'id-ID',
+    publisher: { '@id': 'https://app.lembar.web.id/#organization' },
+  },
+  {
+    '@type': 'SoftwareApplication',
+    '@id': 'https://app.lembar.web.id/#software',
+    name: 'Lembar',
+    applicationCategory: 'EducationalApplication',
+    operatingSystem: 'Web',
+    url: 'https://app.lembar.web.id',
+    description:
+      'Generator soal otomatis berbasis AI untuk guru Indonesia. Buat dan tinjau draft soal dari materi kurikulum atau PDF.',
+    inLanguage: 'id-ID',
+    publisher: { '@id': 'https://app.lembar.web.id/#organization' },
+  },
+  {
+    '@type': 'WebPage',
+    '@id': 'https://app.lembar.web.id/#webpage',
+    url: 'https://app.lembar.web.id',
+    name: 'Generator Soal AI untuk Guru Indonesia',
+    inLanguage: 'id-ID',
+    isPartOf: { '@id': 'https://app.lembar.web.id/#website' },
+    about: { '@id': 'https://app.lembar.web.id/#software' },
+  },
+];
+
 type LandingPricingCopy = {
   emptyTitle: string;
   emptyBody: string;
@@ -157,6 +196,7 @@ export default async function LandingPage() {
   if (cmsDoc) {
     return (
       <>
+        <JsonLd schema={HOME_SCHEMA} />
         <BlockRenderer blocks={cmsDoc.blocks.filter((block) => block.type !== 'pricing')} />
         <LivePlanCatalog plans={plans} copy={pricingCopy} locale={locale} />
       </>
@@ -164,28 +204,7 @@ export default async function LandingPage() {
   }
   return (
     <>
-      <JsonLd
-        schema={[
-          {
-            '@type': 'SoftwareApplication',
-            '@id': 'https://app.lembar.web.id/#app',
-            name: 'lembar',
-            applicationCategory: 'EducationApplication',
-            operatingSystem: 'Web',
-            url: 'https://app.lembar.web.id',
-            description:
-              'Generator soal otomatis berbasis AI untuk guru Indonesia. Buat soal ujian, ulangan, dan latihan dari materi kurikulum atau PDF.',
-
-            inLanguage: 'id',
-          },
-          {
-            '@type': 'Organization',
-            '@id': 'https://app.lembar.web.id/#org',
-            name: 'lembar',
-            url: 'https://app.lembar.web.id',
-          },
-        ]}
-      />
+      <JsonLd schema={HOME_SCHEMA} />
       <main className="flex-grow">
         <section className="py-24 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto overflow-hidden">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-center">

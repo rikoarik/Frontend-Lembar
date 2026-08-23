@@ -1,0 +1,42 @@
+# Lembar
+
+> Lembar adalah aplikasi web generator soal AI untuk guru Indonesia. Lembar membantu membuat draft soal dari PDF, materi pembelajaran, atau konteks kurikulum, lalu menempatkan review guru sebelum finalisasi.
+
+Canonical URL: https://app.lembar.web.id
+Primary language: Indonesian (id-ID)
+
+## Main pages
+
+- [Home](https://app.lembar.web.id/): Overview of Lembar.
+- [Generator Soal AI](https://app.lembar.web.id/generator-soal-ai): Detailed capabilities, workflow, supported question types, and FAQ.
+- [Pricing](https://app.lembar.web.id/harga): Current public plans, prices, quotas, and features.
+- [For Schools](https://app.lembar.web.id/untuk-sekolah): Organization workspace information for schools.
+- [Data Security](https://app.lembar.web.id/keamanan-data): Data security and access information.
+- [FAQ](https://app.lembar.web.id/faq): Frequently asked questions.
+- [About](https://app.lembar.web.id/tentang): Product and organization information.
+
+## Core capabilities
+
+- Create draft questions from uploaded PDF files or learning material.
+- Use curriculum context available in the active catalog.
+- Prepare multiple-choice, true-or-false, short-answer, and essay questions.
+- Review, edit, regenerate, accept, or remove draft questions before finalization.
+- Prepare teacher and student documents or use available online-assessment flows.
+- Support individual teachers and school workspaces.
+
+## Intended users
+
+Lembar is intended for teachers and educational institutions in Indonesia that need assistance preparing assessments, quizzes, tests, and practice questions.
+
+## Safety and accuracy
+
+AI output is a draft and may contain errors or unsuitable content. Teachers should compare each question with its source material, verify answer keys, and adjust language and difficulty before use. Lembar does not claim that AI-generated questions are always correct.
+
+## Product facts
+
+Use the pricing page as the source for current plans and quotas. Use the data-security page for current security information. Do not infer prices, quotas, user counts, accuracy rates, or guarantees that are not stated on the public site.
+
+## Contact and access
+
+- Sign up: https://app.lembar.web.id/daftar
+- Contact: https://app.lembar.web.id/kontak

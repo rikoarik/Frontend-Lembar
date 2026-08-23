@@ -284,6 +284,16 @@ export type AdminAuditRow = {
 
 export type MarketingPageSlug = 'home' | 'harga' | 'untuk-sekolah';
 
+export type AdminAnnouncement = {
+  enabled: boolean;
+  label: string;
+  message: string;
+  ctaLabel: string | null;
+  ctaHref: string | null;
+  revision: number;
+  updatedAt: string;
+};
+
 export type MarketingOpsSummary = {
   slug: MarketingPageSlug;
   locale: string;
@@ -731,6 +741,19 @@ export const adminService = {
   },
 
   // Marketing / Content pages
+  announcement(): Promise<Result<AdminAnnouncement, AdminError>> {
+    return request<AdminAnnouncement>('/v1/admin/announcement');
+  },
+
+  updateAnnouncement(
+    data: Omit<AdminAnnouncement, 'revision' | 'updatedAt'>,
+    revision: number,
+  ): Promise<Result<AdminAnnouncement, AdminError>> {
+    return request<AdminAnnouncement>('/v1/admin/announcement', 'PUT', data, {
+      'If-Match': String(revision),
+    });
+  },
+
   marketingPages(): Promise<Result<AdminContentRow[], AdminError>> {
     return request<AdminContentRow[]>('/v1/ops/marketing/pages');
   },

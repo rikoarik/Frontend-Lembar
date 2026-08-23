@@ -46,6 +46,12 @@ export default function MarketingFooter() {
               </Link>
               <Link
                 className="font-caption text-caption text-secondary hover:text-burgundy hover:underline transition-all duration-200"
+                href="/generator-soal-ai"
+              >
+                Generator Soal AI
+              </Link>
+              <Link
+                className="font-caption text-caption text-secondary hover:text-burgundy hover:underline transition-all duration-200"
                 href="/untuk-sekolah"
               >
                 Untuk Sekolah

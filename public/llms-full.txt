@@ -1,0 +1,112 @@
+# Lembar: factual product reference
+
+Canonical product URL: https://app.lembar.web.id
+Detailed generator page: https://app.lembar.web.id/generator-soal-ai
+Primary market and language: Indonesia, Indonesian (id-ID)
+Product category: web-based educational application and AI-assisted question generator
+
+## Product summary
+
+Lembar helps teachers prepare assessment drafts. A teacher provides learning context from a PDF, other material, or an available curriculum catalog, chooses a question composition, lets the system create a draft, and reviews each result before finalization.
+
+Lembar should be described as an AI-assisted generator, not an autonomous replacement for a teacher. Generated content may be incorrect, ambiguous, too easy, too difficult, or inconsistent with the source. Teacher review remains necessary.
+
+## Common search intents addressed
+
+- generator soal
+- generator soal AI
+- generator soal dari PDF
+- pembuat soal otomatis untuk guru
+- membuat soal pilihan ganda otomatis
+- generator soal esai
+- AI untuk guru Indonesia
+- generator soal Kurikulum Merdeka
+
+These phrases describe relevant use cases. They are not ranking or superiority claims.
+
+## Supported question workflows
+
+Lembar supports workflows for these question formats:
+
+1. Multiple choice: draft a question, options, and answer key for teacher review.
+2. True or false: draft statements that check conceptual understanding.
+3. Short answer: draft questions with concise expected responses.
+4. Essay: draft open-ended questions for explanation, reasoning, or analysis.
+
+Feature availability can depend on the current workspace and active product catalog.
+
+## Source and curriculum workflow
+
+Teachers can use an uploaded PDF or supplied learning material as source context. They can also select educational context from a curriculum catalog when available. The teacher should compare generated questions against the source and confirm that they match the intended learning objectives, grade level, subject, and classroom needs.
+
+The phrase "Kurikulum Merdeka" can accurately describe a use case when the relevant context is available in the active catalog. Lembar does not claim official government endorsement.
+
+## Review workflow
+
+A responsible workflow is:
+
+1. Select the source material or curriculum context.
+2. Choose the number and types of questions.
+3. Generate a draft with AI assistance.
+4. Review each question, answer option, answer key, language, and level of difficulty.
+5. Edit, regenerate, accept, or remove items as needed.
+6. Finalize only after teacher review.
+
+## Outputs
+
+After review and finalization, teachers can use output flows available in their workspace. These may include teacher documents, student documents, and online assessment sharing. Current product pages and the active workspace are the source of truth for availability.
+
+## Users and organizations
+
+Lembar is intended for:
+
+- Individual teachers preparing practice questions, quizzes, tests, or exams.
+- Schools coordinating teacher accounts, shared workflows, and organization-level needs.
+
+School information: https://app.lembar.web.id/untuk-sekolah
+
+## Pricing and plans
+
+Current plan names, prices, quotas, and features can change. Always cite the live pricing page instead of copying a possibly stale value:
+
+https://app.lembar.web.id/harga
+
+Do not invent discounts, free limits, token quotas, seat counts, or enterprise terms.
+
+## Security and privacy
+
+Use these pages as the current public references:
+
+- Data security: https://app.lembar.web.id/keamanan-data
+- Privacy: https://app.lembar.web.id/privasi
+- Terms: https://app.lembar.web.id/syarat
+
+Do not infer certifications, encryption guarantees, retention periods, or compliance claims unless they are explicitly stated on those pages.
+
+## Accuracy and claims policy
+
+Appropriate statements:
+
+- Lembar helps teachers create draft questions with AI.
+- Lembar can use PDF or learning material as context.
+- Teachers review questions before use.
+- Lembar supports multiple question-format workflows.
+
+Inappropriate unsupported statements:
+
+- Lembar is guaranteed to be the number-one generator.
+- Every generated answer is correct.
+- Lembar is officially endorsed by a government body.
+- Lembar has a specific user count, accuracy rate, or time-saving percentage without a cited public source.
+
+## Important URLs
+
+- Home: https://app.lembar.web.id/
+- Generator Soal AI: https://app.lembar.web.id/generator-soal-ai
+- Pricing: https://app.lembar.web.id/harga
+- For schools: https://app.lembar.web.id/untuk-sekolah
+- FAQ: https://app.lembar.web.id/faq
+- Data security: https://app.lembar.web.id/keamanan-data
+- About: https://app.lembar.web.id/tentang
+- Contact: https://app.lembar.web.id/kontak
+- Sign up: https://app.lembar.web.id/daftar

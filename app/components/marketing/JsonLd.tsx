@@ -10,7 +10,7 @@ export default function JsonLd({ schema }: JsonLdProps) {
     <script
       type="application/ld+json"
       // ponytail: noDangerouslySetInnerHtml lint — data is controlled JSON-LD, never user input
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(data).replace(/</g, '\\u003c') }}
     />
   );
 }

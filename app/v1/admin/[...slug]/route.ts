@@ -79,6 +79,30 @@ async function handleProxy(request: NextRequest, context: { params: Promise<{ sl
       );
     }
 
+    if (path === '/v1/admin/announcement') {
+      const defaultAnnouncement = {
+        enabled: true,
+        label: 'Beta',
+        message: 'Lembar sedang dalam tahap beta dan terus disempurnakan bersama guru Indonesia.',
+        ctaLabel: 'Mulai mencoba',
+        ctaHref: '/daftar',
+        revision: 1,
+        updatedAt: new Date().toISOString(),
+      };
+      if (request.method === 'PUT') {
+        const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;
+        const revision = Number(request.headers.get('if-match'));
+        return NextResponse.json({
+          data: {
+            ...defaultAnnouncement,
+            ...body,
+            revision: Number.isInteger(revision) ? revision + 1 : 2,
+          },
+        });
+      }
+      return NextResponse.json({ data: defaultAnnouncement });
+    }
+
     if (path === '/v1/admin/accounts') {
       const q = request.nextUrl.searchParams.get('q') || '';
       const role = request.nextUrl.searchParams.get('role') || '';
@@ -501,9 +525,11 @@ async function handleProxy(request: NextRequest, context: { params: Promise<{ sl
     }
   }
 
+  const ifMatch = request.headers.get('if-match');
   const upstream = await backendFetch(fullPath, {
     method: request.method,
     token: effectiveToken,
+    headers: ifMatch ? { 'If-Match': ifMatch } : undefined,
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
 
