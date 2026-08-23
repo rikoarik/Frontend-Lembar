@@ -19,6 +19,8 @@ export type PrintQuestion = {
   rubric?: PrintRubricCriterion[];
 };
 
+export type LetterheadTemplate = 'official' | 'compact' | 'simple';
+
 export type PrintMetadata = {
   schoolName: string;
   teacherName: string;
@@ -28,6 +30,13 @@ export type PrintMetadata = {
   duration: string;
   instructions: string;
   maxScore?: number;
+  headerTemplate?: LetterheadTemplate;
+  authorityName?: string;
+  departmentName?: string;
+  schoolAddress?: string;
+  schoolContact?: string;
+  leftLogoDataUrl?: string;
+  rightLogoDataUrl?: string;
 };
 
 export type PrintDTO = {
@@ -116,6 +125,29 @@ function mapPrintMetadata(metadata?: Record<string, unknown>): PrintMetadata | u
     date: String(metadata.date ?? ''),
     duration: String(metadata.duration ?? ''),
     instructions: String(metadata.instructions ?? ''),
+    ...(metadata.headerTemplate === 'official' ||
+    metadata.headerTemplate === 'compact' ||
+    metadata.headerTemplate === 'simple'
+      ? { headerTemplate: metadata.headerTemplate }
+      : {}),
+    ...(typeof metadata.authorityName === 'string'
+      ? { authorityName: metadata.authorityName }
+      : {}),
+    ...(typeof metadata.departmentName === 'string'
+      ? { departmentName: metadata.departmentName }
+      : {}),
+    ...(typeof metadata.schoolAddress === 'string'
+      ? { schoolAddress: metadata.schoolAddress }
+      : {}),
+    ...(typeof metadata.schoolContact === 'string'
+      ? { schoolContact: metadata.schoolContact }
+      : {}),
+    ...(typeof metadata.leftLogoDataUrl === 'string'
+      ? { leftLogoDataUrl: metadata.leftLogoDataUrl }
+      : {}),
+    ...(typeof metadata.rightLogoDataUrl === 'string'
+      ? { rightLogoDataUrl: metadata.rightLogoDataUrl }
+      : {}),
     ...(Number.isFinite(maxScore) ? { maxScore } : {}),
   };
 }

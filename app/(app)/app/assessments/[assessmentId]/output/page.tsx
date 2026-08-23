@@ -6,6 +6,10 @@ import { MetadataForm } from '@/src/features/output/MetadataForm';
 import { StudentWorksheetRenderer } from '@/src/features/output/StudentWorksheetRenderer';
 import { TeacherKeyRenderer } from '@/src/features/output/TeacherKeyRenderer';
 import type { PrintDTO, PrintMetadata } from '@/src/features/output/types';
+import {
+  loadPrintTemplate,
+  savePrintTemplate,
+} from '@/src/features/output/printTemplateStorage';
 
 const blankMetadata: PrintMetadata = {
   schoolName: '',
@@ -15,6 +19,7 @@ const blankMetadata: PrintMetadata = {
   date: '',
   duration: '',
   instructions: '',
+  headerTemplate: 'official',
 };
 
 type Params = { params: Promise<{ assessmentId: string }> };
@@ -63,7 +68,7 @@ export function OutputCenterContent({ assessmentId }: { assessmentId: string }) 
       .then((next) => {
         if (!active || !next) return;
         setDto(next);
-        setMetadata(next.metadata ?? blankMetadata);
+        setMetadata({ ...blankMetadata, ...loadPrintTemplate(), ...(next.metadata ?? {}) });
       })
       .catch((err: unknown) => {
         if (active) setError(err instanceof Error ? err.message : 'Gagal memuat output.');
@@ -106,7 +111,10 @@ export function OutputCenterContent({ assessmentId }: { assessmentId: string }) 
               <MetadataForm
                 value={metadata}
                 onChange={setMetadata}
-                onSave={setMetadata}
+                onSave={(next) => {
+                  setMetadata(next);
+                  savePrintTemplate(next);
+                }}
                 onCancel={() => setMetadata(dto.metadata ?? blankMetadata)}
               />
             </section>

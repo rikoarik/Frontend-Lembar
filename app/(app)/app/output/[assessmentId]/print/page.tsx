@@ -7,6 +7,10 @@ import { MetadataForm } from '@/src/features/output/MetadataForm';
 import { StudentWorksheetRenderer } from '@/src/features/output/StudentWorksheetRenderer';
 import { TeacherKeyRenderer } from '@/src/features/output/TeacherKeyRenderer';
 import type { PrintDTO, PrintMetadata } from '@/src/features/output/types';
+import {
+  loadPrintTemplate,
+  savePrintTemplate,
+} from '@/src/features/output/printTemplateStorage';
 import { assessmentService } from '@/src/services/assessments/assessmentService';
 import type { AssessmentDetail } from '@/src/features/review/types';
 import { humanizeAssessmentLabel } from '@/src/features/history/HistoryView';
@@ -19,6 +23,7 @@ const EMPTY_METADATA: PrintMetadata = {
   date: '',
   duration: '',
   instructions: '',
+  headerTemplate: 'official',
 };
 
 export default function OutputPrintPage({ params }: { params: Promise<{ assessmentId: string }> }) {
@@ -31,6 +36,13 @@ export default function OutputPrintPage({ params }: { params: Promise<{ assessme
   const [sharing, setSharing] = useState(false);
   const [printing, setPrinting] = useState<'student' | 'teacher' | null>(null);
   const [printCopy, setPrintCopy] = useState<'student' | 'teacher'>('student');
+
+  useEffect(() => {
+    const timeout = window.setTimeout(() => {
+      setMetadata((current) => ({ ...current, ...loadPrintTemplate() }));
+    }, 0);
+    return () => window.clearTimeout(timeout);
+  }, []);
 
   useEffect(() => {
     void assessmentService.get(assessmentId).then((result) => {
@@ -183,6 +195,7 @@ export default function OutputPrintPage({ params }: { params: Promise<{ assessme
             onChange={setMetadata}
             onSave={(v) => {
               setMetadata(v);
+              savePrintTemplate(v);
               setShowForm(false);
             }}
             onCancel={() => setShowForm(false)}

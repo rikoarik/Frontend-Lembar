@@ -1,32 +1,14 @@
 import {
-  formatExamContext,
-  formatExamHeading,
   type PrintDTO,
   type PrintQuestion,
   type PrintRubricCriterion,
 } from '@/src/features/output/types';
+import { DocumentLetterhead } from '@/src/features/output/DocumentLetterhead';
 
 export function TeacherKeyRenderer({ dto }: { dto: PrintDTO }) {
   return (
     <article className="teacher-key-print print:bg-white print:text-black">
-      <header className="mb-8 border-b border-brand-line pb-4 text-center print:border-black">
-        <h1 className="text-body-lg font-bold text-brand-ink print:text-black">
-          {formatExamHeading(dto)}
-        </h1>
-        {formatExamContext(dto) ? (
-          <p className="mt-1 text-body-sm text-brand-ink print:text-black">
-            {formatExamContext(dto)}
-          </p>
-        ) : null}
-        {dto.academicYear ? (
-          <p className="mt-1 text-body-sm font-semibold text-brand-ink print:text-black">
-            TAHUN PELAJARAN {dto.academicYear}
-          </p>
-        ) : null}
-        <p className="mt-1 text-label-sm text-brand-ink-muted print:text-black">
-          KUNCI JAWABAN GURU
-        </p>
-      </header>
+      <DocumentLetterhead dto={dto} copy="teacher" />
 
       <ol className="flex flex-col gap-6" aria-label="Teacher answer key questions">
         {dto.questions.map((question) => (

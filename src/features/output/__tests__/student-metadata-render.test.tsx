@@ -34,14 +34,13 @@ describe('StudentWorksheetRenderer metadata header', () => {
     const title = screen.getByRole('heading', { name: /pecahan harian/i });
     expect(metadata.compareDocumentPosition(title) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(metadata).toHaveTextContent('SDN 1 Lembar');
-    expect(metadata).toHaveTextContent('Guru: Bu Sari');
-    expect(metadata).toHaveTextContent('Tanggal: 2026-07-30');
-    expect(metadata).toHaveTextContent('Durasi: 90 menit');
-    expect(metadata).toHaveTextContent('Instruksi: Kerjakan dengan teliti.');
+    expect(metadata).toHaveTextContent('Mata Pelajaran:Matematika');
+    expect(metadata).toHaveTextContent('Hari / Tanggal:2026-07-30');
+    expect(metadata).toHaveTextContent('Waktu:90 menit');
+    expect(metadata).toHaveTextContent('Petunjuk: Kerjakan dengan teliti.');
     expect(metadata).toHaveTextContent('Nama:');
-    expect(metadata).toHaveTextContent('Kelas:');
-    expect(metadata).toHaveTextContent('Nilai Maksimal: 100');
-    expect(container.querySelector('.student-print-metadata')).toHaveClass('print:border-black');
+    expect(metadata).toHaveTextContent('No. Peserta:');
+    expect(container.querySelector('.student-print-metadata')).toHaveClass('print:text-black');
   });
 
   it('does not render a metadata block when metadata is absent', () => {

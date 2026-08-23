@@ -115,11 +115,17 @@ export function OutputCenterView({ assessmentId }: { assessmentId: string }) {
         {/* Actions */}
         <Panel title="Aksi" description="Unduh atau cetak lembar ini.">
           <div className="flex flex-wrap gap-3">
-            <a
-              href={`/v1/assessments/${assessmentId}/download?copy=student`}
+            <Link
+              href={`/app/output/${assessmentId}/print`}
               className="inline-flex min-h-[var(--control-md)] items-center rounded-md bg-brand-accent px-4 text-body-sm font-medium text-white"
             >
-              Unduh lembar siswa (PDF)
+              Atur kop & cetak PDF
+            </Link>
+            <a
+              href={`/v1/assessments/${assessmentId}/download?copy=student`}
+              className="inline-flex min-h-[var(--control-md)] items-center rounded-md border border-brand-line px-4 text-body-sm"
+            >
+              Unduh PDF standar
             </a>
             <a
               href={`/v1/assessments/${assessmentId}/download?copy=teacher`}
