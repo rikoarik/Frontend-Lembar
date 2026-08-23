@@ -1,6 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
-  CANONICAL_FALLBACK,
   fetchPublicPlans,
   formatPrice,
   formatTokenLimit,
@@ -23,8 +22,8 @@ describe('canonical plan catalog helper', () => {
     expect(formatTokenLimit(plans[1]!.tokenMonthlyLimit)).toBe('Tidak terbatas');
   });
 
-  it('uses only canonical defaults when the API is unavailable', async () => {
+  it('returns no plans when the API is unavailable', async () => {
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('offline')));
-    expect(await fetchPublicPlans({ baseUrl: 'https://api.example.test' })).toEqual(CANONICAL_FALLBACK);
+    expect(await fetchPublicPlans({ baseUrl: 'https://api.example.test' })).toEqual([]);
   });
 });

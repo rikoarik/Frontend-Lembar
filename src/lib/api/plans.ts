@@ -57,30 +57,6 @@ export type AdminPlan = PublicPlan & {
   updatedBy?: string;
 };
 
-// ── Canonical fallback (matches BE defaults when catalog unavailable) ───────
-
-export const CANONICAL_FREE: PublicPlan = {
-  key: 'free',
-  displayName: 'Free',
-  priceAmount: 0,
-  currency: 'IDR',
-  billingPeriod: null,
-  tokenMonthlyLimit: 60_000,
-  features: [],
-};
-
-export const CANONICAL_PRO: PublicPlan = {
-  key: 'pro',
-  displayName: 'Pro',
-  priceAmount: 49_000,
-  currency: 'IDR',
-  billingPeriod: 'monthly',
-  tokenMonthlyLimit: null,
-  features: [],
-};
-
-export const CANONICAL_FALLBACK: PublicPlan[] = [CANONICAL_FREE, CANONICAL_PRO];
-
 // ── Format helpers ──────────────────────────────────────────────────────────
 
 /** Rp49.000 / bulan */
@@ -119,12 +95,12 @@ export async function fetchPublicPlans(
     'http://localhost:3000';
   try {
     const res = await fetch(`${base}/v1/public/plans`);
-    if (!res.ok) return CANONICAL_FALLBACK;
+    if (!res.ok) return [];
     const json = (await res.json()) as { data?: unknown };
     const arr = Array.isArray(json.data) ? (json.data as PublicPlan[]) : null;
-    if (!arr || arr.length === 0) return CANONICAL_FALLBACK;
+    if (!arr || arr.length === 0) return [];
     return arr;
   } catch {
-    return CANONICAL_FALLBACK;
+    return [];
   }
 }
