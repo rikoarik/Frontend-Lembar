@@ -64,7 +64,7 @@ beforeEach(() => {
     cacheScope: 'ws_demo',
     getCacheKey: (k: string) => k,
     registerCache: () => () => {},
-    switchWorkspace: () => true,
+    switchWorkspace: async () => true,
   });
   // Default: populated success
   mockGET.mockResolvedValue({ data: POPULATED, error: undefined });

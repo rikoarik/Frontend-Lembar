@@ -1,11 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { SHELL_PLACEHOLDER_ROUTES } from '@/app/(app)/app/[...slug]/routes';
-
-const PLACEHOLDER_SHELL_ROUTES = [
-  '/app/plan',
-  '/app/pengaturan/langganan',
-  '/app/pengaturan/workspace',
-];
+import { SHELL_REDIRECT_ROUTES } from '@/app/(app)/app/[...slug]/routes';
 
 const DEDICATED = [
   '/app/riwayat',
@@ -14,20 +8,23 @@ const DEDICATED = [
   '/app/analitik',
   '/app/bantuan',
   '/app/kelas',
+  '/app/pengaturan/langganan',
+  '/app/pengaturan/profil',
+  '/app/pengaturan/workspace',
 ];
 
 describe('app shell navigation route coverage', () => {
-  it('placeholder routes remain mapped', () => {
-    for (const route of PLACEHOLDER_SHELL_ROUTES) {
-      const slug = route.replace(/^\/app\//, '');
-      expect(Object.prototype.hasOwnProperty.call(SHELL_PLACEHOLDER_ROUTES, slug)).toBe(true);
-    }
+  it('redirects legacy profile and plan routes to dedicated pages', () => {
+    expect(SHELL_REDIRECT_ROUTES).toEqual({
+      profil: '/app/pengaturan/profil',
+      plan: '/app/pengaturan/langganan',
+    });
   });
 
-  it('dedicated routes are not placeholders', () => {
+  it('does not shadow dedicated routes with catch-all redirects', () => {
     for (const route of DEDICATED) {
       const slug = route.replace(/^\/app\//, '');
-      expect(Object.prototype.hasOwnProperty.call(SHELL_PLACEHOLDER_ROUTES, slug)).toBe(false);
+      expect(Object.prototype.hasOwnProperty.call(SHELL_REDIRECT_ROUTES, slug)).toBe(false);
     }
   });
 });

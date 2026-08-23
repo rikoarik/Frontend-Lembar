@@ -2,10 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { QuickReviewView } from '@/src/features/review/QuickReviewView';
 import type { AssessmentDetail, ReviewQuestion } from '@/src/features/review/types';
-import {
-  mapReviewStateFromBackend,
-  mapReviewStateToBackend,
-} from '@/src/features/review/types';
+import { mapReviewStateFromBackend, mapReviewStateToBackend } from '@/src/features/review/types';
 import { loadLiveAssessment } from '@/src/lib/api/liveAssessment';
 import { assessmentService } from '@/src/services/assessments/assessmentService';
 

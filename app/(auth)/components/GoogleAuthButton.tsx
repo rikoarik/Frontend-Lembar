@@ -46,14 +46,6 @@ export default function GoogleAuthButton({ intent }: GoogleAuthButtonProps) {
         setBusy(false);
         return;
       }
-      // Persist state for optional CSRF check later.
-      if (payload.state) {
-        try {
-          sessionStorage.setItem('lembar_google_oauth_state', payload.state);
-        } catch {
-          // ignore storage failures
-        }
-      }
       window.location.href = payload.url as string;
     } catch {
       setMessage('Tidak dapat terhubung ke server autentikasi.');

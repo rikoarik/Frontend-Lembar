@@ -15,9 +15,9 @@ vi.mock('@/src/lib/api/session', async (importOriginal) => {
 
 function jwt(workspaceId = 'workspace-1') {
   const header = Buffer.from(JSON.stringify({ alg: 'none', typ: 'JWT' })).toString('base64url');
-  const payload = Buffer.from(
-    JSON.stringify({ userId: 'user-1', workspaceId }),
-  ).toString('base64url');
+  const payload = Buffer.from(JSON.stringify({ userId: 'user-1', workspaceId })).toString(
+    'base64url',
+  );
   return `${header}.${payload}.signature`;
 }
 
@@ -53,7 +53,11 @@ describe('POST /v1/generate/submit blueprint distribution', () => {
         curriculumVersionId: 'cv-1',
         gradeId: 'grade-1',
         subjectId: 'subject-1',
-        assessmentType: 'practice',
+        assessmentType: 'promotion',
+        academicYear: '2026/2027',
+        gradeLabel: 'Kelas 4',
+        subjectLabel: 'Matematika',
+        durationMinutes: 90,
         difficulty: 'hard',
         questionCount: 7,
         questionTypeCounts: {
@@ -70,7 +74,9 @@ describe('POST /v1/generate/submit blueprint distribution', () => {
     const response = await POST(request as never);
 
     expect(response.status).toBe(202);
-    const assessmentBody = JSON.parse(String((backendFetch.mock.calls[0]?.[1] as RequestInit).body));
+    const assessmentBody = JSON.parse(
+      String((backendFetch.mock.calls[0]?.[1] as RequestInit).body),
+    );
     const jobBody = JSON.parse(String((backendFetch.mock.calls[1]?.[1] as RequestInit).body));
     const expected = [
       'multiple_choice',
@@ -82,14 +88,25 @@ describe('POST /v1/generate/submit blueprint distribution', () => {
       'true_false',
     ];
 
+    expect(assessmentBody).toMatchObject({
+      assessmentType: 'promotion',
+      academicYear: '2026/2027',
+      gradeLabel: 'Kelas 4',
+      subjectLabel: 'Matematika',
+      durationMinutes: 90,
+    });
     expect(assessmentBody.blueprintItems).toHaveLength(7);
-    expect(assessmentBody.blueprintItems.map((item: { questionType: string }) => item.questionType)).toEqual(
-      expected,
-    );
-    expect(assessmentBody.blueprintItems.map((item: { sequence: number }) => item.sequence)).toEqual([
-      0, 1, 2, 3, 4, 5, 6,
-    ]);
-    expect(assessmentBody.blueprintItems.every((item: { difficulty: string }) => item.difficulty === 'hard')).toBe(true);
+    expect(
+      assessmentBody.blueprintItems.map((item: { questionType: string }) => item.questionType),
+    ).toEqual(expected);
+    expect(
+      assessmentBody.blueprintItems.map((item: { sequence: number }) => item.sequence),
+    ).toEqual([0, 1, 2, 3, 4, 5, 6]);
+    expect(
+      assessmentBody.blueprintItems.every(
+        (item: { difficulty: string }) => item.difficulty === 'hard',
+      ),
+    ).toBe(true);
     expect(
       assessmentBody.blueprintItems.every(
         (item: { sourceUploadId: string | null }) => item.sourceUploadId === 'upload-1',
@@ -136,7 +153,9 @@ describe('POST /v1/generate/submit blueprint distribution', () => {
 
     await POST(request as never);
 
-    const assessmentBody = JSON.parse(String((backendFetch.mock.calls[0]?.[1] as RequestInit).body));
+    const assessmentBody = JSON.parse(
+      String((backendFetch.mock.calls[0]?.[1] as RequestInit).body),
+    );
     expect(assessmentBody.blueprintItems).toEqual([
       expect.objectContaining({
         sequence: 0,

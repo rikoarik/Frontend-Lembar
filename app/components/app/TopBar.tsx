@@ -4,25 +4,36 @@ import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { RoleSwitcher } from '@/src/features/admin/RoleSwitcher';
+import { LocaleSwitcher } from '@/src/i18n/LocaleSwitcher';
 
 type PlanUsage = {
-  plan: 'free' | 'pro';
-  generationsUsedThisMonth: number;
-  monthlyLimit: number | null;
+  plan: 'free' | 'pro' | 'plus';
+  tokenUsedThisMonth: number;
+  tokenMonthlyLimit: number | null;
 };
 
 export function entitlementCta(plan: Pick<PlanUsage, 'plan'>) {
+  if (plan.plan === 'plus') return { label: 'Plus', icon: 'verified' };
   if (plan.plan === 'pro') return { label: 'Pro', icon: 'verified' };
   return { label: 'Upgrade Pro', icon: 'workspace_premium' };
 }
 
-export function formatQuota(
-  plan: Pick<PlanUsage, 'generationsUsedThisMonth' | 'monthlyLimit'>,
-): { label: string; percent: number } {
-  const { generationsUsedThisMonth: used, monthlyLimit: limit } = plan;
+export function formatQuota(plan: Pick<PlanUsage, 'tokenUsedThisMonth' | 'tokenMonthlyLimit'>): {
+  label: string;
+  percent: number;
+} {
+  const { tokenUsedThisMonth: used, tokenMonthlyLimit: limit } = plan;
+  const format = (value: number) => new Intl.NumberFormat('id-ID').format(value);
   return {
-    label: `${used}/${limit ?? '∞'}`,
-    percent: limit ? Math.min(100, Math.round((used / limit) * 100)) : 0,
+    label: `${format(used)}/${limit === null ? '∞' : format(limit)}`,
+    percent:
+      limit === null
+        ? 0
+        : limit <= 0
+          ? used > 0
+            ? 100
+            : 0
+          : Math.min(100, Math.round((used / limit) * 100)),
   };
 }
 
@@ -30,9 +41,9 @@ function isPlanUsage(value: unknown): value is PlanUsage {
   if (!value || typeof value !== 'object') return false;
   const plan = value as Record<string, unknown>;
   return (
-    (plan['plan'] === 'free' || plan['plan'] === 'pro') &&
-    typeof plan['generationsUsedThisMonth'] === 'number' &&
-    (typeof plan['monthlyLimit'] === 'number' || plan['monthlyLimit'] === null)
+    (plan['plan'] === 'free' || plan['plan'] === 'pro' || plan['plan'] === 'plus') &&
+    typeof plan['tokenUsedThisMonth'] === 'number' &&
+    (typeof plan['tokenMonthlyLimit'] === 'number' || plan['tokenMonthlyLimit'] === null)
   );
 }
 
@@ -54,6 +65,7 @@ function titleFromPath(pathname: string): string {
   if (pathname.startsWith('/app/bantuan')) return 'Bantuan';
   if (pathname.startsWith('/app/review')) return 'Tinjau';
   if (pathname.startsWith('/app/output')) return 'Output';
+  if (pathname.startsWith('/app/pengaturan/langganan/trial')) return 'Konfirmasi trial';
   if (pathname.startsWith('/app/pengaturan')) return 'Pengaturan';
   if (pathname.startsWith('/app/kelas')) return 'Kelas';
   if (pathname.startsWith('/app/analitik')) return 'Analitik';
@@ -144,23 +156,28 @@ export function TopBar({
       </div>
 
       <div className="flex items-center gap-2">
+        <LocaleSwitcher className="hidden lg:inline-flex items-center gap-2 text-sm" />
         <RoleSwitcher />
         {quota ? (
           <Link
             href="/app/pengaturan/langganan"
             className="hidden h-9 items-center gap-2 rounded-lg border border-[#e6dfd4] bg-white px-3 text-[12px] font-medium text-[#171717] hover:bg-[#f3eee6] sm:inline-flex"
-            aria-label={`Kuota: ${quota.label} lembar terpakai`}
+            aria-label={`Kuota token: ${quota.label} terpakai`}
           >
-            <span aria-hidden="true" className="material-symbols-outlined text-[16px] text-[#8a8379]">
+            <span
+              aria-hidden="true"
+              className="material-symbols-outlined text-[16px] text-[#8a8379]"
+            >
               data_usage
             </span>
             <span className="text-[#8a8379]">{quota.label}</span>
             <span
               className="h-1.5 w-16 rounded-full bg-[#e6dfd4] overflow-hidden"
               role="progressbar"
-              aria-valuenow={plan?.generationsUsedThisMonth}
+              aria-valuenow={plan?.tokenUsedThisMonth}
               aria-valuemin={0}
-              aria-valuemax={plan?.monthlyLimit ?? undefined}
+              aria-valuemax={plan?.tokenMonthlyLimit ?? undefined}
+              aria-label="Penggunaan token bulan ini"
             >
               <span
                 className="block h-full rounded-full bg-[#a3202b]"
@@ -174,7 +191,10 @@ export function TopBar({
             href="/app/pengaturan/langganan"
             className="hidden h-9 max-w-[180px] items-center gap-1.5 rounded-lg border border-[#e6dfd4] bg-white px-2.5 text-[12px] font-medium text-[#171717] hover:bg-[#f3eee6] md:inline-flex md:max-w-[220px]"
           >
-            <span aria-hidden="true" className="material-symbols-outlined text-[16px] text-[#8a8379]">
+            <span
+              aria-hidden="true"
+              className="material-symbols-outlined text-[16px] text-[#8a8379]"
+            >
               {entitlement.icon}
             </span>
             <span className="truncate">{entitlement.label}</span>

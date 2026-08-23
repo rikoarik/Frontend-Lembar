@@ -1,1 +1,5 @@
-import AssessmentResults from '@/src/features/output/AssessmentResults';export default async function Page({params}:{params:Promise<{assessmentId:string}>}){const {assessmentId}=await params;return <AssessmentResults assessmentId={assessmentId}/>}
+import AssessmentResults from '@/src/features/output/AssessmentResults';
+export default async function Page({ params }: { params: Promise<{ assessmentId: string }> }) {
+  const { assessmentId } = await params;
+  return <AssessmentResults assessmentId={assessmentId} />;
+}

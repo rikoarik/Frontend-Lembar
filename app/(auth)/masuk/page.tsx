@@ -23,17 +23,24 @@ const fieldError = (errors: Record<string, string[]>, key: FieldKey): string | u
 export default function LoginPage() {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
-  const [localErrors, setLocalErrors] = useState<Partial<Record<FieldKey, string>>>( {});
+  const [localErrors, setLocalErrors] = useState<Partial<Record<FieldKey, string>>>({});
 
   const submit = useAuthSubmit<{ identifier: string; password: string }>({
     submit: (input, idempotencyKey) => {
       if (input.identifier.trim().toLowerCase() === 'ops') {
-        return authService.login({ identifier: input.identifier, password: input.password }, idempotencyKey);
+        return authService.login(
+          { identifier: input.identifier, password: input.password },
+          idempotencyKey,
+        );
       }
       return authService.login(input, idempotencyKey);
     },
     onSuccess: (value) => {
-      const payload = value as { homePath?: string; activeRole?: string; workspaceId?: string } | null;
+      const payload = value as {
+        homePath?: string;
+        activeRole?: string;
+        workspaceId?: string;
+      } | null;
       window.location.href = payload?.homePath || '/app';
     },
   });

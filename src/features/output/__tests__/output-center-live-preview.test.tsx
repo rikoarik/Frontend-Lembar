@@ -40,7 +40,10 @@ const dto: PrintDTO = {
 beforeEach(() => {
   vi.restoreAllMocks();
   replace.mockReset();
-  vi.stubGlobal('fetch', vi.fn(async () => Response.json({ data: dto })));
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async () => Response.json({ data: dto })),
+  );
 });
 
 describe('P1-Q3 OutputCenterContent live preview', () => {
@@ -55,7 +58,9 @@ describe('P1-Q3 OutputCenterContent live preview', () => {
     expect(fetch).toHaveBeenCalledTimes(1);
 
     await user.click(screen.getByRole('button', { name: /sembunyikan lembar siswa/i }));
-    expect(within(preview).queryByRole('region', { name: /lembar siswa/i })).not.toBeInTheDocument();
+    expect(
+      within(preview).queryByRole('region', { name: /lembar siswa/i }),
+    ).not.toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: /sembunyikan kunci guru/i }));
     expect(within(preview).queryByRole('region', { name: /kunci guru/i })).not.toBeInTheDocument();
@@ -75,7 +80,9 @@ describe('P1-Q3 OutputCenterContent live preview', () => {
     await user.clear(school);
     await user.type(school, 'SDN 2');
 
-    await waitFor(() => expect(within(preview).getByTestId('student-print-metadata')).toHaveTextContent('SDN 2'));
+    await waitFor(() =>
+      expect(within(preview).getByTestId('student-print-metadata')).toHaveTextContent('SDN 2'),
+    );
     expect(fetch).toHaveBeenCalledTimes(1);
   });
 });

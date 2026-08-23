@@ -69,7 +69,9 @@ describe('QuickReviewView sticky bulk toolbar', () => {
   it('sticky bar is absent when nothing is selected', async () => {
     render(<QuickReviewView assessmentId="assessment-1" />);
     await screen.findByText('Pertanyaan 1');
-    expect(screen.queryByRole('region', { name: 'Tindakan soal terpilih' })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('region', { name: 'Tindakan soal terpilih' }),
+    ).not.toBeInTheDocument();
   });
 
   it('sticky bar appears with count label and action buttons when selection is non-empty', async () => {
@@ -107,7 +109,9 @@ describe('QuickReviewView sticky bulk toolbar', () => {
     await user.click(screen.getByRole('button', { name: 'Batal' }));
 
     await waitFor(() =>
-      expect(screen.queryByRole('region', { name: 'Tindakan soal terpilih' })).not.toBeInTheDocument(),
+      expect(
+        screen.queryByRole('region', { name: 'Tindakan soal terpilih' }),
+      ).not.toBeInTheDocument(),
     );
     expect(screen.getByRole('checkbox', { name: 'Pilih soal 1' })).not.toBeChecked();
   });
@@ -122,7 +126,9 @@ describe('QuickReviewView sticky bulk toolbar', () => {
     await user.keyboard('{Escape}');
 
     await waitFor(() =>
-      expect(screen.queryByRole('region', { name: 'Tindakan soal terpilih' })).not.toBeInTheDocument(),
+      expect(
+        screen.queryByRole('region', { name: 'Tindakan soal terpilih' }),
+      ).not.toBeInTheDocument(),
     );
   });
 
@@ -134,7 +140,9 @@ describe('QuickReviewView sticky bulk toolbar', () => {
 
     // master checkbox still present
     expect(
-      screen.getByRole('checkbox', { name: 'Pilih semua soal yang dapat diterima di tampilan ini' }),
+      screen.getByRole('checkbox', {
+        name: 'Pilih semua soal yang dapat diterima di tampilan ini',
+      }),
     ).toBeInTheDocument();
     // filter toolbar still present
     expect(screen.getByRole('toolbar', { name: 'Filter soal' })).toBeInTheDocument();

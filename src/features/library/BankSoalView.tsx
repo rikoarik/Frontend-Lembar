@@ -25,7 +25,9 @@ export function BankSoalView() {
         if (!response.ok) throw new Error(payload?.error?.message ?? 'Bank soal gagal dimuat');
         setItems(payload?.data?.questions ?? []);
       })
-      .catch((reason: unknown) => setError(reason instanceof Error ? reason.message : 'Bank soal gagal dimuat'))
+      .catch((reason: unknown) =>
+        setError(reason instanceof Error ? reason.message : 'Bank soal gagal dimuat'),
+      )
       .finally(() => setLoading(false));
   }, []);
 
@@ -39,19 +41,32 @@ export function BankSoalView() {
       </div>
 
       <Panel title="Koleksi" description={loading ? 'Memuat…' : `${items.length} soal tersimpan`}>
-        {error ? <p className="text-body-sm text-brand-danger" role="alert">{error}</p> : null}
+        {error ? (
+          <p className="text-body-sm text-brand-danger" role="alert">
+            {error}
+          </p>
+        ) : null}
         {!loading && !error && items.length === 0 ? (
           <div className="space-y-3">
             <p className="text-body-sm text-brand-ink-muted">Belum ada soal tersimpan.</p>
-            <Link href="/app/generate" className="inline-flex min-h-[var(--control-md)] items-center rounded-md bg-brand-accent px-4 text-white">Generate soal</Link>
+            <Link
+              href="/app/generate"
+              className="inline-flex min-h-[var(--control-md)] items-center rounded-md bg-brand-accent px-4 text-white"
+            >
+              Generate soal
+            </Link>
           </div>
         ) : (
           <ul className="flex flex-col gap-3" role="list">
             {items.map((item) => (
-              <li key={item.id} className="rounded-md border border-brand-line bg-brand-paper px-3 py-3">
+              <li
+                key={item.id}
+                className="rounded-md border border-brand-line bg-brand-paper px-3 py-3"
+              >
                 <p className="text-body-default font-semibold text-brand-ink">{item.stem}</p>
                 <p className="mt-1 text-body-sm text-brand-ink-muted">
-                  {item.questionType.replaceAll('_', ' ')} · {item.difficulty} · Jawaban {item.answer}
+                  {item.questionType.replaceAll('_', ' ')} · {item.difficulty} · Jawaban{' '}
+                  {item.answer}
                 </p>
               </li>
             ))}

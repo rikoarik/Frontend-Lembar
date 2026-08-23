@@ -1,11 +1,23 @@
+import axe from 'axe-core';
 import { describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Button, ChoiceCard, Field, LinkButton, Panel, StatusBadge, TextField } from '../index';
 
-function expectNoCriticalOrSeriousA11yProxy(container: HTMLElement) {
-  // ponytail: semantic smoke proxy until axe-core is available in repo deps; upgrade to axe.run().
-  expect(container.innerHTML.trim()).not.toBe('');
+async function expectNoCriticalOrSeriousA11yIssues(container: HTMLElement) {
+  const result = await axe.run(container, {
+    runOnly: {
+      type: 'tag',
+      values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'],
+    },
+    rules: {
+      'color-contrast': { enabled: false },
+    },
+  });
+  const violations = result.violations.filter(
+    (violation) => violation.impact === 'critical' || violation.impact === 'serious',
+  );
+  expect(violations).toEqual([]);
 }
 
 describe('Button primitive', () => {
@@ -51,18 +63,18 @@ describe('Button primitive', () => {
       'true',
     );
     expect(screen.getByRole('button', { name: /Membuat draft…/ })).toBeDisabled();
-    expectNoCriticalOrSeriousA11yProxy(container);
+    await expectNoCriticalOrSeriousA11yIssues(container);
   });
 
-  it('renders LinkButton with proper link semantics', () => {
+  it('renders LinkButton with proper link semantics', async () => {
     const { container } = render(<LinkButton href="/draft">Buka draft</LinkButton>);
     expect(screen.getByRole('link', { name: /Buka draft/i })).toHaveAttribute('href', '/draft');
-    expectNoCriticalOrSeriousA11yProxy(container);
+    await expectNoCriticalOrSeriousA11yIssues(container);
   });
 });
 
 describe('Field primitive', () => {
-  it('associates label, help, required, and error state', () => {
+  it('associates label, help, required, and error state', async () => {
     const { container, rerender } = render(
       <Field label="Judul lembar" help="Maksimal 80 karakter." required>
         {(props) => <input {...props} />}
@@ -80,7 +92,7 @@ describe('Field primitive', () => {
     );
     expect(screen.getByLabelText(/Judul lembar/i)).toHaveAttribute('aria-invalid', 'true');
     expect(screen.getByRole('alert')).toHaveTextContent(/Judul wajib diisi/i);
-    expectNoCriticalOrSeriousA11yProxy(container);
+    await expectNoCriticalOrSeriousA11yIssues(container);
   });
 
   it('TextField supports input and textarea helpers', async () => {
@@ -111,12 +123,12 @@ describe('ChoiceCard primitive', () => {
     await user.keyboard(' ');
     expect(b).toBeChecked();
     expect(a).not.toBeChecked();
-    expectNoCriticalOrSeriousA11yProxy(container);
+    await expectNoCriticalOrSeriousA11yIssues(container);
   });
 });
 
 describe('StatusBadge primitive', () => {
-  it('renders the six allowed labels with status role', () => {
+  it('renders the six allowed labels with status role', async () => {
     const labels = [
       'Draft',
       'Diproses',
@@ -134,12 +146,12 @@ describe('StatusBadge primitive', () => {
     );
     expect(screen.getAllByRole('status')).toHaveLength(6);
     for (const label of labels) expect(screen.getByText(label)).toBeInTheDocument();
-    expectNoCriticalOrSeriousA11yProxy(container);
+    await expectNoCriticalOrSeriousA11yIssues(container);
   });
 });
 
 describe('Panel primitive', () => {
-  it('renders border-first and elevated panel surfaces', () => {
+  it('renders border-first and elevated panel surfaces', async () => {
     const { container, rerender } = render(
       <Panel
         title="Pengaturan"
@@ -158,6 +170,6 @@ describe('Panel primitive', () => {
       </Panel>,
     );
     expect(screen.getByRole('heading', { level: 2, name: /Elevated/i })).toBeInTheDocument();
-    expectNoCriticalOrSeriousA11yProxy(container);
+    await expectNoCriticalOrSeriousA11yIssues(container);
   });
 });

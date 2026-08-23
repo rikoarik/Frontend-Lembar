@@ -1,6 +1,7 @@
 'use client';
 
-import { createContext, useCallback, useContext, useMemo, useRef } from 'react';
+import { Fragment, createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import type { ActiveRole, WorkspaceKind } from '@/src/types/auth';
 
 type Workspace = {
@@ -22,10 +23,10 @@ type WorkspaceContextValue = {
   cacheScope: string;
   getCacheKey: (key: string) => string;
   registerCache: (key: string, clear: () => void) => () => void;
-  switchWorkspace: (workspaceId: string) => boolean;
+  switchWorkspace: (workspaceId: string) => Promise<boolean>;
 };
 
-// Seed data used in tests and as fallback during development
+// Seed data used as fallback during development only (never in production builds)
 const DEMO_WORKSPACES: Workspace[] = [
   {
     id: 'ws_demo',
@@ -43,8 +44,13 @@ const DEMO_WORKSPACES: Workspace[] = [
 
 const WorkspaceContext = createContext<WorkspaceContextValue | null>(null);
 
-function labelFor(workspace: Workspace): string {
-  return `${workspace.name} · ${workspace.kind === 'school' ? 'Sekolah' : 'Pribadi'}`;
+const isLiveApi = () => process.env.NEXT_PUBLIC_API_MODE === 'live';
+
+/** Demo seed data is allowed only outside production and only in mock API mode. */
+const canUseDemoSeed = () => process.env.NODE_ENV !== 'production' && !isLiveApi();
+
+function labelFor(workspace: Workspace, kindLabel: { personal: string; school: string }): string {
+  return `${workspace.name} · ${workspace.kind === 'school' ? kindLabel.school : kindLabel.personal}`;
 }
 
 type WorkspaceProviderProps = {
@@ -63,19 +69,41 @@ export function WorkspaceProvider({
   initialActiveId,
   initialDisplayName,
 }: WorkspaceProviderProps) {
-  const workspaceList = initialWorkspaces ?? DEMO_WORKSPACES;
+  const live = isLiveApi();
+  const allowDemoSeed = canUseDemoSeed();
+  const tWorkspace = useTranslations('workspace');
+  const kindLabel = {
+    personal: tWorkspace('personalLabel'),
+    school: tWorkspace('schoolLabel'),
+  };
+  const fallbackWorkspaces = useMemo(
+    () => (allowDemoSeed ? DEMO_WORKSPACES : []),
+    [allowDemoSeed],
+  );
+  const workspaceList = initialWorkspaces ?? fallbackWorkspaces;
   const firstWorkspace = workspaceList[0];
   const resolvedActiveId = initialActiveId ?? firstWorkspace?.id ?? '';
-
-  const activeWorkspaceId = resolvedActiveId;
-  const ws = workspaceList.find((w) => w.id === resolvedActiveId) ?? firstWorkspace;
-  const announcement = ws ? `Workspace aktif: ${labelFor(ws)}` : '';
+  const [activeWorkspaceId, setActiveWorkspaceId] = useState(resolvedActiveId);
+  const ws = workspaceList.find((w) => w.id === activeWorkspaceId) ?? firstWorkspace;
+  const announcement = ws
+    ? tWorkspace('activeAnnouncement', {
+        name: ws.name,
+        kind: ws.kind === 'school' ? kindLabel.school : kindLabel.personal,
+      })
+    : '';
   const cacheRef = useRef(new Map<string, CacheEntry>());
 
-  const activeWorkspace =
-    workspaceList.find((workspace) => workspace.id === activeWorkspaceId) ??
-    firstWorkspace ??
-    DEMO_WORKSPACES[0];
+  const activeWorkspace = useMemo(
+    () =>
+      workspaceList.find((workspace) => workspace.id === activeWorkspaceId) ??
+      firstWorkspace ?? {
+        id: '',
+        name: tWorkspace('fallbackWorkspace'),
+        kind: 'personal' as WorkspaceKind,
+        activeRole: 'teacher' as ActiveRole,
+      },
+    [workspaceList, activeWorkspaceId, firstWorkspace, tWorkspace],
+  );
 
   const getCacheKey = useCallback(
     (key: string) => `${activeWorkspaceId}:${key}`,
@@ -91,14 +119,42 @@ export function WorkspaceProvider({
     [activeWorkspaceId],
   );
 
-  // Backend belum menyediakan kontrak switch yang terverifikasi; jangan palsukan konteks aktif.
-  const switchWorkspace = useCallback((_workspaceId: string) => false, []);
+  const switchWorkspace = useCallback(
+    async (workspaceId: string) => {
+      if (workspaceId === activeWorkspaceId) return true;
+      if (!workspaceList.some((workspace) => workspace.id === workspaceId)) return false;
+
+      try {
+        const response = await fetch('/v1/auth/workspace/switch', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ workspaceId }),
+        });
+        if (!response.ok) return false;
+
+        for (const entry of cacheRef.current.values()) {
+          try {
+            entry.clear();
+          } catch {
+            // A cache cleanup must not leave the workspace switch half-applied.
+          }
+        }
+        cacheRef.current.clear();
+        setActiveWorkspaceId(workspaceId);
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    [activeWorkspaceId, workspaceList],
+  );
 
   const value = useMemo<WorkspaceContextValue>(
     () => ({
       activeWorkspace,
       workspaces: workspaceList,
-      displayName: initialDisplayName ?? 'Demo Guru',
+      displayName: initialDisplayName ?? (allowDemoSeed ? 'Demo Guru' : tWorkspace('fallbackUser')),
       announcement,
       cacheScope: activeWorkspace.id,
       getCacheKey,
@@ -110,13 +166,20 @@ export function WorkspaceProvider({
       workspaceList,
       initialDisplayName,
       announcement,
+      live,
+      allowDemoSeed,
+      tWorkspace,
       getCacheKey,
       registerCache,
       switchWorkspace,
     ],
   );
 
-  return <WorkspaceContext.Provider value={value}>{children}</WorkspaceContext.Provider>;
+  return (
+    <WorkspaceContext.Provider value={value}>
+      <Fragment key={activeWorkspace.id}>{children}</Fragment>
+    </WorkspaceContext.Provider>
+  );
 }
 
 export function useWorkspace() {

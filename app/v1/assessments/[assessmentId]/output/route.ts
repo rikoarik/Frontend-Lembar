@@ -17,12 +17,19 @@ export async function GET(
     );
   }
   const detail = await loadLiveAssessment(auth.token, auth.claims.workspaceId, assessmentId);
-  const versionId = (detail.payload as { data?: { versionId?: string; lifecycle?: string } } | null)?.data?.versionId;
+  const versionId = (detail.payload as { data?: { versionId?: string; lifecycle?: string } } | null)
+    ?.data?.versionId;
   const lifecycle = (detail.payload as { data?: { lifecycle?: string } } | null)?.data?.lifecycle;
-  if (detail.status !== 200 || !versionId) return NextResponse.json(detail.payload, { status: detail.status });
+  if (detail.status !== 200 || !versionId)
+    return NextResponse.json(detail.payload, { status: detail.status });
   if (lifecycle !== 'final') {
     return NextResponse.json(
-      { error: { code: 'VALIDATION_FAILED', message: 'Lembar harus difinalkan sebelum output dibuat.' } },
+      {
+        error: {
+          code: 'VALIDATION_FAILED',
+          message: 'Lembar harus difinalkan sebelum output dibuat.',
+        },
+      },
       { status: 422 },
     );
   }
@@ -58,7 +65,12 @@ export async function GET(
     data: {
       assessmentId,
       versionId,
-      status: artifact?.status === 'failed' ? 'failed' : artifact?.status === 'ready' ? 'ready' : 'rendering',
+      status:
+        artifact?.status === 'failed'
+          ? 'failed'
+          : artifact?.status === 'ready'
+            ? 'ready'
+            : 'rendering',
       studentSheetLabel: 'Lembar siswa',
       answerKeyLabel: 'Kunci jawaban',
       explanationLabel: 'Pembahasan',

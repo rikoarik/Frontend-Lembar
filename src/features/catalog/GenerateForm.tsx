@@ -159,6 +159,13 @@ export default function GenerateForm() {
   // Cascade announcement
   const [announcement, setAnnouncement] = useState('');
 
+  useEffect(() => {
+    if (!announcement) return;
+
+    const timeoutId = setTimeout(() => setAnnouncement(''), 2000);
+    return () => clearTimeout(timeoutId);
+  }, [announcement]);
+
   // ── Load grades on mount ──────────────────────
   useEffect(() => {
     let cancelled = false;
@@ -190,6 +197,11 @@ export default function GenerateForm() {
         if (result.ok) {
           setSubjects(result.value);
         }
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setLoading((prev) => ({ ...prev, subjectId: false }));
+        setInitialLoadError('Gagal memuat mata pelajaran.');
       });
     return () => {
       cancelled = true;
@@ -242,7 +254,6 @@ export default function GenerateForm() {
 
       if (ann) {
         setAnnouncement(ann);
-        setTimeout(() => setAnnouncement(''), 2000);
       }
 
       return next;
@@ -351,10 +362,7 @@ export default function GenerateForm() {
     missingSteps.length === 0
       ? 'Semua bagian utama sudah lengkap.'
       : `Belum lengkap: ${missingSteps.join(', ')}.`;
-  const readinessTitle = hasKatalog
-    ? 'Langkah konfigurasi'
-    : 'Kesiapan konfigurasi';
-
+  const readinessTitle = hasKatalog ? 'Langkah konfigurasi' : 'Kesiapan konfigurasi';
 
   // ── Form field classes ────────────────────────
   const fieldClass =
@@ -397,7 +405,11 @@ export default function GenerateForm() {
           </button>
           {summaryOpen && (
             <div className="mt-2 rounded-xl border border-brand-line bg-brand-paper px-4 py-3">
-              <SummaryContent items={summaryItems} readinessLabel={readinessLabel} readinessText={readinessText} />
+              <SummaryContent
+                items={summaryItems}
+                readinessLabel={readinessLabel}
+                readinessText={readinessText}
+              />
             </div>
           )}
         </div>

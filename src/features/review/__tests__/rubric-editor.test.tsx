@@ -66,7 +66,10 @@ function buildAssessment(
 
 async function renderReview(assessment: AssessmentDetail, mode: 'quick' | 'detail' = 'detail') {
   vi.mocked(assessmentService.get).mockResolvedValue({ ok: true, value: assessment });
-  vi.mocked(assessmentService.updateQuestionContent).mockResolvedValue({ ok: true, value: assessment });
+  vi.mocked(assessmentService.updateQuestionContent).mockResolvedValue({
+    ok: true,
+    value: assessment,
+  });
   const user = userEvent.setup();
   render(<QuickReviewView assessmentId="assessment-rubric" mode={mode} />);
   await screen.findByText('Jelaskan dampak fotosintesis.');
@@ -95,12 +98,23 @@ describe('P1-L rubric editor/renderer', () => {
     await user.click(within(rubric).getByRole('button', { name: /tambah kriteria/i }));
     const rowsAfterAdd = within(rubric).getAllByRole('listitem');
     const newRow = rowsAfterAdd[2];
-    await user.type(within(newRow).getByRole('textbox', { name: /deskripsi kriteria 3/i }), 'Struktur jawaban');
+    await user.type(
+      within(newRow).getByRole('textbox', { name: /deskripsi kriteria 3/i }),
+      'Struktur jawaban',
+    );
     await user.clear(within(newRow).getByRole('spinbutton', { name: /skor maksimum kriteria 3/i }));
-    await user.type(within(newRow).getByRole('spinbutton', { name: /skor maksimum kriteria 3/i }), '4');
+    await user.type(
+      within(newRow).getByRole('spinbutton', { name: /skor maksimum kriteria 3/i }),
+      '4',
+    );
 
-    await user.clear(within(rowsAfterAdd[0]).getByRole('textbox', { name: /deskripsi kriteria 1/i }));
-    await user.type(within(rowsAfterAdd[0]).getByRole('textbox', { name: /deskripsi kriteria 1/i }), 'Akurasi konsep');
+    await user.clear(
+      within(rowsAfterAdd[0]).getByRole('textbox', { name: /deskripsi kriteria 1/i }),
+    );
+    await user.type(
+      within(rowsAfterAdd[0]).getByRole('textbox', { name: /deskripsi kriteria 1/i }),
+      'Akurasi konsep',
+    );
     await user.click(within(rowsAfterAdd[1]).getByRole('button', { name: /hapus kriteria/i }));
 
     await user.click(screen.getByRole('button', { name: /simpan edit/i }));

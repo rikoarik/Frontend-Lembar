@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import AuthShell from '../../(auth)/AuthShell';
 import AuthFormShell from '../../(auth)/components/AuthFormShell';
@@ -12,30 +12,38 @@ type Status =
   | { kind: 'error'; message: string }
   | { kind: 'success'; homePath: string };
 
+type CallbackResult = Exclude<Status, { kind: 'loading' }>;
+
+function subscribeToLocationSearch() {
+  return () => undefined;
+}
+
+function getLocationSearch() {
+  return window.location.search;
+}
+
+function getServerLocationSearch() {
+  return null;
+}
+
 export default function GoogleAuthCallbackPage() {
-  const [status, setStatus] = useState<Status>({ kind: 'loading' });
+  const locationSearch = useSyncExternalStore(
+    subscribeToLocationSearch,
+    getLocationSearch,
+    getServerLocationSearch,
+  );
+  const params = locationSearch === null ? null : new URLSearchParams(locationSearch);
+  const code = params?.get('code') ?? null;
+  const oauthState = params?.get('state') ?? null;
+  const oauthError = params?.get('error') ?? null;
+  const requestKey = code ? JSON.stringify([code, oauthState]) : null;
+  const [result, setResult] = useState<{
+    requestKey: string;
+    status: CallbackResult;
+  } | null>(null);
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get('code');
-    const state = params.get('state');
-    const oauthError = params.get('error');
-
-    if (oauthError) {
-      setStatus({
-        kind: 'error',
-        message: 'Google membatalkan autentikasi. Coba lagi.',
-      });
-      return;
-    }
-
-    if (!code) {
-      setStatus({
-        kind: 'error',
-        message: 'Kode autentikasi Google tidak ditemukan.',
-      });
-      return;
-    }
+    if (!code || oauthError || !requestKey) return;
 
     let cancelled = false;
     const run = async () => {
@@ -44,27 +52,33 @@ export default function GoogleAuthCallbackPage() {
           method: 'POST',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ code, state }),
+          body: JSON.stringify({ code, state: oauthState }),
         });
         const payload = await response.json().catch(() => null);
         if (cancelled) return;
 
         if (!response.ok) {
-          setStatus({
-            kind: 'error',
-            message: payload?.error?.message || 'Autentikasi Google gagal.',
+          setResult({
+            requestKey,
+            status: {
+              kind: 'error',
+              message: payload?.error?.message || 'Autentikasi Google gagal.',
+            },
           });
           return;
         }
 
         const homePath = payload?.data?.homePath || '/app';
-        setStatus({ kind: 'success', homePath });
+        setResult({ requestKey, status: { kind: 'success', homePath } });
         window.location.href = homePath;
       } catch {
         if (!cancelled) {
-          setStatus({
-            kind: 'error',
-            message: 'Tidak dapat terhubung ke server autentikasi.',
+          setResult({
+            requestKey,
+            status: {
+              kind: 'error',
+              message: 'Tidak dapat terhubung ke server autentikasi.',
+            },
           });
         }
       }
@@ -74,7 +88,24 @@ export default function GoogleAuthCallbackPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [code, oauthError, oauthState, requestKey]);
+
+  let status: Status = { kind: 'loading' };
+  if (locationSearch !== null) {
+    if (oauthError) {
+      status = {
+        kind: 'error',
+        message: 'Google membatalkan autentikasi. Coba lagi.',
+      };
+    } else if (!code) {
+      status = {
+        kind: 'error',
+        message: 'Kode autentikasi Google tidak ditemukan.',
+      };
+    } else if (result?.requestKey === requestKey) {
+      status = result.status;
+    }
+  }
 
   return (
     <AuthShell

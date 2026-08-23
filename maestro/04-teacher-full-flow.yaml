@@ -2,50 +2,50 @@ url: https://app.lembar.web.id/masuk
 ---
 - launchApp:
     clearState: true
-- assertVisible: "Masuk ke lembar"
-- tapOn: "Username, email, atau nomor telepon"
+- assertVisible: 'Masuk ke lembar'
+- tapOn: 'Username, email, atau nomor telepon'
 - inputText: ${QA_EMAIL}
-- tapOn: "Kata sandi"
+- tapOn: 'Kata sandi'
 - inputText: ${QA_PASSWORD}
 - tapOn:
-    text: "Masuk"
+    text: 'Masuk'
     index: 0
-- assertVisible: "Buat lembar"
-- takeScreenshot: "04-01-teacher-login"
+- assertVisible: 'Buat lembar'
+- takeScreenshot: '04-01-teacher-login'
 
 # Dashboard
 - openLink: https://app.lembar.web.id/app
-- assertVisible: "Buat lembar"
-- takeScreenshot: "04-02-teacher-dashboard"
+- assertVisible: 'Buat lembar'
+- takeScreenshot: '04-02-teacher-dashboard'
 
 # Generate form
 - openLink: https://app.lembar.web.id/app/generate
-- assertVisible: "Buat lembar"
-- assertVisible: "Materi Ujian"
-- takeScreenshot: "04-03-teacher-generate"
+- assertVisible: 'Buat lembar'
+- assertVisible: 'Materi Ujian'
+- takeScreenshot: '04-03-teacher-generate'
 
 # Riwayat (empty state)
 - openLink: https://app.lembar.web.id/app/riwayat
-- assertVisible: "Riwayat lembar"
-- takeScreenshot: "04-04-teacher-riwayat"
+- assertVisible: 'Riwayat lembar'
+- takeScreenshot: '04-04-teacher-riwayat'
 
 # Bank soal
 - openLink: https://app.lembar.web.id/app/bank-soal
-- takeScreenshot: "04-05-teacher-bank-soal"
+- takeScreenshot: '04-05-teacher-bank-soal'
 
 # Template
 - openLink: https://app.lembar.web.id/app/template
-- takeScreenshot: "04-06-teacher-template"
+- takeScreenshot: '04-06-teacher-template'
 
 # Langganan
 - openLink: https://app.lembar.web.id/app/pengaturan/langganan
-- takeScreenshot: "04-07-teacher-langganan"
+- takeScreenshot: '04-07-teacher-langganan'
 
 # Profil
 - openLink: https://app.lembar.web.id/app/pengaturan/profil
-- takeScreenshot: "04-08-teacher-profil"
+- takeScreenshot: '04-08-teacher-profil'
 
 # Role guard: ops harus redirect
 - openLink: https://app.lembar.web.id/ops/jobs
-- assertNotVisible: "Jobs"
-- takeScreenshot: "04-09-teacher-ops-guard"
+- assertNotVisible: 'Jobs'
+- takeScreenshot: '04-09-teacher-ops-guard'

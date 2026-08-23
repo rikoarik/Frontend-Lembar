@@ -9,7 +9,9 @@ export async function liveClaims(): Promise<{ token: string; claims: LiveClaims 
   const token = jar.get(JWT_COOKIE)?.value || jar.get(SESSION_COOKIE)?.value;
   if (!token) return null;
   try {
-    const payload = JSON.parse(Buffer.from(token.split('.')[1] ?? '', 'base64url').toString('utf8')) as {
+    const payload = JSON.parse(
+      Buffer.from(token.split('.')[1] ?? '', 'base64url').toString('utf8'),
+    ) as {
       userId?: unknown;
       workspaceId?: unknown;
     };
@@ -35,10 +37,13 @@ export async function loadLiveAssessment(token: string, workspaceId: string, ass
   const assessment = assessmentPayload.assessment;
   const version = assessmentPayload.version;
   const versionId = String(version.id);
-  const questionsResponse = await backendFetch(`${base}/versions/${encodeURIComponent(versionId)}/questions`, {
-    method: 'GET',
-    token,
-  });
+  const questionsResponse = await backendFetch(
+    `${base}/versions/${encodeURIComponent(versionId)}/questions`,
+    {
+      method: 'GET',
+      token,
+    },
+  );
   const questionsPayload = (await questionsResponse.json().catch(() => null)) as {
     data?: { questions?: Array<Record<string, unknown>> };
     error?: unknown;
@@ -60,14 +65,22 @@ export async function loadLiveAssessment(token: string, workspaceId: string, ass
     explanation: String(question.explanation ?? ''),
     topic: '',
     difficulty: question.difficulty ?? 'medium',
-    sourceLabel: Array.isArray(question.sourceIds) && question.sourceIds.length ? 'Sumber terlampir' : 'Tanpa sumber',
+    sourceLabel:
+      Array.isArray(question.sourceIds) && question.sourceIds.length
+        ? 'Sumber terlampir'
+        : 'Tanpa sumber',
     reviewState: mapReviewStateFromBackend(String(question.status ?? '')),
     warnings: [],
     updatedAt: String(question.updatedAt ?? assessment.updatedAt ?? new Date().toISOString()),
   }));
-  const reviewedCount = questions.filter((question) => question.reviewState !== 'unreviewed').length;
-  const allAccepted = questions.length > 0 && questions.every((question) => question.reviewState === 'accepted');
-  const finalized = questions.length > 0 && (questionsPayload?.data?.questions ?? []).every((question) => question.isFinalized === true);
+  const reviewedCount = questions.filter(
+    (question) => question.reviewState !== 'unreviewed',
+  ).length;
+  const allAccepted =
+    questions.length > 0 && questions.every((question) => question.reviewState === 'accepted');
+  const finalized =
+    questions.length > 0 &&
+    (questionsPayload?.data?.questions ?? []).every((question) => question.isFinalized === true);
   const config = (version.configSnapshot ?? {}) as Record<string, unknown>;
 
   return {
@@ -76,8 +89,12 @@ export async function loadLiveAssessment(token: string, workspaceId: string, ass
       data: {
         id: String(assessment.id),
         title: String(assessment.title ?? 'Lembar soal'),
-        subject: String((config as Record<string, unknown>).subjectLabel ?? config.subjectId ?? 'Mata pelajaran'),
-        gradeLabel: String((config as Record<string, unknown>).gradeLabel ?? config.gradeId ?? 'Kelas'),
+        subject: String(
+          (config as Record<string, unknown>).subjectLabel ?? config.subjectId ?? 'Mata pelajaran',
+        ),
+        gradeLabel: String(
+          (config as Record<string, unknown>).gradeLabel ?? config.gradeId ?? 'Kelas',
+        ),
         lifecycle: finalized
           ? 'final'
           : (() => {
@@ -91,6 +108,10 @@ export async function loadLiveAssessment(token: string, workspaceId: string, ass
         reviewedCount,
         warningCount: 0,
         reviewMode: 'quick',
+        ...(typeof config.assessmentType === 'string'
+          ? { assessmentType: config.assessmentType }
+          : {}),
+        ...(typeof config.academicYear === 'string' ? { academicYear: config.academicYear } : {}),
         updatedAt: String(assessment.updatedAt ?? assessment.createdAt),
         createdAt: String(assessment.createdAt),
         canReview: questions.length > 0 && !finalized,
@@ -98,7 +119,8 @@ export async function loadLiveAssessment(token: string, workspaceId: string, ass
         canOpenOutput: finalized,
         questions,
         finalizeBlockers: allAccepted ? [] : ['Semua soal harus diterima sebelum finalisasi.'],
-        teacherResponsibilityNote: 'Guru bertanggung jawab meninjau kebenaran setiap soal sebelum finalisasi.',
+        teacherResponsibilityNote:
+          'Guru bertanggung jawab meninjau kebenaran setiap soal sebelum finalisasi.',
         versionId,
       },
     },

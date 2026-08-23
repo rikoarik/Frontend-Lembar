@@ -1,9 +1,28 @@
 import { cookies } from 'next/headers';
 import { NextResponse, type NextRequest } from 'next/server';
 import { backendFetch, JWT_COOKIE, SESSION_COOKIE } from '@/src/lib/api/session';
+import { findMockAccountBySession } from '@/src/lib/mock-api/accounts';
 import { isMockApiMode } from '@/src/lib/mock-api/preview';
 
-function extractToken(request: NextRequest, jar: Awaited<ReturnType<typeof cookies>>): string | null {
+function redactAdminSecrets(path: string, payload: unknown): unknown {
+  if (path !== '/v1/admin/accounts/invite' && !path.endsWith('/reset-password')) {
+    return payload;
+  }
+  const envelope = payload as { data?: Record<string, unknown> } | null;
+  if (!envelope?.data) return payload;
+  const {
+    token: _token,
+    resetUrl: _resetUrl,
+    welcomeUrl: _welcomeUrl,
+    ...safeData
+  } = envelope.data;
+  return { ...envelope, data: safeData };
+}
+
+function extractToken(
+  request: NextRequest,
+  jar: Awaited<ReturnType<typeof cookies>>,
+): string | null {
   const authHeader = request.headers.get('authorization');
   if (authHeader) {
     const match = authHeader.match(/^Bearer\s+(.+)$/i);
@@ -31,7 +50,7 @@ async function handleProxy(request: NextRequest, context: { params: Promise<{ sl
   const sessionCookie = jar.get('__Host-lembar_session')?.value ?? null;
   const effectiveToken = token || sessionCookie;
 
-  if (!effectiveToken && !isMockApiMode()) {
+  if (!effectiveToken) {
     return NextResponse.json(
       {
         error: {
@@ -46,7 +65,19 @@ async function handleProxy(request: NextRequest, context: { params: Promise<{ sl
 
   // ── Mock API Fallback ────────────────────────────────────────────────
   if (isMockApiMode()) {
-    console.log('[Admin Proxy] Mock API Mode active. Returning mock response for path:', path);
+    const account = findMockAccountBySession(effectiveToken);
+    if (!account?.roles.includes('superadmin')) {
+      return NextResponse.json(
+        {
+          error: {
+            code: 'ROLE_FORBIDDEN',
+            message: 'Akses superadmin diperlukan.',
+            retryable: false,
+          },
+        },
+        { status: 403 },
+      );
+    }
 
     if (path === '/v1/admin/accounts') {
       const q = request.nextUrl.searchParams.get('q') || '';
@@ -56,32 +87,214 @@ async function handleProxy(request: NextRequest, context: { params: Promise<{ sl
       const limitNum = parseInt(request.nextUrl.searchParams.get('limit') || '10', 10);
 
       const allRows = [
-        { id: 'acc_1', displayName: 'Ops Superadmin', email: 'ops@lembar.id', role: 'superadmin', status: 'aktif', school: 'Lembar HQ' },
-        { id: 'acc_2', displayName: 'Demo Guru', email: 'guru@lembar.id', role: 'teacher', status: 'aktif', school: 'SDN Contoh 01' },
-        { id: 'acc_3', displayName: 'Admin Sekolah', email: 'admin@lembar.id', role: 'school_admin', status: 'aktif', school: 'SDN Contoh 01' },
-        { id: 'acc_4', displayName: 'Budi Santoso', email: 'budi@sdncontoh.sch.id', role: 'teacher', status: 'aktif', school: 'SDN Contoh 01' },
-        { id: 'acc_5', displayName: 'Iwan Setiawan', email: 'iwan@sdncontoh.sch.id', role: 'teacher', status: 'baru', school: 'SDN Contoh 02' },
-        { id: 'acc_6', displayName: 'Siti Rahma', email: 'siti@sdncontoh.sch.id', role: 'school_admin', status: 'ditangguhkan', school: 'SDN Contoh 02' },
-        { id: 'acc_7', displayName: 'Ahmad Dahlan', email: 'ahmad@sdncontoh.sch.id', role: 'teacher', status: 'aktif', school: 'SDN Contoh 01' },
-        { id: 'acc_8', displayName: 'Dewi Sartika', email: 'dewi@smpn01.sch.id', role: 'teacher', status: 'aktif', school: 'SMPN 01 Kota' },
-        { id: 'acc_9', displayName: 'R.A. Kartini', email: 'kartini@smpn01.sch.id', role: 'school_admin', status: 'aktif', school: 'SMPN 01 Kota' },
-        { id: 'acc_10', displayName: 'Ki Hajar Dewantara', email: 'kihajar@sma1.sch.id', role: 'teacher', status: 'aktif', school: 'SMAN 01 Merdeka' },
-        { id: 'acc_11', displayName: 'Bambang Pamungkas', email: 'bambang@sma1.sch.id', role: 'teacher', status: 'baru', school: 'SMAN 01 Merdeka' },
-        { id: 'acc_12', displayName: 'Cut Nyak Dien', email: 'cutnyak@sdn03.sch.id', role: 'school_admin', status: 'aktif', school: 'SDN 03 Bandung' },
-        { id: 'acc_13', displayName: 'Pangeran Diponegoro', email: 'diponegoro@sdn03.sch.id', role: 'teacher', status: 'aktif', school: 'SDN 03 Bandung' },
-        { id: 'acc_14', displayName: 'Mohammad Hatta', email: 'hatta@lembar.id', role: 'superadmin', status: 'aktif', school: 'Lembar HQ' },
-        { id: 'acc_15', displayName: 'Soekarno Hatta', email: 'soekarno@lembar.id', role: 'superadmin', status: 'aktif', school: 'Lembar HQ' },
-        { id: 'acc_16', displayName: 'Megawati Soekarnoputri', email: 'megawati@sdn04.sch.id', role: 'teacher', status: 'ditangguhkan', school: 'SDN 04 Jakarta' },
-        { id: 'acc_17', displayName: 'Gus Dur Wahid', email: 'gusdur@sdn04.sch.id', role: 'teacher', status: 'aktif', school: 'SDN 04 Jakarta' },
-        { id: 'acc_18', displayName: 'Habibie Research', email: 'habibie@smpn02.sch.id', role: 'school_admin', status: 'aktif', school: 'SMPN 02 Surabaya' },
-        { id: 'acc_19', displayName: 'Sutan Sjahrir', email: 'sjahrir@smpn02.sch.id', role: 'teacher', status: 'baru', school: 'SMPN 02 Surabaya' },
-        { id: 'acc_20', displayName: 'Tan Malaka', email: 'tanmalaka@smpn02.sch.id', role: 'teacher', status: 'aktif', school: 'SMPN 02 Surabaya' },
-        { id: 'acc_21', displayName: 'Jendral Soedirman', email: 'soedirman@sman02.sch.id', role: 'school_admin', status: 'aktif', school: 'SMAN 02 Jogja' },
-        { id: 'acc_22', displayName: 'Pattimura Maluku', email: 'pattimura@sman02.sch.id', role: 'teacher', status: 'aktif', school: 'SMAN 02 Jogja' },
-        { id: 'acc_23', displayName: 'Teuku Umar', email: 'teukuumar@sdn05.sch.id', role: 'teacher', status: 'ditangguhkan', school: 'SDN 05 Aceh' },
-        { id: 'acc_24', displayName: 'Martha Christina', email: 'martha@sdn05.sch.id', role: 'teacher', status: 'aktif', school: 'SDN 05 Aceh' },
-        { id: 'acc_25', displayName: 'I Gusti Ngurah Rai', email: 'ngurahrai@sdn06.sch.id', role: 'teacher', status: 'baru', school: 'SDN 06 Bali' },
-        { id: 'acc_26', displayName: 'Frans Kaisiepo', email: 'frans@sdn07.sch.id', role: 'teacher', status: 'aktif', school: 'SDN 07 Papua' },
+        {
+          id: 'acc_1',
+          displayName: 'Ops Superadmin',
+          email: 'ops@lembar.id',
+          role: 'superadmin',
+          status: 'aktif',
+          school: 'Lembar HQ',
+        },
+        {
+          id: 'acc_2',
+          displayName: 'Demo Guru',
+          email: 'guru@lembar.id',
+          role: 'teacher',
+          status: 'aktif',
+          school: 'SDN Contoh 01',
+        },
+        {
+          id: 'acc_3',
+          displayName: 'Admin Sekolah',
+          email: 'admin@lembar.id',
+          role: 'school_admin',
+          status: 'aktif',
+          school: 'SDN Contoh 01',
+        },
+        {
+          id: 'acc_4',
+          displayName: 'Budi Santoso',
+          email: 'budi@sdncontoh.sch.id',
+          role: 'teacher',
+          status: 'aktif',
+          school: 'SDN Contoh 01',
+        },
+        {
+          id: 'acc_5',
+          displayName: 'Iwan Setiawan',
+          email: 'iwan@sdncontoh.sch.id',
+          role: 'teacher',
+          status: 'baru',
+          school: 'SDN Contoh 02',
+        },
+        {
+          id: 'acc_6',
+          displayName: 'Siti Rahma',
+          email: 'siti@sdncontoh.sch.id',
+          role: 'school_admin',
+          status: 'ditangguhkan',
+          school: 'SDN Contoh 02',
+        },
+        {
+          id: 'acc_7',
+          displayName: 'Ahmad Dahlan',
+          email: 'ahmad@sdncontoh.sch.id',
+          role: 'teacher',
+          status: 'aktif',
+          school: 'SDN Contoh 01',
+        },
+        {
+          id: 'acc_8',
+          displayName: 'Dewi Sartika',
+          email: 'dewi@smpn01.sch.id',
+          role: 'teacher',
+          status: 'aktif',
+          school: 'SMPN 01 Kota',
+        },
+        {
+          id: 'acc_9',
+          displayName: 'R.A. Kartini',
+          email: 'kartini@smpn01.sch.id',
+          role: 'school_admin',
+          status: 'aktif',
+          school: 'SMPN 01 Kota',
+        },
+        {
+          id: 'acc_10',
+          displayName: 'Ki Hajar Dewantara',
+          email: 'kihajar@sma1.sch.id',
+          role: 'teacher',
+          status: 'aktif',
+          school: 'SMAN 01 Merdeka',
+        },
+        {
+          id: 'acc_11',
+          displayName: 'Bambang Pamungkas',
+          email: 'bambang@sma1.sch.id',
+          role: 'teacher',
+          status: 'baru',
+          school: 'SMAN 01 Merdeka',
+        },
+        {
+          id: 'acc_12',
+          displayName: 'Cut Nyak Dien',
+          email: 'cutnyak@sdn03.sch.id',
+          role: 'school_admin',
+          status: 'aktif',
+          school: 'SDN 03 Bandung',
+        },
+        {
+          id: 'acc_13',
+          displayName: 'Pangeran Diponegoro',
+          email: 'diponegoro@sdn03.sch.id',
+          role: 'teacher',
+          status: 'aktif',
+          school: 'SDN 03 Bandung',
+        },
+        {
+          id: 'acc_14',
+          displayName: 'Mohammad Hatta',
+          email: 'hatta@lembar.id',
+          role: 'superadmin',
+          status: 'aktif',
+          school: 'Lembar HQ',
+        },
+        {
+          id: 'acc_15',
+          displayName: 'Soekarno Hatta',
+          email: 'soekarno@lembar.id',
+          role: 'superadmin',
+          status: 'aktif',
+          school: 'Lembar HQ',
+        },
+        {
+          id: 'acc_16',
+          displayName: 'Megawati Soekarnoputri',
+          email: 'megawati@sdn04.sch.id',
+          role: 'teacher',
+          status: 'ditangguhkan',
+          school: 'SDN 04 Jakarta',
+        },
+        {
+          id: 'acc_17',
+          displayName: 'Gus Dur Wahid',
+          email: 'gusdur@sdn04.sch.id',
+          role: 'teacher',
+          status: 'aktif',
+          school: 'SDN 04 Jakarta',
+        },
+        {
+          id: 'acc_18',
+          displayName: 'Habibie Research',
+          email: 'habibie@smpn02.sch.id',
+          role: 'school_admin',
+          status: 'aktif',
+          school: 'SMPN 02 Surabaya',
+        },
+        {
+          id: 'acc_19',
+          displayName: 'Sutan Sjahrir',
+          email: 'sjahrir@smpn02.sch.id',
+          role: 'teacher',
+          status: 'baru',
+          school: 'SMPN 02 Surabaya',
+        },
+        {
+          id: 'acc_20',
+          displayName: 'Tan Malaka',
+          email: 'tanmalaka@smpn02.sch.id',
+          role: 'teacher',
+          status: 'aktif',
+          school: 'SMPN 02 Surabaya',
+        },
+        {
+          id: 'acc_21',
+          displayName: 'Jendral Soedirman',
+          email: 'soedirman@sman02.sch.id',
+          role: 'school_admin',
+          status: 'aktif',
+          school: 'SMAN 02 Jogja',
+        },
+        {
+          id: 'acc_22',
+          displayName: 'Pattimura Maluku',
+          email: 'pattimura@sman02.sch.id',
+          role: 'teacher',
+          status: 'aktif',
+          school: 'SMAN 02 Jogja',
+        },
+        {
+          id: 'acc_23',
+          displayName: 'Teuku Umar',
+          email: 'teukuumar@sdn05.sch.id',
+          role: 'teacher',
+          status: 'ditangguhkan',
+          school: 'SDN 05 Aceh',
+        },
+        {
+          id: 'acc_24',
+          displayName: 'Martha Christina',
+          email: 'martha@sdn05.sch.id',
+          role: 'teacher',
+          status: 'aktif',
+          school: 'SDN 05 Aceh',
+        },
+        {
+          id: 'acc_25',
+          displayName: 'I Gusti Ngurah Rai',
+          email: 'ngurahrai@sdn06.sch.id',
+          role: 'teacher',
+          status: 'baru',
+          school: 'SDN 06 Bali',
+        },
+        {
+          id: 'acc_26',
+          displayName: 'Frans Kaisiepo',
+          email: 'frans@sdn07.sch.id',
+          role: 'teacher',
+          status: 'aktif',
+          school: 'SDN 07 Papua',
+        },
       ];
 
       const filtered = allRows.filter((r) => {
@@ -150,7 +363,10 @@ async function handleProxy(request: NextRequest, context: { params: Promise<{ sl
 
     if (request.method === 'PATCH' && path.startsWith('/v1/admin/accounts/')) {
       const id = path.split('/')[4];
-      const body = ((await request.json().catch(() => ({}))) || {}) as { name?: string; phone?: string };
+      const body = ((await request.json().catch(() => ({}))) || {}) as {
+        name?: string;
+        phone?: string;
+      };
       return NextResponse.json({
         data: {
           id,
@@ -295,12 +511,14 @@ async function handleProxy(request: NextRequest, context: { params: Promise<{ sl
 
   if (!upstream.ok) {
     return NextResponse.json(
-      payload ?? { error: { code: 'UPSTREAM_ERROR', message: 'Gagal mengambil data dari server.' } },
+      payload ?? {
+        error: { code: 'UPSTREAM_ERROR', message: 'Gagal mengambil data dari server.' },
+      },
       { status: upstream.status },
     );
   }
 
-  return NextResponse.json(payload ?? { data: null }, { status: 200 });
+  return NextResponse.json(redactAdminSecrets(path, payload ?? { data: null }), { status: 200 });
 }
 
 export const GET = handleProxy;

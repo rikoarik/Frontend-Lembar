@@ -16,7 +16,12 @@ export default async function UntukSekolahPage() {
     inLanguage: 'id',
   };
   if (cmsDoc) {
-    return <><JsonLd schema={sekolahSchema} /><BlockRenderer blocks={cmsDoc.blocks} /></>;
+    return (
+      <>
+        <JsonLd schema={sekolahSchema} />
+        <BlockRenderer blocks={cmsDoc.blocks} />
+      </>
+    );
   }
   return (
     <>

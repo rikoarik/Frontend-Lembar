@@ -1,5 +1,3 @@
-'use client';
-
 import { Button } from '@/app/components/ui';
 import {
   AdminPageHeader,
@@ -104,14 +102,20 @@ export function OpsQualitySection({
               <div className="space-y-4 text-[13px]">
                 <div className="grid grid-cols-3 gap-x-3 gap-y-2">
                   <span className="font-semibold text-[#6d665d]">ID</span>
-                  <span className="col-span-2 font-mono text-[10px] break-all">{qualityDetailData.id}</span>
+                  <span className="col-span-2 font-mono text-[10px] break-all">
+                    {qualityDetailData.id}
+                  </span>
                   <span className="font-semibold text-[#6d665d]">Reporter</span>
                   <span className="col-span-2">{qualityDetailData.reporter}</span>
                   <span className="font-semibold text-[#6d665d]">Workspace</span>
-                  <span className="col-span-2 font-mono text-[10px]">{qualityDetailData.workspaceId}</span>
+                  <span className="col-span-2 font-mono text-[10px]">
+                    {qualityDetailData.workspaceId}
+                  </span>
                   <span className="font-semibold text-[#6d665d]">Status</span>
                   <span className="col-span-2">
-                    <AdminPill tone={qualityTone(qualityDetailData.status as AdminQualityRow['status'])}>
+                    <AdminPill
+                      tone={qualityTone(qualityDetailData.status as AdminQualityRow['status'])}
+                    >
                       {qualityDetailData.status}
                     </AdminPill>
                   </span>
@@ -122,10 +126,14 @@ export function OpsQualitySection({
                 </div>
                 <div>
                   <div className="font-semibold text-[#6d665d] mb-1">Alasan laporan</div>
-                  <div className="bg-[#faf8f5] rounded-xl p-3 text-[12px]">{qualityDetailData.reason}</div>
+                  <div className="bg-[#faf8f5] rounded-xl p-3 text-[12px]">
+                    {qualityDetailData.reason}
+                  </div>
                 </div>
                 <div>
-                  <div className="font-semibold text-[#171717] mb-1 text-[12px]">Catatan internal</div>
+                  <div className="font-semibold text-[#171717] mb-1 text-[12px]">
+                    Catatan internal
+                  </div>
                   <textarea
                     rows={4}
                     value={qualityNotesDraft}
@@ -138,15 +146,20 @@ export function OpsQualitySection({
                     disabled={qualityNotesSaving}
                     onClick={() => {
                       setQualityNotesSaving(true);
-                      adminService.updateQualityNotes(qualityDetailId, { notes: qualityNotesDraft }).then((res) => {
-                        if (res.ok) {
-                          setToast('Catatan disimpan.');
-                          setQualityDetailData({ ...qualityDetailData, notes: qualityNotesDraft });
-                        } else {
-                          setToast(`Gagal: ${res.error.safeMessage}`);
-                        }
-                        setQualityNotesSaving(false);
-                      });
+                      adminService
+                        .updateQualityNotes(qualityDetailId, { notes: qualityNotesDraft })
+                        .then((res) => {
+                          if (res.ok) {
+                            setToast('Catatan disimpan.');
+                            setQualityDetailData({
+                              ...qualityDetailData,
+                              notes: qualityNotesDraft,
+                            });
+                          } else {
+                            setToast(`Gagal: ${res.error.safeMessage}`);
+                          }
+                          setQualityNotesSaving(false);
+                        });
                     }}
                   >
                     {qualityNotesSaving ? 'Menyimpan...' : 'Simpan catatan'}
@@ -158,16 +171,21 @@ export function OpsQualitySection({
                       size="sm"
                       variant="secondary"
                       onClick={() => {
-                        adminService.updateQualityNotes(qualityDetailId, {
-                          status: 'triaged',
-                          expectedStatus: qualityDetailData.status as 'open' | 'triaged' | 'closed',
-                        }).then((res) => {
-                          if (res.ok) {
-                            setToast('Report ditriage.');
-                            setQualityDetailData({ ...qualityDetailData, status: 'triaged' });
-                            loadQuality();
-                          } else setToast(`Gagal: ${res.error.safeMessage}`);
-                        });
+                        adminService
+                          .updateQualityNotes(qualityDetailId, {
+                            status: 'triaged',
+                            expectedStatus: qualityDetailData.status as
+                              | 'open'
+                              | 'triaged'
+                              | 'closed',
+                          })
+                          .then((res) => {
+                            if (res.ok) {
+                              setToast('Report ditriage.');
+                              setQualityDetailData({ ...qualityDetailData, status: 'triaged' });
+                              loadQuality();
+                            } else setToast(`Gagal: ${res.error.safeMessage}`);
+                          });
                       }}
                     >
                       Triage
@@ -177,16 +195,21 @@ export function OpsQualitySection({
                     <Button
                       size="sm"
                       onClick={() => {
-                        adminService.updateQualityNotes(qualityDetailId, {
-                          status: 'closed',
-                          expectedStatus: qualityDetailData.status as 'open' | 'triaged' | 'closed',
-                        }).then((res) => {
-                          if (res.ok) {
-                            setToast('Report ditutup.');
-                            setQualityDetailData({ ...qualityDetailData, status: 'closed' });
-                            loadQuality();
-                          } else setToast(`Gagal: ${res.error.safeMessage}`);
-                        });
+                        adminService
+                          .updateQualityNotes(qualityDetailId, {
+                            status: 'closed',
+                            expectedStatus: qualityDetailData.status as
+                              | 'open'
+                              | 'triaged'
+                              | 'closed',
+                          })
+                          .then((res) => {
+                            if (res.ok) {
+                              setToast('Report ditutup.');
+                              setQualityDetailData({ ...qualityDetailData, status: 'closed' });
+                              loadQuality();
+                            } else setToast(`Gagal: ${res.error.safeMessage}`);
+                          });
                       }}
                     >
                       Tutup report
@@ -252,7 +275,6 @@ export function OpsQualitySection({
             >
               Detail
             </Button>
-
           </div>
         )}
       />

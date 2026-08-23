@@ -46,7 +46,6 @@ async function parseError(response: Response): Promise<SchoolError> {
   }
 }
 
-
 async function request<T>(
   path: string,
   method: 'GET' | 'POST' | 'PATCH' | 'DELETE' = 'GET',
@@ -130,8 +129,6 @@ export type SchoolMembersResult = {
 };
 
 export type SchoolInvitationResult = {
-  token: string;
-  tokenHash?: string;
   email: string;
   role?: string;
   expiresAt: string;
@@ -250,7 +247,7 @@ export type SchoolDashboard = {
   usage: {
     generationsUsedThisMonth: number;
     monthlyLimit: number | null;
-    plan: 'free' | 'pro';
+    plan: 'free' | 'pro' | 'plus';
   };
 };
 
@@ -302,10 +299,7 @@ export const schoolService = {
     return request<SchoolInvitationResult>('/v1/school/members/invite', 'POST', payload);
   },
 
-  updateMemberRole(
-    id: string,
-    role: string,
-  ): Promise<Result<SchoolMember, SchoolError>> {
+  updateMemberRole(id: string, role: string): Promise<Result<SchoolMember, SchoolError>> {
     return request<SchoolMember>(`/v1/school/members/${id}/role`, 'PATCH', { role });
   },
 
@@ -318,8 +312,14 @@ export const schoolService = {
     return request<SchoolSettings>('/v1/school/settings');
   },
 
-  updateSettings(payload: { name: string }): Promise<Result<{ id: string; name: string; updatedAt: string }, SchoolError>> {
-    return request<{ id: string; name: string; updatedAt: string }>('/v1/school/settings', 'PATCH', payload);
+  updateSettings(payload: {
+    name: string;
+  }): Promise<Result<{ id: string; name: string; updatedAt: string }, SchoolError>> {
+    return request<{ id: string; name: string; updatedAt: string }>(
+      '/v1/school/settings',
+      'PATCH',
+      payload,
+    );
   },
 
   // Usage

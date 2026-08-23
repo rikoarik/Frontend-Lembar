@@ -1,12 +1,30 @@
-import type { PrintDTO, PrintQuestion, PrintRubricCriterion } from '@/src/features/output/types';
+import {
+  formatExamContext,
+  formatExamHeading,
+  type PrintDTO,
+  type PrintQuestion,
+  type PrintRubricCriterion,
+} from '@/src/features/output/types';
 
 export function TeacherKeyRenderer({ dto }: { dto: PrintDTO }) {
   return (
     <article className="teacher-key-print print:bg-white print:text-black">
-      <header className="mb-8 border-b border-brand-line pb-4 print:border-black">
-        <h1 className="text-h1 font-semibold text-brand-ink print:text-black">{dto.title}</h1>
-        <p className="mt-2 text-body-sm text-brand-ink-muted print:text-black">
-          {dto.subject} · {dto.gradeLabel}
+      <header className="mb-8 border-b border-brand-line pb-4 text-center print:border-black">
+        <h1 className="text-body-lg font-bold text-brand-ink print:text-black">
+          {formatExamHeading(dto)}
+        </h1>
+        {formatExamContext(dto) ? (
+          <p className="mt-1 text-body-sm text-brand-ink print:text-black">
+            {formatExamContext(dto)}
+          </p>
+        ) : null}
+        {dto.academicYear ? (
+          <p className="mt-1 text-body-sm font-semibold text-brand-ink print:text-black">
+            TAHUN PELAJARAN {dto.academicYear}
+          </p>
+        ) : null}
+        <p className="mt-1 text-label-sm text-brand-ink-muted print:text-black">
+          KUNCI JAWABAN GURU
         </p>
       </header>
 
@@ -14,7 +32,9 @@ export function TeacherKeyRenderer({ dto }: { dto: PrintDTO }) {
         {dto.questions.map((question) => (
           <li key={question.number} className="break-inside-avoid print:break-inside-avoid">
             <div className="flex gap-3">
-              <span className="font-semibold text-brand-ink print:text-black">{question.number}.</span>
+              <span className="font-semibold text-brand-ink print:text-black">
+                {question.number}.
+              </span>
               <div className="flex-1">
                 <p className="text-body text-brand-ink print:text-black">{question.stem}</p>
                 <AnswerSection question={question} />
@@ -61,7 +81,9 @@ function AnswerSection({ question }: { question: PrintQuestion }) {
     return (
       <>
         <div className="mt-3 rounded-sm border border-brand-line p-3 print:border-black">
-          <p className="text-label-sm font-semibold text-brand-ink-muted print:text-black">Answer key</p>
+          <p className="text-label-sm font-semibold text-brand-ink-muted print:text-black">
+            Answer key
+          </p>
           <p className="mt-1 text-body-sm text-brand-ink print:text-black">{answerKey}</p>
         </div>
         <Explanation text={explanation} />
@@ -74,15 +96,21 @@ function AnswerSection({ question }: { question: PrintQuestion }) {
     return (
       <>
         <div className="mt-3 rounded-sm border border-brand-line p-3 print:border-black">
-          <p className="text-label-sm font-semibold text-brand-ink-muted print:text-black">Model answer</p>
+          <p className="text-label-sm font-semibold text-brand-ink-muted print:text-black">
+            Model answer
+          </p>
           <p className="mt-1 text-body-sm text-brand-ink print:text-black">{answerKey}</p>
         </div>
         {rubric && rubric.length > 0 && (
           <div className="mt-3">
             <div className="flex items-baseline gap-3">
-              <p className="text-label-sm font-semibold text-brand-ink-muted print:text-black">Rubric</p>
+              <p className="text-label-sm font-semibold text-brand-ink-muted print:text-black">
+                Rubric
+              </p>
               {maxScore != null && (
-                <p className="text-body-sm text-brand-ink-muted print:text-black">Max score: {maxScore}</p>
+                <p className="text-body-sm text-brand-ink-muted print:text-black">
+                  Max score: {maxScore}
+                </p>
               )}
             </div>
             <RubricList criteria={rubric} />
@@ -100,7 +128,10 @@ function RubricList({ criteria }: { criteria: PrintRubricCriterion[] }) {
   return (
     <ul className="mt-2 flex flex-col gap-1" aria-label="Rubric criteria">
       {criteria.map((c) => (
-        <li key={c.label} className="flex items-start gap-2 text-body-sm text-brand-ink print:text-black">
+        <li
+          key={c.label}
+          className="flex items-start gap-2 text-body-sm text-brand-ink print:text-black"
+        >
           <span className="min-w-[6rem] font-semibold">{c.label}</span>
           <span className="flex-1">{c.description}</span>
           <span className="shrink-0 text-brand-ink-muted print:text-black">{c.points} pts</span>
@@ -112,9 +143,5 @@ function RubricList({ criteria }: { criteria: PrintRubricCriterion[] }) {
 
 function Explanation({ text }: { text?: string }) {
   if (!text) return null;
-  return (
-    <p className="mt-2 text-body-sm italic text-brand-ink-muted print:text-black">
-      {text}
-    </p>
-  );
+  return <p className="mt-2 text-body-sm italic text-brand-ink-muted print:text-black">{text}</p>;
 }

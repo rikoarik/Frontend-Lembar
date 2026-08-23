@@ -36,7 +36,12 @@ describe('job progress UX', () => {
   });
 
   it('uses a stable indeterminate progress and generic timing when evidence is insufficient', () => {
-    render(<JobProgressPanel job={{ ...running, stage: undefined, progressPercent: undefined }} loading={false} />);
+    render(
+      <JobProgressPanel
+        job={{ ...running, stage: undefined, progressPercent: undefined }}
+        loading={false}
+      />,
+    );
     expect(screen.getByText('Biasanya selesai dalam beberapa menit')).toBeInTheDocument();
     expect(screen.getByRole('progressbar')).not.toHaveAttribute('aria-valuenow');
   });
@@ -74,9 +79,7 @@ describe('job progress UX', () => {
     expect(formatJobTiming({ ...running, progressPercent: 50 }, now).eta).toBe(
       'Perkiraan tersisa 1–3 menit',
     );
-    expect(formatJobTiming({ ...running, progressPercent: 99 }, now).eta).toBe(
-      'Hampir selesai',
-    );
+    expect(formatJobTiming({ ...running, progressPercent: 99 }, now).eta).toBe('Hampir selesai');
     expect(formatJobTiming({ ...running, createdAt: 'invalid' }, now).elapsed).toBeUndefined();
   });
 });

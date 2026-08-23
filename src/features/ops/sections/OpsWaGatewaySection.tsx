@@ -5,7 +5,8 @@
  * Proxy ke BE /v1/admin/wa-gateway → OpenWA container.
  */
 
-import { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { AdminPageHeader, AdminPill } from '@/src/features/admin/AdminChrome';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -25,7 +26,9 @@ type QrState = { sessionId: string; qrCode: string | null; timedOut: boolean } |
 function resolveApiUrl(path: string): string {
   const base = (process.env.NEXT_PUBLIC_API_BASE_URL ?? '/v1').replace(/\/+$/, '');
   const clean = path.startsWith('/') ? path : `/${path}`;
-  return base.endsWith('/v1') && clean.startsWith('/v1') ? `${base}${clean.slice(3)}` : `${base}${clean}`;
+  return base.endsWith('/v1') && clean.startsWith('/v1')
+    ? `${base}${clean.slice(3)}`
+    : `${base}${clean}`;
 }
 
 async function apiFetch(path: string, opts?: RequestInit) {
@@ -43,45 +46,70 @@ const STATUS_TONE: Record<string, 'ok' | 'warn' | 'bad' | 'info' | 'neutral'> = 
 
 export function OpsWaGatewaySection({ setToast }: { setToast?: (msg: string) => void }) {
   const [sessions, setSessions] = useState<WaSession[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [newId, setNewId] = useState('');
   const [qr, setQr] = useState<QrState>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const cancelPollRef = useRef<(() => void) | null>(null);
 
-  const toast = (msg: string) => setToast?.(msg);
+  const toast = useCallback((msg: string) => setToast?.(msg), [setToast]);
 
-  const load = async () => {
+  const requestSessions = useCallback(() => {
+    return apiFetch('/v1/admin/wa-gateway')
+      .then(async (res) => {
+        if (!res.ok) {
+          toast('Gagal memuat sessions');
+          return null;
+        }
+        return (await res.json()) as WaSession[] | { data: WaSession[] };
+      })
+      .then((body) => {
+        if (body) setSessions(Array.isArray(body) ? body : (body.data ?? []));
+      })
+      .catch(() => toast('Gagal memuat sessions'))
+      .finally(() => setLoading(false));
+  }, [toast]);
+
+  const load = useCallback(async () => {
     setLoading(true);
-    try {
-      const res = await apiFetch('/v1/admin/wa-gateway');
-      if (!res.ok) { toast('Gagal memuat sessions'); return; }
-      const body = (await res.json()) as WaSession[] | { data: WaSession[] };
-      setSessions(Array.isArray(body) ? body : (body as { data: WaSession[] }).data ?? []);
-    } catch { toast('Gagal memuat sessions'); }
-    finally { setLoading(false); }
-  };
+    await requestSessions();
+  }, [requestSessions]);
 
-  useEffect(() => { void load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    void requestSessions();
+  }, [requestSessions]);
 
-  const stopPoll = () => {
-    if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
-  };
+  const stopPoll = useCallback(() => {
+    cancelPollRef.current?.();
+    cancelPollRef.current = null;
+    if (pollRef.current) {
+      clearInterval(pollRef.current);
+      pollRef.current = null;
+    }
+  }, []);
 
   const startQrPoll = (sessionId: string) => {
     stopPoll();
+    let cancelled = false;
+    cancelPollRef.current = () => {
+      cancelled = true;
+    };
     const deadline = Date.now() + 60_000;
 
     const poll = async () => {
+      if (cancelled) return;
       if (Date.now() > deadline) {
         stopPoll();
-        setQr(prev => prev ? { ...prev, timedOut: true } : null);
+        setQr((prev) => (prev ? { ...prev, timedOut: true } : null));
         return;
       }
       try {
         const res = await apiFetch(`/v1/admin/wa-gateway/${sessionId}/qr`);
+        if (cancelled) return;
         if (!res.ok) return;
         const body = (await res.json()) as { qrCode?: string; status?: string };
+        if (cancelled) return;
         if (body.status === 'ready') {
           stopPoll();
           setQr(null);
@@ -90,10 +118,13 @@ export function OpsWaGatewaySection({ setToast }: { setToast?: (msg: string) => 
           return;
         }
         setQr({ sessionId, qrCode: body.qrCode ?? null, timedOut: false });
-      } catch { /* retry next tick */ }
+      } catch {
+        /* retry next tick */
+      }
     };
 
     void poll();
+    if (pollRef.current) clearInterval(pollRef.current);
     pollRef.current = setInterval(poll, 3000);
   };
 
@@ -107,28 +138,39 @@ export function OpsWaGatewaySection({ setToast }: { setToast?: (msg: string) => 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id }),
       });
-      if (!res.ok) { toast('Gagal membuat session'); return; }
+      if (!res.ok) {
+        toast('Gagal membuat session');
+        return;
+      }
 
       // start session
       await apiFetch(`/v1/admin/wa-gateway/${id}/start`, { method: 'POST' });
       setNewId('');
       await load();
       startQrPoll(id);
-    } catch { toast('Gagal membuat session'); }
-    finally { setCreating(false); }
+    } catch {
+      toast('Gagal membuat session');
+    } finally {
+      setCreating(false);
+    }
   };
 
   const handleDelete = async (sessionId: string) => {
     if (!confirm(`Hapus session "${sessionId}"?`)) return;
     try {
       await apiFetch(`/v1/admin/wa-gateway/${sessionId}`, { method: 'DELETE' });
-      if (qr?.sessionId === sessionId) { stopPoll(); setQr(null); }
+      if (qr?.sessionId === sessionId) {
+        stopPoll();
+        setQr(null);
+      }
       void load();
-    } catch { toast('Gagal menghapus session'); }
+    } catch {
+      toast('Gagal menghapus session');
+    }
   };
 
   // Cleanup on unmount
-  useEffect(() => stopPoll, []);
+  useEffect(() => () => stopPoll(), [stopPoll]);
 
   return (
     <div className="space-y-6">
@@ -144,8 +186,8 @@ export function OpsWaGatewaySection({ setToast }: { setToast?: (msg: string) => 
           className="w-full sm:w-auto min-w-[240px] rounded-xl border border-[#ddd3c4] bg-white px-3.5 py-2.5 text-sm text-[#1e1814] placeholder:text-[#b0a79b] outline-none transition focus:border-[#851925] focus:ring-2 focus:ring-[#851925]/20"
           placeholder="ID session baru (mis. lembar-wa-1)"
           value={newId}
-          onChange={e => setNewId(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && void handleCreate()}
+          onChange={(e) => setNewId(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && void handleCreate()}
           disabled={creating}
           aria-label="ID session baru"
         />
@@ -177,19 +219,26 @@ export function OpsWaGatewaySection({ setToast }: { setToast?: (msg: string) => 
             Scan QR di WhatsApp untuk session <strong>{qr.sessionId}</strong>
           </p>
           {qr.timedOut ? (
-            <p className="text-sm text-[#a3202b]">Waktu habis. Mulai ulang session secara manual.</p>
+            <p className="text-sm text-[#a3202b]">
+              Waktu habis. Mulai ulang session secara manual.
+            </p>
           ) : qr.qrCode ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Image
               src={`data:image/png;base64,${qr.qrCode}`}
               alt="QR WhatsApp"
-              className="w-48 h-48 rounded"
+              width={192}
+              height={192}
+              unoptimized
+              className="h-48 w-48 rounded"
             />
           ) : (
             <p className="text-sm text-[#8a8177] animate-pulse">Menunggu QR…</p>
           )}
           <button
-            onClick={() => { stopPoll(); setQr(null); }}
+            onClick={() => {
+              stopPoll();
+              setQr(null);
+            }}
             className="text-xs text-[#8a8177] hover:text-[#1e1814]"
           >
             Tutup
@@ -204,7 +253,7 @@ export function OpsWaGatewaySection({ setToast }: { setToast?: (msg: string) => 
         <p className="text-sm text-[#8a8177]">Belum ada session. Tambah session di atas.</p>
       ) : (
         <ul className="space-y-2" aria-label="Daftar WA session">
-          {sessions.map(s => (
+          {sessions.map((s) => (
             <li
               key={s.id}
               className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#e6dfd4] bg-white px-4 py-3 shadow-sm"

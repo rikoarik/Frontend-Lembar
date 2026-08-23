@@ -1,16 +1,26 @@
 'use client';
 
-import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { Button } from '@/app/components/ui';
 import { AdminAvatar, AdminPill, AdminConfirmModal } from '@/src/features/admin/AdminChrome';
 
-export function OpsProfileSection({
-  setToast,
-}: {
-  setToast: (msg: string) => void;
-}) {
+export function OpsProfileSection({ setToast }: { setToast: (msg: string) => void }) {
+  const router = useRouter();
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
   const [logoutLoading, setLogoutLoading] = useState(false);
+  const [sessionStartedAt, setSessionStartedAt] = useState<string | null>(null);
+
+  useEffect(() => {
+    const timer = window.setTimeout(
+      () =>
+        setSessionStartedAt(
+          new Date().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }),
+        ),
+      0,
+    );
+    return () => window.clearTimeout(timer);
+  }, []);
 
   const handleLogout = async () => {
     setLogoutLoading(true);
@@ -19,7 +29,7 @@ export function OpsProfileSection({
     } catch {
       // ignore network errors on logout
     } finally {
-      window.location.href = '/masuk';
+      router.replace('/masuk');
     }
   };
 
@@ -71,10 +81,10 @@ export function OpsProfileSection({
               <span className="text-[#57534e]">Browser</span>
               <span className="font-medium text-[#171717] text-right max-w-[60%] truncate">
                 {typeof navigator !== 'undefined'
-                  ? navigator.userAgent.match(/Chrome\/[\d.]+/)?.[0] ??
+                  ? (navigator.userAgent.match(/Chrome\/[\d.]+/)?.[0] ??
                     navigator.userAgent.match(/Firefox\/[\d.]+/)?.[0] ??
                     navigator.userAgent.match(/Safari\/[\d.]+/)?.[0] ??
-                    'Browser'
+                    'Browser')
                   : 'Browser'}
               </span>
             </div>
@@ -87,14 +97,14 @@ export function OpsProfileSection({
             <div className="flex justify-between items-center">
               <span className="text-[#57534e]">Zona Waktu</span>
               <span className="font-medium text-[#171717]">
-                {typeof Intl !== 'undefined' ? Intl.DateTimeFormat().resolvedOptions().timeZone : '—'}
+                {typeof Intl !== 'undefined'
+                  ? Intl.DateTimeFormat().resolvedOptions().timeZone
+                  : '—'}
               </span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-[#57534e]">Sesi Aktif Sejak</span>
-              <span className="font-medium text-[#171717]">
-                {new Date().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })}
-              </span>
+              <span className="font-medium text-[#171717]">{sessionStartedAt ?? '—'}</span>
             </div>
           </div>
           <div className="border-t border-[#eee6da]/60 pt-4 space-y-2">

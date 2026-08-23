@@ -36,7 +36,9 @@ const buildQuestion = (): ReviewQuestion => ({
   updatedAt: '2026-07-29T10:00:00.000Z',
 });
 
-const buildAssessment = (lifecycle: AssessmentDetail['lifecycle'] = 'review'): AssessmentDetail => ({
+const buildAssessment = (
+  lifecycle: AssessmentDetail['lifecycle'] = 'review',
+): AssessmentDetail => ({
   id: 'assessment-mc',
   title: 'Latihan MC',
   subject: 'Matematika',
@@ -129,21 +131,27 @@ describe('QuickReviewView option editor (P1-J, detail mode)', () => {
     const user = await openDetail();
     const group = optionGroup();
 
-    const initial = within(group).getAllByRole('listitem').map((row) => row.dataset.optionId);
+    const initial = within(group)
+      .getAllByRole('listitem')
+      .map((row) => row.dataset.optionId);
     expect(initial).toEqual(['a-q-mc', 'b-q-mc', 'c-q-mc', 'd-q-mc']);
 
     // move B up → ['b-q-mc', 'a-q-mc', 'c-q-mc', 'd-q-mc']
     const rowB = within(group).getAllByRole('listitem')[1];
     await user.click(within(rowB).getByRole('button', { name: /pindah ke atas/i }));
     expect(
-      within(group).getAllByRole('listitem').map((row) => row.dataset.optionId),
+      within(group)
+        .getAllByRole('listitem')
+        .map((row) => row.dataset.optionId),
     ).toEqual(['b-q-mc', 'a-q-mc', 'c-q-mc', 'd-q-mc']);
 
     // move the same option (now at index 0) down → ['a-q-mc', 'b-q-mc', 'c-q-mc', 'd-q-mc']
     const rowMoved = within(group).getAllByRole('listitem')[0];
     await user.click(within(rowMoved).getByRole('button', { name: /pindah ke bawah/i }));
     expect(
-      within(group).getAllByRole('listitem').map((row) => row.dataset.optionId),
+      within(group)
+        .getAllByRole('listitem')
+        .map((row) => row.dataset.optionId),
     ).toEqual(['a-q-mc', 'b-q-mc', 'c-q-mc', 'd-q-mc']);
   });
 
@@ -162,9 +170,7 @@ describe('QuickReviewView option editor (P1-J, detail mode)', () => {
       'q-mc',
       expect.objectContaining({
         answerKey: 'c-q-mc',
-        options: expect.arrayContaining([
-          expect.objectContaining({ id: 'c-q-mc' }),
-        ]),
+        options: expect.arrayContaining([expect.objectContaining({ id: 'c-q-mc' })]),
       }),
       expect.any(Object),
     );
@@ -191,7 +197,10 @@ describe('QuickReviewView option editor (P1-J, detail mode)', () => {
     await user.click(screen.getByRole('button', { name: /simpan edit/i }));
 
     const call = vi.mocked(assessmentService.updateQuestionContent).mock.calls[0];
-    const patch = call[2] as { options: { id: string; label: string; text: string }[]; answerKey: string };
+    const patch = call[2] as {
+      options: { id: string; label: string; text: string }[];
+      answerKey: string;
+    };
     expect(patch.answerKey).toBe(newId);
     expect(patch.options).toHaveLength(5);
     expect(patch.options[0]).toEqual({ id: 'a-q-mc', label: 'A', text: 'Pilihan A' });

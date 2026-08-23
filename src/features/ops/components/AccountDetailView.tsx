@@ -1,5 +1,3 @@
-'use client';
-
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/app/components/ui';
 import { AdminPageHeader, AdminPill, AdminConfirmModal } from '@/src/features/admin/AdminChrome';
@@ -29,15 +27,21 @@ export function AccountDetailView({
   const [saving, setSaving] = useState(false);
   const [rolesEditing, setRolesEditing] = useState(false);
   const [rolesSaving, setRolesSaving] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<'free' | 'pro'>('free');
+  const [selectedPlan, setSelectedPlan] = useState<'free' | 'pro' | 'plus'>('free');
   const [entitlementConfirmOpen, setEntitlementConfirmOpen] = useState(false);
   const [entitlementSaving, setEntitlementSaving] = useState(false);
   const [entitlementMessage, setEntitlementMessage] = useState<string | null>(null);
   const AVAILABLE_ROLES = ['teacher', 'school_admin', 'subscriber'] as const;
   const [editRoles, setEditRoles] = useState<string[]>([]);
 
-  const currentPlan = detail?.billing?.plan === 'pro' ? 'pro' : 'free';
-  const planLabel = (plan: 'free' | 'pro') => (plan === 'pro' ? 'Pro' : 'Free');
+  const currentPlan: 'free' | 'pro' | 'plus' =
+    detail?.billing?.plan === 'pro'
+      ? 'pro'
+      : detail?.billing?.plan === 'plus'
+        ? 'plus'
+        : 'free';
+  const planLabel = (plan: 'free' | 'pro' | 'plus') =>
+    plan === 'plus' ? 'Plus' : plan === 'pro' ? 'Pro' : 'Free';
   const tokenUsage = detail?.workspacePlan ?? null;
   const formatTokens = (value: number) => new Intl.NumberFormat('id-ID').format(value);
   const tokenUsageLabel = tokenUsage
@@ -49,18 +53,30 @@ export function AccountDetailView({
     : 'Data penggunaan token belum tersedia';
 
   useEffect(() => {
-    setLoading(true);
+    let cancelled = false;
+
     adminService.accountDetail(accountId).then((res) => {
+      if (cancelled) return;
       if (res.ok) {
         setDetail(res.value);
         setEditName(res.value.name || res.value.displayName || '');
         setEditPhone(res.value.phone || '');
-        setSelectedPlan(res.value.billing?.plan === 'pro' ? 'pro' : 'free');
+        setSelectedPlan(
+          res.value.billing?.plan === 'pro'
+            ? 'pro'
+            : res.value.billing?.plan === 'plus'
+              ? 'plus'
+              : 'free',
+        );
       } else {
         setToast(`Gagal memuat detail: ${res.error.safeMessage}`);
       }
       setLoading(false);
     });
+
+    return () => {
+      cancelled = true;
+    };
   }, [accountId, setToast]);
 
   const handleSave = (e: React.FormEvent) => {
@@ -91,7 +107,12 @@ export function AccountDetailView({
       .setEntitlement(detail.workspaceId, { plan: selectedPlan })
       .then((res) => {
         if (res.ok) {
-          const newPlan = res.value.newPlan === 'pro' ? 'pro' : 'free';
+          const newPlan: 'free' | 'pro' | 'plus' =
+            res.value.newPlan === 'pro'
+              ? 'pro'
+              : res.value.newPlan === 'plus'
+                ? 'plus'
+                : 'free';
           setDetail((prev) =>
             prev
               ? {
@@ -338,7 +359,7 @@ export function AccountDetailView({
                     id="workspace-entitlement-plan"
                     value={selectedPlan}
                     onChange={(event) => {
-                      setSelectedPlan(event.target.value as 'free' | 'pro');
+                      setSelectedPlan(event.target.value as 'free' | 'pro' | 'plus');
                       setEntitlementMessage(null);
                     }}
                     disabled={entitlementSaving}
@@ -346,6 +367,7 @@ export function AccountDetailView({
                   >
                     <option value="free">Free</option>
                     <option value="pro">Pro</option>
+                    <option value="plus">Plus</option>
                   </select>
                   {entitlementMessage ? (
                     <p
@@ -577,14 +599,7 @@ export function AccountRowActions({
                   setIsOpen(false);
                   adminService.resetPassword(row.id).then((res) => {
                     if (res.ok) {
-                      const details = [res.value.token, res.value.resetUrl]
-                        .filter(Boolean)
-                        .join(' · ');
-                      setToast(
-                        details
-                          ? `Reset sandi untuk ${row.email}: ${details}`
-                          : `Reset sandi berhasil dikirim ke ${row.email}.`,
-                      );
+                      setToast(`Instruksi reset sandi berhasil diproses untuk ${row.email}.`);
                     } else {
                       setToast(`Gagal: ${res.error.safeMessage}`);
                     }

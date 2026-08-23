@@ -5,8 +5,20 @@ import WorkspaceSettingsPage from '../app/pengaturan/workspace/page';
 
 const MOCK_WORKSPACES = [
   { id: 'ws-1', name: 'Workspace Pribadi', type: 'personal', role: 'owner', permissions: [] },
-  { id: 'ws-2', name: 'SD Negeri 01 Maju', type: 'school', role: 'admin', permissions: [] },
-  { id: 'ws-3', name: 'Tim Guru Matematika', type: 'school', role: 'member', permissions: [] },
+  {
+    id: 'ws-2',
+    name: 'SD Negeri 01 Maju',
+    type: 'school',
+    role: 'school_admin',
+    permissions: [],
+  },
+  {
+    id: 'ws-3',
+    name: 'Tim Guru Matematika',
+    type: 'school',
+    role: 'teacher',
+    permissions: [],
+  },
 ];
 
 function mockFetch() {
@@ -90,49 +102,14 @@ describe('F2-07 workspace settings — /app/pengaturan/workspace', () => {
     });
   });
 
-  it('shows leave confirmation when Keluar is clicked', async () => {
-    const user = userEvent.setup();
+  it('does not offer a fake leave action without a backend contract', async () => {
     render(<WorkspaceSettingsPage />);
 
     await waitFor(() => {
       expect(screen.queryByText(/memuat…/i)).not.toBeInTheDocument();
     });
 
-    const leaveButtons = screen.getAllByRole('button', { name: /^keluar$/i });
-    await user.click(leaveButtons[0]);
-
-    expect(screen.getByText(/yakin ingin keluar dari workspace/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /ya, keluar/i })).toBeInTheDocument();
-  });
-
-  it('shows unavailable status after confirming leave', async () => {
-    const user = userEvent.setup();
-    render(<WorkspaceSettingsPage />);
-
-    await waitFor(() => {
-      expect(screen.queryByText(/memuat…/i)).not.toBeInTheDocument();
-    });
-
-    const leaveButtons = screen.getAllByRole('button', { name: /^keluar$/i });
-    await user.click(leaveButtons[0]);
-    await user.click(screen.getByRole('button', { name: /ya, keluar/i }));
-
-    await waitFor(() => {
-      expect(screen.getByRole('status')).toHaveTextContent(/belum tersedia/i);
-    });
-  });
-
-  it('does not show leave button for personal workspace', async () => {
-    render(<WorkspaceSettingsPage />);
-
-    await waitFor(() => {
-      expect(screen.queryByText(/memuat…/i)).not.toBeInTheDocument();
-    });
-
-    // "Workspace Pribadi" is personal + owner — no Keluar button.
-    // "SD Negeri 01 Maju" is non-personal admin — Keluar shown.
-    // "Tim Guru Matematika" is non-personal member — Keluar shown.
-    const leaveButtons = screen.queryAllByRole('button', { name: /^keluar$/i });
-    expect(leaveButtons).toHaveLength(2);
+    expect(screen.queryByRole('button', { name: /^keluar$/i })).toBeNull();
+    expect(screen.getByText(/dikelola oleh admin sekolah/i)).toBeInTheDocument();
   });
 });

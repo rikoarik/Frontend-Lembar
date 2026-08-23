@@ -36,9 +36,7 @@ function memberRoleLabel(role: SchoolMember['role']): string {
   return 'Guru';
 }
 
-function memberStateTone(
-  state: SchoolMember['state'],
-): 'ok' | 'warn' | 'bad' | 'neutral' {
+function memberStateTone(state: SchoolMember['state']): 'ok' | 'warn' | 'bad' | 'neutral' {
   if (state === 'active') return 'ok';
   if (state === 'suspended') return 'bad';
   return 'neutral';
@@ -86,17 +84,12 @@ function notificationStatusLabel(status: string): string {
 
 // ── Section: Ringkasan ────────────────────────────────────────────────────────
 
-function SectionRingkasan({
-  setToast,
-}: {
-  setToast: (msg: string) => void;
-}) {
+function SectionRingkasan({ setToast }: { setToast: (msg: string) => void }) {
   const [dashboard, setDashboard] = useState<SchoolDashboard | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
     schoolService.dashboard().then((res) => {
       if (cancelled) return;
       if (res.ok) {
@@ -115,9 +108,7 @@ function SectionRingkasan({
 
   if (!dashboard) {
     return (
-      <div className="text-sm text-neutral-400 py-8 text-center">
-        Data ringkasan tidak tersedia
-      </div>
+      <div className="text-sm text-neutral-400 py-8 text-center">Data ringkasan tidak tersedia</div>
     );
   }
 
@@ -178,51 +169,62 @@ function SectionGuru({
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [actionId, setActionId] = useState<string | null>(null);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const requestIdRef = useRef(0);
 
-  const fetchMembers = useCallback(
-    (q: string, role: string, pg: number) => {
-      setLoading(true);
-      setFetchError(null);
-      schoolService
-        .members({
-          q: q || undefined,
-          role:
-            role !== 'all'
-              ? (role as 'teacher' | 'school_admin')
-              : undefined,
-          page: pg,
-          limit: 20,
-        })
-        .then((res) => {
-          if (res.ok) {
-            // service wraps paginated responses as { data, meta }
-            const result = res.value as unknown as SchoolMembersResult;
-            setMembers(result.data ?? []);
-            setMeta(result.meta ?? null);
-          } else {
-            setFetchError(res.error.safeMessage);
-          }
-          setLoading(false);
-        });
-    },
-    [],
-  );
+  const fetchMembers = useCallback((q: string, role: string, pg: number) => {
+    const requestId = ++requestIdRef.current;
+    setLoading(true);
+    setFetchError(null);
+    schoolService
+      .members({
+        q: q || undefined,
+        role: role !== 'all' ? (role as 'teacher' | 'school_admin') : undefined,
+        page: pg,
+        limit: 20,
+      })
+      .then((res) => {
+        if (requestId !== requestIdRef.current) return;
+        if (res.ok) {
+          // service wraps paginated responses as { data, meta }
+          const result = res.value as unknown as SchoolMembersResult;
+          setMembers(result.data ?? []);
+          setMeta(result.meta ?? null);
+        } else {
+          setFetchError(res.error.safeMessage);
+        }
+        setLoading(false);
+      });
+  }, []);
 
   useEffect(() => {
-    setPage(1);
-  }, [search, filter]);
-
-  useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(
-      () => fetchMembers(search, filter, page),
-      300,
-    );
+    const timeoutId = setTimeout(() => fetchMembers(search, filter, page), 300);
     return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
+      clearTimeout(timeoutId);
+      requestIdRef.current += 1;
     };
   }, [search, filter, page, fetchMembers]);
+
+  function handleSearchChange(value: string) {
+    if (value === search) return;
+    requestIdRef.current += 1;
+    setLoading(true);
+    setPage(1);
+    setSearch(value);
+  }
+
+  function handleFilterChange(value: string) {
+    if (value === filter) return;
+    requestIdRef.current += 1;
+    setLoading(true);
+    setPage(1);
+    setFilter(value);
+  }
+
+  function handlePageChange(updater: (currentPage: number) => number) {
+    requestIdRef.current += 1;
+    setLoading(true);
+    setPage(updater);
+  }
 
   async function handleSuspend(member: SchoolMember) {
     setActionId(member.id);
@@ -272,7 +274,7 @@ function SectionGuru({
     <>
       <AdminToolbar
         search={search}
-        onSearchChange={setSearch}
+        onSearchChange={handleSearchChange}
         searchPlaceholder="Cari nama / email…"
         filters={
           <>
@@ -280,7 +282,7 @@ function SectionGuru({
               <AdminFilterChip
                 key={value}
                 active={filter === value}
-                onClick={() => setFilter(value)}
+                onClick={() => handleFilterChange(value)}
               >
                 {label}
               </AdminFilterChip>
@@ -329,9 +331,7 @@ function SectionGuru({
           aria-label="Belum ada anggota sekolah"
           className="rounded-xl border border-dashed border-[#ddd4c8] bg-white px-6 py-14 text-center"
         >
-          <p className="text-[13px] font-semibold text-[#171717]">
-            Belum ada anggota sekolah
-          </p>
+          <p className="text-[13px] font-semibold text-[#171717]">Belum ada anggota sekolah</p>
           <p className="mx-auto mt-1 max-w-md text-[12px] text-[#57534e]">
             Undang guru pertama agar mereka bisa mulai memakai workspace sekolah.
           </p>
@@ -359,9 +359,7 @@ function SectionGuru({
             {
               key: 'role',
               header: 'Peran',
-              render: (row) => (
-                <AdminPill tone="neutral">{memberRoleLabel(row.role)}</AdminPill>
-              ),
+              render: (row) => <AdminPill tone="neutral">{memberRoleLabel(row.role)}</AdminPill>,
             },
             {
               key: 'state',
@@ -425,7 +423,7 @@ function SectionGuru({
               size="sm"
               variant="secondary"
               disabled={meta.page <= 1}
-              onClick={() => setPage((p) => p - 1)}
+              onClick={() => handlePageChange((p) => p - 1)}
             >
               ‹ Sebelumnya
             </Button>
@@ -433,7 +431,7 @@ function SectionGuru({
               size="sm"
               variant="secondary"
               disabled={meta.page >= meta.pages}
-              onClick={() => setPage((p) => p + 1)}
+              onClick={() => handlePageChange((p) => p + 1)}
             >
               Berikutnya ›
             </Button>
@@ -485,10 +483,7 @@ function SectionUndang({ setToast }: { setToast: (msg: string) => void }) {
   return (
     <form onSubmit={handleSubmit} className="max-w-md space-y-4">
       <div>
-        <label
-          className="block text-sm font-medium mb-1"
-          htmlFor="invite-email"
-        >
+        <label className="block text-sm font-medium mb-1" htmlFor="invite-email">
           Email
         </label>
         <input
@@ -502,18 +497,13 @@ function SectionUndang({ setToast }: { setToast: (msg: string) => void }) {
         />
       </div>
       <div>
-        <label
-          className="block text-sm font-medium mb-1"
-          htmlFor="invite-role"
-        >
+        <label className="block text-sm font-medium mb-1" htmlFor="invite-role">
           Peran
         </label>
         <select
           id="invite-role"
           value={role}
-          onChange={(e) =>
-            setRole(e.target.value as 'teacher' | 'school_admin')
-          }
+          onChange={(e) => setRole(e.target.value as 'teacher' | 'school_admin')}
           className="w-full rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white"
         >
           <option value="teacher">Guru</option>
@@ -529,17 +519,12 @@ function SectionUndang({ setToast }: { setToast: (msg: string) => void }) {
 
 // ── Section: Penggunaan ───────────────────────────────────────────────────────
 
-function SectionPenggunaan({
-  setToast,
-}: {
-  setToast: (msg: string) => void;
-}) {
+function SectionPenggunaan({ setToast }: { setToast: (msg: string) => void }) {
   const [usage, setUsage] = useState<SchoolUsage | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
     schoolService.usage().then((res) => {
       if (cancelled) return;
       if (res.ok) {
@@ -557,11 +542,7 @@ function SectionPenggunaan({
   if (loading) return <AdminContentLoading />;
 
   if (!usage) {
-    return (
-      <div className="text-sm text-neutral-400 py-8 text-center">
-        Data tidak tersedia
-      </div>
-    );
+    return <div className="text-sm text-neutral-400 py-8 text-center">Data tidak tersedia</div>;
   }
 
   const unlimited = usage.quotaLimit === 0;
@@ -576,25 +557,23 @@ function SectionPenggunaan({
             {usage.quotaUsed} / {unlimited ? 'Tidak terbatas' : `${usage.quotaLimit} (${pct}%)`}
           </span>
         </div>
-        {!unlimited && <div
-          role="progressbar"
-          aria-label="Kuota terpakai"
-          aria-valuemin={0}
-          aria-valuemax={usage.quotaLimit}
-          aria-valuenow={Math.min(usage.quotaUsed, usage.quotaLimit)}
-          className="h-2 rounded-full bg-neutral-100 dark:bg-neutral-800"
-        >
+        {!unlimited && (
           <div
-            className={`h-2 rounded-full transition-all ${
-              pct >= 90
-                ? 'bg-red-500'
-                : pct >= 70
-                  ? 'bg-yellow-500'
-                  : 'bg-blue-500'
-            }`}
-            style={{ width: `${Math.min(pct, 100)}%` }}
-          />
-        </div>}
+            role="progressbar"
+            aria-label="Kuota terpakai"
+            aria-valuemin={0}
+            aria-valuemax={usage.quotaLimit}
+            aria-valuenow={Math.min(usage.quotaUsed, usage.quotaLimit)}
+            className="h-2 rounded-full bg-neutral-100 dark:bg-neutral-800"
+          >
+            <div
+              className={`h-2 rounded-full transition-all ${
+                pct >= 90 ? 'bg-red-500' : pct >= 70 ? 'bg-yellow-500' : 'bg-blue-500'
+              }`}
+              style={{ width: `${Math.min(pct, 100)}%` }}
+            />
+          </div>
+        )}
       </div>
 
       {usage.breakdown.length > 0 && (
@@ -644,11 +623,7 @@ function SectionPenggunaan({
 
 // ── Section: Pengaturan ───────────────────────────────────────────────────────
 
-function SectionPengaturan({
-  setToast,
-}: {
-  setToast: (msg: string) => void;
-}) {
+function SectionPengaturan({ setToast }: { setToast: (msg: string) => void }) {
   const [settings, setSettings] = useState<SchoolSettings | null>(null);
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(true);
@@ -656,7 +631,6 @@ function SectionPengaturan({
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
     schoolService.settings().then((res) => {
       if (cancelled) return;
       if (res.ok) {
@@ -692,10 +666,7 @@ function SectionPengaturan({
   return (
     <form onSubmit={handleSave} className="max-w-md space-y-4">
       <div>
-        <label
-          className="block text-sm font-medium mb-1"
-          htmlFor="settings-name"
-        >
+        <label className="block text-sm font-medium mb-1" htmlFor="settings-name">
           Nama sekolah
         </label>
         <input
@@ -715,9 +686,7 @@ function SectionPengaturan({
           <div>Level: {neutralMetadataLabel(settings.level)}</div>
           <div>Paket: {neutralMetadataLabel(settings.plan)}</div>
           <div>Kursi: {settings.seats}</div>
-          {settings.renewsAt && (
-            <div>Perpanjang: {fmtDate(settings.renewsAt)}</div>
-          )}
+          {settings.renewsAt && <div>Perpanjang: {fmtDate(settings.renewsAt)}</div>}
         </div>
       )}
       <Button type="submit" size="sm" disabled={saving}>
@@ -730,7 +699,9 @@ function SectionPengaturan({
 // ── Section: Billing ──────────────────────────────────────────────────────────
 
 function SectionBilling() {
-  const [billing, setBilling] = useState<import('@/src/services/school/schoolService').SchoolBilling | null>(null);
+  const [billing, setBilling] = useState<
+    import('@/src/services/school/schoolService').SchoolBilling | null
+  >(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -742,13 +713,18 @@ function SectionBilling() {
       else setError(res.error.safeMessage);
       setLoading(false);
     });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   if (loading) return <AdminContentLoading />;
   if (error || !billing) {
     return (
-      <div role="alert" className="rounded-xl border border-brand-danger/30 bg-brand-danger-soft px-6 py-5 text-sm text-brand-danger">
+      <div
+        role="alert"
+        className="rounded-xl border border-brand-danger/30 bg-brand-danger-soft px-6 py-5 text-sm text-brand-danger"
+      >
         <p className="font-semibold text-[#171717]">Gagal memuat billing sekolah</p>
         <p className="mt-1">{error ?? 'Data billing tidak tersedia.'}</p>
       </div>
@@ -759,15 +735,36 @@ function SectionBilling() {
     <div className="space-y-6">
       <div>
         <h2 className="text-[18px] font-bold text-[#171717]">Langganan & Tagihan Sekolah</h2>
-        <p className="mt-0.5 text-[13px] text-[#6d665d]">Ringkasan paket aktual dari layanan billing.</p>
+        <p className="mt-0.5 text-[13px] text-[#6d665d]">
+          Ringkasan paket aktual dari layanan billing.
+        </p>
       </div>
-      <AdminStatCards items={[
-        { label: 'Paket', value: billing.plan, tone: 'neutral' },
-        { label: 'Lisensi Guru', value: `${billing.seatCount} Guru`, hint: 'Anggota aktif', tone: 'info' },
-        { label: 'Penggunaan Bulan Ini', value: `${billing.generationsUsedThisMonth} / ${billing.monthlyLimit ?? 'Tidak terbatas'}`, tone: 'neutral' },
-        { label: 'Mulai Siklus Billing', value: fmtDate(billing.billingCycleStartedAt), hint: 'Tanggal mulai siklus, bukan tanggal perpanjangan', tone: 'neutral' },
-      ]} />
-      <div role="status" className="rounded-xl border border-[#ddd4c8] bg-white px-5 py-4 text-sm text-[#57534e]">
+      <AdminStatCards
+        items={[
+          { label: 'Paket', value: billing.plan, tone: 'neutral' },
+          {
+            label: 'Lisensi Guru',
+            value: `${billing.seatCount} Guru`,
+            hint: 'Anggota aktif',
+            tone: 'info',
+          },
+          {
+            label: 'Penggunaan Bulan Ini',
+            value: `${billing.generationsUsedThisMonth} / ${billing.monthlyLimit ?? 'Tidak terbatas'}`,
+            tone: 'neutral',
+          },
+          {
+            label: 'Mulai Siklus Billing',
+            value: fmtDate(billing.billingCycleStartedAt),
+            hint: 'Tanggal mulai siklus, bukan tanggal perpanjangan',
+            tone: 'neutral',
+          },
+        ]}
+      />
+      <div
+        role="status"
+        className="rounded-xl border border-[#ddd4c8] bg-white px-5 py-4 text-sm text-[#57534e]"
+      >
         Riwayat dan unduhan faktur belum tersedia.
       </div>
     </div>
@@ -789,14 +786,14 @@ function SectionLibrary({
   const [meta, setMeta] = useState<SchoolLibraryResult['meta'] | null>(null);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => { setPage(1); }, [search]);
+  const requestIdRef = useRef(0);
 
   const fetchLibrary = useCallback(
     (q: string, pg: number) => {
+      const requestId = ++requestIdRef.current;
       setLoading(true);
       schoolService.library({ q: q || undefined, page: pg, limit: 20 }).then((res) => {
+        if (requestId !== requestIdRef.current) return;
         if (res.ok) {
           // service wraps paginated responses as { data, meta }
           const result = res.value as unknown as SchoolLibraryResult;
@@ -812,18 +809,32 @@ function SectionLibrary({
   );
 
   useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => fetchLibrary(search, page), 300);
+    const timeoutId = setTimeout(() => fetchLibrary(search, page), 300);
     return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
+      clearTimeout(timeoutId);
+      requestIdRef.current += 1;
     };
   }, [search, page, fetchLibrary]);
+
+  function handleSearchChange(value: string) {
+    if (value === search) return;
+    requestIdRef.current += 1;
+    setLoading(true);
+    setPage(1);
+    setSearch(value);
+  }
+
+  function handlePageChange(updater: (currentPage: number) => number) {
+    requestIdRef.current += 1;
+    setLoading(true);
+    setPage(updater);
+  }
 
   return (
     <>
       <AdminToolbar
         search={search}
-        onSearchChange={setSearch}
+        onSearchChange={handleSearchChange}
         searchPlaceholder="Cari judul / mapel / penulis…"
       />
       {loading ? (
@@ -878,7 +889,7 @@ function SectionLibrary({
               size="sm"
               variant="secondary"
               disabled={page <= 1}
-              onClick={() => setPage((p) => p - 1)}
+              onClick={() => handlePageChange((p) => p - 1)}
             >
               ‹ Sebelumnya
             </Button>
@@ -886,7 +897,7 @@ function SectionLibrary({
               size="sm"
               variant="secondary"
               disabled={page >= meta.pages}
-              onClick={() => setPage((p) => p + 1)}
+              onClick={() => handlePageChange((p) => p + 1)}
             >
               Berikutnya ›
             </Button>
@@ -912,14 +923,14 @@ function SectionAudit({
   const [meta, setMeta] = useState<SchoolAuditResult['meta'] | null>(null);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => { setPage(1); }, [search]);
+  const requestIdRef = useRef(0);
 
   const fetchAudit = useCallback(
     (q: string, pg: number) => {
+      const requestId = ++requestIdRef.current;
       setLoading(true);
       schoolService.audit({ q: q || undefined, page: pg, limit: 20 }).then((res) => {
+        if (requestId !== requestIdRef.current) return;
         if (res.ok) {
           // service wraps paginated responses as { data, meta }
           const result = res.value as unknown as SchoolAuditResult;
@@ -935,18 +946,32 @@ function SectionAudit({
   );
 
   useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => fetchAudit(search, page), 300);
+    const timeoutId = setTimeout(() => fetchAudit(search, page), 300);
     return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
+      clearTimeout(timeoutId);
+      requestIdRef.current += 1;
     };
   }, [search, page, fetchAudit]);
+
+  function handleSearchChange(value: string) {
+    if (value === search) return;
+    requestIdRef.current += 1;
+    setLoading(true);
+    setPage(1);
+    setSearch(value);
+  }
+
+  function handlePageChange(updater: (currentPage: number) => number) {
+    requestIdRef.current += 1;
+    setLoading(true);
+    setPage(updater);
+  }
 
   return (
     <>
       <AdminToolbar
         search={search}
-        onSearchChange={setSearch}
+        onSearchChange={handleSearchChange}
         searchPlaceholder="Cari aktor / aksi / target…"
       />
       {loading ? (
@@ -989,7 +1014,7 @@ function SectionAudit({
               size="sm"
               variant="secondary"
               disabled={page <= 1}
-              onClick={() => setPage((p) => p - 1)}
+              onClick={() => handlePageChange((p) => p - 1)}
             >
               ‹ Sebelumnya
             </Button>
@@ -997,7 +1022,7 @@ function SectionAudit({
               size="sm"
               variant="secondary"
               disabled={page >= meta.pages}
-              onClick={() => setPage((p) => p + 1)}
+              onClick={() => handlePageChange((p) => p + 1)}
             >
               Berikutnya ›
             </Button>
@@ -1015,10 +1040,29 @@ function SectionUndangan({ setToast }: { setToast: (msg: string) => void }) {
   const [loading, setLoading] = useState(true);
   const [cancelId, setCancelId] = useState<string | null>(null);
   const [confirmCancelInv, setConfirmCancelInv] = useState<SchoolInvitation | null>(null);
+  const requestIdRef = useRef(0);
 
-  function fetchInvitations() {
+  useEffect(() => {
+    const requestId = ++requestIdRef.current;
+    schoolService.invitations().then((res) => {
+      if (requestId !== requestIdRef.current) return;
+      if (res.ok) {
+        setInvitations(res.value);
+      } else {
+        setToast(`Gagal memuat undangan: ${res.error.safeMessage}`);
+      }
+      setLoading(false);
+    });
+    return () => {
+      requestIdRef.current += 1;
+    };
+  }, [setToast]);
+
+  function refreshInvitations() {
+    const requestId = ++requestIdRef.current;
     setLoading(true);
     schoolService.invitations().then((res) => {
+      if (requestId !== requestIdRef.current) return;
       if (res.ok) {
         setInvitations(res.value);
       } else {
@@ -1028,17 +1072,12 @@ function SectionUndangan({ setToast }: { setToast: (msg: string) => void }) {
     });
   }
 
-  useEffect(() => {
-    fetchInvitations();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   async function handleCancel(inv: SchoolInvitation) {
     setCancelId(inv.id);
     const res = await schoolService.cancelInvitation(inv.id);
     if (res.ok) {
       setToast(`Undangan ke ${inv.email} dibatalkan`);
-      fetchInvitations();
+      refreshInvitations();
     } else {
       setToast(`Gagal membatalkan: ${res.error.safeMessage}`);
     }
@@ -1060,9 +1099,7 @@ function SectionUndangan({ setToast }: { setToast: (msg: string) => void }) {
               <div>
                 <div className="font-medium text-sm">{row.email}</div>
                 {row.invitedBy && (
-                  <div className="text-xs text-neutral-400">
-                    Diundang oleh {row.invitedBy}
-                  </div>
+                  <div className="text-xs text-neutral-400">Diundang oleh {row.invitedBy}</div>
                 )}
               </div>
             ),
@@ -1134,23 +1171,51 @@ function SectionNotifikasi({ setToast }: { setToast: (msg: string) => void }) {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState('');
-
-  const fetchNotifications = useCallback((pg: number, status: string) => {
-    setLoading(true);
-    schoolService.notifications({ page: pg, limit: 20, status: status || undefined }).then((res) => {
-      if (res.ok) {
-        setData(res.value.data ?? []);
-        setMeta(res.value.meta ?? null);
-      } else {
-        setToast(`Gagal memuat notifikasi: ${res.error.safeMessage}`);
-      }
-      setLoading(false);
-    });
-  }, [setToast]);
+  const [refreshVersion, setRefreshVersion] = useState(0);
+  const requestIdRef = useRef(0);
 
   useEffect(() => {
-    fetchNotifications(page, filterStatus);
-  }, [fetchNotifications, page, filterStatus]);
+    const requestId = ++requestIdRef.current;
+    schoolService
+      .notifications({
+        page,
+        limit: 20,
+        status: filterStatus || undefined,
+      })
+      .then((res) => {
+        if (requestId !== requestIdRef.current) return;
+        if (res.ok) {
+          setData(res.value.data ?? []);
+          setMeta(res.value.meta ?? null);
+        } else {
+          setToast(`Gagal memuat notifikasi: ${res.error.safeMessage}`);
+        }
+        setLoading(false);
+      });
+    return () => {
+      requestIdRef.current += 1;
+    };
+  }, [filterStatus, page, refreshVersion, setToast]);
+
+  function handleFilterStatusChange(status: string) {
+    if (status === filterStatus && page === 1) return;
+    requestIdRef.current += 1;
+    setLoading(true);
+    setFilterStatus(status);
+    setPage(1);
+  }
+
+  function handlePageChange(updater: (currentPage: number) => number) {
+    requestIdRef.current += 1;
+    setLoading(true);
+    setPage(updater);
+  }
+
+  function handleRefresh() {
+    requestIdRef.current += 1;
+    setLoading(true);
+    setRefreshVersion((version) => version + 1);
+  }
 
   function notifTone(status: string): 'ok' | 'warn' | 'bad' | 'neutral' {
     if (status === 'delivered') return 'ok';
@@ -1164,7 +1229,7 @@ function SectionNotifikasi({ setToast }: { setToast: (msg: string) => void }) {
         {(['', 'pending', 'delivered', 'failed'] as const).map((s) => (
           <button
             key={s || 'all'}
-            onClick={() => { setFilterStatus(s); setPage(1); }}
+            onClick={() => handleFilterStatusChange(s)}
             className={`px-3 py-1 rounded-full text-[12px] font-medium border transition-colors ${
               filterStatus === s
                 ? 'bg-[#171717] text-white border-[#171717]'
@@ -1175,7 +1240,7 @@ function SectionNotifikasi({ setToast }: { setToast: (msg: string) => void }) {
           </button>
         ))}
         <button
-          onClick={() => fetchNotifications(page, filterStatus)}
+          onClick={handleRefresh}
           className="px-3 py-1 rounded-full text-[12px] font-medium border border-[#ddd4c8] bg-white text-[#6d665d] hover:bg-[#faf8f5] ml-auto"
         >
           Refresh
@@ -1201,7 +1266,11 @@ function SectionNotifikasi({ setToast }: { setToast: (msg: string) => void }) {
             {
               key: 'status',
               header: 'Status',
-              render: (row) => <AdminPill tone={notifTone(row.status)}>{notificationStatusLabel(row.status)}</AdminPill>,
+              render: (row) => (
+                <AdminPill tone={notifTone(row.status)}>
+                  {notificationStatusLabel(row.status)}
+                </AdminPill>
+              ),
             },
             {
               key: 'attempt',
@@ -1220,7 +1289,9 @@ function SectionNotifikasi({ setToast }: { setToast: (msg: string) => void }) {
             {
               key: 'created',
               header: 'Dibuat',
-              render: (row) => <span className="text-[11px] text-[#6d665d]">{row.createdAt ?? '—'}</span>,
+              render: (row) => (
+                <span className="text-[11px] text-[#6d665d]">{row.createdAt ?? '—'}</span>
+              ),
             },
           ]}
         />
@@ -1235,7 +1306,7 @@ function SectionNotifikasi({ setToast }: { setToast: (msg: string) => void }) {
             <button
               aria-label="Halaman notifikasi sebelumnya"
               disabled={page <= 1}
-              onClick={() => setPage((p) => p - 1)}
+              onClick={() => handlePageChange((p) => p - 1)}
               className="px-3 py-1 rounded-lg border border-[#ddd4c8] text-[12px] disabled:opacity-40"
             >
               ‹
@@ -1243,7 +1314,7 @@ function SectionNotifikasi({ setToast }: { setToast: (msg: string) => void }) {
             <button
               aria-label="Halaman notifikasi berikutnya"
               disabled={page >= meta.pages}
-              onClick={() => setPage((p) => p + 1)}
+              onClick={() => handlePageChange((p) => p + 1)}
               className="px-3 py-1 rounded-lg border border-[#ddd4c8] text-[12px] disabled:opacity-40"
             >
               ›
@@ -1257,14 +1328,13 @@ function SectionNotifikasi({ setToast }: { setToast: (msg: string) => void }) {
 
 export function SchoolAdminView({ section = '' }: { section?: string }) {
   const current = section || '';
-  const { search, filter, setSearch, setFilter, setToast } =
-    useAdminSectionState(current || 'ringkasan');
+  const { search, filter, setSearch, setFilter, setToast } = useAdminSectionState(
+    current || 'ringkasan',
+  );
 
   return (
     <div className="space-y-4">
-      {current === '' ? (
-        <SectionRingkasan setToast={setToast} />
-      ) : null}
+      {current === '' ? <SectionRingkasan setToast={setToast} /> : null}
 
       {current === 'guru' ? (
         <SectionGuru
@@ -1276,51 +1346,42 @@ export function SchoolAdminView({ section = '' }: { section?: string }) {
         />
       ) : null}
 
-      {current === 'undang' ? (
-        <SectionUndang setToast={setToast} />
-      ) : null}
+      {current === 'undang' ? <SectionUndang setToast={setToast} /> : null}
 
-      {current === 'undangan' ? (
-        <SectionUndangan setToast={setToast} />
-      ) : null}
+      {current === 'undangan' ? <SectionUndangan setToast={setToast} /> : null}
 
-      {current === 'penggunaan' ? (
-        <SectionPenggunaan setToast={setToast} />
-      ) : null}
+      {current === 'penggunaan' ? <SectionPenggunaan setToast={setToast} /> : null}
 
-      {current === 'billing' ? (
-        <SectionBilling />
-      ) : null}
+      {current === 'billing' ? <SectionBilling /> : null}
 
-      {current === 'pengaturan' ? (
-        <SectionPengaturan setToast={setToast} />
-      ) : null}
+      {current === 'pengaturan' ? <SectionPengaturan setToast={setToast} /> : null}
 
       {current === 'library' ? (
-        <SectionLibrary
-          search={search}
-          setSearch={setSearch}
-          setToast={setToast}
-        />
+        <SectionLibrary search={search} setSearch={setSearch} setToast={setToast} />
       ) : null}
 
       {current === 'audit' ? (
-        <SectionAudit
-          search={search}
-          setSearch={setSearch}
-          setToast={setToast}
-        />
+        <SectionAudit search={search} setSearch={setSearch} setToast={setToast} />
       ) : null}
 
-      {current === 'notifikasi' ? (
-        <SectionNotifikasi setToast={setToast} />
-      ) : null}
+      {current === 'notifikasi' ? <SectionNotifikasi setToast={setToast} /> : null}
 
       {![
-        '', 'guru', 'undang', 'undangan', 'penggunaan', 'billing', 'pengaturan',
-        'library', 'audit', 'notifikasi',
+        '',
+        'guru',
+        'undang',
+        'undangan',
+        'penggunaan',
+        'billing',
+        'pengaturan',
+        'library',
+        'audit',
+        'notifikasi',
       ].includes(current) ? (
-        <div role="alert" className="rounded-xl border border-[#ddd4c8] bg-white px-6 py-8 text-center">
+        <div
+          role="alert"
+          className="rounded-xl border border-[#ddd4c8] bg-white px-6 py-8 text-center"
+        >
           Halaman tidak ditemukan.
         </div>
       ) : null}

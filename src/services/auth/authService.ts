@@ -17,7 +17,10 @@ export type RecoveryRequestOutcome = { delivered: true };
 export const authService = {
   login(input: LoginInput, idempotencyKey: string) {
     if (input.identifier.trim().toLowerCase() === 'ops') {
-      return authMutations.adminLogin({ email: input.identifier, password: input.password }, idempotencyKey);
+      return authMutations.adminLogin(
+        { email: input.identifier, password: input.password },
+        idempotencyKey,
+      );
     }
     return authMutations.login(input, idempotencyKey);
   },

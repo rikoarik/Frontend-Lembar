@@ -1,8 +1,8 @@
 url: https://app.lembar.web.id/masuk
 ---
 - launchApp
-- assertVisible: "Masuk ke lembar"
-- assertVisible: "Username, email, atau nomor telepon"
-- assertVisible: "Kata sandi"
-- assertVisible: "Masuk"
-- takeScreenshot: "02-login-validation"
+- assertVisible: 'Masuk ke lembar'
+- assertVisible: 'Username, email, atau nomor telepon'
+- assertVisible: 'Kata sandi'
+- assertVisible: 'Masuk'
+- takeScreenshot: '02-login-validation'

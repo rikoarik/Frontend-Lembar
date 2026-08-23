@@ -47,7 +47,9 @@ export async function GET(request: NextRequest) {
   if (q) {
     items = items.filter((item) =>
       [item.title, item.subject, item.gradeLabel].some((value) =>
-        String(value ?? '').toLowerCase().includes(q),
+        String(value ?? '')
+          .toLowerCase()
+          .includes(q),
       ),
     );
   }

@@ -7,6 +7,7 @@ import { marketingNavigation, type MarketingNavItem } from '@/src/lib/marketing/
 import { getMarketingCta } from '@/src/lib/marketing/ctas';
 import ActiveNavIndicator from './ActiveNavIndicator';
 import Logo from './Logo';
+import { LocaleSwitcher } from '@/src/i18n/LocaleSwitcher';
 
 function isActive(item: MarketingNavItem, pathname: string): boolean {
   if (item.href === '/') return pathname === '/';
@@ -25,11 +26,6 @@ export default function MarketingNavbar({
   const panelRef = useRef<HTMLDivElement>(null);
 
   const closeMobile = useCallback(() => setMobileOpen(false), []);
-
-  // Close drawer when route changes.
-  useEffect(() => {
-    setMobileOpen(false);
-  }, [pathname]);
 
   // Escape closes the mobile menu and returns focus to the toggle.
   useEffect(() => {
@@ -99,13 +95,17 @@ export default function MarketingNavbar({
         </nav>
 
         <div className="flex shrink-0 items-center gap-unit-2">
+          <LocaleSwitcher className="hidden md:inline-flex items-center gap-2 text-sm" />
           {session ? (
             <Link
               href={session.homePath}
               className="inline-flex h-control-md items-center gap-unit-2 rounded-md bg-brand-accent px-unit-3 text-label-semibold text-white hover:bg-brand-accent-hover sm:px-unit-4"
               title={session.displayName}
+              onClick={closeMobile}
             >
-              <span className="material-symbols-outlined text-[18px]" aria-hidden="true">account_circle</span>
+              <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
+                account_circle
+              </span>
               Buka workspace
             </Link>
           ) : (
@@ -113,12 +113,14 @@ export default function MarketingNavbar({
               <Link
                 href={loginCta.href}
                 className="inline-flex h-control-md items-center rounded-md px-unit-2 text-label-semibold text-brand-ink hover:text-brand-accent sm:px-unit-3"
+                onClick={closeMobile}
               >
                 {loginCta.label}
               </Link>
               <Link
                 href={tryFreeCta.href}
                 className="inline-flex h-control-md items-center rounded-md bg-brand-accent px-unit-3 text-label-semibold text-white hover:bg-brand-accent-hover sm:px-unit-4"
+                onClick={closeMobile}
               >
                 {tryFreeCta.label}
               </Link>
@@ -172,6 +174,8 @@ export default function MarketingNavbar({
 
             <div className="my-unit-2 border-t border-brand-line" />
 
+            <LocaleSwitcher className="inline-flex items-center gap-2 text-sm px-unit-3 py-unit-2 md:hidden" />
+
             {session ? (
               <Link
                 href={session.homePath}
@@ -182,8 +186,20 @@ export default function MarketingNavbar({
               </Link>
             ) : (
               <>
-                <Link href={loginCta.href} onClick={closeMobile} className="inline-flex min-h-[var(--control-lg)] items-center rounded-md px-unit-3 text-label-semibold text-brand-ink hover:bg-brand-paper">{loginCta.label}</Link>
-                <Link href={tryFreeCta.href} onClick={closeMobile} className="inline-flex min-h-[var(--control-lg)] items-center justify-center rounded-md bg-brand-accent px-unit-4 text-label-semibold text-white hover:bg-brand-accent-hover">{tryFreeCta.label}</Link>
+                <Link
+                  href={loginCta.href}
+                  onClick={closeMobile}
+                  className="inline-flex min-h-[var(--control-lg)] items-center rounded-md px-unit-3 text-label-semibold text-brand-ink hover:bg-brand-paper"
+                >
+                  {loginCta.label}
+                </Link>
+                <Link
+                  href={tryFreeCta.href}
+                  onClick={closeMobile}
+                  className="inline-flex min-h-[var(--control-lg)] items-center justify-center rounded-md bg-brand-accent px-unit-4 text-label-semibold text-white hover:bg-brand-accent-hover"
+                >
+                  {tryFreeCta.label}
+                </Link>
               </>
             )}
           </nav>

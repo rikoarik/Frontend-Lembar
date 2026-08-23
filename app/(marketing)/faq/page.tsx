@@ -4,27 +4,27 @@ import Link from 'next/link';
 const faqs = [
   {
     q: 'Apa itu lembar?',
-    a: 'Platform pembuatan asesmen berbasis AI untuk guru Indonesia. Masukkan topik, pilih tingkat kesulitan — AI menyusun draft soal yang bisa Anda revisi dan ekspor ke Word/PDF.',
+    a: 'lembar membantu guru menyusun draft asesmen, meninjau setiap butir, lalu menyiapkan hasil untuk dicetak atau dibagikan.',
   },
   {
     q: 'Berapa biayanya?',
-    a: 'Ada paket Gratis untuk mulai mencoba tanpa batas waktu. Paket Pro mulai Rp79rb/bulan untuk fitur lengkap seperti AI tak terbatas dan ekspor massal.',
+    a: 'Harga, kuota, dan fitur mengikuti katalog aktif di halaman Harga. Jika katalog sedang tidak tersedia, lembar tidak menampilkan nilai fallback.',
   },
   {
-    q: 'Bagaimana AI-nya bekerja?',
-    a: 'AI kami dilatih dengan ribuan soal berkualitas dari berbagai mata pelajaran dan jenjang Indonesia. Cukup berikan topik dan level taksonomi Bloom, sisanya AI yang handle.',
+    q: 'Bagaimana proses generasinya?',
+    a: 'Guru memilih konteks dan komposisi soal, lalu sistem menyiapkan draft untuk ditinjau. Guru tetap perlu memeriksa dan menerima setiap butir sebelum finalisasi.',
   },
   {
-    q: 'Apakah data soal saya aman?',
-    a: 'Sangat. Enkripsi AES-256, audit trail lengkap, dan infrastruktur ISO 27001. Soal Anda 100% milik sekolah Anda — kami tidak pernah menjual atau melihat isinya.',
+    q: 'Bagaimana akses soal dikendalikan?',
+    a: 'Area kerja memerlukan sesi akun. Tautan siswa menggunakan token terbatas yang dapat kedaluwarsa atau dicabut dan tidak menampilkan kunci jawaban.',
   },
   {
-    q: 'Kurikulum apa yang didukung?',
-    a: 'Kurikulum Merdeka dan K-13. Anda juga bisa menyesuaikan soal untuk kebutuhan khusus sekolah, ujian mandiri, atau olimpiade.',
+    q: 'Kurikulum apa yang tersedia?',
+    a: 'Pilihan jenjang, mata pelajaran, materi, dan versi kurikulum mengikuti katalog yang sedang aktif untuk workspace Anda.',
   },
   {
-    q: 'Berapa lama untuk mulai menggunakan?',
-    a: 'Kurang dari 2 menit. Daftar akun gratis, pilih mata pelajaran, dan langsung buat lembar soal pertama Anda.',
+    q: 'Bagaimana cara mulai menggunakan?',
+    a: 'Masuk atau daftar, pilih workspace, tentukan komposisi soal, lalu tinjau draft sebelum mencetak atau membagikannya.',
   },
 ];
 
@@ -60,7 +60,7 @@ export default function FAQPage() {
             <div className="flex-1">
               <h3 className="font-h3 text-h3 text-ink mb-1">Belum terjawab?</h3>
               <p className="text-secondary text-body-sm">
-                Hubungi kami langsung — kami fast response.
+                Kirim pertanyaan melalui halaman kontak.
               </p>
             </div>
             <Link

@@ -198,6 +198,27 @@ describe('ConfigurationCompose — empty state', () => {
   });
 });
 
+describe('ConfigurationCompose — review mode stability', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockListGrades.mockResolvedValue(ok(MOCK_GRADES));
+    mockListSubjects.mockResolvedValue(ok([]));
+    mockListMaterials.mockResolvedValue(ok([]));
+  });
+
+  it('keeps the remaining form mounted after Detail is selected', async () => {
+    const user = userEvent.setup();
+    render(<ConfigurationCompose />, { wrapper: Wrapper });
+
+    const detail = await screen.findByRole('radio', { name: /Detail/i });
+    await user.click(detail);
+
+    expect(detail).toBeChecked();
+    expect(screen.getByRole('heading', { name: 'Konteks & Referensi' })).toBeInTheDocument();
+    expect(screen.getByTestId('output-settings')).toBeInTheDocument();
+  });
+});
+
 describe('ConfigurationCompose — 390px', () => {
   beforeEach(() => {
     vi.clearAllMocks();

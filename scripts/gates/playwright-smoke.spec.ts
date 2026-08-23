@@ -1,3 +1,4 @@
+import AxeBuilder from '@axe-core/playwright';
 import { mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { expect, test } from 'playwright/test';
@@ -9,8 +10,8 @@ const ROUTES = [
   {
     name: 'home',
     path: '/',
-    heading: /lembar ujian yang siap ditinjau/i,
-    cta: /Buat lembar gratis/i,
+    heading: /Buat soal ujian otomatis dari materi kurikulum atau PDF Anda/i,
+    cta: /Mulai membuat soal/i,
   },
   {
     name: 'untuk-sekolah',
@@ -45,6 +46,19 @@ for (const route of ROUTES) {
     expect(hasOverflow, `${route.name} should not overflow at ${testInfo.project.name}`).toBe(
       false,
     );
+
+    const accessibility = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
+      .analyze();
+    const seriousViolations = accessibility.violations.filter(
+      (violation) => violation.impact === 'critical' || violation.impact === 'serious',
+    );
+    expect(
+      seriousViolations,
+      seriousViolations
+        .map((violation) => `${violation.id}: ${violation.help} (${violation.nodes.length})`)
+        .join('\n'),
+    ).toEqual([]);
 
     await page.screenshot({
       path: resolve(SCREENSHOTS_DIR, `${route.name}.${testInfo.project.name}.png`),

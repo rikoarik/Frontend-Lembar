@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import AuthShell from '../AuthShell';
 import AuthSidePanel from '../components/AuthSidePanel';
@@ -22,6 +23,7 @@ const fieldError = (errors: Record<string, string[]>, key: FieldKey): string | u
   errors[key]?.[0];
 
 export default function RegisterPage() {
+  const router = useRouter();
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -37,7 +39,7 @@ export default function RegisterPage() {
   }>({
     submit: (input, idempotencyKey) => authService.register(input, idempotencyKey),
     onSuccess: () => {
-      window.location.href = '/app';
+      router.replace('/app');
     },
   });
 

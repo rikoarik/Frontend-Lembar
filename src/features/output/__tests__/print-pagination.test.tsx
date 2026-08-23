@@ -3,9 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { PrintPageWrapper } from '@/src/features/output/PrintPageWrapper';
 
 function makeChildren(n: number) {
-  return Array.from({ length: n }, (_, i) => (
-    <div key={i} data-question={i + 1} />
-  ));
+  return Array.from({ length: n }, (_, i) => <div key={i} data-question={i + 1} />);
 }
 
 describe('PrintPageWrapper', () => {
@@ -39,9 +37,7 @@ describe('PrintPageWrapper', () => {
 
   it('defaults questionsPerPage to 20', () => {
     // 21 children → 2 pages when default 20 is used
-    const { container } = render(
-      <PrintPageWrapper>{makeChildren(21)}</PrintPageWrapper>,
-    );
+    const { container } = render(<PrintPageWrapper>{makeChildren(21)}</PrintPageWrapper>);
     // wrapper div contains page divs
     const pages = container.querySelectorAll('[data-page]');
     expect(pages).toHaveLength(2);

@@ -19,13 +19,19 @@ export async function POST(
   const body = (await request.json().catch(() => ({}))) as { acknowledged?: boolean };
   if (body.acknowledged !== true) {
     return NextResponse.json(
-      { error: { code: 'VALIDATION_FAILED', message: 'Konfirmasi tanggung jawab guru wajib dicentang.' } },
+      {
+        error: {
+          code: 'VALIDATION_FAILED',
+          message: 'Konfirmasi tanggung jawab guru wajib dicentang.',
+        },
+      },
       { status: 400 },
     );
   }
   const detail = await loadLiveAssessment(auth.token, auth.claims.workspaceId, assessmentId);
   const versionId = (detail.payload as { data?: { versionId?: string } } | null)?.data?.versionId;
-  if (detail.status !== 200 || !versionId) return NextResponse.json(detail.payload, { status: detail.status });
+  if (detail.status !== 200 || !versionId)
+    return NextResponse.json(detail.payload, { status: detail.status });
   const upstream = await backendFetch(
     `/v1/workspaces/${encodeURIComponent(auth.claims.workspaceId)}/assessments/${encodeURIComponent(assessmentId)}/versions/${encodeURIComponent(versionId)}/finalize`,
     {
@@ -35,7 +41,10 @@ export async function POST(
       body: '{}',
     },
   );
-  const payload = (await upstream.json().catch(() => null)) as { finalizedAt?: string; error?: unknown } | null;
+  const payload = (await upstream.json().catch(() => null)) as {
+    finalizedAt?: string;
+    error?: unknown;
+  } | null;
   if (!upstream.ok) return NextResponse.json(payload, { status: upstream.status });
   return NextResponse.json({
     data: {

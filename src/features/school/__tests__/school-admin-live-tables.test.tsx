@@ -176,7 +176,9 @@ describe('SectionGuru — error state', () => {
     renderGuru();
 
     await waitFor(() => {
-      expect(screen.getByRole('alert', { name: /Gagal memuat anggota sekolah/ })).toBeInTheDocument();
+      expect(
+        screen.getByRole('alert', { name: /Gagal memuat anggota sekolah/ }),
+      ).toBeInTheDocument();
     });
     expect(screen.getByText('Tidak dapat terhubung ke server.')).toBeInTheDocument();
 

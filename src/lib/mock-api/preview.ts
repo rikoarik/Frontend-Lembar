@@ -1,9 +1,15 @@
 import { NextResponse } from 'next/server';
-
-const SESSION_COOKIE = 'lembar_session';
+import {
+  ACTIVE_ROLE_COOKIE,
+  ACTIVE_WORKSPACE_COOKIE,
+  JWT_COOKIE,
+  ROLES_COOKIE,
+  SESSION_COOKIE,
+} from '@/src/lib/api/session';
 const SESSION_VALUE = 'demo';
 
 export function isMockApiMode(): boolean {
+  if (process.env.NODE_ENV === 'production') return false;
   return process.env.NEXT_PUBLIC_API_MODE !== 'live';
 }
 
@@ -44,18 +50,18 @@ export function mockOk<T>(
 ) {
   const response = NextResponse.json({ data }, { status: init?.status ?? 200 });
   if (init?.clearSession) {
-    response.cookies.set({
-      name: SESSION_COOKIE,
-      value: '',
-      path: '/',
-      maxAge: 0,
-    });
-    response.cookies.set({
-      name: 'lembar_roles',
-      value: '',
-      path: '/',
-      maxAge: 0,
-    });
+    for (const name of [
+      SESSION_COOKIE,
+      JWT_COOKIE,
+      ROLES_COOKIE,
+      ACTIVE_ROLE_COOKIE,
+      ACTIVE_WORKSPACE_COOKIE,
+      'lembar_impersonator',
+      'lembar_is_impersonating',
+      'lembar_impersonated_name',
+    ]) {
+      response.cookies.set({ name, value: '', path: '/', maxAge: 0 });
+    }
   }
   if (init?.setSession) {
     const value = typeof init.setSession === 'string' ? init.setSession : SESSION_VALUE;

@@ -13,7 +13,7 @@ const WA_LINK = 'https://wa.me/6285784255112';
 const STATE_COPY: Record<EntitlementState, { heading: string; body: string }> = {
   free: {
     heading: 'Paket Gratis',
-    body: 'Anda saat ini menggunakan paket gratis dengan kuota terbatas. Tingkatkan paket untuk akses tanpa batas.',
+    body: 'Anda saat ini menggunakan paket gratis dengan kuota token terbatas. Tingkatkan paket untuk kuota lebih besar.',
   },
   active: {
     heading: 'Paket aktif',
@@ -47,14 +47,12 @@ function TokenMeter({ used, limit }: { used: number; limit: number | null }) {
   const pct = Math.min(100, Math.round((used / limit) * 100));
   const isHigh = pct >= 80;
   return (
-    <div
-      className="flex flex-col gap-1.5"
-      aria-label={`Token digunakan: ${used} dari ${limit}`}
-    >
+    <div className="flex flex-col gap-1.5" aria-label={`Token digunakan: ${used} dari ${limit}`}>
       <div className="flex justify-between text-body-xs text-brand-muted">
         <span>Token digunakan bulan ini</span>
         <span>
-          {new Intl.NumberFormat('id-ID').format(used)} / {new Intl.NumberFormat('id-ID').format(limit)}
+          {new Intl.NumberFormat('id-ID').format(used)} /{' '}
+          {new Intl.NumberFormat('id-ID').format(limit)}
         </span>
       </div>
       <div
@@ -80,11 +78,11 @@ export default function PlanUsageSettingsPage() {
   const [error, setError] = useState('');
   const [upgradeLoading, setUpgradeLoading] = useState(false);
   const [upgradeError, setUpgradeError] = useState('');
+  const [upgradePlan, setUpgradePlan] = useState<'pro' | 'plus'>('pro');
 
-  // Trial state (preserved from existing tests)
-  const [trialLoading, setTrialLoading] = useState(false);
-  const [trialError, setTrialError] = useState('');
-  const [trialSuccess, setTrialSuccess] = useState('');
+  const [claimLinkLoading, setClaimLinkLoading] = useState(false);
+  const [claimLinkError, setClaimLinkError] = useState('');
+  const [claimLink, setClaimLink] = useState<{ token: string; expiresAt: string } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -103,7 +101,9 @@ export default function PlanUsageSettingsPage() {
         setError(err.message || 'Gagal memuat data paket');
         setLoading(false);
       });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const handleUpgrade = async () => {
@@ -116,9 +116,12 @@ export default function PlanUsageSettingsPage() {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId, toPlan: 'pro' }),
+        body: JSON.stringify({ orderId, toPlan: upgradePlan }),
       });
-      const json = (await res.json()) as { paymentUrl?: string; error?: { code?: string; message?: string } };
+      const json = (await res.json()) as {
+        paymentUrl?: string;
+        error?: { code?: string; message?: string };
+      };
       if (res.ok && json.paymentUrl) {
         window.location.href = json.paymentUrl;
         return;
@@ -138,27 +141,27 @@ export default function PlanUsageSettingsPage() {
     }
   };
 
-  const handleClaimTrial = async () => {
-    setTrialLoading(true);
-    setTrialError('');
-    setTrialSuccess('');
+  const handlePrepareClaimLink = async () => {
+    setClaimLinkLoading(true);
+    setClaimLinkError('');
     try {
-      const res = await fetch('/v1/me/plan/trial/claim', {
+      const res = await fetch('/v1/me/plan/trial/claim-links', {
         method: 'POST',
         credentials: 'include',
       });
-      if (!res.ok) {
-        const json = (await res.json()) as { error?: { message?: string } };
-        setTrialError(json.error?.message ?? 'Gagal mengklaim trial.');
+      const json = (await res.json()) as {
+        data?: { token?: string; expiresAt?: string };
+        error?: { message?: string };
+      };
+      if (!res.ok || !json.data?.token || !json.data.expiresAt) {
+        setClaimLinkError(json.error?.message ?? 'Gagal menyiapkan tautan klaim trial.');
         return;
       }
-      const json = (await res.json()) as { data: MePlanData };
-      setPlan(json.data);
-      setTrialSuccess('Trial berhasil diaktifkan.');
+      setClaimLink({ token: json.data.token, expiresAt: json.data.expiresAt });
     } catch {
-      setTrialError('Tidak dapat terhubung. Periksa koneksi Anda.');
+      setClaimLinkError('Tidak dapat terhubung. Periksa koneksi Anda.');
     } finally {
-      setTrialLoading(false);
+      setClaimLinkLoading(false);
     }
   };
 
@@ -178,26 +181,33 @@ export default function PlanUsageSettingsPage() {
     return (
       <div className="flex flex-col gap-6 w-full">
         <h1 className="text-brand-ink font-semibold text-body-xl">Paket &amp; kuota</h1>
-        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700" role="alert">
+        <div
+          className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700"
+          role="alert"
+        >
           {error || 'Data tidak tersedia'}
         </div>
       </div>
     );
   }
 
-  const state: EntitlementState = plan.entitlementState ?? (plan.plan === 'pro' ? 'active' : 'free');
+  const state: EntitlementState =
+    plan.entitlementState ?? (plan.plan === 'free' ? 'free' : 'active');
   const stateCopy = STATE_COPY[state];
-  const planLabel = plan.plan === 'pro' ? 'Guru Pro' : 'Paket Gratis';
+  const planLabel =
+    plan.catalog?.displayName ?? (plan.plan === 'free' ? 'Paket Gratis' : plan.plan);
   const tokenLimit = plan.tokenMonthlyLimit ?? plan.catalog?.tokenMonthlyLimit ?? null;
   const tokenUsed = plan.tokenUsedThisMonth ?? 0;
   const trial = plan.trial;
-  const isPro = plan.plan === 'pro';
+  const isPaidPlan = plan.plan !== 'free';
 
   return (
     <div className="flex flex-col gap-6 w-full">
       <div className="flex flex-col gap-1">
         <h1 className="text-brand-ink font-semibold text-body-xl">Paket &amp; kuota</h1>
-        <p className="text-body-sm text-[#6d665d]">Kelola paket berlangganan dan pantau penggunaan token Anda.</p>
+        <p className="text-body-sm text-[#6d665d]">
+          Kelola paket berlangganan dan pantau penggunaan token Anda.
+        </p>
       </div>
 
       {/* Current plan status */}
@@ -237,20 +247,41 @@ export default function PlanUsageSettingsPage() {
             {trial.eligible && !trial.claimed && (
               <>
                 <p className="text-body-sm text-[#6d665d]">
-                  Anda memenuhi syarat trial 2 bulan Guru Pro gratis. Klaim sekarang untuk menikmati kuota tidak
-                  terbatas.
+                  Anda memenuhi syarat trial 2 bulan Guru Pro gratis. Trial hanya dapat diklaim satu
+                  kali melalui tautan pribadi yang berlaku selama 15 menit.
                 </p>
-                {trialError && (
-                  <p className="text-sm text-red-700" role="alert">{trialError}</p>
+                {claimLinkError && (
+                  <p className="text-sm text-red-700" role="alert">
+                    {claimLinkError}
+                  </p>
                 )}
-                <Button size="sm" onClick={handleClaimTrial} disabled={trialLoading}>
-                  {trialLoading ? 'Memproses…' : 'Klaim trial 2 bulan'}
-                </Button>
+                {claimLink ? (
+                  <div className="flex flex-col items-start gap-2">
+                    <Link
+                      href={`/app/pengaturan/langganan/trial/konfirmasi#token=${encodeURIComponent(claimLink.token)}`}
+                      prefetch={false}
+                      className="inline-flex min-h-9 items-center justify-center rounded-md bg-brand-accent px-3 text-body-sm font-medium text-white transition-colors hover:bg-brand-accent-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-focus"
+                    >
+                      Buka tautan klaim trial
+                    </Link>
+                    <p className="text-body-xs text-[#6d665d]">
+                      Tautan berlaku hingga{' '}
+                      {new Date(claimLink.expiresAt).toLocaleTimeString('id-ID', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                      . Setelah digunakan, tautan tidak dapat dipakai lagi.
+                    </p>
+                  </div>
+                ) : (
+                  <Button size="sm" onClick={handlePrepareClaimLink} disabled={claimLinkLoading}>
+                    {claimLinkLoading ? 'Menyiapkan…' : 'Siapkan tautan klaim'}
+                  </Button>
+                )}
               </>
             )}
             {trial.claimed && trial.endsAt && (
               <div className="flex flex-col gap-1">
-                {trialSuccess && <p className="text-sm text-green-700" role="status">{trialSuccess}</p>}
                 <p className="text-body-sm text-[#6d665d]">
                   Trial aktif hingga{' '}
                   <strong>
@@ -271,17 +302,46 @@ export default function PlanUsageSettingsPage() {
       )}
 
       {/* Upgrade section — only shown for free non-trial users */}
-      {!isPro && plan.entitlementSource !== 'trial' && (
+      {!isPaidPlan && plan.entitlementSource !== 'trial' && (
         <Panel>
           <div className="flex flex-col gap-4">
             <div>
-              <p className="font-semibold text-body-lead text-brand-ink">Upgrade ke Guru Pro</p>
+              <p className="font-semibold text-body-lead text-brand-ink">Upgrade paket</p>
               <p className="text-body-sm text-[#6d665d] mt-0.5">
-                Kuota tidak terbatas, ekspor penuh, dan semua fitur Pro.
+                Pilih paket berlangganan dengan kuota token lebih besar.
               </p>
             </div>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2" role="radiogroup" aria-label="Pilih paket upgrade">
+              {(
+                [
+                  { key: 'pro', label: 'Guru Pro', price: 'Rp49.000/bln' },
+                  { key: 'plus', label: 'Plus', price: 'Rp149.000/bln' },
+                ] as const
+              ).map((option) => (
+                <button
+                  key={option.key}
+                  type="button"
+                  role="radio"
+                  aria-checked={upgradePlan === option.key}
+                  onClick={() => setUpgradePlan(option.key)}
+                  className={`rounded-lg border p-3 text-left transition-colors ${
+                    upgradePlan === option.key
+                      ? 'border-brand-accent bg-brand-accent/5'
+                      : 'border-[#e6dfd4] bg-white hover:bg-[#f3eee6]'
+                  }`}
+                >
+                  <span className="block text-body-sm font-semibold text-brand-ink">
+                    {option.label}
+                  </span>
+                  <span className="block text-body-xs text-[#6d665d]">{option.price}</span>
+                </button>
+              ))}
+            </div>
             {upgradeError && (
-              <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700" role="alert">
+              <div
+                className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700"
+                role="alert"
+              >
                 <p>{upgradeError}</p>
                 {upgradeError.includes('WhatsApp') && (
                   <Link
@@ -296,7 +356,7 @@ export default function PlanUsageSettingsPage() {
               </div>
             )}
             <Button onClick={handleUpgrade} disabled={upgradeLoading}>
-              {upgradeLoading ? 'Memproses…' : 'Upgrade ke Pro'}
+              {upgradeLoading ? 'Memproses…' : `Lanjutkan ke ${upgradePlan === 'plus' ? 'Plus' : 'Pro'}`}
             </Button>
             <p className="text-body-xs text-[#6d665d]">Pembayaran via QRIS. Aman dan instan.</p>
           </div>

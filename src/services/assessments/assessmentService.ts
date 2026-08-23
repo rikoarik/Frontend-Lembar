@@ -21,8 +21,7 @@ export type AssessmentError = {
   cause?: unknown;
 };
 
-const STATE_CONFLICT_MESSAGE =
-  'Versi soal berubah, muat ulang untuk melihat perubahan terbaru.';
+const STATE_CONFLICT_MESSAGE = 'Versi soal berubah, muat ulang untuk melihat perubahan terbaru.';
 
 async function parseError(response: Response): Promise<AssessmentError> {
   try {
@@ -33,7 +32,7 @@ async function parseError(response: Response): Promise<AssessmentError> {
     const safeMessage =
       code === 'STATE_CONFLICT'
         ? STATE_CONFLICT_MESSAGE
-        : body.error?.message ?? 'Tidak dapat menyelesaikan permintaan saat ini.';
+        : (body.error?.message ?? 'Tidak dapat menyelesaikan permintaan saat ini.');
     return {
       code,
       safeMessage,

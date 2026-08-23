@@ -1,5 +1,3 @@
-'use client';
-
 import { Eye, EyeSlash } from 'iconsax-react';
 import { useId, useState } from 'react';
 import { PASSWORD_MIN, passwordRules } from '@/src/features/auth/validation/auth-validation';

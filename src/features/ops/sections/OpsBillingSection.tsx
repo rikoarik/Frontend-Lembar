@@ -1,5 +1,3 @@
-'use client';
-
 import { Button } from '@/app/components/ui';
 import {
   AdminPageHeader,
@@ -11,7 +9,11 @@ import {
 } from '@/src/features/admin/AdminChrome';
 import { AdminPagination } from '../components/AdminPagination';
 import { billingTone } from '../utils/opsToneUtils';
-import { adminService, type AdminBillingRow, type PaymentOrder } from '@/src/services/admin/adminService';
+import {
+  adminService,
+  type AdminBillingRow,
+  type PaymentOrder,
+} from '@/src/services/admin/adminService';
 
 export function OpsBillingSection({
   billingData,
@@ -43,7 +45,6 @@ export function OpsBillingSection({
   filterBilling,
   setFilterBilling,
   loadBilling,
-  loadPaymentOrders,
   setToast,
 }: {
   billingData: AdminBillingRow[];
@@ -75,7 +76,6 @@ export function OpsBillingSection({
   filterBilling: '' | AdminBillingRow['state'];
   setFilterBilling: (v: '' | AdminBillingRow['state']) => void;
   loadBilling: (stateVal?: AdminBillingRow['state'], searchVal?: string, pg?: number) => void;
-  loadPaymentOrders: (statusVal?: string, pg?: number) => void;
   setToast: (msg: string) => void;
 }) {
   return (
@@ -127,11 +127,18 @@ export function OpsBillingSection({
                 </div>
                 <div className="space-y-3">
                   <div>
-                    <label htmlFor="billing-edit-state" className="block text-[12px] font-semibold text-[#6d665d] mb-1">State</label>
+                    <label
+                      htmlFor="billing-edit-state"
+                      className="block text-[12px] font-semibold text-[#6d665d] mb-1"
+                    >
+                      State
+                    </label>
                     <select
                       id="billing-edit-state"
                       value={billingEditState}
-                      onChange={(e) => setBillingEditState(e.target.value as AdminBillingRow['state'])}
+                      onChange={(e) =>
+                        setBillingEditState(e.target.value as AdminBillingRow['state'])
+                      }
                       className="w-full h-9 rounded-xl border border-[#ddd4c8] bg-white px-3 text-[13px] text-[#171717] focus:outline-none focus:ring-2 focus:ring-[#171717]/20"
                     >
                       <option value="active">active</option>
@@ -141,7 +148,12 @@ export function OpsBillingSection({
                     </select>
                   </div>
                   <div>
-                    <label htmlFor="billing-edit-seats" className="block text-[12px] font-semibold text-[#6d665d] mb-1">Seats</label>
+                    <label
+                      htmlFor="billing-edit-seats"
+                      className="block text-[12px] font-semibold text-[#6d665d] mb-1"
+                    >
+                      Seats
+                    </label>
                     <input
                       id="billing-edit-seats"
                       type="number"
@@ -152,7 +164,12 @@ export function OpsBillingSection({
                     />
                   </div>
                   <div>
-                    <label htmlFor="billing-edit-renews" className="block text-[12px] font-semibold text-[#6d665d] mb-1">Tanggal Perpanjangan</label>
+                    <label
+                      htmlFor="billing-edit-renews"
+                      className="block text-[12px] font-semibold text-[#6d665d] mb-1"
+                    >
+                      Tanggal Perpanjangan
+                    </label>
                     <input
                       id="billing-edit-renews"
                       type="date"
@@ -218,14 +235,28 @@ export function OpsBillingSection({
             rows={billingData}
             emptyLabel="Tidak ada data billing yang cocok."
             columns={[
-              { key: 'school', header: 'Sekolah', render: (row) => <span className="font-semibold">{row.school}</span> },
+              {
+                key: 'school',
+                header: 'Sekolah',
+                render: (row) => <span className="font-semibold">{row.school}</span>,
+              },
               {
                 key: 'state',
                 header: 'State',
                 render: (row) => <AdminPill tone={billingTone(row.state)}>{row.state}</AdminPill>,
               },
-              { key: 'seats', header: 'Seats', render: (row) => <span className="tabular-nums">{row.seats}</span> },
-              { key: 'renew', header: 'Perpanjangan', render: (row) => <span className="text-[12px] text-[#6d665d]">{row.renewsAt ?? '—'}</span> },
+              {
+                key: 'seats',
+                header: 'Seats',
+                render: (row) => <span className="tabular-nums">{row.seats}</span>,
+              },
+              {
+                key: 'renew',
+                header: 'Perpanjangan',
+                render: (row) => (
+                  <span className="text-[12px] text-[#6d665d]">{row.renewsAt ?? '—'}</span>
+                ),
+              },
             ]}
             rowActions={(row) => (
               <Button
@@ -265,11 +296,7 @@ export function OpsBillingSection({
                   <AdminFilterChip
                     key={s || 'all'}
                     active={filterOrderStatus === s}
-                    onClick={() => {
-                      setFilterOrderStatus(s);
-                      setPaymentOrdersPage(1);
-                      loadPaymentOrders(s, 1);
-                    }}
+                    onClick={() => setFilterOrderStatus(s)}
                   >
                     {s || 'Semua'}
                   </AdminFilterChip>
@@ -291,7 +318,10 @@ export function OpsBillingSection({
                 header: 'Amount',
                 render: (row: any) => (
                   <span className="tabular-nums">
-                    {row.currency} {(Number(row.amountCents) / 100).toLocaleString('id-ID', { minimumFractionDigits: 0 })}
+                    {row.currency}{' '}
+                    {(Number(row.amountCents) / 100).toLocaleString('id-ID', {
+                      minimumFractionDigits: 0,
+                    })}
                   </span>
                 ),
               },

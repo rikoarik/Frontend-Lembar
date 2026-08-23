@@ -24,7 +24,8 @@ export async function PATCH(
     return NextResponse.json(detail.payload, { status: detail.status });
   }
   const reviewState = body.reviewState;
-  const status = reviewState === 'accepted' ? 'accepted' : reviewState === 'rejected' ? 'rejected' : undefined;
+  const status =
+    reviewState === 'accepted' ? 'accepted' : reviewState === 'rejected' ? 'rejected' : undefined;
   const patch = {
     ...(typeof body.stem === 'string' ? { stem: body.stem } : {}),
     ...(typeof body.explanation === 'string' ? { explanation: body.explanation } : {}),

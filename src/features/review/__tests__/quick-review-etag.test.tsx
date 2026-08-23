@@ -7,9 +7,9 @@ import { assessmentService as mockedAssessmentService } from '@/src/services/ass
 import { err, ok } from '@/src/types/result';
 
 vi.mock('@/src/services/assessments/assessmentService', async () => {
-  const actual = await vi.importActual<typeof import('@/src/services/assessments/assessmentService')>(
-    '@/src/services/assessments/assessmentService',
-  );
+  const actual = await vi.importActual<
+    typeof import('@/src/services/assessments/assessmentService')
+  >('@/src/services/assessments/assessmentService');
   return {
     ...actual,
     assessmentService: {

@@ -32,7 +32,13 @@ export async function POST(request: Request) {
     const account = findMockAccount('ops', 'ops1234');
     if (!account) return mockFail('INVALID_CREDENTIALS', 'Email atau kata sandi tidak cocok.', 401);
     const data = authSuccessFromBackend({
-      user: { id: account.accountId, email: account.identifier, name: account.displayName, roles: account.roles, workspaceId: account.workspaceId },
+      user: {
+        id: account.accountId,
+        email: account.identifier,
+        name: account.displayName,
+        roles: account.roles,
+        workspaceId: account.workspaceId,
+      },
     });
     const response = mockOk(data, { setSession: account.session, setRoles: account.roles });
     response.cookies.set(authCookieOptions('lembar_active_role', data.activeRole));
@@ -46,10 +52,9 @@ export async function POST(request: Request) {
 
   const raw = (await upstream.json().catch(() => null)) as BackendAuthResponse | null;
   if (!upstream.ok) {
-    return NextResponse.json(
-      raw ?? { error: { code: 'UNKNOWN', message: 'Gagal masuk.' } },
-      { status: upstream.status },
-    );
+    return NextResponse.json(raw ?? { error: { code: 'UNKNOWN', message: 'Gagal masuk.' } }, {
+      status: upstream.status,
+    });
   }
 
   const token = raw?.token ?? raw?.data?.token;

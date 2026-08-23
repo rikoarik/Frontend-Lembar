@@ -18,75 +18,75 @@ function formatDayLabel(dateStr: string) {
 const BAR_H = 56;
 
 function MiniBar({
-    data,
-    max,
-    color,
-    hoverColor,
-    hoveredIdx,
-    setHoveredIdx,
-  }: {
-    data: { day: string; count: number }[];
-    max: number;
-    color: string;
-    hoverColor: string;
-    hoveredIdx: number | null;
-    setHoveredIdx: (idx: number | null) => void;
-  }) {
-    if (data.length === 0) {
-      return (
-        <div className="flex py-6 px-4 items-center justify-center rounded-xl bg-[#faf8f5] text-[12px] text-[#57534e]">
-          Belum ada data tren 7 hari terakhir
-        </div>
-      );
-    }
-
+  data,
+  max,
+  color,
+  hoverColor,
+  hoveredIdx,
+  setHoveredIdx,
+}: {
+  data: { day: string; count: number }[];
+  max: number;
+  color: string;
+  hoverColor: string;
+  hoveredIdx: number | null;
+  setHoveredIdx: (idx: number | null) => void;
+}) {
+  if (data.length === 0) {
     return (
-      <div className="relative pt-6 pb-2">
-        <div className="flex items-end gap-1.5 min-h-[100px] px-1 py-2">
-          {data.map((d, idx) => {
-            const h = Math.max(4, Math.round((d.count / max) * BAR_H));
-            const isHovered = hoveredIdx === idx;
-            const isMax = d.count === max && d.count > 0;
-            return (
-              <div
-                key={d.day}
-                onMouseEnter={() => setHoveredIdx(idx)}
-                onMouseLeave={() => setHoveredIdx(null)}
-                className="group relative flex flex-col items-center flex-1 cursor-pointer"
-              >
-                <div
-                  className={`absolute -top-6 text-[10px] font-bold tabular-nums transition-all duration-150 ${
-                    isHovered || isMax
-                      ? 'opacity-100 text-[#171717] scale-100'
-                      : 'opacity-0 text-[#57534e] scale-95 group-hover:opacity-100'
-                  }`}
-                >
-                  {d.count}
-                </div>
-
-                <div className="relative w-full rounded-md bg-[#f4ede4]/60 h-[56px] flex items-end overflow-hidden">
-                  <div
-                    className={`w-full rounded-t-md transition-all duration-300 ${
-                      isHovered ? hoverColor : color
-                    }`}
-                    style={{ height: `${h}px` }}
-                  />
-                </div>
-
-                <span
-                  className={`mt-2 text-[10px] font-medium tabular-nums transition-colors ${
-                    isHovered ? 'text-[#171717] font-semibold' : 'text-[#57534e]'
-                  }`}
-                >
-                  {formatDayLabel(d.day)}
-                </span>
-              </div>
-            );
-          })}
-        </div>
+      <div className="flex py-6 px-4 items-center justify-center rounded-xl bg-[#faf8f5] text-[12px] text-[#57534e]">
+        Belum ada data tren 7 hari terakhir
       </div>
     );
   }
+
+  return (
+    <div className="relative pt-6 pb-2">
+      <div className="flex items-end gap-1.5 min-h-[100px] px-1 py-2">
+        {data.map((d, idx) => {
+          const h = Math.max(4, Math.round((d.count / max) * BAR_H));
+          const isHovered = hoveredIdx === idx;
+          const isMax = d.count === max && d.count > 0;
+          return (
+            <div
+              key={d.day}
+              onMouseEnter={() => setHoveredIdx(idx)}
+              onMouseLeave={() => setHoveredIdx(null)}
+              className="group relative flex flex-col items-center flex-1 cursor-pointer"
+            >
+              <div
+                className={`absolute -top-6 text-[10px] font-bold tabular-nums transition-all duration-150 ${
+                  isHovered || isMax
+                    ? 'opacity-100 text-[#171717] scale-100'
+                    : 'opacity-0 text-[#57534e] scale-95 group-hover:opacity-100'
+                }`}
+              >
+                {d.count}
+              </div>
+
+              <div className="relative w-full rounded-md bg-[#f4ede4]/60 h-[56px] flex items-end overflow-hidden">
+                <div
+                  className={`w-full rounded-t-md transition-all duration-300 ${
+                    isHovered ? hoverColor : color
+                  }`}
+                  style={{ height: `${h}px` }}
+                />
+              </div>
+
+              <span
+                className={`mt-2 text-[10px] font-medium tabular-nums transition-colors ${
+                  isHovered ? 'text-[#171717] font-semibold' : 'text-[#57534e]'
+                }`}
+              >
+                {formatDayLabel(d.day)}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 export function DashboardTrendsChart() {
   const [trends, setTrends] = useState<{
@@ -134,13 +134,17 @@ export function DashboardTrendsChart() {
               <span className="h-2.5 w-2.5 rounded-full bg-[#176b45]" aria-hidden />
               <h3 className="text-[14px] font-bold text-[#171717]">Tren Aktivitas Jobs (7 Hari)</h3>
             </div>
-            <p className="mt-0.5 text-[12px] text-[#57534e]">Total beban job pemrosesan yang dieksekusi</p>
+            <p className="mt-0.5 text-[12px] text-[#57534e]">
+              Total beban job pemrosesan yang dieksekusi
+            </p>
           </div>
           <div className="text-right">
             <span className="text-[18px] font-extrabold tabular-nums text-[#171717]">
               {trends.jobs.reduce((s, d) => s + d.count, 0)}
             </span>
-            <span className="block text-[10px] uppercase font-semibold text-[#57534e]">total job</span>
+            <span className="block text-[10px] uppercase font-semibold text-[#57534e]">
+              total job
+            </span>
           </div>
         </div>
         <MiniBar
@@ -160,13 +164,17 @@ export function DashboardTrendsChart() {
               <span className="h-2.5 w-2.5 rounded-full bg-[#c9703a]" aria-hidden />
               <h3 className="text-[14px] font-bold text-[#171717]">Laporan Quality (7 Hari)</h3>
             </div>
-            <p className="mt-0.5 text-[12px] text-[#57534e]">Laporan masalah / kendala dari pengguna</p>
+            <p className="mt-0.5 text-[12px] text-[#57534e]">
+              Laporan masalah / kendala dari pengguna
+            </p>
           </div>
           <div className="text-right">
             <span className="text-[18px] font-extrabold tabular-nums text-[#171717]">
               {trends.quality.reduce((s, d) => s + d.count, 0)}
             </span>
-            <span className="block text-[10px] uppercase font-semibold text-[#57534e]">total laporan</span>
+            <span className="block text-[10px] uppercase font-semibold text-[#57534e]">
+              total laporan
+            </span>
           </div>
         </div>
         <MiniBar

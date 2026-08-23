@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useState, useSyncExternalStore } from 'react';
 
 function readCookie(name: string) {
   const match = document.cookie
@@ -11,14 +12,33 @@ function readCookie(name: string) {
   return match ? decodeURIComponent(match.split('=').slice(1).join('=')) : null;
 }
 
-export function ImpersonationBanner() {
-  const [impersonatedName, setImpersonatedName] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+function subscribeToImpersonationCookie() {
+  return () => undefined;
+}
 
-  useEffect(() => {
-    if (readCookie('lembar_is_impersonating') !== '1') return;
-    setImpersonatedName(readCookie('lembar_impersonated_name') || 'Pengguna Impersonasi');
-  }, []);
+function getImpersonatedName() {
+  if (readCookie('lembar_is_impersonating') !== '1') return null;
+  return readCookie('lembar_impersonated_name') || 'Pengguna Impersonasi';
+}
+
+function getServerImpersonatedName() {
+  return null;
+}
+
+function isInternalPath(targetPath: unknown): targetPath is string {
+  return (
+    typeof targetPath === 'string' && targetPath.startsWith('/') && !targetPath.startsWith('//')
+  );
+}
+
+export function ImpersonationBanner() {
+  const impersonatedName = useSyncExternalStore(
+    subscribeToImpersonationCookie,
+    getImpersonatedName,
+    getServerImpersonatedName,
+  );
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   if (!impersonatedName) return null;
 
@@ -26,10 +46,13 @@ export function ImpersonationBanner() {
     setLoading(true);
     try {
       const response = await fetch('/v1/admin/unimpersonate', { method: 'POST' });
-      const payload = (await response.json().catch(() => null)) as { data?: { targetPath?: string } } | null;
-      window.location.href = payload?.data?.targetPath || '/ops';
+      const payload = (await response.json().catch(() => null)) as {
+        data?: { targetPath?: string };
+      } | null;
+      const targetPath = payload?.data?.targetPath;
+      router.replace(isInternalPath(targetPath) ? targetPath : '/ops');
     } catch {
-      window.location.href = '/ops';
+      router.replace('/ops');
     }
   };
 

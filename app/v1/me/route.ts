@@ -2,6 +2,8 @@ import { cookies } from 'next/headers';
 import { findMockAccountBySession, mePayloadFor } from '@/src/lib/mock-api/accounts';
 import { isMockApiMode, mePayload, mockFail, mockOk } from '@/src/lib/mock-api/preview';
 import {
+  ACTIVE_ROLE_COOKIE,
+  ACTIVE_WORKSPACE_COOKIE,
   backendFetch,
   JWT_COOKIE,
   mePayloadFromBackendUser,
@@ -23,7 +25,7 @@ export async function GET() {
       return mockFail('AUTH_REQUIRED', 'Sesi tidak valid. Masuk ulang.', 401);
     }
 
-    return mockOk(mePayloadFor(account));
+    return mockOk(mePayloadFor(account, jar.get(ACTIVE_WORKSPACE_COOKIE)?.value));
   }
 
   const jar = await cookies();
@@ -48,5 +50,11 @@ export async function GET() {
     return mockFail('AUTH_REQUIRED', 'Sesi tidak valid. Masuk ulang.', 401);
   }
 
-  return mockOk(mePayloadFromBackendUser(user, jar.get('lembar_active_role')?.value));
+  return mockOk(
+    mePayloadFromBackendUser(
+      user,
+      jar.get(ACTIVE_ROLE_COOKIE)?.value,
+      jar.get(ACTIVE_WORKSPACE_COOKIE)?.value,
+    ),
+  );
 }

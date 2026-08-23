@@ -47,6 +47,39 @@ describe('PrintDTO', () => {
     });
   });
 
+  it('maps the current PrintDocument API shape and preserves its exam header metadata', () => {
+    const dto = mapToPrintDTO('fallback-id', {
+      data: {
+        meta: {
+          assessmentId: 'asm_1',
+          title: 'Matematika Kelas 4',
+          assessmentType: 'promotion',
+          academicYear: '2026/2027',
+          subjectLabel: 'Matematika',
+          gradeLabel: 'Kelas 4',
+        },
+        questions: [
+          {
+            stem: '2 + 2 = ...',
+            questionType: 'multiple_choice',
+            options: [{ key: 'A', text: '4' }],
+            answer: 'A',
+          },
+        ],
+      },
+    });
+
+    expect(dto).toMatchObject({
+      assessmentId: 'asm_1',
+      title: 'Matematika Kelas 4',
+      subject: 'Matematika',
+      gradeLabel: 'Kelas 4',
+      assessmentType: 'promotion',
+      academicYear: '2026/2027',
+      questionCount: 1,
+    });
+  });
+
   it('returns 401 without session', async () => {
     const { GET } = await import('@/app/v1/assessments/[assessmentId]/print/route');
     const response = await GET(new Request('http://localhost/v1/assessments/asm_1/print'), {

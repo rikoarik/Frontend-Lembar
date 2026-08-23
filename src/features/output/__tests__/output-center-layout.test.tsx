@@ -34,7 +34,10 @@ const dto: PrintDTO = {
 };
 
 beforeEach(() => {
-  vi.stubGlobal('fetch', vi.fn(async () => Response.json({ data: dto })));
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async () => Response.json({ data: dto })),
+  );
 });
 
 describe('P1-Q2 OutputCenterContent layout', () => {
@@ -49,7 +52,9 @@ describe('P1-Q2 OutputCenterContent layout', () => {
     const controls = screen.getByRole('complementary', { name: /kontrol output/i });
     expect(controls).toHaveClass('order-1', 'lg:order-none');
     expect(controls).toContainElement(screen.getByLabelText('Nama sekolah'));
-    expect(controls).toContainElement(screen.getByRole('button', { name: /sembunyikan lembar siswa/i }));
+    expect(controls).toContainElement(
+      screen.getByRole('button', { name: /sembunyikan lembar siswa/i }),
+    );
 
     const preview = screen.getByRole('region', { name: /pratinjau output/i });
     expect(preview).toHaveClass('order-2', 'lg:sticky', 'lg:top-4', 'lg:self-start');

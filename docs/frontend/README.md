@@ -17,14 +17,5 @@ Repository purpose: landing page dan seluruh antarmuka web `lembar`.
 - Handwritten API response types that duplicate OpenAPI.
 - Final pricing, role policy, curriculum claims, or entitlement decisions.
 
-## Required context before a task
-
-1. Root `AGENTS.md`.
-2. Product PRD/FRD snapshot.
-3. `SOURCE-OF-TRUTH.md`.
-4. Relevant frontend document.
-5. Pinned backend OpenAPI artifact.
-6. Exact task contract.
-
-Only work on an explicitly started frontend task ID. Return
-`READY_FOR_OWNER_REVIEW`, then stop.
+Technical documentation in this directory is reference material. The running application, tests,
+and generated API schema remain the implementation source of truth.

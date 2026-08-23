@@ -6,18 +6,14 @@ import type {
   AdminQualityRow,
 } from '@/src/services/admin/adminService';
 
-export function planTone(
-  plan: AdminSchoolRow['plan'],
-): 'ok' | 'warn' | 'bad' | 'info' | 'neutral' {
+export function planTone(plan: AdminSchoolRow['plan']): 'ok' | 'warn' | 'bad' | 'info' | 'neutral' {
   if (plan === 'active' || plan === 'pilot') return 'ok';
   if (plan === 'grace') return 'warn';
   if (plan === 'blocked') return 'bad';
   return 'neutral';
 }
 
-export function jobTone(
-  status: AdminJobRow['status'],
-): 'ok' | 'warn' | 'bad' | 'info' | 'neutral' {
+export function jobTone(status: AdminJobRow['status']): 'ok' | 'warn' | 'bad' | 'info' | 'neutral' {
   if (status === 'succeeded') return 'ok';
   if (status === 'running') return 'info';
   if (status === 'queued') return 'neutral';

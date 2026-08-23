@@ -7,14 +7,29 @@ const mocks = vi.hoisted(() => ({
   marketingPage: vi.fn().mockResolvedValue({
     ok: true,
     value: {
-      summary: { slug: 'home', state: 'draft', revision: 3, locale: 'id-ID', publishedVersion: null, updatedAt: '2026-01-01' },
+      summary: {
+        slug: 'home',
+        state: 'draft',
+        revision: 3,
+        locale: 'id-ID',
+        publishedVersion: null,
+        updatedAt: '2026-01-01',
+      },
       draft: { schemaVersion: 1, seo: { title: 'Home', description: '' }, blocks: [] },
     },
   }),
-  saveMarketingDraft: vi.fn().mockResolvedValue({ ok: true, value: { summary: { slug: 'home', state: 'draft', revision: 4 }, draft: { schemaVersion: 1, seo: {}, blocks: [] } } }),
+  saveMarketingDraft: vi.fn().mockResolvedValue({
+    ok: true,
+    value: {
+      summary: { slug: 'home', state: 'draft', revision: 4 },
+      draft: { schemaVersion: 1, seo: {}, blocks: [] },
+    },
+  }),
 }));
 
-vi.mock('@/src/services/admin/adminService', () => ({ adminService: { ...mocks, publishPage: vi.fn(), unpublishPage: vi.fn() } }));
+vi.mock('@/src/services/admin/adminService', () => ({
+  adminService: { ...mocks, publishPage: vi.fn(), unpublishPage: vi.fn() },
+}));
 
 describe('OpsContentSection', () => {
   it('only exposes public marketing slugs and saves a structured draft with revision', async () => {

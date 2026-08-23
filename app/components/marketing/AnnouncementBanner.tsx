@@ -27,7 +27,10 @@ export default function AnnouncementBanner() {
         <span>
           <strong>Pengumuman:</strong> Selamat datang di lembar! Uji coba gratis kini tersedia untuk
           institusi pendidikan.{' '}
-          <a href="/untuk-sekolah" className="underline font-semibold hover:opacity-80 transition-opacity">
+          <a
+            href="/untuk-sekolah"
+            className="underline font-semibold hover:opacity-80 transition-opacity"
+          >
             Pelajari lebih lanjut →
           </a>
         </span>

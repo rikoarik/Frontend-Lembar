@@ -85,17 +85,24 @@ function lifecycleCopy(item: AssessmentSummary): string {
   }
 }
 
-export function HistoryView({ refreshIntervalMs = DEFAULT_REFRESH_MS }: { refreshIntervalMs?: number }) {
+export function HistoryView({
+  refreshIntervalMs = DEFAULT_REFRESH_MS,
+}: {
+  refreshIntervalMs?: number;
+}) {
   const [items, setItems] = useState<AssessmentSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [q, setQ] = useState('');
   const [lifecycle, setLifecycle] = useState<AssessmentLifecycle | 'all'>('all');
   const loaded = useRef(false);
+  const requestSeq = useRef(0);
 
   const load = useCallback(async () => {
     if (!loaded.current) setLoading(true);
+    const seq = ++requestSeq.current;
     const result = await assessmentService.list({ q, lifecycle });
+    if (seq !== requestSeq.current) return;
     loaded.current = true;
     setLoading(false);
     if (!result.ok) {
@@ -161,7 +168,10 @@ export function HistoryView({ refreshIntervalMs = DEFAULT_REFRESH_MS }: { refres
           <Button onClick={() => void load()}>Coba lagi</Button>
         </Panel>
       ) : items.length === 0 ? (
-        <Panel title="Belum ada lembar" description="Mulai dari generate untuk membuat draf pertama.">
+        <Panel
+          title="Belum ada lembar"
+          description="Mulai dari generate untuk membuat draf pertama."
+        >
           <Link
             href="/app/generate"
             className="inline-flex min-h-[var(--control-md)] items-center rounded-md bg-brand-accent px-4 text-white"
@@ -181,8 +191,13 @@ export function HistoryView({ refreshIntervalMs = DEFAULT_REFRESH_MS }: { refres
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <p className="text-body-sm text-brand-ink-muted">
                     {item.lifecycle === 'generating' ? (
-                      <><span className="font-medium text-brand-ink">Sedang membuat soal</span>{' · Proses tetap aktif meski halaman ini ditinggalkan.'}</>
-                    ) : lifecycleCopy(item)}
+                      <>
+                        <span className="font-medium text-brand-ink">Sedang membuat soal</span>
+                        {' · Proses tetap aktif meski halaman ini ditinggalkan.'}
+                      </>
+                    ) : (
+                      lifecycleCopy(item)
+                    )}
                     {item.warningCount > 0 ? ` · ${item.warningCount} peringatan` : ''}
                   </p>
                   <div className="flex flex-wrap gap-2">

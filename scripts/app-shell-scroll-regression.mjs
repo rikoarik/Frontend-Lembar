@@ -35,7 +35,11 @@ try {
       windowScrollY: window.scrollY,
       html: { clientHeight: html.clientHeight, scrollHeight: html.scrollHeight },
       body: { clientHeight: body.clientHeight, scrollHeight: body.scrollHeight },
-      main: { clientHeight: main.clientHeight, scrollHeight: main.scrollHeight, overflowY: getComputedStyle(main).overflowY },
+      main: {
+        clientHeight: main.clientHeight,
+        scrollHeight: main.scrollHeight,
+        overflowY: getComputedStyle(main).overflowY,
+      },
       sidebarTop: sidebar.getBoundingClientRect().top,
       overflowOwners,
     };
@@ -44,23 +48,33 @@ try {
   await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
   const afterWindowScroll = await page.evaluate(() => ({
     windowScrollY: window.scrollY,
-    sidebarTop: document.querySelector('nav[aria-label="Navigasi utama"]')?.getBoundingClientRect().top,
+    sidebarTop: document.querySelector('nav[aria-label="Navigasi utama"]')?.getBoundingClientRect()
+      .top,
   }));
 
-  await page.locator('#konten-utama').evaluate((main) => { main.scrollTop = main.scrollHeight; });
+  await page.locator('#konten-utama').evaluate((main) => {
+    main.scrollTop = main.scrollHeight;
+  });
   const afterMainScroll = await page.evaluate(() => ({
     windowScrollY: window.scrollY,
     mainScrollTop: document.querySelector('#konten-utama')?.scrollTop,
-    sidebarTop: document.querySelector('nav[aria-label="Navigasi utama"]')?.getBoundingClientRect().top,
+    sidebarTop: document.querySelector('nav[aria-label="Navigasi utama"]')?.getBoundingClientRect()
+      .top,
   }));
 
   console.log(JSON.stringify({ before, afterWindowScroll, afterMainScroll }, null, 2));
 
-  const bodyDoesNotScroll = before.html.scrollHeight === before.viewportHeight && before.body.scrollHeight === before.viewportHeight;
-  const mainOwnsOverflow = before.main.scrollHeight > before.main.clientHeight && before.main.overflowY === 'auto';
-  const sidebarStaysPut = afterMainScroll.sidebarTop === before.sidebarTop && afterMainScroll.windowScrollY === 0;
+  const bodyDoesNotScroll =
+    before.html.scrollHeight === before.viewportHeight &&
+    before.body.scrollHeight === before.viewportHeight;
+  const mainOwnsOverflow =
+    before.main.scrollHeight > before.main.clientHeight && before.main.overflowY === 'auto';
+  const sidebarStaysPut =
+    afterMainScroll.sidebarTop === before.sidebarTop && afterMainScroll.windowScrollY === 0;
   if (!bodyDoesNotScroll || !mainOwnsOverflow || !sidebarStaysPut) {
-    throw new Error(`Scroll regression: ${JSON.stringify({ bodyDoesNotScroll, mainOwnsOverflow, sidebarStaysPut })}`);
+    throw new Error(
+      `Scroll regression: ${JSON.stringify({ bodyDoesNotScroll, mainOwnsOverflow, sidebarStaysPut })}`,
+    );
   }
 } finally {
   await browser.close();

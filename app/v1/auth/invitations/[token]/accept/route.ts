@@ -1,22 +1,12 @@
 import { cookies } from 'next/headers';
 import { NextResponse, type NextRequest } from 'next/server';
-import {
-  backendFetch,
-  JWT_COOKIE,
-  SESSION_COOKIE,
-} from '@/src/lib/api/session';
+import { backendFetch, JWT_COOKIE, SESSION_COOKIE } from '@/src/lib/api/session';
 
-export async function POST(
-  request: NextRequest,
-  context: { params: Promise<{ token: string }> },
-) {
+export async function POST(request: NextRequest, context: { params: Promise<{ token: string }> }) {
   const { token } = await context.params;
   const jar = await cookies();
   const sessionToken =
-    jar.get(JWT_COOKIE)?.value ||
-    jar.get(SESSION_COOKIE)?.value ||
-    jar.get('token')?.value ||
-    null;
+    jar.get(JWT_COOKIE)?.value || jar.get(SESSION_COOKIE)?.value || jar.get('token')?.value || null;
 
   let body: Record<string, unknown> = {};
   try {

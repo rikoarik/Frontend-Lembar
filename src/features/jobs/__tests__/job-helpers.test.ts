@@ -5,7 +5,12 @@ import {
   readActiveJob,
   writeActiveJob,
 } from '@/src/features/jobs/activeJobStorage';
-import { formatJobTiming, isTerminalJobStatus, jobStatusLabel, type JobStatus } from '@/src/features/jobs/types';
+import {
+  formatJobTiming,
+  isTerminalJobStatus,
+  jobStatusLabel,
+  type JobStatus,
+} from '@/src/features/jobs/types';
 
 describe('job helpers', () => {
   const store = new Map<string, string>();

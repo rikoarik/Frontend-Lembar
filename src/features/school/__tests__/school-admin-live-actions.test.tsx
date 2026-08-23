@@ -135,7 +135,9 @@ describe('SectionUndang — inviteMember live action', () => {
 
     // Toast must include the email returned by the service — not the submitted/static value.
     await waitFor(() =>
-      expect(screen.getByText(/undangan dikirim ke server-budi@sdn1\.sch\.id/i)).toBeInTheDocument(),
+      expect(
+        screen.getByText(/undangan dikirim ke server-budi@sdn1\.sch\.id/i),
+      ).toBeInTheDocument(),
     );
 
     // Email field is cleared after success
@@ -161,9 +163,7 @@ describe('SectionUndang — inviteMember live action', () => {
     await user.click(screen.getByRole('button', { name: /kirim undangan/i }));
 
     // Toast must carry the real safeMessage from the API — not a static string
-    await waitFor(() =>
-      expect(screen.getByText(/kuota undangan habis/i)).toBeInTheDocument(),
-    );
+    await waitFor(() => expect(screen.getByText(/kuota undangan habis/i)).toBeInTheDocument());
 
     // Email field is NOT cleared on failure
     expect((emailInput as HTMLInputElement).value).toBe('budi@sdn1.sch.id');
@@ -213,7 +213,7 @@ describe('SectionAnggota — removeMember live action', () => {
     vi.mocked(schoolService.dashboard).mockResolvedValue(dashboardOk);
     vi.mocked(schoolService.members)
       .mockResolvedValueOnce(memberPage) // initial load
-      .mockResolvedValue(emptyPage);     // after remove
+      .mockResolvedValue(emptyPage); // after remove
     vi.mocked(schoolService.removeMember).mockResolvedValue(okVoid);
 
     const user = userEvent.setup();
@@ -226,9 +226,7 @@ describe('SectionAnggota — removeMember live action', () => {
     await user.click(within(modal).getByRole('button', { name: /ya, hapus/i }));
 
     // Toast uses the real member name — not a static placeholder
-    await waitFor(() =>
-      expect(screen.getByText(/budi santoso dihapus/i)).toBeInTheDocument(),
-    );
+    await waitFor(() => expect(screen.getByText(/budi santoso dihapus/i)).toBeInTheDocument());
   });
 
   it('[RED→GREEN] shows error toast from res.error.safeMessage when remove fails', async () => {
@@ -254,9 +252,7 @@ describe('SectionAnggota — removeMember live action', () => {
 
     // Toast must carry the real safeMessage from the API
     await waitFor(() =>
-      expect(
-        screen.getByText(/tidak dapat menghapus admin terakhir/i),
-      ).toBeInTheDocument(),
+      expect(screen.getByText(/tidak dapat menghapus admin terakhir/i)).toBeInTheDocument(),
     );
   });
 

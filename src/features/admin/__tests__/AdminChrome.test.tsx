@@ -11,7 +11,20 @@ vi.mock('next/navigation', () => ({
 
 describe('admin accessibility basics', () => {
   it('keeps the sidebar navigation scrollable and clear of the profile panel', () => {
-    render(<AdminPanelProvider panelId="shell-test"><AdminShell brand="lembar school" title="Audit" nav={[{ href: '/school', label: 'Ringkasan' }, { href: '/school/audit', label: 'Audit' }]}>Konten</AdminShell></AdminPanelProvider>);
+    render(
+      <AdminPanelProvider panelId="shell-test">
+        <AdminShell
+          brand="lembar school"
+          title="Audit"
+          nav={[
+            { href: '/school', label: 'Ringkasan' },
+            { href: '/school/audit', label: 'Audit' },
+          ]}
+        >
+          Konten
+        </AdminShell>
+      </AdminPanelProvider>,
+    );
     const nav = screen.getByRole('navigation', { name: 'Navigasi panel' });
     expect(nav).toHaveClass('overflow-y-auto', 'pb-6');
   });
@@ -23,12 +36,7 @@ describe('admin accessibility basics', () => {
   it('focuses the modal cancel action and closes on Escape', async () => {
     const onCancel = vi.fn();
     render(
-      <AdminConfirmModal
-        open
-        description="Konfirmasi"
-        onCancel={onCancel}
-        onConfirm={vi.fn()}
-      />,
+      <AdminConfirmModal open description="Konfirmasi" onCancel={onCancel} onConfirm={vi.fn()} />,
     );
 
     expect(screen.getByRole('button', { name: 'Batal' })).toHaveFocus();

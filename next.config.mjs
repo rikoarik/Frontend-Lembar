@@ -10,6 +10,7 @@ function apiOrigin(value) {
 }
 
 const isDev = process.env.NODE_ENV === 'development';
+const isStandaloneBuild = process.env.NEXT_OUTPUT_MODE !== 'server';
 const shouldUpgradeInsecureRequests =
   process.env.VERCEL === '1' || process.env.NEXT_PUBLIC_APP_URL?.startsWith('https://');
 const connectSrc = [
@@ -53,7 +54,7 @@ const permissionsPolicy = [
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  output: 'standalone',
+  output: isStandaloneBuild ? 'standalone' : undefined,
   async headers() {
     return [
       {

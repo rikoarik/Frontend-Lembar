@@ -35,7 +35,10 @@ export function validateComposition(values: CompositionValues): CompositionValid
     failures.push({ field: 'questionCount', message: 'Jumlah soal antara 1–200.' });
   }
   if (sumQuestionTypeCounts(values.questionTypeCounts) !== values.questionCount) {
-    failures.push({ field: 'questionTypeCounts', message: 'Distribusi tipe soal harus sama dengan jumlah soal.' });
+    failures.push({
+      field: 'questionTypeCounts',
+      message: 'Distribusi tipe soal harus sama dengan jumlah soal.',
+    });
   }
   if (!values.reviewMode) {
     failures.push({ field: 'reviewMode', message: 'Pilih mode review.' });

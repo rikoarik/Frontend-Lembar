@@ -5,6 +5,7 @@ import { use, useEffect, useState } from 'react';
 import OutputPackagePreview from '@/app/components/print/OutputPackagePreview';
 import { MetadataForm } from '@/src/features/output/MetadataForm';
 import { StudentWorksheetRenderer } from '@/src/features/output/StudentWorksheetRenderer';
+import { TeacherKeyRenderer } from '@/src/features/output/TeacherKeyRenderer';
 import type { PrintDTO, PrintMetadata } from '@/src/features/output/types';
 import { assessmentService } from '@/src/services/assessments/assessmentService';
 import type { AssessmentDetail } from '@/src/features/review/types';
@@ -50,7 +51,7 @@ export default function OutputPrintPage({ params }: { params: Promise<{ assessme
       if (res.ok) {
         const data = (await res.json()) as { data?: { token?: string }; token?: string };
         const token = data.data?.token ?? data.token ?? '';
-        if (token) setShareUrl(`${window.location.origin}/bagikan/${token}`);
+        if (token) setShareUrl(`${window.location.origin}/attempt/${token}`);
         else setShareUrl('Token tidak tersedia.');
       } else {
         setShareUrl('Gagal membuat link berbagi.');
@@ -69,6 +70,8 @@ export default function OutputPrintPage({ params }: { params: Promise<{ assessme
         title: assessment.title,
         subject: assessment.subject ?? '',
         gradeLabel: assessment.gradeLabel ?? '',
+        ...(assessment.assessmentType ? { assessmentType: assessment.assessmentType } : {}),
+        ...(assessment.academicYear ? { academicYear: assessment.academicYear } : {}),
         questionCount: assessment.questionCount,
         questions: assessment.questions.map((q, i) => ({
           number: q.number ?? i + 1,
@@ -153,7 +156,12 @@ export default function OutputPrintPage({ params }: { params: Promise<{ assessme
       {shareUrl ? (
         <div className="flex items-center gap-2 rounded-md border border-brand-line bg-brand-paper px-4 py-3 text-body-sm print:hidden">
           <span className="text-brand-ink-muted">Link berbagi:</span>
-          <a href={shareUrl} className="break-all text-brand-accent underline" target="_blank" rel="noreferrer">
+          <a
+            href={shareUrl}
+            className="break-all text-brand-accent underline"
+            target="_blank"
+            rel="noreferrer"
+          >
             {shareUrl}
           </a>
           <button
@@ -173,7 +181,10 @@ export default function OutputPrintPage({ params }: { params: Promise<{ assessme
           <MetadataForm
             value={metadata}
             onChange={setMetadata}
-            onSave={(v) => { setMetadata(v); setShowForm(false); }}
+            onSave={(v) => {
+              setMetadata(v);
+              setShowForm(false);
+            }}
             onCancel={() => setShowForm(false)}
           />
         </div>
@@ -181,7 +192,7 @@ export default function OutputPrintPage({ params }: { params: Promise<{ assessme
 
       {/* Preview */}
       <OutputPackagePreview
-        sections={printCopy === 'student' ? ['lembar-soal'] : ['kunci-jawaban', 'pembahasan']}
+        sections={printCopy === 'student' ? ['lembar-soal'] : ['kunci-jawaban']}
         content={{
           'lembar-soal': dto ? (
             <StudentWorksheetRenderer dto={dto} />
@@ -190,20 +201,11 @@ export default function OutputPrintPage({ params }: { params: Promise<{ assessme
               <p className="text-brand-ink-muted italic">Memuat…</p>
             </div>
           ),
-          'kunci-jawaban': (
-            <ol className="space-y-2 text-body-sm">
-              {assessment?.questions.map((question) => (
-                <li key={question.id}>{question.number}. {question.answerKey}</li>
-              ))}
-            </ol>
-          ),
-          pembahasan: (
-            <div className="space-y-4 text-body-sm">
-              {assessment?.questions.map((question) => (
-                <section key={question.id}>
-                  <strong>{question.number}.</strong> {question.explanation}
-                </section>
-              ))}
+          'kunci-jawaban': dto ? (
+            <TeacherKeyRenderer dto={dto} />
+          ) : (
+            <div className="space-y-5 text-body-sm">
+              <p className="text-brand-ink-muted italic">Memuat…</p>
             </div>
           ),
         }}

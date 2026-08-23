@@ -94,8 +94,6 @@ export function OpsAiProviderSection({ setToast }: { setToast?: (msg: string) =>
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
-    setError(null);
 
     aiProviderService.getAiProvider().then((result) => {
       if (cancelled) return;
@@ -144,7 +142,11 @@ export function OpsAiProviderSection({ setToast }: { setToast?: (msg: string) =>
       timeoutMs,
     };
 
-    if (primaryApiKey && primaryApiKey !== originalPrimaryKey.current && !primaryApiKey.includes('***')) {
+    if (
+      primaryApiKey &&
+      primaryApiKey !== originalPrimaryKey.current &&
+      !primaryApiKey.includes('***')
+    ) {
       payload.primaryApiKey = primaryApiKey;
     }
     if (
@@ -209,7 +211,9 @@ export function OpsAiProviderSection({ setToast }: { setToast?: (msg: string) =>
           {driver.toUpperCase()}
         </AdminPill>
         {primaryModelId ? <span className="text-xs text-[#b0a79b]">·</span> : null}
-        {primaryModelId ? <span className="font-mono text-xs text-[#57534e]">{primaryModelId}</span> : null}
+        {primaryModelId ? (
+          <span className="font-mono text-xs text-[#57534e]">{primaryModelId}</span>
+        ) : null}
         {driver === 'mock' ? (
           <span className="ml-auto text-xs text-amber-700">
             Driver mock aktif. Tidak ada request nyata yang dikirim.
@@ -253,7 +257,10 @@ export function OpsAiProviderSection({ setToast }: { setToast?: (msg: string) =>
               />
             </ProviderField>
 
-            <ProviderField label="API Key" hint="Biarkan kosong untuk mempertahankan key yang tersimpan.">
+            <ProviderField
+              label="API Key"
+              hint="Biarkan kosong untuk mempertahankan key yang tersimpan."
+            >
               <input
                 type="password"
                 className={fieldCls}
@@ -305,7 +312,10 @@ export function OpsAiProviderSection({ setToast }: { setToast?: (msg: string) =>
 
         <Panel title="Fallback">
           <div className="space-y-4">
-            <ProviderField label="Base URL" hint="Default: https://api.openai.com - ganti jika pakai proxy">
+            <ProviderField
+              label="Base URL"
+              hint="Default: https://api.openai.com - ganti jika pakai proxy"
+            >
               <input
                 type="url"
                 className={fieldCls}
@@ -316,7 +326,10 @@ export function OpsAiProviderSection({ setToast }: { setToast?: (msg: string) =>
               />
             </ProviderField>
 
-            <ProviderField label="API Key" hint="Biarkan kosong untuk mempertahankan key yang tersimpan.">
+            <ProviderField
+              label="API Key"
+              hint="Biarkan kosong untuk mempertahankan key yang tersimpan."
+            >
               <input
                 type="password"
                 className={fieldCls}
@@ -363,7 +376,9 @@ export function OpsAiProviderSection({ setToast }: { setToast?: (msg: string) =>
         >
           {saving ? 'Menyimpan...' : 'Simpan Konfigurasi'}
         </button>
-        <p className="text-sm text-[#7a736b]">Perubahan langsung diterapkan ke .env server dan merestart worker.</p>
+        <p className="text-sm text-[#7a736b]">
+          Perubahan langsung diterapkan ke .env server dan merestart worker.
+        </p>
       </div>
     </div>
   );

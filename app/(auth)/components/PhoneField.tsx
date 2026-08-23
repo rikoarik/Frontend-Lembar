@@ -1,5 +1,3 @@
-'use client';
-
 import { ArrowDown2 } from 'iconsax-react';
 import { useId, useState } from 'react';
 

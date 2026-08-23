@@ -1,5 +1,3 @@
-'use client';
-
 import { useState } from 'react';
 import type { PrintMetadata } from '@/src/features/output/types';
 
@@ -10,7 +8,11 @@ type MetadataFormProps = {
   onCancel: () => void;
 };
 
-const textFields: Array<{ name: keyof Omit<PrintMetadata, 'instructions' | 'maxScore'>; label: string; type?: string }> = [
+const textFields: Array<{
+  name: keyof Omit<PrintMetadata, 'instructions' | 'maxScore'>;
+  label: string;
+  type?: string;
+}> = [
   { name: 'schoolName', label: 'Nama sekolah' },
   { name: 'teacherName', label: 'Nama guru' },
   { name: 'subject', label: 'Mata pelajaran' },
@@ -75,7 +77,9 @@ export function MetadataForm({ value, onChange, onSave, onCancel }: MetadataForm
             type="number"
             value={draft.maxScore ?? ''}
             onChange={(event) =>
-              update({ maxScore: event.target.value === '' ? undefined : Number(event.target.value) })
+              update({
+                maxScore: event.target.value === '' ? undefined : Number(event.target.value),
+              })
             }
           />
         </label>

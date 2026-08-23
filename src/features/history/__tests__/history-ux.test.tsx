@@ -83,6 +83,8 @@ describe('history lifecycle UX', () => {
     expect(humanizeAssessmentLabel('practice')).toBe('Latihan');
     expect(humanizeAssessmentLabel('official-subject-sd-mi-a-seni-tari')).toBe('Seni Tari');
     expect(humanizeAssessmentLabel('official-grade-sd-mi-2')).toBe('Kelas 2 SD/MI');
-    expect(humanizeAssessmentLabel('official-subject-a12345678901234567890')).toBe('Mata pelajaran');
+    expect(humanizeAssessmentLabel('official-subject-a12345678901234567890')).toBe(
+      'Mata pelajaran',
+    );
   });
 });

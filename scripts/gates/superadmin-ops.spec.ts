@@ -8,7 +8,6 @@
  *   PLAYWRIGHT_BASE_URL=http://localhost:3000 npx playwright test scripts/gates/superadmin-ops.spec.ts --config playwright.config.ts
  */
 
-import { execSync } from 'node:child_process';
 import { mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { expect, test, type Page, type BrowserContext } from 'playwright/test';
@@ -21,60 +20,44 @@ mkdirSync(SCREENSHOTS, { recursive: true });
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-function getToken(): string {
-  try {
-    const out = execSync(
-      `curl -s -X POST ${BE_URL}/v1/auth/login \
-        -H 'Content-Type: application/json' \
-        -d '{"email":"admin@lembar.web.id","password":"Admin123!"}'`,
-      { encoding: 'utf8' },
-    );
-    const d = JSON.parse(out);
-    const token = d?.token ?? d?.data?.token ?? '';
-    if (!token) throw new Error(`No token in response: ${out.slice(0, 200)}`);
-    return token;
-  } catch (e) {
-    // Fallback to ops@lembar.id
-    const out = execSync(
-      `curl -s -X POST ${BE_URL}/v1/auth/login \
-        -H 'Content-Type: application/json' \
-        -d '{"email":"ops@lembar.id","password":"ops1234"}'`,
-      { encoding: 'utf8' },
-    );
-    const d = JSON.parse(out);
-    const token = d?.token ?? d?.data?.token ?? '';
-    if (!token) throw new Error('Both login attempts failed');
-    return token;
+async function getToken(): Promise<string> {
+  const email = process.env.E2E_OPS_EMAIL;
+  const password = process.env.E2E_OPS_PASSWORD;
+  if (!email || !password) {
+    throw new Error('Set E2E_OPS_EMAIL and E2E_OPS_PASSWORD to run the ops E2E suite.');
   }
+
+  const response = await fetch(`${BE_URL}/v1/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
+  });
+  const payload = await response.json().catch(() => null);
+  const token = payload?.token ?? payload?.data?.token ?? '';
+  if (!response.ok || !token) {
+    throw new Error(`Ops E2E login failed with status ${response.status}.`);
+  }
+  return token;
 }
 
 async function injectAuth(context: BrowserContext, token: string) {
-  // Middleware checks: lembar_session (non-empty) + lembar_roles (superadmin)
-  // BFF checks: lembar_token (JWT) for proxying to BE
+  const origin = new URL(BASE).origin;
   await context.addCookies([
     {
       name: 'lembar_token',
       value: token,
-      domain: 'localhost',
-      path: '/',
-      httpOnly: false,
-      secure: false,
-    },
-    {
-      name: 'lembar_session',
-      value: token, // middleware only checks non-empty
-      domain: 'localhost',
-      path: '/',
-      httpOnly: false,
-      secure: false,
+      url: origin,
+      httpOnly: true,
+      secure: origin.startsWith('https://'),
+      sameSite: 'Lax',
     },
     {
       name: 'lembar_roles',
-      value: 'superadmin', // middleware getRolesFromCookies reads this
-      domain: 'localhost',
-      path: '/',
-      httpOnly: false,
-      secure: false,
+      value: 'superadmin',
+      url: origin,
+      httpOnly: true,
+      secure: origin.startsWith('https://'),
+      sameSite: 'Lax',
     },
   ]);
 }
@@ -96,9 +79,8 @@ async function waitForSection(page: Page) {
 
 let TOKEN = '';
 
-test.beforeAll(() => {
-  TOKEN = getToken();
-  console.log('[ops-test] Token acquired, length:', TOKEN.length);
+test.beforeAll(async () => {
+  TOKEN = await getToken();
 });
 
 test.beforeEach(async ({ context }) => {
@@ -108,7 +90,6 @@ test.beforeEach(async ({ context }) => {
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
 test.describe('Superadmin OpsConsole', () => {
-
   // ── Dashboard ──────────────────────────────────────────────────────────────
   test('dashboard loads with stat cards', async ({ page }) => {
     await page.goto(`${BASE}/ops`, { waitUntil: 'domcontentloaded' });
@@ -320,8 +301,17 @@ test.describe('Superadmin OpsConsole', () => {
     await waitForSection(page);
 
     const expectedNavItems = [
-      'Ringkasan', 'Akun', 'Sekolah', 'Katalog', 'Prompt',
-      'Jobs', 'Quality', 'Audit', 'Billing', 'Flags', 'Marketing CMS',
+      'Ringkasan',
+      'Akun',
+      'Sekolah',
+      'Katalog',
+      'Prompt',
+      'Jobs',
+      'Quality',
+      'Audit',
+      'Billing',
+      'Flags',
+      'Marketing CMS',
     ];
 
     for (const label of expectedNavItems) {

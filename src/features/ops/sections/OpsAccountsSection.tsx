@@ -1,3 +1,4 @@
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Button } from '@/app/components/ui';
 import {
@@ -84,11 +85,13 @@ export function OpsAccountsSection({
   loadAccounts: () => void;
   setToast: (msg: string) => void;
 }) {
+  const router = useRouter();
   const [confirmDeleteBulkOpen, setConfirmDeleteBulkOpen] = useState(false);
 
   if (detailAccountId) {
     return (
       <AccountDetailView
+        key={detailAccountId}
         accountId={detailAccountId}
         onBack={() => setDetailAccountId(null)}
         setToast={setToast}
@@ -101,9 +104,10 @@ export function OpsAccountsSection({
     const routeId = keyStr.replace('accounts/', '');
     return (
       <AccountDetailView
+        key={routeId}
         accountId={routeId}
         onBack={() => {
-          window.location.href = '/ops/accounts';
+          router.push('/ops/accounts');
         }}
         setToast={setToast}
         onUpdated={loadAccounts}
@@ -135,12 +139,7 @@ export function OpsAccountsSection({
               })
               .then((res) => {
                 if (res.ok) {
-                  const details = [res.value.token, res.value.welcomeUrl].filter(Boolean).join(' · ');
-                  setToast(
-                    details
-                      ? `Undangan terkirim ke ${inviteEmail}. ${details}`
-                      : `Undangan terkirim ke ${inviteEmail}.`,
-                  );
+                  setToast(`Undangan berhasil diproses untuk ${inviteEmail}.`);
                   setInviteEmail('');
                   setInviteName('');
                   setInviteRole('');
@@ -183,68 +182,68 @@ export function OpsAccountsSection({
           <div className="flex flex-col gap-1">
             <label className="text-[11px] font-medium text-[#6d665d]" htmlFor="invite-role">
               Role
-          </label>
-          <AdminSelect
-            value={inviteRole}
-            onChange={(val) => setInviteRole(val as typeof inviteRole)}
-            options={[
-              { value: '', label: '— pilih role —' },
-              { value: 'teacher', label: 'teacher' },
-              { value: 'school_admin', label: 'school_admin' },
-              { value: 'superadmin', label: 'superadmin' },
-            ]}
-          />
-        </div>
-        <div className="flex gap-2">
-          <Button size="sm" type="submit" disabled={inviteLoading}>
-            {inviteLoading ? 'Mengirim…' : 'Kirim undangan'}
-          </Button>
-          <Button
-            size="sm"
-            variant="secondary"
-            type="button"
-            onClick={() => {
-              setInviteOpen(false);
-              setInviteEmail('');
-              setInviteName('');
-              setInviteRole('');
-            }}
-          >
-            Batal
-          </Button>
-        </div>
-      </form>
-    )}
-    <AdminToolbar
-      search={search}
-      onSearchChange={setSearch}
-      searchPlaceholder="Cari akun, email, role, sekolah"
-      filters={
-        <div className="flex items-center gap-2">
-          <AdminSelect
-            value={filterRole}
-            onChange={(val) => setFilterRole(val as typeof filterRole)}
-            options={[
-              { value: '', label: 'Semua role' },
-              { value: 'teacher', label: 'teacher' },
-              { value: 'school_admin', label: 'school_admin' },
-              { value: 'superadmin', label: 'superadmin' },
-            ]}
-          />
+            </label>
+            <AdminSelect
+              value={inviteRole}
+              onChange={(val) => setInviteRole(val as typeof inviteRole)}
+              options={[
+                { value: '', label: '— pilih role —' },
+                { value: 'teacher', label: 'teacher' },
+                { value: 'school_admin', label: 'school_admin' },
+                { value: 'superadmin', label: 'superadmin' },
+              ]}
+            />
+          </div>
+          <div className="flex gap-2">
+            <Button size="sm" type="submit" disabled={inviteLoading}>
+              {inviteLoading ? 'Mengirim…' : 'Kirim undangan'}
+            </Button>
+            <Button
+              size="sm"
+              variant="secondary"
+              type="button"
+              onClick={() => {
+                setInviteOpen(false);
+                setInviteEmail('');
+                setInviteName('');
+                setInviteRole('');
+              }}
+            >
+              Batal
+            </Button>
+          </div>
+        </form>
+      )}
+      <AdminToolbar
+        search={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Cari akun, email, role, sekolah"
+        filters={
+          <div className="flex items-center gap-2">
+            <AdminSelect
+              value={filterRole}
+              onChange={(val) => setFilterRole(val as typeof filterRole)}
+              options={[
+                { value: '', label: 'Semua role' },
+                { value: 'teacher', label: 'teacher' },
+                { value: 'school_admin', label: 'school_admin' },
+                { value: 'superadmin', label: 'superadmin' },
+              ]}
+            />
 
-          <AdminSelect
-            value={filterStatus}
-            onChange={(val) => setFilterStatus(val as typeof filterStatus)}
-            options={[
-              { value: '', label: 'Semua status' },
-              { value: 'aktif', label: 'aktif' },
-              { value: 'baru', label: 'baru' },
-              { value: 'ditangguhkan', label: 'ditangguhkan' },
-            ]}
-          />
-        </div>
-      }
-    />
+            <AdminSelect
+              value={filterStatus}
+              onChange={(val) => setFilterStatus(val as typeof filterStatus)}
+              options={[
+                { value: '', label: 'Semua status' },
+                { value: 'aktif', label: 'aktif' },
+                { value: 'baru', label: 'baru' },
+                { value: 'ditangguhkan', label: 'ditangguhkan' },
+              ]}
+            />
+          </div>
+        }
+      />
       <AdminBulkBar count={selectedIds.length} onClear={clearSelection}>
         <Button
           size="sm"
@@ -253,7 +252,9 @@ export function OpsAccountsSection({
             const ids = [...selectedIds];
             adminService.bulkSuspend(ids).then((res) => {
               if (res.ok) {
-                setToast(`${res.value.succeeded} akun berhasil ditangguhkan, ${res.value.failed} gagal.`);
+                setToast(
+                  `${res.value.succeeded} akun berhasil ditangguhkan, ${res.value.failed} gagal.`,
+                );
               } else {
                 setToast(`Gagal: ${res.error.safeMessage}`);
               }
@@ -271,7 +272,9 @@ export function OpsAccountsSection({
             const ids = [...selectedIds];
             adminService.bulkUnsuspend(ids).then((res) => {
               if (res.ok) {
-                setToast(`${res.value.succeeded} akun berhasil diaktifkan, ${res.value.failed} gagal.`);
+                setToast(
+                  `${res.value.succeeded} akun berhasil diaktifkan, ${res.value.failed} gagal.`,
+                );
               } else {
                 setToast(`Gagal: ${res.error.safeMessage}`);
               }
@@ -383,7 +386,9 @@ export function OpsAccountsSection({
             ? accountsMeta.pages
             : Math.max(1, Math.ceil(accounts.length / 10))
         }
-        totalItems={accountsMeta.total !== accountsData.length ? accountsMeta.total : accounts.length}
+        totalItems={
+          accountsMeta.total !== accountsData.length ? accountsMeta.total : accounts.length
+        }
         pageSize={10}
         onPageChange={setPage}
       />

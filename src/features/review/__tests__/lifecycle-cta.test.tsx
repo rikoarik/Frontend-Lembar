@@ -5,9 +5,9 @@ import type { AssessmentDetail, ReviewQuestion } from '@/src/features/review/typ
 import { assessmentService as mockedAssessmentService } from '@/src/services/assessments/assessmentService';
 
 vi.mock('@/src/services/assessments/assessmentService', async () => {
-  const actual = await vi.importActual<typeof import('@/src/services/assessments/assessmentService')>(
-    '@/src/services/assessments/assessmentService',
-  );
+  const actual = await vi.importActual<
+    typeof import('@/src/services/assessments/assessmentService')
+  >('@/src/services/assessments/assessmentService');
   return {
     ...actual,
     assessmentService: {
@@ -66,7 +66,7 @@ beforeEach(() => {
 });
 
 describe('QuickReviewView lifecycle CTA (P1-V)', () => {
-  it('menampilkan tombol Finalisasi ketika canFinalize true dan lifecycle != final', async () => {
+  it('menampilkan link Finalisasi ketika canFinalize true dan lifecycle != final', async () => {
     vi.mocked(mockedAssessmentService.get).mockResolvedValue({
       ok: true,
       value: assessmentWithCtas({ lifecycle: 'review', canFinalize: true, canOpenOutput: false }),
@@ -74,11 +74,8 @@ describe('QuickReviewView lifecycle CTA (P1-V)', () => {
 
     render(<QuickReviewView assessmentId="assessment-1" mode="quick" />);
 
-    await waitFor(() => {
-      expect(
-        screen.getByRole('button', { name: 'Finalisasi' }),
-      ).toBeInTheDocument();
-    });
+    const finalize = await waitFor(() => screen.getByRole('link', { name: 'Finalisasi' }));
+    expect(finalize).toHaveAttribute('href', '/app/review/assessment-1/finalize');
     expect(screen.queryByRole('link', { name: 'Buka output' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Buka output' })).not.toBeInTheDocument();
   });
@@ -91,12 +88,9 @@ describe('QuickReviewView lifecycle CTA (P1-V)', () => {
 
     render(<QuickReviewView assessmentId="assessment-1" mode="quick" />);
 
-    const openOutput = await waitFor(() =>
-      screen.getByRole('link', { name: 'Buka output' }),
-    );
+    const openOutput = await waitFor(() => screen.getByRole('link', { name: 'Buka output' }));
     expect(openOutput).toHaveAttribute('href', '/app/output/assessment-1');
     expect(screen.queryByRole('link', { name: 'Finalisasi' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Finalisasi' })).not.toBeInTheDocument();
   });
 
   it('tidak menampilkan Finalisasi maupun Buka output ketika kedua flag bernilai false', async () => {
@@ -109,7 +103,6 @@ describe('QuickReviewView lifecycle CTA (P1-V)', () => {
 
     await screen.findByText('Latihan');
     expect(screen.queryByRole('link', { name: 'Finalisasi' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Finalisasi' })).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Buka output' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Buka output' })).not.toBeInTheDocument();
   });

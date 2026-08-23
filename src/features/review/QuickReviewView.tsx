@@ -227,7 +227,10 @@ export function QuickReviewView({
         stem: editStem,
         explanation: editExplanation,
         ...(current?.questionType === 'short_answer' || current?.questionType === 'essay'
-          ? { answerKey: editAnswerKey, rubric: current?.questionType === 'essay' ? editRubric : undefined }
+          ? {
+              answerKey: editAnswerKey,
+              rubric: current?.questionType === 'essay' ? editRubric : undefined,
+            }
           : {
               options: editOptions.length > 0 ? editOptions : (current?.options ?? []),
               answerKey: editOptionsAnswerKey || current?.answerKey || '',
@@ -294,7 +297,9 @@ export function QuickReviewView({
             <StatusBadge label={badgeForLifecycle(assessment.lifecycle)} />
           </div>
           <p className="text-body-sm text-brand-ink-muted">
-            {lifecycleSubtitle ? <span data-testid="lifecycle-subtitle">{lifecycleSubtitle}</span> : null}{' '}
+            {lifecycleSubtitle ? (
+              <span data-testid="lifecycle-subtitle">{lifecycleSubtitle}</span>
+            ) : null}{' '}
             {assessment.subject} · {assessment.gradeLabel} · {assessment.reviewedCount}/
             {assessment.questionCount} ditinjau · {assessment.warningCount} peringatan
           </p>
@@ -313,14 +318,20 @@ export function QuickReviewView({
             Mode detail
           </Link>
           {canFinalize ? (
-            <Button
-              disabled={busy}
-              onClick={() => {
-                window.location.assign(`/app/review/${assessment.id}/finalize`);
+            <Link
+              href={`/app/review/${assessment.id}/finalize`}
+              aria-disabled={busy || undefined}
+              tabIndex={busy ? -1 : undefined}
+              onClick={(event) => {
+                if (busy) event.preventDefault();
               }}
+              className={[
+                'inline-flex min-h-[var(--control-md)] items-center justify-center gap-2 rounded-md bg-brand-accent px-4 text-body-default font-medium text-white transition-colors duration-[var(--motion-fast)] ease-[ease-out] hover:bg-brand-accent-hover active:bg-brand-accent-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-focus focus-visible:outline-offset-2 select-none whitespace-nowrap',
+                busy ? 'cursor-not-allowed opacity-60' : '',
+              ].join(' ')}
             >
               Finalisasi
-            </Button>
+            </Link>
           ) : null}
           {canOpenOutput ? (
             <Link
@@ -442,23 +453,23 @@ export function QuickReviewView({
                       </p>
                     ) : (
                       <>
-                      <ul className="grid gap-1 sm:grid-cols-2">
-                        {question.options.map((option) => (
-                          <li
-                            key={option.id}
-                            className={`rounded-md border px-3 py-2 text-body-sm ${
-                              option.id === question.answerKey
-                                ? 'border-brand-accent bg-brand-accent-soft'
-                                : 'border-brand-line'
-                            }`}
-                          >
-                            <span className="font-semibold">{option.label}.</span> {option.text}
-                          </li>
-                        ))}
-                      </ul>
-                      <p className="text-body-sm text-brand-ink-muted">
-                        Kunci: {question.answerKey.toUpperCase()} · Sumber: {question.sourceLabel}
-                      </p>
+                        <ul className="grid gap-1 sm:grid-cols-2">
+                          {question.options.map((option) => (
+                            <li
+                              key={option.id}
+                              className={`rounded-md border px-3 py-2 text-body-sm ${
+                                option.id === question.answerKey
+                                  ? 'border-brand-accent bg-brand-accent-soft'
+                                  : 'border-brand-line'
+                              }`}
+                            >
+                              <span className="font-semibold">{option.label}.</span> {option.text}
+                            </li>
+                          ))}
+                        </ul>
+                        <p className="text-body-sm text-brand-ink-muted">
+                          Kunci: {question.answerKey.toUpperCase()} · Sumber: {question.sourceLabel}
+                        </p>
                       </>
                     )}
                     {question.warnings.length > 0 ? (
@@ -558,7 +569,8 @@ export function QuickReviewView({
                   onChange={(e) => setEditStem(e.target.value)}
                 />
               </label>
-              {(current.questionType === 'short_answer' || current.questionType === 'essay') ? null : (
+              {current.questionType === 'short_answer' ||
+              current.questionType === 'essay' ? null : (
                 <fieldset
                   role="group"
                   aria-label="Daftar pilihan"
@@ -638,7 +650,9 @@ export function QuickReviewView({
                             type="button"
                             aria-label="Hapus pilihan"
                             disabled={
-                              visibleEditOptions.length <= 2 || assessment.lifecycle === 'final' || busy
+                              visibleEditOptions.length <= 2 ||
+                              assessment.lifecycle === 'final' ||
+                              busy
                             }
                             onClick={() =>
                               setEditOptions((opts) => {
@@ -661,7 +675,9 @@ export function QuickReviewView({
                   <button
                     type="button"
                     aria-label="Tambah pilihan"
-                    disabled={visibleEditOptions.length >= 6 || assessment.lifecycle === 'final' || busy}
+                    disabled={
+                      visibleEditOptions.length >= 6 || assessment.lifecycle === 'final' || busy
+                    }
                     onClick={() => {
                       const label = String.fromCharCode(65 + visibleEditOptions.length);
                       optionCounterRef.current += 1;

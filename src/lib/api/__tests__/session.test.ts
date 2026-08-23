@@ -25,4 +25,40 @@ describe('mePayloadFromBackendUser', () => {
       permissions: ['assessment.create', 'assessment.read'],
     });
   });
+
+  it('preserves backend workspace memberships and selects the preferred workspace', () => {
+    const me = mePayloadFromBackendUser(
+      {
+        id: 'user-1',
+        name: 'Guru Multi Workspace',
+        roles: ['teacher', 'school_admin'],
+        workspaces: [
+          {
+            id: 'personal-1',
+            name: 'Pribadi',
+            type: 'personal',
+            role: 'teacher',
+            permissions: ['assessment.read'],
+          },
+          {
+            id: 'school-1',
+            name: 'Sekolah',
+            type: 'school',
+            role: 'school_admin',
+            permissions: ['workspace.member.manage'],
+          },
+        ],
+      },
+      undefined,
+      'school-1',
+    );
+
+    expect(me.workspaces).toHaveLength(2);
+    expect(me.activeWorkspace).toMatchObject({
+      id: 'school-1',
+      name: 'Sekolah',
+      role: 'school_admin',
+      type: 'school',
+    });
+  });
 });

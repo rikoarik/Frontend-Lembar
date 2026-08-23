@@ -2,9 +2,13 @@ import { cookies } from 'next/headers';
 
 export const SESSION_COOKIE = 'lembar_session';
 export const JWT_COOKIE = 'lembar_token';
+export const ROLES_COOKIE = 'lembar_roles';
+export const ACTIVE_ROLE_COOKIE = 'lembar_active_role';
+export const ACTIVE_WORKSPACE_COOKIE = 'lembar_active_workspace';
 export const TRIAL_DEVICE_COOKIE = '__Host-lembar_trial_device';
 
 export function isMockApiMode(): boolean {
+  if (process.env.NODE_ENV === 'production') return false;
   return process.env.NEXT_PUBLIC_API_MODE !== 'live';
 }
 
@@ -29,21 +33,25 @@ export type BackendUser = {
   workspaceId?: string | null;
   workspace?: {
     id?: string;
+    name?: string;
     type?: string;
     role?: string;
     permissions?: string[];
   } | null;
   activeWorkspace?: {
     id?: string;
+    name?: string;
     type?: string;
     role?: string;
     permissions?: string[];
   } | null;
   workspaces?: Array<{
     id?: string;
+    name?: string;
     type?: string;
     role?: string;
     permissions?: string[];
+    isActive?: boolean;
   }>;
 };
 
@@ -102,7 +110,6 @@ export function normalizeRoles(user: any): string[] {
     for (const ws of user.workspaces) {
       if (ws && typeof ws === 'object') {
         if (typeof ws.role === 'string') check(ws.role);
-
       }
     }
   }
@@ -111,14 +118,24 @@ export function normalizeRoles(user: any): string[] {
 }
 
 export function homePathForRoles(roles: string[] | string | undefined | null): string {
-  const list = Array.isArray(roles) ? roles : typeof roles === 'string' ? roles.split(',').map((r) => r.trim()) : [];
+  const list = Array.isArray(roles)
+    ? roles
+    : typeof roles === 'string'
+      ? roles.split(',').map((r) => r.trim())
+      : [];
   if (list.includes('superadmin')) return '/ops';
   if (list.includes('school_admin')) return '/school';
   return '/app';
 }
 
-export function workspaceKindForRoles(roles: string[] | string | undefined | null): 'personal' | 'school' {
-  const list = Array.isArray(roles) ? roles : typeof roles === 'string' ? roles.split(',').map((r) => r.trim()) : [];
+export function workspaceKindForRoles(
+  roles: string[] | string | undefined | null,
+): 'personal' | 'school' {
+  const list = Array.isArray(roles)
+    ? roles
+    : typeof roles === 'string'
+      ? roles.split(',').map((r) => r.trim())
+      : [];
   if (list.includes('school_admin')) return 'school';
   return 'personal';
 }
@@ -126,7 +143,11 @@ export function workspaceKindForRoles(roles: string[] | string | undefined | nul
 export function activeRoleForRoles(
   roles: string[] | string | undefined | null,
 ): 'teacher' | 'school_admin' | 'superadmin' {
-  const list = Array.isArray(roles) ? roles : typeof roles === 'string' ? roles.split(',').map((r) => r.trim()) : [];
+  const list = Array.isArray(roles)
+    ? roles
+    : typeof roles === 'string'
+      ? roles.split(',').map((r) => r.trim())
+      : [];
   if (list.includes('superadmin')) return 'superadmin';
   if (list.includes('school_admin')) return 'school_admin';
   return 'teacher';
@@ -145,7 +166,8 @@ export function authSuccessFromBackend(auth: any) {
 
   // Support both { user, workspace } and { data: { user, workspace } } and direct payload
   const user = auth.user ?? auth.data?.user ?? auth.data ?? auth;
-  const workspace = auth.workspace ?? auth.data?.workspace ?? user?.workspace ?? user?.activeWorkspace;
+  const workspace =
+    auth.workspace ?? auth.data?.workspace ?? user?.workspace ?? user?.activeWorkspace;
 
   const mergedUser = {
     ...user,
@@ -155,7 +177,8 @@ export function authSuccessFromBackend(auth: any) {
   const roles = normalizeRoles(mergedUser);
   const role = activeRoleForRoles(roles);
   const accountId = user?.id ?? user?.accountId ?? user?.user?.id ?? '';
-  const workspaceId = workspace?.id ?? user?.workspaceId ?? (accountId ? `ws_${accountId.slice(0, 8)}` : 'ws_demo');
+  const workspaceId =
+    workspace?.id ?? user?.workspaceId ?? (accountId ? `ws_${accountId.slice(0, 8)}` : 'ws_demo');
 
   return {
     accountId,
@@ -166,26 +189,83 @@ export function authSuccessFromBackend(auth: any) {
   };
 }
 
-export function mePayloadFromBackendUser(user: BackendUser, activeRole?: string) {
-  const roles = normalizeRoles(user);
-  const role = activeRole && roles.includes(activeRole)
-    ? activeRoleForRoles([activeRole])
-    : activeRoleForRoles(roles);
-  const userId = user?.id ?? 'demo';
-  const workspaceId = user?.workspaceId ?? `ws_${userId.slice(0, 8)}`;
-  const workspaceName =
-    role === 'superadmin'
-      ? 'Platform lembar'
-      : role === 'school_admin'
-        ? 'Workspace sekolah'
-        : 'Ruang pribadi';
-  const type = role === 'school_admin' ? 'school' : 'personal';
-  const permissions =
-    role === 'superadmin'
-      ? ['platform.ops', 'school.manage', 'assessment.read']
-      : role === 'school_admin'
-        ? ['assessment.create', 'assessment.read', 'workspace.member.manage', 'school.manage']
-        : ['assessment.create', 'assessment.read'];
+function defaultPermissions(role: string): string[] {
+  if (role === 'superadmin') {
+    return ['platform.ops', 'school.manage', 'assessment.read'];
+  }
+  if (role === 'school_admin') {
+    return ['assessment.create', 'assessment.read', 'workspace.member.manage', 'school.manage'];
+  }
+  return ['assessment.create', 'assessment.read'];
+}
+
+function defaultWorkspaceName(role: string): string {
+  if (role === 'superadmin') return 'Platform lembar';
+  if (role === 'school_admin') return 'Workspace sekolah';
+  return 'Ruang pribadi';
+}
+
+export function mePayloadFromBackendUser(
+  user: BackendUser,
+  activeRole?: string,
+  preferredWorkspaceId?: string,
+) {
+  const accountRoles = normalizeRoles(user);
+  const userId = user.id ?? 'demo';
+  const candidates = [
+    ...(user.workspaces ?? []),
+    ...(user.activeWorkspace ? [user.activeWorkspace] : []),
+    ...(user.workspace ? [user.workspace] : []),
+  ].filter((workspace, index, all) => {
+    if (!workspace.id) return false;
+    return all.findIndex((candidate) => candidate.id === workspace.id) === index;
+  });
+
+  const fallbackRole = activeRoleForRoles(accountRoles);
+  const fallbackWorkspaceId = user.workspaceId ?? `ws_${userId.slice(0, 8)}`;
+  const workspaces = candidates.length
+    ? candidates.map((workspace) => {
+        const role = workspace.role ?? fallbackRole;
+        return {
+          id: workspace.id!,
+          name: workspace.name ?? defaultWorkspaceName(role),
+          type:
+            workspace.type === 'school' || role === 'school_admin'
+              ? ('school' as const)
+              : ('personal' as const),
+          role: activeRoleForRoles([role]),
+          permissions: workspace.permissions ?? defaultPermissions(role),
+          isActive: 'isActive' in workspace ? workspace.isActive : undefined,
+        };
+      })
+    : [
+        {
+          id: fallbackWorkspaceId,
+          name: defaultWorkspaceName(fallbackRole),
+          type: fallbackRole === 'school_admin' ? ('school' as const) : ('personal' as const),
+          role: fallbackRole,
+          permissions: defaultPermissions(fallbackRole),
+          isActive: true,
+        },
+      ];
+
+  const selected =
+    workspaces.find((workspace) => workspace.id === preferredWorkspaceId) ??
+    workspaces.find((workspace) => workspace.isActive) ??
+    workspaces.find((workspace) => workspace.id === user.activeWorkspace?.id) ??
+    workspaces.find((workspace) => workspace.id === user.workspaceId) ??
+    workspaces[0]!;
+  const role =
+    activeRole && accountRoles.includes(activeRole)
+      ? activeRoleForRoles([activeRole])
+      : selected.role;
+  const activeWorkspace = {
+    ...selected,
+    role,
+    type: role === 'school_admin' ? ('school' as const) : selected.type,
+    permissions: role === selected.role ? selected.permissions : defaultPermissions(role),
+    isActive: true,
+  };
 
   return {
     account: {
@@ -193,23 +273,16 @@ export function mePayloadFromBackendUser(user: BackendUser, activeRole?: string)
       displayName: user.name || user.email,
       email: user.email,
     },
-    activeWorkspaceId: workspaceId,
-    activeWorkspace: {
-      id: workspaceId,
-      name: workspaceName,
-      type,
-      role,
-      permissions,
+    activeWorkspaceId: activeWorkspace.id,
+    activeWorkspace,
+    context: {
+      workspaceIds: workspaces.map((workspace) => workspace.id),
+      permissionSet: activeWorkspace.permissions,
     },
-    workspaces: [
-      {
-        id: workspaceId,
-        name: workspaceName,
-        type,
-        role,
-        permissions,
-      },
-    ],
+    workspaces: workspaces.map((workspace) => ({
+      ...workspace,
+      isActive: workspace.id === activeWorkspace.id,
+    })),
   };
 }
 

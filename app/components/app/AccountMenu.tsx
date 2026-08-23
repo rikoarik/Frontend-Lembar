@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
 
 type AccountMenuProps = {
@@ -10,6 +11,7 @@ type AccountMenuProps = {
 };
 
 export function AccountMenu({ displayName, planLabel, compact = false }: AccountMenuProps) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -27,7 +29,7 @@ export function AccountMenu({ displayName, planLabel, compact = false }: Account
     } catch {
       // still leave the session UI
     } finally {
-      window.location.href = '/masuk';
+      router.replace('/masuk');
     }
   };
 

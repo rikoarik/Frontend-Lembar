@@ -32,17 +32,18 @@ const ROLE_LABEL: Record<WorkspaceRole, string> = {
   member: 'Anggota',
 };
 
-function mapRole(backendRole: string): WorkspaceRole {
-  if (backendRole === 'admin') return 'admin';
-  if (backendRole === 'member') return 'member';
-  return 'owner';
+function mapRole(backendRole: string, workspaceType: string): WorkspaceRole {
+  if (workspaceType === 'personal' || backendRole === 'owner' || backendRole === 'superadmin') {
+    return 'owner';
+  }
+  if (backendRole === 'admin' || backendRole === 'school_admin') return 'admin';
+  return 'member';
 }
 
 export default function WorkspaceSettingsPage() {
   const [memberships, setMemberships] = useState<WorkspaceMembership[]>([]);
   const [loading, setLoading] = useState(true);
   const [switchTarget, setSwitchTarget] = useState<WorkspaceMembership | null>(null);
-  const [leaveTarget, setLeaveTarget] = useState<WorkspaceMembership | null>(null);
   const [actionBusy, setActionBusy] = useState(false);
   const [actionStatus, setActionStatus] = useState('');
 
@@ -51,13 +52,13 @@ export default function WorkspaceSettingsPage() {
       try {
         const res = await fetch('/v1/me', { credentials: 'include' });
         if (!res.ok) throw new Error('Gagal memuat data workspace');
-        const json = await res.json() as MeResponse;
+        const json = (await res.json()) as MeResponse;
         const raw = json.data?.workspaces ?? [];
         const activeWorkspaceId = json.data?.activeWorkspaceId;
         const mapped: WorkspaceMembership[] = raw.map((w) => ({
           id: w.id,
           name: w.name,
-          role: mapRole(w.role),
+          role: mapRole(w.role, w.type),
           isActive: w.id === activeWorkspaceId,
           isPersonal: w.type === 'personal',
         }));
@@ -94,12 +95,6 @@ export default function WorkspaceSettingsPage() {
       setSwitchTarget(null);
       setActionStatus(`Gagal beralih ke workspace "${switchTarget.name}".`);
     }
-  };
-
-  const handleLeave = async () => {
-    if (!leaveTarget) return;
-    setLeaveTarget(null);
-    setActionStatus('Fitur keluar workspace belum tersedia');
   };
 
   if (loading) {
@@ -164,18 +159,6 @@ export default function WorkspaceSettingsPage() {
                       Pilih
                     </Button>
                   )}
-                  {!ws.isPersonal && ws.role !== 'owner' && (
-                    <Button
-                      variant="quiet"
-                      size="sm"
-                      onClick={() => {
-                        setActionStatus('');
-                        setLeaveTarget(ws);
-                      }}
-                    >
-                      Keluar
-                    </Button>
-                  )}
                 </div>
               </li>
             ))}
@@ -203,30 +186,9 @@ export default function WorkspaceSettingsPage() {
         </Panel>
       )}
 
-      {/* Leave workspace confirmation */}
-      {leaveTarget && (
-        <Panel title="Keluar dari workspace">
-          <div className="flex flex-col gap-3">
-            <p className="text-body-sm text-brand-ink">
-              Yakin ingin keluar dari workspace <strong>{leaveTarget.name}</strong>? Anda tidak
-              dapat mengakses workspace ini setelah keluar.
-            </p>
-            <div className="flex gap-2">
-              <Button
-                variant="danger"
-                size="sm"
-                onClick={handleLeave}
-                disabled={actionBusy}
-              >
-                {actionBusy ? 'Keluar…' : 'Ya, keluar'}
-              </Button>
-              <Button variant="quiet" size="sm" onClick={() => setLeaveTarget(null)}>
-                Batal
-              </Button>
-            </div>
-          </div>
-        </Panel>
-      )}
+      <p className="text-body-xs text-brand-muted">
+        Perubahan keanggotaan workspace dikelola oleh admin sekolah.
+      </p>
     </div>
   );
 }

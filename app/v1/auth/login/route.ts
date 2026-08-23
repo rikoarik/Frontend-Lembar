@@ -38,7 +38,6 @@ export async function POST(request: Request) {
   if (isMockApiMode()) {
     const account = findMockAccount(identifier, password);
     if (!account) {
-
       return mockFail(
         'INVALID_CREDENTIALS',
         'Username/email/phone dan kata sandi tidak cocok.',
@@ -51,7 +50,6 @@ export async function POST(request: Request) {
       setRoles: account.roles,
     });
   }
-
 
   const upstream = await backendFetch('/v1/auth/login', {
     method: 'POST',
@@ -81,14 +79,12 @@ export async function POST(request: Request) {
   const raw = await upstream.json();
   const token = raw?.token ?? raw?.data?.token;
   if (!token) {
-
     return mockFail('UNKNOWN', 'Respons autentikasi tidak valid.', 502);
   }
 
   const successPayload = authSuccessFromBackend(raw);
   const user = raw?.user ?? raw?.data?.user ?? raw?.data;
   const roles = normalizeRoles(user);
-
 
   const response = NextResponse.json({ data: successPayload }, { status: 200 });
   response.cookies.set(jwtCookieOptions(token));

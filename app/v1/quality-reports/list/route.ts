@@ -2,7 +2,10 @@ import { cookies } from 'next/headers';
 import { NextResponse, type NextRequest } from 'next/server';
 import { backendFetch, JWT_COOKIE, SESSION_COOKIE } from '@/src/lib/api/session';
 
-function extractToken(request: NextRequest, jar: Awaited<ReturnType<typeof cookies>>): string | null {
+function extractToken(
+  request: NextRequest,
+  jar: Awaited<ReturnType<typeof cookies>>,
+): string | null {
   const authHeader = request.headers.get('authorization');
   if (authHeader) {
     const match = authHeader.match(/^Bearer\s+(.+)$/i);

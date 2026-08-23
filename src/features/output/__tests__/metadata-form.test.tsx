@@ -43,9 +43,7 @@ describe('MetadataForm', () => {
 
     await user.type(screen.getByLabelText(/nama sekolah/i), 'SDN 1');
 
-    expect(onChange).toHaveBeenLastCalledWith(
-      expect.objectContaining({ schoolName: 'SDN 1' }),
-    );
+    expect(onChange).toHaveBeenLastCalledWith(expect.objectContaining({ schoolName: 'SDN 1' }));
   });
 
   it('calls onChange when teacherName changes', async () => {
@@ -55,9 +53,7 @@ describe('MetadataForm', () => {
 
     await user.type(screen.getByLabelText(/nama guru/i), 'Bu Sari');
 
-    expect(onChange).toHaveBeenLastCalledWith(
-      expect.objectContaining({ teacherName: 'Bu Sari' }),
-    );
+    expect(onChange).toHaveBeenLastCalledWith(expect.objectContaining({ teacherName: 'Bu Sari' }));
   });
 
   it('shows validation error when schoolName is empty on save', async () => {
@@ -75,7 +71,9 @@ describe('MetadataForm', () => {
     const user = userEvent.setup();
     const onSave = vi.fn();
     const withSchool: PrintMetadata = { ...base, schoolName: 'SDN 1' };
-    render(<MetadataForm value={withSchool} onChange={vi.fn()} onSave={onSave} onCancel={vi.fn()} />);
+    render(
+      <MetadataForm value={withSchool} onChange={vi.fn()} onSave={onSave} onCancel={vi.fn()} />,
+    );
 
     await user.click(screen.getByRole('button', { name: /simpan/i }));
 

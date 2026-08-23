@@ -9,22 +9,14 @@
  */
 import { cookies } from 'next/headers';
 import { NextResponse, type NextRequest } from 'next/server';
-import {
-  backendFetch,
-  JWT_COOKIE,
-  SESSION_COOKIE,
-} from '@/src/lib/api/session';
+import { backendFetch, JWT_COOKIE, SESSION_COOKIE } from '@/src/lib/api/session';
 
 const PREVIEW_PATH_FALLBACK = '/v1/auth/invitations/preview';
 
-export async function GET(
-  _request: NextRequest,
-  context: { params: Promise<{ token: string }> },
-) {
+export async function GET(_request: NextRequest, context: { params: Promise<{ token: string }> }) {
   const { token } = await context.params;
   const jar = await cookies();
-  const sessionToken =
-    jar.get(JWT_COOKIE)?.value || jar.get(SESSION_COOKIE)?.value;
+  const sessionToken = jar.get(JWT_COOKIE)?.value || jar.get(SESSION_COOKIE)?.value;
 
   // First try the dedicated preview endpoint so the admin can set a
   // custom domain/url etc. If it returns 404, fall back to a probe via
@@ -59,9 +51,7 @@ export async function GET(
 
   // Normalise shape. Backend currently returns an arbitrary envelope;
   // expose the minimal field used by the FE page: status.
-  const status =
-    payload?.status ??
-    (payload?.data?.status ?? (upstream.ok ? 'pending' : 'invalid'));
+  const status = payload?.status ?? payload?.data?.status ?? (upstream.ok ? 'pending' : 'invalid');
 
   return NextResponse.json({
     data: {

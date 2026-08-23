@@ -13,15 +13,18 @@ function jwtWorkspaceId(token: string): string | null {
   }
 }
 
-export async function GET(
-  request: NextRequest,
-  context: { params: Promise<{ slug: string[] }> },
-) {
+export async function GET(request: NextRequest, context: { params: Promise<{ slug: string[] }> }) {
   const jar = await cookies();
   const token = jar.get(JWT_COOKIE)?.value || jar.get(SESSION_COOKIE)?.value;
   if (!token) {
     return NextResponse.json(
-      { error: { code: 'AUTH_REQUIRED', message: 'Silakan masuk terlebih dahulu.', retryable: false } },
+      {
+        error: {
+          code: 'AUTH_REQUIRED',
+          message: 'Silakan masuk terlebih dahulu.',
+          retryable: false,
+        },
+      },
       { status: 401 },
     );
   }
@@ -30,7 +33,9 @@ export async function GET(
   const workspaceId = request.nextUrl.searchParams.get('workspaceId') || jwtWorkspaceId(token);
   if (!workspaceId) {
     return NextResponse.json(
-      { error: { code: 'VALIDATION_FAILED', message: 'workspaceId wajib diisi.', retryable: false } },
+      {
+        error: { code: 'VALIDATION_FAILED', message: 'workspaceId wajib diisi.', retryable: false },
+      },
       { status: 400 },
     );
   }
@@ -47,15 +52,18 @@ export async function GET(
   );
 }
 
-export async function POST(
-  request: NextRequest,
-  context: { params: Promise<{ slug: string[] }> },
-) {
+export async function POST(request: NextRequest, context: { params: Promise<{ slug: string[] }> }) {
   const jar = await cookies();
   const token = jar.get(JWT_COOKIE)?.value || jar.get(SESSION_COOKIE)?.value;
   if (!token) {
     return NextResponse.json(
-      { error: { code: 'AUTH_REQUIRED', message: 'Silakan masuk terlebih dahulu.', retryable: false } },
+      {
+        error: {
+          code: 'AUTH_REQUIRED',
+          message: 'Silakan masuk terlebih dahulu.',
+          retryable: false,
+        },
+      },
       { status: 401 },
     );
   }
@@ -64,7 +72,9 @@ export async function POST(
   const workspaceId = request.nextUrl.searchParams.get('workspaceId') || jwtWorkspaceId(token);
   if (!workspaceId) {
     return NextResponse.json(
-      { error: { code: 'VALIDATION_FAILED', message: 'workspaceId wajib diisi.', retryable: false } },
+      {
+        error: { code: 'VALIDATION_FAILED', message: 'workspaceId wajib diisi.', retryable: false },
+      },
       { status: 400 },
     );
   }

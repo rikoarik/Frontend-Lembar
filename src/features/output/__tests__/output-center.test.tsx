@@ -49,7 +49,10 @@ const dto: PrintDTO = {
 };
 
 function okFetch() {
-  vi.stubGlobal('fetch', vi.fn(async () => Response.json({ data: dto })));
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async () => Response.json({ data: dto })),
+  );
 }
 
 beforeEach(() => {
@@ -99,7 +102,10 @@ describe('P1-Q OutputCenterContent', () => {
   });
 
   it('redirects to sign-in when the print route returns 401', async () => {
-    vi.stubGlobal('fetch', vi.fn(async () => Response.json({ error: { code: 'AUTH_REQUIRED' } }, { status: 401 })));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => Response.json({ error: { code: 'AUTH_REQUIRED' } }, { status: 401 })),
+    );
 
     render(<OutputCenterContent assessmentId="asm_1" />);
 

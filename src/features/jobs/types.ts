@@ -61,15 +61,24 @@ export function isTerminalJobStatus(status: JobStatus): boolean {
 
 export function jobStatusLabel(status: JobStatus): string {
   switch (status) {
-    case 'queued': return 'Dalam antrean';
-    case 'running': return 'Sedang menyiapkan soal';
-    case 'retry_wait': return 'Menunggu coba ulang';
-    case 'succeeded': return 'Draft siap ditinjau';
-    case 'partially_succeeded': return 'Draft sebagian siap';
-    case 'failed': return 'Gagal menyiapkan soal';
-    case 'cancellation_requested': return 'Membatalkan…';
-    case 'cancelled': return 'Dibatalkan';
-    default: return 'Sedang diproses';
+    case 'queued':
+      return 'Dalam antrean';
+    case 'running':
+      return 'Sedang menyiapkan soal';
+    case 'retry_wait':
+      return 'Menunggu coba ulang';
+    case 'succeeded':
+      return 'Draft siap ditinjau';
+    case 'partially_succeeded':
+      return 'Draft sebagian siap';
+    case 'failed':
+      return 'Gagal menyiapkan soal';
+    case 'cancellation_requested':
+      return 'Membatalkan…';
+    case 'cancelled':
+      return 'Dibatalkan';
+    default:
+      return 'Sedang diproses';
   }
 }
 
@@ -97,11 +106,12 @@ export function formatJobTiming(
   const elapsedMinutes = Number.isFinite(createdAt)
     ? Math.max(0, Math.floor((now - createdAt) / 60_000))
     : undefined;
-  const elapsed = elapsedMinutes === undefined
-    ? undefined
-    : elapsedMinutes === 0
-      ? 'Baru saja dimulai'
-      : `Berjalan ${elapsedMinutes} menit`;
+  const elapsed =
+    elapsedMinutes === undefined
+      ? undefined
+      : elapsedMinutes === 0
+        ? 'Baru saja dimulai'
+        : `Berjalan ${elapsedMinutes} menit`;
   const progress = job.progressPercent;
   if (progress === undefined || progress <= 0 || progress >= 100 || elapsedMinutes === undefined) {
     return { elapsed, eta: 'Biasanya selesai dalam beberapa menit' };

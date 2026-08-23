@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { use, useEffect, useState } from 'react';
 import AuthShell from '../../AuthShell';
 import AuthSidePanel from '../../components/AuthSidePanel';
@@ -24,6 +25,7 @@ const fieldError = (errors: Record<string, string[]>, key: FieldKey): string | u
   errors[key]?.[0];
 
 export default function InvitationPage({ params }: { params: Promise<{ token: string }> }) {
+  const router = useRouter();
   const { token } = use(params);
   const [preview, setPreview] = useState<InvitationPreview | null>(null);
   const [loadError, setLoadError] = useState<AuthError | null>(null);
@@ -69,7 +71,7 @@ export default function InvitationPage({ params }: { params: Promise<{ token: st
       return authService.acceptInvitation({ ...input, token }, idempotencyKey);
     },
     onSuccess: () => {
-      window.location.href = '/app';
+      router.replace('/app');
     },
   });
 

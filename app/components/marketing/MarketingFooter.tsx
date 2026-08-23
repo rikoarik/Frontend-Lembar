@@ -1,5 +1,7 @@
 'use client';
 
+import Image from 'next/image';
+import Link from 'next/link';
 import { useReducedMotion } from 'framer-motion';
 
 export default function MarketingFooter() {
@@ -13,10 +15,12 @@ export default function MarketingFooter() {
           <div className="md:col-span-4 flex flex-col gap-unit-6">
             <div className="flex items-center gap-2">
               <div className="h-unit-8 w-unit-8 flex-shrink-0">
-                <img
+                <Image
                   alt="lembar logo"
                   className="h-full w-full object-contain"
                   src="/lembar/logo-mark.png"
+                  width={32}
+                  height={32}
                 />
               </div>
               <span className="font-h3 text-h3 text-ink font-bold tracking-tight">lembar</span>
@@ -34,24 +38,24 @@ export default function MarketingFooter() {
               Layanan
             </span>
             <div className="flex flex-col gap-unit-2">
-              <a
+              <Link
                 className="font-caption text-caption text-secondary hover:text-burgundy hover:underline transition-all duration-200"
                 href="/"
               >
                 Beranda
-              </a>
-              <a
+              </Link>
+              <Link
                 className="font-caption text-caption text-secondary hover:text-burgundy hover:underline transition-all duration-200"
                 href="/untuk-sekolah"
               >
                 Untuk Sekolah
-              </a>
-              <a
+              </Link>
+              <Link
                 className="font-caption text-caption text-secondary hover:text-burgundy hover:underline transition-all duration-200"
                 href="/harga"
               >
                 Harga
-              </a>
+              </Link>
             </div>
           </div>
 
@@ -61,24 +65,24 @@ export default function MarketingFooter() {
               Perusahaan
             </span>
             <div className="flex flex-col gap-unit-2">
-              <a
+              <Link
                 className="font-caption text-caption text-secondary hover:text-burgundy hover:underline transition-all duration-200"
                 href="/tentang"
               >
                 Tentang Kami
-              </a>
-              <a
+              </Link>
+              <Link
                 className="font-caption text-caption text-secondary hover:text-burgundy hover:underline transition-all duration-200"
                 href="/keamanan-data"
               >
                 Keamanan Data
-              </a>
-              <a
+              </Link>
+              <Link
                 className="font-caption text-caption text-secondary hover:text-burgundy hover:underline transition-all duration-200"
                 href="/kontak"
               >
                 Kontak Kami
-              </a>
+              </Link>
             </div>
           </div>
 
@@ -88,30 +92,30 @@ export default function MarketingFooter() {
               Dukungan
             </span>
             <div className="flex flex-col gap-unit-2">
-              <a
+              <Link
                 className="font-caption text-caption text-secondary hover:text-burgundy hover:underline transition-all duration-200"
                 href="/bantuan"
               >
                 Pusat Bantuan
-              </a>
-              <a
+              </Link>
+              <Link
                 className="font-caption text-caption text-secondary hover:text-burgundy hover:underline transition-all duration-200"
                 href="/faq"
               >
                 FAQ
-              </a>
-              <a
+              </Link>
+              <Link
                 className="font-caption text-caption text-secondary hover:text-burgundy hover:underline transition-all duration-200"
                 href="/privasi"
               >
                 Kebijakan Privasi
-              </a>
-              <a
+              </Link>
+              <Link
                 className="font-caption text-caption text-secondary hover:text-burgundy hover:underline transition-all duration-200"
                 href="/syarat"
               >
                 Syarat & Ketentuan
-              </a>
+              </Link>
             </div>
           </div>
 

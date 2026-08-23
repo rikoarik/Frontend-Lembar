@@ -112,7 +112,7 @@ so a failing CI job is reproducible on a developer machine.
 ./scripts/gates/playwright-smoke.sh   # pnpm exec playwright test
 ```
 
-Vitest is configured via `vitest.config.ts` (jsdom, globals, `vitest.setup.ts`, excludes
+Vitest is configured via `vitest.config.mts` (jsdom, globals, `vitest.setup.ts`, excludes
 `scripts/gates/**` so Playwright specs are not picked up by unit tests).
 
 Playwright is configured via `playwright.config.ts`:

@@ -17,9 +17,9 @@ const params = (jobId: string) => ({ params: Promise.resolve({ jobId }) });
 
 function jwt(workspaceId = 'workspace-1') {
   const header = Buffer.from(JSON.stringify({ alg: 'none', typ: 'JWT' })).toString('base64url');
-  const payload = Buffer.from(
-    JSON.stringify({ userId: 'user-1', workspaceId }),
-  ).toString('base64url');
+  const payload = Buffer.from(JSON.stringify({ userId: 'user-1', workspaceId })).toString(
+    'base64url',
+  );
   return `${header}.${payload}.signature`;
 }
 

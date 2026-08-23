@@ -16,7 +16,7 @@ describe('TeacherKeyRenderer', () => {
   it('renders the title with subject and grade header', () => {
     render(<TeacherKeyRenderer dto={base} />);
 
-    expect(screen.getByRole('heading', { name: 'Pecahan Harian' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'UJIAN PECAHAN HARIAN' })).toBeInTheDocument();
     expect(screen.getByText('Matematika · Kelas 4')).toBeInTheDocument();
   });
 
@@ -93,7 +93,10 @@ describe('TeacherKeyRenderer', () => {
       />,
     );
 
-    expect(screen.getByText('True.').closest('li')).toHaveAttribute('aria-label', 'Correct answer: True. Benar');
+    expect(screen.getByText('True.').closest('li')).toHaveAttribute(
+      'aria-label',
+      'Correct answer: True. Benar',
+    );
   });
 
   it('shows short-answer answer key text', () => {
@@ -102,7 +105,14 @@ describe('TeacherKeyRenderer', () => {
         dto={{
           ...base,
           questionCount: 1,
-          questions: [{ number: 1, stem: 'Ibukota Indonesia?', questionType: 'short_answer', answerKey: 'Jakarta' }],
+          questions: [
+            {
+              number: 1,
+              stem: 'Ibukota Indonesia?',
+              questionType: 'short_answer',
+              answerKey: 'Jakarta',
+            },
+          ],
         }}
       />,
     );

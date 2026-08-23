@@ -48,7 +48,9 @@ export function useRoles(): Role[] | null {
       .then((json: any) => {
         if (cancelled) return;
         const raw: string[] = json?.data?.roles ?? [];
-        setRoles(raw.filter((r): r is Role => ['teacher', 'school_admin', 'superadmin'].includes(r)));
+        setRoles(
+          raw.filter((r): r is Role => ['teacher', 'school_admin', 'superadmin'].includes(r)),
+        );
       })
       .catch(() => {
         if (!cancelled) setRoles([]);

@@ -29,10 +29,12 @@ function valid(overrides: Partial<CompositionValues> = {}): CompositionValues {
   };
   return {
     ...values,
-    questionTypeCounts: overrides.questionTypeCounts ?? rebalanceQuestionTypeCounts(
-      values.questionCount,
-      INITIAL_COMPOSITION_VALUES.questionTypeCounts,
-    ),
+    questionTypeCounts:
+      overrides.questionTypeCounts ??
+      rebalanceQuestionTypeCounts(
+        values.questionCount,
+        INITIAL_COMPOSITION_VALUES.questionTypeCounts,
+      ),
   };
 }
 

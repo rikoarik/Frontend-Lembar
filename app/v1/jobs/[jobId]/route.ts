@@ -4,7 +4,9 @@ import { backendFetch, JWT_COOKIE, SESSION_COOKIE } from '@/src/lib/api/session'
 
 function workspaceIdFromToken(token: string): string | null {
   try {
-    const payload = JSON.parse(Buffer.from(token.split('.')[1] ?? '', 'base64url').toString('utf8')) as {
+    const payload = JSON.parse(
+      Buffer.from(token.split('.')[1] ?? '', 'base64url').toString('utf8'),
+    ) as {
       workspaceId?: unknown;
     };
     return typeof payload.workspaceId === 'string' ? payload.workspaceId : null;
@@ -18,14 +20,26 @@ async function proxy(request: NextRequest, jobId: string, cancel: boolean) {
   const token = jar.get(JWT_COOKIE)?.value || jar.get(SESSION_COOKIE)?.value;
   if (!token) {
     return NextResponse.json(
-      { error: { code: 'AUTH_REQUIRED', message: 'Silakan masuk terlebih dahulu.', retryable: false } },
+      {
+        error: {
+          code: 'AUTH_REQUIRED',
+          message: 'Silakan masuk terlebih dahulu.',
+          retryable: false,
+        },
+      },
       { status: 401 },
     );
   }
   const workspaceId = workspaceIdFromToken(token);
   if (!workspaceId) {
     return NextResponse.json(
-      { error: { code: 'MISSING_WORKSPACE', message: 'Workspace tidak ditemukan.', retryable: false } },
+      {
+        error: {
+          code: 'MISSING_WORKSPACE',
+          message: 'Workspace tidak ditemukan.',
+          retryable: false,
+        },
+      },
       { status: 400 },
     );
   }
@@ -88,18 +102,12 @@ async function proxy(request: NextRequest, jobId: string, cancel: boolean) {
   );
 }
 
-export async function GET(
-  request: NextRequest,
-  context: { params: Promise<{ jobId: string }> },
-) {
+export async function GET(request: NextRequest, context: { params: Promise<{ jobId: string }> }) {
   const { jobId } = await context.params;
   return proxy(request, jobId, false);
 }
 
-export async function POST(
-  request: NextRequest,
-  context: { params: Promise<{ jobId: string }> },
-) {
+export async function POST(request: NextRequest, context: { params: Promise<{ jobId: string }> }) {
   const { jobId } = await context.params;
   return proxy(request, jobId, true);
 }

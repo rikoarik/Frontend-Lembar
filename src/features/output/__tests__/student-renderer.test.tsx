@@ -15,7 +15,7 @@ const base: PrintDTO = {
 describe('StudentWorksheetRenderer', () => {
   it('renders the assessment title', () => {
     render(<StudentWorksheetRenderer dto={base} />);
-    expect(screen.getByRole('heading', { name: 'Pecahan Harian' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'UJIAN PECAHAN HARIAN' })).toBeInTheDocument();
   });
 
   it('renders subject and grade label', () => {

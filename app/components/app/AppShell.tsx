@@ -28,11 +28,18 @@ export function AppShell({ children }: AppShellProps) {
   );
 
   const accountMenu = (
-    <AccountMenu displayName={displayName} planLabel={activeWorkspace.activeRole === 'subscriber' ? 'Guru Pro' : 'Paket Gratis'} compact={collapsed} />
+    <AccountMenu
+      displayName={displayName}
+      planLabel={activeWorkspace.activeRole === 'subscriber' ? 'Guru Pro' : 'Paket Gratis'}
+      compact={collapsed}
+    />
   );
 
   return (
-    <div className="fixed inset-0 flex h-dvh flex-col overflow-hidden bg-[#f3eee6] text-[#171717]">
+    <div
+      data-app-shell
+      className="fixed inset-0 flex min-h-0 flex-col overflow-hidden bg-[#f3eee6] text-[#171717]"
+    >
       <ImpersonationBanner />
       <a
         href="#konten-utama"

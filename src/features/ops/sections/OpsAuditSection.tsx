@@ -1,5 +1,3 @@
-'use client';
-
 import { Button } from '@/app/components/ui';
 import {
   AdminPageHeader,
@@ -8,7 +6,12 @@ import {
   AdminContentLoading,
 } from '@/src/features/admin/AdminChrome';
 import { AdminPagination } from '../components/AdminPagination';
-import { adminService, type AdminAuditRow, type AdminAuditDetail, type AdminMeta } from '@/src/services/admin/adminService';
+import {
+  adminService,
+  type AdminAuditRow,
+  type AdminAuditDetail,
+  type AdminMeta,
+} from '@/src/services/admin/adminService';
 
 export function OpsAuditSection({
   auditData,
@@ -106,7 +109,9 @@ export function OpsAuditSection({
                   <span className="font-semibold text-[#6d665d]">Waktu</span>
                   <span className="col-span-2">{auditDetailData.at}</span>
                   <span className="font-semibold text-[#6d665d]">Actor</span>
-                  <span className="col-span-2">{auditDetailData.actorName ?? auditDetailData.actor}</span>
+                  <span className="col-span-2">
+                    {auditDetailData.actorName ?? auditDetailData.actor}
+                  </span>
                   <span className="font-semibold text-[#6d665d]">Aksi</span>
                   <span className="col-span-2 font-mono">{auditDetailData.action}</span>
                   <span className="font-semibold text-[#6d665d]">Target</span>
@@ -190,10 +195,26 @@ export function OpsAuditSection({
         emptyLabel="Belum ada jejak audit."
         emptyHint="Audit trail akan muncul setelah ada aksi superadmin."
         columns={[
-          { key: 'at', header: 'Waktu', render: (row) => <span className="text-[11px] tabular-nums">{row.at}</span> },
-          { key: 'actor', header: 'Actor', render: (row) => <span className="font-mono text-[11px]">{row.actor}</span> },
-          { key: 'action', header: 'Aksi', render: (row) => <span className="font-mono text-[12px]">{row.action}</span> },
-          { key: 'target', header: 'Target', render: (row) => <span className="text-[11px] text-[#6d665d]">{row.target}</span> },
+          {
+            key: 'at',
+            header: 'Waktu',
+            render: (row) => <span className="text-[11px] tabular-nums">{row.at}</span>,
+          },
+          {
+            key: 'actor',
+            header: 'Actor',
+            render: (row) => <span className="font-mono text-[11px]">{row.actor}</span>,
+          },
+          {
+            key: 'action',
+            header: 'Aksi',
+            render: (row) => <span className="font-mono text-[12px]">{row.action}</span>,
+          },
+          {
+            key: 'target',
+            header: 'Target',
+            render: (row) => <span className="text-[11px] text-[#6d665d]">{row.target}</span>,
+          },
         ]}
         rowActions={(row) => (
           <Button

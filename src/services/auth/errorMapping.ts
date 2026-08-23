@@ -6,78 +6,80 @@ type ErrorCopy = {
   retryable: boolean;
 };
 
+// safeMessage/hint carry message keys from the `errors` namespace
+// (messages/<locale>/errors.json), resolved at render time.
 const COPY: Record<AuthErrorCode, ErrorCopy> = {
   INVALID_CREDENTIALS: {
-    safeMessage: 'Username, email, atau nomor telepon dan kata sandi tidak cocok.',
-    hint: 'Coba lagi atau pulihkan kata sandi.',
+    safeMessage: 'auth.invalidCredentials.message',
+    hint: 'auth.invalidCredentials.hint',
     retryable: false,
   },
   RATE_LIMITED: {
-    safeMessage: 'Terlalu banyak percobaan. Coba lagi dalam beberapa saat.',
-    hint: 'Permintaan akan dibuka kembali otomatis.',
+    safeMessage: 'auth.rateLimited.message',
+    hint: 'auth.rateLimited.hint',
     retryable: true,
   },
   ACCOUNT_LOCKED: {
-    safeMessage: 'Akun Anda dikunci sementara untuk keamanan. Coba lagi nanti.',
-    hint: 'Jika merasa ini keliru, hubungi bantuan.',
+    safeMessage: 'auth.accountLocked.message',
+    hint: 'auth.accountLocked.hint',
     retryable: true,
   },
   ACCOUNT_NOT_VERIFIED: {
-    safeMessage: 'Akun Anda belum aktif. Cek email untuk langkah verifikasi.',
-    hint: 'Tidak menemukan pesan? Periksa folder spam atau kirim ulang.',
+    safeMessage: 'auth.accountNotVerified.message',
+    hint: 'auth.accountNotVerified.hint',
     retryable: false,
   },
   PROVIDER_NOT_READY: {
-    safeMessage: 'Sedang ada gangguan masuk. Coba lagi dalam beberapa menit.',
+    safeMessage: 'auth.providerNotReady.message',
     retryable: true,
   },
   PASSWORD_RECOVERY_REQUIRED: {
-    safeMessage: 'Kata sandi perlu diatur ulang sebelum masuk.',
-    hint: 'Gunakan tautan pemulihan dari email Anda.',
+    safeMessage: 'auth.passwordRecoveryRequired.message',
+    hint: 'auth.passwordRecoveryRequired.hint',
     retryable: false,
   },
   CAPTCHA_REQUIRED: {
-    safeMessage: 'Verifikasi tambahan diperlukan untuk melanjutkan.',
+    safeMessage: 'auth.captchaRequired.message',
     retryable: false,
   },
   NETWORK: {
-    safeMessage: 'Tidak dapat terhubung. Periksa koneksi Anda.',
+    safeMessage: 'auth.network.message',
     retryable: true,
   },
   TIMEOUT: {
-    safeMessage: 'Permintaan memakan waktu terlalu lama. Coba lagi.',
+    safeMessage: 'auth.timeout.message',
     retryable: true,
   },
   VALIDATION_FAILED: {
-    safeMessage: 'Periksa kembali isian formulir.',
+    safeMessage: 'auth.validationFailed.message',
     retryable: false,
   },
   DUPLICATE_RESOURCE: {
-    safeMessage: 'Email atau nomor telepon sudah terdaftar.',
-    hint: 'Gunakan identitas lain atau pulihkan akun.',
+    safeMessage: 'auth.duplicateResource.message',
+    hint: 'auth.duplicateResource.hint',
     retryable: false,
   },
   RECOVERY_TOKEN_INVALID: {
-    safeMessage: 'Tautan pemulihan tidak valid.',
-    hint: 'Minta tautan baru untuk melanjutkan.',
+    safeMessage: 'auth.recoveryTokenInvalid.message',
+    hint: 'auth.recoveryTokenInvalid.hint',
     retryable: false,
   },
   INVITATION_INVALID: {
-    safeMessage: 'Undangan tidak lagi aktif.',
-    hint: 'Hubungi admin sekolah untuk undangan baru.',
+    safeMessage: 'auth.invitationInvalid.message',
+    hint: 'auth.invitationInvalid.hint',
     retryable: false,
   },
   REGISTRATION_UNAVAILABLE: {
-    safeMessage: 'Pendaftaran sedang ditutup untuk sementara.',
+    safeMessage: 'auth.registrationUnavailable.message',
     retryable: false,
   },
   VERIFICATION_REQUIRED: {
-    safeMessage: 'Verifikasi tambahan diperlukan.',
+    safeMessage: 'auth.verificationRequired.message',
     retryable: false,
   },
   UNKNOWN: {
-    safeMessage: 'Tidak dapat menyelesaikan permintaan saat ini.',
-    hint: 'Coba lagi beberapa saat lagi.',
+    safeMessage: 'auth.unknown.message',
+    hint: 'auth.unknown.hint',
     retryable: true,
   },
 };
@@ -93,9 +95,24 @@ export type AuthErrorEnvelope = {
 const KNOWN_CODES = new Set<string>(Object.keys(COPY));
 
 const genericRecoveryCopy: ErrorCopy = {
-  safeMessage: 'Jika akun ditemukan, kami akan mengirimkan langkah berikutnya.',
+  safeMessage: 'auth.recoveryRequest.message',
   retryable: false,
 };
+
+const COPY_MESSAGE_KEYS = new Set<string>(
+  Object.values(COPY).flatMap((copy) =>
+    copy.hint ? [copy.safeMessage, copy.hint] : [copy.safeMessage],
+  ),
+);
+COPY_MESSAGE_KEYS.add(genericRecoveryCopy.safeMessage);
+
+export function resolveErrorMessage(
+  t: (key: string) => string,
+  value: string | undefined,
+): string | undefined {
+  if (!value) return value;
+  return COPY_MESSAGE_KEYS.has(value) ? t(value) : value;
+}
 
 export function recoveryRequestCopy(): ErrorCopy {
   return genericRecoveryCopy;

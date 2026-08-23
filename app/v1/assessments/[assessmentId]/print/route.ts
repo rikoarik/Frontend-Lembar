@@ -16,12 +16,15 @@ export async function GET(
   }
 
   const { assessmentId } = await context.params;
-  const upstream = await backendFetch(
-    `/v1/assessments/${encodeURIComponent(assessmentId)}/print`,
-    { method: 'GET', token: auth.token, headers: { 'x-workspace-id': auth.claims.workspaceId } },
-  );
+  const upstream = await backendFetch(`/v1/assessments/${encodeURIComponent(assessmentId)}/print`, {
+    method: 'GET',
+    token: auth.token,
+    headers: { 'x-workspace-id': auth.claims.workspaceId },
+  });
 
-  const be = (await upstream.json().catch(() => null)) as Parameters<typeof mapToPrintDTO>[1] | null;
+  const be = (await upstream.json().catch(() => null)) as
+    | Parameters<typeof mapToPrintDTO>[1]
+    | null;
   if (!upstream.ok || !be) {
     return NextResponse.json(be, { status: upstream.status });
   }

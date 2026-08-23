@@ -1,5 +1,5 @@
 export type SourceMode = 'katalog' | 'pdf' | 'katalog+pdf';
-export type AssessmentType = 'practice' | 'daily' | 'midterm' | 'final' | 'tka';
+export type AssessmentType = 'practice' | 'daily' | 'midterm' | 'final' | 'tka' | 'promotion';
 export type Difficulty = 'easy' | 'medium' | 'hard' | 'mixed';
 export type ReviewMode = 'quick' | 'detail';
 export type QuestionType = 'multiple_choice' | 'short_answer' | 'essay' | 'true_false';
@@ -24,12 +24,15 @@ export function buildEvenQuestionTypeCounts(total: number): QuestionTypeCounts {
   const base = Math.floor(safeTotal / QUESTION_TYPES.length);
   let remainder = safeTotal % QUESTION_TYPES.length;
 
-  return QUESTION_TYPES.reduce<QuestionTypeCounts>((acc, type) => {
-    const bonus = remainder > 0 ? 1 : 0;
-    if (remainder > 0) remainder -= 1;
-    acc[type] = base + bonus;
-    return acc;
-  }, { ...EMPTY_QUESTION_TYPE_COUNTS });
+  return QUESTION_TYPES.reduce<QuestionTypeCounts>(
+    (acc, type) => {
+      const bonus = remainder > 0 ? 1 : 0;
+      if (remainder > 0) remainder -= 1;
+      acc[type] = base + bonus;
+      return acc;
+    },
+    { ...EMPTY_QUESTION_TYPE_COUNTS },
+  );
 }
 
 export function sumQuestionTypeCounts(counts: QuestionTypeCounts): number {
@@ -46,17 +49,23 @@ export function rebalanceQuestionTypeCounts(
   if (!editedType) return buildEvenQuestionTypeCounts(safeTotal);
 
   if (safeTotal <= 1) {
-    return QUESTION_TYPES.reduce<QuestionTypeCounts>((acc, type) => {
-      acc[type] = type === editedType ? safeTotal : 0;
-      return acc;
-    }, { ...EMPTY_QUESTION_TYPE_COUNTS });
+    return QUESTION_TYPES.reduce<QuestionTypeCounts>(
+      (acc, type) => {
+        acc[type] = type === editedType ? safeTotal : 0;
+        return acc;
+      },
+      { ...EMPTY_QUESTION_TYPE_COUNTS },
+    );
   }
 
-  const next = QUESTION_TYPES.reduce<QuestionTypeCounts>((acc, type) => {
-    const raw = counts[type];
-    acc[type] = Number.isFinite(raw) ? Math.max(0, Math.floor(raw)) : 0;
-    return acc;
-  }, { ...EMPTY_QUESTION_TYPE_COUNTS });
+  const next = QUESTION_TYPES.reduce<QuestionTypeCounts>(
+    (acc, type) => {
+      const raw = counts[type];
+      acc[type] = Number.isFinite(raw) ? Math.max(0, Math.floor(raw)) : 0;
+      return acc;
+    },
+    { ...EMPTY_QUESTION_TYPE_COUNTS },
+  );
 
   next[editedType] = Math.min(safeTotal, next[editedType]);
 
@@ -98,19 +107,24 @@ export function normalizeQuestionTypeCounts(
   counts: QuestionTypeCounts,
 ): QuestionTypeCounts {
   const safeTotal = Number.isFinite(total) ? Math.max(0, Math.floor(total)) : 0;
-  const sanitized = QUESTION_TYPES.reduce<QuestionTypeCounts>((acc, type) => {
-    const raw = counts[type];
-    acc[type] = Number.isFinite(raw) ? Math.max(0, Math.floor(raw)) : 0;
-    return acc;
-  }, { ...EMPTY_QUESTION_TYPE_COUNTS });
+  const sanitized = QUESTION_TYPES.reduce<QuestionTypeCounts>(
+    (acc, type) => {
+      const raw = counts[type];
+      acc[type] = Number.isFinite(raw) ? Math.max(0, Math.floor(raw)) : 0;
+      return acc;
+    },
+    { ...EMPTY_QUESTION_TYPE_COUNTS },
+  );
 
   if (safeTotal <= 1) {
-    const preferredType =
-      QUESTION_TYPES.find((type) => sanitized[type] > 0) ?? QUESTION_TYPES[0];
-    return QUESTION_TYPES.reduce<QuestionTypeCounts>((acc, type) => {
-      acc[type] = type === preferredType ? safeTotal : 0;
-      return acc;
-    }, { ...EMPTY_QUESTION_TYPE_COUNTS });
+    const preferredType = QUESTION_TYPES.find((type) => sanitized[type] > 0) ?? QUESTION_TYPES[0];
+    return QUESTION_TYPES.reduce<QuestionTypeCounts>(
+      (acc, type) => {
+        acc[type] = type === preferredType ? safeTotal : 0;
+        return acc;
+      },
+      { ...EMPTY_QUESTION_TYPE_COUNTS },
+    );
   }
 
   return sumQuestionTypeCounts(sanitized) === safeTotal
@@ -159,6 +173,8 @@ export type CompositionValues = {
   materialIds: string[];
   sourceId: string;
   assessmentType: AssessmentType;
+  /** Academic year printed in the exam header, for example "2026/2027". */
+  academicYear: string;
   difficulty: Difficulty;
   questionCount: number;
   questionTypeCounts: QuestionTypeCounts;
@@ -179,6 +195,7 @@ export const INITIAL_COMPOSITION_VALUES: CompositionValues = {
   materialIds: [],
   sourceId: '',
   assessmentType: 'practice',
+  academicYear: `${new Date().getFullYear()}/${new Date().getFullYear() + 1}`,
   difficulty: 'medium',
   questionCount: 20,
   questionTypeCounts: buildEvenQuestionTypeCounts(20),

@@ -44,14 +44,20 @@ export function OutputCenterContent({ assessmentId }: { assessmentId: string }) 
 
   useEffect(() => {
     let active = true;
-    void fetch(`/v1/assessments/${encodeURIComponent(assessmentId)}/print`, { credentials: 'include' })
+    void fetch(`/v1/assessments/${encodeURIComponent(assessmentId)}/print`, {
+      credentials: 'include',
+    })
       .then(async (response) => {
         if (response.status === 401) {
           routerRef.current.replace('/masuk');
           return null;
         }
-        const body = (await response.json().catch(() => null)) as { data?: PrintDTO; error?: { message?: string } } | null;
-        if (!response.ok || !body?.data) throw new Error(body?.error?.message ?? 'Gagal memuat output.');
+        const body = (await response.json().catch(() => null)) as {
+          data?: PrintDTO;
+          error?: { message?: string };
+        } | null;
+        if (!response.ok || !body?.data)
+          throw new Error(body?.error?.message ?? 'Gagal memuat output.');
         return body.data;
       })
       .then((next) => {
@@ -79,7 +85,9 @@ export function OutputCenterContent({ assessmentId }: { assessmentId: string }) 
     <main className="flex flex-col gap-4">
       <header>
         <h1 className="text-h1 font-semibold text-brand-ink">Pusat output</h1>
-        <p className="text-body-sm text-brand-ink-muted">{dto.title} · {dto.questionCount} soal</p>
+        <p className="text-body-sm text-brand-ink-muted">
+          {dto.title} · {dto.questionCount} soal
+        </p>
       </header>
 
       <div

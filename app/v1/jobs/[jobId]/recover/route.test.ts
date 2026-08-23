@@ -19,23 +19,33 @@ function jwt() {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  cookieGet.mockImplementation((name: string) => name === 'lembar_token' ? { value: jwt() } : undefined);
+  cookieGet.mockImplementation((name: string) =>
+    name === 'lembar_token' ? { value: jwt() } : undefined,
+  );
 });
 
 describe('POST /v1/jobs/[jobId]/recover', () => {
   it('forwards recovery to backend with workspace isolation', async () => {
     const { POST } = await import('./route');
-    backendFetch.mockResolvedValue(new Response(JSON.stringify({ data: { id: 'job-1', status: 'queued' } }), { status: 200 }));
+    backendFetch.mockResolvedValue(
+      new Response(JSON.stringify({ data: { id: 'job-1', status: 'queued' } }), { status: 200 }),
+    );
 
-    const response = await POST(new Request('http://localhost/v1/jobs/job-1/recover', { method: 'POST' }) as never, {
-      params: Promise.resolve({ jobId: 'job-1' }),
-    });
+    const response = await POST(
+      new Request('http://localhost/v1/jobs/job-1/recover', { method: 'POST' }) as never,
+      {
+        params: Promise.resolve({ jobId: 'job-1' }),
+      },
+    );
 
     expect(response.status).toBe(200);
-    expect(backendFetch).toHaveBeenCalledWith('/v1/jobs/job-1/recover', expect.objectContaining({
-      method: 'POST',
-      headers: { 'x-workspace-id': 'workspace-1' },
-      body: '{}',
-    }));
+    expect(backendFetch).toHaveBeenCalledWith(
+      '/v1/jobs/job-1/recover',
+      expect.objectContaining({
+        method: 'POST',
+        headers: { 'x-workspace-id': 'workspace-1' },
+        body: '{}',
+      }),
+    );
   });
 });

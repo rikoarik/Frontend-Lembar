@@ -27,7 +27,9 @@ export async function GET(
   }
   const result = await loadLiveAssessment(auth.token, auth.claims.workspaceId, assessmentId);
   return NextResponse.json(
-    result.payload ?? { error: { code: 'UPSTREAM_ERROR', message: 'Respons backend tidak valid.' } },
+    result.payload ?? {
+      error: { code: 'UPSTREAM_ERROR', message: 'Respons backend tidak valid.' },
+    },
     { status: result.status },
   );
 }

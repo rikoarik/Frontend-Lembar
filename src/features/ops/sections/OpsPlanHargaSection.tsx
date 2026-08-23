@@ -1,5 +1,3 @@
-'use client';
-
 /**
  * Ops Plan & Harga section — manage canonical plan catalog via GET/PATCH /v1/admin/plans.
  * Uses existing adminService request() pattern and BFF proxy at /v1/admin/[...slug].
@@ -8,7 +6,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/app/components/ui';
 import { AdminPageHeader } from '@/src/features/admin/AdminChrome';
-import { adminService, type AdminPlanRow, type AdminError } from '@/src/services/admin/adminService';
+import {
+  adminService,
+  type AdminPlanRow,
+  type AdminError,
+} from '@/src/services/admin/adminService';
 import type { Result } from '@/src/types/result';
 import { formatPrice, formatTokenLimit } from '@/src/lib/api/plans';
 
@@ -55,14 +57,17 @@ function PlanListItem({
         <div className="min-w-0">
           <p className="font-semibold text-[#171717]">{plan.displayName}</p>
           <p className="text-body-xs text-[#6d665d]">
-            {plan.key} · {formatPrice({ ...plan, key: plan.key })} · {formatTokenLimit(plan.tokenMonthlyLimit)}
+            {plan.key} · {formatPrice({ ...plan, key: plan.key })} ·{' '}
+            {formatTokenLimit(plan.tokenMonthlyLimit)}
           </p>
         </div>
         <div className="flex items-center gap-2">
           <span className="rounded-full border border-[#ddd4c8] bg-white px-2.5 py-1 text-[11px] font-semibold text-[#6d665d]">
             {plan.features.length} fitur
           </span>
-          <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${plan.active ? 'bg-emerald-50 text-emerald-700' : 'bg-[#f3ede5] text-[#6d665d]'}`}>
+          <span
+            className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${plan.active ? 'bg-emerald-50 text-emerald-700' : 'bg-[#f3ede5] text-[#6d665d]'}`}
+          >
             {plan.active ? 'aktif' : 'nonaktif'}
           </span>
           <span className="rounded-full bg-[#851925] px-2.5 py-1 text-[11px] font-semibold text-white">
@@ -86,12 +91,6 @@ function PlanEditor({
   const [edit, setEdit] = useState<EditRow>(toEditRow(plan));
   const [saveState, setSaveState] = useState<SaveState>('idle');
   const [saveError, setSaveError] = useState('');
-
-  useEffect(() => {
-    setEdit(toEditRow(plan));
-    setSaveState('idle');
-    setSaveError('');
-  }, [plan]);
 
   const handleSave = async () => {
     setSaveState('saving');
@@ -162,10 +161,13 @@ function PlanEditor({
     <div className="rounded-2xl border border-[#e2ddd6] bg-white p-5 shadow-sm">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#8a8177]">Sedang diedit</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#8a8177]">
+            Sedang diedit
+          </p>
           <h3 className="text-body-lead font-semibold text-[#171717]">{plan.displayName}</h3>
           <p className="text-body-xs text-[#6d665d]">
-            {plan.key} · {formatPrice({ ...plan, key: plan.key })} · {formatTokenLimit(plan.tokenMonthlyLimit)} · Revisi #{plan.revision}
+            {plan.key} · {formatPrice({ ...plan, key: plan.key })} ·{' '}
+            {formatTokenLimit(plan.tokenMonthlyLimit)} · Revisi #{plan.revision}
           </p>
         </div>
         <label className="flex items-center gap-2 cursor-pointer select-none">
@@ -182,14 +184,29 @@ function PlanEditor({
 
       <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
         {field('Nama tampil', 'displayName', 'Dipakai di landing, langganan, dan label admin.')}
-        {field('Harga (IDR)', 'priceAmount', 'Server memakai angka ini saat bikin order dan entitlement.')}
-        {field('Kuota token per bulan', 'tokenMonthlyLimit', 'Kosongkan jika paket tidak dibatasi.')}
+        {field(
+          'Harga (IDR)',
+          'priceAmount',
+          'Server memakai angka ini saat bikin order dan entitlement.',
+        )}
+        {field(
+          'Kuota token per bulan',
+          'tokenMonthlyLimit',
+          'Kosongkan jika paket tidak dibatasi.',
+        )}
         {field('Periode tagihan', 'billingPeriod', 'monthly, yearly, atau kosong.')}
-        {field('Fitur paket', 'features', 'Pisahkan dengan koma. Dipakai untuk copy publik dan akses fitur.')}
+        {field(
+          'Fitur paket',
+          'features',
+          'Pisahkan dengan koma. Dipakai untuk copy publik dan akses fitur.',
+        )}
       </div>
 
       {saveError && (
-        <p className="mt-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
+        <p
+          className="mt-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+          role="alert"
+        >
           {saveError}
         </p>
       )}
@@ -208,15 +225,12 @@ function PlanEditor({
   );
 }
 
-
 export function OpsPlanHargaSection({ setToast }: { setToast: (msg: string) => void }) {
   const [plans, setPlans] = useState<AdminPlanRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
 
-  const load = useCallback(() => {
-    setLoading(true);
-    setLoadError('');
+  const requestPlans = useCallback(() => {
     adminService.listPlans().then((result) => {
       if (result.ok) {
         setPlans(result.value);
@@ -227,7 +241,15 @@ export function OpsPlanHargaSection({ setToast }: { setToast: (msg: string) => v
     });
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  const load = useCallback(() => {
+    setLoading(true);
+    setLoadError('');
+    requestPlans();
+  }, [requestPlans]);
+
+  useEffect(() => {
+    requestPlans();
+  }, [requestPlans]);
 
   const handleSaved = (updated: AdminPlanRow) => {
     setPlans((prev) => prev.map((p) => (p.key === updated.key ? updated : p)));
@@ -255,7 +277,10 @@ export function OpsPlanHargaSection({ setToast }: { setToast: (msg: string) => v
           <div className="h-16 animate-pulse rounded-xl bg-[#f3ede5]" />
         </div>
       ) : loadError ? (
-        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700" role="alert">
+        <div
+          className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700"
+          role="alert"
+        >
           {loadError}
           <button className="ml-3 underline font-semibold text-red-800" onClick={load}>
             Coba lagi
@@ -267,7 +292,8 @@ export function OpsPlanHargaSection({ setToast }: { setToast: (msg: string) => v
         <div className="grid gap-4 lg:grid-cols-[1fr_1.1fr]">
           <div className="space-y-3">
             <div className="rounded-xl border border-[#ddd4c8] bg-white p-3 text-sm text-[#6d665d]">
-              Pilih paket untuk diedit. Perubahan ini dipakai di landing harga, langganan, dan batas token.
+              Pilih paket untuk diedit. Perubahan ini dipakai di landing harga, langganan, dan batas
+              token.
             </div>
             {plans.map((plan) => (
               <PlanListItem
@@ -280,11 +306,15 @@ export function OpsPlanHargaSection({ setToast }: { setToast: (msg: string) => v
           </div>
 
           {activePlan ? (
-            <PlanEditor key={activePlan.key} plan={activePlan} onSaved={handleSaved} setToast={setToast} />
+            <PlanEditor
+              key={`${activePlan.key}:${activePlan.revision}`}
+              plan={activePlan}
+              onSaved={handleSaved}
+              setToast={setToast}
+            />
           ) : null}
         </div>
       )}
     </div>
   );
 }
-

@@ -1,10 +1,14 @@
-'use client';
-
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/app/components/ui';
 import { AdminStatCards, AdminDataTable, AdminPill } from '@/src/features/admin/AdminChrome';
 import { DashboardTrendsChart } from '../components/DashboardTrendsChart';
 import { jobTone, planTone } from '../utils/opsToneUtils';
-import type { AdminDashboard, AdminJobRow, AdminSchoolRow } from '@/src/services/admin/adminService';
+import type {
+  AdminDashboard,
+  AdminJobRow,
+  AdminSchoolRow,
+} from '@/src/services/admin/adminService';
 
 export function OpsOverviewSection({
   dashboard,
@@ -21,6 +25,8 @@ export function OpsOverviewSection({
   loadDashboard: () => void;
   setToast: (msg: string) => void;
 }) {
+  const router = useRouter();
+
   return (
     <>
       {/* Editorial Hero Header */}
@@ -51,7 +57,8 @@ export function OpsOverviewSection({
               ) : null}
             </div>
             <p className="mt-1 text-[13px] text-[#57534e] max-w-md leading-relaxed">
-              Ringkasan performa pemrosesan job, kesehatan tenant, dan aktivitas sistem superadmin secara real-time.
+              Ringkasan performa pemrosesan job, kesehatan tenant, dan aktivitas sistem superadmin
+              secara real-time.
             </p>
           </div>
 
@@ -79,7 +86,7 @@ export function OpsOverviewSection({
               <Button
                 size="sm"
                 onClick={() => {
-                  window.location.href = '/ops/jobs?status=failed';
+                  router.push('/ops/jobs?status=failed');
                 }}
                 className="bg-[#851925] hover:bg-[#6b131e] text-white gap-1.5 shadow-sm"
               >
@@ -91,7 +98,7 @@ export function OpsOverviewSection({
                 size="sm"
                 variant="secondary"
                 onClick={() => {
-                  window.location.href = '/ops/jobs';
+                  router.push('/ops/jobs');
                 }}
                 className="gap-1.5"
               >
@@ -165,13 +172,13 @@ export function OpsOverviewSection({
                 <p className="text-[12px] text-[#57534e]">Antrean & status eksekusi job terkini</p>
               </div>
             </div>
-            <a
+            <Link
               href="/ops/jobs"
               className="inline-flex items-center gap-1 text-[12px] font-semibold text-brand-accent hover:text-brand-accent-hover transition-colors"
             >
               Lihat semua
               <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
-            </a>
+            </Link>
           </div>
           <AdminDataTable
             rows={dashboardJobs}
@@ -230,9 +237,7 @@ export function OpsOverviewSection({
         <div className="flex flex-col space-y-4 rounded-2xl border border-[#ddd4c8]/80 bg-white p-5 shadow-[0_2px_12px_rgba(23,23,23,0.01),0_1px_2px_rgba(23,23,23,0.02)] transition-all duration-200 hover:shadow-[0_8px_24px_rgba(23,23,23,0.04)]">
           <div className="flex items-center justify-between gap-2 border-b border-[#eee6da]/60 pb-3.5">
             <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-[18px] text-[#c9703a]">
-                warning
-              </span>
+              <span className="material-symbols-outlined text-[18px] text-[#c9703a]">warning</span>
               <div>
                 <h3 className="text-[14px] font-bold text-[#171717]">Tenant Perlu Perhatian</h3>
                 <p className="text-[12px] text-[#57534e]">
@@ -240,13 +245,13 @@ export function OpsOverviewSection({
                 </p>
               </div>
             </div>
-            <a
+            <Link
               href="/ops/schools"
               className="inline-flex items-center gap-1 text-[12px] font-semibold text-brand-accent hover:text-brand-accent-hover transition-colors"
             >
               Lihat semua
               <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
-            </a>
+            </Link>
           </div>
           <AdminDataTable
             rows={dashboardSchools.filter((s) => s.plan === 'grace' || s.plan === 'blocked')}
@@ -294,7 +299,8 @@ export function OpsOverviewSection({
         <div className="flex items-center gap-2">
           <span className="h-2 w-2 rounded-full bg-[#176b45]" aria-hidden />
           <span>
-            Infrastruktur Superadmin lembar beroperasi normal — API, Database, Worker Queue, dan Storage terpantau stabil.
+            Infrastruktur Superadmin lembar beroperasi normal — API, Database, Worker Queue, dan
+            Storage terpantau stabil.
           </span>
         </div>
         <span className="text-[12px] font-mono text-[#57534e] hidden md:inline-block">

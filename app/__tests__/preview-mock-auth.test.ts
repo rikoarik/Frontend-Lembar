@@ -1,5 +1,6 @@
 import { describe, expect, it, beforeEach, afterEach } from 'vitest';
 import { POST as loginPost } from '@/app/v1/auth/login/route';
+import { POST as logoutPost } from '@/app/v1/auth/logout/route';
 import { GET as meGet } from '@/app/v1/me/route';
 
 describe('preview mock auth routes', () => {
@@ -38,5 +39,28 @@ describe('preview mock auth routes', () => {
     expect(response.status).toBe(401);
     const json = (await response.json()) as { error: { code: string } };
     expect(json.error.code).toBe('INVALID_CREDENTIALS');
+  });
+
+  it('clears mock auth cookies on logout', async () => {
+    const response = await logoutPost();
+
+    expect(response.status).toBe(200);
+    for (const name of [
+      'lembar_session',
+      'lembar_token',
+      'lembar_roles',
+      'lembar_active_role',
+      'lembar_active_workspace',
+      'lembar_impersonator',
+      'lembar_is_impersonating',
+      'lembar_impersonated_name',
+    ]) {
+      expect(response.cookies.get(name)).toMatchObject({
+        name,
+        value: '',
+        path: '/',
+        maxAge: 0,
+      });
+    }
   });
 });

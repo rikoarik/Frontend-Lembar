@@ -33,7 +33,9 @@ export default function TentangPage() {
             <span className="text-on-primary/70 text-caption mt-1 block">Lebih cepat</span>
           </div>
           <div className="col-span-2 md:col-span-4 text-center mt-unit-2">
-            <span className="text-on-primary/50 text-caption block">per Agustus 2026 · sejak beta launch</span>
+            <span className="text-on-primary/50 text-caption block">
+              per Agustus 2026 · sejak beta launch
+            </span>
           </div>
         </div>
       </section>

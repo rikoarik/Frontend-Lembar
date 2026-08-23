@@ -1,5 +1,3 @@
-'use client';
-
 import type { InputHTMLAttributes, ReactElement } from 'react';
 import { useId } from 'react';
 

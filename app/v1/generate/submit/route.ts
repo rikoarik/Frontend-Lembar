@@ -32,7 +32,10 @@ function toQuestionTypeCounts(value: unknown): QuestionTypeCounts {
 }
 
 function buildBlueprintItems(body: Record<string, unknown>, count: number, difficulty: string) {
-  const normalizedCounts = normalizeQuestionTypeCounts(count, toQuestionTypeCounts(body.questionTypeCounts));
+  const normalizedCounts = normalizeQuestionTypeCounts(
+    count,
+    toQuestionTypeCounts(body.questionTypeCounts),
+  );
   let sequence = 0;
 
   return QUESTION_TYPES.flatMap((questionType) =>
@@ -111,12 +114,20 @@ export async function POST(request: NextRequest) {
         'x-actor-user-id': actorId,
       },
       body: JSON.stringify({
-        title: `${String(body.subjectLabel || body.subjectId || 'Lembar soal')} ${String(body.gradeLabel || body.gradeId || '')}`.trim(),
+        title:
+          `${String(body.subjectLabel || body.subjectId || 'Lembar soal')} ${String(body.gradeLabel || body.gradeId || '')}`.trim(),
         curriculumVersionId: String(
           body.curriculumVersionId || '11111111-1111-1111-1111-111111111111',
         ),
         gradeId: String(body.gradeId || ''),
+        gradeLabel: typeof body.gradeLabel === 'string' ? body.gradeLabel : undefined,
         subjectId: String(body.subjectId || ''),
+        subjectLabel: typeof body.subjectLabel === 'string' ? body.subjectLabel : undefined,
+        assessmentType: typeof body.assessmentType === 'string' ? body.assessmentType : undefined,
+        academicYear: typeof body.academicYear === 'string' ? body.academicYear : undefined,
+        durationMinutes: Number.isFinite(Number(body.durationMinutes))
+          ? Number(body.durationMinutes)
+          : undefined,
         sourceUploadIds: typeof body.sourceId === 'string' && body.sourceId ? [body.sourceId] : [],
         blueprintItems,
       }),

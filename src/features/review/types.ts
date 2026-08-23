@@ -5,12 +5,7 @@ export type QuestionReviewState =
   | 'rejected'
   | 'needs_attention';
 
-export type BackendReviewState =
-  | 'pending'
-  | 'accepted'
-  | 'rejected'
-  | 'edited'
-  | 'needs_attention';
+export type BackendReviewState = 'pending' | 'accepted' | 'rejected' | 'edited' | 'needs_attention';
 
 const BACKEND_TO_FRONTEND: Record<BackendReviewState, QuestionReviewState> = {
   pending: 'unreviewed',
@@ -36,7 +31,13 @@ export function mapReviewStateToBackend(value: QuestionReviewState): BackendRevi
   return FRONTEND_TO_BACKEND[value];
 }
 
-export type AssessmentLifecycle = 'draft' | 'generating' | 'review' | 'final' | 'archived' | 'failed';
+export type AssessmentLifecycle =
+  | 'draft'
+  | 'generating'
+  | 'review'
+  | 'final'
+  | 'archived'
+  | 'failed';
 
 export type QuestionWarning = {
   code: string;
@@ -89,6 +90,8 @@ export type AssessmentSummary = {
   reviewedCount: number;
   warningCount: number;
   reviewMode: 'quick' | 'detail';
+  assessmentType?: string;
+  academicYear?: string;
   updatedAt: string;
   createdAt: string;
   canReview: boolean;

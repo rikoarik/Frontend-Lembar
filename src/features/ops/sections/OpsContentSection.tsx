@@ -1,9 +1,11 @@
-'use client';
-
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/app/components/ui';
 import { AdminContentLoading, AdminPageHeader, AdminPill } from '@/src/features/admin/AdminChrome';
-import { adminService, type MarketingOpsPage, type MarketingPageSlug } from '@/src/services/admin/adminService';
+import {
+  adminService,
+  type MarketingOpsPage,
+  type MarketingPageSlug,
+} from '@/src/services/admin/adminService';
 
 const PAGES: { slug: MarketingPageSlug; label: string; href: string }[] = [
   { slug: 'home', label: 'Beranda', href: '/' },
@@ -18,38 +20,73 @@ export function OpsContentSection({ setToast }: { setToast: (message: string) =>
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
+  const requestPage = useCallback(
+    (slug: MarketingPageSlug) => {
+      adminService.marketingPage(slug).then((result) => {
+        if (result.ok) {
+          setPage(result.value);
+          setDraftJson(result.value.draft ? JSON.stringify(result.value.draft, null, 2) : '');
+        } else {
+          setToast(`Gagal memuat konten: ${result.error.safeMessage}`);
+        }
+        setLoading(false);
+      });
+    },
+    [setToast],
+  );
+
   const load = (slug = selected) => {
     setLoading(true);
-    adminService.marketingPage(slug).then((result) => {
-      if (result.ok) {
-        setPage(result.value);
-        setDraftJson(result.value.draft ? JSON.stringify(result.value.draft, null, 2) : '');
-      } else setToast(`Gagal memuat konten: ${result.error.safeMessage}`);
-      setLoading(false);
-    });
+    requestPage(slug);
   };
 
-  useEffect(() => { load(selected); }, [selected]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    requestPage(selected);
+  }, [requestPage, selected]);
 
   const save = () => {
     if (!page) return;
     let draft: unknown;
-    try { draft = JSON.parse(draftJson); } catch { setToast('JSON draft tidak valid.'); return; }
+    try {
+      draft = JSON.parse(draftJson);
+    } catch {
+      setToast('JSON draft tidak valid.');
+      return;
+    }
     setSaving(true);
     adminService.saveMarketingDraft(selected, draft, page.summary.revision).then((result) => {
       setSaving(false);
-      if (result.ok) { setPage(result.value); setDraftJson(JSON.stringify(result.value.draft, null, 2)); setToast('Draft tersimpan.'); }
-      else setToast(result.error.code === 'STATE_CONFLICT' ? 'Draft berubah di tempat lain. Muat ulang sebelum menyimpan.' : `Gagal menyimpan: ${result.error.safeMessage}`);
+      if (result.ok) {
+        setPage(result.value);
+        setDraftJson(JSON.stringify(result.value.draft, null, 2));
+        setToast('Draft tersimpan.');
+      } else
+        setToast(
+          result.error.code === 'STATE_CONFLICT'
+            ? 'Draft berubah di tempat lain. Muat ulang sebelum menyimpan.'
+            : `Gagal menyimpan: ${result.error.safeMessage}`,
+        );
     });
   };
 
   const changePublication = (action: 'publish' | 'unpublish') => {
-    if (!page || !window.confirm(`${action === 'publish' ? 'Terbitkan' : 'Tarik'} halaman ini?`)) return;
+    if (!page || !window.confirm(`${action === 'publish' ? 'Terbitkan' : 'Tarik'} halaman ini?`))
+      return;
     setSaving(true);
-    adminService[action === 'publish' ? 'publishPage' : 'unpublishPage'](selected, page.summary.revision).then((result) => {
+    adminService[action === 'publish' ? 'publishPage' : 'unpublishPage'](
+      selected,
+      page.summary.revision,
+    ).then((result) => {
       setSaving(false);
-      if (result.ok) { setPage(result.value); setToast(action === 'publish' ? 'Halaman diterbitkan.' : 'Halaman ditarik dari publik.'); }
-      else setToast(result.error.code === 'STATE_CONFLICT' ? 'Versi sudah berubah. Muat ulang sebelum melanjutkan.' : `Gagal: ${result.error.safeMessage}`);
+      if (result.ok) {
+        setPage(result.value);
+        setToast(action === 'publish' ? 'Halaman diterbitkan.' : 'Halaman ditarik dari publik.');
+      } else
+        setToast(
+          result.error.code === 'STATE_CONFLICT'
+            ? 'Versi sudah berubah. Muat ulang sebelum melanjutkan.'
+            : `Gagal: ${result.error.safeMessage}`,
+        );
     });
   };
 
@@ -65,7 +102,11 @@ export function OpsContentSection({ setToast }: { setToast: (message: string) =>
             key={item.slug}
             size="sm"
             variant={selected === item.slug ? undefined : 'secondary'}
-            onClick={() => setSelected(item.slug)}
+            onClick={() => {
+              if (item.slug === selected) return;
+              setLoading(true);
+              setSelected(item.slug);
+            }}
           >
             {item.label}
           </Button>
@@ -95,11 +136,20 @@ export function OpsContentSection({ setToast }: { setToast: (message: string) =>
               Muat ulang
             </Button>
             {page?.summary.state === 'published' ? (
-              <Button size="sm" variant="secondary" disabled={saving} onClick={() => changePublication('unpublish')}>
+              <Button
+                size="sm"
+                variant="secondary"
+                disabled={saving}
+                onClick={() => changePublication('unpublish')}
+              >
                 Tarik publikasi
               </Button>
             ) : (
-              <Button size="sm" disabled={saving || !page?.draft} onClick={() => changePublication('publish')}>
+              <Button
+                size="sm"
+                disabled={saving || !page?.draft}
+                onClick={() => changePublication('publish')}
+              >
                 Terbitkan
               </Button>
             )}
@@ -109,14 +159,17 @@ export function OpsContentSection({ setToast }: { setToast: (message: string) =>
             <label className="block space-y-2" htmlFor="marketing-draft-json">
               <span className="text-sm font-semibold">Draft terstruktur (mode lanjutan)</span>
               <span className="block text-xs text-[#6d665d]">
-                Gunakan hanya kalau mau edit schemaVersion, seo, dan blocks langsung. Untuk perubahan cepat, isi blok melalui editor yang lebih kecil nanti.
+                Gunakan hanya kalau mau edit schemaVersion, seo, dan blocks langsung. Untuk
+                perubahan cepat, isi blok melalui editor yang lebih kecil nanti.
               </span>
               <textarea
                 id="marketing-draft-json"
                 className="min-h-[420px] w-full rounded-xl border border-[#ddd4c8] bg-white p-3 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-[#171717]/20"
                 value={draftJson}
                 onChange={(event) => setDraftJson(event.target.value)}
-                placeholder={'{\n  "schemaVersion": 1,\n  "seo": { "title": "", "description": "" },\n  "blocks": []\n}'}
+                placeholder={
+                  '{\n  "schemaVersion": 1,\n  "seo": { "title": "", "description": "" },\n  "blocks": []\n}'
+                }
               />
             </label>
 

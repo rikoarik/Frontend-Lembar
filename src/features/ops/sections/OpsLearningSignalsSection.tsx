@@ -53,7 +53,8 @@ export function OpsLearningSignalsSection({
         <div className="rounded-2xl border border-[#ddd4c8]/60 bg-[#faf8f5] p-8 text-center space-y-2">
           <div className="text-[14px] font-semibold text-[#171717]">Belum ada learning signal</div>
           <div className="text-[13px] text-[#6d665d]">
-            Sinyal muncul ketika pengguna memberikan feedback pada hasil generate. Data dari tabel ai_learning_signals.
+            Sinyal muncul ketika pengguna memberikan feedback pada hasil generate. Data dari tabel
+            ai_learning_signals.
           </div>
         </div>
       ) : (
@@ -79,7 +80,9 @@ export function OpsLearningSignalsSection({
               key: 'frequency',
               header: 'Frekuensi',
               render: (row) => (
-                <span className="tabular-nums font-semibold">{String((row as any).frequency ?? 0)}</span>
+                <span className="tabular-nums font-semibold">
+                  {String((row as any).frequency ?? 0)}
+                </span>
               ),
             },
             {
@@ -95,7 +98,7 @@ export function OpsLearningSignalsSection({
               key: 'action',
               header: 'Aksi yang Disarankan',
               render: (row) => (
-                <span className="text-[12px] text-[#c9703a] font-medium font-semibold">
+                <span className="text-[12px] font-semibold text-[#c9703a]">
                   {(row as any).suggested_action ?? '—'}
                 </span>
               ),

@@ -20,7 +20,8 @@ export function CreatorAnalyticsView() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    void assessmentService.list()
+    void assessmentService
+      .list()
       .then((result) => {
         if (result.ok) setItems(result.value);
         else setError(result.error.safeMessage);
@@ -47,16 +48,33 @@ export function CreatorAnalyticsView() {
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
           <h1 className="text-h1 font-semibold text-brand-ink">Analitik pembuat</h1>
-          <p className="text-body-sm text-brand-ink-muted">Ringkasan dari assessment workspace aktif.</p>
+          <p className="text-body-sm text-brand-ink-muted">
+            Ringkasan dari assessment workspace aktif.
+          </p>
         </div>
         <div className="flex rounded-xl border border-brand-line p-1">
-          {([['7d', '7 Hari'], ['30d', '30 Hari'], ['semester', 'Semester']] as const).map(([key, label]) => (
-            <button key={key} type="button" onClick={() => setRange(key)} className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${range === key ? 'bg-brand-paper shadow-sm' : 'text-brand-ink-muted'}`}>{label}</button>
+          {(
+            [
+              ['7d', '7 Hari'],
+              ['30d', '30 Hari'],
+              ['semester', 'Semester'],
+            ] as const
+          ).map(([key, label]) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setRange(key)}
+              className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${range === key ? 'bg-brand-paper shadow-sm' : 'text-brand-ink-muted'}`}
+            >
+              {label}
+            </button>
           ))}
         </div>
       </div>
 
-      {loading ? <div className="h-40 animate-pulse rounded-xl bg-brand-line" aria-busy="true" /> : null}
+      {loading ? (
+        <div className="h-40 animate-pulse rounded-xl bg-brand-line" aria-busy="true" />
+      ) : null}
       {error ? <Panel title="Analitik gagal dimuat" description={error} /> : null}
       {!loading && !error ? (
         <>
@@ -75,15 +93,55 @@ export function CreatorAnalyticsView() {
           </div>
 
           <div className="grid gap-4 lg:grid-cols-2">
-            <Panel title="Mata pelajaran" description="Distribusi assessment pada periode terpilih.">
+            <Panel
+              title="Mata pelajaran"
+              description="Distribusi assessment pada periode terpilih."
+            >
               {subjects.length ? (
-                <ul className="space-y-2">{subjects.map(([subject, count]) => <li key={subject} className="flex justify-between text-body-sm"><span>{subject}</span><strong>{count}</strong></li>)}</ul>
-              ) : <p className="text-body-sm text-brand-ink-muted">Belum ada aktivitas pada periode ini.</p>}
+                <ul className="space-y-2">
+                  {subjects.map(([subject, count]) => (
+                    <li key={subject} className="flex justify-between text-body-sm">
+                      <span>{subject}</span>
+                      <strong>{count}</strong>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-body-sm text-brand-ink-muted">
+                  Belum ada aktivitas pada periode ini.
+                </p>
+              )}
             </Panel>
-            <Panel title="Aktivitas terbaru" description={`${filtered.length} assessment pada periode terpilih.`}>
+            <Panel
+              title="Aktivitas terbaru"
+              description={`${filtered.length} assessment pada periode terpilih.`}
+            >
               {filtered.length ? (
-                <ul className="space-y-3">{filtered.slice(0, 5).map((item) => <li key={item.id}><Link href={item.canOpenOutput ? `/app/output/${item.id}` : `/app/review/${item.id}`} className="text-body-sm font-medium text-brand-ink hover:underline">{item.title}</Link><p className="text-body-xs text-brand-ink-muted">{item.lifecycle} · {item.questionCount} soal</p></li>)}</ul>
-              ) : <Link href="/app/generate" className="text-body-sm font-medium text-brand-accent hover:underline">Buat lembar pertama</Link>}
+                <ul className="space-y-3">
+                  {filtered.slice(0, 5).map((item) => (
+                    <li key={item.id}>
+                      <Link
+                        href={
+                          item.canOpenOutput ? `/app/output/${item.id}` : `/app/review/${item.id}`
+                        }
+                        className="text-body-sm font-medium text-brand-ink hover:underline"
+                      >
+                        {item.title}
+                      </Link>
+                      <p className="text-body-xs text-brand-ink-muted">
+                        {item.lifecycle} · {item.questionCount} soal
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <Link
+                  href="/app/generate"
+                  className="text-body-sm font-medium text-brand-accent hover:underline"
+                >
+                  Buat lembar pertama
+                </Link>
+              )}
             </Panel>
           </div>
         </>

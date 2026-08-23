@@ -45,15 +45,21 @@ function safeUrl(value: string | undefined, fallback: string): string {
 }
 
 export function loadPublicRuntimeConfig(env: Env = process.env): PublicRuntimeConfig {
+  const appEnv = oneOf(
+    env.NEXT_PUBLIC_APP_ENV,
+    ['development', 'preview', 'production'],
+    DEFAULT_PUBLIC_CONFIG.appEnv,
+  );
+
   return {
-    appEnv: oneOf(
-      env.NEXT_PUBLIC_APP_ENV,
-      ['development', 'preview', 'production'],
-      DEFAULT_PUBLIC_CONFIG.appEnv,
-    ),
+    appEnv,
     appUrl: safeUrl(env.NEXT_PUBLIC_APP_URL, DEFAULT_PUBLIC_CONFIG.appUrl),
     apiBaseUrl: safeUrl(env.NEXT_PUBLIC_API_BASE_URL, DEFAULT_PUBLIC_CONFIG.apiBaseUrl),
-    apiMode: oneOf(env.NEXT_PUBLIC_API_MODE, ['mock', 'live'], DEFAULT_PUBLIC_CONFIG.apiMode),
+    apiMode: oneOf(
+      env.NEXT_PUBLIC_API_MODE,
+      ['mock', 'live'],
+      appEnv === 'production' ? 'live' : DEFAULT_PUBLIC_CONFIG.apiMode,
+    ),
     analyticsEnabled: booleanFromEnv(
       env.NEXT_PUBLIC_ANALYTICS_ENABLED,
       DEFAULT_PUBLIC_CONFIG.analyticsEnabled,

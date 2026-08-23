@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useEffect, useId, useRef, useState } from 'react';
+import { FormEvent, useCallback, useEffect, useId, useRef, useState } from 'react';
 
 const WHATSAPP_URL = 'https://wa.me/6285784255112';
 
@@ -17,7 +17,13 @@ export default function SupportChat() {
   const launcherRef = useRef<HTMLButtonElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const scrollLockYRef = useRef(0);
   const titleId = useId();
+
+  const closeChat = useCallback(() => {
+    setOpen(false);
+    launcherRef.current?.focus();
+  }, []);
 
   // Detect mobile
   useEffect(() => {
@@ -29,9 +35,9 @@ export default function SupportChat() {
 
   // Focus input on open
   useEffect(() => {
-    if (open) {
-      setTimeout(() => inputRef.current?.focus(), 100);
-    }
+    if (!open) return;
+    const timer = window.setTimeout(() => inputRef.current?.focus(), 100);
+    return () => window.clearTimeout(timer);
   }, [open]);
 
   // Scroll to bottom on new message
@@ -43,18 +49,16 @@ export default function SupportChat() {
   useEffect(() => {
     if (!open) return;
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setOpen(false);
-        requestAnimationFrame(() => launcherRef.current?.focus());
-      }
+      if (e.key === 'Escape') closeChat();
     };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
-  }, [open]);
+  }, [closeChat, open]);
 
   // Lock body scroll on mobile when open
   useEffect(() => {
     if (isMobile && open) {
+      scrollLockYRef.current = window.scrollY;
       document.body.style.overflow = 'hidden';
       document.body.style.position = 'fixed';
       document.body.style.width = '100%';
@@ -62,11 +66,15 @@ export default function SupportChat() {
       document.body.style.overflow = '';
       document.body.style.position = '';
       document.body.style.width = '';
+      window.scrollTo?.(0, scrollLockYRef.current);
+      scrollLockYRef.current = 0;
     }
     return () => {
       document.body.style.overflow = '';
       document.body.style.position = '';
       document.body.style.width = '';
+      window.scrollTo?.(0, scrollLockYRef.current);
+      scrollLockYRef.current = 0;
     };
   }, [isMobile, open]);
 
@@ -136,13 +144,17 @@ export default function SupportChat() {
           <span className="material-symbols-outlined text-[20px] text-white">support_agent</span>
         </div>
         <div className="flex-1 min-w-0">
-          <p id={titleId} className="text-[14px] font-semibold text-white leading-tight">Tanya Lembar</p>
-          <p className="text-[11px] text-white/70 leading-tight">Biasanya membalas dalam hitungan detik</p>
+          <p id={titleId} className="text-[14px] font-semibold text-white leading-tight">
+            Tanya Lembar
+          </p>
+          <p className="text-[11px] text-white/70 leading-tight">
+            Biasanya membalas dalam hitungan detik
+          </p>
         </div>
         <button
           type="button"
           aria-label="Tutup chat"
-          onClick={() => setOpen(false)}
+          onClick={closeChat}
           className="flex h-8 w-8 items-center justify-center rounded-full text-white/80 hover:bg-white/20 transition-colors"
         >
           <span className="material-symbols-outlined text-[20px]">close</span>
@@ -159,24 +171,31 @@ export default function SupportChat() {
             </div>
             <div className="max-w-[260px] rounded-2xl rounded-tl-sm bg-white px-3 py-2.5 shadow-sm border border-[#e6dfd4]">
               <p className="text-[13px] text-[#171717] leading-relaxed">
-                Halo! Saya asisten Lembar 👋<br />
+                Halo! Saya asisten Lembar 👋
+                <br />
                 Ada yang bisa saya bantu tentang platform Lembar?
               </p>
               <p className="mt-2 text-[12px] text-[#6d665d]">
-                Hanya menjawab pertanyaan tentang Lembar dan tidak dapat menjawab topik coding atau topik umum.
+                Hanya menjawab pertanyaan tentang Lembar dan tidak dapat menjawab topik coding atau
+                topik umum.
               </p>
             </div>
           </div>
         )}
 
         {messages.map((msg, i) => (
-          <div key={i} className={`flex items-end gap-2 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
+          <div
+            key={i}
+            className={`flex items-end gap-2 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}
+          >
             {msg.role === 'bot' && (
               <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#a3202b]">
                 <span className="material-symbols-outlined text-[14px] text-white">smart_toy</span>
               </div>
             )}
-            <div className={`max-w-[260px] ${msg.role === 'user' ? 'items-end' : 'items-start'} flex flex-col gap-1.5`}>
+            <div
+              className={`max-w-[260px] ${msg.role === 'user' ? 'items-end' : 'items-start'} flex flex-col gap-1.5`}
+            >
               <div
                 className={`rounded-2xl px-3 py-2.5 text-[13px] leading-relaxed ${
                   msg.role === 'user'
@@ -201,7 +220,11 @@ export default function SupportChat() {
           </div>
         ))}
 
-        {requestError ? <p role="alert" className="text-[12px] text-[#a3202b]">{requestError}</p> : null}
+        {requestError ? (
+          <p role="alert" className="text-[12px] text-[#a3202b]">
+            {requestError}
+          </p>
+        ) : null}
 
         {loading && (
           <div className="flex items-end gap-2">
@@ -210,9 +233,18 @@ export default function SupportChat() {
             </div>
             <div className="rounded-2xl rounded-bl-sm bg-white px-4 py-3 shadow-sm border border-[#e6dfd4]">
               <div className="flex gap-1 items-center">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#8a8379] animate-bounce" style={{ animationDelay: '0ms' }} />
-                <span className="h-1.5 w-1.5 rounded-full bg-[#8a8379] animate-bounce" style={{ animationDelay: '150ms' }} />
-                <span className="h-1.5 w-1.5 rounded-full bg-[#8a8379] animate-bounce" style={{ animationDelay: '300ms' }} />
+                <span
+                  className="h-1.5 w-1.5 rounded-full bg-[#8a8379] animate-bounce"
+                  style={{ animationDelay: '0ms' }}
+                />
+                <span
+                  className="h-1.5 w-1.5 rounded-full bg-[#8a8379] animate-bounce"
+                  style={{ animationDelay: '150ms' }}
+                />
+                <span
+                  className="h-1.5 w-1.5 rounded-full bg-[#8a8379] animate-bounce"
+                  style={{ animationDelay: '300ms' }}
+                />
               </div>
             </div>
           </div>
@@ -256,11 +288,7 @@ export default function SupportChat() {
   return (
     <>
       {/* Mobile: fullscreen overlay */}
-      {isMobile && open && (
-        <div className="fixed inset-0 z-[80]">
-          {chatWindow}
-        </div>
-      )}
+      {isMobile && open && <div className="fixed inset-0 z-[80]">{chatWindow}</div>}
 
       {/* Desktop: floating window */}
       {!isMobile && open && (

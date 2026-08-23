@@ -63,7 +63,12 @@ export function OpsFlagsSection({
           <h4 className="text-[13px] font-bold text-[#171717]">Flag baru</h4>
           <div className="flex flex-wrap items-end gap-3">
             <div>
-              <label htmlFor="create-flag-key" className="block text-[11px] font-semibold text-[#6d665d] mb-1">Key *</label>
+              <label
+                htmlFor="create-flag-key"
+                className="block text-[11px] font-semibold text-[#6d665d] mb-1"
+              >
+                Key *
+              </label>
               <input
                 id="create-flag-key"
                 type="text"
@@ -74,7 +79,12 @@ export function OpsFlagsSection({
               />
             </div>
             <div>
-              <label htmlFor="create-flag-desc" className="block text-[11px] font-semibold text-[#6d665d] mb-1">Deskripsi</label>
+              <label
+                htmlFor="create-flag-desc"
+                className="block text-[11px] font-semibold text-[#6d665d] mb-1"
+              >
+                Deskripsi
+              </label>
               <input
                 id="create-flag-desc"
                 type="text"
@@ -85,7 +95,12 @@ export function OpsFlagsSection({
               />
             </div>
             <div>
-              <label htmlFor="create-flag-scope" className="block text-[11px] font-semibold text-[#6d665d] mb-1">Scope</label>
+              <label
+                htmlFor="create-flag-scope"
+                className="block text-[11px] font-semibold text-[#6d665d] mb-1"
+              >
+                Scope
+              </label>
               <select
                 id="create-flag-scope"
                 value={createFlagScope}
@@ -140,7 +155,11 @@ export function OpsFlagsSection({
       ) : null}
 
       {/* Search flags */}
-      <AdminToolbar search={search} onSearchChange={setSearch} searchPlaceholder="Cari key / deskripsi" />
+      <AdminToolbar
+        search={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Cari key / deskripsi"
+      />
 
       <AdminDataTable
         rows={flagsData.filter((f) => {
@@ -149,9 +168,25 @@ export function OpsFlagsSection({
         })}
         emptyLabel="Tidak ada feature flag."
         columns={[
-          { key: 'key', header: 'Flag', render: (row) => <span className="font-mono text-[12px]">{row.key}</span> },
-          { key: 'desc', header: 'Deskripsi', render: (row) => <span className="text-[12px] text-[#6d665d]">{row.description || '—'}</span> },
-          { key: 'scope', header: 'Scope', render: (row) => <AdminPill tone={row.scope === 'pilot' ? 'warn' : 'neutral'}>{row.scope}</AdminPill> },
+          {
+            key: 'key',
+            header: 'Flag',
+            render: (row) => <span className="font-mono text-[12px]">{row.key}</span>,
+          },
+          {
+            key: 'desc',
+            header: 'Deskripsi',
+            render: (row) => (
+              <span className="text-[12px] text-[#6d665d]">{row.description || '—'}</span>
+            ),
+          },
+          {
+            key: 'scope',
+            header: 'Scope',
+            render: (row) => (
+              <AdminPill tone={row.scope === 'pilot' ? 'warn' : 'neutral'}>{row.scope}</AdminPill>
+            ),
+          },
           {
             key: 'enabled',
             header: 'State',

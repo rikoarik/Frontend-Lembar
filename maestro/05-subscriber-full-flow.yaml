@@ -2,42 +2,42 @@ url: https://app.lembar.web.id/masuk
 ---
 - launchApp:
     clearState: true
-- assertVisible: "Masuk ke lembar"
-- tapOn: "Username, email, atau nomor telepon"
+- assertVisible: 'Masuk ke lembar'
+- tapOn: 'Username, email, atau nomor telepon'
 - inputText: ${QA_EMAIL}
-- tapOn: "Kata sandi"
+- tapOn: 'Kata sandi'
 - inputText: ${QA_PASSWORD}
 - tapOn:
-    text: "Masuk"
+    text: 'Masuk'
     index: 0
-- assertVisible: "Buat lembar"
-- takeScreenshot: "05-01-subscriber-login"
+- assertVisible: 'Buat lembar'
+- takeScreenshot: '05-01-subscriber-login'
 
 # Dashboard
 - openLink: https://app.lembar.web.id/app
-- assertVisible: "Buat lembar"
-- takeScreenshot: "05-02-subscriber-dashboard"
+- assertVisible: 'Buat lembar'
+- takeScreenshot: '05-02-subscriber-dashboard'
 
 # Generate form
 - openLink: https://app.lembar.web.id/app/generate
-- assertVisible: "Buat lembar"
-- assertVisible: "Materi Ujian"
-- takeScreenshot: "05-03-subscriber-generate"
+- assertVisible: 'Buat lembar'
+- assertVisible: 'Materi Ujian'
+- takeScreenshot: '05-03-subscriber-generate'
 
 # Riwayat (empty state)
 - openLink: https://app.lembar.web.id/app/riwayat
-- assertVisible: "Riwayat lembar"
-- takeScreenshot: "05-04-subscriber-riwayat"
+- assertVisible: 'Riwayat lembar'
+- takeScreenshot: '05-04-subscriber-riwayat'
 
 # Langganan — subscriber harus bisa lihat pilihan paket
 - openLink: https://app.lembar.web.id/app/pengaturan/langganan
-- takeScreenshot: "05-05-subscriber-langganan"
+- takeScreenshot: '05-05-subscriber-langganan'
 
 # Profil
 - openLink: https://app.lembar.web.id/app/pengaturan/profil
-- takeScreenshot: "05-06-subscriber-profil"
+- takeScreenshot: '05-06-subscriber-profil'
 
 # Role guard: ops harus redirect
 - openLink: https://app.lembar.web.id/ops/jobs
-- assertNotVisible: "Jobs"
-- takeScreenshot: "05-07-subscriber-ops-guard"
+- assertNotVisible: 'Jobs'
+- takeScreenshot: '05-07-subscriber-ops-guard'

@@ -1,12 +1,8 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button } from '@/app/components/ui';
-import {
-  AdminAvatar,
-  AdminPageHeader,
-  AdminPill,
-} from '@/src/features/admin/AdminChrome';
+import { AdminAvatar, AdminPageHeader, AdminPill } from '@/src/features/admin/AdminChrome';
 import { useAdminSectionState } from '@/src/features/admin/adminPanelState';
 import {
   adminService,
@@ -75,10 +71,9 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
   const [dashboard, setDashboard] = useState<AdminDashboard | null>(null);
   const [dashboardJobs, setDashboardJobs] = useState<AdminJobRow[]>([]);
   const [dashboardSchools, setDashboardSchools] = useState<AdminSchoolRow[]>([]);
-  const [dashboardLoading, setDashboardLoading] = useState(false);
+  const [dashboardLoading, setDashboardLoading] = useState(key === '');
 
-  const loadDashboard = () => {
-    setDashboardLoading(true);
+  const requestDashboard = useCallback(() => {
     Promise.all([
       adminService.dashboard(),
       adminService.jobs({ limit: 4 }),
@@ -95,29 +90,48 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
       }
       setDashboardLoading(false);
     });
-  };
+  }, []);
+
+  const loadDashboard = useCallback(() => {
+    setDashboardLoading(true);
+    requestDashboard();
+  }, [requestDashboard]);
 
   useEffect(() => {
-    if (key === '') loadDashboard();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key]);
+    if (key === '') requestDashboard();
+  }, [key, requestDashboard]);
 
   // ── Per-section live data state ────────────────────────────────────────
   const [accountsData, setAccountsData] = useState<AccountRow[]>([]);
   const [accountsMeta, setAccountsMeta] = useState({ total: 0, pages: 1 });
-  const [accountsLoading, setAccountsLoading] = useState(false);
+  const [accountsLoading, setAccountsLoading] = useState(key === 'accounts');
   const [detailAccountId, setDetailAccountId] = useState<string | null>(null);
 
   const [schoolsData, setSchoolsData] = useState<SchoolRow[]>([]);
   const [schoolsMeta, setSchoolsMeta] = useState({ total: 0, pages: 1 });
-  const [schoolsLoading, setSchoolsLoading] = useState(false);
+  const [schoolsLoading, setSchoolsLoading] = useState(key === 'schools');
   const [schoolsPage, setSchoolsPage] = useState(1);
 
   // School detail modal
   const [schoolDetailId, setSchoolDetailId] = useState<string | null>(null);
   const [schoolDetailData, setSchoolDetailData] = useState<{
-    school: { id: string; name: string; slug: string; plan: string; state: string; seats: number; renewsAt: string };
-    members: { id: string; email: string; name: string; username: string | null; roles: string[]; createdAt: string }[];
+    school: {
+      id: string;
+      name: string;
+      slug: string;
+      plan: string;
+      state: string;
+      seats: number;
+      renewsAt: string;
+    };
+    members: {
+      id: string;
+      email: string;
+      name: string;
+      username: string | null;
+      roles: string[];
+      createdAt: string;
+    }[];
     memberCount: number;
   } | null>(null);
   const [schoolDetailLoading, setSchoolDetailLoading] = useState(false);
@@ -126,7 +140,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
 
   const [jobsData, setJobsData] = useState<JobRow[]>([]);
   const [jobsMeta, setJobsMeta] = useState({ total: 0, pages: 1 });
-  const [jobsLoading, setJobsLoading] = useState(false);
+  const [jobsLoading, setJobsLoading] = useState(key === 'jobs');
   const [jobsPage, setJobsPage] = useState(1);
 
   // Job detail modal
@@ -136,7 +150,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
 
   const [qualityData, setQualityData] = useState<QualityRow[]>([]);
   const [qualityMeta, setQualityMeta] = useState({ total: 0, pages: 1 });
-  const [qualityLoading, setQualityLoading] = useState(false);
+  const [qualityLoading, setQualityLoading] = useState(key === 'quality');
 
   // Quality detail modal
   const [qualityDetailId, setQualityDetailId] = useState<string | null>(null);
@@ -156,19 +170,18 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
 
   const [billingData, setBillingData] = useState<BillingRow[]>([]);
   const [billingMeta, setBillingMeta] = useState({ total: 0, pages: 1 });
-  const [billingLoading, setBillingLoading] = useState(false);
+  const [billingLoading, setBillingLoading] = useState(key === 'billing');
 
   const [flagsData, setFlagsData] = useState<FlagRow[]>([]);
-  const [flagsLoading, setFlagsLoading] = useState(false);
+  const [flagsLoading, setFlagsLoading] = useState(key === 'flags');
 
   const [promptsData, setPromptsData] = useState<AdminPromptRow[]>([]);
-  const [promptsLoading, setPromptsLoading] = useState(false);
+  const [promptsLoading, setPromptsLoading] = useState(key === 'prompts');
 
   const [auditData, setAuditData] = useState<AdminAuditRow[]>([]);
   const [auditMeta, setAuditMeta] = useState<AdminMeta>({ total: 0, page: 1, limit: 20, pages: 1 });
   const [auditPage, setAuditPage] = useState(1);
-  const [auditLoading, setAuditLoading] = useState(false);
-
+  const [auditLoading, setAuditLoading] = useState(key === 'audit');
 
   // Audit detail modal state
   const [auditDetailId, setAuditDetailId] = useState<string | null>(null);
@@ -187,17 +200,23 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
 
   // Payment orders state
   const [billingTab, setBillingTab] = useState<'langganan' | 'orders'>('langganan');
-  const [paymentOrdersData, setPaymentOrdersData] = useState<import('@/src/services/admin/adminService').PaymentOrder[]>([]);
+  const [paymentOrdersData, setPaymentOrdersData] = useState<
+    import('@/src/services/admin/adminService').PaymentOrder[]
+  >([]);
   const [paymentOrdersMeta, setPaymentOrdersMeta] = useState({ total: 0, pages: 1 });
   const [paymentOrdersLoading, setPaymentOrdersLoading] = useState(false);
   const [paymentOrdersPage, setPaymentOrdersPage] = useState(1);
   const [filterOrderStatus, setFilterOrderStatus] = useState('');
 
   // Catalog state
-  const [catalogGrades, setCatalogGrades] = useState<{ id: string; label: string; status: string; jenjang?: string }[]>([]);
-  const [catalogSubjects, setCatalogSubjects] = useState<{ id: string; label: string; status: string }[]>([]);
+  const [catalogGrades, setCatalogGrades] = useState<
+    { id: string; label: string; status: string; jenjang?: string }[]
+  >([]);
+  const [catalogSubjects, setCatalogSubjects] = useState<
+    { id: string; label: string; status: string }[]
+  >([]);
   const [catalogSelectedGrade, setCatalogSelectedGrade] = useState<string>('');
-  const [catalogLoading, setCatalogLoading] = useState(false);
+  const [catalogLoading, setCatalogLoading] = useState(key === 'catalog');
   const [catalogSubjectsLoading, setCatalogSubjectsLoading] = useState(false);
   const [catalogUpdatingIds, setCatalogUpdatingIds] = useState<Set<string>>(new Set());
   const [catalogShowAddGrade, setCatalogShowAddGrade] = useState(false);
@@ -217,8 +236,16 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
   const [createPromptLoading, setCreatePromptLoading] = useState(false);
 
   // Learning Signals state
-  const [signalsData, setSignalsData] = useState<{ prompt_template_id: string; pattern: string; frequency: number; avg_rating: number; suggested_action: string }[]>([]);
-  const [signalsLoading, setSignalsLoading] = useState(false);
+  const [signalsData, setSignalsData] = useState<
+    {
+      prompt_template_id: string;
+      pattern: string;
+      frequency: number;
+      avg_rating: number;
+      suggested_action: string;
+    }[]
+  >([]);
+  const [signalsLoading, setSignalsLoading] = useState(key === 'learning-signals');
 
   const [createFlagOpen, setCreateFlagOpen] = useState(false);
   const [createFlagKey, setCreateFlagKey] = useState('');
@@ -233,120 +260,186 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
   const [createSchoolLoading, setCreateSchoolLoading] = useState(false);
 
   // ── Fetch loaders ─────────────────────────────────────────────────────
-  const loadAccounts = (
-    currentPage = page,
-    searchVal = search,
-    roleVal = filterRole,
-    statusVal = filterStatus,
-  ) => {
-    setAccountsLoading(true);
-    adminService
-      .accounts({
-        q: searchVal || undefined,
-        role: roleVal || undefined,
-        status: statusVal || undefined,
-        page: currentPage,
-        limit: 10,
-      })
-      .then((res) => {
-        if (res.ok) {
-          const val = res.value as any;
-          if (val && typeof val === 'object' && Array.isArray(val.data) && val.meta) {
-            setAccountsData(val.data);
-            setAccountsMeta({
-              total: val.meta.total ?? val.data.length,
-              pages: val.meta.pages ?? Math.max(1, Math.ceil((val.meta.total ?? val.data.length) / 10)),
-            });
-          } else if (Array.isArray(val)) {
-            setAccountsData(val);
-            setAccountsMeta({
-              total: val.length,
-              pages: Math.max(1, Math.ceil(val.length / 10)),
-            });
+  const requestAccounts = useCallback(
+    (
+      currentPage: number,
+      searchVal: string,
+      roleVal: '' | AccountRow['role'],
+      statusVal: '' | AccountRow['status'],
+    ) => {
+      adminService
+        .accounts({
+          q: searchVal || undefined,
+          role: roleVal || undefined,
+          status: statusVal || undefined,
+          page: currentPage,
+          limit: 10,
+        })
+        .then((res) => {
+          if (res.ok) {
+            const val = res.value as any;
+            if (val && typeof val === 'object' && Array.isArray(val.data) && val.meta) {
+              setAccountsData(val.data);
+              setAccountsMeta({
+                total: val.meta.total ?? val.data.length,
+                pages:
+                  val.meta.pages ??
+                  Math.max(1, Math.ceil((val.meta.total ?? val.data.length) / 10)),
+              });
+            } else if (Array.isArray(val)) {
+              setAccountsData(val);
+              setAccountsMeta({
+                total: val.length,
+                pages: Math.max(1, Math.ceil(val.length / 10)),
+              });
+            }
           }
-        }
-        setAccountsLoading(false);
-      });
-  };
+          setAccountsLoading(false);
+        });
+    },
+    [],
+  );
 
-  const loadSchools = (
-    pg = schoolsPage,
-    searchVal = search,
-    planVal = filterPlan,
-  ) => {
-    setSchoolsLoading(true);
+  const loadAccounts = useCallback(
+    (currentPage = page, searchVal = search, roleVal = filterRole, statusVal = filterStatus) => {
+      setAccountsLoading(true);
+      requestAccounts(currentPage, searchVal, roleVal, statusVal);
+    },
+    [filterRole, filterStatus, page, requestAccounts, search],
+  );
+
+  const requestSchools = useCallback(
+    (currentPage: number, searchVal: string, planVal: '' | SchoolRow['plan']) => {
+      adminService
+        .schools({
+          q: searchVal || undefined,
+          plan: planVal || undefined,
+          page: currentPage,
+          limit: 10,
+        })
+        .then((res) => {
+          if (res.ok) {
+            const val = res.value as {
+              data: SchoolRow[];
+              meta: { total: number; pages: number };
+            };
+            setSchoolsData(val.data ?? []);
+            setSchoolsMeta({ total: val.meta?.total ?? 0, pages: val.meta?.pages ?? 1 });
+          }
+          setSchoolsLoading(false);
+        });
+    },
+    [],
+  );
+
+  const loadSchools = useCallback(
+    (currentPage = schoolsPage, searchVal = search, planVal = filterPlan) => {
+      setSchoolsLoading(true);
+      requestSchools(currentPage, searchVal, planVal);
+    },
+    [filterPlan, requestSchools, schoolsPage, search],
+  );
+
+  const requestJobs = useCallback(
+    (currentPage: number, searchVal: string, statusVal: '' | JobRow['status']) => {
+      adminService
+        .jobs({
+          q: searchVal || undefined,
+          status: statusVal || undefined,
+          page: currentPage,
+          limit: 20,
+        })
+        .then((res) => {
+          if (res.ok) {
+            const val = res.value as {
+              data: JobRow[];
+              meta: { total: number; pages: number };
+            };
+            setJobsData(val.data ?? []);
+            setJobsMeta({ total: val.meta?.total ?? 0, pages: val.meta?.pages ?? 1 });
+          }
+          setJobsLoading(false);
+        });
+    },
+    [],
+  );
+
+  const loadJobs = useCallback(
+    (currentPage = jobsPage, searchVal = search, statusVal = filterJobStatus) => {
+      setJobsLoading(true);
+      requestJobs(currentPage, searchVal, statusVal);
+    },
+    [filterJobStatus, jobsPage, requestJobs, search],
+  );
+
+  const requestQuality = useCallback(
+    (currentPage: number, searchVal: string, statusVal: '' | QualityRow['status']) => {
+      adminService
+        .qualityReports({
+          status: statusVal || undefined,
+          q: searchVal || undefined,
+          page: currentPage,
+          limit: 20,
+        })
+        .then((res) => {
+          if (res.ok) {
+            const val = res.value as {
+              data: QualityRow[];
+              meta: { total: number; pages: number };
+            };
+            setQualityData(val.data ?? []);
+            setQualityMeta({ total: val.meta?.total ?? 0, pages: val.meta?.pages ?? 1 });
+          }
+          setQualityLoading(false);
+        });
+    },
+    [],
+  );
+
+  const loadQuality = useCallback(
+    (currentPage = qualityPage, searchVal = search, statusVal = filterQuality) => {
+      setQualityLoading(true);
+      requestQuality(currentPage, searchVal, statusVal);
+    },
+    [filterQuality, qualityPage, requestQuality, search],
+  );
+
+  const requestBilling = useCallback(
+    (stateFilter: '' | BillingRow['state'], searchVal: string, currentPage: number) => {
+      adminService
+        .billing({
+          state: stateFilter || undefined,
+          q: searchVal || undefined,
+          page: currentPage,
+          limit: 10,
+        })
+        .then((res) => {
+          if (res.ok) {
+            const val = res.value as any;
+            if (val?.data && val?.meta) {
+              setBillingData(val.data);
+              setBillingMeta({ total: val.meta.total, pages: val.meta.pages });
+            } else {
+              setBillingData(Array.isArray(val) ? val : []);
+            }
+          }
+          setBillingLoading(false);
+        });
+    },
+    [],
+  );
+
+  const loadBilling = useCallback(
+    (stateFilter = filterBilling, searchVal = search, currentPage = billingPage) => {
+      setBillingLoading(true);
+      requestBilling(stateFilter, searchVal, currentPage);
+    },
+    [billingPage, filterBilling, requestBilling, search],
+  );
+
+  const requestPaymentOrders = useCallback((statusFilter: string, currentPage: number) => {
     adminService
-      .schools({ q: searchVal || undefined, plan: planVal || undefined, page: pg, limit: 10 })
-      .then((res) => {
-        if (res.ok) {
-          const val = res.value as { data: SchoolRow[]; meta: { total: number; pages: number } };
-          setSchoolsData(val.data ?? []);
-          setSchoolsMeta({ total: val.meta?.total ?? 0, pages: val.meta?.pages ?? 1 });
-        }
-        setSchoolsLoading(false);
-      });
-  };
-
-  const loadJobs = (
-    pg = jobsPage,
-    searchVal = search,
-    statusVal = filterJobStatus,
-  ) => {
-    setJobsLoading(true);
-    adminService
-      .jobs({ q: searchVal || undefined, status: statusVal || undefined, page: pg, limit: 20 })
-      .then((res) => {
-        if (res.ok) {
-          const val = res.value as { data: JobRow[]; meta: { total: number; pages: number } };
-          setJobsData(val.data ?? []);
-          setJobsMeta({ total: val.meta?.total ?? 0, pages: val.meta?.pages ?? 1 });
-        }
-        setJobsLoading(false);
-      });
-  };
-
-  const loadQuality = (
-    pg = qualityPage,
-    searchVal = search,
-    statusVal = filterQuality,
-  ) => {
-    setQualityLoading(true);
-    adminService
-      .qualityReports({ status: statusVal || undefined, q: searchVal || undefined, page: pg, limit: 20 })
-      .then((res) => {
-        if (res.ok) {
-          const val = res.value as { data: QualityRow[]; meta: { total: number; pages: number } };
-          setQualityData(val.data ?? []);
-          setQualityMeta({ total: val.meta?.total ?? 0, pages: val.meta?.pages ?? 1 });
-        }
-        setQualityLoading(false);
-      });
-  };
-
-  const loadBilling = (stateFilter = filterBilling, searchVal = search, pg = billingPage) => {
-    setBillingLoading(true);
-    adminService.billing({
-      state: stateFilter || undefined,
-      q: searchVal || undefined,
-      page: pg,
-      limit: 10,
-    }).then((res) => {
-      if (res.ok) {
-        const val = res.value as any;
-        if (val?.data && val?.meta) {
-          setBillingData(val.data);
-          setBillingMeta({ total: val.meta.total, pages: val.meta.pages });
-        } else {
-          setBillingData(Array.isArray(val) ? val : []);
-        }
-      }
-      setBillingLoading(false);
-    });
-  };
-
-  const loadPaymentOrders = (statusFilter = filterOrderStatus, pg = paymentOrdersPage) => {
-    setPaymentOrdersLoading(true);
-    adminService.paymentOrders({ status: statusFilter || undefined, page: pg, limit: 20 })
+      .paymentOrders({ status: statusFilter || undefined, page: currentPage, limit: 20 })
       .then((res) => {
         if (res.ok) {
           const val = res.value as any;
@@ -355,18 +448,29 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
         }
         setPaymentOrdersLoading(false);
       });
-  };
+  }, []);
 
-  const loadFlags = () => {
-    setFlagsLoading(true);
+  const loadPaymentOrders = useCallback(
+    (statusFilter = filterOrderStatus, currentPage = paymentOrdersPage) => {
+      setPaymentOrdersLoading(true);
+      requestPaymentOrders(statusFilter, currentPage);
+    },
+    [filterOrderStatus, paymentOrdersPage, requestPaymentOrders],
+  );
+
+  const requestFlags = useCallback(() => {
     adminService.flags().then((res) => {
       if (res.ok) setFlagsData(res.value);
       setFlagsLoading(false);
     });
-  };
+  }, []);
 
-  const loadPrompts = (status?: AdminPromptRow['status']) => {
-    setPromptsLoading(true);
+  const loadFlags = useCallback(() => {
+    setFlagsLoading(true);
+    requestFlags();
+  }, [requestFlags]);
+
+  const requestPrompts = useCallback((status?: AdminPromptRow['status']) => {
     adminService.prompts({ status }).then((res) => {
       if (res.ok) {
         const val = res.value as AdminPromptRow[] | { data?: AdminPromptRow[] };
@@ -374,11 +478,18 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
       }
       setPromptsLoading(false);
     });
-  };
+  }, []);
 
-  const loadAudit = (page: number) => {
-    setAuditLoading(true);
-    adminService.auditLogs({ page, limit: 20 }).then((res) => {
+  const loadPrompts = useCallback(
+    (status?: AdminPromptRow['status']) => {
+      setPromptsLoading(true);
+      requestPrompts(status);
+    },
+    [requestPrompts],
+  );
+
+  const requestAudit = useCallback((currentPage: number) => {
+    adminService.auditLogs({ page: currentPage, limit: 20 }).then((res) => {
       if (res.ok) {
         const val = res.value as any;
         if (val?.data && val?.meta) {
@@ -390,68 +501,63 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
       }
       setAuditLoading(false);
     });
-  };
+  }, []);
 
-  // ── Fetch on section change ──────────────────────────────────────────
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const loadAudit = useCallback(
+    (currentPage: number) => {
+      setAuditLoading(true);
+      requestAudit(currentPage);
+    },
+    [requestAudit],
+  );
+
+  // ── Fetch on section/query change ─────────────────────────────────────
   useEffect(() => {
     if (key === 'accounts') {
-      loadAccounts(page, search, filterRole, filterStatus);
+      requestAccounts(page, search, filterRole, filterStatus);
     }
-  }, [key, page, search, filterRole, filterStatus]);
+  }, [filterRole, filterStatus, key, page, requestAccounts, search]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (key === 'schools') {
-      setSchoolsPage(1);
-      loadSchools(1, search, filterPlan);
+      requestSchools(schoolsPage, search, filterPlan);
     }
-  }, [key, search, filterPlan]);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => {
-    if (key === 'schools') loadSchools(schoolsPage, search, filterPlan);
-  }, [schoolsPage]);
+  }, [filterPlan, key, requestSchools, schoolsPage, search]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (key === 'jobs') {
-      setJobsPage(1);
-      loadJobs(1, search, filterJobStatus);
+      requestJobs(jobsPage, search, filterJobStatus);
     }
-  }, [key, search, filterJobStatus]);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => {
-    if (key === 'jobs') loadJobs(jobsPage, search, filterJobStatus);
-  }, [jobsPage]);
+  }, [filterJobStatus, jobsPage, key, requestJobs, search]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (key === 'quality') {
-      setQualityPage(1);
-      loadQuality(1, search, filterQuality);
+      requestQuality(qualityPage, search, filterQuality);
     }
-  }, [key, search, filterQuality]);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => {
-    if (key === 'quality') loadQuality(qualityPage, search, filterQuality);
-  }, [qualityPage]);
+  }, [filterQuality, key, qualityPage, requestQuality, search]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { if (key === 'billing') loadBilling(); }, [key]);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { if (key === 'billing') loadBilling(filterBilling, search, billingPage); }, [billingPage]);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { if (key === 'billing' && billingTab === 'orders') loadPaymentOrders(); }, [key, billingTab]);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { if (key === 'billing' && billingTab === 'orders') loadPaymentOrders(filterOrderStatus, paymentOrdersPage); }, [paymentOrdersPage]);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { if (key === 'flags') loadFlags(); }, [key]);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { if (key === 'prompts') loadPrompts(); }, [key]);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (key === 'billing') {
+      requestBilling(filterBilling, search, billingPage);
+    }
+  }, [billingPage, filterBilling, key, requestBilling, search]);
+
+  useEffect(() => {
+    if (key === 'billing' && billingTab === 'orders') {
+      requestPaymentOrders(filterOrderStatus, paymentOrdersPage);
+    }
+  }, [billingTab, filterOrderStatus, key, paymentOrdersPage, requestPaymentOrders]);
+
+  useEffect(() => {
+    if (key === 'flags') requestFlags();
+  }, [key, requestFlags]);
+
+  useEffect(() => {
+    if (key === 'prompts') requestPrompts();
+  }, [key, requestPrompts]);
+
   useEffect(() => {
     if (key === 'catalog') {
-      setCatalogLoading(true);
       const base = (process.env.NEXT_PUBLIC_API_BASE_URL ?? '/v1').replace(/\/+$/, '');
       fetch(`${base}/catalog/grades`, { credentials: 'include' })
         .then((r) => r.json())
@@ -474,10 +580,9 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
         .catch(() => setCatalogLoading(false));
     }
   }, [key]);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     if (key === 'learning-signals') {
-      setSignalsLoading(true);
       adminService.learningSignals().then((res) => {
         if (res.ok) {
           const val = res.value as any;
@@ -488,17 +593,116 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
     }
   }, [key]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
-    if (key === 'audit') {
-      setAuditPage(1);
-      loadAudit(1);
+    if (key === 'audit') requestAudit(auditPage);
+  }, [auditPage, key, requestAudit]);
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    if (key === 'accounts') {
+      setPage(1);
+      setAccountsLoading(true);
+    } else if (key === 'schools') {
+      setSchoolsPage(1);
+      setSchoolsLoading(true);
+    } else if (key === 'jobs') {
+      setJobsPage(1);
+      setJobsLoading(true);
+    } else if (key === 'quality') {
+      setQualityPage(1);
+      setQualityLoading(true);
+    } else if (key === 'billing') {
+      setBillingPage(1);
+      setBillingLoading(true);
     }
-  }, [key]);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => {
-    if (key === 'audit') loadAudit(auditPage);
-  }, [auditPage]);
+  };
+
+  const handleFilterRoleChange = (value: '' | AccountRow['role']) => {
+    setFilterRole(value);
+    setPage(1);
+    setAccountsLoading(true);
+  };
+
+  const handleFilterStatusChange = (value: '' | AccountRow['status']) => {
+    setFilterStatus(value);
+    setPage(1);
+    setAccountsLoading(true);
+  };
+
+  const handleFilterPlanChange = (value: '' | SchoolRow['plan']) => {
+    setFilterPlan(value);
+    setSchoolsPage(1);
+    setSchoolsLoading(true);
+  };
+
+  const handleFilterJobStatusChange = (value: '' | JobRow['status']) => {
+    setFilterJobStatus(value);
+    setJobsPage(1);
+    setJobsLoading(true);
+  };
+
+  const handleFilterQualityChange = (value: '' | QualityRow['status']) => {
+    setFilterQuality(value);
+    setQualityPage(1);
+    setQualityLoading(true);
+  };
+
+  const handleFilterBillingChange = (value: '' | BillingRow['state']) => {
+    setFilterBilling(value);
+    setBillingPage(1);
+    setBillingLoading(true);
+  };
+
+  const handleBillingTabChange = (tab: 'langganan' | 'orders') => {
+    if (tab === billingTab) return;
+    setBillingTab(tab);
+    if (tab === 'orders') setPaymentOrdersLoading(true);
+  };
+
+  const handleOrderStatusChange = (status: string) => {
+    if (status === filterOrderStatus && paymentOrdersPage === 1) {
+      loadPaymentOrders(status, 1);
+      return;
+    }
+    setFilterOrderStatus(status);
+    setPaymentOrdersPage(1);
+    setPaymentOrdersLoading(true);
+  };
+
+  const handleAccountsPageChange = (nextPage: number) => {
+    setPage(nextPage);
+    setAccountsLoading(true);
+  };
+
+  const handleSchoolsPageChange = (nextPage: number) => {
+    setSchoolsPage(nextPage);
+    setSchoolsLoading(true);
+  };
+
+  const handleJobsPageChange = (nextPage: number) => {
+    setJobsPage(nextPage);
+    setJobsLoading(true);
+  };
+
+  const handleQualityPageChange = (nextPage: number) => {
+    setQualityPage(nextPage);
+    setQualityLoading(true);
+  };
+
+  const handleBillingPageChange = (nextPage: number) => {
+    setBillingPage(nextPage);
+    setBillingLoading(true);
+  };
+
+  const handlePaymentOrdersPageChange = (nextPage: number) => {
+    setPaymentOrdersPage(nextPage);
+    setPaymentOrdersLoading(true);
+  };
+
+  const handleAuditPageChange = (nextPage: number) => {
+    setAuditPage(nextPage);
+    setAuditLoading(true);
+  };
 
   // ── Impersonate Action ────────────────────────────────────────────────
   const handleImpersonate = (row: AccountRow) => {
@@ -506,7 +710,9 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
     setToast(`Memulai impersonasi sebagai ${row.displayName}...`);
     adminService.impersonateAccount(row.id).then((res) => {
       if (res.ok) {
-        setToast(`Impersonasi ${res.value.targetName || res.value.targetEmail} berhasil. Mengalihkan...`);
+        setToast(
+          `Impersonasi ${res.value.targetName || res.value.targetEmail} berhasil. Mengalihkan...`,
+        );
         setTimeout(() => {
           window.location.href = res.value.homePath;
         }, 300);
@@ -516,10 +722,6 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
       }
     });
   };
-
-  useEffect(() => {
-    setPage(1);
-  }, [search, filterRole, filterStatus, filterBilling, key]);
 
   const accounts = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -571,11 +773,11 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
           inviteLoading={inviteLoading}
           setInviteLoading={setInviteLoading}
           search={search}
-          setSearch={setSearch}
+          setSearch={handleSearchChange}
           filterRole={filterRole}
-          setFilterRole={setFilterRole}
+          setFilterRole={handleFilterRoleChange}
           filterStatus={filterStatus}
-          setFilterStatus={setFilterStatus}
+          setFilterStatus={handleFilterStatusChange}
           selectedIds={selectedIds}
           setSelectedIds={setSelectedIds}
           toggleSelectedId={toggleSelectedId}
@@ -584,7 +786,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
           accountsData={accountsData}
           accountsMeta={accountsMeta}
           page={page}
-          setPage={setPage}
+          setPage={handleAccountsPageChange}
           impersonatingId={impersonatingId}
           handleImpersonate={handleImpersonate}
           loadAccounts={loadAccounts}
@@ -614,12 +816,12 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
           schoolRenameSaving={schoolRenameSaving}
           setSchoolRenameSaving={setSchoolRenameSaving}
           search={search}
-          setSearch={setSearch}
+          setSearch={handleSearchChange}
           filterPlan={filterPlan}
-          setFilterPlan={setFilterPlan}
+          setFilterPlan={handleFilterPlanChange}
           schools={schools}
           schoolsPage={schoolsPage}
-          setSchoolsPage={setSchoolsPage}
+          setSchoolsPage={handleSchoolsPageChange}
           schoolsMeta={schoolsMeta}
           loadSchools={loadSchools}
           setToast={setToast}
@@ -677,7 +879,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
           createPromptLoading={createPromptLoading}
           setCreatePromptLoading={setCreatePromptLoading}
           search={search}
-          setSearch={setSearch}
+          setSearch={handleSearchChange}
           loadPrompts={loadPrompts}
           setToast={setToast}
         />
@@ -689,7 +891,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
           jobsData={jobsData}
           jobsLoading={jobsLoading}
           jobsPage={jobsPage}
-          setJobsPage={setJobsPage}
+          setJobsPage={handleJobsPageChange}
           jobsMeta={jobsMeta}
           jobDetailId={jobDetailId}
           setJobDetailId={setJobDetailId}
@@ -698,9 +900,9 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
           jobDetailLoading={jobDetailLoading}
           setJobDetailLoading={setJobDetailLoading}
           search={search}
-          setSearch={setSearch}
+          setSearch={handleSearchChange}
           filterJobStatus={filterJobStatus}
-          setFilterJobStatus={setFilterJobStatus}
+          setFilterJobStatus={handleFilterJobStatusChange}
           loadJobs={loadJobs}
           setToast={setToast}
         />
@@ -711,7 +913,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
           quality={quality}
           qualityLoading={qualityLoading}
           qualityPage={qualityPage}
-          setQualityPage={setQualityPage}
+          setQualityPage={handleQualityPageChange}
           qualityMeta={qualityMeta}
           qualityDetailId={qualityDetailId}
           setQualityDetailId={setQualityDetailId}
@@ -724,9 +926,9 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
           qualityNotesSaving={qualityNotesSaving}
           setQualityNotesSaving={setQualityNotesSaving}
           search={search}
-          setSearch={setSearch}
+          setSearch={handleSearchChange}
           filterQuality={filterQuality}
-          setFilterQuality={setFilterQuality}
+          setFilterQuality={handleFilterQualityChange}
           loadQuality={loadQuality}
           setToast={setToast}
         />
@@ -739,7 +941,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
           auditMeta={auditMeta}
           setAuditMeta={setAuditMeta}
           auditPage={auditPage}
-          setAuditPage={setAuditPage}
+          setAuditPage={handleAuditPageChange}
           auditLoading={auditLoading}
           auditDetailId={auditDetailId}
           setAuditDetailId={setAuditDetailId}
@@ -771,22 +973,21 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
           billingEditLoading={billingEditLoading}
           setBillingEditLoading={setBillingEditLoading}
           billingPage={billingPage}
-          setBillingPage={setBillingPage}
+          setBillingPage={handleBillingPageChange}
           billingTab={billingTab}
-          setBillingTab={setBillingTab}
+          setBillingTab={handleBillingTabChange}
           paymentOrdersData={paymentOrdersData}
           paymentOrdersMeta={paymentOrdersMeta}
           paymentOrdersLoading={paymentOrdersLoading}
           paymentOrdersPage={paymentOrdersPage}
-          setPaymentOrdersPage={setPaymentOrdersPage}
+          setPaymentOrdersPage={handlePaymentOrdersPageChange}
           filterOrderStatus={filterOrderStatus}
-          setFilterOrderStatus={setFilterOrderStatus}
+          setFilterOrderStatus={handleOrderStatusChange}
           search={search}
-          setSearch={setSearch}
+          setSearch={handleSearchChange}
           filterBilling={filterBilling}
-          setFilterBilling={setFilterBilling}
+          setFilterBilling={handleFilterBillingChange}
           loadBilling={loadBilling}
-          loadPaymentOrders={loadPaymentOrders}
           setToast={setToast}
         />
       ) : null}
@@ -806,7 +1007,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
           createFlagLoading={createFlagLoading}
           setCreateFlagLoading={setCreateFlagLoading}
           search={search}
-          setSearch={setSearch}
+          setSearch={handleSearchChange}
           loadFlags={loadFlags}
           setToast={setToast}
         />
@@ -825,16 +1026,13 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
 
       {key === 'profile' ? <OpsProfileSection setToast={setToast} /> : null}
 
-      {key === 'ai-provider' ? (
-        <OpsAiProviderSection setToast={setToast} />
-      ) : null}
+      {key === 'ai-provider' ? <OpsAiProviderSection setToast={setToast} /> : null}
 
       {key === 'plans' ? <OpsPlanHargaSection setToast={setToast} /> : null}
 
       {key === 'wa-gateway' ? <OpsWaGatewaySection setToast={setToast} /> : null}
 
       {key !== '' &&
-
       !key.startsWith('accounts/') &&
       ![
         'accounts',

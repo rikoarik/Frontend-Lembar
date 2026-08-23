@@ -1,10 +1,6 @@
-// Owns the slug allowlist for the /app catch-all route. Dedicated pages must
-// NOT remain here once implemented. Remaining placeholders:
-export const SHELL_PLACEHOLDER_ROUTES = {
-  profil: 'Profil',
-  plan: 'Paket & kuota',
-  'pengaturan/workspace': 'Workspace',
-  'pengaturan/langganan': 'Paket & kuota',
+export const SHELL_REDIRECT_ROUTES = {
+  profil: '/app/pengaturan/profil',
+  plan: '/app/pengaturan/langganan',
 } as const;
 
-export type ShellPlaceholderSlug = keyof typeof SHELL_PLACEHOLDER_ROUTES;
+export type ShellRedirectSlug = keyof typeof SHELL_REDIRECT_ROUTES;

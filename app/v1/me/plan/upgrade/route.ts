@@ -16,9 +16,7 @@ function decodeJwtPayload(token: string): Record<string, unknown> | null {
 export async function POST(request: Request) {
   const jar = await cookies();
   const token =
-    jar.get(JWT_COOKIE)?.value ||
-    jar.get(SESSION_COOKIE)?.value ||
-    jar.get('token')?.value;
+    jar.get(JWT_COOKIE)?.value || jar.get(SESSION_COOKIE)?.value || jar.get('token')?.value;
 
   if (!token) {
     return NextResponse.json(

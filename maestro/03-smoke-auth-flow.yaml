@@ -2,22 +2,22 @@ url: https://app.lembar.web.id/masuk
 ---
 - launchApp:
     clearState: true
-- assertVisible: "Masuk ke lembar"
-- tapOn: "Username, email, atau nomor telepon"
+- assertVisible: 'Masuk ke lembar'
+- tapOn: 'Username, email, atau nomor telepon'
 - inputText: ${QA_EMAIL}
-- tapOn: "Kata sandi"
+- tapOn: 'Kata sandi'
 - inputText: ${QA_PASSWORD}
 - tapOn:
-    text: "Masuk"
+    text: 'Masuk'
     index: 0
-- assertVisible: "Buat lembar"
-- takeScreenshot: "03-login-success"
+- assertVisible: 'Buat lembar'
+- takeScreenshot: '03-login-success'
 - openLink: https://app.lembar.web.id/app/generate
-- takeScreenshot: "04-generate-form"
+- takeScreenshot: '04-generate-form'
 - openLink: https://app.lembar.web.id/app/riwayat
-- takeScreenshot: "05-riwayat"
+- takeScreenshot: '05-riwayat'
 - openLink: https://app.lembar.web.id/app/pengaturan/langganan
-- takeScreenshot: "06-langganan"
+- takeScreenshot: '06-langganan'
 - openLink: https://app.lembar.web.id/ops/jobs
-- assertVisible: "Buat lembar"
-- takeScreenshot: "07-role-guard"
+- assertVisible: 'Buat lembar'
+- takeScreenshot: '07-role-guard'

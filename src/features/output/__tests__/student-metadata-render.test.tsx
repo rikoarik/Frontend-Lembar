@@ -31,7 +31,7 @@ describe('StudentWorksheetRenderer metadata header', () => {
     const { container } = render(<StudentWorksheetRenderer dto={dto} />);
 
     const metadata = screen.getByTestId('student-print-metadata');
-    const title = screen.getByRole('heading', { name: 'Pecahan Harian' });
+    const title = screen.getByRole('heading', { name: /pecahan harian/i });
     expect(metadata.compareDocumentPosition(title) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(metadata).toHaveTextContent('SDN 1 Lembar');
     expect(metadata).toHaveTextContent('Guru: Bu Sari');

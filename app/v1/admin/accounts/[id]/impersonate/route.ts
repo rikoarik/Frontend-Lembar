@@ -7,20 +7,16 @@ import {
   JWT_COOKIE,
   SESSION_COOKIE,
 } from '@/src/lib/api/session';
-import { findMockAccountById } from '@/src/lib/mock-api/accounts';
+import { findMockAccountById, findMockAccountBySession } from '@/src/lib/mock-api/accounts';
 import { isMockApiMode, mockFail } from '@/src/lib/mock-api/preview';
 
-export async function POST(
-  request: NextRequest,
-  context: { params: Promise<{ id: string }> },
-) {
+export async function POST(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params;
   const jar = await cookies();
 
-  const currentToken =
-    jar.get(JWT_COOKIE)?.value || jar.get(SESSION_COOKIE)?.value || null;
+  const currentToken = jar.get(JWT_COOKIE)?.value || jar.get(SESSION_COOKIE)?.value || null;
 
-  if (!currentToken && !isMockApiMode()) {
+  if (!currentToken) {
     return mockFail('AUTH_REQUIRED', 'Sesi superadmin tidak ditemukan.', 401);
   }
 
@@ -32,7 +28,7 @@ export async function POST(
     });
 
     // Read body once
-    const payload = await upstream.json().catch(() => null) as {
+    const payload = (await upstream.json().catch(() => null)) as {
       data?: {
         token?: string;
         targetId?: string;
@@ -67,11 +63,11 @@ export async function POST(
     try {
       const parts = token.split('.');
       if (parts.length === 3) {
-        const claims = JSON.parse(Buffer.from(parts[1], 'base64').toString('utf8'));
+        const claims = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf8'));
         roles = Array.isArray(claims.roles) ? claims.roles : [];
       }
-    } catch (e) {
-      console.error('Failed to decode impersonation JWT claims:', e);
+    } catch {
+      roles = [];
     }
 
     if (roles.length === 0) {
@@ -81,19 +77,45 @@ export async function POST(
     const homePath = payload?.data?.homePath || homePathForRoles(roles);
     const displayName = targetName || targetEmail || 'Pengguna Impersonasi';
 
-    const response = NextResponse.json({ data: { homePath, displayName } });
+    const response = NextResponse.json({
+      data: {
+        homePath,
+        displayName,
+        targetName: targetName ?? displayName,
+        targetEmail: targetEmail ?? null,
+      },
+    });
 
     response.cookies.set(authCookieOptions('lembar_impersonator', currentToken, 60 * 60));
     response.cookies.set(authCookieOptions(JWT_COOKIE, token, 60 * 60));
     response.cookies.set({ name: SESSION_COOKIE, value: '', path: '/', maxAge: 0 });
     response.cookies.set(authCookieOptions('lembar_roles', roles.join(','), 60 * 60));
-    response.cookies.set({ name: 'lembar_is_impersonating', value: '1', path: '/', sameSite: 'lax', httpOnly: false, maxAge: 60 * 60 });
-    response.cookies.set({ name: 'lembar_impersonated_name', value: displayName, path: '/', sameSite: 'lax', httpOnly: false, maxAge: 60 * 60 });
+    response.cookies.set({
+      name: 'lembar_is_impersonating',
+      value: '1',
+      path: '/',
+      sameSite: 'lax',
+      httpOnly: false,
+      maxAge: 60 * 60,
+    });
+    response.cookies.set({
+      name: 'lembar_impersonated_name',
+      value: displayName,
+      path: '/',
+      sameSite: 'lax',
+      httpOnly: false,
+      maxAge: 60 * 60,
+    });
 
     return response;
   }
 
   // 2. Mock Mode
+  const actor = findMockAccountBySession(currentToken);
+  if (!actor?.roles.includes('superadmin')) {
+    return mockFail('ROLE_FORBIDDEN', 'Akses superadmin diperlukan.', 403);
+  }
+
   const mockAccount = findMockAccountById(id);
   if (!mockAccount) {
     return mockFail('NOT_FOUND', `Akun dengan ID "${id}" tidak ditemukan.`, 404);
@@ -103,14 +125,52 @@ export async function POST(
   const displayName = mockAccount.displayName;
 
   const response = NextResponse.json({
-    data: { token: mockAccount.session, homePath, displayName },
+    data: {
+      homePath,
+      displayName,
+      targetName: displayName,
+      targetEmail: mockAccount.identifier,
+    },
   });
 
-  response.cookies.set({ name: 'lembar_impersonator', value: currentToken || 'ops', path: '/', sameSite: 'lax', httpOnly: true });
-  response.cookies.set({ name: SESSION_COOKIE, value: mockAccount.session, path: '/', sameSite: 'lax', httpOnly: true, maxAge: 60 * 60 * 24 });
-  response.cookies.set({ name: 'lembar_roles', value: mockAccount.roles.join(','), path: '/', sameSite: 'lax', httpOnly: true });
-  response.cookies.set({ name: 'lembar_is_impersonating', value: '1', path: '/', sameSite: 'lax', httpOnly: false, maxAge: 60 * 60 * 24 });
-  response.cookies.set({ name: 'lembar_impersonated_name', value: displayName, path: '/', sameSite: 'lax', httpOnly: false, maxAge: 60 * 60 * 24 });
+  response.cookies.set({
+    name: 'lembar_impersonator',
+    value: currentToken || 'ops',
+    path: '/',
+    sameSite: 'lax',
+    httpOnly: true,
+  });
+  response.cookies.set({
+    name: SESSION_COOKIE,
+    value: mockAccount.session,
+    path: '/',
+    sameSite: 'lax',
+    httpOnly: true,
+    maxAge: 60 * 60 * 24,
+  });
+  response.cookies.set({
+    name: 'lembar_roles',
+    value: mockAccount.roles.join(','),
+    path: '/',
+    sameSite: 'lax',
+    httpOnly: true,
+  });
+  response.cookies.set({
+    name: 'lembar_is_impersonating',
+    value: '1',
+    path: '/',
+    sameSite: 'lax',
+    httpOnly: false,
+    maxAge: 60 * 60 * 24,
+  });
+  response.cookies.set({
+    name: 'lembar_impersonated_name',
+    value: displayName,
+    path: '/',
+    sameSite: 'lax',
+    httpOnly: false,
+    maxAge: 60 * 60 * 24,
+  });
 
   return response;
 }

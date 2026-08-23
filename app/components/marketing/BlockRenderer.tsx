@@ -167,7 +167,7 @@ function FaqBlock({ block }: { block: MarketingBlock }) {
       data-block-id={block.id}
       className={`py-16 px-margin-mobile md:px-margin-desktop ${themeClass(block.theme)}`}
     >
-      <div className="max-w-container-max mx-auto max-w-2xl">
+      <div className="mx-auto max-w-2xl">
         {block.eyebrow && (
           <p className="text-caption font-medium uppercase tracking-widest mb-3 opacity-70">
             {block.eyebrow}

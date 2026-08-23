@@ -1,5 +1,3 @@
-'use client';
-
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { ActiveRole, WorkspaceKind } from '@/src/types/auth';
@@ -129,9 +127,10 @@ export function LeftRail({
   onToggleCollapse,
 }: LeftRailProps) {
   const pathname = usePathname() ?? '/app';
-  const schoolItems = activeWorkspaceKind === 'school'
-    ? SCHOOL_ONLY_NAV.filter((item) => roleAllows(activeRole, item.entitlement))
-    : [];
+  const schoolItems =
+    activeWorkspaceKind === 'school'
+      ? SCHOOL_ONLY_NAV.filter((item) => roleAllows(activeRole, item.entitlement))
+      : [];
 
   const isActive = (href: string) =>
     href === '/app' ? pathname === '/app' : pathname.startsWith(href);

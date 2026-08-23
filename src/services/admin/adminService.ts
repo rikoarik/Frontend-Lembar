@@ -381,15 +381,19 @@ export const adminService = {
     email: string;
     name?: string;
     role?: string;
-  }): Promise<Result<{ invited: true; accountId: string; token?: string; welcomeUrl?: string; expiresAt?: string }, AdminError>> {
-    return request<{ invited: true; accountId: string; token?: string; welcomeUrl?: string; expiresAt?: string }>('/v1/admin/accounts/invite', 'POST', payload);
+  }): Promise<Result<{ invited: true; accountId: string; expiresAt?: string }, AdminError>> {
+    return request<{ invited: true; accountId: string; expiresAt?: string }>(
+      '/v1/admin/accounts/invite',
+      'POST',
+      payload,
+    );
   },
 
   inviteAccount(payload: {
     email: string;
     name?: string;
     role?: string;
-  }): Promise<Result<{ invited: true; accountId: string; token?: string; welcomeUrl?: string; expiresAt?: string }, AdminError>> {
+  }): Promise<Result<{ invited: true; accountId: string; expiresAt?: string }, AdminError>> {
     return adminService.invite(payload);
   },
 
@@ -398,7 +402,10 @@ export const adminService = {
   },
 
   unsuspendAccount(id: string): Promise<Result<{ id: string; suspended: boolean }, AdminError>> {
-    return request<{ id: string; suspended: boolean }>(`/v1/admin/accounts/${id}/unsuspend`, 'POST');
+    return request<{ id: string; suspended: boolean }>(
+      `/v1/admin/accounts/${id}/unsuspend`,
+      'POST',
+    );
   },
 
   accountDetail(id: string): Promise<Result<AdminAccountDetail, AdminError>> {
@@ -412,53 +419,74 @@ export const adminService = {
     return request<AdminAccountPatchResult>(`/v1/admin/accounts/${id}`, 'PATCH', payload);
   },
 
-  deleteAccount(id: string): Promise<Result<{ id: string; deleted: boolean; email: string }, AdminError>> {
-    return request<{ id: string; deleted: boolean; email: string }>(`/v1/admin/accounts/${id}`, 'DELETE');
+  deleteAccount(
+    id: string,
+  ): Promise<Result<{ id: string; deleted: boolean; email: string }, AdminError>> {
+    return request<{ id: string; deleted: boolean; email: string }>(
+      `/v1/admin/accounts/${id}`,
+      'DELETE',
+    );
   },
 
   bulkSuspend(ids: string[]): Promise<Result<{ succeeded: number; failed: number }, AdminError>> {
-    return request<{ succeeded: number; failed: number }>('/v1/admin/accounts/bulk/suspend', 'POST', { ids });
+    return request<{ succeeded: number; failed: number }>(
+      '/v1/admin/accounts/bulk/suspend',
+      'POST',
+      { ids },
+    );
   },
 
   bulkUnsuspend(ids: string[]): Promise<Result<{ succeeded: number; failed: number }, AdminError>> {
-    return request<{ succeeded: number; failed: number }>('/v1/admin/accounts/bulk/unsuspend', 'POST', { ids });
+    return request<{ succeeded: number; failed: number }>(
+      '/v1/admin/accounts/bulk/unsuspend',
+      'POST',
+      { ids },
+    );
   },
 
   bulkDelete(ids: string[]): Promise<Result<{ succeeded: number; failed: number }, AdminError>> {
-    return request<{ succeeded: number; failed: number }>('/v1/admin/accounts/bulk/delete', 'POST', { ids });
+    return request<{ succeeded: number; failed: number }>(
+      '/v1/admin/accounts/bulk/delete',
+      'POST',
+      { ids },
+    );
   },
 
-  impersonateAccount(
-    id: string,
-  ): Promise<
+  impersonateAccount(id: string): Promise<
     Result<
       {
-        token: string;
-        targetId: string;
-        targetEmail: string;
-        targetName: string;
-        expiresIn: number;
         homePath: string;
+        displayName: string;
+        targetEmail: string | null;
+        targetName: string;
       },
       AdminError
     >
   > {
     return request<{
-      token: string;
-      targetId: string;
-      targetEmail: string;
-      targetName: string;
-      expiresIn: number;
       homePath: string;
+      displayName: string;
+      targetEmail: string | null;
+      targetName: string;
     }>(`/v1/admin/accounts/${id}/impersonate`, 'POST');
   },
 
-  resetPassword(id: string): Promise<Result<{ id: string; sent: true; token?: string; resetUrl?: string; expiresAt?: string }, AdminError>> {
-    return request<{ id: string; sent: true; token?: string; resetUrl?: string; expiresAt?: string }>(`/v1/admin/accounts/${id}/reset-password`, 'POST');
+  resetPassword(
+    id: string,
+  ): Promise<Result<{ id: string; sent: true; expiresAt?: string }, AdminError>> {
+    return request<{ id: string; sent: true; expiresAt?: string }>(
+      `/v1/admin/accounts/${id}/reset-password`,
+      'POST',
+    );
   },
 
-  updateRoles(id: string, roles: string[]): Promise<Result<{ id: string; roles: string[] }, AdminError>> {
-    return request<{ id: string; roles: string[] }>(`/v1/admin/accounts/${id}/roles`, 'PATCH', { roles });
+  updateRoles(
+    id: string,
+    roles: string[],
+  ): Promise<Result<{ id: string; roles: string[] }, AdminError>> {
+    return request<{ id: string; roles: string[] }>(`/v1/admin/accounts/${id}/roles`, 'PATCH', {
+      roles,
+    });
   },
 
   // Schools
@@ -474,7 +502,9 @@ export const adminService = {
     if (params?.page) qs.set('page', String(params.page));
     if (params?.limit) qs.set('limit', String(params.limit));
     const q = qs.toString();
-    return request<{ data: AdminSchoolRow[]; meta: AdminMeta }>(`/v1/admin/schools${q ? `?${q}` : ''}`);
+    return request<{ data: AdminSchoolRow[]; meta: AdminMeta }>(
+      `/v1/admin/schools${q ? `?${q}` : ''}`,
+    );
   },
 
   // Jobs
@@ -517,7 +547,9 @@ export const adminService = {
     if (params?.page) qs.set('page', String(params.page));
     if (params?.limit) qs.set('limit', String(params.limit));
     const q = qs.toString();
-    return request<{ data: AdminQualityRow[]; meta: AdminMeta }>(`/v1/admin/quality-reports${q ? `?${q}` : ''}`);
+    return request<{ data: AdminQualityRow[]; meta: AdminMeta }>(
+      `/v1/admin/quality-reports${q ? `?${q}` : ''}`,
+    );
   },
 
   triageReport(id: string, status: string): Promise<Result<unknown, AdminError>> {
@@ -537,12 +569,18 @@ export const adminService = {
     return request(`/v1/admin/flags/${key}`, 'DELETE');
   },
 
-  createFlag(data: { key: string; description?: string; scope?: string }): Promise<Result<CreateFlagResult, AdminError>> {
+  createFlag(data: {
+    key: string;
+    description?: string;
+    scope?: string;
+  }): Promise<Result<CreateFlagResult, AdminError>> {
     return request<CreateFlagResult>('/v1/admin/flags', 'POST', data);
   },
 
   // Prompts
-  prompts(params?: { status?: AdminPromptRow['status'] }): Promise<Result<AdminPromptRow[], AdminError>> {
+  prompts(params?: {
+    status?: AdminPromptRow['status'];
+  }): Promise<Result<AdminPromptRow[], AdminError>> {
     const qs = new URLSearchParams();
     if (params?.status) qs.set('status', params.status);
     const q = qs.toString();
@@ -558,7 +596,14 @@ export const adminService = {
   },
 
   // Audit
-  audit(params?: { action?: string; actor?: string; from?: string; to?: string; page?: number; limit?: number }): Promise<Result<{ data: AdminAuditRow[]; meta: AdminMeta }, AdminError>> {
+  audit(params?: {
+    action?: string;
+    actor?: string;
+    from?: string;
+    to?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<Result<{ data: AdminAuditRow[]; meta: AdminMeta }, AdminError>> {
     const qs = new URLSearchParams();
     if (params?.action) qs.set('action', params.action);
     if (params?.actor) qs.set('actor', params.actor);
@@ -567,11 +612,20 @@ export const adminService = {
     if (params?.page) qs.set('page', String(params.page));
     if (params?.limit) qs.set('limit', String(params.limit));
     const q = qs.toString();
-    return request<{ data: AdminAuditRow[]; meta: AdminMeta }>(`/v1/admin/audit${q ? `?${q}` : ''}`);
+    return request<{ data: AdminAuditRow[]; meta: AdminMeta }>(
+      `/v1/admin/audit${q ? `?${q}` : ''}`,
+    );
   },
 
   // Alias for audit() — BE uses /v1/admin/audit, FE prefers auditLogs naming
-  auditLogs(params?: { action?: string; actor?: string; from?: string; to?: string; page?: number; limit?: number }): Promise<Result<{ data: AdminAuditRow[]; meta: AdminMeta }, AdminError>> {
+  auditLogs(params?: {
+    action?: string;
+    actor?: string;
+    from?: string;
+    to?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<Result<{ data: AdminAuditRow[]; meta: AdminMeta }, AdminError>> {
     return this.audit(params);
   },
 
@@ -601,26 +655,47 @@ export const adminService = {
   },
 
   // Billing
-  billing(params?: { state?: string; q?: string; page?: number; limit?: number }): Promise<Result<{ data: AdminBillingRow[]; meta: AdminMeta }, AdminError>> {
+  billing(params?: {
+    state?: string;
+    q?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<Result<{ data: AdminBillingRow[]; meta: AdminMeta }, AdminError>> {
     const qs = new URLSearchParams();
     if (params?.state) qs.set('state', params.state);
     if (params?.q) qs.set('q', params.q);
     if (params?.page) qs.set('page', String(params.page));
     if (params?.limit) qs.set('limit', String(params.limit));
     const q = qs.toString();
-    return request<{ data: AdminBillingRow[]; meta: AdminMeta }>(`/v1/admin/billing${q ? `?${q}` : ''}`);
+    return request<{ data: AdminBillingRow[]; meta: AdminMeta }>(
+      `/v1/admin/billing${q ? `?${q}` : ''}`,
+    );
   },
 
-  updateBilling(id: string, data: { state?: string; plan?: string; seats?: number; renewsAt?: string }): Promise<Result<{ id: string } & Partial<AdminBillingRow>, AdminError>> {
+  updateBilling(
+    id: string,
+    data: { state?: string; plan?: string; seats?: number; renewsAt?: string },
+  ): Promise<Result<{ id: string } & Partial<AdminBillingRow>, AdminError>> {
     return request(`/v1/admin/billing/${id}`, 'PATCH', data);
   },
 
-  createBilling(data: { tenantId: string; schoolName: string; plan?: string; seats?: number; state?: string }): Promise<Result<{ id: string; tenantId: string; schoolName: string }, AdminError>> {
+  createBilling(data: {
+    tenantId: string;
+    schoolName: string;
+    plan?: string;
+    seats?: number;
+    state?: string;
+  }): Promise<Result<{ id: string; tenantId: string; schoolName: string }, AdminError>> {
     return request('/v1/admin/billing', 'POST', data);
   },
 
   // Payment orders
-  paymentOrders(params?: { workspaceId?: string; status?: string; page?: number; limit?: number }): Promise<Result<PaymentOrder[], AdminError>> {
+  paymentOrders(params?: {
+    workspaceId?: string;
+    status?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<Result<PaymentOrder[], AdminError>> {
     const qs = new URLSearchParams();
     if (params?.workspaceId) qs.set('workspaceId', params.workspaceId);
     if (params?.status) qs.set('status', params.status);
@@ -637,7 +712,12 @@ export const adminService = {
   },
 
   // Dashboard trends
-  dashboardTrends(): Promise<Result<{ jobs: { day: string; count: number }[]; quality: { day: string; count: number }[] }, AdminError>> {
+  dashboardTrends(): Promise<
+    Result<
+      { jobs: { day: string; count: number }[]; quality: { day: string; count: number }[] },
+      AdminError
+    >
+  > {
     return request('/v1/admin/dashboard/trends');
   },
 
@@ -650,7 +730,11 @@ export const adminService = {
     return request<MarketingOpsPage>(`/v1/ops/marketing/pages/${encodeURIComponent(slug)}`);
   },
 
-  saveMarketingDraft(slug: MarketingPageSlug, draft: unknown, revision: number): Promise<Result<MarketingOpsPage, AdminError>> {
+  saveMarketingDraft(
+    slug: MarketingPageSlug,
+    draft: unknown,
+    revision: number,
+  ): Promise<Result<MarketingOpsPage, AdminError>> {
     return request<MarketingOpsPage>(
       `/v1/ops/marketing/pages/${encodeURIComponent(slug)}/draft`,
       'PUT',
@@ -660,7 +744,10 @@ export const adminService = {
   },
 
   // Create school/tenant
-  createSchool(data: { name: string; slug?: string }): Promise<Result<{ id: string; name: string; slug: string }, AdminError>> {
+  createSchool(data: {
+    name: string;
+    slug?: string;
+  }): Promise<Result<{ id: string; name: string; slug: string }, AdminError>> {
     return request('/v1/admin/schools', 'POST', data);
   },
 
@@ -670,15 +757,39 @@ export const adminService = {
   },
 
   // School detail (members list) + rename + delete
-  schoolDetail(id: string): Promise<Result<{
-    school: { id: string; workspaceId: string; name: string; slug: string; plan: string; state: string; seats: number; renewsAt: string };
-    members: { id: string; email: string; name: string; username: string | null; roles: string[]; createdAt: string }[];
-    memberCount: number;
-  }, AdminError>> {
+  schoolDetail(id: string): Promise<
+    Result<
+      {
+        school: {
+          id: string;
+          workspaceId: string;
+          name: string;
+          slug: string;
+          plan: string;
+          state: string;
+          seats: number;
+          renewsAt: string;
+        };
+        members: {
+          id: string;
+          email: string;
+          name: string;
+          username: string | null;
+          roles: string[];
+          createdAt: string;
+        }[];
+        memberCount: number;
+      },
+      AdminError
+    >
+  > {
     return request(`/v1/admin/schools/${id}`);
   },
 
-  renameSchool(id: string, name: string): Promise<Result<{ id: string; name: string }, AdminError>> {
+  renameSchool(
+    id: string,
+    name: string,
+  ): Promise<Result<{ id: string; name: string }, AdminError>> {
     return request(`/v1/admin/schools/${id}`, 'PATCH', { name });
   },
 
@@ -687,16 +798,30 @@ export const adminService = {
   },
 
   // Quality report detail + notes update
-  qualityDetail(id: string): Promise<Result<{
-    id: string; reason: string; status: string; reporter: string; notes: string;
-    workspaceId: string; createdAt: string;
-  }, AdminError>> {
+  qualityDetail(id: string): Promise<
+    Result<
+      {
+        id: string;
+        reason: string;
+        status: string;
+        reporter: string;
+        notes: string;
+        workspaceId: string;
+        createdAt: string;
+      },
+      AdminError
+    >
+  > {
     return request(`/v1/admin/quality-reports/${id}`);
   },
 
   updateQualityNotes(
     id: string,
-    data: { notes?: string; status?: 'triaged' | 'closed'; expectedStatus?: 'open' | 'triaged' | 'closed' },
+    data: {
+      notes?: string;
+      status?: 'triaged' | 'closed';
+      expectedStatus?: 'open' | 'triaged' | 'closed';
+    },
   ): Promise<Result<unknown, AdminError>> {
     return request(`/v1/admin/quality-reports/${id}`, 'PATCH', data);
   },
@@ -706,16 +831,30 @@ export const adminService = {
     return request<AdminPromptDetail>(`/v1/admin/prompts/${id}`);
   },
 
-  updatePromptMetadata(id: string, data: AdminPromptMetadataUpdate): Promise<Result<{ id: string } & AdminPromptMetadataUpdate, AdminError>> {
-    return request<{ id: string } & AdminPromptMetadataUpdate>(`/v1/admin/prompts/${id}`, 'PATCH', data);
+  updatePromptMetadata(
+    id: string,
+    data: AdminPromptMetadataUpdate,
+  ): Promise<Result<{ id: string } & AdminPromptMetadataUpdate, AdminError>> {
+    return request<{ id: string } & AdminPromptMetadataUpdate>(
+      `/v1/admin/prompts/${id}`,
+      'PATCH',
+      data,
+    );
   },
 
   promptVersions(id: string): Promise<Result<AdminPromptVersion[], AdminError>> {
     return request<AdminPromptVersion[]>(`/v1/admin/prompts/${id}/versions`);
   },
 
-  createPromptVersion(id: string, data: { prompt_text: string; notes?: string; schema_version?: number }): Promise<Result<{ id: string; version: number; status: string }, AdminError>> {
-    return request<{ id: string; version: number; status: string }>(`/v1/admin/prompts/${id}/versions`, 'POST', data);
+  createPromptVersion(
+    id: string,
+    data: { prompt_text: string; notes?: string; schema_version?: number },
+  ): Promise<Result<{ id: string; version: number; status: string }, AdminError>> {
+    return request<{ id: string; version: number; status: string }>(
+      `/v1/admin/prompts/${id}/versions`,
+      'POST',
+      data,
+    );
   },
 
   activatePromptVersion(id: string, version: number): Promise<Result<unknown, AdminError>> {
@@ -730,21 +869,52 @@ export const adminService = {
     return request(`/v1/admin/prompts/${id}/metrics`);
   },
 
-  learningSignals(): Promise<Result<{ prompt_template_id: string; pattern: string; frequency: number; avg_rating: number; suggested_action: string }[], AdminError>> {
-    return request<{ prompt_template_id: string; pattern: string; frequency: number; avg_rating: number; suggested_action: string }[]>('/v1/admin/learning-signals');
+  learningSignals(): Promise<
+    Result<
+      {
+        prompt_template_id: string;
+        pattern: string;
+        frequency: number;
+        avg_rating: number;
+        suggested_action: string;
+      }[],
+      AdminError
+    >
+  > {
+    return request<
+      {
+        prompt_template_id: string;
+        pattern: string;
+        frequency: number;
+        avg_rating: number;
+        suggested_action: string;
+      }[]
+    >('/v1/admin/learning-signals');
   },
 
-  createPrompt(data: { name: string; slug: string; description?: string; promptText?: string; contextWindow?: string }): Promise<Result<Record<string, unknown>, AdminError>> {
+  createPrompt(data: {
+    name: string;
+    slug: string;
+    description?: string;
+    promptText?: string;
+    contextWindow?: string;
+  }): Promise<Result<Record<string, unknown>, AdminError>> {
     return request('/v1/admin/prompts', 'POST', data);
   },
 
   // Set entitlement (plan) for a workspace
-  setEntitlement(workspaceId: string, data: { plan: 'free' | 'pro' }): Promise<Result<PlanChangeResult, AdminError>> {
+  setEntitlement(
+    workspaceId: string,
+    data: { plan: 'free' | 'pro' | 'plus' },
+  ): Promise<Result<PlanChangeResult, AdminError>> {
     return request<PlanChangeResult>(`/v1/admin/entitlements/${workspaceId}`, 'POST', data);
   },
 
   // Marketing CMS publish/unpublish
-  publishPage(slug: MarketingPageSlug, revision: number): Promise<Result<MarketingOpsPage, AdminError>> {
+  publishPage(
+    slug: MarketingPageSlug,
+    revision: number,
+  ): Promise<Result<MarketingOpsPage, AdminError>> {
     return request(
       `/v1/ops/marketing/pages/${encodeURIComponent(slug)}/publish`,
       'POST',
@@ -753,7 +923,10 @@ export const adminService = {
     );
   },
 
-  unpublishPage(slug: MarketingPageSlug, revision: number): Promise<Result<MarketingOpsPage, AdminError>> {
+  unpublishPage(
+    slug: MarketingPageSlug,
+    revision: number,
+  ): Promise<Result<MarketingOpsPage, AdminError>> {
     return request<MarketingOpsPage>(
       `/v1/ops/marketing/pages/${encodeURIComponent(slug)}/unpublish`,
       'POST',
@@ -763,22 +936,53 @@ export const adminService = {
   },
 
   // Create marketing content page
-  createMarketingPage(data: { slug: string; title: string }): Promise<Result<{ slug: string; title: string }, AdminError>> {
+  createMarketingPage(data: {
+    slug: string;
+    title: string;
+  }): Promise<Result<{ slug: string; title: string }, AdminError>> {
     return request('/v1/ops/marketing/pages', 'POST', data);
   },
 
   // ── Catalog CRUD ─────────────────────────────────────────────────────────
-  updateGradeStatus(id: string, status: 'active' | 'archived' | 'unavailable'): Promise<Result<{ id: string; status: string }, AdminError>> {
-    return request<{ id: string; status: string }>(`/v1/admin/catalog/grades/${id}/status`, 'PATCH', { status });
+  updateGradeStatus(
+    id: string,
+    status: 'active' | 'archived' | 'unavailable',
+  ): Promise<Result<{ id: string; status: string }, AdminError>> {
+    return request<{ id: string; status: string }>(
+      `/v1/admin/catalog/grades/${id}/status`,
+      'PATCH',
+      { status },
+    );
   },
-  updateSubjectStatus(id: string, status: 'active' | 'archived' | 'unavailable'): Promise<Result<{ id: string; status: string }, AdminError>> {
-    return request<{ id: string; status: string }>(`/v1/admin/catalog/subjects/${id}/status`, 'PATCH', { status });
+  updateSubjectStatus(
+    id: string,
+    status: 'active' | 'archived' | 'unavailable',
+  ): Promise<Result<{ id: string; status: string }, AdminError>> {
+    return request<{ id: string; status: string }>(
+      `/v1/admin/catalog/subjects/${id}/status`,
+      'PATCH',
+      { status },
+    );
   },
-  createGrade(data: { label: string; status?: string }): Promise<Result<{ id: string; label: string; status: string }, AdminError>> {
-    return request<{ id: string; label: string; status: string }>('/v1/admin/catalog/grades', 'POST', data);
+  createGrade(data: {
+    label: string;
+    status?: string;
+  }): Promise<Result<{ id: string; label: string; status: string }, AdminError>> {
+    return request<{ id: string; label: string; status: string }>(
+      '/v1/admin/catalog/grades',
+      'POST',
+      data,
+    );
   },
-  createSubject(data: { label: string; status?: string }): Promise<Result<{ id: string; label: string; status: string }, AdminError>> {
-    return request<{ id: string; label: string; status: string }>('/v1/admin/catalog/subjects', 'POST', data);
+  createSubject(data: {
+    label: string;
+    status?: string;
+  }): Promise<Result<{ id: string; label: string; status: string }, AdminError>> {
+    return request<{ id: string; label: string; status: string }>(
+      '/v1/admin/catalog/subjects',
+      'POST',
+      data,
+    );
   },
   archiveGrade(id: string): Promise<Result<{ id: string; archived: boolean }, AdminError>> {
     return request<{ id: string; archived: boolean }>(`/v1/admin/catalog/grades/${id}`, 'DELETE');
@@ -814,8 +1018,14 @@ export const aiProviderService = {
   getAiProvider(): Promise<Result<AiProviderConfig, AdminError>> {
     return request<AiProviderConfig>('/v1/admin/ai-provider', 'GET');
   },
-  updateAiProvider(payload: AiProviderUpdatePayload): Promise<Result<{ updated: boolean; fields?: string[] }, AdminError>> {
-    return request<{ updated: boolean; fields?: string[] }>('/v1/admin/ai-provider', 'PATCH', payload);
+  updateAiProvider(
+    payload: AiProviderUpdatePayload,
+  ): Promise<Result<{ updated: boolean; fields?: string[] }, AdminError>> {
+    return request<{ updated: boolean; fields?: string[] }>(
+      '/v1/admin/ai-provider',
+      'PATCH',
+      payload,
+    );
   },
   testAiProvider(payload: {
     target: 'primary' | 'fallback';

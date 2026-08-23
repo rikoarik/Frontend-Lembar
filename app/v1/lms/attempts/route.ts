@@ -30,7 +30,9 @@ export async function GET(request: Request) {
     const item = getAssessment(assessmentId);
     if (!item) return mockFail('RESOURCE_NOT_FOUND', 'Lembar tidak ditemukan.', 404);
     // Build a minimal PrintDTO from the mock assessment
-    const questions = ((item as Record<string, unknown>).questions as Array<Record<string, unknown>> | undefined) ?? [];
+    const questions =
+      ((item as Record<string, unknown>).questions as Array<Record<string, unknown>> | undefined) ??
+      [];
     return mockOk({
       assessmentId,
       title: String((item as Record<string, unknown>).title ?? 'Ujian'),

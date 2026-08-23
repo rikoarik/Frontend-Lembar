@@ -4,7 +4,11 @@ import { liveClaims } from '@/src/lib/api/liveAssessment';
 
 async function proxy(request: NextRequest) {
   const auth = await liveClaims();
-  if (!auth) return NextResponse.json({ error: { code: 'AUTH_REQUIRED', message: 'Silakan masuk terlebih dahulu.' } }, { status: 401 });
+  if (!auth)
+    return NextResponse.json(
+      { error: { code: 'AUTH_REQUIRED', message: 'Silakan masuk terlebih dahulu.' } },
+      { status: 401 },
+    );
   const upstream = await backendFetch('/v1/classes', {
     method: request.method,
     token: auth.token,

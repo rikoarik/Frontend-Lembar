@@ -1,5 +1,3 @@
-'use client';
-
 import Link from 'next/link';
 import { Button, Panel, StatusBadge } from '@/app/components/ui';
 import type { StatusLabel } from '@/app/components/ui';
@@ -132,11 +130,11 @@ export function JobProgressPanel({
               />
             </div>
             <p className="text-body-sm text-brand-ink-muted">
-              {percent === undefined
-                ? 'Proses sedang aktif.'
-                : `${percent}% selesai`}
+              {percent === undefined ? 'Proses sedang aktif.' : `${percent}% selesai`}
             </p>
-            {timing.elapsed ? <p className="text-body-sm text-brand-ink-muted">{timing.elapsed}</p> : null}
+            {timing.elapsed ? (
+              <p className="text-body-sm text-brand-ink-muted">{timing.elapsed}</p>
+            ) : null}
             <p className="text-body-sm text-brand-ink-muted">{timing.eta}</p>
           </div>
         ) : null}

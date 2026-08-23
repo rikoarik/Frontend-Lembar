@@ -7,6 +7,8 @@ import { Button, Panel, StatusBadge } from '@/app/components/ui';
 import { assessmentService } from '@/src/services/assessments/assessmentService';
 import type { AssessmentDetail } from '@/src/features/review/types';
 
+type AssessmentResult = Awaited<ReturnType<typeof assessmentService.get>>;
+
 export function FinalizeView({ assessmentId }: { assessmentId: string }) {
   const router = useRouter();
   const [assessment, setAssessment] = useState<AssessmentDetail | null>(null);
@@ -16,9 +18,7 @@ export function FinalizeView({ assessmentId }: { assessmentId: string }) {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    const result = await assessmentService.get(assessmentId);
+  const applyLoadResult = useCallback((result: AssessmentResult) => {
     if (!result.ok) {
       setError(result.error.safeMessage);
       setAssessment(null);
@@ -28,11 +28,24 @@ export function FinalizeView({ assessmentId }: { assessmentId: string }) {
     setAssessment(result.value);
     setError(null);
     setLoading(false);
-  }, [assessmentId]);
+  }, []);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    applyLoadResult(await assessmentService.get(assessmentId));
+  }, [applyLoadResult, assessmentId]);
 
   useEffect(() => {
-    void load();
-  }, [load]);
+    let cancelled = false;
+
+    void assessmentService.get(assessmentId).then((result) => {
+      if (!cancelled) applyLoadResult(result);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [applyLoadResult, assessmentId]);
 
   const onFinalize = async () => {
     setBusy(true);

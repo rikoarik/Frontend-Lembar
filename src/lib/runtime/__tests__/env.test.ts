@@ -23,6 +23,16 @@ describe('loadPublicRuntimeConfig', () => {
     expect(config.apiMode).toBe('mock');
   });
 
+  it('fails closed to live mode for production when mode is missing or invalid', () => {
+    expect(loadPublicRuntimeConfig({ NEXT_PUBLIC_APP_ENV: 'production' }).apiMode).toBe('live');
+    expect(
+      loadPublicRuntimeConfig({
+        NEXT_PUBLIC_APP_ENV: 'production',
+        NEXT_PUBLIC_API_MODE: 'invalid',
+      }).apiMode,
+    ).toBe('live');
+  });
+
   it('falls back when NEXT_PUBLIC_APP_URL is not a valid URL', () => {
     const config = loadPublicRuntimeConfig({ NEXT_PUBLIC_APP_URL: 'not-a-url' });
     expect(config.appUrl).toBe('http://localhost:3000');

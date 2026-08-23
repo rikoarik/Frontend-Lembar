@@ -1,5 +1,3 @@
-'use client';
-
 import { Button } from '@/app/components/ui';
 import {
   AdminPageHeader,
@@ -59,19 +57,35 @@ export function OpsJobsSection({
         <Button
           size="sm"
           onClick={() => {
-            const status = filterJobStatus === 'failed' || filterJobStatus === 'dead_letter'
-              ? filterJobStatus
-              : undefined;
-            const scope = status === 'failed' ? 'failed' : status === 'dead_letter' ? 'dead-letter' : 'failed & dead-letter';
-            if (!window.confirm(`Retry semua job ${scope} yang sesuai filter saat ini? Job running, queued, dan succeeded tidak akan diubah.`)) return;
-            adminService.retryJobsBulk({ ...(status ? { status } : {}), ...(search.trim() ? { q: search.trim() } : {}) }).then((result) => {
-              if (!result.ok) {
-                setToast(`Gagal retry: ${result.error.safeMessage}`);
-                return;
-              }
-              setToast(`${result.value.retried} job di-retry; ${result.value.skipped} dilewati.`);
-              loadJobs();
-            });
+            const status =
+              filterJobStatus === 'failed' || filterJobStatus === 'dead_letter'
+                ? filterJobStatus
+                : undefined;
+            const scope =
+              status === 'failed'
+                ? 'failed'
+                : status === 'dead_letter'
+                  ? 'dead-letter'
+                  : 'failed & dead-letter';
+            if (
+              !window.confirm(
+                `Retry semua job ${scope} yang sesuai filter saat ini? Job running, queued, dan succeeded tidak akan diubah.`,
+              )
+            )
+              return;
+            adminService
+              .retryJobsBulk({
+                ...(status ? { status } : {}),
+                ...(search.trim() ? { q: search.trim() } : {}),
+              })
+              .then((result) => {
+                if (!result.ok) {
+                  setToast(`Gagal retry: ${result.error.safeMessage}`);
+                  return;
+                }
+                setToast(`${result.value.retried} job di-retry; ${result.value.skipped} dilewati.`);
+                loadJobs();
+              });
           }}
         >
           Retry failed & dead-letter
@@ -117,14 +131,18 @@ export function OpsJobsSection({
                   <span className="col-span-2 font-mono">{String(jobDetailData.type ?? '—')}</span>
                   <span className="font-semibold text-[#6d665d]">Status</span>
                   <span className="col-span-2">
-                    <AdminPill tone={jobTone((jobDetailData.status as AdminJobRow['status']) ?? 'failed')}>
+                    <AdminPill
+                      tone={jobTone((jobDetailData.status as AdminJobRow['status']) ?? 'failed')}
+                    >
                       {String(jobDetailData.status ?? '—')}
                     </AdminPill>
                   </span>
                   <span className="font-semibold text-[#6d665d]">Tenant</span>
                   <span className="col-span-2">{String(jobDetailData.workspace_id ?? '—')}</span>
                   <span className="font-semibold text-[#6d665d]">Attempt</span>
-                  <span className="col-span-2 tabular-nums">{String(jobDetailData.attempt ?? 0)}</span>
+                  <span className="col-span-2 tabular-nums">
+                    {String(jobDetailData.attempt ?? 0)}
+                  </span>
                   <span className="font-semibold text-[#6d665d]">Dibuat</span>
                   <span className="col-span-2 text-[11px]">
                     {jobDetailData.created_at
@@ -140,7 +158,9 @@ export function OpsJobsSection({
                 </div>
                 {jobDetailData.input ? (
                   <div>
-                    <div className="font-semibold text-[#6d665d] mb-1 text-[12px]">Input payload</div>
+                    <div className="font-semibold text-[#6d665d] mb-1 text-[12px]">
+                      Input payload
+                    </div>
                     <pre className="bg-[#f5f0eb] rounded-xl p-3 text-[10px] overflow-auto max-h-32">
                       {JSON.stringify(jobDetailData.input, null, 2)}
                     </pre>
@@ -187,7 +207,9 @@ export function OpsJobsSection({
         searchPlaceholder="Cari job / tenant / status"
         filters={
           <>
-            {(['', 'running', 'queued', 'retry_wait', 'failed', 'dead_letter', 'succeeded'] as const).map((status) => (
+            {(
+              ['', 'running', 'queued', 'retry_wait', 'failed', 'dead_letter', 'succeeded'] as const
+            ).map((status) => (
               <AdminFilterChip
                 key={status || 'all'}
                 active={filterJobStatus === status}
@@ -213,15 +235,31 @@ export function OpsJobsSection({
               </code>
             ),
           },
-          { key: 'type', header: 'Tipe', render: (row) => <span className="font-mono text-[11px]">{row.type}</span> },
-          { key: 'tenant', header: 'Tenant', render: (row) => <span className="text-[12px]">{row.tenant}</span> },
+          {
+            key: 'type',
+            header: 'Tipe',
+            render: (row) => <span className="font-mono text-[11px]">{row.type}</span>,
+          },
+          {
+            key: 'tenant',
+            header: 'Tenant',
+            render: (row) => <span className="text-[12px]">{row.tenant}</span>,
+          },
           {
             key: 'status',
             header: 'Status',
             render: (row) => <AdminPill tone={jobTone(row.status)}>{row.status}</AdminPill>,
           },
-          { key: 'attempt', header: 'Attempt', render: (row) => <span className="tabular-nums text-[12px]">{row.attempt}</span> },
-          { key: 'updated', header: 'Update', render: (row) => <span className="text-[11px] text-[#6d665d]">{row.updatedAt}</span> },
+          {
+            key: 'attempt',
+            header: 'Attempt',
+            render: (row) => <span className="tabular-nums text-[12px]">{row.attempt}</span>,
+          },
+          {
+            key: 'updated',
+            header: 'Update',
+            render: (row) => <span className="text-[11px] text-[#6d665d]">{row.updatedAt}</span>,
+          },
         ]}
         rowActions={(row) => (
           <div className="flex items-center gap-1.5">
@@ -240,12 +278,16 @@ export function OpsJobsSection({
             >
               Detail
             </Button>
-            {(row.status === 'failed' || row.status === 'dead_letter') ? (
+            {row.status === 'failed' || row.status === 'dead_letter' ? (
               <Button
                 size="sm"
                 onClick={() => {
                   adminService.retryJob(row.id).then((res) => {
-                    setToast(res.ok ? `Job ${row.id.slice(0, 8)} di-retry.` : `Gagal: ${res.error.safeMessage}`);
+                    setToast(
+                      res.ok
+                        ? `Job ${row.id.slice(0, 8)} di-retry.`
+                        : `Gagal: ${res.error.safeMessage}`,
+                    );
                     loadJobs();
                   });
                 }}

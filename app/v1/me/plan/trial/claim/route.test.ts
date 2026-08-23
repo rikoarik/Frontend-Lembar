@@ -15,6 +15,13 @@ vi.mock('@/src/lib/api/session', async (importOriginal) => {
 
 import { POST, TRIAL_DEVICE_COOKIE } from './route';
 
+const claimRequest = (claimToken = 'one-time-claim-token-with-at-least-32-characters') =>
+  new Request('http://localhost/v1/me/plan/trial/claim', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ claimToken }),
+  });
+
 describe('POST /v1/me/plan/trial/claim', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -26,7 +33,7 @@ describe('POST /v1/me/plan/trial/claim', () => {
   it('requires an HttpOnly auth cookie', async () => {
     cookieGet.mockReturnValue(undefined);
 
-    const response = await POST();
+    const response = await POST(claimRequest());
 
     expect(response.status).toBe(401);
     expect(backendFetch).not.toHaveBeenCalled();
@@ -34,20 +41,31 @@ describe('POST /v1/me/plan/trial/claim', () => {
 
   it('creates a secure opaque device cookie and only sends the token upstream', async () => {
     backendFetch.mockResolvedValue(
-      new Response(JSON.stringify({ data: { trialClaimed: true, deviceToken: 'must-not-leak' } }), {
-        status: 201,
-        headers: { 'content-type': 'application/json' },
-      }),
+      new Response(
+        JSON.stringify({
+          data: {
+            trialClaimed: true,
+            claimToken: 'must-not-leak',
+            deviceToken: 'must-not-leak',
+          },
+        }),
+        {
+          status: 201,
+          headers: { 'content-type': 'application/json' },
+        },
+      ),
     );
 
-    const response = await POST();
+    const response = await POST(claimRequest());
     const upstreamInit = backendFetch.mock.calls[0][1] as RequestInit;
     const upstreamBody = JSON.parse(String(upstreamInit.body));
 
     expect(response.status).toBe(201);
     const responseBody = await response.json();
     expect(responseBody).toEqual({ data: { trialClaimed: true } });
+    expect(upstreamBody.claimToken).toBe('one-time-claim-token-with-at-least-32-characters');
     expect(upstreamBody.deviceToken).toMatch(/^[0-9a-f-]{36}$/i);
+    expect(JSON.stringify(responseBody)).not.toContain(upstreamBody.claimToken);
     expect(JSON.stringify(responseBody)).not.toContain(upstreamBody.deviceToken);
     const setCookie = response.headers.get('set-cookie') ?? '';
     expect(setCookie).toContain(`${TRIAL_DEVICE_COOKIE}=${upstreamBody.deviceToken}`);
@@ -73,15 +91,26 @@ describe('POST /v1/me/plan/trial/claim', () => {
       ),
     );
 
-    const response = await POST();
+    const response = await POST(claimRequest());
 
     expect(response.status).toBe(409);
     expect(await response.json()).toEqual({
       error: { code: 'TRIAL_DEVICE_CONFLICT', message: 'Conflict' },
     });
     expect(JSON.parse(backendFetch.mock.calls[0][1].body)).toEqual({
+      claimToken: 'one-time-claim-token-with-at-least-32-characters',
       deviceToken: 'existing-device-secret',
     });
     expect(response.headers.get('set-cookie')).toBeNull();
+  });
+
+  it('rejects requests that do not come from a valid claim link', async () => {
+    const response = await POST(claimRequest('short'));
+
+    expect(response.status).toBe(400);
+    expect(await response.json()).toMatchObject({
+      error: { code: 'TRIAL_CLAIM_LINK_REQUIRED' },
+    });
+    expect(backendFetch).not.toHaveBeenCalled();
   });
 });

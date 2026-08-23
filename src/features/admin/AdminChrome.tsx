@@ -1,5 +1,3 @@
-'use client';
-
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState, useTransition, type ReactNode } from 'react';
@@ -89,9 +87,7 @@ export function AdminStatCards({
               {item.value}
             </div>
             {item.hint ? (
-              <div className="mt-3 text-[12px] font-medium text-[#57534e]">
-                {item.hint}
-              </div>
+              <div className="mt-3 text-[12px] font-medium text-[#57534e]">{item.hint}</div>
             ) : null}
           </div>
         );
@@ -230,7 +226,10 @@ export function AdminEmptyState({
   return (
     <div className={containerCls}>
       <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-[#f0ebe3] text-[#57534e]">
-        <span className="material-symbols-outlined text-[20px] leading-none inline-flex items-center justify-center" aria-hidden>
+        <span
+          className="material-symbols-outlined text-[20px] leading-none inline-flex items-center justify-center"
+          aria-hidden
+        >
           {icon}
         </span>
       </div>
@@ -297,7 +296,10 @@ export function AdminConfirmModal({
                 : 'bg-amber-50 text-amber-600 border border-amber-100'
             }`}
           >
-            <span className="material-symbols-outlined text-[20px] leading-none inline-flex items-center justify-center" aria-hidden>
+            <span
+              className="material-symbols-outlined text-[20px] leading-none inline-flex items-center justify-center"
+              aria-hidden
+            >
               {variant === 'danger' ? 'warning' : 'help_outline'}
             </span>
           </div>
@@ -310,7 +312,13 @@ export function AdminConfirmModal({
         </div>
 
         <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#eee6da]/60">
-          <Button ref={cancelRef} size="sm" variant="secondary" onClick={onCancel} disabled={loading}>
+          <Button
+            ref={cancelRef}
+            size="sm"
+            variant="secondary"
+            onClick={onCancel}
+            disabled={loading}
+          >
             {cancelLabel}
           </Button>
           <Button
@@ -609,7 +617,9 @@ export function AdminSelect<T extends string>({
         className="h-9 px-3.5 rounded-xl border border-[#ddd4c8] bg-white text-[12px] font-medium text-[#171717] hover:bg-[#faf7f2] hover:border-[#b8ad9e] focus:outline-none focus:ring-2 focus:ring-[#171717]/20 inline-flex items-center gap-2 transition-all cursor-pointer shadow-sm select-none"
       >
         <span>{selectedOption ? selectedOption.label : placeholder}</span>
-        <span className={`material-symbols-outlined text-[16px] text-[#6d665d] transition-transform duration-150 ${open ? 'rotate-180' : ''}`}>
+        <span
+          className={`material-symbols-outlined text-[16px] text-[#6d665d] transition-transform duration-150 ${open ? 'rotate-180' : ''}`}
+        >
           expand_more
         </span>
       </button>
@@ -627,16 +637,12 @@ export function AdminSelect<T extends string>({
                   setOpen(false);
                 }}
                 className={`w-full flex items-center justify-between gap-3 rounded-xl px-3 py-2 text-left text-[12px] font-medium transition-all ${
-                  isSelected
-                    ? 'bg-[#171717] text-white'
-                    : 'text-[#171717] hover:bg-[#faf7f2]'
+                  isSelected ? 'bg-[#171717] text-white' : 'text-[#171717] hover:bg-[#faf7f2]'
                 }`}
               >
                 <span>{opt.label}</span>
                 {isSelected && (
-                  <span className="material-symbols-outlined text-[14px] text-white">
-                    check
-                  </span>
+                  <span className="material-symbols-outlined text-[14px] text-white">check</span>
                 )}
               </button>
             );
@@ -849,9 +855,7 @@ export function AdminShell({
                     <div className="truncate text-[13px] font-bold text-white">
                       {resolvedActorName}
                     </div>
-                    <div className="truncate text-[11px] text-white/60">
-                      {resolvedActorMeta}
-                    </div>
+                    <div className="truncate text-[11px] text-white/60">{resolvedActorMeta}</div>
                   </div>
                 </div>
 
@@ -869,7 +873,7 @@ export function AdminShell({
                     </span>
                     Profil Sesi
                   </Link>
-                  <a
+                  <Link
                     href="/app"
                     onClick={() => setProfileOpen(false)}
                     className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[12px] font-medium text-white/80 hover:bg-white/10 hover:text-white transition-colors"
@@ -881,12 +885,12 @@ export function AdminShell({
                       open_in_new
                     </span>
                     Buka aplikasi guru
-                  </a>
+                  </Link>
                   <button
                     type="button"
                     onClick={async () => {
                       await fetch('/v1/auth/logout', { method: 'POST', credentials: 'include' });
-                      window.location.href = '/masuk';
+                      router.replace('/masuk');
                     }}
                     className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-[12px] font-semibold text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors"
                   >
@@ -909,7 +913,7 @@ export function AdminShell({
               aria-label={`Profil ${resolvedActorName}`}
               aria-expanded={profileOpen}
               aria-haspopup="menu"
-              >
+            >
               <AdminAvatar name={resolvedActorName} />
               {!collapsed ? (
                 <div className="min-w-0 flex-1">
@@ -1015,7 +1019,10 @@ export function AdminShell({
                       : 'bg-[#e4f2ea] text-[#176b45] border border-[#c3e3d2]'
                   }`}
                 >
-                  <span className="material-symbols-outlined text-[18px] leading-none inline-flex items-center justify-center" aria-hidden>
+                  <span
+                    className="material-symbols-outlined text-[18px] leading-none inline-flex items-center justify-center"
+                    aria-hidden
+                  >
                     {toast.toLowerCase().includes('gagal') || toast.toLowerCase().includes('error')
                       ? 'error'
                       : 'check_circle'}
@@ -1028,7 +1035,10 @@ export function AdminShell({
                   onClick={() => setToast(null)}
                   aria-label="Tutup notifikasi"
                 >
-                  <span className="material-symbols-outlined text-[16px] leading-none inline-flex items-center justify-center" aria-hidden>
+                  <span
+                    className="material-symbols-outlined text-[16px] leading-none inline-flex items-center justify-center"
+                    aria-hidden
+                  >
                     close
                   </span>
                 </button>

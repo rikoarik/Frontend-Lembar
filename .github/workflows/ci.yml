@@ -2,9 +2,9 @@ name: ci
 
 on:
   push:
-    branches: [main, ao/frontend-integration, feat/**]
+    branches: [main, dev, ao/frontend-integration, feat/**]
   pull_request:
-    branches: [main, ao/frontend-integration]
+    branches: [main, dev, ao/frontend-integration]
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   static-and-build:
-    name: lint • typecheck • format • test • build
+    name: lint • typecheck • format • test • audit • build
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -26,7 +26,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22.22.2
           cache: pnpm
 
       - name: Install (frozen lockfile)
@@ -41,16 +41,17 @@ jobs:
       - name: Format check
         run: pnpm run format:check
 
-      - name: Unit/component tests
+      - name: Unit and component tests
         run: pnpm run test
+
+      - name: Secret scan
+        run: pnpm run secret:scan
+
+      - name: Production dependency audit
+        run: pnpm run audit:prod
 
       - name: Production build
         run: pnpm run build
-
-      - name: Secret scan (optional)
-        if: hashFiles('.github/secret-scan/**') != ''
-        run: ./scripts/gates/secret-scan.sh
-        continue-on-error: true
 
   playwright-smoke:
     name: playwright smoke
@@ -68,23 +69,25 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22.22.2
           cache: pnpm
 
       - name: Install (frozen lockfile)
         run: pnpm install --frozen-lockfile
 
-      - name: Install Playwright browsers
+      - name: Install Playwright Chromium
         run: pnpm exec playwright install --with-deps chromium
 
       - name: Playwright smoke
-        run: ./scripts/gates/playwright-smoke.sh
+        run: pnpm exec playwright test --project=desktop --project=mobile
 
-      - name: Upload smoke screenshots
+      - name: Upload smoke artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-smoke-screenshots
-          path: docs/frontend/screenshots
+          name: playwright-smoke-artifacts
+          path: |
+            docs/frontend/screenshots
+            test-results
           if-no-files-found: ignore
           retention-days: 7

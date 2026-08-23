@@ -6,10 +6,39 @@ vi.mock('@/src/lib/api/marketingSession', () => ({
 import { render, screen, within } from '@testing-library/react';
 import MarketingLayout from '../(marketing)/layout';
 
-// Force seed fallback in all three pages by returning null from the fetcher
+// Render the built-in marketing pages instead of CMS-provided blocks.
 vi.mock('@/src/lib/marketing/fetchMarketingPage', () => ({
   fetchMarketingPage: vi.fn().mockResolvedValue(null),
 }));
+
+// Pricing has no production fallback, so this test supplies a verified catalog response.
+vi.mock('@/src/lib/api/plans', async (importOriginal) => {
+  const original = await importOriginal<typeof import('@/src/lib/api/plans')>();
+
+  return {
+    ...original,
+    fetchPublicPlans: vi.fn().mockResolvedValue([
+      {
+        key: 'free',
+        displayName: 'Free',
+        priceAmount: 0,
+        currency: 'IDR',
+        billingPeriod: null,
+        tokenMonthlyLimit: 1000,
+        features: ['Fitur dasar'],
+      },
+      {
+        key: 'pro',
+        displayName: 'Pro',
+        priceAmount: 100000,
+        currency: 'IDR',
+        billingPeriod: 'monthly',
+        tokenMonthlyLimit: 50000,
+        features: ['Fitur lengkap'],
+      },
+    ]),
+  };
+});
 
 import HomePage from '../(marketing)/page';
 import SchoolPage from '../(marketing)/untuk-sekolah/page';

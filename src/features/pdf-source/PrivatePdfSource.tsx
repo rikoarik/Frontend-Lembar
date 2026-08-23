@@ -1,5 +1,3 @@
-'use client';
-
 import { useCallback, useRef, useState } from 'react';
 import { Button } from '@/app/components/ui/Button';
 import { Panel } from '@/app/components/ui/Panel';

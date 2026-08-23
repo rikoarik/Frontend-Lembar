@@ -1,45 +1,36 @@
 name: Deploy Frontend to VPS
 
 on:
-  push:
+  workflow_run:
+    workflows: [ci]
+    types: [completed]
     branches: [dev]
-    paths:
-      - 'app/**'
-      - 'src/**'
-      - 'public/**'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
-      - 'next.config.*'
-      - 'tailwind.config.*'
-      - 'postcss.config.*'
-      - 'tsconfig.json'
+
+concurrency:
+  group: deploy-frontend-dev
+  cancel-in-progress: false
 
 jobs:
   deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
+    environment: development
     steps:
-      - name: Deploy to VPS
+      - name: Deploy verified commit to VPS
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
-          username: root
+          username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEY }}
+          script_stop: true
           script: |
+            set -eu
             cd ~/Projects/Frontend-Lembar
-
-            # Pull latest changes
-            git pull origin dev
-
-            # Install dependencies
+            git fetch origin dev
+            git checkout -B dev ${{ github.event.workflow_run.head_sha }}
             pnpm install --frozen-lockfile
-
-            # Build for production
             pnpm run build
-
-            # Restart PM2
             pm2 restart lembar-frontend --update-env
-
-            # Check status
+            sleep 3
+            curl --fail --silent --show-error http://127.0.0.1:3000/ >/dev/null
             pm2 status lembar-frontend
-
-            echo "✅ Frontend deployed successfully!"

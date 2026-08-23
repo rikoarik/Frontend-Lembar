@@ -1,10 +1,29 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { render, screen, waitForElementToBeRemoved } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { OpsConsoleView } from '@/src/features/ops/OpsConsoleView';
 import { OpsAdminShell } from '@/src/features/admin/AdminAppShell';
 
 const push = vi.fn();
+const originalFetch = globalThis.fetch;
+const rolesFetch = vi.fn(
+  async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+    const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
+
+    if (url.endsWith('/v1/me/roles')) {
+      return new Response(
+        JSON.stringify({ data: { roles: ['teacher', 'school_admin', 'superadmin'] } }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    }
+
+    return originalFetch(input, init);
+  },
+);
+
+async function waitForRoleSwitcher() {
+  expect(await screen.findByRole('button', { name: 'Admin Sekolah' })).toBeInTheDocument();
+}
 
 vi.mock('next/navigation', () => ({
   usePathname: () => '/ops/accounts',
@@ -89,7 +108,13 @@ vi.mock('@/src/services/admin/adminService', () => ({
     prompts: vi.fn().mockResolvedValue({
       ok: true,
       value: [
-        { id: 'prompt_active', name: 'Alpha Active', owner: 'Ops', status: 'active', successRate: 25 },
+        {
+          id: 'prompt_active',
+          name: 'Alpha Active',
+          owner: 'Ops',
+          status: 'active',
+          successRate: 25,
+        },
         { id: 'prompt_draft', name: 'Alpha Draft', owner: 'Ops', status: 'draft', successRate: 10 },
       ],
     }),
@@ -109,20 +134,31 @@ function renderOps(section: string) {
 describe('ops superadmin management panel', () => {
   beforeEach(() => {
     push.mockReset();
+    rolesFetch.mockClear();
+    vi.stubGlobal('fetch', rolesFetch);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   it('keeps shell chrome and renders jobs table content', async () => {
     renderOps('');
+    const trendsLoading = screen.getByLabelText('Memuat data…');
+
     expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
     expect(screen.getAllByRole('navigation', { name: /navigasi panel/i }).length).toBeGreaterThan(
       0,
     );
+    await waitForElementToBeRemoved(trendsLoading);
+    await waitForRoleSwitcher();
     expect(await screen.findByText(/job_8f2a/i)).toBeInTheDocument();
   });
 
   it('renders accounts management table and supports search state', async () => {
     const user = userEvent.setup();
     renderOps('accounts');
+    await waitForRoleSwitcher();
     expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
     const search = await screen.findByPlaceholderText(/cari akun, email, role, sekolah/i);
     await user.type(search, 'ops');
@@ -132,12 +168,14 @@ describe('ops superadmin management panel', () => {
 
   it('renders billing section table', async () => {
     renderOps('billing');
+    await waitForRoleSwitcher();
     expect(await screen.findByText(/SMP Harapan/i)).toBeInTheDocument();
   });
 
   it('filters prompts by status independently from search and renders percent values directly', async () => {
     const user = userEvent.setup();
     renderOps('prompts');
+    await waitForRoleSwitcher();
 
     const search = await screen.findByPlaceholderText(/cari nama prompt \/ slug \/ owner/i);
     await user.type(search, 'alpha');
@@ -150,8 +188,14 @@ describe('ops superadmin management panel', () => {
     expect(screen.queryByText('Alpha Active')).not.toBeInTheDocument();
   });
 
-  it('does not leak teacher question content', () => {
+  it('does not leak teacher question content', async () => {
     renderOps('');
+    const trendsLoading = screen.getByLabelText('Memuat data…');
+
+    await waitForElementToBeRemoved(trendsLoading);
+    await waitForRoleSwitcher();
+    expect(await screen.findByText(/job_8f2a/i)).toBeInTheDocument();
+
     const content = document.body.textContent ?? '';
     expect(content).not.toMatch(/workspace guru|bank soal pribadi|lembar kerja guru/i);
   });

@@ -18,9 +18,7 @@ vi.mock('@/src/services/assessments/assessmentService', () => ({
 
 const ANSWER_KEY_LABEL = /kunci \/ pedoman jawaban/i;
 
-function buildQuestion(
-  overrides: Partial<ReviewQuestion> = {},
-): ReviewQuestion {
+function buildQuestion(overrides: Partial<ReviewQuestion> = {}): ReviewQuestion {
   return {
     id: 'q-1',
     number: 1,

@@ -1,7 +1,11 @@
 import { render, screen, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { QuickReviewView } from '@/src/features/review/QuickReviewView';
-import type { AssessmentDetail, AssessmentLifecycle, ReviewQuestion } from '@/src/features/review/types';
+import type {
+  AssessmentDetail,
+  AssessmentLifecycle,
+  ReviewQuestion,
+} from '@/src/features/review/types';
 import { assessmentService } from '@/src/services/assessments/assessmentService';
 
 vi.mock('@/src/services/assessments/assessmentService', () => ({
@@ -15,7 +19,11 @@ vi.mock('@/src/services/assessments/assessmentService', () => ({
   },
 }));
 
-const question = (id: string, number: number, state: ReviewQuestion['reviewState']): ReviewQuestion => ({
+const question = (
+  id: string,
+  number: number,
+  state: ReviewQuestion['reviewState'],
+): ReviewQuestion => ({
   id,
   number,
   stem: `Pertanyaan ${number}`,
@@ -35,7 +43,10 @@ const question = (id: string, number: number, state: ReviewQuestion['reviewState
 
 type MarkerOverrides = Partial<Pick<AssessmentDetail, 'canFinalize' | 'canOpenOutput'>>;
 
-const baseAssessment = (lifecycle: AssessmentLifecycle, overrides: MarkerOverrides = {}): AssessmentDetail => ({
+const baseAssessment = (
+  lifecycle: AssessmentLifecycle,
+  overrides: MarkerOverrides = {},
+): AssessmentDetail => ({
   id: 'assessment-1',
   title: 'Latihan',
   subject: 'Matematika',
@@ -60,7 +71,7 @@ beforeEach(() => {
 });
 
 describe('QuickReviewView lifecycle eligibility (BE-marker driven)', () => {
-  it('menyembunyikan tombol Finalisasi ketika canFinalize false walau lifecycle review', async () => {
+  it('menyembunyikan link Finalisasi ketika canFinalize false walau lifecycle review', async () => {
     vi.mocked(assessmentService.get).mockResolvedValue({
       ok: true,
       value: baseAssessment('review', { canFinalize: false, canOpenOutput: false }),
@@ -68,19 +79,19 @@ describe('QuickReviewView lifecycle eligibility (BE-marker driven)', () => {
 
     render(<QuickReviewView assessmentId="assessment-1" />);
     await screen.findByText('Pertanyaan 1');
-    expect(screen.queryByRole('button', { name: 'Finalisasi' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Finalisasi' })).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Buka output' })).not.toBeInTheDocument();
   });
 
-  it('enables the Finalisasi button when canFinalize is true and shows no Buka output yet', async () => {
+  it('shows the Finalisasi link when canFinalize is true and no Buka output yet', async () => {
     vi.mocked(assessmentService.get).mockResolvedValue({
       ok: true,
       value: baseAssessment('review', { canFinalize: true, canOpenOutput: false }),
     });
 
     render(<QuickReviewView assessmentId="assessment-1" />);
-    const finalize = await screen.findByRole('button', { name: 'Finalisasi' });
-    expect(finalize).toBeEnabled();
+    const finalize = await screen.findByRole('link', { name: 'Finalisasi' });
+    expect(finalize).toHaveAttribute('href', '/app/review/assessment-1/finalize');
     expect(screen.queryByRole('link', { name: 'Buka output' })).not.toBeInTheDocument();
   });
 
@@ -92,7 +103,7 @@ describe('QuickReviewView lifecycle eligibility (BE-marker driven)', () => {
 
     render(<QuickReviewView assessmentId="assessment-1" />);
     await screen.findByText('Pertanyaan 1');
-    expect(screen.queryByRole('button', { name: 'Finalisasi' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Finalisasi' })).not.toBeInTheDocument();
     const buka = screen.getByRole('link', { name: 'Buka output' });
     expect(buka).toHaveAttribute('href', '/app/output/assessment-1');
   });
@@ -107,8 +118,8 @@ describe('QuickReviewView lifecycle eligibility (BE-marker driven)', () => {
 
     render(<QuickReviewView assessmentId="assessment-1" />);
     await screen.findByText('Pertanyaan 1');
-    const finalize = screen.getByRole('button', { name: 'Finalisasi' });
-    expect(finalize).toBeEnabled();
+    const finalize = screen.getByRole('link', { name: 'Finalisasi' });
+    expect(finalize).toHaveAttribute('href', '/app/review/assessment-1/finalize');
     expect(screen.getByRole('link', { name: 'Buka output' })).toHaveAttribute(
       'href',
       '/app/output/assessment-1',
@@ -123,7 +134,7 @@ describe('QuickReviewView lifecycle eligibility (BE-marker driven)', () => {
 
     render(<QuickReviewView assessmentId="assessment-1" />);
     await screen.findByText('Pertanyaan 1');
-    expect(screen.queryByRole('button', { name: 'Finalisasi' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Finalisasi' })).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Buka output' })).not.toBeInTheDocument();
   });
 
@@ -144,6 +155,8 @@ describe('QuickReviewView lifecycle eligibility (BE-marker driven)', () => {
     });
     view.unmount();
     render(<QuickReviewView assessmentId="assessment-1" />);
-    expect(await screen.findByTestId('lifecycle-subtitle')).toHaveTextContent(/output belum tersedia/i);
+    expect(await screen.findByTestId('lifecycle-subtitle')).toHaveTextContent(
+      /output belum tersedia/i,
+    );
   });
 });

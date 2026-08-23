@@ -1,6 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { catalogService } from '@/src/services/catalog/catalogService';
 import { useWorkspace } from '@/src/features/workspace/workspaceContext';
@@ -48,6 +49,7 @@ const ASSESSMENT_TYPE_OPTIONS: { value: AssessmentType; label: string }[] = [
   { value: 'daily', label: 'Ulangan Harian' },
   { value: 'midterm', label: 'UTS' },
   { value: 'final', label: 'UAS' },
+  { value: 'promotion', label: 'Ujian Kenaikan Kelas' },
   { value: 'tka', label: 'TKA' },
 ];
 
@@ -76,6 +78,7 @@ const LABELS: Record<CompositionFieldKey, string> = {
   materialIds: 'Materi',
   sourceId: 'Sumber PDF',
   assessmentType: 'Jenis Lembar',
+  academicYear: 'Tahun Pelajaran',
   difficulty: 'Tingkat Kesulitan',
   questionCount: 'Jumlah Soal',
   durationMinutes: 'Waktu pengerjaan',
@@ -99,6 +102,13 @@ export default function ConfigurationCompose() {
   const [submitted, setSubmitted] = useState(false);
   const [summaryOpen, setSummaryOpen] = useState(false);
   const [announcement, setAnnouncement] = useState('');
+  const announcementTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (announcementTimerRef.current) clearTimeout(announcementTimerRef.current);
+    };
+  }, []);
 
   const [loading, setLoading] = useState<Partial<Record<CompositionFieldKey, boolean>>>({
     gradeId: true,
@@ -125,11 +135,19 @@ export default function ConfigurationCompose() {
         setTemplateStatus('Template tidak ditemukan atau tidak dapat dimuat.');
         return;
       }
-      setValues(ensureCompositionValues({ ...INITIAL_COMPOSITION_VALUES, ...template.config, sourceId: '' }));
+      setValues(
+        ensureCompositionValues({
+          ...INITIAL_COMPOSITION_VALUES,
+          ...template.config,
+          sourceId: '',
+        }),
+      );
       setTemplateName(template.name ?? '');
       setTemplateStatus(`Template “${template.name}” diterapkan.`);
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [searchParams]);
 
   const loadGrades = useCallback(async () => {
@@ -292,7 +310,8 @@ export default function ConfigurationCompose() {
 
         if (ann) {
           setAnnouncement(ann);
-          setTimeout(() => setAnnouncement(''), 2000);
+          if (announcementTimerRef.current) clearTimeout(announcementTimerRef.current);
+          announcementTimerRef.current = setTimeout(() => setAnnouncement(''), 2000);
         }
 
         return next;
@@ -317,22 +336,19 @@ export default function ConfigurationCompose() {
     [compositionError, permissionState, successState],
   );
 
-  const updateQuestionTypeCount = useCallback(
-    (type: QuestionType, rawValue: number) => {
-      setValues((prev) => {
-        const sanitized = parseQuestionTypeCountInput(String(rawValue));
-        const nextCounts = rebalanceQuestionTypeCounts(
-          prev.questionCount,
-          { ...prev.questionTypeCounts, [type]: sanitized },
-          type,
-        );
-        return { ...prev, questionTypeCounts: nextCounts };
-      });
-    },
-    [],
-  );
+  const updateQuestionTypeCount = useCallback((type: QuestionType, rawValue: number) => {
+    setValues((prev) => {
+      const sanitized = parseQuestionTypeCountInput(String(rawValue));
+      const nextCounts = rebalanceQuestionTypeCounts(
+        prev.questionCount,
+        { ...prev.questionTypeCounts, [type]: sanitized },
+        type,
+      );
+      return { ...prev, questionTypeCounts: nextCounts };
+    });
+  }, []);
 
-const toggleMaterial = useCallback((materialId: string) => {
+  const toggleMaterial = useCallback((materialId: string) => {
     setValues((prev) => {
       const ids = prev.materialIds.includes(materialId)
         ? prev.materialIds.filter((id) => id !== materialId)
@@ -373,17 +389,28 @@ const toggleMaterial = useCallback((materialId: string) => {
       setLocalErrors({});
       const gradeLabel = grades.find((g) => g.id === values.gradeId)?.label;
       const subjectLabel = subjects.find((s) => s.id === values.subjectId)?.label;
-      const result = await generateSubmit.submit({ ...values, gradeLabel, subjectLabel }, workspaceId);
-      if (!result.ok && !['ENTITLEMENT_REQUIRED', 'SUBSCRIPTION_INACTIVE', 'QUOTA_EXHAUSTED'].includes(result.error.code)) {
+      const result = await generateSubmit.submit(
+        { ...values, gradeLabel, subjectLabel },
+        workspaceId,
+      );
+      if (
+        !result.ok &&
+        !['ENTITLEMENT_REQUIRED', 'SUBSCRIPTION_INACTIVE', 'QUOTA_EXHAUSTED'].includes(
+          result.error.code,
+        )
+      ) {
         setCompositionError(result.error);
       }
     },
-    [values, workspaceId, generateSubmit],
+    [values, workspaceId, generateSubmit, grades, subjects],
   );
 
   const saveTemplate = useCallback(async () => {
     const name = templateName.trim();
-    if (!name) { setTemplateStatus('Nama template wajib diisi.'); return; }
+    if (!name) {
+      setTemplateStatus('Nama template wajib diisi.');
+      return;
+    }
     setTemplateBusy(true);
     setTemplateStatus('');
     const response = await fetch('/v1/templates', {
@@ -423,6 +450,9 @@ const toggleMaterial = useCallback((materialId: string) => {
     }
     const atype = ASSESSMENT_TYPE_OPTIONS.find((a) => a.value === values.assessmentType);
     if (atype) items.push({ label: 'Jenis', value: atype.label });
+    if (values.academicYear.trim()) {
+      items.push({ label: 'Tahun Pelajaran', value: values.academicYear.trim() });
+    }
     const diff = DIFFICULTY_OPTIONS.find((d) => d.value === values.difficulty);
     if (diff) items.push({ label: 'Kesulitan', value: diff.label });
     items.push({ label: 'Jumlah Soal', value: String(values.questionCount) });
@@ -530,12 +560,12 @@ const toggleMaterial = useCallback((materialId: string) => {
             >
               Coba lagi
             </Button>
-            <a
+            <Link
               href="/app/pengaturan/langganan"
               className="inline-flex items-center rounded-md border border-brand-accent px-3 py-1.5 text-body-sm font-medium text-brand-accent hover:bg-brand-accent/5 transition-colors"
             >
               Tingkatkan paket →
-            </a>
+            </Link>
           </div>
         </div>
       )}
@@ -825,6 +855,26 @@ const toggleMaterial = useCallback((materialId: string) => {
                 </div>
 
                 <div className="flex flex-col gap-2">
+                  <label htmlFor="compose-academicYear" className={labelClass}>
+                    Tahun Pelajaran
+                  </label>
+                  <input
+                    id="compose-academicYear"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]{4}/[0-9]{4}"
+                    placeholder="Contoh: 2026/2027"
+                    value={values.academicYear}
+                    onChange={(event) => update('academicYear', event.target.value)}
+                    className={fieldClass}
+                    aria-describedby="compose-academicYear-help"
+                  />
+                  <p className={helpClass} id="compose-academicYear-help">
+                    Ditampilkan tepat di bawah judul ujian pada PDF.
+                  </p>
+                </div>
+
+                <div className="flex flex-col gap-2">
                   <label htmlFor="compose-difficulty" className={labelClass}>
                     Tingkat Kesulitan <span className="text-brand-danger">*</span>
                   </label>
@@ -859,10 +909,16 @@ const toggleMaterial = useCallback((materialId: string) => {
                     max={MAX_QUESTIONS}
                     value={values.questionCount}
                     onChange={(e) =>
-                      update('questionCount', clampQuestionCount(parseQuestionCountInput(e.target.value)))
+                      update(
+                        'questionCount',
+                        clampQuestionCount(parseQuestionCountInput(e.target.value)),
+                      )
                     }
                     onBlur={(e) =>
-                      update('questionCount', clampQuestionCount(parseQuestionCountInput(e.target.value)))
+                      update(
+                        'questionCount',
+                        clampQuestionCount(parseQuestionCountInput(e.target.value)),
+                      )
                     }
                     className={fieldClass}
                     aria-invalid={localErrors.questionCount ? true : undefined}
@@ -888,7 +944,12 @@ const toggleMaterial = useCallback((materialId: string) => {
                     min={0}
                     max={480}
                     value={values.durationMinutes}
-                    onChange={(e) => update('durationMinutes', Math.min(480, Math.max(0, Number(e.target.value) || 0)))}
+                    onChange={(e) =>
+                      update(
+                        'durationMinutes',
+                        Math.min(480, Math.max(0, Number(e.target.value) || 0)),
+                      )
+                    }
                     className={fieldClass}
                     aria-describedby="compose-durationMinutes-help"
                   />
@@ -905,7 +966,10 @@ const toggleMaterial = useCallback((materialId: string) => {
                   <div className="mt-3 grid gap-3 sm:grid-cols-2">
                     {QUESTION_TYPES.map((type) => (
                       <div key={type} className="flex flex-col gap-2">
-                        <label htmlFor={`compose-questionTypeCounts-${type}`} className={labelClass}>
+                        <label
+                          htmlFor={`compose-questionTypeCounts-${type}`}
+                          className={labelClass}
+                        >
                           {getQuestionTypeLabel(type)}
                         </label>
                         <input
@@ -915,10 +979,16 @@ const toggleMaterial = useCallback((materialId: string) => {
                           max={MAX_QUESTIONS}
                           value={values.questionTypeCounts[type]}
                           onChange={(e) =>
-                            updateQuestionTypeCount(type, parseQuestionTypeCountInput(e.target.value))
+                            updateQuestionTypeCount(
+                              type,
+                              parseQuestionTypeCountInput(e.target.value),
+                            )
                           }
                           onBlur={(e) =>
-                            updateQuestionTypeCount(type, parseQuestionTypeCountInput(e.target.value))
+                            updateQuestionTypeCount(
+                              type,
+                              parseQuestionTypeCountInput(e.target.value),
+                            )
                           }
                           className={fieldClass}
                         />
@@ -1033,7 +1103,10 @@ const toggleMaterial = useCallback((materialId: string) => {
 
             <OutputSettings />
 
-            <Panel title="Simpan sebagai template" description="Gunakan kembali konfigurasi ini tanpa memilih ulang pengaturan.">
+            <Panel
+              title="Simpan sebagai template"
+              description="Gunakan kembali konfigurasi ini tanpa memilih ulang pengaturan."
+            >
               <div className="flex flex-col gap-3 sm:flex-row">
                 <input
                   value={templateName}
@@ -1042,11 +1115,20 @@ const toggleMaterial = useCallback((materialId: string) => {
                   placeholder="Nama template, mis. UH Matematika Kelas 5"
                   className={`${fieldClass} flex-1`}
                 />
-                <Button type="button" variant="secondary" onClick={() => void saveTemplate()} disabled={templateBusy || !templateName.trim()}>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => void saveTemplate()}
+                  disabled={templateBusy || !templateName.trim()}
+                >
                   {templateBusy ? 'Menyimpan…' : 'Simpan template'}
                 </Button>
               </div>
-              {templateStatus ? <p className="mt-2 text-body-sm text-brand-ink-muted" role="status">{templateStatus}</p> : null}
+              {templateStatus ? (
+                <p className="mt-2 text-body-sm text-brand-ink-muted" role="status">
+                  {templateStatus}
+                </p>
+              ) : null}
             </Panel>
 
             {submitted && !validateComposition(values).ok && (

@@ -29,6 +29,10 @@ async function api<T>(path: string, init?: RequestInit): Promise<T> {
   return json.data as T;
 }
 
+function fetchShareLinks(assessmentId: string) {
+  return api<ShareLink[]>(`/shares?assessmentId=${encodeURIComponent(assessmentId)}`);
+}
+
 export function ShareManager({ assessmentId, title }: { assessmentId: string; title: string }) {
   const [items, setItems] = useState<ShareLink[]>([]);
   const [busy, setBusy] = useState(false);
@@ -36,18 +40,29 @@ export function ShareManager({ assessmentId, title }: { assessmentId: string; ti
 
   const load = useCallback(async () => {
     try {
-      const data = await api<ShareLink[]>(
-        `/shares?assessmentId=${encodeURIComponent(assessmentId)}`,
-      );
-      setItems(data);
+      setItems(await fetchShareLinks(assessmentId));
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Gagal memuat tautan.');
     }
   }, [assessmentId]);
 
   useEffect(() => {
-    void load();
-  }, [load]);
+    let cancelled = false;
+
+    void fetchShareLinks(assessmentId)
+      .then((data) => {
+        if (!cancelled) setItems(data);
+      })
+      .catch((error) => {
+        if (!cancelled) {
+          setMessage(error instanceof Error ? error.message : 'Gagal memuat tautan.');
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [assessmentId]);
 
   const onCreate = async () => {
     setBusy(true);

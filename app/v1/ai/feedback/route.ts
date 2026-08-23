@@ -5,9 +5,7 @@ import { backendFetch, JWT_COOKIE, SESSION_COOKIE } from '@/src/lib/api/session'
 export async function POST(request: NextRequest) {
   const jar = await cookies();
   const token =
-    jar.get(JWT_COOKIE)?.value ||
-    jar.get(SESSION_COOKIE)?.value ||
-    jar.get('token')?.value;
+    jar.get(JWT_COOKIE)?.value || jar.get(SESSION_COOKIE)?.value || jar.get('token')?.value;
 
   if (!token) {
     return NextResponse.json(

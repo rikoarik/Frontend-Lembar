@@ -2,7 +2,21 @@ import { cookies } from 'next/headers';
 import { NextResponse, type NextRequest } from 'next/server';
 import { backendFetch, JWT_COOKIE, SESSION_COOKIE } from '@/src/lib/api/session';
 
-function extractToken(request: NextRequest, jar: Awaited<ReturnType<typeof cookies>>): string | null {
+function redactInvitationSecrets(path: string, payload: unknown): unknown {
+  if (!path.startsWith('/v1/school/members/invite')) return payload;
+  const envelope = payload as { data?: Record<string, unknown> } | null;
+  if (!envelope?.data) return payload;
+  const safeData = { ...envelope.data };
+  delete safeData.token;
+  delete safeData.tokenHash;
+  delete safeData.welcomeUrl;
+  return { ...envelope, data: safeData };
+}
+
+function extractToken(
+  request: NextRequest,
+  jar: Awaited<ReturnType<typeof cookies>>,
+): string | null {
   const authHeader = request.headers.get('authorization');
   if (authHeader) {
     const match = authHeader.match(/^Bearer\s+(.+)$/i);
@@ -54,12 +68,16 @@ async function handleProxy(request: NextRequest, context: { params: Promise<{ sl
   const payload = await upstream.json().catch(() => null);
   if (!upstream.ok) {
     return NextResponse.json(
-      payload ?? { error: { code: 'UPSTREAM_ERROR', message: 'Gagal mengambil data dari server.' } },
+      payload ?? {
+        error: { code: 'UPSTREAM_ERROR', message: 'Gagal mengambil data dari server.' },
+      },
       { status: upstream.status },
     );
   }
 
-  return NextResponse.json(payload ?? { data: null }, { status: 200 });
+  return NextResponse.json(redactInvitationSecrets(fullPath, payload ?? { data: null }), {
+    status: 200,
+  });
 }
 
 export const GET = handleProxy;

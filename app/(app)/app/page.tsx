@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import { Button } from '@/app/components/ui';
 import { apiClient } from '@/src/lib/api/client';
@@ -16,6 +16,103 @@ type State =
   | { status: 'empty'; message: string; workspaceName: string }
   | { status: 'populated'; data: DashboardData }
   | { status: 'error'; message: string };
+
+type ActiveJobState = {
+  jobId: string;
+  percent?: number;
+  hidden?: boolean;
+};
+
+function subscribeToActiveJobStorage() {
+  return () => undefined;
+}
+
+function getServerActiveJobId() {
+  return null;
+}
+
+function ActiveJobBanner({ workspaceId }: { workspaceId: string }) {
+  const storedJobId = useSyncExternalStore(
+    subscribeToActiveJobStorage,
+    () => readActiveJob(workspaceId)?.jobId ?? null,
+    getServerActiveJobId,
+  );
+  const [polledJob, setPolledJob] = useState<ActiveJobState | null>(null);
+
+  useEffect(() => {
+    if (!storedJobId) return;
+
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+
+    const poll = async () => {
+      const result = await jobService.getJob(storedJobId);
+      if (cancelled) return;
+      if (!result.ok) {
+        setPolledJob({ jobId: storedJobId, hidden: true });
+        return;
+      }
+
+      const job = result.value;
+      if (['succeeded', 'partially_succeeded', 'failed', 'cancelled'].includes(job.status)) {
+        setPolledJob({ jobId: storedJobId, hidden: true });
+        return;
+      }
+
+      const percent = typeof job.progressPercent === 'number' ? job.progressPercent : undefined;
+      setPolledJob({ jobId: storedJobId, percent });
+      timer = setTimeout(() => void poll(), 2000);
+    };
+
+    void poll();
+    return () => {
+      cancelled = true;
+      if (timer !== null) clearTimeout(timer);
+    };
+  }, [storedJobId]);
+
+  const activeJob =
+    storedJobId && polledJob?.jobId === storedJobId && !polledJob.hidden
+      ? polledJob
+      : storedJobId && polledJob?.jobId !== storedJobId
+        ? { jobId: storedJobId }
+        : null;
+
+  if (!activeJob) return null;
+
+  return (
+    <Link
+      href={`/app/jobs/${activeJob.jobId}`}
+      className="flex items-center gap-3 rounded-2xl border border-[#d4b8ba] bg-[#fdf0f0] px-4 py-3 hover:bg-[#fae8e8] transition-colors"
+      aria-live="polite"
+    >
+      <span
+        className="material-symbols-outlined text-[20px] text-[#a3202b] animate-spin"
+        style={{ animationDuration: '2s' }}
+      >
+        progress_activity
+      </span>
+      <div className="flex-1 min-w-0">
+        <span className="text-[13px] font-semibold text-[#a3202b]">Generate sedang berjalan</span>
+        {activeJob.percent !== undefined ? (
+          <div className="mt-1 h-1.5 w-full rounded-full bg-[#f0d0d0]">
+            <div
+              className="h-full rounded-full bg-[#a3202b] transition-all duration-500"
+              style={{ width: `${activeJob.percent}%` }}
+            />
+          </div>
+        ) : (
+          <div className="mt-1 h-1.5 w-full rounded-full bg-[#f0d0d0] overflow-hidden">
+            <div className="h-full w-1/3 rounded-full bg-[#a3202b] animate-pulse" />
+          </div>
+        )}
+      </div>
+      <span className="text-[12px] text-[#a3202b] font-medium whitespace-nowrap">
+        {activeJob.percent !== undefined ? `${activeJob.percent}%` : 'Memproses…'}
+      </span>
+    </Link>
+  );
+}
 
 const QUICK_ACTIONS = [
   {
@@ -86,36 +183,11 @@ export default function AppDashboardPage() {
   const { displayName, activeWorkspace } = useWorkspace();
   const [state, setState] = useState<State>({ status: 'loading' });
   const [retryKey, setRetryKey] = useState(0);
-  const [activeJob, setActiveJob] = useState<{ jobId: string; percent?: number } | null>(null);
-
-  // Poll active job dari sessionStorage
-  useEffect(() => {
-    const stored = readActiveJob(activeWorkspace.id);
-    if (!stored?.jobId) { setActiveJob(null); return; }
-    setActiveJob({ jobId: stored.jobId });
-    let cancelled = false;
-    const poll = async () => {
-      const result = await jobService.getJob(stored.jobId);
-      if (cancelled) return;
-      if (!result.ok) { setActiveJob(null); return; }
-      const job = result.value;
-      if (['succeeded', 'partially_succeeded', 'failed', 'cancelled'].includes(job.status)) {
-        setActiveJob(null);
-        return;
-      }
-      const pct = typeof job.progressPercent === 'number' ? job.progressPercent : undefined;
-      setActiveJob({ jobId: stored.jobId, percent: pct });
-      setTimeout(poll, 2000);
-    };
-    void poll();
-    return () => { cancelled = true; };
-  }, [activeWorkspace.id]);
 
   useEffect(() => {
     let cancelled = false;
-    const load = async () => {
-      setState({ status: 'loading' });
-      const { data, error } = await apiClient.GET('/v1/dashboard/summary');
+
+    void apiClient.GET('/v1/dashboard/summary').then(({ data, error }) => {
       if (cancelled) return;
       if (error || !data) {
         setState({ status: 'error', message: 'Gagal memuat ringkasan. Coba lagi.' });
@@ -130,8 +202,8 @@ export default function AppDashboardPage() {
         return;
       }
       setState({ status: 'populated', data: data.data });
-    };
-    void load();
+    });
+
     return () => {
       cancelled = true;
     };
@@ -152,7 +224,13 @@ export default function AppDashboardPage() {
           <p className="mt-1 text-[13px] text-[#6d665d]">{state.message}</p>
         </div>
         <div>
-          <Button size="sm" onClick={() => setRetryKey((k) => k + 1)}>
+          <Button
+            size="sm"
+            onClick={() => {
+              setState({ status: 'loading' });
+              setRetryKey((key) => key + 1);
+            }}
+          >
             Coba lagi
           </Button>
         </div>
@@ -162,41 +240,10 @@ export default function AppDashboardPage() {
 
   const firstName = displayName.split(/\s+/)[0] || 'Guru';
 
-  // Active job banner — tampil di semua state dashboard
-  const activeJobBanner = activeJob ? (
-    <Link
-      href={`/app/jobs/${activeJob.jobId}`}
-      className="flex items-center gap-3 rounded-2xl border border-[#d4b8ba] bg-[#fdf0f0] px-4 py-3 hover:bg-[#fae8e8] transition-colors"
-      aria-live="polite"
-    >
-      <span className="material-symbols-outlined text-[20px] text-[#a3202b] animate-spin" style={{ animationDuration: '2s' }}>
-        progress_activity
-      </span>
-      <div className="flex-1 min-w-0">
-        <span className="text-[13px] font-semibold text-[#a3202b]">Generate sedang berjalan</span>
-        {activeJob.percent !== undefined ? (
-          <div className="mt-1 h-1.5 w-full rounded-full bg-[#f0d0d0]">
-            <div
-              className="h-full rounded-full bg-[#a3202b] transition-all duration-500"
-              style={{ width: `${activeJob.percent}%` }}
-            />
-          </div>
-        ) : (
-          <div className="mt-1 h-1.5 w-full rounded-full bg-[#f0d0d0] overflow-hidden">
-            <div className="h-full w-1/3 rounded-full bg-[#a3202b] animate-pulse" />
-          </div>
-        )}
-      </div>
-      <span className="text-[12px] text-[#a3202b] font-medium whitespace-nowrap">
-        {activeJob.percent !== undefined ? `${activeJob.percent}%` : 'Memproses…'}
-      </span>
-    </Link>
-  ) : null;
-
   if (state.status === 'empty') {
     return (
       <div className="mx-auto flex max-w-4xl flex-col gap-5">
-        {activeJobBanner}
+        <ActiveJobBanner key={activeWorkspace.id} workspaceId={activeWorkspace.id} />
         <section className="rounded-3xl border border-[#e6dfd4] bg-white p-6 shadow-[0_1px_0_rgba(23,23,23,0.03)] md:p-8">
           <div className="inline-flex rounded-full bg-[#f5e4e5] px-2.5 py-1 text-[11px] font-semibold text-[#851925]">
             Ruang pribadi
@@ -254,7 +301,7 @@ export default function AppDashboardPage() {
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-5">
-      {activeJobBanner}
+      <ActiveJobBanner key={activeWorkspace.id} workspaceId={activeWorkspace.id} />
       <section className="flex flex-col gap-4 rounded-3xl border border-[#e6dfd4] bg-white p-5 shadow-[0_1px_0_rgba(23,23,23,0.03)] md:flex-row md:items-end md:justify-between md:p-6">
         <div className="min-w-0">
           <div className="text-[12px] font-medium text-[#8a8379]">{workspace.name}</div>

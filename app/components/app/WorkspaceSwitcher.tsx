@@ -1,12 +1,10 @@
-'use client';
-
 import { useId, useRef, useState } from 'react';
 import type { Workspace } from '@/src/features/workspace/workspaceContext';
 
 type WorkspaceSwitcherProps = {
   workspaces: Workspace[];
   activeWorkspaceId: string;
-  onSelect: (workspaceId: string) => void;
+  onSelect: (workspaceId: string) => void | boolean | Promise<void | boolean>;
   compact?: boolean;
 };
 
@@ -17,6 +15,8 @@ export function WorkspaceSwitcher({
   compact = false,
 }: WorkspaceSwitcherProps) {
   const [open, setOpen] = useState(false);
+  const [switchingId, setSwitchingId] = useState<string | null>(null);
+  const [message, setMessage] = useState('');
   const labelId = useId();
   const wrapperRef = useRef<HTMLDivElement>(null);
   const active = workspaces.find((workspace) => workspace.id === activeWorkspaceId);
@@ -102,10 +102,17 @@ export function WorkspaceSwitcher({
                   type="button"
                   role="option"
                   aria-selected={isActive}
-                  disabled={!isActive}
-                  title={!isActive ? 'Beralih workspace belum tersedia' : undefined}
-                  onClick={() => {
-                    onSelect(workspace.id);
+                  disabled={isActive || switchingId !== null}
+                  title={isActive ? 'Workspace aktif' : `Beralih ke ${workspace.name}`}
+                  onClick={async () => {
+                    setSwitchingId(workspace.id);
+                    setMessage('');
+                    const switched = await onSelect(workspace.id);
+                    setSwitchingId(null);
+                    if (switched === false) {
+                      setMessage('Gagal beralih workspace. Coba lagi.');
+                      return;
+                    }
                     setOpen(false);
                   }}
                   className={[
@@ -115,7 +122,7 @@ export function WorkspaceSwitcher({
                 >
                   <span className="flex min-w-0 flex-col">
                     <span className="truncate text-[13px] font-semibold text-[#171717]">
-                      {workspace.name}
+                      {switchingId === workspace.id ? 'Beralih…' : workspace.name}
                     </span>
                     <span className="text-[11px] text-[#6d665d]">
                       {workspace.kind === 'school' ? 'Sekolah' : 'Pribadi'}
@@ -134,6 +141,11 @@ export function WorkspaceSwitcher({
             );
           })}
         </ul>
+      ) : null}
+      {message ? (
+        <p className="mt-1 text-[11px] text-red-700" role="status">
+          {message}
+        </p>
       ) : null}
     </div>
   );

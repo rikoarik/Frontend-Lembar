@@ -1,5 +1,5 @@
-import { describe, expect, it, vi, beforeAll, afterAll, beforeEach } from 'vitest';
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import GenerateForm, { validateGenerateForm, type GenerateFormValues } from '../GenerateForm';
 import { WorkspaceProvider } from '@/src/features/workspace/workspaceContext';
@@ -35,6 +35,10 @@ const MOCK_MATERIALS_S4 = [
   },
 ];
 
+const MOCK_MATERIALS_S5 = [
+  { id: 'm-20', label: 'Teks Narasi dan Deskripsi', status: 'active' as const },
+];
+
 const mockListGrades = vi.fn();
 const mockListSubjects = vi.fn();
 const mockListMaterials = vi.fn();
@@ -60,6 +64,7 @@ beforeEach(() => {
   });
   mockListMaterials.mockImplementation((_ws: string, _g: string, subjectId: string) => {
     if (subjectId === 's-4') return Promise.resolve(ok(MOCK_MATERIALS_S4));
+    if (subjectId === 's-5') return Promise.resolve(ok(MOCK_MATERIALS_S5));
     return Promise.resolve(ok([]));
   });
 });
@@ -86,12 +91,12 @@ async function waitForSubjects() {
   });
 }
 
-async function pickSelect(label: string, optionValue: string) {
+type User = ReturnType<typeof userEvent.setup>;
+
+async function pickSelect(user: User, label: string, optionLabel: string) {
   const select = screen.getByLabelText(new RegExp(label, 'i')) as HTMLSelectElement;
-  const user = userEvent.setup();
-  await act(async () => {
-    await user.selectOptions(select, optionValue);
-  });
+  await user.selectOptions(select, optionLabel);
+  expect(select).toHaveDisplayValue(optionLabel);
 }
 
 // ── Tests ──
@@ -103,26 +108,24 @@ describe('GenerateForm — dependency-reset', () => {
 
     await waitForGrades();
 
-    await pickSelect('Kurikulum', 'Kurikulum Merdeka (Fase B)');
-    await pickSelect('Kelas', 'Kelas 4');
+    await pickSelect(user, 'Kurikulum', 'Kurikulum Merdeka (Fase B)');
+    await pickSelect(user, 'Kelas', 'Kelas 4');
 
     await waitForSubjects();
-    await pickSelect('Mata Pelajaran', 'Matematika');
+    await pickSelect(user, 'Mata Pelajaran', 'Matematika');
 
-    await waitFor(() => {
-      expect(screen.getByText('Bilangan Cacah sampai 10.000')).toBeInTheDocument();
-    });
+    expect(await screen.findByText('Bilangan Cacah sampai 10.000')).toBeInTheDocument();
 
     await user.click(screen.getByLabelText('Bilangan Cacah sampai 10.000'));
 
-    // Change grade
-    await pickSelect('Kelas', 'Kelas 7');
+    await pickSelect(user, 'Kelas', 'Kelas 7');
 
-    // Subject and materials should be cleared
-    await new Promise((r) => setTimeout(r, 100));
+    await waitFor(() => {
+      expect(screen.getByRole('option', { name: 'Matematika' })).toHaveValue('s-8');
+    });
 
     const subjectSelect = screen.getByLabelText(/Mata Pelajaran/i) as HTMLSelectElement;
-    expect(subjectSelect.value).toBe('');
+    expect(subjectSelect).toHaveValue('');
     expect(screen.queryByText('Bilangan Cacah sampai 10.000')).not.toBeInTheDocument();
   });
 
@@ -131,46 +134,44 @@ describe('GenerateForm — dependency-reset', () => {
     render(<GenerateForm />, { wrapper: Wrapper });
 
     await waitForGrades();
-    await pickSelect('Kurikulum', 'Kurikulum Merdeka (Fase B)');
-    await pickSelect('Kelas', 'Kelas 4');
+    await pickSelect(user, 'Kurikulum', 'Kurikulum Merdeka (Fase B)');
+    await pickSelect(user, 'Kelas', 'Kelas 4');
     await waitForSubjects();
-    await pickSelect('Mata Pelajaran', 'Matematika');
+    await pickSelect(user, 'Mata Pelajaran', 'Matematika');
 
-    await waitFor(() => {
-      expect(screen.getByText('Bilangan Cacah sampai 10.000')).toBeInTheDocument();
-    });
+    expect(await screen.findByText('Bilangan Cacah sampai 10.000')).toBeInTheDocument();
     await user.click(screen.getByLabelText('Bilangan Cacah sampai 10.000'));
 
-    await pickSelect('Mata Pelajaran', 'Bahasa Indonesia');
+    await pickSelect(user, 'Mata Pelajaran', 'Bahasa Indonesia');
 
-    await new Promise((r) => setTimeout(r, 100));
+    expect(await screen.findByText('Teks Narasi dan Deskripsi')).toBeInTheDocument();
     expect(screen.queryByText('Bilangan Cacah sampai 10.000')).not.toBeInTheDocument();
   });
 });
 
 describe('GenerateForm — long-content', () => {
   it('handles long material labels in the DOM', async () => {
+    const user = userEvent.setup();
     render(<GenerateForm />, { wrapper: Wrapper });
 
     await waitForGrades();
-    await pickSelect('Kurikulum', 'Kurikulum Merdeka (Fase B)');
-    await pickSelect('Kelas', 'Kelas 4');
+    await pickSelect(user, 'Kurikulum', 'Kurikulum Merdeka (Fase B)');
+    await pickSelect(user, 'Kelas', 'Kelas 4');
     await waitForSubjects();
-    await pickSelect('Mata Pelajaran', 'Matematika');
+    await pickSelect(user, 'Mata Pelajaran', 'Matematika');
 
-    await waitFor(() => {
-      expect(
-        screen.getByText(/Pengukuran Panjang dan Berat dalam Satuan Baku/),
-      ).toBeInTheDocument();
-    });
+    expect(
+      await screen.findByText(/Pengukuran Panjang dan Berat dalam Satuan Baku/),
+    ).toBeInTheDocument();
   });
 
   it('shows long subject option', async () => {
+    const user = userEvent.setup();
     render(<GenerateForm />, { wrapper: Wrapper });
 
     await waitForGrades();
-    await pickSelect('Kurikulum', 'Kurikulum Merdeka (Fase B)');
-    await pickSelect('Kelas', 'Kelas 4');
+    await pickSelect(user, 'Kurikulum', 'Kurikulum Merdeka (Fase B)');
+    await pickSelect(user, 'Kelas', 'Kelas 4');
     await waitForSubjects();
 
     const longLabel =
@@ -186,20 +187,19 @@ describe('GenerateForm — 390', () => {
   });
 
   it('renders without horizontal overflow at 390px', async () => {
+    const user = userEvent.setup();
     const { container } = render(<GenerateForm />, { wrapper: Wrapper });
 
     await waitForGrades();
-    await pickSelect('Kurikulum', 'Kurikulum Merdeka (Fase B)');
-    await pickSelect('Kelas', 'Kelas 4');
+    await pickSelect(user, 'Kurikulum', 'Kurikulum Merdeka (Fase B)');
+    await pickSelect(user, 'Kelas', 'Kelas 4');
     await waitForSubjects();
-    await pickSelect('Mata Pelajaran', 'Matematika');
+    await pickSelect(user, 'Mata Pelajaran', 'Matematika');
 
-    await waitFor(() => {
-      expect(screen.getByText('Bilangan Cacah sampai 10.000')).toBeInTheDocument();
-    });
+    expect(await screen.findByText('Bilangan Cacah sampai 10.000')).toBeInTheDocument();
 
     const submitBtn = screen.getByRole('button', { name: /buat draft/i });
-    await userEvent.setup().click(submitBtn);
+    await user.click(submitBtn);
 
     const allElements = container.querySelectorAll('*');
     let maxRight = 0;
@@ -214,9 +214,7 @@ describe('GenerateForm — 390', () => {
   it('shows collapsible summary toggle on mobile', async () => {
     render(<GenerateForm />, { wrapper: Wrapper });
 
-    await waitFor(() => {
-      expect(screen.getByLabelText(/Kelas/i)).toBeInTheDocument();
-    });
+    await waitForGrades();
   });
 });
 
@@ -304,19 +302,17 @@ describe('GenerateForm — happy-path', () => {
   });
 
   it('loads subjects and materials progressively', async () => {
+    const user = userEvent.setup();
     render(<GenerateForm />, { wrapper: Wrapper });
 
     await waitForGrades();
-    await pickSelect('Kurikulum', 'Kurikulum Merdeka (Fase B)');
-    await pickSelect('Kelas', 'Kelas 4');
+    await pickSelect(user, 'Kurikulum', 'Kurikulum Merdeka (Fase B)');
+    await pickSelect(user, 'Kelas', 'Kelas 4');
     await waitForSubjects();
 
-    await pickSelect('Mata Pelajaran', 'Matematika');
+    await pickSelect(user, 'Mata Pelajaran', 'Matematika');
 
-    await waitFor(() => {
-      expect(screen.getByText('Bilangan Cacah sampai 10.000')).toBeInTheDocument();
-    });
-
+    expect(await screen.findByText('Bilangan Cacah sampai 10.000')).toBeInTheDocument();
     expect(screen.getByText(/Kesiapan/)).toBeInTheDocument();
   });
 });

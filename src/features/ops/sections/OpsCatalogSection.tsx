@@ -65,9 +65,13 @@ export function OpsCatalogSection({
   setToast,
 }: {
   catalogGrades: { id: string; label: string; status: string; jenjang?: string }[];
-  setCatalogGrades: React.Dispatch<React.SetStateAction<{ id: string; label: string; status: string; jenjang?: string }[]>>;
+  setCatalogGrades: React.Dispatch<
+    React.SetStateAction<{ id: string; label: string; status: string; jenjang?: string }[]>
+  >;
   catalogSubjects: { id: string; label: string; status: string }[];
-  setCatalogSubjects: React.Dispatch<React.SetStateAction<{ id: string; label: string; status: string }[]>>;
+  setCatalogSubjects: React.Dispatch<
+    React.SetStateAction<{ id: string; label: string; status: string }[]>
+  >;
   catalogSelectedGrade: string;
   setCatalogSelectedGrade: (v: string) => void;
   catalogLoading: boolean;
@@ -94,8 +98,14 @@ export function OpsCatalogSection({
   setCatalogAddGradePredefined: (v: string) => void;
   setToast: (msg: string) => void;
 }) {
-  const [confirmDeleteGrade, setConfirmDeleteGrade] = useState<{ id: string; label: string } | null>(null);
-  const [confirmDeleteSubject, setConfirmDeleteSubject] = useState<{ id: string; label: string } | null>(null);
+  const [confirmDeleteGrade, setConfirmDeleteGrade] = useState<{
+    id: string;
+    label: string;
+  } | null>(null);
+  const [confirmDeleteSubject, setConfirmDeleteSubject] = useState<{
+    id: string;
+    label: string;
+  } | null>(null);
   const [addGradeCustom, setAddGradeCustom] = useState(false);
   const [addGradeCustomLabel, setAddGradeCustomLabel] = useState('');
   const activeGradesCount = catalogGrades.filter((g) => g.status === 'active').length;
@@ -127,17 +137,17 @@ export function OpsCatalogSection({
   };
 
   /** Normalize jenjang to uppercase SD/SMP/SMA/SMK */
-function normalizeJenjang(raw?: string): Jenjang | undefined {
-  if (!raw) return undefined;
-  const upper = raw.toUpperCase().trim();
-  if (upper === 'SMK') return 'SMK';
-  if (upper === 'SMA') return 'SMA';
-  if (upper === 'SMP') return 'SMP';
-  if (upper === 'SD') return 'SD';
-  return undefined;
-}
+  function normalizeJenjang(raw?: string): Jenjang | undefined {
+    if (!raw) return undefined;
+    const upper = raw.toUpperCase().trim();
+    if (upper === 'SMK') return 'SMK';
+    if (upper === 'SMA') return 'SMA';
+    if (upper === 'SMP') return 'SMP';
+    if (upper === 'SD') return 'SD';
+    return undefined;
+  }
 
-/** Filter & group grades by jenjang */
+  /** Filter & group grades by jenjang */
   const gradeJenjang = (g: { label: string; jenjang?: string }) =>
     normalizeJenjang(g.jenjang) || inferJenjang(g.label);
 
@@ -157,9 +167,7 @@ function normalizeJenjang(raw?: string): Jenjang | undefined {
     }
   } else {
     const matchKey =
-      JENJANG_LIST.find(
-        (j) => j.toLowerCase() === catalogJenjangFilter.toLowerCase(),
-      ) || 'SD';
+      JENJANG_LIST.find((j) => j.toLowerCase() === catalogJenjangFilter.toLowerCase()) || 'SD';
     groupedGrades[matchKey] = filteredGrades;
   }
 
@@ -182,7 +190,9 @@ function normalizeJenjang(raw?: string): Jenjang | undefined {
       resetAddGradeForm();
       refreshCatalog();
     } else {
-      setToast(`Gagal: ${(res as { ok: false; error: { safeMessage: string } }).error.safeMessage}`);
+      setToast(
+        `Gagal: ${(res as { ok: false; error: { safeMessage: string } }).error.safeMessage}`,
+      );
     }
     setCatalogAddingGrade(false);
   };
@@ -201,7 +211,9 @@ function normalizeJenjang(raw?: string): Jenjang | undefined {
           }}
           className="inline-flex items-center justify-center gap-1.5"
         >
-          <span className={`material-symbols-outlined text-[16px] leading-none inline-flex items-center justify-center shrink-0 align-middle ${catalogLoading ? 'animate-spin' : ''}`}>
+          <span
+            className={`material-symbols-outlined text-[16px] leading-none inline-flex items-center justify-center shrink-0 align-middle ${catalogLoading ? 'animate-spin' : ''}`}
+          >
             refresh
           </span>
           <span className="leading-none">Refresh</span>
@@ -210,7 +222,10 @@ function normalizeJenjang(raw?: string): Jenjang | undefined {
 
       {/* ── Jenjang Filter Tabs ── */}
       <div className="flex items-center gap-2 px-1 pb-2">
-        {[{ key: 'semua', label: 'Semua' }, ...JENJANG_LIST.map((j) => ({ key: j.toLowerCase(), label: j }))].map((tab) => (
+        {[
+          { key: 'semua', label: 'Semua' },
+          ...JENJANG_LIST.map((j) => ({ key: j.toLowerCase(), label: j })),
+        ].map((tab) => (
           <button
             key={tab.key}
             onClick={() => setCatalogJenjangFilter(tab.key)}
@@ -342,18 +357,19 @@ function normalizeJenjang(raw?: string): Jenjang | undefined {
               )}
 
               {/* Step 3: Submit */}
-              {catalogAddGradeJenjang && (catalogAddGradePredefined || (addGradeCustom && addGradeCustomLabel.trim())) && (
-                <div className="flex justify-end">
-                  <Button
-                    size="sm"
-                    disabled={catalogAddingGrade}
-                    onClick={submitGrade}
-                    className="inline-flex items-center justify-center gap-1.5"
-                  >
-                    {catalogAddingGrade ? 'Menyimpan…' : 'Simpan Grade'}
-                  </Button>
-                </div>
-              )}
+              {catalogAddGradeJenjang &&
+                (catalogAddGradePredefined || (addGradeCustom && addGradeCustomLabel.trim())) && (
+                  <div className="flex justify-end">
+                    <Button
+                      size="sm"
+                      disabled={catalogAddingGrade}
+                      onClick={submitGrade}
+                      className="inline-flex items-center justify-center gap-1.5"
+                    >
+                      {catalogAddingGrade ? 'Menyimpan…' : 'Simpan Grade'}
+                    </Button>
+                  </div>
+                )}
             </div>
           )}
 
@@ -374,7 +390,9 @@ function normalizeJenjang(raw?: string): Jenjang | undefined {
                       }}
                       className="inline-flex items-center justify-center gap-1.5"
                     >
-                      <span className="material-symbols-outlined text-[16px] leading-none inline-flex items-center justify-center shrink-0 align-middle">add</span>
+                      <span className="material-symbols-outlined text-[16px] leading-none inline-flex items-center justify-center shrink-0 align-middle">
+                        add
+                      </span>
                       <span className="leading-none">Tambah Grade Baru</span>
                     </Button>
                   }
@@ -418,8 +436,12 @@ function normalizeJenjang(raw?: string): Jenjang | undefined {
                                 onClick={() => {
                                   setCatalogSelectedGrade(g.id);
                                   setCatalogSubjectsLoading(true);
-                                  const base = (process.env.NEXT_PUBLIC_API_BASE_URL ?? '/v1').replace(/\/+$/, '');
-                                  fetch(`${base}/catalog/subjects?gradeId=${g.id}`, { credentials: 'include' })
+                                  const base = (
+                                    process.env.NEXT_PUBLIC_API_BASE_URL ?? '/v1'
+                                  ).replace(/\/+$/, '');
+                                  fetch(`${base}/catalog/subjects?gradeId=${g.id}`, {
+                                    credentials: 'include',
+                                  })
                                     .then((r) => r.json())
                                     .then((j) => {
                                       setCatalogSubjects(j?.data ?? []);
@@ -449,7 +471,9 @@ function normalizeJenjang(raw?: string): Jenjang | undefined {
                               </button>
 
                               <div className="flex items-center gap-1.5 ml-2 shrink-0">
-                                <AdminPill tone={g.status === 'active' ? 'ok' : 'neutral'}>{g.status}</AdminPill>
+                                <AdminPill tone={g.status === 'active' ? 'ok' : 'neutral'}>
+                                  {g.status}
+                                </AdminPill>
                                 <Button
                                   size="sm"
                                   variant="secondary"
@@ -460,7 +484,9 @@ function normalizeJenjang(raw?: string): Jenjang | undefined {
                                     const res = await adminService.updateGradeStatus(g.id, next);
                                     if (res.ok) {
                                       setCatalogGrades((prev) =>
-                                        prev.map((x) => (x.id === g.id ? { ...x, status: next } : x)),
+                                        prev.map((x) =>
+                                          x.id === g.id ? { ...x, status: next } : x,
+                                        ),
                                       );
                                       setToast(`Grade "${g.label}" diubah ke ${next}.`);
                                     } else {
@@ -475,7 +501,11 @@ function normalizeJenjang(raw?: string): Jenjang | undefined {
                                     });
                                   }}
                                 >
-                                  {isUpdating ? '…' : g.status === 'active' ? 'Archive' : 'Aktifkan'}
+                                  {isUpdating
+                                    ? '…'
+                                    : g.status === 'active'
+                                      ? 'Archive'
+                                      : 'Aktifkan'}
                                 </Button>
                                 <Button
                                   size="sm"
@@ -526,7 +556,9 @@ function normalizeJenjang(raw?: string): Jenjang | undefined {
                 <span className="material-symbols-outlined text-[16px] leading-none inline-flex items-center justify-center shrink-0 align-middle">
                   {catalogShowAddSubject ? 'close' : 'add'}
                 </span>
-                <span className="leading-none">{catalogShowAddSubject ? 'Batal' : 'Tambah Mapel'}</span>
+                <span className="leading-none">
+                  {catalogShowAddSubject ? 'Batal' : 'Tambah Mapel'}
+                </span>
               </Button>
             ) : null}
           </div>
@@ -549,7 +581,9 @@ function normalizeJenjang(raw?: string): Jenjang | undefined {
                   setCatalogNewSubjectLabel('');
                   // Reload subjects
                   const base = (process.env.NEXT_PUBLIC_API_BASE_URL ?? '/v1').replace(/\/+$/, '');
-                  fetch(`${base}/catalog/subjects?gradeId=${catalogSelectedGrade}`, { credentials: 'include' })
+                  fetch(`${base}/catalog/subjects?gradeId=${catalogSelectedGrade}`, {
+                    credentials: 'include',
+                  })
                     .then((r) => r.json())
                     .then((j) => setCatalogSubjects(j?.data ?? []));
                 } else {
@@ -567,7 +601,11 @@ function normalizeJenjang(raw?: string): Jenjang | undefined {
                 onChange={(e) => setCatalogNewSubjectLabel(e.target.value)}
                 disabled={catalogAddingSubject}
               />
-              <Button size="sm" type="submit" disabled={catalogAddingSubject || !catalogNewSubjectLabel.trim()}>
+              <Button
+                size="sm"
+                type="submit"
+                disabled={catalogAddingSubject || !catalogNewSubjectLabel.trim()}
+              >
                 {catalogAddingSubject ? 'Menyimpan…' : 'Simpan'}
               </Button>
             </form>
@@ -601,7 +639,9 @@ function normalizeJenjang(raw?: string): Jenjang | undefined {
                     >
                       <span className="font-semibold text-[#171717]">{s.label}</span>
                       <div className="flex items-center gap-1.5 ml-2 shrink-0">
-                        <AdminPill tone={s.status === 'active' ? 'ok' : 'neutral'}>{s.status}</AdminPill>
+                        <AdminPill tone={s.status === 'active' ? 'ok' : 'neutral'}>
+                          {s.status}
+                        </AdminPill>
                         <Button
                           size="sm"
                           variant="secondary"

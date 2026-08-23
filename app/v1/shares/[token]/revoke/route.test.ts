@@ -16,19 +16,27 @@ beforeEach(() => {
 describe('DELETE /v1/shares/[token]/revoke', () => {
   it('forwards revoke with the backend method and response body', async () => {
     const route = await import('./route');
-    backendFetch.mockResolvedValue(new Response(JSON.stringify({ data: { token: 'tok-1', revokedAt: '2026-08-10' } }), {
-      status: 200,
-      headers: { 'content-type': 'application/json' },
-    }));
+    backendFetch.mockResolvedValue(
+      new Response(JSON.stringify({ data: { token: 'tok-1', revokedAt: '2026-08-10' } }), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      }),
+    );
 
-    const response = await route.DELETE(new Request('http://localhost/v1/shares/tok-1/revoke', { method: 'DELETE' }) as never, {
-      params: Promise.resolve({ token: 'tok-1' }),
-    });
+    const response = await route.DELETE(
+      new Request('http://localhost/v1/shares/tok-1/revoke', { method: 'DELETE' }) as never,
+      {
+        params: Promise.resolve({ token: 'tok-1' }),
+      },
+    );
 
-    expect(backendFetch).toHaveBeenCalledWith('/v1/shares/tok-1/revoke', expect.objectContaining({
-      method: 'DELETE',
-      headers: { 'x-workspace-id': 'workspace-1' },
-    }));
+    expect(backendFetch).toHaveBeenCalledWith(
+      '/v1/shares/tok-1/revoke',
+      expect.objectContaining({
+        method: 'DELETE',
+        headers: { 'x-workspace-id': 'workspace-1' },
+      }),
+    );
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toMatchObject({ data: { token: 'tok-1' } });
   });

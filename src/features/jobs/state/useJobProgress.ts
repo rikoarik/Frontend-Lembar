@@ -1,5 +1,3 @@
-'use client';
-
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { jobService } from '@/src/services/jobs/jobService';
 import type { JobError } from '@/src/services/jobs/jobErrors';
@@ -108,10 +106,7 @@ export function useJobProgress({
     if (job && isTerminalJobStatus(job.status) && job.assessmentId) return;
 
     const id = window.setInterval(() => {
-      if (
-        handoffDeadlineAt.current !== null &&
-        Date.now() >= handoffDeadlineAt.current
-      ) {
+      if (handoffDeadlineAt.current !== null && Date.now() >= handoffDeadlineAt.current) {
         setError(assessmentHandoffTimeoutError());
         handoffDeadlineAt.current = null;
         return;

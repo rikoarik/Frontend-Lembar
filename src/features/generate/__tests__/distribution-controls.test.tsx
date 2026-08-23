@@ -5,15 +5,9 @@ import ConfigurationCompose from '../ConfigurationCompose';
 import { WorkspaceProvider } from '@/src/features/workspace/workspaceContext';
 import { ok } from '@/src/types/result';
 
-const MOCK_GRADES = [
-  { id: 'g-4', label: 'Kelas 4', status: 'active' as const },
-];
-const MOCK_SUBJECTS = [
-  { id: 's-4', label: 'Matematika', status: 'active' as const },
-];
-const MOCK_MATERIALS = [
-  { id: 'm-10', label: 'Bilangan Cacah', status: 'active' as const },
-];
+const MOCK_GRADES = [{ id: 'g-4', label: 'Kelas 4', status: 'active' as const }];
+const MOCK_SUBJECTS = [{ id: 's-4', label: 'Matematika', status: 'active' as const }];
+const MOCK_MATERIALS = [{ id: 'm-10', label: 'Bilangan Cacah', status: 'active' as const }];
 
 const mockListGrades = vi.fn();
 const mockListSubjects = vi.fn();
@@ -104,7 +98,9 @@ describe('ConfigurationCompose — distribution controls', () => {
       expect(screen.getByText(/Materi Ujian/i)).toBeInTheDocument();
     });
 
-    expect(document.getElementById('compose-questionTypeCounts-multiple_choice')).toBeInTheDocument();
+    expect(
+      document.getElementById('compose-questionTypeCounts-multiple_choice'),
+    ).toBeInTheDocument();
     expect(document.getElementById('compose-questionTypeCounts-short_answer')).toBeInTheDocument();
     expect(document.getElementById('compose-questionTypeCounts-essay')).toBeInTheDocument();
     expect(document.getElementById('compose-questionTypeCounts-true_false')).toBeInTheDocument();
@@ -119,10 +115,12 @@ describe('ConfigurationCompose — distribution controls', () => {
 
     // Default questionCount = 20 → 5 each, no remainder (20/4 = 5)
     expect(
-      (document.getElementById('compose-questionTypeCounts-multiple_choice') as HTMLInputElement).value,
+      (document.getElementById('compose-questionTypeCounts-multiple_choice') as HTMLInputElement)
+        .value,
     ).toBe('5');
     expect(
-      (document.getElementById('compose-questionTypeCounts-short_answer') as HTMLInputElement).value,
+      (document.getElementById('compose-questionTypeCounts-short_answer') as HTMLInputElement)
+        .value,
     ).toBe('5');
     expect(
       (document.getElementById('compose-questionTypeCounts-essay') as HTMLInputElement).value,
@@ -135,8 +133,12 @@ describe('ConfigurationCompose — distribution controls', () => {
     fireEvent.change(getQuestionCountInput(), { target: { value: '7' } });
     fireEvent.blur(getQuestionCountInput());
 
-    const mc = document.getElementById('compose-questionTypeCounts-multiple_choice') as HTMLInputElement;
-    const sa = document.getElementById('compose-questionTypeCounts-short_answer') as HTMLInputElement;
+    const mc = document.getElementById(
+      'compose-questionTypeCounts-multiple_choice',
+    ) as HTMLInputElement;
+    const sa = document.getElementById(
+      'compose-questionTypeCounts-short_answer',
+    ) as HTMLInputElement;
     const essay = document.getElementById('compose-questionTypeCounts-essay') as HTMLInputElement;
     const tf = document.getElementById('compose-questionTypeCounts-true_false') as HTMLInputElement;
     expect(mc.value).toBe('2');
@@ -155,13 +157,17 @@ describe('ConfigurationCompose — distribution controls', () => {
       expect(screen.getByText(/Materi Ujian/i)).toBeInTheDocument();
     });
 
-    const mc = document.getElementById('compose-questionTypeCounts-multiple_choice') as HTMLInputElement;
+    const mc = document.getElementById(
+      'compose-questionTypeCounts-multiple_choice',
+    ) as HTMLInputElement;
     await user.clear(mc);
     await user.type(mc, '8');
     await user.tab();
 
     // Sum must always equal values.questionCount (default 20)
-    const sa = document.getElementById('compose-questionTypeCounts-short_answer') as HTMLInputElement;
+    const sa = document.getElementById(
+      'compose-questionTypeCounts-short_answer',
+    ) as HTMLInputElement;
     const essay = document.getElementById('compose-questionTypeCounts-essay') as HTMLInputElement;
     const tf = document.getElementById('compose-questionTypeCounts-true_false') as HTMLInputElement;
     const sum = Number(mc.value) + Number(sa.value) + Number(essay.value) + Number(tf.value);
@@ -175,15 +181,23 @@ describe('ConfigurationCompose — distribution controls', () => {
     await fillKatalogRequired(user);
 
     // Override distribution: 6 MC, 5 SA, 4 essay, 5 TF = 20
-    const mc = document.getElementById('compose-questionTypeCounts-multiple_choice') as HTMLInputElement;
-    const sa = document.getElementById('compose-questionTypeCounts-short_answer') as HTMLInputElement;
+    const mc = document.getElementById(
+      'compose-questionTypeCounts-multiple_choice',
+    ) as HTMLInputElement;
+    const sa = document.getElementById(
+      'compose-questionTypeCounts-short_answer',
+    ) as HTMLInputElement;
     const essay = document.getElementById('compose-questionTypeCounts-essay') as HTMLInputElement;
     const tf = document.getElementById('compose-questionTypeCounts-true_false') as HTMLInputElement;
 
-    await user.clear(mc); await user.type(mc, '6'); await user.tab();
-    await user.clear(sa); await user.type(sa, '5'); await user.tab();
-    await user.clear(essay); await user.type(essay, '4'); await user.tab();
-    await user.clear(tf); await user.type(tf, '5'); await user.tab();
+    fireEvent.change(mc, { target: { value: '6' } });
+    fireEvent.blur(mc);
+    fireEvent.change(sa, { target: { value: '5' } });
+    fireEvent.blur(sa);
+    fireEvent.change(essay, { target: { value: '4' } });
+    fireEvent.blur(essay);
+    fireEvent.change(tf, { target: { value: '5' } });
+    fireEvent.blur(tf);
 
     await user.click(screen.getByRole('button', { name: /Buat draft/i }));
 

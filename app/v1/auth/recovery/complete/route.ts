@@ -9,11 +9,7 @@
  */
 import { cookies } from 'next/headers';
 import { NextResponse, type NextRequest } from 'next/server';
-import {
-  backendFetch,
-  JWT_COOKIE,
-  SESSION_COOKIE,
-} from '@/src/lib/api/session';
+import { backendFetch, JWT_COOKIE, SESSION_COOKIE } from '@/src/lib/api/session';
 
 export async function POST(request: NextRequest) {
   const jar = await cookies();
