@@ -25,10 +25,10 @@ jobs:
           script_stop: true
           script: |
             set -eu
-            cd /home/hermes/Projects/Frontend-Lembar
-            git -c safe.directory=/home/hermes/Projects/Frontend-Lembar fetch origin dev
-            git -c safe.directory=/home/hermes/Projects/Frontend-Lembar checkout -B dev ${{ github.event.workflow_run.head_sha }}
-            docker compose up --build --detach --remove-orphans
-            docker compose exec -T app curl --fail --silent --show-error http://127.0.0.1:3000/ >/dev/null
-            docker compose ps
+            su - hermes -c 'cd /home/hermes/Projects/Frontend-Lembar &&
+              git fetch origin dev &&
+              git checkout -B dev ${{ github.event.workflow_run.head_sha }} &&
+              pnpm install --frozen-lockfile &&
+              pnpm run build &&
+              pm2 restart lembar-frontend --update-env'
             curl --fail --silent --show-error http://127.0.0.1:3000/ >/dev/null
