@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { LeftRail } from './LeftRail';
 import { TopBar } from './TopBar';
 import { WorkspaceSwitcher } from './WorkspaceSwitcher';
@@ -17,6 +17,24 @@ export function AppShell({ children }: AppShellProps) {
     useWorkspace();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
+  const [planLabel, setPlanLabel] = useState('Paket Gratis');
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/v1/me/plan', { credentials: 'include' })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((payload: { data?: { catalog?: { displayName?: string }; plan?: string } } | null) => {
+        if (cancelled || !payload?.data) return;
+        setPlanLabel(
+          payload.data.catalog?.displayName ??
+            (payload.data.plan === 'free' ? 'Paket Gratis' : payload.data.plan ?? 'Paket Gratis'),
+        );
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [activeWorkspace.id]);
 
   const switcher = (
     <WorkspaceSwitcher
@@ -30,7 +48,7 @@ export function AppShell({ children }: AppShellProps) {
   const accountMenu = (
     <AccountMenu
       displayName={displayName}
-      planLabel={activeWorkspace.activeRole === 'subscriber' ? 'Guru Pro' : 'Paket Gratis'}
+      planLabel={planLabel}
       compact={collapsed}
     />
   );
