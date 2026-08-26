@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import QRCode from 'qrcode';
 import { Panel, Button } from '@/app/components/ui';
 import { formatTokenLimit } from '@/src/lib/api/plans';
 import type { MePlanData } from '@/src/lib/api/plans';
@@ -79,7 +80,12 @@ export default function PlanUsageSettingsPage() {
   const [upgradeLoading, setUpgradeLoading] = useState(false);
   const [upgradeError, setUpgradeError] = useState('');
   const [upgradePlan, setUpgradePlan] = useState<'pro' | 'plus'>('pro');
-
+  const [checkout, setCheckout] = useState<{
+    qrImage: string;
+    paymentUrl: string;
+    totalPayment: number;
+    expiredAt: string | null;
+  } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -117,10 +123,24 @@ export default function PlanUsageSettingsPage() {
       });
       const json = (await res.json()) as {
         paymentUrl?: string;
+        qrString?: string;
+        totalPayment?: number;
+        expiredAt?: string | null;
         error?: { code?: string; message?: string };
       };
-      if (res.ok && json.paymentUrl) {
-        window.location.href = json.paymentUrl;
+      if (res.ok && json.paymentUrl && json.qrString) {
+        const qrImage = await QRCode.toDataURL(json.qrString, {
+          width: 320,
+          margin: 2,
+          color: { dark: '#1e1814', light: '#ffffff' },
+          errorCorrectionLevel: 'M',
+        });
+        setCheckout({
+          qrImage,
+          paymentUrl: json.paymentUrl,
+          totalPayment: json.totalPayment ?? 0,
+          expiredAt: json.expiredAt ?? null,
+        });
         return;
       }
       const code = json.error?.code ?? '';
@@ -311,6 +331,64 @@ export default function PlanUsageSettingsPage() {
             <p className="text-body-xs text-[#6d665d]">Pembayaran via QRIS. Aman dan instan.</p>
           </div>
         </Panel>
+      )}
+
+      {checkout && (
+        <div
+          className="fixed inset-0 z-50 grid place-items-center bg-[#1e1814]/45 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="qris-title"
+          onClick={() => setCheckout(null)}
+        >
+          <div
+            className="w-full max-w-md rounded-3xl border border-[#e6dfd4] bg-[#fbf8f2] p-5 shadow-2xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-accent">Pembayaran aman</p>
+                <h2 id="qris-title" className="mt-1 text-xl font-semibold text-brand-ink">Scan QRIS</h2>
+                <p className="mt-1 text-sm text-[#6d665d]">Buka aplikasi pembayaran lalu scan kode berikut.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setCheckout(null)}
+                className="rounded-full border border-[#e6dfd4] bg-white px-3 py-1 text-sm text-[#6d665d]"
+                aria-label="Tutup pembayaran"
+              >
+                Tutup
+              </button>
+            </div>
+
+            <div className="mx-auto mt-5 w-fit rounded-2xl border border-[#e6dfd4] bg-white p-3 shadow-sm">
+              {/* QR data stays local in the browser; it is never sent to an image service. */}
+              <img src={checkout.qrImage} alt="Kode QRIS pembayaran paket Lembar" className="h-64 w-64" />
+            </div>
+
+            <div className="mt-5 rounded-2xl border border-[#e6dfd4] bg-white p-4 text-center">
+              <p className="text-xs text-[#6d665d]">Total pembayaran</p>
+              <p className="mt-1 text-2xl font-bold text-brand-ink">
+                {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(checkout.totalPayment)}
+              </p>
+              {checkout.expiredAt && (
+                <p className="mt-1 text-xs text-[#6d665d]">
+                  Berlaku hingga {new Date(checkout.expiredAt).toLocaleString('id-ID')}
+                </p>
+              )}
+            </div>
+
+            <Link
+              href={checkout.paymentUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 flex w-full items-center justify-center rounded-xl bg-brand-accent px-4 py-3 text-sm font-semibold text-white"
+            >
+              Buka QRIS di Pakasir
+            </Link>
+            <p className="mt-3 text-center text-xs text-[#6d665d]">Paket aktif otomatis setelah pembayaran terkonfirmasi.</p>
+          </div>
+        </div>
       )}
     </div>
   );
