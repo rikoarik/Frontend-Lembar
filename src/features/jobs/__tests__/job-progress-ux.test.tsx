@@ -9,6 +9,26 @@ vi.mock('@/src/services/jobs/jobService', () => ({
   jobService: { getJob: vi.fn(), cancelJob: vi.fn() },
 }));
 
+class MockEventSource {
+  static instances: MockEventSource[] = [];
+  listeners = new Map<string, Set<() => void>>();
+  constructor(public url: string) {
+    MockEventSource.instances.push(this);
+  }
+  addEventListener(event: string, cb: () => void) {
+    if (!this.listeners.has(event)) this.listeners.set(event, new Set());
+    this.listeners.get(event)!.add(cb);
+  }
+  removeEventListener(event: string, cb: () => void) {
+    this.listeners.get(event)?.delete(cb);
+  }
+  close() {}
+  emit(event: string) {
+    for (const cb of this.listeners.get(event) ?? []) cb();
+  }
+}
+(globalThis as unknown as { EventSource: typeof MockEventSource }).EventSource = MockEventSource as never;
+
 const running: JobSnapshot = {
   jobId: 'job_internal_123',
   status: 'running',

@@ -9,6 +9,26 @@ vi.mock('@/src/services/jobs/jobService', () => ({
   jobService: { getJob: vi.fn(), cancelJob: vi.fn() },
 }));
 
+class MockEventSource {
+  static lastInstance: MockEventSource | null = null;
+  listeners = new Map<string, Set<() => void>>();
+  constructor(public url: string) {
+    MockEventSource.lastInstance = this;
+  }
+  addEventListener(event: string, cb: () => void) {
+    if (!this.listeners.has(event)) this.listeners.set(event, new Set());
+    this.listeners.get(event)!.add(cb);
+  }
+  removeEventListener(event: string, cb: () => void) {
+    this.listeners.get(event)?.delete(cb);
+  }
+  close() {}
+  emit(event: string) {
+    for (const cb of this.listeners.get(event) ?? []) cb();
+  }
+}
+(globalThis as unknown as { EventSource: typeof MockEventSource }).EventSource = MockEventSource as never;
+
 const running: JobSnapshot = {
   jobId: 'job-123',
   status: 'running',
@@ -69,7 +89,8 @@ describe('job handoff UX', () => {
     expect(result.current.job?.assessmentId).toBeUndefined();
 
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(100);
+      MockEventSource.lastInstance?.emit('status');
+      await Promise.resolve();
     });
 
     expect(result.current.job?.assessmentId).toBe('assessment-789');
@@ -100,6 +121,8 @@ describe('job handoff UX', () => {
     expect(result.current.job?.status).toBe('succeeded');
 
     await act(async () => {
+      MockEventSource.lastInstance?.emit('status');
+      await Promise.resolve();
       await vi.advanceTimersByTimeAsync(300);
     });
 
