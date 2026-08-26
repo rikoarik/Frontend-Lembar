@@ -714,6 +714,7 @@ export default function GenerateForm() {
                     {REVIEW_MODE_OPTIONS.map((r) => (
                       <label
                         key={r.value}
+                        onClick={() => update('reviewMode', r.value)}
                         className={`flex cursor-pointer items-center gap-2 rounded-md border px-4 py-3 transition-colors ${
                           values.reviewMode === r.value
                             ? 'border-brand-accent bg-brand-accent-soft ring-1 ring-brand-accent'

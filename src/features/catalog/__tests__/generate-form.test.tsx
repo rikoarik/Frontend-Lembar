@@ -292,6 +292,16 @@ describe('GenerateForm — validation (pure)', () => {
 });
 
 describe('GenerateForm — happy-path', () => {
+  it('selects Detail review mode when its card is clicked', async () => {
+    const user = userEvent.setup();
+    render(<GenerateForm />, { wrapper: Wrapper });
+
+    await user.click(screen.getByText('Detail'));
+
+    expect(screen.getByLabelText(/Detail.*Tinjau satu per satu/i)).toBeChecked();
+    expect(screen.getByLabelText(/Cepat.*Tinjau dalam satu daftar/i)).not.toBeChecked();
+  });
+
   it('loads grades on mount and shows selects', async () => {
     render(<GenerateForm />, { wrapper: Wrapper });
 
