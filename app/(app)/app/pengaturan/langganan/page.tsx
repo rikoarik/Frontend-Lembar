@@ -212,11 +212,6 @@ export default function PlanUsageSettingsPage() {
               <p className="font-semibold text-body-lead text-brand-ink">{stateCopy.heading}</p>
               <p className="text-body-sm text-[#6d665d] mt-0.5">{planLabel}</p>
             </div>
-            {plan.entitlementSource === 'trial' && (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">
-                Trial aktif
-              </span>
-            )}
           </div>
           <p className="text-body-sm text-[#6d665d]">{stateCopy.body}</p>
         </div>
@@ -232,44 +227,6 @@ export default function PlanUsageSettingsPage() {
           </p>
         </div>
       </Panel>
-
-      {/* Trial section */}
-      {trial && (
-        <Panel>
-          <div className="flex flex-col gap-3">
-            <p className="font-semibold text-body-lead text-brand-ink">Trial Guru Pro</p>
-            {trial.eligible && !trial.claimed && (
-              <>
-                <p className="text-body-sm text-[#6d665d]">
-                  Akun Anda memenuhi syarat trial 2 bulan Guru Pro. Tautan aktivasi hanya dapat
-                  diterbitkan oleh superadmin dan berlaku selama 15 menit.
-                </p>
-                <div className="rounded-lg border border-[#e6dfd4] bg-[#fbf8f2] p-3 text-body-sm text-[#57534e]">
-                  Hubungi tim Lembar untuk meminta tautan aktivasi pribadi. Setelah menerima tautan,
-                  buka tautan tersebut saat sudah masuk ke akun ini lalu konfirmasi aktivasi trial.
-                </div>
-              </>
-            )}
-            {trial.claimed && trial.endsAt && (
-              <div className="flex flex-col gap-1">
-                <p className="text-body-sm text-[#6d665d]">
-                  Trial aktif hingga{' '}
-                  <strong>
-                    {new Date(trial.endsAt).toLocaleDateString('id-ID', {
-                      day: 'numeric',
-                      month: 'long',
-                      year: 'numeric',
-                    })}
-                  </strong>
-                </p>
-                {trial.remainingDays !== null && (
-                  <p className="text-body-sm text-amber-700">{trial.remainingDays} hari tersisa</p>
-                )}
-              </div>
-            )}
-          </div>
-        </Panel>
-      )}
 
       {/* Upgrade section — only shown for free non-trial users */}
       {!isPaidPlan && plan.entitlementSource !== 'trial' && (
