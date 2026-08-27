@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import type { QuestionImage } from '@/src/types/questionImage';
 
 export function QuestionImageDisplay({
@@ -13,12 +12,11 @@ export function QuestionImageDisplay({
   if (!image) return null;
 
   return (
-    <Image
+    // Generated data URLs are rendered directly; Next's optimizer is not applicable.
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
       src={image.dataUrl}
       alt={image.alt.trim() || fallbackAlt}
-      width={1200}
-      height={800}
-      unoptimized
       className={`h-auto max-h-[28rem] w-auto max-w-full rounded-md object-contain ${className}`.trim()}
     />
   );
