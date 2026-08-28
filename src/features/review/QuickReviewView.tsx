@@ -72,23 +72,30 @@ export function QuickReviewView({
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
-    const result = await assessmentService.get(assessmentId);
-    if (!result.ok) {
-      setError(result.error.safeMessage);
+    try {
+      const result = await assessmentService.get(assessmentId);
+      if (!result.ok) {
+        setError(result.error.safeMessage);
+        setAssessment(null);
+        return;
+      }
+
+      const rawQuestions = Array.isArray(result.value.questions) ? result.value.questions : [];
+      setAssessment({
+        ...result.value,
+        questions: rawQuestions.map((question) => ({
+          ...question,
+          reviewState: mapReviewStateFromBackend(String(question.reviewState)),
+        })),
+      });
+      setConflictMessage(null);
+      setSelected(new Set());
+    } catch {
+      setError('Tinjauan belum siap dimuat. Silakan coba lagi.');
       setAssessment(null);
+    } finally {
       setLoading(false);
-      return;
     }
-    setAssessment({
-      ...result.value,
-      questions: result.value.questions.map((question) => ({
-        ...question,
-        reviewState: mapReviewStateFromBackend(String(question.reviewState)),
-      })),
-    });
-    setConflictMessage(null);
-    setSelected(new Set());
-    setLoading(false);
   }, [assessmentId]);
 
   useEffect(() => {

@@ -56,6 +56,12 @@ async function proxy(request: NextRequest, jobId: string, cancel: boolean) {
   } | null;
   if (upstream.ok && payload?.data) {
     const data = payload.data;
+    const payloadReviewMode =
+      data.payload && typeof data.payload === 'object'
+        ? (data.payload as Record<string, unknown>).reviewMode
+        : undefined;
+    const reviewMode =
+      data.reviewMode === 'detail' || payloadReviewMode === 'detail' ? 'detail' : 'quick';
     const rawStatus = String(data.status ?? 'queued');
     const status =
       rawStatus === 'completed'
@@ -76,7 +82,7 @@ async function proxy(request: NextRequest, jobId: string, cancel: boolean) {
         jobId: data.id ?? jobId,
         assessmentId: data.assessmentId,
         compositionId: data.compositionId,
-        reviewMode: data.reviewMode,
+        reviewMode,
         status,
         stage: rawStatus === 'completed' ? 'finalizing' : rawStatus,
         ...(progressPercent === undefined ? {} : { progressPercent }),

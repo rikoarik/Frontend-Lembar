@@ -127,6 +127,18 @@ describe('QuickReviewView quick mode — per-questionType renderer', () => {
     ).toBeInTheDocument();
   });
 
+  it('shows a usable empty state when a newly generated assessment has no questions yet', async () => {
+    const incompleteAssessment = { ...makeAssessment([]), questions: undefined } as never;
+    vi.mocked(assessmentService.get).mockResolvedValue({
+      ok: true,
+      value: incompleteAssessment,
+    });
+
+    render(<QuickReviewView assessmentId="a1" mode="detail" />);
+
+    expect(await screen.findByText('Tidak ada soal pada filter ini.')).toBeInTheDocument();
+  });
+
   it('shows options list for multiple_choice', async () => {
     setup(makeAssessment([{ questionType: 'multiple_choice' }]));
     render(<QuickReviewView assessmentId="a1" mode="quick" />);

@@ -1,11 +1,12 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useSyncExternalStore } from 'react';
 import { useRouter } from 'next/navigation';
 import { JobProgressPanel } from '@/src/features/jobs/JobProgressPanel';
 import { useJobProgress } from '@/src/features/jobs/state/useJobProgress';
 import { useWorkspace } from '@/src/features/workspace/workspaceContext';
-import { clearActiveJob } from '@/src/features/jobs/activeJobStorage';
+import { clearActiveJob, readActiveJob } from '@/src/features/jobs/activeJobStorage';
+import type { JobSnapshot } from '@/src/features/jobs/types';
 import { jobService } from '@/src/services/jobs/jobService';
 
 type JobProgressViewProps = {
@@ -16,6 +17,16 @@ export function JobProgressView({ jobId }: JobProgressViewProps) {
   const router = useRouter();
   const { activeWorkspace } = useWorkspace();
   const workspaceId = activeWorkspace.id;
+  const subscribeToActiveJob = useCallback(() => () => {}, []);
+  const getSavedReviewMode = useCallback((): JobSnapshot['reviewMode'] => {
+    const activeJob = readActiveJob(workspaceId);
+    return activeJob?.jobId === jobId ? activeJob.reviewMode : undefined;
+  }, [jobId, workspaceId]);
+  const savedReviewMode = useSyncExternalStore(
+    subscribeToActiveJob,
+    getSavedReviewMode,
+    () => undefined,
+  );
 
   const { job, loading, error, cancelling, refresh, cancel } = useJobProgress({
     jobId,
@@ -32,6 +43,9 @@ export function JobProgressView({ jobId }: JobProgressViewProps) {
     }
   }, [jobId, workspaceId, refresh, router]);
 
+  const jobWithReviewMode =
+    job && !job.reviewMode && savedReviewMode ? { ...job, reviewMode: savedReviewMode } : job;
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
@@ -41,7 +55,7 @@ export function JobProgressView({ jobId }: JobProgressViewProps) {
         </p>
       </div>
       <JobProgressPanel
-        job={job}
+        job={jobWithReviewMode}
         loading={loading}
         error={error}
         cancelling={cancelling}

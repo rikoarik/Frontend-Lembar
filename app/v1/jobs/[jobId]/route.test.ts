@@ -59,6 +59,33 @@ describe('GET /v1/jobs/[jobId] handoff contract', () => {
     expect(body.data.jobId).not.toBe(body.data.assessmentId);
   });
 
+  it('preserves Detail mode from the job payload for the review handoff', async () => {
+    const { GET } = await import('./route');
+
+    backendFetch.mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          data: {
+            id: 'job-detail',
+            assessmentId: 'assessment-detail',
+            status: 'completed',
+            payload: { reviewMode: 'detail' },
+            createdAt: '2026-07-29T10:00:00.000Z',
+            updatedAt: '2026-07-29T10:01:00.000Z',
+          },
+        }),
+        { status: 200, headers: { 'content-type': 'application/json' } },
+      ),
+    );
+
+    const response = await GET(
+      new Request('http://localhost/api/v1/jobs/job-detail') as never,
+      params('job-detail'),
+    );
+
+    expect((await response.json()).data.reviewMode).toBe('detail');
+  });
+
   it('does not substitute jobId into the assessmentId field when the backend omits it', async () => {
     const { GET } = await import('./route');
 

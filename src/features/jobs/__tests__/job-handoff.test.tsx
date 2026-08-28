@@ -69,6 +69,20 @@ describe('job handoff UX', () => {
     expect(screen.queryByText(/job-123/)).not.toBeInTheDocument();
   });
 
+  it('opens Detail review when the completed job is marked Detail', () => {
+    render(
+      <JobProgressPanel
+        job={{ ...succeededWithAssessment, reviewMode: 'detail' }}
+        loading={false}
+      />,
+    );
+
+    expect(screen.getByRole('link', { name: 'Buka tinjauan' })).toHaveAttribute(
+      'href',
+      '/app/review/assessment-789?mode=detail',
+    );
+  });
+
   it('keeps polling after success until assessmentId arrives, then exposes the review link', async () => {
     vi.useFakeTimers();
     vi.mocked(jobService.getJob)
