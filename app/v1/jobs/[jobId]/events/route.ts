@@ -1,14 +1,21 @@
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
-import {
-  backendBaseUrl,
-  JWT_COOKIE,
-  SESSION_COOKIE,
-} from '@/src/lib/api/session';
+import { backendBaseUrl, JWT_COOKIE, SESSION_COOKIE } from '@/src/lib/api/session';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(_request: Request, context: { params: Promise<{ jobId: string }> }) {
+function workspaceIdFromToken(token: string): string | null {
+  try {
+    const payload = JSON.parse(
+      Buffer.from(token.split('.')[1] ?? '', 'base64url').toString('utf8'),
+    ) as { workspaceId?: unknown };
+    return typeof payload.workspaceId === 'string' ? payload.workspaceId : null;
+  } catch {
+    return null;
+  }
+}
+
+export async function GET(request: Request, context: { params: Promise<{ jobId: string }> }) {
   const jar = await cookies();
   const token = jar.get(JWT_COOKIE)?.value || jar.get(SESSION_COOKIE)?.value;
   if (!token) {
@@ -17,15 +24,32 @@ export async function GET(_request: Request, context: { params: Promise<{ jobId:
       { status: 401 },
     );
   }
+  const workspaceId = workspaceIdFromToken(token);
+  if (!workspaceId) {
+    return NextResponse.json(
+      { error: { code: 'MISSING_WORKSPACE', message: 'Workspace tidak ditemukan.' } },
+      { status: 400 },
+    );
+  }
+
   const { jobId } = await context.params;
-  const upstream = await fetch(
-    `${backendBaseUrl()}/v1/jobs/${encodeURIComponent(jobId)}/events`,
-    {
-      headers: { Authorization: `Bearer ${token}`, Accept: 'text/event-stream' },
+  let upstream: Response;
+  try {
+    upstream = await fetch(`${backendBaseUrl()}/v1/jobs/${encodeURIComponent(jobId)}/events`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'text/event-stream',
+        'x-workspace-id': workspaceId,
+      },
       cache: 'no-store',
-      signal: _request.signal,
-    },
-  );
+      signal: request.signal,
+    });
+  } catch {
+    return NextResponse.json(
+      { error: { code: 'UPSTREAM_UNAVAILABLE', message: 'Stream status tidak tersedia.' } },
+      { status: 502 },
+    );
+  }
   if (!upstream.ok || !upstream.body) {
     return NextResponse.json(
       { error: { code: 'UPSTREAM_ERROR', message: 'Stream status tidak tersedia.' } },

@@ -1,10 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { jobService } from '@/src/services/jobs/jobService';
 import type { JobError } from '@/src/services/jobs/jobErrors';
-import {
-  isTerminalJobStatus,
-  type JobSnapshot,
-} from '@/src/features/jobs/types';
+import { isTerminalJobStatus, type JobSnapshot } from '@/src/features/jobs/types';
 import { clearActiveJob } from '@/src/features/jobs/activeJobStorage';
 
 export type UseJobProgressOptions = {
@@ -74,7 +71,7 @@ export function useJobProgress({
     }
     setError(result.error);
     setLoading(false);
-  }, [jobId, workspaceId]);
+  }, [jobId, workspaceId, assessmentHandoffTimeoutMs]);
 
   useEffect(() => {
     const changedJob = activeJobId.current !== jobId;
@@ -89,30 +86,12 @@ export function useJobProgress({
     });
   }, [jobId, refresh]);
 
+  const handoffComplete = Boolean(job && isTerminalJobStatus(job.status) && job.assessmentId);
+
   useEffect(() => {
-    if (!jobId) return;
-    if (job && isTerminalJobStatus(job.status) && job.assessmentId) return;
+    if (!jobId || handoffComplete) return;
 
-    if (typeof EventSource === 'undefined') {
-      const id = window.setInterval(() => {
-        if (handoffDeadlineAt.current !== null && Date.now() >= handoffDeadlineAt.current) {
-          setError({
-            code: 'ASSESSMENT_HANDOFF_TIMEOUT' as JobError['code'],
-            safeMessage: 'Belum dapat assessmentId, coba lagi',
-            retryable: true,
-          });
-          handoffDeadlineAt.current = null;
-          return;
-        }
-        void refresh();
-      }, pollIntervalMs);
-      return () => window.clearInterval(id);
-    }
-
-    const stream = new EventSource(`/v1/jobs/${encodeURIComponent(jobId)}/events`);
-    const onStatus = () => void refresh();
-    stream.addEventListener('status', onStatus);
-    const timeoutChecker = window.setInterval(() => {
+    const id = window.setInterval(() => {
       if (handoffDeadlineAt.current !== null && Date.now() >= handoffDeadlineAt.current) {
         setError({
           code: 'TIMEOUT',
@@ -120,23 +99,32 @@ export function useJobProgress({
           retryable: true,
         });
         handoffDeadlineAt.current = null;
+        return;
       }
-    }, 250);
+      void refresh();
+    }, pollIntervalMs);
+
+    return () => window.clearInterval(id);
+  }, [jobId, handoffComplete, pollIntervalMs, refresh]);
+
+  useEffect(() => {
+    if (!jobId || handoffComplete || typeof EventSource === 'undefined') return;
+
+    const stream = new EventSource(`/v1/jobs/${encodeURIComponent(jobId)}/events`);
+    const onStatus = () => void refresh();
+    stream.addEventListener('status', onStatus);
+    stream.addEventListener('message', onStatus);
     stream.onerror = () => {
+      // Polling above remains the source-of-truth fallback when SSE is unavailable.
       stream.close();
-      setError({
-        code: 'NETWORK',
-        safeMessage: 'Koneksi progres terputus. Muat ulang status untuk mencoba lagi.',
-        retryable: true,
-      });
     };
 
     return () => {
-      window.clearInterval(timeoutChecker);
       stream.removeEventListener('status', onStatus);
+      stream.removeEventListener('message', onStatus);
       stream.close();
     };
-  }, [jobId, job, refresh]);
+  }, [jobId, handoffComplete, refresh]);
 
   const cancel = useCallback(async () => {
     if (!jobId || cancelling) return;

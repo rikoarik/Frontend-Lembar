@@ -27,7 +27,8 @@ class MockEventSource {
     for (const cb of this.listeners.get(event) ?? []) cb();
   }
 }
-(globalThis as unknown as { EventSource: typeof MockEventSource }).EventSource = MockEventSource as never;
+(globalThis as unknown as { EventSource: typeof MockEventSource }).EventSource =
+  MockEventSource as never;
 
 const running: JobSnapshot = {
   jobId: 'job_internal_123',
@@ -64,6 +65,37 @@ describe('job progress UX', () => {
     );
     expect(screen.getByText('Biasanya selesai dalam beberapa menit')).toBeInTheDocument();
     expect(screen.getByRole('progressbar')).not.toHaveAttribute('aria-valuenow');
+  });
+
+  it('recovers from an initial status error through polling when SSE sends no events', async () => {
+    vi.useFakeTimers();
+    vi.mocked(jobService.getJob)
+      .mockResolvedValueOnce({
+        ok: false,
+        error: {
+          code: 'UNKNOWN',
+          safeMessage: 'Tidak dapat memuat status pekerjaan saat ini.',
+          retryable: true,
+        },
+      })
+      .mockResolvedValueOnce({ ok: true, value: running });
+
+    const { result } = renderHook(() =>
+      useJobProgress({ jobId: running.jobId, workspaceId: 'workspace', pollIntervalMs: 100 }),
+    );
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(result.current.error?.code).toBe('UNKNOWN');
+    expect(result.current.job).toBeUndefined();
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(100);
+    });
+
+    expect(result.current.job).toEqual(running);
+    expect(result.current.error).toBeUndefined();
   });
 
   it('keeps the previous snapshot visible during background refresh', async () => {
