@@ -448,15 +448,22 @@ export default function StudentRunner({ token }: { token: string }) {
           <div className="min-w-0">
             <p className="truncate text-label-sm font-semibold text-brand-ink">{data?.title}</p>
             <p className="text-label-xs text-brand-ink-muted">
-              <span>{name}{klass ? `, ${klass}` : ''} | </span>
+              <span>
+                {name}
+                {klass ? `, ${klass}` : ''} |{' '}
+              </span>
               <span>{`${answered} dari ${questions.length} soal terjawab`}</span>
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-4">
             {remaining !== null ? (
               <div className="text-right">
-                <p className="text-[10px] uppercase tracking-wide text-brand-ink-muted">Sisa waktu</p>
-                <p className={`font-mono text-body-sm font-semibold ${remaining <= 300 ? 'text-brand-danger' : 'text-brand-ink'}`}>
+                <p className="text-[10px] uppercase tracking-wide text-brand-ink-muted">
+                  Sisa waktu
+                </p>
+                <p
+                  className={`font-mono text-body-sm font-semibold ${remaining <= 300 ? 'text-brand-danger' : 'text-brand-ink'}`}
+                >
                   {formatRemaining(remaining)}
                 </p>
               </div>
@@ -481,7 +488,9 @@ export default function StudentRunner({ token }: { token: string }) {
       <main className="mx-auto grid max-w-5xl gap-5 px-4 py-5 md:grid-cols-[15rem_minmax(0,1fr)] md:px-6 md:py-8">
         {questions.length === 0 ? (
           <div className="rounded-xl border border-brand-line bg-white p-6 text-center md:col-span-2">
-            <p className="text-body-sm text-brand-ink-muted">Belum ada soal yang dapat dikerjakan.</p>
+            <p className="text-body-sm text-brand-ink-muted">
+              Belum ada soal yang dapat dikerjakan.
+            </p>
           </div>
         ) : (
           <>
@@ -489,7 +498,9 @@ export default function StudentRunner({ token }: { token: string }) {
               <div className="rounded-xl border border-brand-line bg-white p-4">
                 <div className="mb-3 flex items-center justify-between">
                   <h2 className="text-body-sm font-semibold text-brand-ink">Nomor soal</h2>
-                  <span className="text-label-xs text-brand-ink-muted">{answered}/{questions.length}</span>
+                  <span className="text-label-xs text-brand-ink-muted">
+                    {answered}/{questions.length}
+                  </span>
                 </div>
                 <div className="grid grid-cols-6 gap-2 sm:grid-cols-10 md:grid-cols-5">
                   {questions.map((question, index) => {
@@ -516,8 +527,14 @@ export default function StudentRunner({ token }: { token: string }) {
                   })}
                 </div>
                 <div className="mt-4 grid grid-cols-2 gap-2 text-[11px] text-brand-ink-muted">
-                  <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm bg-brand-accent-soft" />Terjawab</span>
-                  <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm border border-brand-line bg-white" />Kosong</span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="h-2.5 w-2.5 rounded-sm bg-brand-accent-soft" />
+                    Terjawab
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="h-2.5 w-2.5 rounded-sm border border-brand-line bg-white" />
+                    Kosong
+                  </span>
                 </div>
               </div>
             </aside>
@@ -530,7 +547,9 @@ export default function StudentRunner({ token }: { token: string }) {
                       <p className="text-label-sm font-semibold text-brand-accent">
                         Soal {currentQuestion.number} dari {questions.length}
                       </p>
-                      <span className="text-label-xs text-brand-ink-muted">{questionTypeLabel}</span>
+                      <span className="text-label-xs text-brand-ink-muted">
+                        {questionTypeLabel}
+                      </span>
                     </div>
                     <h1 className="mt-4 text-body-lg font-semibold leading-relaxed text-brand-ink">
                       {currentQuestion.stem}
@@ -545,7 +564,9 @@ export default function StudentRunner({ token }: { token: string }) {
                   <div className="px-5 py-5 sm:px-7 sm:py-6">
                     {isObjective ? (
                       <fieldset>
-                        <legend className="sr-only">Pilihan jawaban soal {currentQuestion.number}</legend>
+                        <legend className="sr-only">
+                          Pilihan jawaban soal {currentQuestion.number}
+                        </legend>
                         <div className="grid gap-3">
                           {choices?.map((option) => (
                             <label
@@ -564,7 +585,9 @@ export default function StudentRunner({ token }: { token: string }) {
                                 onChange={() => updateAnswer(currentQuestion.id, option.key)}
                                 className="sr-only"
                               />
-                              <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md border text-xs font-bold ${currentAnswer === option.key ? 'border-brand-accent bg-brand-accent text-white' : 'border-brand-line bg-white text-brand-ink'}`}>
+                              <span
+                                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md border text-xs font-bold ${currentAnswer === option.key ? 'border-brand-accent bg-brand-accent text-white' : 'border-brand-line bg-white text-brand-ink'}`}
+                              >
                                 {option.key}
                               </span>
                               <span className="pt-1 leading-relaxed">{option.text}</span>
@@ -574,7 +597,10 @@ export default function StudentRunner({ token }: { token: string }) {
                       </fieldset>
                     ) : (
                       <div>
-                        <label htmlFor={`answer-${currentQuestion.id}`} className="mb-2 block text-label-sm font-medium text-brand-ink">
+                        <label
+                          htmlFor={`answer-${currentQuestion.id}`}
+                          className="mb-2 block text-label-sm font-medium text-brand-ink"
+                        >
                           {currentQuestion.questionType === 'essay' ? 'Jawaban esai' : 'Jawaban'}
                         </label>
                         <textarea
@@ -584,10 +610,18 @@ export default function StudentRunner({ token }: { token: string }) {
                           value={currentAnswer}
                           onChange={(event) => updateAnswer(currentQuestion.id, event.target.value)}
                           className="w-full resize-y rounded-lg border border-brand-line bg-white px-4 py-3 text-body-sm leading-relaxed text-brand-ink placeholder:text-brand-ink-muted focus:outline-none focus:ring-2 focus:ring-brand-accent"
-                          placeholder={currentQuestion.questionType === 'essay' ? 'Tulis jawaban secara runtut dan lengkap.' : 'Tulis jawaban singkat.'}
+                          placeholder={
+                            currentQuestion.questionType === 'essay'
+                              ? 'Tulis jawaban secara runtut dan lengkap.'
+                              : 'Tulis jawaban singkat.'
+                          }
                         />
                         <div className="mt-2 flex items-center justify-between gap-4 text-label-xs text-brand-ink-muted">
-                          <span>{currentQuestion.questionType === 'essay' ? 'Jawaban tersimpan otomatis saat kamu mengetik.' : 'Periksa kembali ejaan jawabanmu.'}</span>
+                          <span>
+                            {currentQuestion.questionType === 'essay'
+                              ? 'Jawaban tersimpan otomatis saat kamu mengetik.'
+                              : 'Periksa kembali ejaan jawabanmu.'}
+                          </span>
                           <span>{currentAnswer.length} karakter</span>
                         </div>
                       </div>
@@ -604,12 +638,24 @@ export default function StudentRunner({ token }: { token: string }) {
                     </Button>
                     <div className="flex items-center gap-2">
                       {safeIndex < questions.length - 1 ? (
-                        <Button onClick={() => setCurrentIndex((index) => Math.min(questions.length - 1, index + 1))}>
+                        <Button
+                          onClick={() =>
+                            setCurrentIndex((index) => Math.min(questions.length - 1, index + 1))
+                          }
+                        >
                           Berikutnya
                         </Button>
                       ) : (
-                        <Button loading={submitting} disabled={submitting} onClick={() => void submit()}>
-                          {error ? 'Coba kirim lagi' : remaining === 0 ? 'Kirim sekarang' : 'Kirim jawaban'}
+                        <Button
+                          loading={submitting}
+                          disabled={submitting}
+                          onClick={() => void submit()}
+                        >
+                          {error
+                            ? 'Coba kirim lagi'
+                            : remaining === 0
+                              ? 'Kirim sekarang'
+                              : 'Kirim jawaban'}
                         </Button>
                       )}
                     </div>
@@ -618,7 +664,10 @@ export default function StudentRunner({ token }: { token: string }) {
               ) : null}
 
               {error ? (
-                <div role="alert" className="mt-4 rounded-lg border border-brand-danger/30 bg-brand-danger/5 px-4 py-3 text-body-sm text-brand-danger">
+                <div
+                  role="alert"
+                  className="mt-4 rounded-lg border border-brand-danger/30 bg-brand-danger/5 px-4 py-3 text-body-sm text-brand-danger"
+                >
                   {error}
                 </div>
               ) : null}
@@ -626,7 +675,12 @@ export default function StudentRunner({ token }: { token: string }) {
               {safeIndex < questions.length - 1 ? (
                 <div className="mt-5 flex items-center justify-between gap-4 rounded-lg border border-brand-line bg-white px-4 py-3">
                   <p className="text-body-sm text-brand-ink-muted">Selesai lebih awal?</p>
-                  <Button variant="secondary" loading={submitting} disabled={submitting} onClick={() => void submit()}>
+                  <Button
+                    variant="secondary"
+                    loading={submitting}
+                    disabled={submitting}
+                    onClick={() => void submit()}
+                  >
                     {error ? 'Coba kirim lagi' : 'Kirim semua jawaban'}
                   </Button>
                 </div>

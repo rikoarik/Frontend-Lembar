@@ -158,7 +158,6 @@ export default function PlanUsageSettingsPage() {
     }
   };
 
-
   if (loading) {
     return (
       <div className="flex flex-col gap-6 w-full">
@@ -238,7 +237,11 @@ export default function PlanUsageSettingsPage() {
                 Pilih paket berlangganan dengan kuota token lebih besar.
               </p>
             </div>
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2" role="radiogroup" aria-label="Pilih paket upgrade">
+            <div
+              className="grid grid-cols-1 gap-2 sm:grid-cols-2"
+              role="radiogroup"
+              aria-label="Pilih paket upgrade"
+            >
               {(
                 [
                   { key: 'pro', label: 'Guru Pro', price: 'Rp49.000/bln' },
@@ -283,7 +286,9 @@ export default function PlanUsageSettingsPage() {
               </div>
             )}
             <Button onClick={handleUpgrade} disabled={upgradeLoading}>
-              {upgradeLoading ? 'Memproses…' : `Lanjutkan ke ${upgradePlan === 'plus' ? 'Plus' : 'Pro'}`}
+              {upgradeLoading
+                ? 'Memproses…'
+                : `Lanjutkan ke ${upgradePlan === 'plus' ? 'Plus' : 'Pro'}`}
             </Button>
             <p className="text-body-xs text-[#6d665d]">Pembayaran via QRIS. Aman dan instan.</p>
           </div>
@@ -304,9 +309,15 @@ export default function PlanUsageSettingsPage() {
           >
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-accent">Pembayaran aman</p>
-                <h2 id="qris-title" className="mt-1 text-xl font-semibold text-brand-ink">Scan QRIS</h2>
-                <p className="mt-1 text-sm text-[#6d665d]">Buka aplikasi pembayaran lalu scan kode berikut.</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-accent">
+                  Pembayaran aman
+                </p>
+                <h2 id="qris-title" className="mt-1 text-xl font-semibold text-brand-ink">
+                  Scan QRIS
+                </h2>
+                <p className="mt-1 text-sm text-[#6d665d]">
+                  Buka aplikasi pembayaran lalu scan kode berikut.
+                </p>
               </div>
               <button
                 type="button"
@@ -320,13 +331,21 @@ export default function PlanUsageSettingsPage() {
 
             <div className="mx-auto mt-5 w-fit rounded-2xl border border-[#e6dfd4] bg-white p-3 shadow-sm">
               {/* QR data stays local in the browser; it is never sent to an image service. */}
-              <img src={checkout.qrImage} alt="Kode QRIS pembayaran paket Lembar" className="h-64 w-64" />
+              <img
+                src={checkout.qrImage}
+                alt="Kode QRIS pembayaran paket Lembar"
+                className="h-64 w-64"
+              />
             </div>
 
             <div className="mt-5 rounded-2xl border border-[#e6dfd4] bg-white p-4 text-center">
               <p className="text-xs text-[#6d665d]">Total pembayaran</p>
               <p className="mt-1 text-2xl font-bold text-brand-ink">
-                {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(checkout.totalPayment)}
+                {new Intl.NumberFormat('id-ID', {
+                  style: 'currency',
+                  currency: 'IDR',
+                  maximumFractionDigits: 0,
+                }).format(checkout.totalPayment)}
               </p>
               {checkout.expiredAt && (
                 <p className="mt-1 text-xs text-[#6d665d]">
@@ -343,7 +362,9 @@ export default function PlanUsageSettingsPage() {
             >
               Buka QRIS di Pakasir
             </Link>
-            <p className="mt-3 text-center text-xs text-[#6d665d]">Paket aktif otomatis setelah pembayaran terkonfirmasi.</p>
+            <p className="mt-3 text-center text-xs text-[#6d665d]">
+              Paket aktif otomatis setelah pembayaran terkonfirmasi.
+            </p>
           </div>
         </div>
       )}

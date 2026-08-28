@@ -33,16 +33,14 @@ export function AccountDetailView({
   const [entitlementMessage, setEntitlementMessage] = useState<string | null>(null);
   const [trialLinkLoading, setTrialLinkLoading] = useState(false);
   const [trialLinkMessage, setTrialLinkMessage] = useState<string | null>(null);
-  const [trialClaimLink, setTrialClaimLink] = useState<{ url: string; expiresAt: string } | null>(null);
+  const [trialClaimLink, setTrialClaimLink] = useState<{ url: string; expiresAt: string } | null>(
+    null,
+  );
   const AVAILABLE_ROLES = ['teacher', 'school_admin', 'subscriber'] as const;
   const [editRoles, setEditRoles] = useState<string[]>([]);
 
   const currentPlan: 'free' | 'pro' | 'plus' =
-    detail?.billing?.plan === 'pro'
-      ? 'pro'
-      : detail?.billing?.plan === 'plus'
-        ? 'plus'
-        : 'free';
+    detail?.billing?.plan === 'pro' ? 'pro' : detail?.billing?.plan === 'plus' ? 'plus' : 'free';
   const planLabel = (plan: 'free' | 'pro' | 'plus') =>
     plan === 'plus' ? 'Plus' : plan === 'pro' ? 'Pro' : 'Free';
   const tokenUsage = detail?.workspacePlan ?? null;
@@ -129,11 +127,7 @@ export function AccountDetailView({
       .then((res) => {
         if (res.ok) {
           const newPlan: 'free' | 'pro' | 'plus' =
-            res.value.newPlan === 'pro'
-              ? 'pro'
-              : res.value.newPlan === 'plus'
-                ? 'plus'
-                : 'free';
+            res.value.newPlan === 'pro' ? 'pro' : res.value.newPlan === 'plus' ? 'plus' : 'free';
           setDetail((prev) =>
             prev
               ? {
@@ -424,8 +418,8 @@ export function AccountDetailView({
                   Tautan trial Guru Pro
                 </h3>
                 <p className="mt-1 text-[12px] leading-relaxed text-[#6d665d]">
-                  Terbitkan tautan satu kali untuk akun ini. Pengguna harus membuka tautan saat masuk
-                  ke akun yang sama, lalu mengonfirmasi aktivasi trial.
+                  Terbitkan tautan satu kali untuk akun ini. Pengguna harus membuka tautan saat
+                  masuk ke akun yang sama, lalu mengonfirmasi aktivasi trial.
                 </p>
               </div>
               {currentPlan === 'free' &&
@@ -444,7 +438,10 @@ export function AccountDetailView({
                   </Button>
                   {trialClaimLink ? (
                     <div className="space-y-2 rounded-xl border border-[#ddd4c8] bg-[#faf7f2] p-3">
-                      <label htmlFor="trial-claim-link" className="block text-[12px] font-medium text-[#57534e]">
+                      <label
+                        htmlFor="trial-claim-link"
+                        className="block text-[12px] font-medium text-[#57534e]"
+                      >
                         Tautan aktivasi
                       </label>
                       <div className="flex gap-2">

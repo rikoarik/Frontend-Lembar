@@ -140,7 +140,10 @@ describe('POST /v1/generate/submit blueprint distribution', () => {
     backendFetch
       .mockResolvedValueOnce(
         new Response(
-          JSON.stringify({ assessment: { id: 'assessment-mixed' }, version: { id: 'version-mixed' } }),
+          JSON.stringify({
+            assessment: { id: 'assessment-mixed' },
+            version: { id: 'version-mixed' },
+          }),
           { status: 201, headers: { 'content-type': 'application/json' } },
         ),
       )
@@ -174,7 +177,9 @@ describe('POST /v1/generate/submit blueprint distribution', () => {
     const assessmentBody = JSON.parse(
       String((backendFetch.mock.calls[0]?.[1] as RequestInit).body),
     );
-    expect(assessmentBody.blueprintItems.map((item: { difficulty: string }) => item.difficulty)).toEqual([
+    expect(
+      assessmentBody.blueprintItems.map((item: { difficulty: string }) => item.difficulty),
+    ).toEqual([
       'easy',
       'easy',
       'easy',

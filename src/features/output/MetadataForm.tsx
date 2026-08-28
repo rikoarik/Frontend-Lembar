@@ -19,7 +19,11 @@ const examFields: Array<{ name: keyof PrintMetadata; label: string; type?: strin
 ];
 
 const identityFields: Array<{ name: keyof PrintMetadata; label: string; placeholder?: string }> = [
-  { name: 'authorityName', label: 'Nama pemerintah / yayasan', placeholder: 'PEMERINTAH KABUPATEN …' },
+  {
+    name: 'authorityName',
+    label: 'Nama pemerintah / yayasan',
+    placeholder: 'PEMERINTAH KABUPATEN …',
+  },
   { name: 'departmentName', label: 'Nama dinas / unit', placeholder: 'DINAS PENDIDIKAN' },
   { name: 'schoolName', label: 'Nama sekolah' },
   { name: 'schoolAddress', label: 'Alamat sekolah' },
@@ -27,9 +31,21 @@ const identityFields: Array<{ name: keyof PrintMetadata; label: string; placehol
 ];
 
 const templates: Array<{ value: LetterheadTemplate; label: string; detail: string }> = [
-  { value: 'official', label: 'Resmi — dua logo', detail: 'Logo kiri dan kanan, identitas terpusat, garis ganda.' },
-  { value: 'compact', label: 'Ringkas — satu logo', detail: 'Satu logo kiri dengan identitas sekolah.' },
-  { value: 'simple', label: 'Sederhana — tanpa logo', detail: 'Identitas teks saja dengan garis resmi.' },
+  {
+    value: 'official',
+    label: 'Resmi — dua logo',
+    detail: 'Logo kiri dan kanan, identitas terpusat, garis ganda.',
+  },
+  {
+    value: 'compact',
+    label: 'Ringkas — satu logo',
+    detail: 'Satu logo kiri dengan identitas sekolah.',
+  },
+  {
+    value: 'simple',
+    label: 'Sederhana — tanpa logo',
+    detail: 'Identitas teks saja dengan garis resmi.',
+  },
 ];
 
 export function MetadataForm({ value, onChange, onSave, onCancel }: MetadataFormProps) {
@@ -81,13 +97,20 @@ export function MetadataForm({ value, onChange, onSave, onCancel }: MetadataForm
         save();
       }}
     >
-      {error ? <p className="text-body-sm text-brand-danger" role="alert">{error}</p> : null}
+      {error ? (
+        <p className="text-body-sm text-brand-danger" role="alert">
+          {error}
+        </p>
+      ) : null}
 
       <fieldset className="grid gap-3">
         <legend className="mb-2 text-body-sm font-semibold text-brand-ink">Template kop</legend>
         <div className="grid gap-2">
           {templates.map((template) => (
-            <label key={template.value} className="flex cursor-pointer gap-3 rounded-md border border-brand-line p-3">
+            <label
+              key={template.value}
+              className="flex cursor-pointer gap-3 rounded-md border border-brand-line p-3"
+            >
               <input
                 type="radio"
                 name="headerTemplate"
@@ -96,7 +119,9 @@ export function MetadataForm({ value, onChange, onSave, onCancel }: MetadataForm
                 onChange={() => update({ headerTemplate: template.value })}
               />
               <span>
-                <span className="block text-body-sm font-medium text-brand-ink">{template.label}</span>
+                <span className="block text-body-sm font-medium text-brand-ink">
+                  {template.label}
+                </span>
                 <span className="block text-label-sm text-brand-ink-muted">{template.detail}</span>
               </span>
             </label>
@@ -144,7 +169,11 @@ export function MetadataForm({ value, onChange, onSave, onCancel }: MetadataForm
               name="maxScore"
               type="number"
               value={draft.maxScore ?? ''}
-              onChange={(event) => update({ maxScore: event.target.value === '' ? undefined : Number(event.target.value) })}
+              onChange={(event) =>
+                update({
+                  maxScore: event.target.value === '' ? undefined : Number(event.target.value),
+                })
+              }
             />
           </label>
         </div>
@@ -161,14 +190,29 @@ export function MetadataForm({ value, onChange, onSave, onCancel }: MetadataForm
       </label>
 
       <div className="flex flex-wrap gap-2">
-        <button className="inline-flex min-h-[var(--control-md)] items-center rounded-md bg-brand-accent px-4 text-white" type="submit">Simpan template</button>
-        <button className="inline-flex min-h-[var(--control-md)] items-center rounded-md border border-brand-line px-4" type="button" onClick={onCancel}>Batal</button>
+        <button
+          className="inline-flex min-h-[var(--control-md)] items-center rounded-md bg-brand-accent px-4 text-white"
+          type="submit"
+        >
+          Simpan template
+        </button>
+        <button
+          className="inline-flex min-h-[var(--control-md)] items-center rounded-md border border-brand-line px-4"
+          type="button"
+          onClick={onCancel}
+        >
+          Batal
+        </button>
       </div>
     </form>
   );
 }
 
-function TextField({ field, draft, update }: {
+function TextField({
+  field,
+  draft,
+  update,
+}: {
   field: { name: keyof PrintMetadata; label: string; type?: string; placeholder?: string };
   draft: PrintMetadata;
   update: (patch: Partial<PrintMetadata>) => void;
@@ -188,7 +232,12 @@ function TextField({ field, draft, update }: {
   );
 }
 
-function LogoField({ label, value, onUpload, onClear }: {
+function LogoField({
+  label,
+  value,
+  onUpload,
+  onClear,
+}: {
   label: string;
   value?: string;
   onUpload: (file?: File) => void;
@@ -198,12 +247,29 @@ function LogoField({ label, value, onUpload, onClear }: {
     <div className="grid gap-2 rounded-md border border-brand-line p-3">
       <span className="text-body-sm text-brand-ink">{label}</span>
       <div className="flex items-center gap-3">
-        {value ? <img className="h-12 w-12 object-contain" src={value} alt={`Pratinjau ${label.toLowerCase()}`} /> : <div className="h-12 w-12 rounded border border-dashed border-brand-line" />}
+        {value ? (
+          <img
+            className="h-12 w-12 object-contain"
+            src={value}
+            alt={`Pratinjau ${label.toLowerCase()}`}
+          />
+        ) : (
+          <div className="h-12 w-12 rounded border border-dashed border-brand-line" />
+        )}
         <label className="cursor-pointer rounded-md border border-brand-line px-3 py-2 text-label-sm">
           Pilih gambar
-          <input className="sr-only" type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => onUpload(event.target.files?.[0])} />
+          <input
+            className="sr-only"
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            onChange={(event) => onUpload(event.target.files?.[0])}
+          />
         </label>
-        {value ? <button type="button" className="text-label-sm text-brand-danger" onClick={onClear}>Hapus</button> : null}
+        {value ? (
+          <button type="button" className="text-label-sm text-brand-danger" onClick={onClear}>
+            Hapus
+          </button>
+        ) : null}
       </div>
       <span className="text-label-sm text-brand-ink-muted">PNG/JPG/WebP, maksimal 600 KB.</span>
     </div>

@@ -27,7 +27,7 @@ export function AppShell({ children }: AppShellProps) {
         if (cancelled || !payload?.data) return;
         setPlanLabel(
           payload.data.catalog?.displayName ??
-            (payload.data.plan === 'free' ? 'Paket Gratis' : payload.data.plan ?? 'Paket Gratis'),
+            (payload.data.plan === 'free' ? 'Paket Gratis' : (payload.data.plan ?? 'Paket Gratis')),
         );
       })
       .catch(() => undefined);
@@ -46,11 +46,7 @@ export function AppShell({ children }: AppShellProps) {
   );
 
   const accountMenu = (
-    <AccountMenu
-      displayName={displayName}
-      planLabel={planLabel}
-      compact={collapsed}
-    />
+    <AccountMenu displayName={displayName} planLabel={planLabel} compact={collapsed} />
   );
 
   return (

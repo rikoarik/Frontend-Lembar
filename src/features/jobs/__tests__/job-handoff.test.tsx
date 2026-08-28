@@ -27,7 +27,8 @@ class MockEventSource {
     for (const cb of this.listeners.get(event) ?? []) cb();
   }
 }
-(globalThis as unknown as { EventSource: typeof MockEventSource }).EventSource = MockEventSource as never;
+(globalThis as unknown as { EventSource: typeof MockEventSource }).EventSource =
+  MockEventSource as never;
 
 const running: JobSnapshot = {
   jobId: 'job-123',

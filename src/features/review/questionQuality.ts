@@ -8,7 +8,9 @@ function normalize(value: string): string {
 }
 
 /** Deterministic review checks that are safe to run for live and mock questions. */
-export function analyzeQuestionQuality(question: Pick<ReviewQuestion, 'questionType' | 'options' | 'answerKey'>): QuestionWarning[] {
+export function analyzeQuestionQuality(
+  question: Pick<ReviewQuestion, 'questionType' | 'options' | 'answerKey'>,
+): QuestionWarning[] {
   if (question.questionType !== 'multiple_choice' && question.questionType !== 'true_false') {
     return [];
   }
@@ -25,7 +27,10 @@ export function analyzeQuestionQuality(question: Pick<ReviewQuestion, 'questionT
     });
   }
 
-  if (new Set(optionIds).size !== optionIds.length || new Set(optionTexts).size !== optionTexts.length) {
+  if (
+    new Set(optionIds).size !== optionIds.length ||
+    new Set(optionTexts).size !== optionTexts.length
+  ) {
     warnings.push({
       code: 'DUPLICATE_OPTION',
       message: 'Ada pilihan jawaban yang sama atau terlalu identik. Bedakan agar tidak ambigu.',

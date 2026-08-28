@@ -1,16 +1,12 @@
 'use client';
 
-
 import { use, useEffect, useState } from 'react';
 import OutputPackagePreview from '@/app/components/print/OutputPackagePreview';
 import { MetadataForm } from '@/src/features/output/MetadataForm';
 import { StudentWorksheetRenderer } from '@/src/features/output/StudentWorksheetRenderer';
 import { TeacherKeyRenderer } from '@/src/features/output/TeacherKeyRenderer';
 import type { PrintDTO, PrintMetadata } from '@/src/features/output/types';
-import {
-  loadPrintTemplate,
-  savePrintTemplate,
-} from '@/src/features/output/printTemplateStorage';
+import { loadPrintTemplate, savePrintTemplate } from '@/src/features/output/printTemplateStorage';
 import { assessmentService } from '@/src/services/assessments/assessmentService';
 import type { AssessmentDetail } from '@/src/features/review/types';
 import { humanizeAssessmentLabel } from '@/src/features/history/HistoryView';

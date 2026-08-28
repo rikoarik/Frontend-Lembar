@@ -20,10 +20,14 @@ function SchoolIdentity({ metadata }: { metadata: PrintMetadata }) {
   return (
     <div className="min-w-0 text-center font-serif leading-tight text-brand-ink print:text-black">
       {metadata.authorityName ? (
-        <p className="text-[10px] font-semibold uppercase tracking-wide">{metadata.authorityName}</p>
+        <p className="text-[10px] font-semibold uppercase tracking-wide">
+          {metadata.authorityName}
+        </p>
       ) : null}
       {metadata.departmentName ? (
-        <p className="text-[10px] font-semibold uppercase tracking-wide">{metadata.departmentName}</p>
+        <p className="text-[10px] font-semibold uppercase tracking-wide">
+          {metadata.departmentName}
+        </p>
       ) : null}
       <p className="mt-0.5 text-[15px] font-bold uppercase tracking-wide">{metadata.schoolName}</p>
       {metadata.schoolAddress ? (
@@ -42,7 +46,9 @@ export function DocumentLetterhead({ dto, copy }: { dto: PrintDTO; copy: 'studen
 
   return (
     <header
-      data-testid={metadata && copy === 'student' ? 'student-print-metadata' : 'document-letterhead'}
+      data-testid={
+        metadata && copy === 'student' ? 'student-print-metadata' : 'document-letterhead'
+      }
       className={`mb-5 font-serif text-brand-ink print:text-black ${metadata && copy === 'student' ? 'student-print-metadata' : ''}`}
     >
       {metadata ? (
@@ -67,7 +73,13 @@ export function DocumentLetterhead({ dto, copy }: { dto: PrintDTO; copy: 'studen
         </>
       ) : null}
 
-      <div className={metadata ? 'pt-2 text-center' : 'border-b border-brand-line pb-4 text-center print:border-black'}>
+      <div
+        className={
+          metadata
+            ? 'pt-2 text-center'
+            : 'border-b border-brand-line pb-4 text-center print:border-black'
+        }
+      >
         <h1 className="text-[13px] font-bold uppercase leading-tight">{heading}</h1>
         {!metadata && context ? <p className="mt-1 text-[10px]">{context}</p> : null}
         {dto.academicYear ? (
@@ -108,12 +120,22 @@ export function DocumentLetterhead({ dto, copy }: { dto: PrintDTO; copy: 'studen
   );
 }
 
-function MetaLine({ label, value, blank = false }: { label: string; value: string; blank?: boolean }) {
+function MetaLine({
+  label,
+  value,
+  blank = false,
+}: {
+  label: string;
+  value: string;
+  blank?: boolean;
+}) {
   return (
     <p className="grid grid-cols-[6.5rem_0.5rem_minmax(0,1fr)] gap-1">
       <span>{label}</span>
       <span>:</span>
-      <span className={blank || !value ? 'min-h-4 border-b border-dotted border-black' : ''}>{value}</span>
+      <span className={blank || !value ? 'min-h-4 border-b border-dotted border-black' : ''}>
+        {value}
+      </span>
     </p>
   );
 }

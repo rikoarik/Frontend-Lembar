@@ -76,10 +76,7 @@ export function WorkspaceProvider({
     personal: tWorkspace('personalLabel'),
     school: tWorkspace('schoolLabel'),
   };
-  const fallbackWorkspaces = useMemo(
-    () => (allowDemoSeed ? DEMO_WORKSPACES : []),
-    [allowDemoSeed],
-  );
+  const fallbackWorkspaces = useMemo(() => (allowDemoSeed ? DEMO_WORKSPACES : []), [allowDemoSeed]);
   const workspaceList = initialWorkspaces ?? fallbackWorkspaces;
   const firstWorkspace = workspaceList[0];
   const resolvedActiveId = initialActiveId ?? firstWorkspace?.id ?? '';

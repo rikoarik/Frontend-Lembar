@@ -48,7 +48,9 @@ describe('admin-issued trial link - /app/pengaturan/langganan', () => {
 
     expect(await screen.findByText('1.500 / 30.000')).toBeInTheDocument();
     expect(screen.getByText(/hanya dapat diterbitkan oleh superadmin/i)).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /siapkan|terbitkan.*tautan/i })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /siapkan|terbitkan.*tautan/i }),
+    ).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /klaim trial 2 bulan/i })).not.toBeInTheDocument();
   });
 
@@ -92,6 +94,4 @@ describe('admin-issued trial link - /app/pengaturan/langganan', () => {
       screen.queryByRole('link', { name: /buka tautan klaim trial/i }),
     ).not.toBeInTheDocument();
   });
-
-
 });

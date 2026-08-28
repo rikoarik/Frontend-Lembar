@@ -39,13 +39,16 @@ function sanitizeGenerationContext(body: Record<string, unknown>) {
         ? 'catalog_and_pdf'
         : 'catalog';
   const materialIds = Array.isArray(body.materialIds)
-    ? body.materialIds.filter((id): id is string => typeof id === 'string' && id.length > 0).slice(0, 50)
+    ? body.materialIds
+        .filter((id): id is string => typeof id === 'string' && id.length > 0)
+        .slice(0, 50)
     : [];
 
   return {
     sourceMode,
     materialIds,
-    teacherFocus: typeof body.teacherFocus === 'string' ? body.teacherFocus.trim().slice(0, 500) : '',
+    teacherFocus:
+      typeof body.teacherFocus === 'string' ? body.teacherFocus.trim().slice(0, 500) : '',
     exampleQuestion:
       typeof body.exampleQuestion === 'string' ? body.exampleQuestion.trim().slice(0, 2_000) : '',
   };
@@ -82,7 +85,11 @@ function buildDifficultyDistribution(count: number, requested: string) {
   ];
 }
 
-function buildBlueprintItems(body: Record<string, unknown>, count: number, requestedDifficulty: string) {
+function buildBlueprintItems(
+  body: Record<string, unknown>,
+  count: number,
+  requestedDifficulty: string,
+) {
   const normalizedCounts = normalizeQuestionTypeCounts(
     count,
     toQuestionTypeCounts(body.questionTypeCounts),

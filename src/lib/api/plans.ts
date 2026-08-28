@@ -85,9 +85,7 @@ export type FetchPublicPlansOptions = {
   baseUrl?: string;
 };
 
-export async function fetchPublicPlans(
-  opts?: FetchPublicPlansOptions,
-): Promise<PublicPlan[]> {
+export async function fetchPublicPlans(opts?: FetchPublicPlansOptions): Promise<PublicPlan[]> {
   const base =
     opts?.baseUrl ??
     process.env.BACKEND_API_BASE_URL ??

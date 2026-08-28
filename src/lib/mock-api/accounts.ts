@@ -7,7 +7,9 @@ export type MockRole = 'teacher' | 'school_admin' | 'superadmin';
  */
 function assertNotProduction(): void {
   if (process.env.NODE_ENV === 'production') {
-    throw new Error('mock-api/accounts is disabled in production (NEXT_PUBLIC_API_MODE=live required)');
+    throw new Error(
+      'mock-api/accounts is disabled in production (NEXT_PUBLIC_API_MODE=live required)',
+    );
   }
 }
 

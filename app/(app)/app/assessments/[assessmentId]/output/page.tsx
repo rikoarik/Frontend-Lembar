@@ -6,10 +6,7 @@ import { MetadataForm } from '@/src/features/output/MetadataForm';
 import { StudentWorksheetRenderer } from '@/src/features/output/StudentWorksheetRenderer';
 import { TeacherKeyRenderer } from '@/src/features/output/TeacherKeyRenderer';
 import type { PrintDTO, PrintMetadata } from '@/src/features/output/types';
-import {
-  loadPrintTemplate,
-  savePrintTemplate,
-} from '@/src/features/output/printTemplateStorage';
+import { loadPrintTemplate, savePrintTemplate } from '@/src/features/output/printTemplateStorage';
 
 const blankMetadata: PrintMetadata = {
   schoolName: '',

@@ -30,8 +30,7 @@ export const metadata = {
     'lembar — workspace asesmen untuk guru. Buat draft, tinjau, dan finalkan lembar soal.',
   openGraph: {
     title: 'lembar',
-    description:
-      'Workspace asesmen untuk guru. Buat draft, tinjau, dan finalkan lembar soal.',
+    description: 'Workspace asesmen untuk guru. Buat draft, tinjau, dan finalkan lembar soal.',
     url: 'https://app.lembar.web.id',
     siteName: 'lembar',
     images: [
@@ -48,8 +47,7 @@ export const metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'lembar',
-    description:
-      'Workspace asesmen untuk guru. Buat draft, tinjau, dan finalkan lembar soal.',
+    description: 'Workspace asesmen untuk guru. Buat draft, tinjau, dan finalkan lembar soal.',
     images: ['/og/lembar-home.jpg'],
   },
 };

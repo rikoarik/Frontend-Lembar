@@ -23,7 +23,8 @@ export default function OutputRouteError({
         </span>
         <h1 className="mt-3 text-h3 font-semibold text-brand-ink">Output tidak dapat dimuat</h1>
         <p className="mt-2 text-body-sm leading-relaxed text-brand-ink-muted">
-          Sesi atau data output mungkin berubah. Coba muat ulang data, atau kembali ke riwayat asesmen.
+          Sesi atau data output mungkin berubah. Coba muat ulang data, atau kembali ke riwayat
+          asesmen.
         </p>
         <div className="mt-5 flex flex-wrap justify-center gap-2">
           <Button onClick={reset}>Coba lagi</Button>

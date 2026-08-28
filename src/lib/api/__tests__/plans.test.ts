@@ -1,16 +1,38 @@
 import { describe, expect, it, vi } from 'vitest';
-import {
-  fetchPublicPlans,
-  formatPrice,
-  formatTokenLimit,
-} from '../plans';
+import { fetchPublicPlans, formatPrice, formatTokenLimit } from '../plans';
 
 describe('canonical plan catalog helper', () => {
   it('maps the public response and formats IDR/token limits', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({ data: [
-      { key: 'free', displayName: 'Free', priceAmount: 0, currency: 'IDR', billingPeriod: null, tokenMonthlyLimit: 60000, features: [] },
-      { key: 'pro', displayName: 'Pro', priceAmount: 49000, currency: 'IDR', billingPeriod: 'monthly', tokenMonthlyLimit: null, features: [] },
-    ] }), { status: 200 })));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            data: [
+              {
+                key: 'free',
+                displayName: 'Free',
+                priceAmount: 0,
+                currency: 'IDR',
+                billingPeriod: null,
+                tokenMonthlyLimit: 60000,
+                features: [],
+              },
+              {
+                key: 'pro',
+                displayName: 'Pro',
+                priceAmount: 49000,
+                currency: 'IDR',
+                billingPeriod: 'monthly',
+                tokenMonthlyLimit: null,
+                features: [],
+              },
+            ],
+          }),
+          { status: 200 },
+        ),
+      ),
+    );
 
     const plans = await fetchPublicPlans({ baseUrl: 'https://api.example.test' });
     expect(plans.map((plan) => plan.key)).toEqual(['free', 'pro']);

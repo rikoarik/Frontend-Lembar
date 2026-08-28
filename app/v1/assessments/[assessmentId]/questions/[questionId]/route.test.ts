@@ -47,17 +47,20 @@ describe('PATCH /v1/assessments/:assessmentId/questions/:questionId', () => {
 
   it('forwards edited choices using the backend option contract', async () => {
     const { PATCH } = await import('./route');
-    const request = new Request('http://localhost/v1/assessments/assessment-1/questions/question-1', {
-      method: 'PATCH',
-      headers: { 'content-type': 'application/json', 'if-match': 'etag-1' },
-      body: JSON.stringify({
-        options: [
-          { id: 'a', label: 'A', text: 'Pilihan pertama' },
-          { id: 'b', label: 'B', text: 'Pilihan kedua' },
-        ],
-        answerKey: 'b',
-      }),
-    });
+    const request = new Request(
+      'http://localhost/v1/assessments/assessment-1/questions/question-1',
+      {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json', 'if-match': 'etag-1' },
+        body: JSON.stringify({
+          options: [
+            { id: 'a', label: 'A', text: 'Pilihan pertama' },
+            { id: 'b', label: 'B', text: 'Pilihan kedua' },
+          ],
+          answerKey: 'b',
+        }),
+      },
+    );
 
     const response = await PATCH(request, {
       params: Promise.resolve({ assessmentId: 'assessment-1', questionId: 'question-1' }),
@@ -87,11 +90,14 @@ describe('PATCH /v1/assessments/:assessmentId/questions/:questionId', () => {
 
   it('rejects malformed choice payloads before calling the backend', async () => {
     const { PATCH } = await import('./route');
-    const request = new Request('http://localhost/v1/assessments/assessment-1/questions/question-1', {
-      method: 'PATCH',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ options: [{ id: 'a' }] }),
-    });
+    const request = new Request(
+      'http://localhost/v1/assessments/assessment-1/questions/question-1',
+      {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ options: [{ id: 'a' }] }),
+      },
+    );
 
     const response = await PATCH(request, {
       params: Promise.resolve({ assessmentId: 'assessment-1', questionId: 'question-1' }),

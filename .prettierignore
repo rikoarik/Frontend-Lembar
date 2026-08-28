@@ -1,5 +1,6 @@
 # Generated artifacts
 public/mockServiceWorker.js
+pnpm-lock.yaml
 *.tsbuildinfo
 
 # Build outputs
