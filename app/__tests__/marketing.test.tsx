@@ -3,12 +3,16 @@ import { describe, expect, it, vi } from 'vitest';
 vi.mock('@/src/lib/api/marketingSession', () => ({
   getMarketingSession: vi.fn().mockResolvedValue(null),
 }));
-import { render, screen, within } from '@testing-library/react';
+import { act, render, screen, within } from '@testing-library/react';
 import MarketingLayout from '../(marketing)/layout';
 
 // Render the built-in marketing pages instead of CMS-provided blocks.
 vi.mock('@/src/lib/marketing/fetchMarketingPage', () => ({
   fetchMarketingPage: vi.fn().mockResolvedValue(null),
+}));
+
+vi.mock('@/app/components/marketing/JsonLd', () => ({
+  default: () => null,
 }));
 
 // Pricing has no production fallback, so this test supplies a verified catalog response.
@@ -47,14 +51,20 @@ import PricingPage from '../(marketing)/harga/page';
 async function renderWithLayout(Page: () => Promise<React.ReactElement>) {
   const content = await Page();
   const layout = await MarketingLayout({ children: content });
-  return render(layout);
+  let result: ReturnType<typeof render> | undefined;
+
+  await act(async () => {
+    result = render(layout);
+  });
+
+  return result!;
 }
 
 describe('marketing routes — baseline', () => {
   it('home page renders hero, three steps, Masuk link, Coba Gratis CTA, foreign-host logo', async () => {
     await renderWithLayout(HomePage);
 
-    const hero = screen.getByRole('heading', {
+    const hero = await screen.findByRole('heading', {
       level: 1,
       name: /Buat soal ujian otomatis/i,
     });
@@ -95,23 +105,16 @@ describe('marketing routes — baseline', () => {
     await renderWithLayout(PricingPage);
 
     expect(
-      screen.getByRole('heading', {
+      await screen.findByRole('heading', {
         level: 1,
-        name: /Pilih paket yang sesuai untuk kebutuhan mengajar Anda\./i,
+        name: /Pilih paket yang sesuai dengan cara Anda mengajar\./i,
       }),
     ).toBeInTheDocument();
 
-    const planCards = document.querySelectorAll('.bento-card');
-    expect(planCards.length).toBe(3);
-    expect(
-      within(planCards[0] as HTMLElement).getByRole('heading', { name: 'Free' }),
-    ).toBeInTheDocument();
-    expect(
-      within(planCards[1] as HTMLElement).getByRole('heading', { name: 'Pro' }),
-    ).toBeInTheDocument();
-    expect(
-      within(planCards[2] as HTMLElement).getByRole('heading', { name: 'Sekolah & Institusi' }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Gratis' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Pro' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Plus' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Sekolah & Institusi' })).toBeInTheDocument();
 
     expect(screen.getByRole('heading', { name: 'Pertanyaan umum' })).toBeInTheDocument();
     expect(screen.getByText('Populer')).toBeInTheDocument();

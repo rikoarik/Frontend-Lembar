@@ -65,14 +65,15 @@ vi.mock('next-intl/server', async () => {
   return {
     getLocale: async () => 'id',
     getMessages: async () => messages,
-    getTranslations:
-      (namespace?: string | object) => async (key: string, values?: Record<string, unknown>) => {
-        const ns = typeof namespace === 'string' ? namespace : undefined;
+    getTranslations: async (namespace?: string | object) => {
+      const ns = typeof namespace === 'string' ? namespace : undefined;
+      return (key: string, values?: Record<string, unknown>) => {
         const fullKey = ns ? `${ns}.${key}` : key;
         const value = resolve(fullKey);
         if (typeof value !== 'string') return fullKey;
         return format(value, values);
-      },
+      };
+    },
   };
 });
 
