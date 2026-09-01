@@ -123,6 +123,18 @@ describe('job progress UX', () => {
     expect(result.current.job?.progressPercent).toBe(60);
   });
 
+  it('marks a retained progress snapshot as stale when refresh fails', () => {
+    render(
+      <JobProgressPanel
+        job={running}
+        loading={false}
+        error={{ code: 'UNKNOWN', safeMessage: 'Tidak dapat memuat status pekerjaan saat ini.', retryable: true }}
+      />,
+    );
+
+    expect(screen.getByText(/Status terakhir mungkin tidak terbaru/)).toBeInTheDocument();
+  });
+
   it('formats ETA only within evidence boundaries', () => {
     const now = new Date('2026-07-29T10:02:00.000Z').getTime();
     expect(formatJobTiming({ ...running, progressPercent: 0 }, now).eta).toBe(

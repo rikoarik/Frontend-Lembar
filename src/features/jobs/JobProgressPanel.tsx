@@ -150,7 +150,7 @@ export function JobProgressPanel({
 
         {error ? (
           <p className="text-body-sm text-brand-danger" role="status">
-            {error.safeMessage}
+            Status terakhir mungkin tidak terbaru. {error.safeMessage}
           </p>
         ) : null}
 
