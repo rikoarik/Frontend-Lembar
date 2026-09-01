@@ -1093,23 +1093,20 @@ export default function ConfigurationCompose() {
                   </legend>
                   <div className={radioGroupClass}>
                     {REVIEW_MODE_OPTIONS.map((r) => (
-                      <label
+                      <button
                         key={r.value}
-                        className={`flex cursor-pointer items-center gap-2 rounded-md border px-4 py-3 transition-colors ${
+                        type="button"
+                        role="radio"
+                        aria-checked={values.reviewMode === r.value}
+                        onClick={() => update('reviewMode', r.value)}
+                        className={`flex cursor-pointer items-center gap-2 rounded-md border px-4 py-3 text-left transition-colors ${
                           values.reviewMode === r.value
                             ? 'border-brand-accent bg-brand-accent-soft ring-1 ring-brand-accent'
                             : 'border-brand-line hover:bg-brand-paper'
                         }`}
                       >
-                        <input
-                          type="radio"
-                          name="reviewMode"
-                          value={r.value}
-                          checked={values.reviewMode === r.value}
-                          onChange={() => update('reviewMode', r.value)}
-                          className="sr-only"
-                        />
                         <span
+                          aria-hidden="true"
                           className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${
                             values.reviewMode === r.value
                               ? 'border-brand-accent'
@@ -1120,11 +1117,11 @@ export default function ConfigurationCompose() {
                             <span className="h-2.5 w-2.5 rounded-full bg-brand-accent" />
                           )}
                         </span>
-                        <div className="flex flex-col">
+                        <span className="flex flex-col">
                           <span className="text-body-default font-medium">{r.label}</span>
                           <span className="text-body-sm text-brand-ink-muted">{r.desc}</span>
-                        </div>
-                      </label>
+                        </span>
+                      </button>
                     ))}
                   </div>
                   {localErrors.reviewMode ? (

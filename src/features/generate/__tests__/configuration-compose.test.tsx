@@ -211,11 +211,9 @@ describe('ConfigurationCompose — review mode stability', () => {
     render(<ConfigurationCompose />, { wrapper: Wrapper });
 
     const detail = await screen.findByRole('radio', { name: /Detail/i });
-    const detailCard = detail.closest('label');
-    if (!detailCard) throw new Error('Kartu mode Detail tidak ditemukan.');
-    await user.click(detailCard);
+    await user.click(detail);
 
-    expect(detail).toBeChecked();
+    expect(detail).toHaveAttribute('aria-checked', 'true');
     expect(screen.getByRole('heading', { name: 'Konteks & Referensi' })).toBeInTheDocument();
     expect(screen.getByTestId('output-settings')).toBeInTheDocument();
   });
