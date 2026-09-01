@@ -202,11 +202,13 @@ export function OpsAiProviderSection({ setToast }: { setToast?: (msg: string) =>
     <div className="space-y-6 text-[#1e1814]">
       <AdminPageHeader
         title="Konfigurasi AI"
-        description="Atur driver, base URL, API key, model, dan timeout untuk primary serta fallback."
+        description="Atur provider inference yang dipakai Hermes Runtime: base URL, API key, model utama, fallback, dan timeout. Fitur aplikasi tidak memanggil provider secara langsung."
       />
 
       <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-[#ddd3c4] bg-[#f5f0e8] px-4 py-3">
-        <span className="text-xs text-[#8a8177]">Driver aktif:</span>
+        <span className="text-xs text-[#8a8177]">Runtime:</span>
+        <AdminPill tone="info">HERMES</AdminPill>
+        <span className="text-xs text-[#8a8177]">Provider aktif:</span>
         <AdminPill tone={driver === 'mock' ? 'warn' : driver === 'hermes' ? 'info' : 'ok'}>
           {driver.toUpperCase()}
         </AdminPill>
