@@ -88,6 +88,11 @@ export function OpsAiProviderSection({ setToast }: { setToast?: (msg: string) =>
   const [fallbackModelId, setFallbackModelId] = useState('');
   const [timeoutMs, setTimeoutMs] = useState(30000);
   const [maxTokens, setMaxTokens] = useState(4096);
+  const [imageEnabled, setImageEnabled] = useState(false);
+  const [imageBaseUrl, setImageBaseUrl] = useState('https://api.x.ai/v1');
+  const [imageApiKey, setImageApiKey] = useState('');
+  const [imageModelId, setImageModelId] = useState('grok-imagine-image');
+  const originalImageKey = useRef('');
   const originalPrimaryKey = useRef('');
   const originalFallbackKey = useRef('');
   const [primaryTest, setPrimaryTest] = useState<TestState>(EMPTY_TEST);
@@ -115,6 +120,11 @@ export function OpsAiProviderSection({ setToast }: { setToast?: (msg: string) =>
       setFallbackModelId(cfg.fallbackModelId);
       setTimeoutMs(cfg.timeoutMs);
       setMaxTokens(cfg.maxTokens);
+      setImageEnabled(cfg.imageEnabled);
+      setImageBaseUrl(cfg.imageBaseUrl);
+      setImageApiKey(cfg.imageApiKey);
+      originalImageKey.current = cfg.imageApiKey;
+      setImageModelId(cfg.imageModelId);
     });
 
     return () => {
@@ -143,6 +153,9 @@ export function OpsAiProviderSection({ setToast }: { setToast?: (msg: string) =>
       fallbackModelId,
       timeoutMs,
       maxTokens,
+      imageEnabled,
+      imageBaseUrl,
+      imageModelId,
     };
 
     if (
@@ -158,6 +171,9 @@ export function OpsAiProviderSection({ setToast }: { setToast?: (msg: string) =>
       !fallbackApiKey.includes('***')
     ) {
       payload.fallbackApiKey = fallbackApiKey;
+    }
+    if (imageApiKey && imageApiKey !== originalImageKey.current && !imageApiKey.includes('***')) {
+      payload.imageApiKey = imageApiKey;
     }
 
     const result = await aiProviderService.updateAiProvider(payload);
@@ -384,6 +400,24 @@ export function OpsAiProviderSection({ setToast }: { setToast?: (msg: string) =>
           </div>
         </Panel>
       </div>
+
+      <Panel title="Image generation via Hermes">
+        <div className="space-y-4">
+          <label className="flex items-center gap-2 text-sm font-medium text-[#403a34]">
+            <input type="checkbox" checked={imageEnabled} onChange={(e) => setImageEnabled(e.target.checked)} disabled={saving} />
+            Aktifkan gambar opsional untuk soal
+          </label>
+          <ProviderField label="Base URL xAI" hint="Hermes image_gen yang memanggil xAI; Lembar tidak memanggil provider langsung.">
+            <input type="url" className={fieldCls} placeholder="https://api.x.ai/v1" value={imageBaseUrl} onChange={(e) => setImageBaseUrl(e.target.value)} disabled={saving} />
+          </ProviderField>
+          <ProviderField label="API Key xAI" hint="Biarkan kosong untuk mempertahankan key yang tersimpan.">
+            <input type="password" className={fieldCls} placeholder="Biarkan kosong bila tidak diubah" value={imageApiKey} onChange={(e) => setImageApiKey(e.target.value)} autoComplete="new-password" disabled={saving} />
+          </ProviderField>
+          <ProviderField label="Model gambar Hermes" hint="Default: grok-imagine-image.">
+            <input type="text" className={fieldCls} placeholder="grok-imagine-image" value={imageModelId} onChange={(e) => setImageModelId(e.target.value)} disabled={saving} />
+          </ProviderField>
+        </div>
+      </Panel>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <button

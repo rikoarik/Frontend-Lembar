@@ -1036,6 +1036,10 @@ export type AiProviderConfig = {
   fallbackModelId: string;
   timeoutMs: number;
   maxTokens: number;
+  imageEnabled: boolean;
+  imageBaseUrl: string;
+  imageApiKey: string;
+  imageModelId: string;
   apiKeyPresent: boolean;
 };
 
