@@ -87,6 +87,7 @@ export function OpsAiProviderSection({ setToast }: { setToast?: (msg: string) =>
   const [fallbackApiKey, setFallbackApiKey] = useState('');
   const [fallbackModelId, setFallbackModelId] = useState('');
   const [timeoutMs, setTimeoutMs] = useState(30000);
+  const [maxTokens, setMaxTokens] = useState(4096);
   const originalPrimaryKey = useRef('');
   const originalFallbackKey = useRef('');
   const [primaryTest, setPrimaryTest] = useState<TestState>(EMPTY_TEST);
@@ -113,6 +114,7 @@ export function OpsAiProviderSection({ setToast }: { setToast?: (msg: string) =>
       originalFallbackKey.current = cfg.fallbackApiKey;
       setFallbackModelId(cfg.fallbackModelId);
       setTimeoutMs(cfg.timeoutMs);
+      setMaxTokens(cfg.maxTokens);
     });
 
     return () => {
@@ -140,6 +142,7 @@ export function OpsAiProviderSection({ setToast }: { setToast?: (msg: string) =>
       fallbackBaseUrl,
       fallbackModelId,
       timeoutMs,
+      maxTokens,
     };
 
     if (
@@ -294,6 +297,19 @@ export function OpsAiProviderSection({ setToast }: { setToast?: (msg: string) =>
                 step={1000}
                 value={timeoutMs}
                 onChange={(e) => setTimeoutMs(Number(e.target.value))}
+                disabled={saving}
+              />
+            </ProviderField>
+
+            <ProviderField label="Maks. output token" hint="Batas output untuk satu panggilan Hermes.">
+              <input
+                type="number"
+                className={fieldCls}
+                min={1}
+                max={65536}
+                step={256}
+                value={maxTokens}
+                onChange={(e) => setMaxTokens(Number(e.target.value))}
                 disabled={saving}
               />
             </ProviderField>

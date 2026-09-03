@@ -1035,6 +1035,7 @@ export type AiProviderConfig = {
   fallbackApiKey: string;
   fallbackModelId: string;
   timeoutMs: number;
+  maxTokens: number;
   apiKeyPresent: boolean;
 };
 
