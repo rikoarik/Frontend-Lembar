@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/app/components/ui';
 import {
   AdminPageHeader,
@@ -108,6 +108,27 @@ export function OpsCatalogSection({
   } | null>(null);
   const [addGradeCustom, setAddGradeCustom] = useState(false);
   const [addGradeCustomLabel, setAddGradeCustomLabel] = useState('');
+  const [showAddMaterial, setShowAddMaterial] = useState(false);
+  const [materialSubjectId, setMaterialSubjectId] = useState('');
+  const [materialOutcomeId, setMaterialOutcomeId] = useState('');
+  const [materialOutcomes, setMaterialOutcomes] = useState<{ id: string; label: string }[]>([]);
+  const [materialCode, setMaterialCode] = useState('');
+  const [materialTitle, setMaterialTitle] = useState('');
+  const [materialKind, setMaterialKind] = useState<'lesson' | 'exercise' | 'reading' | 'video' | 'assessment' | 'reference'>('lesson');
+  const [materialSourceRights, setMaterialSourceRights] = useState<'license:internal' | 'license:cc-by' | 'license:cc-by-sa' | 'license:cc-by-nc' | 'license:cc-by-nd' | 'license:unknown'>('license:internal');
+  const [materialPublish, setMaterialPublish] = useState(true);
+  const [materialSaving, setMaterialSaving] = useState(false);
+  useEffect(() => {
+    if (!materialSubjectId) {
+      setMaterialOutcomes([]);
+      setMaterialOutcomeId('');
+      return;
+    }
+    adminService.listOutcomes(materialSubjectId).then((result) => {
+      if (result.ok) setMaterialOutcomes(result.value);
+    });
+  }, [materialSubjectId]);
+
   const activeGradesCount = catalogGrades.filter((g) => g.status === 'active').length;
   const selectedGradeObj = catalogGrades.find((g) => g.id === catalogSelectedGrade);
   const activeSubjectsCount = catalogSubjects.filter((s) => s.status === 'active').length;
@@ -241,6 +262,32 @@ export function OpsCatalogSection({
       </div>
 
       {catalogLoading ? <AdminContentLoading /> : null}
+
+      <section className="rounded-2xl border border-[#ddd4c8]/80 bg-white p-5">
+        <div className="flex items-center justify-between gap-3">
+          <div><h3 className="text-[14px] font-bold text-[#171717]">Materi</h3><p className="text-[12px] text-[#57534e]">Buat materi dari CP/outcome yang sudah ada.</p></div>
+          <Button size="sm" onClick={() => setShowAddMaterial((v) => !v)}>{showAddMaterial ? 'Batal' : 'Tambah Materi'}</Button>
+        </div>
+        {showAddMaterial ? <form className="mt-4 grid gap-3 md:grid-cols-2" onSubmit={async (event) => {
+          event.preventDefault();
+          if (!materialOutcomeId || !materialCode.trim() || !materialTitle.trim()) return;
+          setMaterialSaving(true);
+          const result = await adminService.createMaterial({ outcomeId: materialOutcomeId, code: materialCode.trim(), title: materialTitle.trim(), kind: materialKind, sourceRights: materialSourceRights, publish: materialPublish });
+          setMaterialSaving(false);
+          if (!result.ok) return setToast(`Gagal: ${result.error.safeMessage}`);
+          setToast(`Materi \"${result.value.title}\" ${result.value.published ? 'dipublikasikan' : 'disimpan sebagai draft'}.`);
+          setShowAddMaterial(false); setMaterialCode(''); setMaterialTitle(''); setMaterialOutcomeId('');
+        }}>
+          <label className="text-[12px] text-[#57534e]">Mapel<select required className="mt-1 w-full rounded-xl border border-[#ddd4c8] bg-white px-3 py-2 text-[#171717]" value={materialSubjectId} onChange={(e) => setMaterialSubjectId(e.target.value)}><option value="">Pilih mapel</option>{catalogSubjects.map((subject) => <option key={subject.id} value={subject.id}>{subject.label}</option>)}</select></label>
+          <label className="text-[12px] text-[#57534e]">CP / Outcome<select required disabled={!materialSubjectId} className="mt-1 w-full rounded-xl border border-[#ddd4c8] bg-white px-3 py-2 text-[#171717]" value={materialOutcomeId} onChange={(e) => setMaterialOutcomeId(e.target.value)}><option value="">Pilih CP</option>{materialOutcomes.map((outcome) => <option key={outcome.id} value={outcome.id}>{outcome.label}</option>)}</select></label>
+          <label className="text-[12px] text-[#57534e]">Kode<input required className="mt-1 w-full rounded-xl border border-[#ddd4c8] px-3 py-2 text-[#171717]" value={materialCode} onChange={(e) => setMaterialCode(e.target.value)} placeholder="MAT-001" /></label>
+          <label className="text-[12px] text-[#57534e]">Jenis<select className="mt-1 w-full rounded-xl border border-[#ddd4c8] bg-white px-3 py-2 text-[#171717]" value={materialKind} onChange={(e) => setMaterialKind(e.target.value as typeof materialKind)}>{['lesson','exercise','reading','video','assessment','reference'].map((kind) => <option key={kind} value={kind}>{kind}</option>)}</select></label>
+          <label className="text-[12px] text-[#57534e] md:col-span-2">Judul<input required className="mt-1 w-full rounded-xl border border-[#ddd4c8] px-3 py-2 text-[#171717]" value={materialTitle} onChange={(e) => setMaterialTitle(e.target.value)} placeholder="Judul materi" /></label>
+          <label className="text-[12px] text-[#57534e]">Hak sumber<select className="mt-1 w-full rounded-xl border border-[#ddd4c8] bg-white px-3 py-2 text-[#171717]" value={materialSourceRights} onChange={(e) => setMaterialSourceRights(e.target.value as typeof materialSourceRights)}>{['license:internal','license:cc-by','license:cc-by-sa','license:cc-by-nc','license:cc-by-nd','license:unknown'].map((rights) => <option key={rights} value={rights}>{rights}</option>)}</select></label>
+          <label className="flex items-center gap-2 self-end text-[12px] text-[#57534e]"><input type="checkbox" checked={materialPublish} onChange={(e) => setMaterialPublish(e.target.checked)} /> Publikasikan sekarang</label>
+          <div className="md:col-span-2"><Button size="sm" type="submit" disabled={materialSaving || !materialOutcomeId}>{materialSaving ? 'Menyimpan…' : 'Simpan Materi'}</Button></div>
+        </form> : null}
+      </section>
 
       {/* Grade list + Subjects list grid */}
       <div className="grid gap-4 lg:grid-cols-2">

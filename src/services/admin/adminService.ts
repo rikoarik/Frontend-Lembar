@@ -1016,6 +1016,19 @@ export const adminService = {
       data,
     );
   },
+  listOutcomes(subjectId: string): Promise<Result<{ id: string; label: string }[], AdminError>> {
+    return request(`/v1/admin/catalog/outcomes?subjectId=${encodeURIComponent(subjectId)}`);
+  },
+  createMaterial(data: {
+    outcomeId: string;
+    code: string;
+    kind: 'lesson' | 'exercise' | 'reading' | 'video' | 'assessment' | 'reference';
+    title: string;
+    sourceRights: 'license:internal' | 'license:cc-by' | 'license:cc-by-sa' | 'license:cc-by-nc' | 'license:cc-by-nd' | 'license:unknown';
+    publish: boolean;
+  }): Promise<Result<{ id: string; title: string; published: boolean }, AdminError>> {
+    return request('/v1/admin/catalog/materials', 'POST', data);
+  },
   archiveGrade(id: string): Promise<Result<{ id: string; archived: boolean }, AdminError>> {
     return request<{ id: string; archived: boolean }>(`/v1/admin/catalog/grades/${id}`, 'DELETE');
   },
