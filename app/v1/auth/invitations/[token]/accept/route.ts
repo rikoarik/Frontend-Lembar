@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 import { NextResponse, type NextRequest } from 'next/server';
-import { backendFetch, JWT_COOKIE, SESSION_COOKIE } from '@/src/lib/api/session';
+import { authCookieOptions, backendFetch, jwtCookieOptions, JWT_COOKIE, SESSION_COOKIE, normalizeRoles } from '@/src/lib/api/session';
 
 export async function POST(request: NextRequest, context: { params: Promise<{ token: string }> }) {
   const { token } = await context.params;
@@ -28,7 +28,7 @@ export async function POST(request: NextRequest, context: { params: Promise<{ to
     );
   }
 
-  const upstream = await backendFetch('/v1/auth/invitations/consume', {
+  const upstream = await backendFetch('/v1/invitations/accept', {
     method: 'POST',
     token: sessionToken,
     body: JSON.stringify({
@@ -50,5 +50,15 @@ export async function POST(request: NextRequest, context: { params: Promise<{ to
     );
   }
 
-  return NextResponse.json(payload ?? { data: { accepted: true } }, { status: 200 });
+  const tokenFromResponse = payload?.token ?? payload?.data?.token;
+  const user = payload?.user ?? payload?.data?.user;
+  if (!tokenFromResponse) {
+    return NextResponse.json({ error: { code: 'UPSTREAM_ERROR', message: 'Respons aktivasi tidak lengkap.' } }, { status: 502 });
+  }
+  const response = NextResponse.json({ data: { accepted: true } }, { status: 200 });
+  response.cookies.set(jwtCookieOptions(tokenFromResponse));
+  response.cookies.set({ name: SESSION_COOKIE, value: '', path: '/', maxAge: 0 });
+  const roles = normalizeRoles(user);
+  if (roles.length > 0) response.cookies.set(authCookieOptions('lembar_roles', roles.join(',')));
+  return response;
 }
