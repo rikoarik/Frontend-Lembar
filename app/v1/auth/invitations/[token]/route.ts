@@ -11,29 +11,17 @@ import { cookies } from 'next/headers';
 import { NextResponse, type NextRequest } from 'next/server';
 import { backendFetch, JWT_COOKIE, SESSION_COOKIE } from '@/src/lib/api/session';
 
-const PREVIEW_PATH_FALLBACK = '/v1/auth/invitations/preview';
+const PREVIEW_PATH = '/v1/invitations/preview';
 
 export async function GET(_request: NextRequest, context: { params: Promise<{ token: string }> }) {
   const { token } = await context.params;
   const jar = await cookies();
   const sessionToken = jar.get(JWT_COOKIE)?.value || jar.get(SESSION_COOKIE)?.value;
 
-  // First try the dedicated preview endpoint so the admin can set a
-  // custom domain/url etc. If it returns 404, fall back to a probe via
-  // the consume endpoint which currently exists.
-  let upstream = await backendFetch(`${PREVIEW_PATH_FALLBACK}?token=${encodeURIComponent(token)}`, {
+  const upstream = await backendFetch(`${PREVIEW_PATH}?token=${encodeURIComponent(token)}`, {
     method: 'GET',
     token: sessionToken,
   });
-
-  if (upstream.status === 404) {
-    upstream = await backendFetch('/v1/auth/invitations/consume', {
-      method: 'POST',
-      token: sessionToken,
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ token, dryRun: true }),
-    });
-  }
 
   const payload = await upstream.json().catch(() => null);
 

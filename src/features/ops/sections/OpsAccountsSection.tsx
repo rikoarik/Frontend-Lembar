@@ -196,7 +196,7 @@ export function OpsAccountsSection({
           </div>
           <div className="flex gap-2">
             <Button size="sm" type="submit" disabled={inviteLoading}>
-              {inviteLoading ? 'Mengirim…' : 'Kirim undangan'}
+              {inviteLoading ? 'Membuat…' : 'Buat undangan'}
             </Button>
             <Button
               size="sm"
