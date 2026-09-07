@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/app/components/ui';
 import {
   AdminPageHeader,
@@ -108,9 +108,28 @@ export function OpsCatalogSection({
   } | null>(null);
   const [addGradeCustom, setAddGradeCustom] = useState(false);
   const [addGradeCustomLabel, setAddGradeCustomLabel] = useState('');
+  const [materialSubjectId, setMaterialSubjectId] = useState('');
+  const [materialLabel, setMaterialLabel] = useState('');
+  const [materials, setMaterials] = useState<{ id: string; label: string; status: string }[]>([]);
+  const [materialsLoading, setMaterialsLoading] = useState(false);
+  const [materialSaving, setMaterialSaving] = useState(false);
   const activeGradesCount = catalogGrades.filter((g) => g.status === 'active').length;
   const selectedGradeObj = catalogGrades.find((g) => g.id === catalogSelectedGrade);
   const activeSubjectsCount = catalogSubjects.filter((s) => s.status === 'active').length;
+  const materialSubject = catalogSubjects.find((subject) => subject.id === materialSubjectId);
+
+  useEffect(() => {
+    if (!catalogSelectedGrade || !materialSubjectId) {
+      setMaterials([]);
+      return;
+    }
+    setMaterialsLoading(true);
+    adminService.listCatalogMaterials(catalogSelectedGrade, materialSubjectId).then((result) => {
+      if (result.ok) setMaterials(result.value);
+      else setToast(`Gagal memuat materi: ${result.error.safeMessage}`);
+      setMaterialsLoading(false);
+    });
+  }, [catalogSelectedGrade, materialSubjectId, setToast]);
 
   const refreshCatalog = () => {
     setCatalogLoading(true);
@@ -679,12 +698,72 @@ export function OpsCatalogSection({
                         >
                           Hapus
                         </Button>
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => {
+                            setMaterialSubjectId((current) => current === s.id ? '' : s.id);
+                            setMaterialLabel('');
+                          }}
+                        >
+                          Materi
+                        </Button>
                       </div>
                     </div>
                   );
                 })}
               </div>
             )}
+
+            {materialSubject ? (
+              <div className="mt-5 rounded-xl border border-[#ddd4c8]/70 bg-[#faf8f5] p-3 space-y-3">
+                <div>
+                  <p className="text-[13px] font-semibold text-[#171717]">Materi · {materialSubject.label}</p>
+                  <p className="text-[12px] text-[#57534e]">Materi aktif tersedia pada pilihan generator soal.</p>
+                </div>
+                <form
+                  className="flex gap-2"
+                  onSubmit={async (event) => {
+                    event.preventDefault();
+                    const label = materialLabel.trim();
+                    if (!label || !catalogSelectedGrade) return;
+                    setMaterialSaving(true);
+                    const result = await adminService.createMaterial({ gradeId: catalogSelectedGrade, subjectId: materialSubject.id, label });
+                    if (result.ok) {
+                      setMaterials((items) => [...items, result.value]);
+                      setMaterialLabel('');
+                      setToast(`Materi "${label}" berhasil ditambahkan.`);
+                    } else setToast(`Gagal menambah materi: ${result.error.safeMessage}`);
+                    setMaterialSaving(false);
+                  }}
+                >
+                  <input
+                    className="flex-1 rounded-xl border border-[#ddd4c8] bg-white px-3 py-1.5 text-[12px] text-[#171717]"
+                    placeholder="Contoh: Pecahan dan perbandingan"
+                    value={materialLabel}
+                    onChange={(event) => setMaterialLabel(event.target.value)}
+                    disabled={materialSaving}
+                  />
+                  <Button size="sm" type="submit" disabled={materialSaving || !materialLabel.trim()}>
+                    {materialSaving ? 'Menyimpan…' : 'Tambah materi'}
+                  </Button>
+                </form>
+                {materialsLoading ? <p className="text-[12px] text-[#57534e]">Memuat materi…</p> : null}
+                {!materialsLoading && materials.length === 0 ? <p className="text-[12px] text-[#57534e]">Belum ada materi tambahan.</p> : null}
+                <div className="space-y-1.5">
+                  {materials.map((material) => (
+                    <div key={material.id} className="flex items-center justify-between rounded-lg bg-white px-3 py-2 text-[12px]">
+                      <span>{material.label}</span>
+                      <Button size="sm" variant="danger" onClick={async () => {
+                        const result = await adminService.archiveMaterial(material.id);
+                        if (result.ok) setMaterials((items) => items.filter((item) => item.id !== material.id));
+                        else setToast(`Gagal mengarsipkan materi: ${result.error.safeMessage}`);
+                      }}>Arsipkan</Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
           </div>
         </div>
       </div>
