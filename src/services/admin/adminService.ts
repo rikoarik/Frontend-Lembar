@@ -1022,6 +1022,18 @@ export const adminService = {
   archiveSubject(id: string): Promise<Result<{ id: string; archived: boolean }, AdminError>> {
     return request<{ id: string; archived: boolean }>(`/v1/admin/catalog/subjects/${id}`, 'DELETE');
   },
+  listCatalogMaterials(gradeId: string, subjectId: string): Promise<Result<{ id: string; label: string; status: string; gradeId: string; subjectId: string }[], AdminError>> {
+    return request(`/v1/admin/catalog/materials?gradeId=${encodeURIComponent(gradeId)}&subjectId=${encodeURIComponent(subjectId)}`);
+  },
+  createMaterial(data: { gradeId: string; subjectId: string; label: string }): Promise<Result<{ id: string; label: string; status: string; gradeId: string; subjectId: string }, AdminError>> {
+    return request('/v1/admin/catalog/materials', 'POST', data);
+  },
+  updateMaterialStatus(id: string, status: 'active' | 'archived' | 'unavailable'): Promise<Result<{ id: string; status: string }, AdminError>> {
+    return request(`/v1/admin/catalog/materials/${id}/status`, 'PATCH', { status });
+  },
+  archiveMaterial(id: string): Promise<Result<{ id: string; archived: boolean }, AdminError>> {
+    return request(`/v1/admin/catalog/materials/${id}`, 'DELETE');
+  },
 };
 
 // ── AI Provider config ──────────────────────────────────────────────────────
