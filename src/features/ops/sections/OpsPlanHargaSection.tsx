@@ -20,17 +20,33 @@ type EditRow = {
   displayName: string;
   priceAmount: string;
   tokenMonthlyLimit: string;
-  billingPeriod: string;
+  billingPeriod: '' | 'monthly';
   features: string;
   active: boolean;
 };
+
+type Requirement = { label: string; met: boolean };
+
+export function planRequirements(planKey: string, edit: EditRow): Requirement[] {
+  const price = Number(edit.priceAmount);
+  const tokens = edit.tokenMonthlyLimit.trim() === '' ? null : Number(edit.tokenMonthlyLimit);
+  const features = edit.features.split(',').map((item) => item.trim()).filter(Boolean);
+  const paid = planKey !== 'free';
+  return [
+    { label: 'Nama paket diisi', met: edit.displayName.trim().length > 0 },
+    { label: paid ? 'Harga lebih dari Rp0' : 'Harga tepat Rp0', met: paid ? Number.isInteger(price) && price > 0 : price === 0 },
+    { label: paid ? 'Periode tagihan: bulanan' : 'Periode tagihan kosong', met: paid ? edit.billingPeriod === 'monthly' : edit.billingPeriod === '' },
+    { label: 'Kuota token diisi dan lebih dari 0', met: tokens !== null && Number.isInteger(tokens) && tokens > 0 },
+    { label: 'Minimal satu fitur/manfaat', met: features.length > 0 },
+  ];
+}
 
 function toEditRow(p: AdminPlanRow): EditRow {
   return {
     displayName: p.displayName,
     priceAmount: String(p.priceAmount),
     tokenMonthlyLimit: p.tokenMonthlyLimit === null ? '' : String(p.tokenMonthlyLimit),
-    billingPeriod: p.billingPeriod ?? '',
+    billingPeriod: p.billingPeriod === 'monthly' ? 'monthly' : '',
     features: p.features.join(', '),
     active: p.active,
   };
@@ -91,8 +107,15 @@ function PlanEditor({
   const [edit, setEdit] = useState<EditRow>(toEditRow(plan));
   const [saveState, setSaveState] = useState<SaveState>('idle');
   const [saveError, setSaveError] = useState('');
+  const requirements = planRequirements(plan.key, edit);
+  const activationReady = requirements.every((requirement) => requirement.met);
 
   const handleSave = async () => {
+    if (edit.active && !activationReady) {
+      setSaveError('Lengkapi semua syarat aktivasi terlebih dahulu.');
+      setSaveState('error');
+      return;
+    }
     setSaveState('saving');
     setSaveError('');
     const priceAmount = parseInt(edit.priceAmount, 10);
@@ -175,30 +198,60 @@ function PlanEditor({
             type="checkbox"
             className="h-4 w-4 rounded accent-burgundy"
             checked={edit.active}
+            disabled={!edit.active && !activationReady}
             onChange={(e) => setEdit((prev) => ({ ...prev, active: e.target.checked }))}
+            aria-describedby={`${plan.key}-activation-hint`}
             aria-label={`Paket ${plan.key} aktif`}
           />
           <span className="text-body-sm text-[#171717]">Aktif</span>
         </label>
       </div>
 
+      <div className="mt-4 rounded-xl border border-[#eadfce] bg-[#fffaf4] p-4">
+        <p className="font-semibold text-[#1e1814]">Syarat sebelum paket diaktifkan</p>
+        <p id={`${plan.key}-activation-hint`} className="mt-1 text-body-xs text-[#6d665d]">
+          Status Aktif membuat paket dapat dipilih pengguna. Lengkapi semua poin ini terlebih dahulu.
+        </p>
+        <ul className="mt-3 grid gap-2 text-body-xs sm:grid-cols-2">
+          {requirements.map((requirement) => (
+            <li key={requirement.label} className={requirement.met ? 'text-emerald-700' : 'font-medium text-[#851925]'}>
+              {requirement.met ? '✓' : 'Perlu diisi:'} {requirement.label}
+            </li>
+          ))}
+        </ul>
+      </div>
+
       <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-        {field('Nama tampil', 'displayName', 'Dipakai di landing, langganan, dan label admin.')}
+        {field('Nama paket', 'displayName', 'Contoh: Guru Pro. Tampil di halaman harga dan langganan.')}
         {field(
-          'Harga (IDR)',
+          'Harga per bulan (Rp)',
           'priceAmount',
-          'Server memakai angka ini saat bikin order dan entitlement.',
+          plan.key === 'free' ? 'Wajib 0 untuk paket Free.' : 'Wajib lebih dari 0. Contoh: 49000 untuk Rp49.000/bulan.',
         )}
         {field(
           'Kuota token per bulan',
           'tokenMonthlyLimit',
-          'Kosongkan jika paket tidak dibatasi.',
+          'Wajib diisi saat aktif. Contoh: 300000. Ini batas penggunaan AI per akun tiap bulan.',
         )}
-        {field('Periode tagihan', 'billingPeriod', 'monthly, yearly, atau kosong.')}
+        <div className="flex flex-col gap-1.5">
+          <label className="text-body-xs font-semibold text-[#6d665d]" htmlFor={`${plan.key}-billingPeriod`}>
+            Periode tagihan
+          </label>
+          <select
+            id={`${plan.key}-billingPeriod`}
+            className="rounded-xl border border-[#e2ddd6] bg-white px-3 py-2 text-body-sm text-[#171717] focus:outline-none focus:ring-2 focus:ring-[#851925]/25"
+            value={edit.billingPeriod}
+            onChange={(e) => setEdit((prev) => ({ ...prev, billingPeriod: e.target.value as '' | 'monthly' }))}
+          >
+            <option value="">{plan.key === 'free' ? 'Tidak ada tagihan' : 'Pilih periode'}</option>
+            {plan.key !== 'free' && <option value="monthly">Bulanan</option>}
+          </select>
+          <p className="text-[11px] text-[#6d665d]">{plan.key === 'free' ? 'Free wajib tanpa periode tagihan.' : 'Saat ini platform hanya mendukung tagihan bulanan.'}</p>
+        </div>
         {field(
-          'Fitur paket',
+          'Fitur dan manfaat',
           'features',
-          'Pisahkan dengan koma. Dipakai untuk copy publik dan akses fitur.',
+          'Wajib minimal satu. Pisahkan dengan koma. Contoh: Buat lembar tanpa watermark, Kuota AI 300.000 token/bulan.',
         )}
       </div>
 
