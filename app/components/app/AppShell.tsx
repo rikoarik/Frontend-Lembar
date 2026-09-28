@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { LeftRail } from './LeftRail';
 import { TopBar } from './TopBar';
 import { WorkspaceSwitcher } from './WorkspaceSwitcher';
@@ -13,11 +14,12 @@ type AppShellProps = {
 };
 
 export function AppShell({ children }: AppShellProps) {
+  const t = useTranslations('appShell');
   const { activeWorkspace, workspaces, switchWorkspace, announcement, displayName } =
     useWorkspace();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
-  const [planLabel, setPlanLabel] = useState('Paket Gratis');
+  const [planLabel, setPlanLabel] = useState(() => t('plan.freeLabel'));
 
   useEffect(() => {
     let cancelled = false;
@@ -27,14 +29,16 @@ export function AppShell({ children }: AppShellProps) {
         if (cancelled || !payload?.data) return;
         setPlanLabel(
           payload.data.catalog?.displayName ??
-            (payload.data.plan === 'free' ? 'Paket Gratis' : (payload.data.plan ?? 'Paket Gratis')),
+            (payload.data.plan === 'free'
+              ? t('plan.freeLabel')
+              : (payload.data.plan ?? t('plan.freeLabel'))),
         );
       })
       .catch(() => undefined);
     return () => {
       cancelled = true;
     };
-  }, [activeWorkspace.id]);
+  }, [activeWorkspace.id, t]);
 
   const switcher = (
     <WorkspaceSwitcher
@@ -59,7 +63,7 @@ export function AppShell({ children }: AppShellProps) {
         href="#konten-utama"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[var(--z-toast)] focus:rounded-md focus:bg-white focus:px-3 focus:py-2"
       >
-        Lewati ke konten utama
+        {t('skipToContent')}
       </a>
       <div aria-live="polite" className="sr-only">
         {announcement}
@@ -89,12 +93,12 @@ export function AppShell({ children }: AppShellProps) {
             className="fixed inset-0 z-[var(--z-modal)] md:hidden"
             role="dialog"
             aria-modal="true"
-            aria-label="Navigasi aplikasi"
+            aria-label={t('nav.appDialogLabel')}
           >
             <button
               type="button"
               className="absolute inset-0 bg-[#171717]/25"
-              aria-label="Tutup navigasi"
+              aria-label={t('nav.closeDialog')}
               onClick={() => setMobileNavOpen(false)}
             />
             <div className="absolute inset-y-0 left-0 w-[min(18rem,90vw)] overflow-hidden bg-[#fbf8f2] shadow-xl">

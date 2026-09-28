@@ -1,1 +1,22 @@
-{}
+{
+  "commonUi": {
+    "actions": {
+      "reload": "Muat ulang",
+      "openHelp": "Buka bantuan",
+      "contactHelp": "Hubungi bantuan",
+      "backToDashboard": "Kembali ke dashboard",
+      "openHistory": "Buka riwayat"
+    },
+    "shellStates": {
+      "errorTitle": "Workspace belum bisa dimuat",
+      "errorDescription": "Coba muat ulang. Jika masih gagal, bagikan ID permintaan ke tim bantuan.",
+      "requestId": "ID permintaan: {id}",
+      "requestIdMissing": "ID permintaan belum tersedia.",
+      "notFoundTitle": "Halaman tidak ditemukan",
+      "notFoundDescription": "Periksa kembali tautan atau kembali ke dashboard workspace aktif.",
+      "forbiddenTitle": "Akses belum tersedia",
+      "forbiddenDescription": "Peran di workspace ini belum membuka halaman yang diminta. Ganti workspace atau hubungi admin sekolah.",
+      "placeholderBody": "Sementara itu, gunakan dashboard untuk membuat atau membuka lembar yang sudah tersedia."
+    }
+  }
+}

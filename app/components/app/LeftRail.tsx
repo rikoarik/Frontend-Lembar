@@ -1,5 +1,8 @@
+'use client';
+
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import type { ActiveRole, WorkspaceKind } from '@/src/types/auth';
 
 type LeftRailProps = {
@@ -13,29 +16,34 @@ type LeftRailProps = {
 };
 
 const PRIMARY_NAV = [
-  { href: '/app', label: 'Beranda', icon: 'home' },
-  { href: '/app/generate', label: 'Buat lembar', icon: 'auto_awesome' },
-  { href: '/app/riwayat', label: 'Riwayat', icon: 'history' },
+  { href: '/app', labelKey: 'nav.beranda', icon: 'home' },
+  { href: '/app/generate', labelKey: 'nav.buatLembar', icon: 'auto_awesome' },
+  { href: '/app/riwayat', labelKey: 'nav.riwayat', icon: 'history' },
 ] as const;
 
 const LIBRARY_NAV = [
-  { href: '/app/bank-soal', label: 'Bank soal', icon: 'inventory_2' },
-  { href: '/app/template', label: 'Template', icon: 'description' },
+  { href: '/app/bank-soal', labelKey: 'nav.bankSoal', icon: 'inventory_2' },
+  { href: '/app/template', labelKey: 'nav.template', icon: 'description' },
 ] as const;
 
-const SUPPORT_NAV = [{ href: '/app/bantuan', label: 'Bantuan', icon: 'help' }] as const;
+const SUPPORT_NAV = [{ href: '/app/bantuan', labelKey: 'nav.bantuan', icon: 'help' }] as const;
 
 const SCHOOL_ONLY_NAV = [
-  { href: '/app/kelas', label: 'Kelas', icon: 'groups', entitlement: 'school_admin' as const },
+  {
+    href: '/app/kelas',
+    labelKey: 'nav.kelas',
+    icon: 'groups',
+    entitlement: 'school_admin' as const,
+  },
   {
     href: '/app/analitik',
-    label: 'Analitik',
+    labelKey: 'nav.analitik',
     icon: 'monitoring',
     entitlement: 'school_admin' as const,
   },
   {
     href: '/school',
-    label: 'Admin sekolah',
+    labelKey: 'nav.adminSekolah',
     icon: 'apartment',
     entitlement: 'school_admin' as const,
   },
@@ -126,6 +134,7 @@ export function LeftRail({
   collapsed = false,
   onToggleCollapse,
 }: LeftRailProps) {
+  const t = useTranslations('appShell');
   const pathname = usePathname() ?? '/app';
   const schoolItems =
     activeWorkspaceKind === 'school'
@@ -137,7 +146,7 @@ export function LeftRail({
 
   return (
     <nav
-      aria-label="Navigasi utama"
+      aria-label={t('nav.primaryLabel')}
       className={[
         'flex h-full shrink-0 flex-col overflow-hidden border-r border-[#e6dfd4] bg-[#fbf8f2] transition-all duration-200 ease-in-out',
         collapsed ? 'w-[68px]' : 'w-[248px]',
@@ -153,7 +162,7 @@ export function LeftRail({
             <NavLink
               key={item.href}
               href={item.href}
-              label={item.label}
+              label={t(item.labelKey)}
               icon={item.icon}
               active={isActive(item.href)}
               collapsed={collapsed}
@@ -162,12 +171,12 @@ export function LeftRail({
           ))}
         </NavSection>
 
-        <NavSection label="Pustaka" collapsed={collapsed}>
+        <NavSection label={t('sections.library')} collapsed={collapsed}>
           {LIBRARY_NAV.map((item) => (
             <NavLink
               key={item.href}
               href={item.href}
-              label={item.label}
+              label={t(item.labelKey)}
               icon={item.icon}
               active={isActive(item.href)}
               collapsed={collapsed}
@@ -177,12 +186,12 @@ export function LeftRail({
         </NavSection>
 
         {schoolItems.length > 0 ? (
-          <NavSection label="Sekolah" collapsed={collapsed}>
+          <NavSection label={t('sections.school')} collapsed={collapsed}>
             {schoolItems.map((item) => (
               <NavLink
                 key={item.href}
                 href={item.href}
-                label={item.label}
+                label={t(item.labelKey)}
                 icon={item.icon}
                 active={isActive(item.href)}
                 collapsed={collapsed}
@@ -192,12 +201,12 @@ export function LeftRail({
           </NavSection>
         ) : null}
 
-        <NavSection label="Bantuan" collapsed={collapsed}>
+        <NavSection label={t('sections.help')} collapsed={collapsed}>
           {SUPPORT_NAV.map((item) => (
             <NavLink
               key={item.href}
               href={item.href}
-              label={item.label}
+              label={t(item.labelKey)}
               icon={item.icon}
               active={isActive(item.href)}
               collapsed={collapsed}

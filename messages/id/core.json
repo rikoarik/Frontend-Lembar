@@ -20,6 +20,8 @@
     "schoolLabel": "Sekolah",
     "activeAnnouncement": "Workspace aktif: {name} · {kind}",
     "personalName": "Ruang pribadi",
+    "demoSchoolName": "SDN Contoh 01",
+    "demoUser": "Demo Guru",
     "fallbackUser": "Pengguna",
     "fallbackWorkspace": "Workspace"
   }

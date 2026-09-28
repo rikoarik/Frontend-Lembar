@@ -1,4 +1,7 @@
+'use client';
+
 import { useId, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import type { Workspace } from '@/src/features/workspace/workspaceContext';
 
 type WorkspaceSwitcherProps = {
@@ -14,6 +17,8 @@ export function WorkspaceSwitcher({
   onSelect,
   compact = false,
 }: WorkspaceSwitcherProps) {
+  const t = useTranslations('appShell.workspaceSwitcher');
+  const tWorkspace = useTranslations('workspace');
   const [open, setOpen] = useState(false);
   const [switchingId, setSwitchingId] = useState<string | null>(null);
   const [message, setMessage] = useState('');
@@ -38,10 +43,10 @@ export function WorkspaceSwitcher({
         </span>
         <div className="flex min-w-0 flex-col">
           <span className="text-[10px] font-bold tracking-wider uppercase text-[#8a8379]">
-            Workspace
+            {t('label')}
           </span>
           <span className="truncate text-[13px] font-semibold text-[#171717]">
-            {active?.name ?? 'Ruang pribadi'}
+            {active?.name ?? tWorkspace('personalName')}
           </span>
         </div>
       </div>
@@ -56,8 +61,8 @@ export function WorkspaceSwitcher({
         aria-expanded={open}
         aria-labelledby={labelId}
         onClick={() => setOpen((prev) => !prev)}
-        title={active?.name ?? 'Workspace'}
-        aria-label={`Workspace saat ini: ${active?.name}`}
+        title={active?.name ?? t('label')}
+        aria-label={t('currentAria', { name: active?.name ?? t('noWorkspace') })}
         className={[
           'flex w-full items-center gap-2 rounded-xl border border-[#e6dfd4] bg-white hover:bg-[#f7f3ec]',
           compact ? 'justify-center p-2' : 'justify-between px-3 py-2.5 text-left',
@@ -70,9 +75,9 @@ export function WorkspaceSwitcher({
         ) : (
           <>
             <span id={labelId} className="flex min-w-0 flex-col">
-              <span className="text-[11px] font-medium text-[#8a8379]">Workspace</span>
+              <span className="text-[11px] font-medium text-[#8a8379]">{t('label')}</span>
               <span className="truncate text-[13px] font-semibold text-[#171717]">
-                {active?.name ?? 'Tanpa workspace'}
+                {active?.name ?? t('noWorkspace')}
               </span>
             </span>
             <span
@@ -88,7 +93,7 @@ export function WorkspaceSwitcher({
       {open ? (
         <ul
           role="listbox"
-          aria-label="Daftar workspace"
+          aria-label={t('listLabel')}
           className={[
             'absolute top-full z-[var(--z-popover,50)] mt-1.5 overflow-hidden rounded-xl border border-[#e6dfd4] bg-white p-1.5 shadow-[0_12px_40px_rgba(23,23,23,0.12)]',
             compact ? 'left-0 w-56' : 'left-0 right-0',
@@ -103,14 +108,14 @@ export function WorkspaceSwitcher({
                   role="option"
                   aria-selected={isActive}
                   disabled={isActive || switchingId !== null}
-                  title={isActive ? 'Workspace aktif' : `Beralih ke ${workspace.name}`}
+                  title={isActive ? t('activeOption') : t('switchTo', { name: workspace.name })}
                   onClick={async () => {
                     setSwitchingId(workspace.id);
                     setMessage('');
                     const switched = await onSelect(workspace.id);
                     setSwitchingId(null);
                     if (switched === false) {
-                      setMessage('Gagal beralih workspace. Coba lagi.');
+                      setMessage(t('switchFailed'));
                       return;
                     }
                     setOpen(false);
@@ -122,10 +127,12 @@ export function WorkspaceSwitcher({
                 >
                   <span className="flex min-w-0 flex-col">
                     <span className="truncate text-[13px] font-semibold text-[#171717]">
-                      {switchingId === workspace.id ? 'Beralih…' : workspace.name}
+                      {switchingId === workspace.id ? t('switching') : workspace.name}
                     </span>
                     <span className="text-[11px] text-[#6d665d]">
-                      {workspace.kind === 'school' ? 'Sekolah' : 'Pribadi'}
+                      {workspace.kind === 'school'
+                        ? tWorkspace('schoolLabel')
+                        : tWorkspace('personalLabel')}
                     </span>
                   </span>
                   {isActive ? (

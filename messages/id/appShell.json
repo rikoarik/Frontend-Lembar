@@ -1,1 +1,64 @@
-{}
+{
+  "appShell": {
+    "brand": "lembar",
+    "skipToContent": "Lewati ke konten utama",
+    "nav": {
+      "primaryLabel": "Navigasi utama",
+      "appDialogLabel": "Navigasi aplikasi",
+      "closeDialog": "Tutup navigasi",
+      "openMobile": "Buka navigasi",
+      "expandSidebar": "Perluas sidebar",
+      "collapseSidebar": "Ciutkan sidebar",
+      "workspaceMenu": "Menu workspace, saat ini {name}",
+      "profileMenu": "Menu profil {name}",
+      "beranda": "Beranda",
+      "buatLembar": "Buat lembar",
+      "riwayat": "Riwayat",
+      "bankSoal": "Bank soal",
+      "template": "Template",
+      "bantuan": "Bantuan",
+      "kelas": "Kelas",
+      "analitik": "Analitik",
+      "adminSekolah": "Admin sekolah"
+    },
+    "sections": {
+      "library": "Pustaka",
+      "school": "Sekolah",
+      "help": "Bantuan"
+    },
+    "titles": {
+      "tinjau": "Tinjau",
+      "output": "Output",
+      "trialConfirmation": "Konfirmasi trial",
+      "settings": "Pengaturan",
+      "jobProgress": "Progres generate",
+      "onboarding": "Selamat datang",
+      "assessments": "Asesmen"
+    },
+    "plan": {
+      "freeLabel": "Paket Gratis",
+      "plus": "Plus",
+      "pro": "Pro",
+      "upgradePro": "Upgrade Pro",
+      "quotaAria": "Kuota token: {label} terpakai",
+      "quotaProgressAria": "Penggunaan token bulan ini"
+    },
+    "account": {
+      "profile": "Profil",
+      "planAndQuota": "Paket & kuota",
+      "help": "Bantuan",
+      "logout": "Keluar",
+      "loggingOut": "Keluar…"
+    },
+    "workspaceSwitcher": {
+      "label": "Workspace",
+      "listLabel": "Daftar workspace",
+      "currentAria": "Workspace saat ini: {name}",
+      "activeOption": "Workspace aktif",
+      "switchTo": "Beralih ke {name}",
+      "switching": "Beralih…",
+      "noWorkspace": "Tanpa workspace",
+      "switchFailed": "Gagal beralih workspace. Coba lagi."
+    }
+  }
+}

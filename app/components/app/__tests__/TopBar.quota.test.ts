@@ -1,5 +1,18 @@
 import { describe, expect, it } from 'vitest';
 import { entitlementCta, formatQuota } from '../TopBar';
+import { loadMessages } from '@/src/i18n/messages';
+
+/** Minimal translator backed by the real id catalog, so assertions stay honest. */
+const translate = (key: string): string => {
+  const value = `appShell.${key}`
+    .split('.')
+    .reduce<unknown>(
+      (node, segment) =>
+        node && typeof node === 'object' ? (node as Record<string, unknown>)[segment] : undefined,
+      loadMessages('id'),
+    );
+  return typeof value === 'string' ? value : key;
+};
 
 describe('formatQuota', () => {
   it('formats the same finite token quota used by the plan catalog', () => {
@@ -26,17 +39,20 @@ describe('formatQuota', () => {
 
 describe('entitlementCta', () => {
   it('shows Upgrade Pro for free plan', () => {
-    expect(entitlementCta({ plan: 'free' })).toEqual({
+    expect(entitlementCta({ plan: 'free' }, translate)).toEqual({
       label: 'Upgrade Pro',
       icon: 'workspace_premium',
     });
   });
 
   it('shows Pro for active pro plan', () => {
-    expect(entitlementCta({ plan: 'pro' })).toEqual({ label: 'Pro', icon: 'verified' });
+    expect(entitlementCta({ plan: 'pro' }, translate)).toEqual({ label: 'Pro', icon: 'verified' });
   });
 
   it('shows Plus for the highest paid tier', () => {
-    expect(entitlementCta({ plan: 'plus' })).toEqual({ label: 'Plus', icon: 'verified' });
+    expect(entitlementCta({ plan: 'plus' }, translate)).toEqual({
+      label: 'Plus',
+      icon: 'verified',
+    });
   });
 });

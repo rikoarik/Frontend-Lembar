@@ -20,6 +20,8 @@
     "schoolLabel": "School",
     "activeAnnouncement": "Active workspace: {name} · {kind}",
     "personalName": "Personal space",
+    "demoSchoolName": "Demo School 01",
+    "demoUser": "Demo Teacher",
     "fallbackUser": "User",
     "fallbackWorkspace": "Workspace"
   }
