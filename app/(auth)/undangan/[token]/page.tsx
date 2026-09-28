@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { use, useEffect, useState } from 'react';
 import AuthShell from '../../AuthShell';
 import AuthSidePanel from '../../components/AuthSidePanel';
@@ -15,17 +16,26 @@ import SubmitButton from '../../components/SubmitButton';
 import { authService } from '@/src/services/auth/authService';
 import { validateInvitationAccept } from '@/src/features/auth/validation/auth-validation';
 import { useAuthSubmit } from '@/src/features/auth/state/useAuthSubmit';
+import { resolveErrorMessage } from '@/src/services/auth/errorMapping';
 import type { InvitationPreview } from '@/src/types/auth';
 import type { AuthError } from '@/src/services/auth/authErrors';
 import { err, type Result } from '@/src/types/result';
 
 type FieldKey = 'username' | 'email' | 'phone' | 'password';
 
-const fieldError = (errors: Record<string, string[]>, key: FieldKey): string | undefined =>
-  errors[key]?.[0];
+const fieldError = (
+  t: (key: string) => string,
+  errors: Record<string, string[]>,
+  key: FieldKey,
+): string | undefined => {
+  const first = errors[key]?.[0];
+  return first ? t(first) : undefined;
+};
 
 export default function InvitationPage({ params }: { params: Promise<{ token: string }> }) {
   const router = useRouter();
+  const t = useTranslations('auth');
+  const tErrors = useTranslations();
   const { token } = use(params);
   const [preview, setPreview] = useState<InvitationPreview | null>(null);
   const [loadError, setLoadError] = useState<AuthError | null>(null);
@@ -63,7 +73,7 @@ export default function InvitationPage({ params }: { params: Promise<{ token: st
         return Promise.resolve(
           err({
             code: 'INVITATION_INVALID',
-            safeMessage: 'Undangan tidak lagi aktif.',
+            safeMessage: 'auth.invitationInvalid.message',
             retryable: false,
           }),
         );
@@ -87,7 +97,7 @@ export default function InvitationPage({ params }: { params: Promise<{ token: st
           failure.field === 'phone' ||
           failure.field === 'password'
         ) {
-          next[failure.field] = failure.message;
+          next[failure.field] = t(failure.message);
         }
       }
       setLocalErrors(next);
@@ -102,39 +112,42 @@ export default function InvitationPage({ params }: { params: Promise<{ token: st
     });
   };
 
-  const schoolName = preview?.schoolName ?? 'sekolah Anda';
+  const schoolName = preview?.schoolName ?? t('invitation.fallbackSchool');
 
   const body = (() => {
     if (loadError) {
       return (
-        <Notice tone="danger" title="Undangan tidak dapat diperiksa.">
-          {loadError.safeMessage}
+        <Notice tone="danger" title={t('invitation.checkFailedTitle')}>
+          {resolveErrorMessage(tErrors, loadError.safeMessage)}
         </Notice>
       );
     }
     if (preview === null) {
-      return <Notice tone="info">Memeriksa undangan…</Notice>;
+      return <Notice tone="info">{t('invitation.checking')}</Notice>;
     }
     if (preview.status === 'expired') {
       return (
-        <Notice tone="warning" title="Undangan telah kedaluwarsa.">
-          Hubungi admin sekolah untuk meminta undangan baru.
+        <Notice tone="warning" title={t('invitation.expiredTitle')}>
+          {t('invitation.expiredBody')}
         </Notice>
       );
     }
     if (preview.status === 'invalid' || preview.status === 'revoked') {
       return (
-        <Notice tone="danger" title="Undangan tidak lagi aktif.">
-          Undangan tidak ditemukan atau sudah dibatalkan.
+        <Notice tone="danger" title={t('invitation.inactiveTitle')}>
+          {t('invitation.inactiveBody')}
         </Notice>
       );
     }
     return (
       <form onSubmit={onSubmit} className="flex flex-col gap-5" noValidate>
-        <FormStatus tone="alert" message={submit.error?.safeMessage} />
+        <FormStatus
+          tone="alert"
+          message={resolveErrorMessage(tErrors, submit.error?.safeMessage)}
+        />
         <FormField
-          label="Username"
-          error={localErrors.username ?? fieldError(submit.fieldErrors, 'username')}
+          label={t('labels.username')}
+          error={localErrors.username ?? fieldError(t, submit.fieldErrors, 'username')}
         >
           {(control) => (
             <input
@@ -147,8 +160,8 @@ export default function InvitationPage({ params }: { params: Promise<{ token: st
           )}
         </FormField>
         <FormField
-          label="Email"
-          error={localErrors.email ?? fieldError(submit.fieldErrors, 'email')}
+          label={t('labels.email')}
+          error={localErrors.email ?? fieldError(t, submit.fieldErrors, 'email')}
         >
           {(control) => (
             <input
@@ -164,18 +177,18 @@ export default function InvitationPage({ params }: { params: Promise<{ token: st
         <PhoneField
           value={phone}
           onChange={setPhone}
-          error={localErrors.phone ?? fieldError(submit.fieldErrors, 'phone')}
+          error={localErrors.phone ?? fieldError(t, submit.fieldErrors, 'phone')}
         />
         <PasswordField
-          label="Kata sandi"
+          label={t('labels.password')}
           value={password}
           onChange={setPassword}
-          error={localErrors.password ?? fieldError(submit.fieldErrors, 'password')}
+          error={localErrors.password ?? fieldError(t, submit.fieldErrors, 'password')}
           autoComplete="new-password"
         />
         <SubmitButton
-          label={`Aktifkan akun untuk ${schoolName}`}
-          busyLabel="Mengaktifkan…"
+          label={t('invitation.activate', { school: schoolName })}
+          busyLabel={t('invitation.activating')}
           busy={submit.busy}
         />
       </form>
@@ -186,23 +199,23 @@ export default function InvitationPage({ params }: { params: Promise<{ token: st
     <AuthShell
       side={
         <AuthSidePanel
-          eyebrow={`Undangan dari ${schoolName}`}
-          title="Aktifkan akun guru Anda."
-          description="Lengkapi identitas untuk bergabung dengan workspace sekolah."
+          eyebrow={t('invitation.sideEyebrow', { school: schoolName })}
+          title={t('invitation.sideTitle')}
+          description={t('invitation.sideDescription')}
         />
       }
     >
       <AuthFormShell
-        eyebrow="Undangan sekolah"
-        title={preview?.schoolName ?? 'Undangan sekolah'}
+        eyebrow={t('invitation.eyebrow')}
+        title={preview?.schoolName ?? t('invitation.titleFallback')}
         description={
           preview?.email
-            ? `Email pratinjau: ${preview.email}.`
-            : 'Isi formulir untuk mengaktifkan akun.'
+            ? t('invitation.emailPreview', { email: preview.email })
+            : t('invitation.fillForm')
         }
         foot={
           <Link href="/" className="text-burgundy hover:underline">
-            Kembali ke beranda
+            {t('invitation.backToHome')}
           </Link>
         }
       >

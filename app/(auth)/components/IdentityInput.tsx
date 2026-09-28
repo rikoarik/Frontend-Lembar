@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import FormField from './FormField';
 
 type IdentityInputProps = {
@@ -15,8 +16,9 @@ export default function IdentityInput({
   autoFocus,
   required,
 }: IdentityInputProps) {
+  const t = useTranslations('auth');
   return (
-    <FormField label="Username, email, atau nomor telepon" error={error}>
+    <FormField label={t('labels.identity')} error={error}>
       {(control) => (
         <input
           {...control}

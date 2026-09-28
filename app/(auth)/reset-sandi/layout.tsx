@@ -1,10 +1,14 @@
 import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
 
-export const metadata: Metadata = {
-  title: 'Atur Ulang Kata Sandi — lembar',
-  description: 'Buat kata sandi baru untuk akun lembar Anda.',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('auth');
+  return {
+    title: t('reset.metaTitle'),
+    description: t('reset.metaDescription'),
+  };
+}
 
 export default function ResetSandiLayout({ children }: { children: ReactNode }) {
   return <>{children}</>;

@@ -1,10 +1,14 @@
 import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
 
-export const metadata: Metadata = {
-  title: 'Buat Akun — lembar',
-  description: 'Daftar gratis dan buat asesmen AI pertama Anda dalam 2 menit.',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('auth');
+  return {
+    title: t('register.metaTitle'),
+    description: t('register.metaDescription'),
+  };
+}
 
 export default function DaftarLayout({ children }: { children: ReactNode }) {
   return <>{children}</>;

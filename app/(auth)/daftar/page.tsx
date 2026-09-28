@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import AuthShell from '../AuthShell';
 import AuthSidePanel from '../components/AuthSidePanel';
@@ -19,11 +20,18 @@ import { useAuthSubmit } from '@/src/features/auth/state/useAuthSubmit';
 
 type FieldKey = 'username' | 'email' | 'phone' | 'password' | 'confirmPassword';
 
-const fieldError = (errors: Record<string, string[]>, key: FieldKey): string | undefined =>
-  errors[key]?.[0];
+const fieldError = (
+  t: (key: string) => string,
+  errors: Record<string, string[]>,
+  key: FieldKey,
+): string | undefined => {
+  const first = errors[key]?.[0];
+  return first ? t(first) : undefined;
+};
 
 export default function RegisterPage() {
   const router = useRouter();
+  const t = useTranslations('auth');
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -55,12 +63,12 @@ export default function RegisterPage() {
           failure.field === 'phone' ||
           failure.field === 'password'
         ) {
-          next[failure.field] = failure.message;
+          next[failure.field] = t(failure.message);
         }
       }
     }
     if (password !== confirmPassword) {
-      next.confirmPassword = 'Konfirmasi kata sandi tidak cocok.';
+      next.confirmPassword = t('passwordMismatch');
     }
     if (Object.keys(next).length > 0) {
       setLocalErrors(next);
@@ -79,23 +87,23 @@ export default function RegisterPage() {
     <AuthShell
       side={
         <AuthSidePanel
-          eyebrow="Ruang kerja pribadi"
-          title="Mulai dari satu lembar yang siap ditinjau."
-          description="Simpan draft, sumber, dan hasil kerja dalam ruang yang Anda kelola sendiri."
+          eyebrow={t('register.sideEyebrow')}
+          title={t('register.sideTitle')}
+          description={t('register.sideDescription')}
         />
       }
     >
       <AuthFormShell
-        title="Buat akun lembar"
+        title={t('register.title')}
         foot={
           <span className="font-body-sm text-body-sm text-secondary">
-            Dengan membuat akun, Anda menyetujui{' '}
+            {t('register.termsIntro')}{' '}
             <Link href="/legal/syarat" className="text-burgundy hover:underline">
-              Syarat Penggunaan
+              {t('register.termsLink')}
             </Link>{' '}
-            dan{' '}
+            {t('register.termsAnd')}{' '}
             <Link href="/legal/privasi" className="text-burgundy hover:underline">
-              Kebijakan Privasi
+              {t('register.privacyLink')}
             </Link>
             .
           </span>
@@ -111,8 +119,8 @@ export default function RegisterPage() {
             message={submit.statusMessage}
           />
           <FormField
-            label="Username"
-            error={localErrors.username ?? fieldError(submit.fieldErrors, 'username')}
+            label={t('labels.username')}
+            error={localErrors.username ?? fieldError(t, submit.fieldErrors, 'username')}
           >
             {(control) => (
               <input
@@ -125,8 +133,8 @@ export default function RegisterPage() {
             )}
           </FormField>
           <FormField
-            label="Email"
-            error={localErrors.email ?? fieldError(submit.fieldErrors, 'email')}
+            label={t('labels.email')}
+            error={localErrors.email ?? fieldError(t, submit.fieldErrors, 'email')}
           >
             {(control) => (
               <input
@@ -142,13 +150,13 @@ export default function RegisterPage() {
           <PhoneField
             value={phone}
             onChange={setPhone}
-            error={localErrors.phone ?? fieldError(submit.fieldErrors, 'phone')}
+            error={localErrors.phone ?? fieldError(t, submit.fieldErrors, 'phone')}
           />
           <p className="font-caption text-caption text-secondary -mt-2">
-            Untuk notifikasi penting dan verifikasi akun dari sekolah.
+            {t('register.phoneHelp')}
           </p>
           <PasswordField
-            label="Kata sandi"
+            label={t('labels.password')}
             value={password}
             onChange={(value) => {
               setPassword(value);
@@ -156,31 +164,33 @@ export default function RegisterPage() {
                 setLocalErrors((current) => ({ ...current, confirmPassword: undefined }));
               }
             }}
-            error={localErrors.password ?? fieldError(submit.fieldErrors, 'password')}
+            error={localErrors.password ?? fieldError(t, submit.fieldErrors, 'password')}
             autoComplete="new-password"
           />
           <PasswordField
-            label="Konfirmasi kata sandi"
+            label={t('labels.confirmPassword')}
             value={confirmPassword}
             onChange={(value) => {
               setConfirmPassword(value);
               setLocalErrors((current) => ({
                 ...current,
                 confirmPassword:
-                  value.length > 0 && value !== password
-                    ? 'Konfirmasi kata sandi tidak cocok.'
-                    : undefined,
+                  value.length > 0 && value !== password ? t('passwordMismatch') : undefined,
               }));
             }}
             error={localErrors.confirmPassword}
             autoComplete="new-password"
             showRules={false}
           />
-          <SubmitButton label="Buat akun" busyLabel="Membuat akun…" busy={submit.busy} />
+          <SubmitButton
+            label={t('register.submit')}
+            busyLabel={t('register.submitBusy')}
+            busy={submit.busy}
+          />
           <p className="font-body-sm text-body-sm text-secondary">
-            Sudah punya akun?{' '}
+            {t('register.hasAccount')}{' '}
             <Link href="/masuk" className="text-burgundy hover:underline">
-              Masuk
+              {t('register.signInLink')}
             </Link>
             .
           </p>

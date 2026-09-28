@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import AuthShell from '../AuthShell';
 import AuthSidePanel from '../components/AuthSidePanel';
@@ -11,10 +12,12 @@ import Notice from '../components/Notice';
 import SubmitButton from '../components/SubmitButton';
 import { authService } from '@/src/services/auth/authService';
 import { validateRecoveryRequest } from '@/src/features/auth/validation/auth-validation';
-import { recoveryRequestCopy } from '@/src/services/auth/errorMapping';
+import { recoveryRequestCopy, resolveErrorMessage } from '@/src/services/auth/errorMapping';
 import { useAuthSubmit } from '@/src/features/auth/state/useAuthSubmit';
 
 export default function ForgotPasswordPage() {
+  const t = useTranslations('auth');
+  const tErrors = useTranslations();
   const [identifier, setIdentifier] = useState('');
   const [localError, setLocalError] = useState<string | undefined>();
   const [delivered, setDelivered] = useState(false);
@@ -30,7 +33,8 @@ export default function ForgotPasswordPage() {
     event.preventDefault();
     const validation = validateRecoveryRequest({ identifier });
     if (!validation.ok) {
-      setLocalError(validation.failures[0]?.message);
+      const first = validation.failures[0];
+      setLocalError(first ? t(first.message) : undefined);
       return;
     }
     setLocalError(undefined);
@@ -46,32 +50,35 @@ export default function ForgotPasswordPage() {
     <AuthShell
       side={
         <AuthSidePanel
-          eyebrow="Keamanan akun"
-          title="Pulihkan akses tanpa membuka identitas akun."
-          description="Respons pemulihan tetap sama untuk setiap permintaan agar informasi akun tetap terlindungi."
+          eyebrow={t('forgot.sideEyebrow')}
+          title={t('forgot.sideTitle')}
+          description={t('forgot.sideDescription')}
         />
       }
     >
       <AuthFormShell
-        eyebrow="Pemulihan"
-        title="Lupa kata sandi"
-        description="Masukkan identitas akun Anda."
+        eyebrow={t('forgot.eyebrow')}
+        title={t('forgot.title')}
+        description={t('forgot.description')}
         foot={
           <>
-            Ingat kata sandi Anda?{' '}
+            {t('forgot.remember')}{' '}
             <Link href="/masuk" className="text-burgundy hover:underline">
-              Kembali ke halaman masuk
+              {t('backToLogin')}
             </Link>
           </>
         }
       >
         {delivered ? (
-          <Notice tone="success" title="Permintaan diterima.">
-            {recoveryRequestCopy().safeMessage}
+          <Notice tone="success" title={t('forgot.deliveredTitle')}>
+            {resolveErrorMessage(tErrors, recoveryRequestCopy().safeMessage)}
           </Notice>
         ) : (
           <form onSubmit={onSubmit} className="flex flex-col gap-5" noValidate>
-            <FormStatus tone="alert" message={submit.error?.safeMessage} />
+            <FormStatus
+              tone="alert"
+              message={resolveErrorMessage(tErrors, submit.error?.safeMessage)}
+            />
             {localError ? <Notice tone="warning">{localError}</Notice> : null}
             <IdentityInput
               value={identifier}
@@ -80,7 +87,11 @@ export default function ForgotPasswordPage() {
               autoFocus
               required
             />
-            <SubmitButton label="Kirim tautan pemulihan" busyLabel="Mengirim…" busy={submit.busy} />
+            <SubmitButton
+              label={t('forgot.submit')}
+              busyLabel={t('forgot.submitBusy')}
+              busy={submit.busy}
+            />
           </form>
         )}
       </AuthFormShell>

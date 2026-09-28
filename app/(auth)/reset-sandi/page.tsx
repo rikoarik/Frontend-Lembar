@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { Suspense, useState } from 'react';
 import AuthShell from '../AuthShell';
 import AuthSidePanel from '../components/AuthSidePanel';
@@ -12,9 +13,12 @@ import SubmitButton from '../components/SubmitButton';
 import { authService } from '@/src/services/auth/authService';
 import { validateResetPassword } from '@/src/features/auth/validation/auth-validation';
 import { useAuthSubmit } from '@/src/features/auth/state/useAuthSubmit';
+import { resolveErrorMessage } from '@/src/services/auth/errorMapping';
 import { useSearchParams } from 'next/navigation';
 
 function ResetPasswordInner() {
+  const t = useTranslations('auth');
+  const tErrors = useTranslations();
   const searchParams = useSearchParams();
   const token = searchParams?.get('token') ?? '';
   const [password, setPassword] = useState('');
@@ -34,7 +38,7 @@ function ResetPasswordInner() {
       return;
     }
     if (password !== confirm) {
-      setMatchError('Konfirmasi kata sandi tidak cocok.');
+      setMatchError(t('passwordMismatch'));
       return;
     }
     setMatchError(undefined);
@@ -48,23 +52,23 @@ function ResetPasswordInner() {
       <AuthShell
         side={
           <AuthSidePanel
-            eyebrow="Keamanan akun"
-            title="Tautan tidak ditemukan."
-            description="Tautan pemulihan tidak ada di URL. Minta tautan baru untuk melanjutkan."
+            eyebrow={t('reset.sideEyebrow')}
+            title={t('reset.missingTitle')}
+            description={t('reset.missingDescription')}
           />
         }
       >
         <AuthFormShell
-          eyebrow="Pemulihan"
-          title="Tautan tidak dapat digunakan"
+          eyebrow={t('reset.missingEyebrow')}
+          title={t('reset.missingFormTitle')}
           foot={
             <Link href="/lupa-sandi" className="text-burgundy hover:underline">
-              Minta tautan baru
+              {t('reset.requestNewLink')}
             </Link>
           }
         >
-          <Notice tone="danger" title="Tautan pemulihan tidak valid.">
-            Minta tautan baru untuk melanjutkan.
+          <Notice tone="danger" title={t('reset.invalidTitle')}>
+            {t('reset.invalidBody')}
           </Notice>
         </AuthFormShell>
       </AuthShell>
@@ -75,51 +79,58 @@ function ResetPasswordInner() {
     <AuthShell
       side={
         <AuthSidePanel
-          eyebrow="Keamanan akun"
-          title="Atur ulang kata sandi Anda."
-          description="Pilih kata sandi baru minimal 12 karakter."
+          eyebrow={t('reset.sideEyebrow')}
+          title={t('reset.sideTitle')}
+          description={t('reset.sideDescription')}
         />
       }
     >
       <AuthFormShell
-        eyebrow="Atur ulang"
-        title="Simpan kata sandi baru"
+        eyebrow={t('reset.eyebrow')}
+        title={t('reset.title')}
         foot={
           saved ? (
             <Link href="/masuk" className="text-burgundy hover:underline">
-              Kembali ke halaman masuk
+              {t('backToLogin')}
             </Link>
           ) : (
             <>
-              Tidak ingin mengganti?{' '}
+              {t('reset.notChanging')}{' '}
               <Link href="/masuk" className="text-burgundy hover:underline">
-                Kembali ke halaman masuk
+                {t('backToLogin')}
               </Link>
             </>
           )
         }
       >
         {saved ? (
-          <Notice tone="success" title="Kata sandi diperbarui.">
-            Anda dapat masuk dengan kata sandi baru.
+          <Notice tone="success" title={t('reset.savedTitle')}>
+            {t('reset.savedBody')}
           </Notice>
         ) : (
           <form onSubmit={onSubmit} className="flex flex-col gap-5" noValidate>
-            <FormStatus tone="alert" message={submit.error?.safeMessage} />
+            <FormStatus
+              tone="alert"
+              message={resolveErrorMessage(tErrors, submit.error?.safeMessage)}
+            />
             <PasswordField
-              label="Kata sandi baru"
+              label={t('labels.newPassword')}
               value={password}
               onChange={setPassword}
               error={matchError}
               autoComplete="new-password"
             />
             <PasswordField
-              label="Konfirmasi kata sandi"
+              label={t('labels.confirmPassword')}
               value={confirm}
               onChange={setConfirm}
               autoComplete="new-password"
             />
-            <SubmitButton label="Simpan kata sandi" busyLabel="Menyimpan…" busy={submit.busy} />
+            <SubmitButton
+              label={t('reset.submit')}
+              busyLabel={t('reset.submitBusy')}
+              busy={submit.busy}
+            />
           </form>
         )}
       </AuthFormShell>

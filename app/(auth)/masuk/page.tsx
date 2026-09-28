@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import AuthShell from '../AuthShell';
 import AuthSidePanel from '../components/AuthSidePanel';
@@ -17,10 +18,17 @@ import { useAuthSubmit } from '@/src/features/auth/state/useAuthSubmit';
 
 type FieldKey = 'identifier' | 'password';
 
-const fieldError = (errors: Record<string, string[]>, key: FieldKey): string | undefined =>
-  errors[key]?.[0];
+const fieldError = (
+  t: (key: string) => string,
+  errors: Record<string, string[]>,
+  key: FieldKey,
+): string | undefined => {
+  const first = errors[key]?.[0];
+  return first ? t(first) : undefined;
+};
 
 export default function LoginPage() {
+  const t = useTranslations('auth');
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [localErrors, setLocalErrors] = useState<Partial<Record<FieldKey, string>>>({});
@@ -54,7 +62,7 @@ export default function LoginPage() {
       const next: Partial<Record<FieldKey, string>> = {};
       for (const failure of validation.failures) {
         if (failure.field === 'identifier' || failure.field === 'password') {
-          next[failure.field] = failure.message;
+          next[failure.field] = t(failure.message);
         }
       }
       setLocalErrors(next);
@@ -68,19 +76,19 @@ export default function LoginPage() {
     <AuthShell
       side={
         <AuthSidePanel
-          eyebrow="Ruang kerja lembar"
-          title="Dari materi ke lembar siap ditinjau."
-          description="Guru, admin sekolah, dan ops memakai portal masuk yang sama. Role diarahkan ke panel yang tepat."
+          eyebrow={t('login.sideEyebrow')}
+          title={t('login.sideTitle')}
+          description={t('login.sideDescription')}
         />
       }
     >
       <AuthFormShell
-        title="Masuk ke lembar"
+        title={t('login.title')}
         foot={
           <>
-            Belum punya akun?{' '}
+            {t('login.noAccount')}{' '}
             <Link href="/daftar" className="text-burgundy hover:underline">
-              Daftar gratis
+              {t('login.registerLink')}
             </Link>
           </>
         }
@@ -97,24 +105,28 @@ export default function LoginPage() {
           <IdentityInput
             value={identifier}
             onChange={setIdentifier}
-            error={localErrors.identifier ?? fieldError(submit.fieldErrors, 'identifier')}
+            error={localErrors.identifier ?? fieldError(t, submit.fieldErrors, 'identifier')}
             autoFocus
             required
           />
           <PasswordField
             value={password}
             onChange={setPassword}
-            error={localErrors.password ?? fieldError(submit.fieldErrors, 'password')}
+            error={localErrors.password ?? fieldError(t, submit.fieldErrors, 'password')}
           />
           <div className="flex justify-end">
             <Link
               href="/lupa-sandi"
               className="font-body-sm text-body-sm text-burgundy hover:underline"
             >
-              Lupa kata sandi?
+              {t('login.forgotPassword')}
             </Link>
           </div>
-          <SubmitButton label="Masuk" busyLabel="Memverifikasi…" busy={submit.busy} />
+          <SubmitButton
+            label={t('login.submit')}
+            busyLabel={t('login.submitBusy')}
+            busy={submit.busy}
+          />
         </form>
       </AuthFormShell>
     </AuthShell>
