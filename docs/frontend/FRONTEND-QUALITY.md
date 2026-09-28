@@ -109,11 +109,46 @@ so a failing CI job is reproducible on a developer machine.
 ./scripts/gates/test.sh           # pnpm run test  (vitest run)
 ./scripts/gates/build.sh          # pnpm run build (next build)
 ./scripts/gates/secret-scan.sh    # gitleaks detect (skips if gitleaks absent)
+./scripts/gates/no-hardcoded-copy.sh  # pnpm run i18n:no-hardcoded-copy
 ./scripts/gates/playwright-smoke.sh   # pnpm exec playwright test
 ```
 
 Vitest is configured via `vitest.config.mts` (jsdom, globals, `vitest.setup.ts`, excludes
 `scripts/gates/**` so Playwright specs are not picked up by unit tests).
+
+### i18n gate — no new hard-coded copy (FE-I18N-07)
+
+`scripts/gates/no-hardcoded-copy.ts` (npm: `pnpm run i18n:no-hardcoded-copy`, wired into
+`pnpm run check` and the CI `static-and-build` job) parses the migrated surfaces with the
+TypeScript AST and fails on Indonesian copy written inline instead of read through `next-intl`:
+
+- `jsx-text` — a JSX text node with Indonesian words, e.g. `<p>Simpan perubahan</p>`.
+- `jsx-attribute` — `placeholder` / `aria-label` / `title` / `alt` / `aria-description` on an
+  intrinsic element, e.g. `<input placeholder="Nama siswa" />`.
+
+Configuration is data, not code: `scripts/gates/no-hardcoded-copy.config.json` holds
+
+- `surfaces` — directories whose copy already goes through `next-intl`. Add a path once its
+  namespace is filled and its literals are migrated.
+- `exceptions` — the explicit baseline: literals present when the gate landed that are not
+  migrated yet. A finding matches only on the exact `file` + normalized `text` pair, so renaming
+  or rewording a string still trips the gate. Prune entries as the migrations land.
+
+Never flagged: Material Symbols glyph hosts (`className` contains `material-symbols`), the
+`lembar` wordmark (identical in both locales), identifiers, e-mails, URLs and numeric labels.
+Indonesian detection uses a marker vocabulary derived from `messages/id/*.json` words absent from
+`messages/en/*.json`, so English-only copy (`Review`, `PDF`) is not flagged. Refresh the marker
+list when a namespace introduces new vocabulary.
+
+Flags: `--json` (machine-readable report), `--list` (show allowed findings), `--strict` (stale
+exceptions also fail), `--root DIR`, `--config FILE`. Unmatched baseline entries are printed as
+`stale exception` warnings so the list stays honest.
+
+```bash
+pnpm run i18n:no-hardcoded-copy            # exit 1 on any new literal
+pnpm run i18n:no-hardcoded-copy -- --list  # also list the baselined literals
+pnpm run i18n:no-hardcoded-copy -- --strict  # fail on stale exceptions too
+```
 
 Playwright is configured via `playwright.config.ts`:
 

@@ -1,0 +1,105 @@
+{
+  "surfaces": ["app/(auth)", "app/auth", "app/components/app", "src/features/workspace"],
+  "exceptions": [
+    {
+      "file": "app/(auth)/components/AuthMethodDivider.tsx",
+      "text": "atau",
+      "reason": "baseline FE-I18N-07: pre-existing literal; prune when FE-I18N-02 (auth) migration lands"
+    },
+    {
+      "file": "app/(auth)/components/AuthSidePanel.tsx",
+      "text": "Komitmen lembar",
+      "reason": "baseline FE-I18N-07: pre-existing literal; prune when FE-I18N-02 (auth) migration lands"
+    },
+    {
+      "file": "app/(auth)/components/PasswordField.tsx",
+      "text": "Ketentuan kata sandi",
+      "reason": "baseline FE-I18N-07: pre-existing literal; prune when FE-I18N-02 (auth) migration lands"
+    },
+    {
+      "file": "app/(auth)/components/PhoneField.tsx",
+      "text": "Nomor telepon",
+      "reason": "baseline FE-I18N-07: pre-existing literal; prune when FE-I18N-02 (auth) migration lands"
+    },
+    {
+      "file": "app/(auth)/components/PhoneField.tsx",
+      "text": "Pilih kode negara",
+      "reason": "baseline FE-I18N-07: pre-existing literal; prune when FE-I18N-02 (auth) migration lands"
+    },
+    {
+      "file": "app/(auth)/daftar/page.tsx",
+      "text": "Dengan membuat akun, Anda menyetujui",
+      "reason": "baseline FE-I18N-07: pre-existing literal; prune when FE-I18N-02 (auth) migration lands"
+    },
+    {
+      "file": "app/(auth)/daftar/page.tsx",
+      "text": "Untuk notifikasi penting dan verifikasi akun dari sekolah.",
+      "reason": "baseline FE-I18N-07: pre-existing literal; prune when FE-I18N-02 (auth) migration lands"
+    },
+    {
+      "file": "app/(auth)/daftar/page.tsx",
+      "text": "Sudah punya akun?",
+      "reason": "baseline FE-I18N-07: pre-existing literal; prune when FE-I18N-02 (auth) migration lands"
+    },
+    {
+      "file": "app/(auth)/trial/claim/page.tsx",
+      "text": "Aktivasi trial Guru Pro",
+      "reason": "baseline FE-I18N-07: pre-existing literal; prune when FE-I18N-02 (auth) migration lands"
+    },
+    {
+      "file": "app/auth/callback/page.tsx",
+      "text": "Memverifikasi akun Google…",
+      "reason": "baseline FE-I18N-07: pre-existing literal; prune when FE-I18N-02 (auth) migration lands"
+    },
+    {
+      "file": "app/auth/callback/page.tsx",
+      "text": "Mohon tunggu sebentar, kami sedang mengonfirmasi identitas Anda.",
+      "reason": "baseline FE-I18N-07: pre-existing literal; prune when FE-I18N-02 (auth) migration lands"
+    },
+    {
+      "file": "app/auth/callback/page.tsx",
+      "text": "Autentikasi Berhasil",
+      "reason": "baseline FE-I18N-07: pre-existing literal; prune when FE-I18N-02 (auth) migration lands"
+    },
+    {
+      "file": "app/auth/callback/page.tsx",
+      "text": "Mengalihkan Anda ke portal (",
+      "reason": "baseline FE-I18N-07: pre-existing literal; prune when FE-I18N-02 (auth) migration lands"
+    },
+    {
+      "file": "app/auth/callback/page.tsx",
+      "text": "Gagal Memverifikasi",
+      "reason": "baseline FE-I18N-07: pre-existing literal; prune when FE-I18N-02 (auth) migration lands"
+    },
+    {
+      "file": "app/components/app/AppShell.tsx",
+      "text": "Lewati ke konten utama",
+      "reason": "baseline FE-I18N-07: pre-existing literal; prune when FE-I18N-01 (commonUi/appShell) migration lands"
+    },
+    {
+      "file": "app/components/app/AppShell.tsx",
+      "text": "Navigasi aplikasi",
+      "reason": "baseline FE-I18N-07: pre-existing literal; prune when FE-I18N-01 (commonUi/appShell) migration lands"
+    },
+    {
+      "file": "app/components/app/AppShell.tsx",
+      "text": "Tutup navigasi",
+      "reason": "baseline FE-I18N-07: pre-existing literal; prune when FE-I18N-01 (commonUi/appShell) migration lands"
+    },
+    {
+      "file": "app/components/app/ShellStates.tsx",
+      "text": "Sementara itu, gunakan dashboard untuk membuat atau membuka lembar yang sudah tersedia.",
+      "reason": "baseline FE-I18N-07: pre-existing literal; prune when FE-I18N-01 (commonUi/appShell) migration lands"
+    },
+    {
+      "file": "app/components/app/TopBar.tsx",
+      "text": "Penggunaan token bulan ini",
+      "reason": "baseline FE-I18N-07: pre-existing literal; prune when FE-I18N-01 (commonUi/appShell) migration lands"
+    },
+    {
+      "file": "app/components/app/WorkspaceSwitcher.tsx",
+      "text": "Daftar workspace",
+      "reason": "baseline FE-I18N-07: pre-existing literal; prune when FE-I18N-01 (commonUi/appShell) migration lands"
+    }
+  ]
+}

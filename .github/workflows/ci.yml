@@ -47,6 +47,9 @@ jobs:
       - name: Secret scan
         run: pnpm run secret:scan
 
+      - name: i18n no-hardcoded-copy gate
+        run: pnpm run i18n:no-hardcoded-copy
+
       - name: Production dependency audit
         run: pnpm run audit:prod
 

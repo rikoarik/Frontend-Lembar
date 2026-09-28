@@ -19,8 +19,9 @@
     "test:e2e": "playwright test",
     "test:smoke": "node scripts/browser-smoke.mjs",
     "secret:scan": "node scripts/secret-scan.mjs",
+    "i18n:no-hardcoded-copy": "node scripts/gates/no-hardcoded-copy.ts",
     "audit:prod": "pnpm audit --prod",
-    "check": "pnpm run typecheck && pnpm run lint && pnpm run format:check && pnpm run test && pnpm run secret:scan"
+    "check": "pnpm run typecheck && pnpm run lint && pnpm run format:check && pnpm run test && pnpm run secret:scan && pnpm run i18n:no-hardcoded-copy"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.101.2",
