@@ -1,0 +1,17 @@
+=== PM2 STATUS 2026-09-28T15:30:11Z ===
+lembar-worker | online | 1788440422429 | 2026-09-03T13:00:22.429Z | restarts=24 | pid=1223711
+pm2-logrotate | online | 1786470549144 | 2026-08-11T17:49:09.144Z | restarts=5 | pid=402520
+lembar-api | online | 1790602037486 | 2026-09-28T13:27:17.486Z | restarts=38 | pid=1363404
+lembar-frontend | online | 1790609148383 | 2026-09-28T15:25:48.383Z | restarts=16717 | pid=1539606
+
+=== OUT LOG TAIL ===
+
+▲ Next.js 16.3.2
+- Local:         http://localhost:3000
+- Network:       http://172.22.16.13:3000
+✓ Ready in 427ms
+✓ Running next.config.mjs took 274ms
+
+=== LOG FILE MTIME ===
+2026-09-28 23:25:52.549010181 +0800 /home/hermes/.pm2/logs/lembar-frontend-out.log
+2026-09-28 23:26:08.398500038 +0800 /home/hermes/.pm2/logs/lembar-frontend-error.log
