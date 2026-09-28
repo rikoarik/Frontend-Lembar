@@ -3,9 +3,61 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useReducedMotion } from 'framer-motion';
+import { useTranslations } from 'next-intl';
+
+type FooterLink = { key: string; href: string };
+
+const SERVICE_LINKS: readonly FooterLink[] = [
+  { key: 'home', href: '/' },
+  { key: 'generator', href: '/generator-soal-ai' },
+  { key: 'school', href: '/untuk-sekolah' },
+  { key: 'pricing', href: '/harga' },
+];
+
+const COMPANY_LINKS: readonly FooterLink[] = [
+  { key: 'about', href: '/tentang' },
+  { key: 'security', href: '/keamanan-data' },
+  { key: 'contact', href: '/kontak' },
+];
+
+const SUPPORT_LINKS: readonly FooterLink[] = [
+  { key: 'help', href: '/bantuan' },
+  { key: 'faq', href: '/faq' },
+  { key: 'privacy', href: '/privasi' },
+  { key: 'terms', href: '/syarat' },
+];
+
+const linkClass =
+  'font-caption text-caption text-secondary hover:text-burgundy hover:underline transition-all duration-200';
+
+function FooterColumn({
+  heading,
+  links,
+  t,
+}: {
+  heading: string;
+  links: readonly FooterLink[];
+  t: (key: string) => string;
+}) {
+  return (
+    <div className="md:col-span-2 flex flex-col gap-unit-4">
+      <span className="font-label-semibold text-ink text-body-sm uppercase tracking-wider">
+        {heading}
+      </span>
+      <div className="flex flex-col gap-unit-2">
+        {links.map((link) => (
+          <Link key={link.key} className={linkClass} href={link.href}>
+            {t(`links.${link.key}`)}
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function MarketingFooter() {
   const reduce = useReducedMotion();
+  const t = useTranslations('marketing.footer');
 
   return (
     <footer className="w-full bg-paper border-t border-border-strong pt-unit-16 pb-unit-8 select-none">
@@ -16,7 +68,7 @@ export default function MarketingFooter() {
             <div className="flex items-center gap-2">
               <div className="h-unit-8 w-unit-8 flex-shrink-0">
                 <Image
-                  alt="lembar logo"
+                  alt={t('brandAlt')}
                   className="h-full w-full object-contain"
                   src="/lembar/logo-mark.png"
                   width={32}
@@ -27,120 +79,31 @@ export default function MarketingFooter() {
             </div>
 
             <p className="font-caption text-caption text-secondary max-w-[300px] leading-relaxed">
-              Platform pembuatan asesmen pintar berbasis AI yang dirancang khusus untuk meningkatkan
-              produktivitas dan kualitas pengajaran pendidik di Indonesia.
+              {t('brandBody')}
             </p>
           </div>
 
-          {/* Links Column 1: Layanan */}
-          <div className="md:col-span-2 flex flex-col gap-unit-4">
-            <span className="font-label-semibold text-ink text-body-sm uppercase tracking-wider">
-              Layanan
-            </span>
-            <div className="flex flex-col gap-unit-2">
-              <Link
-                className="font-caption text-caption text-secondary hover:text-burgundy hover:underline transition-all duration-200"
-                href="/"
-              >
-                Beranda
-              </Link>
-              <Link
-                className="font-caption text-caption text-secondary hover:text-burgundy hover:underline transition-all duration-200"
-                href="/generator-soal-ai"
-              >
-                Generator Soal AI
-              </Link>
-              <Link
-                className="font-caption text-caption text-secondary hover:text-burgundy hover:underline transition-all duration-200"
-                href="/untuk-sekolah"
-              >
-                Untuk Sekolah
-              </Link>
-              <Link
-                className="font-caption text-caption text-secondary hover:text-burgundy hover:underline transition-all duration-200"
-                href="/harga"
-              >
-                Harga
-              </Link>
-            </div>
-          </div>
-
-          {/* Links Column 2: Perusahaan */}
-          <div className="md:col-span-2 flex flex-col gap-unit-4">
-            <span className="font-label-semibold text-ink text-body-sm uppercase tracking-wider">
-              Perusahaan
-            </span>
-            <div className="flex flex-col gap-unit-2">
-              <Link
-                className="font-caption text-caption text-secondary hover:text-burgundy hover:underline transition-all duration-200"
-                href="/tentang"
-              >
-                Tentang Kami
-              </Link>
-              <Link
-                className="font-caption text-caption text-secondary hover:text-burgundy hover:underline transition-all duration-200"
-                href="/keamanan-data"
-              >
-                Keamanan Data
-              </Link>
-              <Link
-                className="font-caption text-caption text-secondary hover:text-burgundy hover:underline transition-all duration-200"
-                href="/kontak"
-              >
-                Kontak Kami
-              </Link>
-            </div>
-          </div>
-
-          {/* Links Column 3: Dukungan */}
-          <div className="md:col-span-2 flex flex-col gap-unit-4">
-            <span className="font-label-semibold text-ink text-body-sm uppercase tracking-wider">
-              Dukungan
-            </span>
-            <div className="flex flex-col gap-unit-2">
-              <Link
-                className="font-caption text-caption text-secondary hover:text-burgundy hover:underline transition-all duration-200"
-                href="/bantuan"
-              >
-                Pusat Bantuan
-              </Link>
-              <Link
-                className="font-caption text-caption text-secondary hover:text-burgundy hover:underline transition-all duration-200"
-                href="/faq"
-              >
-                FAQ
-              </Link>
-              <Link
-                className="font-caption text-caption text-secondary hover:text-burgundy hover:underline transition-all duration-200"
-                href="/privasi"
-              >
-                Kebijakan Privasi
-              </Link>
-              <Link
-                className="font-caption text-caption text-secondary hover:text-burgundy hover:underline transition-all duration-200"
-                href="/syarat"
-              >
-                Syarat & Ketentuan
-              </Link>
-            </div>
-          </div>
+          <FooterColumn heading={t('sections.services')} links={SERVICE_LINKS} t={t} />
+          <FooterColumn heading={t('sections.company')} links={COMPANY_LINKS} t={t} />
+          <FooterColumn heading={t('sections.support')} links={SUPPORT_LINKS} t={t} />
 
           {/* Newsletter Column */}
           <div className="md:col-span-2 flex flex-col gap-unit-4">
             <span className="font-label-semibold text-ink text-body-sm uppercase tracking-wider">
-              Update Terbaru
+              {t('sections.newsletter')}
             </span>
             <p className="font-caption text-caption text-secondary leading-relaxed">
-              Langganan buletin kami untuk tips & info edukasi terbaru.
+              {t('newsletterBody')}
             </p>
             <form onSubmit={(e) => e.preventDefault()} className="flex flex-col gap-2">
               <input
                 type="email"
-                placeholder="Alamat email Anda"
+                placeholder={t('newsletterPlaceholder')}
+                aria-label={t('newsletterPlaceholder')}
                 className="w-full bg-surface border border-border-strong rounded px-3 py-2 text-caption focus:outline-none focus:border-burgundy focus:ring-1 focus:ring-burgundy transition-all duration-200"
               />
               <button className="bg-burgundy text-on-primary font-label-semibold h-9 rounded text-caption hover:brightness-110 active:scale-95 transition-all">
-                Langganan
+                {t('newsletterSubmit')}
               </button>
             </form>
           </div>
@@ -149,17 +112,17 @@ export default function MarketingFooter() {
         {/* Bottom Section */}
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-unit-8">
           <p className="font-caption text-caption text-secondary text-center sm:text-left">
-            © 2026 lembar. Dirancang untuk keahlian pendidik.
+            {t('copyright')}
           </p>
           <div className="flex items-center gap-1.5 text-secondary font-caption text-caption">
-            <span>Dibuat dengan</span>
+            <span>{t('madeWith')}</span>
             <span
               className={`material-symbols-outlined text-red-500 text-[16px] ${reduce ? '' : 'animate-pulse'}`}
               style={{ fontVariationSettings: "'FILL' 1" }}
             >
               favorite
             </span>
-            <span>untuk Guru Indonesia</span>
+            <span>{t('madeFor')}</span>
           </div>
         </div>
       </div>

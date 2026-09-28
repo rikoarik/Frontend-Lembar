@@ -1,6 +1,7 @@
 'use client';
 
 import { FormEvent, useCallback, useEffect, useId, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 const WHATSAPP_URL = 'https://wa.me/6285784255112';
 
@@ -8,6 +9,7 @@ type Reply = { answered: boolean; message: string; whatsappUrl?: string };
 type Message = { role: 'user' | 'bot'; text: string; whatsappUrl?: string };
 
 export default function SupportChat() {
+  const t = useTranslations('marketing.support');
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
@@ -104,12 +106,12 @@ export default function SupportChat() {
         { role: 'bot', text: reply.message, whatsappUrl: reply.whatsappUrl },
       ]);
     } catch {
-      setRequestError('Tidak dapat menghubungi layanan chat.');
+      setRequestError(t('requestError'));
       setMessages((prev) => [
         ...prev,
         {
           role: 'bot',
-          text: 'Maaf, layanan chat sedang tidak tersedia.',
+          text: t('unavailable'),
           whatsappUrl: WHATSAPP_URL,
         },
       ]);
@@ -145,15 +147,13 @@ export default function SupportChat() {
         </div>
         <div className="flex-1 min-w-0">
           <p id={titleId} className="text-[14px] font-semibold text-white leading-tight">
-            Tanya Lembar
+            {t('title')}
           </p>
-          <p className="text-[11px] text-white/70 leading-tight">
-            Biasanya membalas dalam hitungan detik
-          </p>
+          <p className="text-[11px] text-white/70 leading-tight">{t('subtitle')}</p>
         </div>
         <button
           type="button"
-          aria-label="Tutup chat"
+          aria-label={t('close')}
           onClick={closeChat}
           className="flex h-8 w-8 items-center justify-center rounded-full text-white/80 hover:bg-white/20 transition-colors"
         >
@@ -171,14 +171,11 @@ export default function SupportChat() {
             </div>
             <div className="max-w-[260px] rounded-2xl rounded-tl-sm bg-white px-3 py-2.5 shadow-sm border border-[#e6dfd4]">
               <p className="text-[13px] text-[#171717] leading-relaxed">
-                Halo! Saya asisten Lembar 👋
+                {t('welcome')}
                 <br />
-                Ada yang bisa saya bantu tentang platform Lembar?
+                {t('welcomeQuestion')}
               </p>
-              <p className="mt-2 text-[12px] text-[#6d665d]">
-                Hanya menjawab pertanyaan tentang Lembar dan tidak dapat menjawab topik coding atau
-                topik umum.
-              </p>
+              <p className="mt-2 text-[12px] text-[#6d665d]">{t('scopeNote')}</p>
             </div>
           </div>
         )}
@@ -213,7 +210,7 @@ export default function SupportChat() {
                   className="inline-flex items-center gap-1.5 rounded-xl bg-[#25d366] px-3 py-2 text-[12px] font-semibold text-white hover:bg-[#20bc5a] transition-colors"
                 >
                   <span className="material-symbols-outlined text-[14px]">chat</span>
-                  Lanjutkan di WhatsApp
+                  {t('continueWhatsapp')}
                 </a>
               )}
             </div>
@@ -258,11 +255,11 @@ export default function SupportChat() {
         <form onSubmit={submit} className="flex items-end gap-2">
           <textarea
             ref={inputRef}
-            aria-label="Pertanyaan"
+            aria-label={t('inputLabel')}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Ketik pertanyaan Anda…"
+            placeholder={t('inputPlaceholder')}
             maxLength={500}
             rows={1}
             disabled={loading}
@@ -273,14 +270,12 @@ export default function SupportChat() {
             type="submit"
             disabled={loading || !input.trim()}
             className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#a3202b] text-white hover:bg-[#851925] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-            aria-label={loading ? 'Mengirim pesan' : 'Kirim pesan'}
+            aria-label={loading ? t('sending') : t('send')}
           >
             <span className="material-symbols-outlined text-[18px]">send</span>
           </button>
         </form>
-        <p className="mt-1.5 text-center text-[10px] text-[#8a8379]">
-          Ditenagai AI · Tidak bisa menjawab topik umum
-        </p>
+        <p className="mt-1.5 text-center text-[10px] text-[#8a8379]">{t('poweredBy')}</p>
       </div>
     </div>
   );
@@ -302,7 +297,7 @@ export default function SupportChat() {
         <button
           ref={launcherRef}
           type="button"
-          aria-label={open ? 'Tutup chat' : 'Buka chat layanan pelanggan'}
+          aria-label={open ? t('close') : t('openLauncher')}
           onClick={() => setOpen((v) => !v)}
           className="group relative flex h-14 w-14 items-center justify-center rounded-full bg-[#a3202b] text-white shadow-lg hover:bg-[#851925] active:scale-95 transition-all duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#a3202b]"
         >
@@ -325,7 +320,7 @@ export default function SupportChat() {
           {/* Tooltip */}
           {!open && (
             <span className="absolute right-16 whitespace-nowrap rounded-lg bg-[#171717] px-2.5 py-1.5 text-[12px] font-medium text-white opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-md">
-              Tanya Lembar
+              {t('title')}
             </span>
           )}
         </button>

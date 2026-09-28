@@ -6,7 +6,11 @@
     "catalogUnavailableTitle": "The pricing catalog is unavailable",
     "catalogUnavailableBody": "We do not show fallback prices or quotas. Try again later or contact our team for verified plan information.",
     "plans": {
-      "free": { "name": "Free", "subtitle": "For trying the core features.", "cta": "Start Free" },
+      "free": {
+        "name": "Free",
+        "subtitle": "For trying the core features.",
+        "cta": "Start Free"
+      },
       "plus": {
         "name": "Plus",
         "subtitle": "Higher capacity for creating assessments more often.",
@@ -68,6 +72,586 @@
       "title": "Ready to design better assessments?",
       "register": "Register now",
       "contact": "Schedule a demo"
+    },
+    "meta": {
+      "title": "lembar pricing — plans for teachers and schools",
+      "description": "See the lembar plans available from the active catalog or contact the team for your school's needs."
+    },
+    "schema": {
+      "webPageName": "lembar pricing — plans for teachers and schools",
+      "webPageDescription": "The lembar plan catalog for teachers and institutional needs."
+    }
+  },
+  "marketing": {
+    "nav": {
+      "ariaLabel": "Main navigation",
+      "ariaSections": "Sections",
+      "ariaMobile": "Mobile navigation",
+      "ariaHome": "lembar — home",
+      "items": {
+        "product": "Product",
+        "school": "For Schools",
+        "pricing": "Pricing"
+      },
+      "openMenu": "Open navigation menu",
+      "closeMenu": "Close navigation menu",
+      "openWorkspace": "Open workspace"
+    },
+    "cta": {
+      "login": "Sign in",
+      "tryFree": "Try for Free",
+      "createFree": "Create a free worksheet",
+      "seeExample": "See an example output",
+      "schoolDiscuss": "Discuss your school's needs",
+      "startFree": "Start Free",
+      "subscribe": "Subscribe Now",
+      "pilot": "Join the Pilot",
+      "registerNow": "Register Now",
+      "scheduleDemo": "Schedule a Demo"
+    },
+    "footer": {
+      "brandAlt": "lembar logo",
+      "brandBody": "An AI-powered assessment creation platform built specifically to improve the productivity and teaching quality of educators in Indonesia.",
+      "sections": {
+        "services": "Services",
+        "company": "Company",
+        "support": "Support",
+        "newsletter": "Latest Updates"
+      },
+      "links": {
+        "home": "Home",
+        "generator": "AI Question Generator",
+        "school": "For Schools",
+        "pricing": "Pricing",
+        "about": "About Us",
+        "security": "Data Security",
+        "contact": "Contact Us",
+        "help": "Help Center",
+        "faq": "FAQ",
+        "privacy": "Privacy Policy",
+        "terms": "Terms & Conditions"
+      },
+      "newsletterBody": "Subscribe to our newsletter for the latest education tips & news.",
+      "newsletterPlaceholder": "Your email address",
+      "newsletterSubmit": "Subscribe",
+      "copyright": "© 2026 lembar. Designed for educator expertise.",
+      "madeWith": "Made with",
+      "madeFor": "for Indonesian Teachers"
+    },
+    "announcement": {
+      "ariaLabel": "Announcement",
+      "close": "Dismiss announcement",
+      "fallbackLabel": "Beta",
+      "fallbackMessage": "Lembar is in beta and keeps improving together with Indonesian teachers.",
+      "fallbackCtaLabel": "Start exploring"
+    },
+    "support": {
+      "title": "Ask Lembar",
+      "subtitle": "Usually replies within seconds",
+      "close": "Close chat",
+      "openLauncher": "Open customer support chat",
+      "welcome": "Hi! I'm the Lembar assistant 👋",
+      "welcomeQuestion": "Anything I can help you with about the Lembar platform?",
+      "scopeNote": "Only answers questions about Lembar and cannot answer coding or general topics.",
+      "inputLabel": "Question",
+      "inputPlaceholder": "Type your question…",
+      "send": "Send message",
+      "sending": "Sending message",
+      "continueWhatsapp": "Continue on WhatsApp",
+      "poweredBy": "AI-powered · Cannot answer general topics",
+      "requestError": "Could not reach the chat service.",
+      "unavailable": "Sorry, the chat service is currently unavailable."
+    },
+    "subpage": {
+      "backHome": "Home"
+    },
+    "home": {
+      "meta": {
+        "title": "AI Question Generator for Teachers — lembar",
+        "description": "AI-powered automatic question generation for Indonesian teachers. Create exam, quiz, and practice drafts from your materials or PDFs, then review before use."
+      },
+      "eyebrow": "AI question generator for Indonesian teachers",
+      "title": "Automatically create exam questions from curriculum materials or your PDFs",
+      "body": "An AI-powered question generator that produces exam, quiz, and practice drafts from the Student Book or your own materials. Review every question before printing or sharing. Pricing and quotas follow the active plan catalog.",
+      "primaryCta": "Start creating questions",
+      "primaryCtaSession": "Open workspace",
+      "secondaryCta": "See an example output",
+      "cardBadge": "AI draft ready for review",
+      "features": {
+        "0": {
+          "title": "Multiple-choice and essay question generator",
+          "body": "Create multiple-choice, essay, or mixed questions automatically from the material you choose"
+        },
+        "1": {
+          "title": "From curriculum or PDF",
+          "body": "Upload materials, pick a topic from the curriculum catalog, or combine both"
+        },
+        "2": {
+          "title": "Review before use",
+          "body": "Every question can be edited, regenerated, or removed before finalizing"
+        },
+        "3": {
+          "title": "Print or share a link",
+          "body": "Download a print-ready PDF or create a secure link to share with students"
+        }
+      },
+      "howTitle": "How the lembar AI question generator works",
+      "steps": {
+        "0": {
+          "title": "1. Choose your material",
+          "body": "Upload your PDF material or pick a topic from the Merdeka and K-13 curriculum catalog"
+        },
+        "1": {
+          "title": "2. Generate a question draft",
+          "body": "AI creates a question draft from the material, complete with answer keys and source references"
+        },
+        "2": {
+          "title": "3. Review & finalize",
+          "body": "Check, edit, or regenerate questions until you are satisfied, then print or share a secure link"
+        }
+      },
+      "whyTitle": "Why teachers choose the lembar question generator?",
+      "whyBody": "An AI question generator built specifically for Indonesian teachers, with clear quotas for every plan.",
+      "benefits": {
+        "0": {
+          "title": "✓ Free plan with clear quotas",
+          "body": "Start without a credit card. Monthly generation quotas and trial options are shown transparently on the plans page."
+        },
+        "1": {
+          "title": "✓ Full control in the teacher's hands",
+          "body": "AI drafts are always reviewed by a teacher. Edit, regenerate, or delete questions as you like before finalizing."
+        },
+        "2": {
+          "title": "✓ Complete curriculum catalog",
+          "body": "Pick topics from Kurikulum Merdeka or K-13, or upload your own material."
+        },
+        "3": {
+          "title": "✓ Ready-to-use results",
+          "body": "A print-ready PDF or a secure share link, with no ads or watermarks."
+        }
+      },
+      "finalTitle": "Start creating questions automatically now",
+      "finalBody": "An AI question generator for Indonesian teachers. Sign up free and create questions right away, no credit card needed.",
+      "finalCta": "Sign up & create questions free",
+      "finalCtaSession": "Open workspace",
+      "schemaDescription": "AI-powered automatic question generation for Indonesian teachers. Create and review question drafts from curriculum materials or PDFs.",
+      "schemaPageName": "AI Question Generator for Indonesian Teachers"
+    },
+    "generator": {
+      "meta": {
+        "title": "AI Question Generator for Indonesian Teachers | Lembar",
+        "description": "AI question generation from PDFs and materials for Kurikulum Merdeka. Create multiple-choice, essay, and other question drafts for teacher review.",
+        "ogDescription": "Create question drafts from PDFs or materials, set the question types, then review every item before use.",
+        "twitterDescription": "Create and review question drafts from PDFs, materials, or curriculum context."
+      },
+      "title": "AI question generator for Indonesian teachers",
+      "lead": "Create multiple-choice, essay, and other question drafts from PDFs or materials, then check them before use.",
+      "primaryCta": "Start creating questions",
+      "secondaryCta": "See how it works",
+      "preview": {
+        "eyebrow": "Example draft for review",
+        "subject": "Natural Science",
+        "question": "Why is photosynthesis important for life on Earth?",
+        "options": {
+          "0": "A. It produces oxygen and stores energy in glucose",
+          "1": "B. It turns all water into carbon dioxide",
+          "2": "C. It stops plant growth during the day"
+        },
+        "note": "The teacher checks the question, answer options, key, and alignment with the source material."
+      },
+      "aboutTitle": "What does the Lembar question generator do?",
+      "aboutBody": "Lembar helps turn learning context into editable assessment drafts. The system does not replace teacher judgement and does not guarantee that every AI output is correct.",
+      "sources": {
+        "pdfTitle": "From a PDF or learning material",
+        "pdfBody": "Use a source document to keep question topics on track, then cross-check the draft against the material before using it.",
+        "curriculumTitle": "Curriculum context",
+        "curriculumBody": "Pick a grade level, subject, or topic from the available catalog, then adapt it to your class learning objectives."
+      },
+      "typesTitle": "Question types you can prepare",
+      "typesLead": "Mix several formats so the assessment measures not only recall, but also understanding and reasoning.",
+      "types": {
+        "0": {
+          "title": "Multiple choice",
+          "body": "Build answer options and keys in a draft the teacher can still inspect and edit."
+        },
+        "1": {
+          "title": "True or false",
+          "body": "Create statements that briefly test conceptual understanding."
+        },
+        "2": {
+          "title": "Short answer",
+          "body": "Prepare questions with short responses for terms, facts, or simple calculations."
+        },
+        "3": {
+          "title": "Essay",
+          "body": "Design open-ended questions for reasoning, process explanation, and student analysis."
+        }
+      },
+      "howTitle": "How to create questions with AI",
+      "howLead": "The flow keeps the teacher as the reviewer and final decision maker.",
+      "steps": {
+        "0": {
+          "title": "Choose the source material",
+          "body": "Use a PDF, material you prepared, or context from the available curriculum catalog."
+        },
+        "1": {
+          "title": "Set the question composition",
+          "body": "Decide the number and types of questions for a practice, quiz, or exam goal."
+        },
+        "2": {
+          "title": "Create a draft with AI",
+          "body": "Lembar processes the context and prepares question items as a draft, not an automatic final result."
+        },
+        "3": {
+          "title": "Review before use",
+          "body": "Check the questions, options, keys, and material alignment. Edit or remove items that are not right yet."
+        }
+      },
+      "reviewTitle": "Teacher review is not an optional step",
+      "reviewBody": "AI can produce inaccurate facts, options, or difficulty levels. Check every item against the source and your students' needs.",
+      "reviewLink": "Learn about data security",
+      "checklist": {
+        "0": "Check alignment with the material and learning objectives.",
+        "1": "Make sure multiple-choice questions have exactly one correct key.",
+        "2": "Adapt the language, context, and difficulty to your students.",
+        "3": "Edit or remove doubtful output before finalizing."
+      },
+      "outputTitle": "From draft to document or online assessment",
+      "outputBody": "After review and finalization, use the output flow available in your workspace to prepare a teacher document, a student document, or share the assessment online.",
+      "outputPricingLink": "View active plans",
+      "outputSchoolLink": "Lembar for schools",
+      "faqTitle": "Questions about the AI question generator",
+      "faqs": {
+        "0": {
+          "question": "What is the Lembar AI question generator?",
+          "answer": "Lembar is a web app that helps teachers create question drafts from materials, PDFs, or curriculum context. Teachers still review every item before finalizing."
+        },
+        "1": {
+          "question": "Can Lembar create questions from a PDF?",
+          "answer": "Yes. Teachers can use a PDF as the source material, then decide the question composition they want. The result still needs to be checked against the source document."
+        },
+        "2": {
+          "question": "What question types can be created?",
+          "answer": "Lembar supports flows for multiple-choice, true or false, short answer, and essay questions. Final availability follows the features enabled in your workspace and the active catalog."
+        },
+        "3": {
+          "question": "Are AI-generated questions ready to use immediately?",
+          "answer": "Not always. AI content can be wrong or poorly matched to the context. That is why Lembar places a teacher review step before questions are printed or shared."
+        },
+        "4": {
+          "question": "What output can be prepared after review?",
+          "answer": "After finalization, teachers can use the teacher and student document export flow or share the assessment through the online features available in the workspace."
+        },
+        "5": {
+          "question": "Can Lembar be used for Kurikulum Merdeka?",
+          "answer": "Teachers can choose context from the currently active curriculum catalog and adapt the result to the learning objectives, material, grade level, and class needs."
+        }
+      },
+      "finalTitle": "Prepare your first question draft",
+      "finalBody": "Start from the material you already have, then review every result before using it in class.",
+      "finalCta": "Start creating questions",
+      "schema": {
+        "webPageName": "AI Question Generator for Indonesian Teachers",
+        "webPageDescription": "A guide to the Lembar AI question generator features for creating question drafts from PDFs, materials, and curriculum context.",
+        "howToName": "How to create questions with AI in Lembar",
+        "howToDescription": "Four stages to prepare and review question drafts with Lembar.",
+        "softwareDescription": "A web app for creating and reviewing question drafts from PDFs, materials, or curriculum context.",
+        "softwareSubCategory": "AI question generator for teachers"
+      }
+    },
+    "school": {
+      "meta": {
+        "title": "For schools — a managed assessment workspace",
+        "description": "The lembar organisation workspace for schools: teacher account management, internal question bank, shared templates, and audit trail. A pilot programme for education institutions."
+      },
+      "heroTitle": "An Organisation Workspace for School Institutions",
+      "heroBody": "Centralise question creation, teacher account management, and AI quota sharing in one secure dashboard. Ensure consistent assessment quality across every department.",
+      "heroCta": "Discuss your school's needs",
+      "mockup": {
+        "dashboard": "School Dashboard",
+        "schoolName": "SMA Nusantara Raya",
+        "activeTeachers": "Active: 42 Teachers",
+        "quotaLabel": "AI Quota Used",
+        "quotaValue": "6,500 / 10,000 units",
+        "bankLabel": "Total Question Bank",
+        "bankValue": "1,248",
+        "bankUnit": "questions",
+        "activityTitle": "Recent Activity",
+        "activity1": "Ms Rina (Mathematics) exported 40 questions",
+        "activity1Time": "2 minutes ago",
+        "activity2": "Mr Budi added the Odd-Semester Final Exam Template",
+        "activity2Time": "1 hour ago"
+      },
+      "featuresEyebrow": "Enterprise Features",
+      "featuresTitle": "Full Control in the Educator's Hands",
+      "features": {
+        "0": {
+          "title": "Account & Quota Management",
+          "body": "Add or remove teacher access easily. Allocate AI quota according to each subject's needs."
+        },
+        "1": {
+          "title": "Internal Question Bank",
+          "body": "Store the school's intellectual assets in a private, encrypted repository accessible only to internal staff."
+        },
+        "2": {
+          "title": "Shared Templates",
+          "body": "Standardise exam header formats, fonts, and branding across all classes to protect the school's credibility."
+        },
+        "3": {
+          "title": "Audit Trail",
+          "body": "Monitor question creation and export activity transparently to minimise data leakage."
+        }
+      },
+      "insight": {
+        "badge": "Visual Insight",
+        "title": "Track Assessment Progress in Real Time",
+        "fileName": "grade_10_dashboard.xlsx",
+        "statTotalLabel": "Total Questions",
+        "statTotalValue": "60",
+        "statTotalUnit": "items",
+        "statAverageLabel": "Average Progress",
+        "statAverageValue": "73%",
+        "barMatematikaLabel": "MATH",
+        "barMatematikaTooltip": "85% • 17/20 questions",
+        "barInggrisLabel": "ENG",
+        "barInggrisTooltip": "42% • 8/20 questions",
+        "barFisikaLabel": "PHY",
+        "barFisikaTooltip": "92% • 18/20 questions",
+        "teacherName": "Mr Budi (Physics)",
+        "teacherAction": "Exported 18 questions to PDF",
+        "securityTitle": "Data Security Is the Top Priority",
+        "securityBody": "Bank-grade encryption for every question created. Your school's data remains your school's property.",
+        "securityBadge": "ISO 27001 Certified Infrastructure"
+      },
+      "pilotTitle": "School Programme (Pilot)",
+      "pilotSteps": {
+        "0": {
+          "title": "Needs Consultation",
+          "body": "Our team will help map your school's required number of teachers and monthly assessment volume."
+        },
+        "1": {
+          "title": "Onboarding & Training",
+          "body": "An exclusive workshop session so teachers master the lembar AI assistant within minutes."
+        },
+        "2": {
+          "title": "Phased Rollout",
+          "body": "Start with one department or grade level before expanding across the whole institution."
+        }
+      },
+      "finalTitle": "Ready to digitalise your school's assessments?",
+      "finalBody": "Join the dozens of institutions that have improved teacher efficiency by up to 70%.",
+      "finalCta": "Discuss your school's needs",
+      "schemaName": "lembar for schools — a teacher organisation workspace",
+      "schemaDescription": "Centralised question creation and teacher account management in one school dashboard."
+    },
+    "help": {
+      "title": "Start here.",
+      "description": "A short guide to becoming productive with lembar right away.",
+      "badge": "Support",
+      "firstStepEyebrow": "First Step",
+      "firstStepTitle": "Create your first assessment",
+      "firstStepBody": "Sign up, pick a subject, enter a topic — our AI composes a question draft in seconds. Just review and adjust.",
+      "tipEyebrow": "AI Tips",
+      "tipTitle": "Prompts that produce good questions",
+      "tipBody": "The more specific the topic and taxonomy level you provide, the sharper the questions the AI produces.",
+      "collabEyebrow": "Collaboration",
+      "collabTitle": "Invite your team",
+      "collabBody": "Bring other teachers into the school workspace. Set roles, share the question bank, and review together.",
+      "ctaText": "Still need help?",
+      "ctaLabel": "Contact Our Team"
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "description": "Straight answers, no filler.",
+      "badge": "FAQ",
+      "items": {
+        "0": {
+          "question": "What is lembar?",
+          "answer": "lembar helps teachers compose assessment drafts, review every item, then prepare the result for printing or sharing."
+        },
+        "1": {
+          "question": "How much does it cost?",
+          "answer": "Pricing, quotas, and features follow the active catalog on the Pricing page. If the catalog is unavailable, lembar does not display fallback values."
+        },
+        "2": {
+          "question": "How does the generation process work?",
+          "answer": "The teacher chooses the context and question composition, then the system prepares a draft for review. The teacher still has to check and accept every item before finalizing."
+        },
+        "3": {
+          "question": "How is question access controlled?",
+          "answer": "The workspace requires an account session. Student links use limited tokens that can expire or be revoked and never show the answer key."
+        },
+        "4": {
+          "question": "Which curricula are available?",
+          "answer": "The available grade levels, subjects, materials, and curriculum versions follow the catalog currently active for your workspace."
+        },
+        "5": {
+          "question": "How do I start using it?",
+          "answer": "Sign in or register, choose a workspace, set the question composition, then review the draft before printing or sharing it."
+        }
+      },
+      "unansweredTitle": "Still unanswered?",
+      "unansweredBody": "Send your question through the contact page.",
+      "contactCta": "Contact"
+    },
+    "contact": {
+      "title": "Let's talk about your school's needs.",
+      "description": "For school institutions, send brief details so the lembar team can review the needs and arrange the right conversation.",
+      "badge": "School Contact",
+      "routesTitle": "Follow-up route",
+      "routesBody": "We use this form to understand your school's context, not to create automatic accounts. Do not include student data or internal documents.",
+      "routes": {
+        "0": {
+          "title": "Data reviewed manually",
+          "body": "The team reviews the school's needs before contacting you."
+        },
+        "1": {
+          "title": "No sensitive data needed",
+          "body": "Work contact details and a summary of the needs are enough."
+        },
+        "2": {
+          "title": "Follow-up within 1–2 business days",
+          "body": "If it is a fit, we will arrange a follow-up conversation."
+        }
+      }
+    },
+    "security": {
+      "title": "Data access is kept limited and reviewable.",
+      "description": "This page describes the controls the application currently applies, without claiming certifications that have not been published.",
+      "badge": "Security",
+      "sessionEyebrow": "Browser session",
+      "sessionTitle": "Limited authentication cookies",
+      "sessionBody": "Session tokens are stored as HttpOnly cookies, use SameSite, and are flagged Secure in the production environment. The browser never receives provider secrets or backend credentials.",
+      "cards": {
+        "0": {
+          "title": "Workspace separation",
+          "body": "The teacher, school admin, and ops areas each have server guards. Final authorisation is still verified by the backend service for every data operation."
+        },
+        "1": {
+          "title": "Limited student links",
+          "body": "Assignment links can expire or be revoked. The student endpoint does not use the legacy viewer that exposed answers and explanations."
+        },
+        "2": {
+          "title": "Compliance status",
+          "body": "Hosting, retention, storage encryption, certifications, and data processing agreements must be confirmed through official documentation or contacts before being used as a basis for organisational decisions."
+        }
+      }
+    },
+    "about": {
+      "titleLine1": "Teachers should not be",
+      "titleLine2": "administration machines.",
+      "description": "We built lembar because we believe a teacher's time is too valuable to spend creating questions from scratch. AI can help — the teacher still decides.",
+      "stats": {
+        "0": { "value": "2,500+", "label": "Active teachers" },
+        "1": { "value": "150+", "label": "Partner schools" },
+        "2": { "value": "50k+", "label": "Questions generated" },
+        "3": { "value": "12x", "label": "Faster" }
+      },
+      "statsNote": "as of August 2026 · since beta launch",
+      "missionEyebrow": "Mission",
+      "missionTitle": "Free teachers from routine",
+      "missionBody": "With AI that understands the Indonesian curriculum, teachers can focus on what matters most: shaping students' character and potential. Not spending the night composing quiz questions.",
+      "visionEyebrow": "Vision",
+      "visionTitle": "Meaningful assessment",
+      "visionBody": "We dream that every student receives fair and relevant assessment — not questions repeated year after year, but ones that genuinely measure understanding.",
+      "principlesEyebrow": "Working Principles",
+      "principlesTitle": "What we hold firmly.",
+      "principles": {
+        "0": {
+          "number": "01",
+          "title": "Teachers first, technology second",
+          "body": "Every feature starts from a real problem teachers face in the field, not from the latest technology trend."
+        },
+        "1": {
+          "number": "02",
+          "title": "Data belongs to the school",
+          "body": "Questions and student data are 100% owned by the school. We never sell them or use them for other purposes."
+        },
+        "2": {
+          "number": "03",
+          "title": "Transparent, always",
+          "body": "Clear pricing, no hidden fees. How our AI works is open. We grow together with trust."
+        }
+      }
+    },
+    "privacy": {
+      "meta": {
+        "title": "Privacy Policy - lembar",
+        "description": "lembar's privacy policy — the data we collect, how we use it, how we protect it, user rights, and policy changes.",
+        "ogTitle": "Privacy Policy - lembar",
+        "ogDescription": "Learn how lembar protects your personal data in line with Indonesia's PDP Law."
+      },
+      "title": "Privacy Policy",
+      "updated": "Last updated: 18 July 2026",
+      "sections": {
+        "0": {
+          "title": "1. Data we collect",
+          "before": "When you register: name, email, school name, and role (teacher/admin). When you use the platform: question creation activity logs, export metadata, and settings preferences. We do ",
+          "strong": "not",
+          "after": " collect student data directly."
+        },
+        "1": {
+          "title": "2. How we use it",
+          "before": "Your information is used to provide the lembar service, personalise the experience (for example subject recommendations), and send account-related notifications. We ",
+          "strong": "never",
+          "after": " sell your data to third parties for advertising."
+        },
+        "2": {
+          "title": "3. Data protection",
+          "body": "All data is encrypted with AES-256 at rest and TLS 1.3 in transit. Our infrastructure is ISO 27001 certified and complies with Indonesia's Personal Data Protection Law (UU PDP)."
+        },
+        "3": {
+          "title": "4. Data sharing",
+          "body": "Data is only shared if: (a) required by applicable law, or (b) with your explicit consent. We use sub-processors (hosting, email) bound by equivalent confidentiality agreements."
+        },
+        "4": {
+          "title": "5. Your rights",
+          "before": "You have the right to access, update, export, or delete your personal data at any time through account settings. For a full deletion request, contact ",
+          "after": "."
+        },
+        "5": {
+          "title": "6. Policy changes",
+          "body": "If there is a material change, we will send an email notification at least 30 days before the change takes effect. Continued use after the effective date means you accept the latest version."
+        }
+      }
+    },
+    "terms": {
+      "meta": {
+        "title": "Terms & Conditions - lembar",
+        "description": "Terms and conditions for using the lembar platform — accounts, permitted use, content ownership, and service availability.",
+        "ogTitle": "Terms & Conditions - lembar",
+        "ogDescription": "Terms of use for the lembar platform for teachers and education institutions."
+      },
+      "title": "Terms & Conditions",
+      "updated": "Last updated: 18 July 2026",
+      "sections": {
+        "0": {
+          "title": "1. Acceptance of terms",
+          "body": "By accessing and using the lembar platform, you agree to be bound by these terms. If you represent an education institution, you state that you have the authority to bind that institution."
+        },
+        "1": {
+          "title": "2. User accounts",
+          "body": "You are responsible for keeping your account credentials confidential. One account per user — account sharing is not permitted. Contact us immediately if unauthorised access occurs."
+        },
+        "2": {
+          "title": "3. Permitted use",
+          "body": "The lembar service may only be used for lawful educational purposes. It is strictly forbidden to: create unlawful content, reverse-engineer the platform, or use the API excessively beyond reasonable limits."
+        },
+        "3": {
+          "title": "4. Content ownership",
+          "before": "Questions you create through lembar ",
+          "strong": "remain 100% yours",
+          "after": " or your institution's. We do not claim ownership of user-created content. You grant us a limited licence solely to store and display that content within the platform."
+        },
+        "4": {
+          "title": "5. Service availability",
+          "body": "We target 99.9% uptime and schedule maintenance outside working hours. However, we do not guarantee the service will always be free of disruption. Maintenance notifications will be sent at least 24 hours in advance."
+        },
+        "5": {
+          "title": "6. Changes to the terms",
+          "body": "Material changes will be notified by email at least 30 days before taking effect. For minor changes (typos, clarifications), we will update the \"Last updated\" date on this page."
+        }
+      }
     }
   }
 }

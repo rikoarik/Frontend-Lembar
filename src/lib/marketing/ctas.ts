@@ -1,73 +1,80 @@
 export type CtaVariant = 'primary' | 'secondary' | 'text';
 export type MarketingCta = {
   id: string;
-  label: string;
+  /** Key inside the `marketing.cta` namespace. */
+  labelKey: string;
   href: string;
   variant: CtaVariant;
   trackingKey: string;
 };
 
 export const marketingCtas: readonly MarketingCta[] = [
-  { id: 'login', label: 'Masuk', href: '/masuk', variant: 'text', trackingKey: 'nav-login' },
+  {
+    id: 'login',
+    labelKey: 'login',
+    href: '/masuk',
+    variant: 'text',
+    trackingKey: 'nav-login',
+  },
   {
     id: 'try-free',
-    label: 'Coba Gratis',
+    labelKey: 'tryFree',
     href: '/daftar',
     variant: 'primary',
     trackingKey: 'nav-try-free',
   },
   {
     id: 'create-free',
-    label: 'Buat lembar gratis',
+    labelKey: 'createFree',
     href: '/daftar',
     variant: 'primary',
     trackingKey: 'home-create-free',
   },
   {
     id: 'see-example',
-    label: 'Lihat contoh hasil',
+    labelKey: 'seeExample',
     href: '#contoh-hasil',
     variant: 'secondary',
     trackingKey: 'home-see-example',
   },
   {
     id: 'school-discuss',
-    label: 'Diskusikan kebutuhan sekolah',
+    labelKey: 'schoolDiscuss',
     href: '/kontak',
     variant: 'primary',
     trackingKey: 'school-discuss',
   },
   {
     id: 'start-free',
-    label: 'Mulai Gratis',
+    labelKey: 'startFree',
     href: '/daftar',
     variant: 'secondary',
     trackingKey: 'pricing-start-free',
   },
   {
     id: 'subscribe',
-    label: 'Langganan Sekarang',
+    labelKey: 'subscribe',
     href: '/daftar',
     variant: 'primary',
     trackingKey: 'pricing-subscribe',
   },
   {
     id: 'pilot',
-    label: 'Daftar Pilot',
+    labelKey: 'pilot',
     href: '/kontak',
     variant: 'secondary',
     trackingKey: 'pricing-pilot',
   },
   {
     id: 'register-now',
-    label: 'Daftar Sekarang',
+    labelKey: 'registerNow',
     href: '/daftar',
     variant: 'primary',
     trackingKey: 'pricing-register',
   },
   {
     id: 'schedule-demo',
-    label: 'Jadwalkan Demo',
+    labelKey: 'scheduleDemo',
     href: '/kontak',
     variant: 'secondary',
     trackingKey: 'pricing-demo',
