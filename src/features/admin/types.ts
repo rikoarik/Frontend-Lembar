@@ -2,7 +2,8 @@ export type AdminTone = 'ok' | 'warn' | 'bad' | 'info' | 'neutral';
 
 export type AdminNavItem = {
   href: string;
-  label: string;
+  /** i18n key inside the `admin` namespace (e.g. `nav.ringkasan`). */
+  labelKey: string;
   badge?: string;
   icon?: string;
 };
@@ -16,34 +17,34 @@ export type AdminColumn<T> = {
 };
 
 export const SCHOOL_NAV: AdminNavItem[] = [
-  { href: '/school', label: 'Ringkasan', icon: 'dashboard' },
-  { href: '/school/guru', label: 'Guru', icon: 'group' },
-  { href: '/school/undang', label: 'Undang', icon: 'person_add' },
-  { href: '/school/undangan', label: 'Undangan menunggu', icon: 'mail' },
-  { href: '/school/penggunaan', label: 'Penggunaan', icon: 'monitoring' },
-  { href: '/school/billing', label: 'Langganan & Billing', icon: 'payments' },
-  { href: '/school/pengaturan', label: 'Pengaturan', icon: 'settings' },
-  { href: '/school/library', label: 'Library', icon: 'inventory_2' },
-  { href: '/school/audit', label: 'Audit', icon: 'history' },
-  { href: '/school/notifikasi', label: 'Notifikasi', icon: 'notifications' },
+  { href: '/school', labelKey: 'nav.ringkasan', icon: 'dashboard' },
+  { href: '/school/guru', labelKey: 'nav.guru', icon: 'group' },
+  { href: '/school/undang', labelKey: 'nav.undang', icon: 'person_add' },
+  { href: '/school/undangan', labelKey: 'nav.undangan', icon: 'mail' },
+  { href: '/school/penggunaan', labelKey: 'nav.penggunaan', icon: 'monitoring' },
+  { href: '/school/billing', labelKey: 'nav.schoolBilling', icon: 'payments' },
+  { href: '/school/pengaturan', labelKey: 'nav.pengaturan', icon: 'settings' },
+  { href: '/school/library', labelKey: 'nav.library', icon: 'inventory_2' },
+  { href: '/school/audit', labelKey: 'nav.audit', icon: 'history' },
+  { href: '/school/notifikasi', labelKey: 'nav.notifikasi', icon: 'notifications' },
 ];
 
 export const OPS_NAV: AdminNavItem[] = [
-  { href: '/ops', label: 'Ringkasan', icon: 'dashboard' },
-  { href: '/ops/accounts', label: 'Akun', icon: 'manage_accounts' },
-  { href: '/ops/schools', label: 'Sekolah', icon: 'apartment' },
-  { href: '/ops/catalog', label: 'Katalog', icon: 'menu_book' },
-  { href: '/ops/prompts', label: 'Prompt', icon: 'terminal' },
-  { href: '/ops/learning-signals', label: 'Learning Signals', icon: 'psychology' },
-  { href: '/ops/jobs', label: 'Jobs', icon: 'work' },
-  { href: '/ops/quality', label: 'Quality', icon: 'verified' },
-  { href: '/ops/audit', label: 'Audit', icon: 'policy' },
-  { href: '/ops/billing', label: 'Billing', icon: 'payments' },
-  { href: '/ops/plans', label: 'Plan & Harga', icon: 'sell' },
-  { href: '/ops/flags', label: 'Flags', icon: 'toggle_on' },
-  { href: '/ops/content', label: 'Marketing CMS', icon: 'web' },
-  { href: '/ops/ai-provider', label: 'Konfigurasi AI', icon: 'smart_toy' },
-  { href: '/ops/wa-gateway', label: 'WA Gateway', icon: 'chat' },
+  { href: '/ops', labelKey: 'nav.ringkasan', icon: 'dashboard' },
+  { href: '/ops/accounts', labelKey: 'nav.accounts', icon: 'manage_accounts' },
+  { href: '/ops/schools', labelKey: 'nav.schools', icon: 'apartment' },
+  { href: '/ops/catalog', labelKey: 'nav.catalog', icon: 'menu_book' },
+  { href: '/ops/prompts', labelKey: 'nav.prompts', icon: 'terminal' },
+  { href: '/ops/learning-signals', labelKey: 'nav.learningSignals', icon: 'psychology' },
+  { href: '/ops/jobs', labelKey: 'nav.jobs', icon: 'work' },
+  { href: '/ops/quality', labelKey: 'nav.quality', icon: 'verified' },
+  { href: '/ops/audit', labelKey: 'nav.audit', icon: 'policy' },
+  { href: '/ops/billing', labelKey: 'nav.billing', icon: 'payments' },
+  { href: '/ops/plans', labelKey: 'nav.plans', icon: 'sell' },
+  { href: '/ops/flags', labelKey: 'nav.flags', icon: 'toggle_on' },
+  { href: '/ops/content', labelKey: 'nav.content', icon: 'web' },
+  { href: '/ops/ai-provider', labelKey: 'nav.aiProvider', icon: 'smart_toy' },
+  { href: '/ops/wa-gateway', labelKey: 'nav.waGateway', icon: 'chat' },
 ];
 
 export function isAdminNavActive(href: string, currentPath: string): boolean {

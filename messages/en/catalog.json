@@ -1,1 +1,143 @@
-{}
+{
+  "catalog": {
+    "labels": {
+      "sourceMode": "Material source",
+      "curriculumVersionId": "Curriculum",
+      "gradeId": "Grade",
+      "subjectId": "Subject",
+      "materialIds": "Material",
+      "assessmentType": "Worksheet type",
+      "difficulty": "Difficulty level",
+      "questionCount": "Question count",
+      "reviewMode": "Review mode",
+      "teacherFocus": "Teacher focus / goal",
+      "exampleQuestion": "Example question"
+    },
+    "sections": {
+      "examMaterial": {
+        "title": "Exam material",
+        "description": "Choose the source and scope of the material."
+      },
+      "questionSettings": {
+        "title": "Question settings",
+        "description": "Configure the question type and count."
+      },
+      "context": {
+        "title": "Context & references",
+        "description": "Extra information for the AI (optional)."
+      }
+    },
+    "sourceMode": {
+      "katalog": "Available books/catalog",
+      "pdf": "My PDFs only",
+      "katalogPdf": "Books/catalog + my PDFs"
+    },
+    "curriculum": {
+      "kurmer1": "Kurikulum Merdeka (Phase A)",
+      "kurmer2": "Kurikulum Merdeka (Phase B)",
+      "kurmer3": "Kurikulum Merdeka (Phase C)",
+      "k13": "Kurikulum 2013"
+    },
+    "assessmentType": {
+      "practice": "Practice questions",
+      "daily": "Daily quiz",
+      "midterm": "Midterm",
+      "final": "Final exam",
+      "tka": "TKA"
+    },
+    "difficulty": {
+      "easy": "Easy",
+      "medium": "Medium",
+      "hard": "Hard",
+      "mixed": "Mixed"
+    },
+    "reviewMode": {
+      "quick": "Quick",
+      "quickDesc": "Review in a single list",
+      "detail": "Detailed",
+      "detailDesc": "Review one by one"
+    },
+    "select": {
+      "curriculum": "Select a curriculum",
+      "gradeLoading": "Loading grades…",
+      "grade": "Select a grade",
+      "subjectLoading": "Loading…",
+      "subject": "Select a subject",
+      "subjectNeedsGrade": "Select a grade first",
+      "materialsLoading": "Loading material…",
+      "materialsNeedsSubject": "Select a subject first",
+      "materialsEmpty": "No material available"
+    },
+    "material": {
+      "hint": "Select at least one material",
+      "groupLabel": "Select material"
+    },
+    "questionCount": {
+      "help": "Between 1 and 200 questions"
+    },
+    "teacherFocus": {
+      "placeholder": "E.g. Focus on understanding fraction concepts",
+      "help": "Maximum 500 characters. Not sent to analytics."
+    },
+    "exampleQuestion": {
+      "placeholder": "Write an example question to use as a style reference",
+      "help": "Maximum 2,000 characters. Guides the style, does not guarantee copying."
+    },
+    "submit": {
+      "invalid": "Fix the incomplete fields before continuing.",
+      "createDraft": "Create a draft of {count} questions",
+      "disclaimer": "The AI drafts from the selected context. You review before finalizing.",
+      "preview": "Draft to be created:\n{payload}"
+    },
+    "summary": {
+      "title": "Configuration summary",
+      "readiness": "Readiness: {label}",
+      "readinessFull": "Readiness: {label}. {text}",
+      "empty": "Select material and settings to see the summary.",
+      "curriculum": "Curriculum",
+      "grade": "Grade",
+      "subject": "Subject",
+      "material": "Material",
+      "assessmentType": "Type",
+      "difficulty": "Difficulty",
+      "questionCount": "Question count",
+      "reviewMode": "Review mode",
+      "topicCount": "{count} topics",
+      "readinessTitleKatalog": "Configuration steps",
+      "readinessTitleOther": "Configuration readiness",
+      "complete": "All main sections are complete.",
+      "incomplete": "Incomplete: {steps}.",
+      "stepGrade": "grade",
+      "stepSubject": "subject",
+      "stepMaterial": "material",
+      "stepAssessmentType": "worksheet type",
+      "stepDifficulty": "difficulty level",
+      "stepReviewMode": "review mode"
+    },
+    "mobileSummary": {
+      "toggleLabel": "Configuration status",
+      "show": "View",
+      "hide": "Hide"
+    },
+    "announce": {
+      "curriculum": "Curriculum updated. Grade, subject, and material were cleared.",
+      "grade": "Grade updated. Subject and material were cleared.",
+      "subject": "Subject updated. Material was cleared."
+    },
+    "errors": {
+      "loadSubjects": "Failed to load subjects."
+    },
+    "validation": {
+      "curriculumVersionId": "Select a curriculum.",
+      "gradeId": "Select a grade.",
+      "subjectId": "Select a subject.",
+      "materialIds": "Select at least one material.",
+      "assessmentType": "Select a worksheet type.",
+      "difficulty": "Select a difficulty level.",
+      "questionCount": "Question count must be between 1 and 200.",
+      "reviewMode": "Select a review mode.",
+      "teacherFocus": "Maximum 500 characters.",
+      "exampleQuestion": "Maximum 2,000 characters."
+    }
+  }
+}

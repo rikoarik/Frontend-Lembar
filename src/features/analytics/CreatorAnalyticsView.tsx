@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { useEffect, useMemo, useState } from 'react';
 import { Panel } from '@/app/components/ui';
 import { assessmentService } from '@/src/services/assessments/assessmentService';
@@ -14,6 +15,7 @@ function cutoff(range: RangeOption): number {
 }
 
 export function CreatorAnalyticsView() {
+  const t = useTranslations('analytics');
   const [range, setRange] = useState<RangeOption>('7d');
   const [items, setItems] = useState<AssessmentSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -47,26 +49,24 @@ export function CreatorAnalyticsView() {
     <div className="flex w-full flex-col gap-6">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-h1 font-semibold text-brand-ink">Analitik pembuat</h1>
-          <p className="text-body-sm text-brand-ink-muted">
-            Ringkasan dari assessment workspace aktif.
-          </p>
+          <h1 className="text-h1 font-semibold text-brand-ink">{t('title')}</h1>
+          <p className="text-body-sm text-brand-ink-muted">{t('subtitle')}</p>
         </div>
         <div className="flex rounded-xl border border-brand-line p-1">
           {(
             [
-              ['7d', '7 Hari'],
-              ['30d', '30 Hari'],
-              ['semester', 'Semester'],
+              ['7d', 'range.d7'],
+              ['30d', 'range.d30'],
+              ['semester', 'range.semester'],
             ] as const
-          ).map(([key, label]) => (
+          ).map(([key, labelKey]) => (
             <button
               key={key}
               type="button"
               onClick={() => setRange(key)}
               className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${range === key ? 'bg-brand-paper shadow-sm' : 'text-brand-ink-muted'}`}
             >
-              {label}
+              {t(labelKey)}
             </button>
           ))}
         </div>
@@ -75,28 +75,27 @@ export function CreatorAnalyticsView() {
       {loading ? (
         <div className="h-40 animate-pulse rounded-xl bg-brand-line" aria-busy="true" />
       ) : null}
-      {error ? <Panel title="Analitik gagal dimuat" description={error} /> : null}
+      {error ? <Panel title={t('error.title')} description={error} /> : null}
       {!loading && !error ? (
         <>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              ['Lembar dibuat', filtered.length],
-              ['Lembar final', final],
-              ['Perlu review', review],
-              ['Soal tersimpan', questionCount],
-            ].map(([label, value]) => (
-              <div key={label} className="rounded-xl border border-brand-line bg-white p-4">
-                <p className="text-body-sm text-brand-ink-muted">{label}</p>
+            {(
+              [
+                ['metric.created', filtered.length],
+                ['metric.final', final],
+                ['metric.review', review],
+                ['metric.questions', questionCount],
+              ] as [string, number][]
+            ).map(([labelKey, value]) => (
+              <div key={labelKey} className="rounded-xl border border-brand-line bg-white p-4">
+                <p className="text-body-sm text-brand-ink-muted">{t(labelKey)}</p>
                 <p className="mt-2 text-2xl font-semibold text-brand-ink">{value}</p>
               </div>
             ))}
           </div>
 
           <div className="grid gap-4 lg:grid-cols-2">
-            <Panel
-              title="Mata pelajaran"
-              description="Distribusi assessment pada periode terpilih."
-            >
+            <Panel title={t('subjects.title')} description={t('subjects.description')}>
               {subjects.length ? (
                 <ul className="space-y-2">
                   {subjects.map(([subject, count]) => (
@@ -107,14 +106,12 @@ export function CreatorAnalyticsView() {
                   ))}
                 </ul>
               ) : (
-                <p className="text-body-sm text-brand-ink-muted">
-                  Belum ada aktivitas pada periode ini.
-                </p>
+                <p className="text-body-sm text-brand-ink-muted">{t('subjects.empty')}</p>
               )}
             </Panel>
             <Panel
-              title="Aktivitas terbaru"
-              description={`${filtered.length} assessment pada periode terpilih.`}
+              title={t('activity.title')}
+              description={t('activity.description', { count: filtered.length })}
             >
               {filtered.length ? (
                 <ul className="space-y-3">
@@ -129,7 +126,10 @@ export function CreatorAnalyticsView() {
                         {item.title}
                       </Link>
                       <p className="text-body-xs text-brand-ink-muted">
-                        {item.lifecycle} · {item.questionCount} soal
+                        {t('activity.itemMeta', {
+                          lifecycle: item.lifecycle,
+                          count: item.questionCount,
+                        })}
                       </p>
                     </li>
                   ))}
@@ -139,7 +139,7 @@ export function CreatorAnalyticsView() {
                   href="/app/generate"
                   className="text-body-sm font-medium text-brand-accent hover:underline"
                 >
-                  Buat lembar pertama
+                  {t('activity.empty')}
                 </Link>
               )}
             </Panel>

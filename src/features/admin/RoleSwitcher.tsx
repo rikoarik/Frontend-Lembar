@@ -1,7 +1,8 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
-import { useRoles, activeRoleFromPathname, roleLabel, type Role } from './useRoles';
+import { useRoles, activeRoleFromPathname, roleLabelKey, type Role } from './useRoles';
 
 /**
  * Compact pill-bar role switcher.
@@ -9,6 +10,7 @@ import { useRoles, activeRoleFromPathname, roleLabel, type Role } from './useRol
  * Clicking a pill does a hard redirect (window.location.href) so session state stays fresh.
  */
 export function RoleSwitcher() {
+  const t = useTranslations('admin');
   const pathname = usePathname() ?? '/';
   const roles = useRoles();
   const activeRole = activeRoleFromPathname(pathname);
@@ -37,7 +39,7 @@ export function RoleSwitcher() {
                   : 'text-[#57534e] hover:text-[#171717] hover:bg-[#f0ebe3]'
               }`}
             >
-              {roleLabel(role)}
+              {t(roleLabelKey(role))}
             </button>
           </form>
         );

@@ -1,1 +1,33 @@
-{}
+{
+  "share": {
+    "title": "Terbitkan asesmen",
+    "description": "Bagikan tautan agar siswa dapat mengerjakan asesmen.",
+    "actions": {
+      "publish": "Terbitkan asesmen",
+      "publishing": "Membuat…",
+      "reload": "Muat ulang",
+      "open": "Buka asesmen",
+      "copy": "Salin",
+      "revoke": "Cabut"
+    },
+    "status": {
+      "revoked": "Dibatalkan",
+      "final": "Final"
+    },
+    "expiry": {
+      "revokedAt": "Dicabut {date}",
+      "expiresAt": "Berlaku hingga {date}",
+      "none": "Tidak ada kedaluwarsa"
+    },
+    "empty": "Belum ada tautan untuk lembar ini.",
+    "messages": {
+      "published": "Asesmen diterbitkan: {path}",
+      "revoked": "Tautan dicabut.",
+      "copied": "Tautan disalin.",
+      "loadFailed": "Gagal memuat tautan.",
+      "createFailed": "Gagal membuat tautan.",
+      "revokeFailed": "Gagal mencabut tautan.",
+      "requestFailed": "Gagal memproses tautan bagikan."
+    }
+  }
+}

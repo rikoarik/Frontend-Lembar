@@ -1,1 +1,78 @@
-{}
+{
+  "lms": {
+    "loading": "Loading assessment…",
+    "starting": "Starting…",
+    "retry": "Try again",
+    "eyebrow": "Assessment",
+    "duration": "Time limit: {minutes} minutes",
+    "identity": {
+      "name": "Name",
+      "namePlaceholder": "Full name",
+      "class": "Class",
+      "classOptional": "(optional)",
+      "classPlaceholder": "e.g. 5A",
+      "start": "Start assessment",
+      "restart": "Try starting again"
+    },
+    "done": {
+      "title": "Answers submitted",
+      "description": "Your answers have been recorded. You may close this page."
+    },
+    "progress": {
+      "answered": "{answered} of {total} questions answered",
+      "remaining": "Time left",
+      "saving": "Saving...",
+      "saved": "Answers saved",
+      "saveFailed": "Failed to save",
+      "answerProgress": "{answered}/{total}",
+      "questionNav": "Question navigation",
+      "questionNumbers": "Question numbers",
+      "answeredLegend": "Answered",
+      "emptyLegend": "Empty",
+      "empty": "No questions available to answer yet."
+    },
+    "question": {
+      "counter": "Question {number} of {total}",
+      "sectionLabel": "Question {number}",
+      "imageAlt": "Supporting image for question {number}",
+      "choicesLegend": "Answer choices for question {number}",
+      "optionLabel": "{key}. {text}",
+      "navAnswered": "Question {number}, answered",
+      "navUnanswered": "Question {number}, unanswered"
+    },
+    "types": {
+      "multipleChoice": "Multiple choice",
+      "trueFalse": "True or false",
+      "shortAnswer": "Short answer",
+      "essay": "Essay"
+    },
+    "trueFalseOptions": {
+      "true": "True",
+      "false": "False"
+    },
+    "answer": {
+      "essayLabel": "Essay answer",
+      "label": "Answer",
+      "essayPlaceholder": "Write a complete, well-structured answer.",
+      "shortPlaceholder": "Write a short answer.",
+      "essayHint": "Your answer is saved automatically as you type.",
+      "shortHint": "Double-check the spelling of your answer.",
+      "characters": "{count} characters"
+    },
+    "actions": {
+      "previous": "Previous",
+      "next": "Next",
+      "submit": "Submit answer",
+      "submitNow": "Submit now",
+      "retrySubmit": "Try submitting again",
+      "finishEarly": "Finishing early?",
+      "submitAll": "Submit all answers"
+    },
+    "errors": {
+      "revoked": "This assessment link has been revoked.",
+      "expired": "This assessment link has expired.",
+      "generic": "Something went wrong.",
+      "saveFailed": "Your answer has not been saved."
+    }
+  }
+}

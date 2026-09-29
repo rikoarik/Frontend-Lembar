@@ -13,6 +13,8 @@ import {
   AdminConfirmModal,
 } from '@/src/features/admin/AdminChrome';
 import { useAdminSectionState } from '@/src/features/admin/adminPanelState';
+import { useTranslations } from 'next-intl';
+import type { Translate } from '@/src/i18n/types';
 import {
   schoolService,
   type SchoolMember,
@@ -31,9 +33,9 @@ import {
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
-function memberRoleLabel(role: SchoolMember['role']): string {
-  if (role === 'school_admin') return 'Admin sekolah';
-  return 'Guru';
+function memberRoleLabel(t: Translate, role: SchoolMember['role'] | string | null): string {
+  if (role === 'school_admin') return t('roles.schoolAdmin');
+  return t('roles.teacher');
 }
 
 function memberStateTone(state: SchoolMember['state']): 'ok' | 'warn' | 'bad' | 'neutral' {
@@ -42,10 +44,10 @@ function memberStateTone(state: SchoolMember['state']): 'ok' | 'warn' | 'bad' | 
   return 'neutral';
 }
 
-function memberStateLabel(state: SchoolMember['state']): string {
-  if (state === 'active') return 'Aktif';
-  if (state === 'suspended') return 'Ditangguhkan';
-  return 'Dicabut';
+function memberStateLabel(t: Translate, state: SchoolMember['state']): string {
+  if (state === 'active') return t('memberState.active');
+  if (state === 'suspended') return t('memberState.suspended');
+  return t('memberState.revoked');
 }
 
 function fmtDate(iso: string | null | undefined): string {
@@ -71,20 +73,21 @@ function safeText(value: unknown): string {
   }
 }
 
-function neutralMetadataLabel(value: string): string {
-  return value.toLowerCase() === 'unknown' ? 'Belum tersedia' : value;
+function neutralMetadataLabel(t: Translate, value: string): string {
+  return value.toLowerCase() === 'unknown' ? t('unknownValue') : value;
 }
 
-function notificationStatusLabel(status: string): string {
-  if (status === 'pending') return 'Menunggu';
-  if (status === 'delivered') return 'Terkirim';
-  if (status === 'failed') return 'Gagal';
+function notificationStatusLabel(t: Translate, status: string): string {
+  if (status === 'pending') return t('notificationStatus.pending');
+  if (status === 'delivered') return t('notificationStatus.delivered');
+  if (status === 'failed') return t('notificationStatus.failed');
   return status;
 }
 
 // ── Section: Ringkasan ────────────────────────────────────────────────────────
 
 function SectionRingkasan({ setToast }: { setToast: (msg: string) => void }) {
+  const t = useTranslations('school');
   const [dashboard, setDashboard] = useState<SchoolDashboard | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -95,7 +98,7 @@ function SectionRingkasan({ setToast }: { setToast: (msg: string) => void }) {
       if (res.ok) {
         setDashboard(res.value);
       } else {
-        setToast(`Gagal memuat ringkasan: ${res.error.safeMessage}`);
+        setToast(t('ringkasan.loadFailed', { message: res.error.safeMessage }));
       }
       setLoading(false);
     });
@@ -108,7 +111,7 @@ function SectionRingkasan({ setToast }: { setToast: (msg: string) => void }) {
 
   if (!dashboard) {
     return (
-      <div className="text-sm text-neutral-400 py-8 text-center">Data ringkasan tidak tersedia</div>
+      <div className="text-sm text-neutral-400 py-8 text-center">{t('ringkasan.unavailable')}</div>
     );
   }
 
@@ -118,28 +121,31 @@ function SectionRingkasan({ setToast }: { setToast: (msg: string) => void }) {
   const pct = quotaLimit && quotaLimit > 0 ? Math.round((quotaUsed / quotaLimit) * 100) : 0;
   const schoolHint = [dashboard.usage.plan, dashboard.workspace.level]
     .filter(Boolean)
-    .map(neutralMetadataLabel)
+    .map((value) => neutralMetadataLabel(t, value))
     .join(' · ');
 
   return (
     <AdminStatCards
       items={[
         {
-          label: 'Anggota aktif',
+          label: t('ringkasan.activeMembers'),
           value: String(activeMembers),
-          hint: `dari ${dashboard.memberCount} total`,
+          hint: t('ringkasan.membersFromTotal', { count: dashboard.memberCount }),
           tone: 'ok',
         },
         {
-          label: 'Kuota terpakai',
-          value: `${quotaUsed} / ${quotaLimit ?? '∞'}`,
-          hint: `${pct}% periode ini`,
+          label: t('ringkasan.quotaUsed'),
+          value: t('ringkasan.quotaValue', {
+            used: quotaUsed,
+            limit: quotaLimit ?? t('ringkasan.quotaUnlimited'),
+          }),
+          hint: t('ringkasan.percentPeriod', { percent: pct }),
           tone: pct >= 90 ? 'bad' : pct >= 70 ? 'warn' : 'info',
           delta: `${pct}%`,
         },
         {
-          label: 'Sekolah',
-          value: dashboard.workspace.name || '—',
+          label: t('ringkasan.school'),
+          value: dashboard.workspace.name || t('common.emDash'),
           hint: schoolHint,
           tone: 'neutral',
         },
@@ -163,6 +169,7 @@ function SectionGuru({
   setFilter: (v: string) => void;
   setToast: (msg: string) => void;
 }) {
+  const t = useTranslations('school');
   const [members, setMembers] = useState<SchoolMember[]>([]);
   const [meta, setMeta] = useState<SchoolMembersResult['meta'] | null>(null);
   const [page, setPage] = useState(1);
@@ -230,10 +237,10 @@ function SectionGuru({
     setActionId(member.id);
     const res = await schoolService.memberSuspend(member.id);
     if (res.ok) {
-      setToast(`${member.name ?? member.email} ditangguhkan`);
+      setToast(t('guru.suspendedToast', { name: member.name ?? member.email }));
       fetchMembers(search, filter, page);
     } else {
-      setToast(`Gagal menangguhkan: ${res.error.safeMessage}`);
+      setToast(t('guru.suspendFailed', { message: res.error.safeMessage }));
     }
     setActionId(null);
   }
@@ -242,10 +249,10 @@ function SectionGuru({
     setActionId(member.id);
     const res = await schoolService.memberUnsuspend(member.id);
     if (res.ok) {
-      setToast(`${member.name ?? member.email} diaktifkan kembali`);
+      setToast(t('guru.activatedToast', { name: member.name ?? member.email }));
       fetchMembers(search, filter, page);
     } else {
-      setToast(`Gagal mengaktifkan: ${res.error.safeMessage}`);
+      setToast(t('guru.activateFailed', { message: res.error.safeMessage }));
     }
     setActionId(null);
   }
@@ -256,18 +263,18 @@ function SectionGuru({
     setActionId(member.id);
     const res = await schoolService.removeMember(member.id);
     if (res.ok) {
-      setToast(`${member.name ?? member.email} dihapus`);
+      setToast(t('guru.deletedToast', { name: member.name ?? member.email }));
       fetchMembers(search, filter, page);
     } else {
-      setToast(`Gagal menghapus: ${res.error.safeMessage}`);
+      setToast(t('guru.deleteFailed', { message: res.error.safeMessage }));
     }
     setActionId(null);
   }
 
   const roleFilters = [
-    { value: 'all', label: 'Semua' },
-    { value: 'teacher', label: 'Guru' },
-    { value: 'school_admin', label: 'Admin' },
+    { value: 'all', label: t('common.all') },
+    { value: 'teacher', label: t('roles.teacher') },
+    { value: 'school_admin', label: t('common.adminShort') },
   ] as const;
 
   return (
@@ -275,7 +282,7 @@ function SectionGuru({
       <AdminToolbar
         search={search}
         onSearchChange={handleSearchChange}
-        searchPlaceholder="Cari nama / email…"
+        searchPlaceholder={t('guru.searchPlaceholder')}
         filters={
           <>
             {roleFilters.map(({ value, label }) => (
@@ -293,11 +300,11 @@ function SectionGuru({
       {loading ? (
         <div
           role="status"
-          aria-label="Memuat daftar anggota sekolah"
+          aria-label={t('guru.loadingListLabel')}
           aria-busy="true"
           className="space-y-3 rounded-2xl border border-[#ddd4c8]/70 bg-white p-4"
         >
-          <AdminContentLoading label="Memuat daftar anggota sekolah…" />
+          <AdminContentLoading label={t('guru.loadingList')} />
           {[0, 1, 2].map((row) => (
             <div key={row} className="flex animate-pulse items-center gap-3">
               <div className="h-8 w-8 rounded-full bg-[#f0ebe3]" />
@@ -311,10 +318,10 @@ function SectionGuru({
       ) : fetchError ? (
         <div
           role="alert"
-          aria-label="Gagal memuat anggota sekolah"
+          aria-label={t('guru.loadFailedLabel')}
           className="rounded-xl border border-brand-danger/30 bg-brand-danger-soft px-6 py-5 text-sm text-brand-danger"
         >
-          <p className="font-semibold text-[#171717]">Gagal memuat anggota sekolah</p>
+          <p className="font-semibold text-[#171717]">{t('guru.loadFailedTitle')}</p>
           <p className="mt-1 text-[13px]">{fetchError}</p>
           <Button
             size="sm"
@@ -322,19 +329,17 @@ function SectionGuru({
             className="mt-3"
             onClick={() => fetchMembers(search, filter, page)}
           >
-            Coba lagi
+            {t('common.retry')}
           </Button>
         </div>
       ) : members.length === 0 ? (
         <div
           role="status"
-          aria-label="Belum ada anggota sekolah"
+          aria-label={t('guru.emptyLabel')}
           className="rounded-xl border border-dashed border-[#ddd4c8] bg-white px-6 py-14 text-center"
         >
-          <p className="text-[13px] font-semibold text-[#171717]">Belum ada anggota sekolah</p>
-          <p className="mx-auto mt-1 max-w-md text-[12px] text-[#57534e]">
-            Undang guru pertama agar mereka bisa mulai memakai workspace sekolah.
-          </p>
+          <p className="text-[13px] font-semibold text-[#171717]">{t('guru.emptyTitle')}</p>
+          <p className="mx-auto mt-1 max-w-md text-[12px] text-[#57534e]">{t('guru.emptyHint')}</p>
         </div>
       ) : (
         <AdminDataTable
@@ -343,7 +348,7 @@ function SectionGuru({
           columns={[
             {
               key: 'name',
-              header: 'Anggota',
+              header: t('guru.columns.member'),
               render: (row) => (
                 <div className="flex items-center gap-3">
                   <AdminAvatar name={row.name ?? row.email} />
@@ -358,21 +363,21 @@ function SectionGuru({
             },
             {
               key: 'role',
-              header: 'Peran',
-              render: (row) => <AdminPill tone="neutral">{memberRoleLabel(row.role)}</AdminPill>,
+              header: t('guru.columns.role'),
+              render: (row) => <AdminPill tone="neutral">{memberRoleLabel(t, row.role)}</AdminPill>,
             },
             {
               key: 'state',
-              header: 'Status',
+              header: t('guru.columns.status'),
               render: (row) => (
                 <AdminPill tone={memberStateTone(row.state)}>
-                  {memberStateLabel(row.state)}
+                  {memberStateLabel(t, row.state)}
                 </AdminPill>
               ),
             },
             {
               key: 'lastActiveAt',
-              header: 'Aktif terakhir',
+              header: t('guru.columns.lastActive'),
               render: (row) => fmtDate(row.lastActiveAt),
             },
             {
@@ -387,7 +392,7 @@ function SectionGuru({
                       disabled={actionId === row.id}
                       onClick={() => handleSuspend(row)}
                     >
-                      Tangguhkan
+                      {t('guru.suspend')}
                     </Button>
                   ) : row.state === 'suspended' ? (
                     <Button
@@ -396,7 +401,7 @@ function SectionGuru({
                       disabled={actionId === row.id}
                       onClick={() => handleUnsuspend(row)}
                     >
-                      Aktifkan
+                      {t('guru.activate')}
                     </Button>
                   ) : null}
                   <Button
@@ -405,7 +410,7 @@ function SectionGuru({
                     disabled={actionId === row.id}
                     onClick={() => setConfirmRemoveMember(row)}
                   >
-                    Hapus
+                    {t('guru.delete')}
                   </Button>
                 </div>
               ),
@@ -416,7 +421,7 @@ function SectionGuru({
       {meta && meta.pages > 1 && (
         <div className="flex items-center justify-between pt-2 text-sm">
           <span className="text-neutral-500">
-            {meta.total} anggota · halaman {meta.page} / {meta.pages}
+            {t('guru.pageSummary', { total: meta.total, page: meta.page, pages: meta.pages })}
           </span>
           <div className="flex gap-1">
             <Button
@@ -425,7 +430,7 @@ function SectionGuru({
               disabled={meta.page <= 1}
               onClick={() => handlePageChange((p) => p - 1)}
             >
-              ‹ Sebelumnya
+              {t('common.previous')}
             </Button>
             <Button
               size="sm"
@@ -433,7 +438,7 @@ function SectionGuru({
               disabled={meta.page >= meta.pages}
               onClick={() => handlePageChange((p) => p + 1)}
             >
-              Berikutnya ›
+              {t('common.next')}
             </Button>
           </div>
         </div>
@@ -441,10 +446,12 @@ function SectionGuru({
 
       <AdminConfirmModal
         open={!!confirmRemoveMember}
-        title="Hapus Anggota Sekolah"
-        description={`Apakah Anda yakin ingin menghapus ${confirmRemoveMember?.name ?? confirmRemoveMember?.email} dari sekolah ini?`}
-        confirmLabel="Ya, Hapus Anggota"
-        cancelLabel="Batal"
+        title={t('guru.removeTitle')}
+        description={t('guru.removeConfirm', {
+          name: confirmRemoveMember?.name ?? confirmRemoveMember?.email ?? '',
+        })}
+        confirmLabel={t('guru.removeConfirmAction')}
+        cancelLabel={t('common.cancel')}
         variant="danger"
         onConfirm={() => {
           if (!confirmRemoveMember) return;
@@ -461,6 +468,7 @@ function SectionGuru({
 // ── Section: Undang ───────────────────────────────────────────────────────────
 
 function SectionUndang({ setToast }: { setToast: (msg: string) => void }) {
+  const t = useTranslations('school');
   const [email, setEmail] = useState('');
   const [role, setRole] = useState<'teacher' | 'school_admin'>('teacher');
   const [loading, setLoading] = useState(false);
@@ -472,10 +480,10 @@ function SectionUndang({ setToast }: { setToast: (msg: string) => void }) {
     setLoading(true);
     const res = await schoolService.inviteMember({ email: trimmed, role });
     if (res.ok) {
-      setToast(`Undangan dibuat untuk ${res.value.email}. Email akan dikirim setelah provider notifikasi dikonfigurasi.`);
+      setToast(t('undang.success', { email: res.value.email }));
       setEmail('');
     } else {
-      setToast(`Gagal mengirim undangan: ${res.error.safeMessage}`);
+      setToast(t('undang.failed', { message: res.error.safeMessage }));
     }
     setLoading(false);
   }
@@ -484,7 +492,7 @@ function SectionUndang({ setToast }: { setToast: (msg: string) => void }) {
     <form onSubmit={handleSubmit} className="max-w-md space-y-4">
       <div>
         <label className="block text-sm font-medium mb-1" htmlFor="invite-email">
-          Email
+          {t('undang.email')}
         </label>
         <input
           id="invite-email"
@@ -492,13 +500,13 @@ function SectionUndang({ setToast }: { setToast: (msg: string) => void }) {
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="guru@sekolah.sch.id"
+          placeholder={t('undang.emailPlaceholder')}
           className="w-full rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white"
         />
       </div>
       <div>
         <label className="block text-sm font-medium mb-1" htmlFor="invite-role">
-          Peran
+          {t('undang.role')}
         </label>
         <select
           id="invite-role"
@@ -506,12 +514,12 @@ function SectionUndang({ setToast }: { setToast: (msg: string) => void }) {
           onChange={(e) => setRole(e.target.value as 'teacher' | 'school_admin')}
           className="w-full rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white"
         >
-          <option value="teacher">Guru</option>
-          <option value="school_admin">Admin sekolah</option>
+          <option value="teacher">{t('undang.roleTeacher')}</option>
+          <option value="school_admin">{t('undang.roleAdmin')}</option>
         </select>
       </div>
       <Button type="submit" size="sm" disabled={loading}>
-        {loading ? 'Mengirim…' : 'Kirim undangan'}
+        {loading ? t('undang.submitting') : t('undang.submit')}
       </Button>
     </form>
   );
@@ -520,6 +528,7 @@ function SectionUndang({ setToast }: { setToast: (msg: string) => void }) {
 // ── Section: Penggunaan ───────────────────────────────────────────────────────
 
 function SectionPenggunaan({ setToast }: { setToast: (msg: string) => void }) {
+  const t = useTranslations('school');
   const [usage, setUsage] = useState<SchoolUsage | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -530,7 +539,7 @@ function SectionPenggunaan({ setToast }: { setToast: (msg: string) => void }) {
       if (res.ok) {
         setUsage(res.value);
       } else {
-        setToast(`Gagal memuat penggunaan: ${res.error.safeMessage}`);
+        setToast(t('penggunaan.loadFailed', { message: res.error.safeMessage }));
       }
       setLoading(false);
     });
@@ -542,7 +551,9 @@ function SectionPenggunaan({ setToast }: { setToast: (msg: string) => void }) {
   if (loading) return <AdminContentLoading />;
 
   if (!usage) {
-    return <div className="text-sm text-neutral-400 py-8 text-center">Data tidak tersedia</div>;
+    return (
+      <div className="text-sm text-neutral-400 py-8 text-center">{t('penggunaan.unavailable')}</div>
+    );
   }
 
   const unlimited = usage.quotaLimit === 0;
@@ -552,15 +563,20 @@ function SectionPenggunaan({ setToast }: { setToast: (msg: string) => void }) {
     <div className="space-y-6">
       <div className="rounded-lg border border-neutral-200 p-4 dark:border-neutral-700">
         <div className="flex justify-between text-sm mb-2">
-          <span className="font-medium">Kuota terpakai</span>
+          <span className="font-medium">{t('penggunaan.quotaUsed')}</span>
           <span className="text-neutral-500">
-            {usage.quotaUsed} / {unlimited ? 'Tidak terbatas' : `${usage.quotaLimit} (${pct}%)`}
+            {t('penggunaan.quotaValue', {
+              used: usage.quotaUsed,
+              limit: unlimited
+                ? t('penggunaan.unlimited')
+                : t('penggunaan.quotaPercent', { limit: usage.quotaLimit, percent: pct }),
+            })}
           </span>
         </div>
         {!unlimited && (
           <div
             role="progressbar"
-            aria-label="Kuota terpakai"
+            aria-label={t('penggunaan.quotaUsed')}
             aria-valuemin={0}
             aria-valuemax={usage.quotaLimit}
             aria-valuenow={Math.min(usage.quotaUsed, usage.quotaLimit)}
@@ -580,11 +596,11 @@ function SectionPenggunaan({ setToast }: { setToast: (msg: string) => void }) {
         <AdminDataTable
           rows={usage.breakdown.map((b) => ({ ...b, id: b.userId }))}
           footerNote=""
-          emptyLabel="Tidak ada data"
+          emptyLabel={t('common.noData')}
           columns={[
             {
               key: 'name',
-              header: 'Guru',
+              header: t('penggunaan.teacher'),
               render: (row) => (
                 <div className="flex items-center gap-3">
                   <AdminAvatar name={row.name ?? row.email} />
@@ -597,7 +613,7 @@ function SectionPenggunaan({ setToast }: { setToast: (msg: string) => void }) {
             },
             {
               key: 'used',
-              header: 'Kuota dipakai',
+              header: t('penggunaan.quotaUsedColumn'),
               render: (row) => String(row.used),
             },
           ]}
@@ -606,7 +622,7 @@ function SectionPenggunaan({ setToast }: { setToast: (msg: string) => void }) {
 
       {usage.trend.length > 0 && (
         <div className="rounded-lg border border-neutral-200 p-4 dark:border-neutral-700">
-          <div className="text-sm font-medium mb-3">Tren bulanan</div>
+          <div className="text-sm font-medium mb-3">{t('penggunaan.monthlyTrend')}</div>
           <div className="space-y-2">
             {usage.trend.map((t) => (
               <div key={t.month} className="flex justify-between text-sm">
@@ -624,6 +640,7 @@ function SectionPenggunaan({ setToast }: { setToast: (msg: string) => void }) {
 // ── Section: Pengaturan ───────────────────────────────────────────────────────
 
 function SectionPengaturan({ setToast }: { setToast: (msg: string) => void }) {
+  const t = useTranslations('school');
   const [settings, setSettings] = useState<SchoolSettings | null>(null);
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(true);
@@ -637,7 +654,7 @@ function SectionPengaturan({ setToast }: { setToast: (msg: string) => void }) {
         setSettings(res.value);
         setName(res.value.name);
       } else {
-        setToast(`Gagal memuat pengaturan: ${res.error.safeMessage}`);
+        setToast(t('pengaturan.loadFailed', { message: res.error.safeMessage }));
       }
       setLoading(false);
     });
@@ -653,10 +670,10 @@ function SectionPengaturan({ setToast }: { setToast: (msg: string) => void }) {
     setSaving(true);
     const res = await schoolService.updateSettings({ name: trimmed });
     if (res.ok) {
-      setToast('Pengaturan disimpan');
+      setToast(t('pengaturan.saved'));
       setSettings((prev) => (prev ? { ...prev, name: trimmed } : prev));
     } else {
-      setToast(`Gagal menyimpan: ${res.error.safeMessage}`);
+      setToast(t('pengaturan.saveFailed', { message: res.error.safeMessage }));
     }
     setSaving(false);
   }
@@ -667,7 +684,7 @@ function SectionPengaturan({ setToast }: { setToast: (msg: string) => void }) {
     <form onSubmit={handleSave} className="max-w-md space-y-4">
       <div>
         <label className="block text-sm font-medium mb-1" htmlFor="settings-name">
-          Nama sekolah
+          {t('pengaturan.nameLabel')}
         </label>
         <input
           id="settings-name"
@@ -681,16 +698,26 @@ function SectionPengaturan({ setToast }: { setToast: (msg: string) => void }) {
       {settings && (
         <div className="text-xs text-neutral-400 space-y-1">
           <div>
-            Slug: <span className="font-mono">{settings.slug}</span>
+            {t('pengaturan.slug')}: <span className="font-mono">{settings.slug}</span>
           </div>
-          <div>Level: {neutralMetadataLabel(settings.level)}</div>
-          <div>Paket: {neutralMetadataLabel(settings.plan)}</div>
-          <div>Kursi: {settings.seats}</div>
-          {settings.renewsAt && <div>Perpanjang: {fmtDate(settings.renewsAt)}</div>}
+          <div>
+            {t('pengaturan.level')}: {neutralMetadataLabel(t, settings.level)}
+          </div>
+          <div>
+            {t('pengaturan.plan')}: {neutralMetadataLabel(t, settings.plan)}
+          </div>
+          <div>
+            {t('pengaturan.seats')}: {settings.seats}
+          </div>
+          {settings.renewsAt && (
+            <div>
+              {t('pengaturan.renewsAt')}: {fmtDate(settings.renewsAt)}
+            </div>
+          )}
         </div>
       )}
       <Button type="submit" size="sm" disabled={saving}>
-        {saving ? 'Menyimpan…' : 'Simpan pengaturan'}
+        {saving ? t('pengaturan.saving') : t('pengaturan.save')}
       </Button>
     </form>
   );
@@ -699,6 +726,7 @@ function SectionPengaturan({ setToast }: { setToast: (msg: string) => void }) {
 // ── Section: Billing ──────────────────────────────────────────────────────────
 
 function SectionBilling() {
+  const t = useTranslations('school');
   const [billing, setBilling] = useState<
     import('@/src/services/school/schoolService').SchoolBilling | null
   >(null);
@@ -725,8 +753,8 @@ function SectionBilling() {
         role="alert"
         className="rounded-xl border border-brand-danger/30 bg-brand-danger-soft px-6 py-5 text-sm text-brand-danger"
       >
-        <p className="font-semibold text-[#171717]">Gagal memuat billing sekolah</p>
-        <p className="mt-1">{error ?? 'Data billing tidak tersedia.'}</p>
+        <p className="font-semibold text-[#171717]">{t('billing.loadFailed')}</p>
+        <p className="mt-1">{error ?? t('billing.unavailable')}</p>
       </div>
     );
   }
@@ -734,29 +762,30 @@ function SectionBilling() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-[18px] font-bold text-[#171717]">Langganan & Tagihan Sekolah</h2>
-        <p className="mt-0.5 text-[13px] text-[#6d665d]">
-          Ringkasan paket aktual dari layanan billing.
-        </p>
+        <h2 className="text-[18px] font-bold text-[#171717]">{t('billing.title')}</h2>
+        <p className="mt-0.5 text-[13px] text-[#6d665d]">{t('billing.description')}</p>
       </div>
       <AdminStatCards
         items={[
-          { label: 'Paket', value: billing.plan, tone: 'neutral' },
+          { label: t('billing.plan'), value: billing.plan, tone: 'neutral' },
           {
-            label: 'Lisensi Guru',
-            value: `${billing.seatCount} Guru`,
-            hint: 'Anggota aktif',
+            label: t('billing.teacherSeats'),
+            value: t('billing.teacherSeatsValue', { count: billing.seatCount }),
+            hint: t('billing.teacherSeatsHint'),
             tone: 'info',
           },
           {
-            label: 'Penggunaan Bulan Ini',
-            value: `${billing.generationsUsedThisMonth} / ${billing.monthlyLimit ?? 'Tidak terbatas'}`,
+            label: t('billing.usageThisMonth'),
+            value: t('billing.usageValue', {
+              used: billing.generationsUsedThisMonth,
+              limit: billing.monthlyLimit ?? t('billing.unlimited'),
+            }),
             tone: 'neutral',
           },
           {
-            label: 'Mulai Siklus Billing',
+            label: t('billing.cycleStart'),
             value: fmtDate(billing.billingCycleStartedAt),
-            hint: 'Tanggal mulai siklus, bukan tanggal perpanjangan',
+            hint: t('billing.cycleStartHint'),
             tone: 'neutral',
           },
         ]}
@@ -765,7 +794,7 @@ function SectionBilling() {
         role="status"
         className="rounded-xl border border-[#ddd4c8] bg-white px-5 py-4 text-sm text-[#57534e]"
       >
-        Riwayat dan unduhan faktur belum tersedia.
+        {t('billing.invoiceUnavailable')}
       </div>
     </div>
   );
@@ -782,6 +811,7 @@ function SectionLibrary({
   setSearch: (v: string) => void;
   setToast: (msg: string) => void;
 }) {
+  const t = useTranslations('school');
   const [items, setItems] = useState<SchoolLibraryItem[]>([]);
   const [meta, setMeta] = useState<SchoolLibraryResult['meta'] | null>(null);
   const [page, setPage] = useState(1);
@@ -800,7 +830,7 @@ function SectionLibrary({
           setItems(result.data ?? []);
           setMeta(result.meta ?? null);
         } else {
-          setToast(`Gagal memuat library: ${res.error.safeMessage}`);
+          setToast(t('library.loadFailed', { message: res.error.safeMessage }));
         }
         setLoading(false);
       });
@@ -835,18 +865,18 @@ function SectionLibrary({
       <AdminToolbar
         search={search}
         onSearchChange={handleSearchChange}
-        searchPlaceholder="Cari judul / mapel / penulis…"
+        searchPlaceholder={t('library.searchPlaceholder')}
       />
       {loading ? (
         <AdminContentLoading />
       ) : (
         <AdminDataTable
           rows={items}
-          emptyLabel="Tidak ada asesmen di library"
+          emptyLabel={t('library.empty')}
           columns={[
             {
               key: 'title',
-              header: 'Judul',
+              header: t('library.columns.title'),
               render: (row) => (
                 <div>
                   <div className="font-medium text-sm">{row.title}</div>
@@ -858,7 +888,7 @@ function SectionLibrary({
             },
             {
               key: 'authorName',
-              header: 'Penulis',
+              header: t('library.columns.author'),
               render: (row) => (
                 <div className="flex items-center gap-2">
                   <AdminAvatar name={row.authorName} />
@@ -868,12 +898,12 @@ function SectionLibrary({
             },
             {
               key: 'questionCount',
-              header: 'Soal',
+              header: t('library.columns.questions'),
               render: (row) => String(row.questionCount),
             },
             {
               key: 'updatedAt',
-              header: 'Diperbarui',
+              header: t('library.columns.updated'),
               render: (row) => fmtDate(row.updatedAt),
             },
           ]}
@@ -882,7 +912,7 @@ function SectionLibrary({
       {meta && meta.pages > 1 && (
         <div className="flex items-center justify-between pt-2 text-sm">
           <span className="text-neutral-500">
-            {meta.total} item · halaman {meta.page} / {meta.pages}
+            {t('library.pageSummary', { total: meta.total, page: meta.page, pages: meta.pages })}
           </span>
           <div className="flex gap-1">
             <Button
@@ -891,7 +921,7 @@ function SectionLibrary({
               disabled={page <= 1}
               onClick={() => handlePageChange((p) => p - 1)}
             >
-              ‹ Sebelumnya
+              {t('common.previous')}
             </Button>
             <Button
               size="sm"
@@ -899,7 +929,7 @@ function SectionLibrary({
               disabled={page >= meta.pages}
               onClick={() => handlePageChange((p) => p + 1)}
             >
-              Berikutnya ›
+              {t('common.next')}
             </Button>
           </div>
         </div>
@@ -919,6 +949,7 @@ function SectionAudit({
   setSearch: (v: string) => void;
   setToast: (msg: string) => void;
 }) {
+  const t = useTranslations('school');
   const [rows, setRows] = useState<SchoolAuditRow[]>([]);
   const [meta, setMeta] = useState<SchoolAuditResult['meta'] | null>(null);
   const [page, setPage] = useState(1);
@@ -937,7 +968,7 @@ function SectionAudit({
           setRows(result.data ?? []);
           setMeta(result.meta ?? null);
         } else {
-          setToast(`Gagal memuat audit: ${res.error.safeMessage}`);
+          setToast(t('audit.loadFailed', { message: res.error.safeMessage }));
         }
         setLoading(false);
       });
@@ -972,33 +1003,33 @@ function SectionAudit({
       <AdminToolbar
         search={search}
         onSearchChange={handleSearchChange}
-        searchPlaceholder="Cari aktor / aksi / target…"
+        searchPlaceholder={t('audit.searchPlaceholder')}
       />
       {loading ? (
         <AdminContentLoading />
       ) : (
         <AdminDataTable
           rows={rows}
-          emptyLabel="Tidak ada log audit"
+          emptyLabel={t('audit.empty')}
           columns={[
             {
               key: 'createdAt',
-              header: 'Waktu',
+              header: t('audit.columns.time'),
               render: (row) => fmtDate(row.at),
             },
             {
               key: 'actorEmail',
-              header: 'Aktor',
+              header: t('audit.columns.actor'),
               render: (row) => row.actor,
             },
             {
               key: 'action',
-              header: 'Aksi',
+              header: t('audit.columns.action'),
               render: (row) => row.action,
             },
             {
               key: 'target',
-              header: 'Target',
+              header: t('audit.columns.target'),
               render: (row) => safeText(row.target),
             },
           ]}
@@ -1007,7 +1038,7 @@ function SectionAudit({
       {meta && meta.pages > 1 && (
         <div className="flex items-center justify-between pt-2 text-sm">
           <span className="text-neutral-500">
-            {meta.total} entri · halaman {meta.page} / {meta.pages}
+            {t('audit.pageSummary', { total: meta.total, page: meta.page, pages: meta.pages })}
           </span>
           <div className="flex gap-1">
             <Button
@@ -1016,7 +1047,7 @@ function SectionAudit({
               disabled={page <= 1}
               onClick={() => handlePageChange((p) => p - 1)}
             >
-              ‹ Sebelumnya
+              {t('common.previous')}
             </Button>
             <Button
               size="sm"
@@ -1024,7 +1055,7 @@ function SectionAudit({
               disabled={page >= meta.pages}
               onClick={() => handlePageChange((p) => p + 1)}
             >
-              Berikutnya ›
+              {t('common.next')}
             </Button>
           </div>
         </div>
@@ -1036,6 +1067,7 @@ function SectionAudit({
 // ── Section: Undangan ────────────────────────────────────────────────────────
 
 function SectionUndangan({ setToast }: { setToast: (msg: string) => void }) {
+  const t = useTranslations('school');
   const [invitations, setInvitations] = useState<SchoolInvitation[]>([]);
   const [loading, setLoading] = useState(true);
   const [cancelId, setCancelId] = useState<string | null>(null);
@@ -1049,7 +1081,7 @@ function SectionUndangan({ setToast }: { setToast: (msg: string) => void }) {
       if (res.ok) {
         setInvitations(res.value);
       } else {
-        setToast(`Gagal memuat undangan: ${res.error.safeMessage}`);
+        setToast(t('undangan.loadFailed', { message: res.error.safeMessage }));
       }
       setLoading(false);
     });
@@ -1076,10 +1108,10 @@ function SectionUndangan({ setToast }: { setToast: (msg: string) => void }) {
     setCancelId(inv.id);
     const res = await schoolService.cancelInvitation(inv.id);
     if (res.ok) {
-      setToast(`Undangan ke ${inv.email} dibatalkan`);
+      setToast(t('undangan.cancelledToast', { email: inv.email }));
       refreshInvitations();
     } else {
-      setToast(`Gagal membatalkan: ${res.error.safeMessage}`);
+      setToast(t('undangan.cancelFailed', { message: res.error.safeMessage }));
     }
     setCancelId(null);
   }
@@ -1090,37 +1122,35 @@ function SectionUndangan({ setToast }: { setToast: (msg: string) => void }) {
     <>
       <AdminDataTable
         rows={invitations}
-        emptyLabel="Tidak ada undangan menunggu"
+        emptyLabel={t('undangan.empty')}
         columns={[
           {
             key: 'email',
-            header: 'Email',
+            header: t('undangan.columns.email'),
             render: (row) => (
               <div>
                 <div className="font-medium text-sm">{row.email}</div>
                 {row.invitedBy && (
-                  <div className="text-xs text-neutral-400">Diundang oleh {row.invitedBy}</div>
+                  <div className="text-xs text-neutral-400">
+                    {t('undangan.invitedBy', { name: row.invitedBy })}
+                  </div>
                 )}
               </div>
             ),
           },
           {
             key: 'role',
-            header: 'Peran',
-            render: (row) => (
-              <AdminPill tone="neutral">
-                {row.role === 'school_admin' ? 'Admin sekolah' : 'Guru'}
-              </AdminPill>
-            ),
+            header: t('undangan.columns.role'),
+            render: (row) => <AdminPill tone="neutral">{memberRoleLabel(t, row.role)}</AdminPill>,
           },
           {
             key: 'createdAt',
-            header: 'Dikirim',
+            header: t('undangan.columns.sent'),
             render: (row) => fmtDate(row.createdAt),
           },
           {
             key: 'expiresAt',
-            header: 'Kedaluwarsa',
+            header: t('undangan.columns.expires'),
             render: (row) => fmtDate(row.expiresAt),
           },
           {
@@ -1134,7 +1164,7 @@ function SectionUndangan({ setToast }: { setToast: (msg: string) => void }) {
                   disabled={cancelId === row.id}
                   onClick={() => setConfirmCancelInv(row)}
                 >
-                  {cancelId === row.id ? 'Membatalkan…' : 'Batalkan'}
+                  {cancelId === row.id ? t('undangan.cancelling') : t('undangan.cancel')}
                 </Button>
               </div>
             ),
@@ -1144,10 +1174,10 @@ function SectionUndangan({ setToast }: { setToast: (msg: string) => void }) {
 
       <AdminConfirmModal
         open={!!confirmCancelInv}
-        title="Batalkan Undangan"
-        description={`Apakah Anda yakin ingin membatalkan undangan ke ${confirmCancelInv?.email}?`}
-        confirmLabel="Ya, Batalkan Undangan"
-        cancelLabel="Batal"
+        title={t('undangan.cancelTitle')}
+        description={t('undangan.cancelConfirm', { email: confirmCancelInv?.email ?? '' })}
+        confirmLabel={t('undangan.cancelConfirmAction')}
+        cancelLabel={t('common.cancel')}
         variant="danger"
         onConfirm={() => {
           if (!confirmCancelInv) return;
@@ -1166,6 +1196,7 @@ function SectionUndangan({ setToast }: { setToast: (msg: string) => void }) {
 // ── Section: Notifikasi ───────────────────────────────────────────────────────
 
 function SectionNotifikasi({ setToast }: { setToast: (msg: string) => void }) {
+  const t = useTranslations('school');
   const [data, setData] = useState<SchoolNotification[]>([]);
   const [meta, setMeta] = useState<SchoolNotificationsResult['meta'] | null>(null);
   const [page, setPage] = useState(1);
@@ -1188,7 +1219,7 @@ function SectionNotifikasi({ setToast }: { setToast: (msg: string) => void }) {
           setData(res.value.data ?? []);
           setMeta(res.value.meta ?? null);
         } else {
-          setToast(`Gagal memuat notifikasi: ${res.error.safeMessage}`);
+          setToast(t('notifikasi.loadFailed', { message: res.error.safeMessage }));
         }
         setLoading(false);
       });
@@ -1236,14 +1267,14 @@ function SectionNotifikasi({ setToast }: { setToast: (msg: string) => void }) {
                 : 'bg-white text-[#6d665d] border-[#ddd4c8] hover:bg-[#faf8f5]'
             }`}
           >
-            {s ? notificationStatusLabel(s) : 'Semua'}
+            {s ? notificationStatusLabel(t, s) : t('common.all')}
           </button>
         ))}
         <button
           onClick={handleRefresh}
           className="px-3 py-1 rounded-full text-[12px] font-medium border border-[#ddd4c8] bg-white text-[#6d665d] hover:bg-[#faf8f5] ml-auto"
         >
-          Refresh
+          {t('notifikasi.refresh')}
         </button>
       </div>
 
@@ -1251,35 +1282,35 @@ function SectionNotifikasi({ setToast }: { setToast: (msg: string) => void }) {
         <AdminContentLoading />
       ) : data.length === 0 ? (
         <div className="rounded-2xl border border-[#ddd4c8]/60 bg-[#faf8f5] p-8 text-center text-[13px] text-[#6d665d]">
-          Belum ada notifikasi.
+          {t('notifikasi.empty')}
         </div>
       ) : (
         <AdminDataTable
           rows={data}
-          emptyLabel="Tidak ada notifikasi."
+          emptyLabel={t('notifikasi.emptyTable')}
           columns={[
             {
               key: 'type',
-              header: 'Tipe',
+              header: t('notifikasi.columns.type'),
               render: (row) => <span className="font-mono text-[11px]">{row.type}</span>,
             },
             {
               key: 'status',
-              header: 'Status',
+              header: t('notifikasi.columns.status'),
               render: (row) => (
                 <AdminPill tone={notifTone(row.status)}>
-                  {notificationStatusLabel(row.status)}
+                  {notificationStatusLabel(t, row.status)}
                 </AdminPill>
               ),
             },
             {
               key: 'attempt',
-              header: 'Attempt',
+              header: t('notifikasi.columns.attempt'),
               render: (row) => <span className="tabular-nums text-[12px]">{row.attemptCount}</span>,
             },
             {
               key: 'error',
-              header: 'Error',
+              header: t('notifikasi.columns.error'),
               render: (row) => (
                 <span className="text-[11px] text-[#c9703a] truncate max-w-[200px] block">
                   {row.lastError ?? '—'}
@@ -1288,7 +1319,7 @@ function SectionNotifikasi({ setToast }: { setToast: (msg: string) => void }) {
             },
             {
               key: 'created',
-              header: 'Dibuat',
+              header: t('notifikasi.columns.created'),
               render: (row) => (
                 <span className="text-[11px] text-[#6d665d]">{row.createdAt ?? '—'}</span>
               ),
@@ -1300,11 +1331,11 @@ function SectionNotifikasi({ setToast }: { setToast: (msg: string) => void }) {
       {meta && meta.pages > 1 ? (
         <div className="flex items-center justify-between pt-2 text-sm">
           <span className="text-neutral-500">
-            {meta.total} notifikasi · halaman {meta.page} / {meta.pages}
+            {t('notifikasi.pageSummary', { total: meta.total, page: meta.page, pages: meta.pages })}
           </span>
           <div className="flex gap-1">
             <button
-              aria-label="Halaman notifikasi sebelumnya"
+              aria-label={t('notifikasi.prevPage')}
               disabled={page <= 1}
               onClick={() => handlePageChange((p) => p - 1)}
               className="px-3 py-1 rounded-lg border border-[#ddd4c8] text-[12px] disabled:opacity-40"
@@ -1312,7 +1343,7 @@ function SectionNotifikasi({ setToast }: { setToast: (msg: string) => void }) {
               ‹
             </button>
             <button
-              aria-label="Halaman notifikasi berikutnya"
+              aria-label={t('notifikasi.nextPage')}
               disabled={page >= meta.pages}
               onClick={() => handlePageChange((p) => p + 1)}
               className="px-3 py-1 rounded-lg border border-[#ddd4c8] text-[12px] disabled:opacity-40"
@@ -1327,6 +1358,7 @@ function SectionNotifikasi({ setToast }: { setToast: (msg: string) => void }) {
 }
 
 export function SchoolAdminView({ section = '' }: { section?: string }) {
+  const t = useTranslations('school');
   const current = section || '';
   const { search, filter, setSearch, setFilter, setToast } = useAdminSectionState(
     current || 'ringkasan',
@@ -1382,7 +1414,7 @@ export function SchoolAdminView({ section = '' }: { section?: string }) {
           role="alert"
           className="rounded-xl border border-[#ddd4c8] bg-white px-6 py-8 text-center"
         >
-          Halaman tidak ditemukan.
+          {t('notFound')}
         </div>
       ) : null}
     </div>

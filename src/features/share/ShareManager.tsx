@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useState } from 'react';
 import { Button, Panel, StatusBadge } from '@/app/components/ui';
 
@@ -13,7 +14,7 @@ type ShareLink = {
   createdAt: string;
 };
 
-async function api<T>(path: string, init?: RequestInit): Promise<T> {
+async function api<T>(path: string, init?: RequestInit, fallbackMessage?: string): Promise<T> {
   const response = await fetch(`/v1${path}`, {
     ...init,
     credentials: 'include',
@@ -24,58 +25,67 @@ async function api<T>(path: string, init?: RequestInit): Promise<T> {
   });
   const json = (await response.json()) as { data?: T; error?: { message?: string } };
   if (!response.ok) {
-    throw new Error(json.error?.message ?? 'Gagal memproses tautan bagikan.');
+    throw new Error(json.error?.message ?? fallbackMessage ?? 'Request failed.');
   }
   return json.data as T;
 }
 
-function fetchShareLinks(assessmentId: string) {
-  return api<ShareLink[]>(`/shares?assessmentId=${encodeURIComponent(assessmentId)}`);
+function fetchShareLinks(assessmentId: string, fallbackMessage?: string) {
+  return api<ShareLink[]>(
+    `/shares?assessmentId=${encodeURIComponent(assessmentId)}`,
+    undefined,
+    fallbackMessage,
+  );
 }
 
 export function ShareManager({ assessmentId, title }: { assessmentId: string; title: string }) {
+  const t = useTranslations('share');
   const [items, setItems] = useState<ShareLink[]>([]);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
 
   const load = useCallback(async () => {
     try {
-      setItems(await fetchShareLinks(assessmentId));
+      setItems(await fetchShareLinks(assessmentId, t('messages.requestFailed')));
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Gagal memuat tautan.');
+      setMessage(error instanceof Error ? error.message : t('messages.loadFailed'));
     }
-  }, [assessmentId]);
+  }, [assessmentId, t]);
 
   useEffect(() => {
     let cancelled = false;
 
-    void fetchShareLinks(assessmentId)
+    void fetchShareLinks(assessmentId, t('messages.requestFailed'))
       .then((data) => {
         if (!cancelled) setItems(data);
       })
       .catch((error) => {
         if (!cancelled) {
-          setMessage(error instanceof Error ? error.message : 'Gagal memuat tautan.');
+          setMessage(error instanceof Error ? error.message : t('messages.loadFailed'));
         }
       });
 
     return () => {
       cancelled = true;
     };
-  }, [assessmentId]);
+  }, [assessmentId, t]);
 
   const onCreate = async () => {
     setBusy(true);
     setMessage('');
     try {
-      const created = await api<ShareLink>('/shares', {
-        method: 'POST',
-        body: JSON.stringify({ assessmentId, title, ttlSeconds: 30 * 24 * 60 * 60 }),
-      });
+      const created = await api<ShareLink>(
+        '/shares',
+        {
+          method: 'POST',
+          body: JSON.stringify({ assessmentId, title, ttlSeconds: 30 * 24 * 60 * 60 }),
+        },
+        t('messages.requestFailed'),
+      );
       setItems((prev) => [created, ...prev.filter((item) => item.token !== created.token)]);
-      setMessage(`Asesmen diterbitkan: /attempt/${created.token}`);
+      setMessage(t('messages.published', { path: `/attempt/${created.token}` }));
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Gagal membuat tautan.');
+      setMessage(error instanceof Error ? error.message : t('messages.createFailed'));
     } finally {
       setBusy(false);
     }
@@ -85,13 +95,15 @@ export function ShareManager({ assessmentId, title }: { assessmentId: string; ti
     setBusy(true);
     setMessage('');
     try {
-      const updated = await api<ShareLink>(`/shares/${encodeURIComponent(token)}/revoke`, {
-        method: 'DELETE',
-      });
+      const updated = await api<ShareLink>(
+        `/shares/${encodeURIComponent(token)}/revoke`,
+        { method: 'DELETE' },
+        t('messages.requestFailed'),
+      );
       setItems((prev) => prev.map((item) => (item.token === token ? updated : item)));
-      setMessage('Tautan dicabut.');
+      setMessage(t('messages.revoked'));
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Gagal mencabut tautan.');
+      setMessage(error instanceof Error ? error.message : t('messages.revokeFailed'));
     } finally {
       setBusy(false);
     }
@@ -101,24 +113,25 @@ export function ShareManager({ assessmentId, title }: { assessmentId: string; ti
     const url = `${window.location.origin}/attempt/${token}`;
     try {
       await navigator.clipboard.writeText(url);
-      setMessage('Tautan disalin.');
+      setMessage(t('messages.copied'));
     } catch {
       setMessage(url);
     }
   };
 
   return (
-    <Panel
-      title="Terbitkan asesmen"
-      description="Bagikan tautan agar siswa dapat mengerjakan asesmen."
-    >
+    <Panel title={t('title')} description={t('description')}>
       <div className="flex flex-col gap-3">
         <div className="flex flex-wrap gap-2">
-          <Button loading={busy} loadingLabel="Membuat…" onClick={() => void onCreate()}>
-            Terbitkan asesmen
+          <Button
+            loading={busy}
+            loadingLabel={t('actions.publishing')}
+            onClick={() => void onCreate()}
+          >
+            {t('actions.publish')}
           </Button>
           <Button variant="secondary" onClick={() => void load()}>
-            Muat ulang
+            {t('actions.reload')}
           </Button>
         </div>
         {message ? (
@@ -127,7 +140,7 @@ export function ShareManager({ assessmentId, title }: { assessmentId: string; ti
           </p>
         ) : null}
         {items.length === 0 ? (
-          <p className="text-body-sm text-brand-ink-muted">Belum ada tautan untuk lembar ini.</p>
+          <p className="text-body-sm text-brand-ink-muted">{t('empty')}</p>
         ) : (
           <ul className="flex flex-col gap-2" role="list">
             {items.map((item) => (
@@ -142,10 +155,14 @@ export function ShareManager({ assessmentId, title }: { assessmentId: string; ti
                   </div>
                   <p className="text-caption text-brand-ink-muted">
                     {item.revokedAt
-                      ? `Dicabut ${new Date(item.revokedAt).toLocaleDateString('id-ID')}`
+                      ? t('expiry.revokedAt', {
+                          date: new Date(item.revokedAt).toLocaleDateString('id-ID'),
+                        })
                       : item.expiresAt
-                        ? `Berlaku hingga ${new Date(item.expiresAt).toLocaleDateString('id-ID')}`
-                        : 'Tidak ada kedaluwarsa'}
+                        ? t('expiry.expiresAt', {
+                            date: new Date(item.expiresAt).toLocaleDateString('id-ID'),
+                          })
+                        : t('expiry.none')}
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -153,10 +170,10 @@ export function ShareManager({ assessmentId, title }: { assessmentId: string; ti
                     href={`/attempt/${item.token}`}
                     className="inline-flex min-h-[var(--control-sm)] items-center rounded-md border border-brand-line px-3 text-body-sm"
                   >
-                    Buka asesmen
+                    {t('actions.open')}
                   </Link>
                   <Button size="sm" variant="secondary" onClick={() => void onCopy(item.token)}>
-                    Salin
+                    {t('actions.copy')}
                   </Button>
                   <Button
                     size="sm"
@@ -164,7 +181,7 @@ export function ShareManager({ assessmentId, title }: { assessmentId: string; ti
                     disabled={!!item.revokedAt || busy}
                     onClick={() => void onRevoke(item.token)}
                   >
-                    Cabut
+                    {t('actions.revoke')}
                   </Button>
                 </div>
               </li>

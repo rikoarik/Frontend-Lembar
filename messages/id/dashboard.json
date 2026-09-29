@@ -1,1 +1,67 @@
-{}
+{
+  "dashboard": {
+    "loadingLabel": "Memuat dashboard",
+    "error": {
+      "title": "Gagal memuat beranda",
+      "load": "Gagal memuat ringkasan. Coba lagi.",
+      "retry": "Coba lagi"
+    },
+    "activeJob": {
+      "running": "Generate sedang berjalan",
+      "processing": "Memproses…"
+    },
+    "greeting": {
+      "fallbackName": "Guru",
+      "hello": "Halo, {name}",
+      "subtitle": "Lanjutkan draft, tinjau hasil generate, atau buat lembar baru dari materi.",
+      "emptyTitle": "Halo, {name}. Siap buat lembar pertama?",
+      "emptyDescription": "Mulai dari materi atau topik, lalu tinjau draft sebelum difinalkan di {workspace}."
+    },
+    "personalBadge": "Ruang pribadi",
+    "actions": {
+      "create": "Buat lembar",
+      "createFirst": "Buat lembar pertama",
+      "openHistory": "Buka riwayat",
+      "viewTemplates": "Lihat template"
+    },
+    "quickActions": {
+      "title": "Aksi cepat",
+      "scope": "Subscriber workspace",
+      "generate": {
+        "title": "Buat lembar",
+        "description": "Generate draft soal dari materi atau topik."
+      },
+      "history": {
+        "title": "Lihat riwayat",
+        "description": "Lanjutkan draft, tinjauan, atau final."
+      },
+      "bank": {
+        "title": "Bank soal",
+        "description": "Ambil item yang sudah pernah dipakai."
+      },
+      "template": {
+        "title": "Template",
+        "description": "Mulai dari struktur yang sudah siap."
+      }
+    },
+    "metrics": {
+      "assessmentsTotal": "Total asesmen",
+      "assessmentsTotalHint": "Semua lembar workspace aktif",
+      "sourcesReady": "Sumber siap",
+      "sourcesReadyHint": "{count} sumber di workspace aktif",
+      "inReview": "Perlu ditinjau",
+      "inReviewHint": "Siap dicek sebelum final",
+      "final": "Final",
+      "finalHint": "Siap dicetak atau diunduh"
+    },
+    "status": {
+      "title": "Status workspace",
+      "workspace": "Workspace",
+      "type": "Tipe",
+      "typeSchool": "Sekolah",
+      "typePersonal": "Pribadi",
+      "role": "Role aktif",
+      "activeSpace": "Ruang aktif"
+    }
+  }
+}

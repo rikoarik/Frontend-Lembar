@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState, useTransition, type ReactNode } from 'react';
 import { Button, StatusBadge } from '@/app/components/ui';
@@ -113,7 +114,7 @@ function AdminDot({ tone }: { tone: AdminTone }) {
 export function AdminToolbar({
   search,
   onSearchChange,
-  searchPlaceholder = 'Cari…',
+  searchPlaceholder,
   filters,
   actions,
   flat = true,
@@ -125,6 +126,7 @@ export function AdminToolbar({
   actions?: ReactNode;
   flat?: boolean;
 }) {
+  const t = useTranslations('admin');
   const containerCls = flat
     ? 'flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between py-1'
     : 'flex flex-col gap-3 rounded-xl border border-[#ddd4c8] bg-white p-3 shadow-[0_1px_0_rgba(23,23,23,0.03)] lg:flex-row lg:items-center lg:justify-between';
@@ -133,7 +135,7 @@ export function AdminToolbar({
     <div className={containerCls}>
       <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-center">
         <label className="relative min-w-0 flex-1">
-          <span className="sr-only">Cari</span>
+          <span className="sr-only">{t('toolbar.search')}</span>
           <span
             aria-hidden
             className="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-[#57534e]"
@@ -143,7 +145,7 @@ export function AdminToolbar({
           <input
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
-            placeholder={searchPlaceholder}
+            placeholder={searchPlaceholder ?? t('toolbar.searchPlaceholder')}
             className="min-h-[40px] w-full rounded-xl border border-[#ddd4c8] bg-white py-2 pl-10 pr-3 text-[13px] text-[#171717] placeholder:text-[#57534e] focus:outline-none focus:ring-2 focus:ring-[#171717]/20"
           />
         </label>
@@ -207,7 +209,7 @@ export function AdminPageHeader({
 }
 
 export function AdminEmptyState({
-  title = 'Tidak ada data.',
+  title,
   description,
   action,
   icon = 'inbox',
@@ -219,6 +221,7 @@ export function AdminEmptyState({
   icon?: string;
   flat?: boolean;
 }) {
+  const t = useTranslations('admin');
   const containerCls = flat
     ? 'rounded-xl bg-[#faf8f5]/60 px-6 py-8 text-center'
     : 'rounded-xl border border-dashed border-[#ddd4c8] bg-white px-6 py-14 text-center';
@@ -233,7 +236,7 @@ export function AdminEmptyState({
           {icon}
         </span>
       </div>
-      <p className="text-[13px] font-semibold text-[#171717]">{title}</p>
+      <p className="text-[13px] font-semibold text-[#171717]">{title ?? t('emptyState.title')}</p>
       {description ? (
         <p className="mx-auto mt-1 max-w-md text-[12px] text-[#57534e]">{description}</p>
       ) : null}
@@ -244,10 +247,10 @@ export function AdminEmptyState({
 
 export function AdminConfirmModal({
   open,
-  title = 'Konfirmasi Tindakan',
+  title,
   description,
-  confirmLabel = 'Ya, Lanjutkan',
-  cancelLabel = 'Batal',
+  confirmLabel,
+  cancelLabel,
   variant = 'danger',
   loading = false,
   onConfirm,
@@ -263,6 +266,7 @@ export function AdminConfirmModal({
   onConfirm: () => void;
   onCancel: () => void;
 }) {
+  const t = useTranslations('admin');
   const cancelRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -305,7 +309,7 @@ export function AdminConfirmModal({
           </div>
           <div className="min-w-0 flex-1">
             <h3 id="confirm-dialog-title" className="text-[15px] font-bold text-[#171717]">
-              {title}
+              {title ?? t('confirm.title')}
             </h3>
             <p className="mt-1 text-[13px] leading-relaxed text-[#57534e]">{description}</p>
           </div>
@@ -319,7 +323,7 @@ export function AdminConfirmModal({
             onClick={onCancel}
             disabled={loading}
           >
-            {cancelLabel}
+            {cancelLabel ?? t('confirm.cancel')}
           </Button>
           <Button
             size="sm"
@@ -327,7 +331,7 @@ export function AdminConfirmModal({
             onClick={onConfirm}
             disabled={loading}
           >
-            {loading ? 'Memproses…' : confirmLabel}
+            {loading ? t('confirm.processing') : (confirmLabel ?? t('confirm.confirm'))}
           </Button>
         </div>
       </div>
@@ -344,11 +348,12 @@ export function AdminBulkBar({
   children: ReactNode;
   onClear?: () => void;
 }) {
+  const t = useTranslations('admin');
   if (count <= 0) return null;
   return (
     <div className="flex flex-col gap-2 rounded-xl border border-[#171717] bg-[#171717] px-3 py-2.5 text-white sm:flex-row sm:items-center sm:justify-between">
       <div className="text-[13px] font-medium">
-        <span className="font-semibold tabular-nums">{count}</span> dipilih
+        <span className="font-semibold tabular-nums">{t('bulk.selected', { count })}</span>
       </div>
       <div className="flex flex-wrap items-center gap-2">
         {children}
@@ -358,7 +363,7 @@ export function AdminBulkBar({
             onClick={onClear}
             className="text-[12px] font-medium text-white/70 hover:text-white underline"
           >
-            Batal
+            {t('bulk.clear')}
           </button>
         ) : null}
       </div>
@@ -368,12 +373,12 @@ export function AdminBulkBar({
 export function AdminDataTable<T extends { id: string }>({
   columns,
   rows,
-  emptyLabel = 'Tidak ada data.',
+  emptyLabel,
   emptyHint,
   emptyAction,
   rowActions,
   density = 'comfortable',
-  footerNote = 'Data preview',
+  footerNote,
   selectable = false,
   selectedIds = [],
   onToggleRow,
@@ -394,6 +399,7 @@ export function AdminDataTable<T extends { id: string }>({
   onToggleAll?: (ids: string[]) => void;
   flat?: boolean;
 }) {
+  const t = useTranslations('admin');
   const cellY = density === 'compact' ? 'py-2' : 'py-3';
   const allSelected =
     selectable && rows.length > 0 && rows.every((row) => selectedIds.includes(row.id));
@@ -403,7 +409,7 @@ export function AdminDataTable<T extends { id: string }>({
   if (rows.length === 0) {
     return (
       <AdminEmptyState
-        title={emptyLabel}
+        title={emptyLabel ?? t('emptyState.title')}
         description={emptyHint}
         action={emptyAction}
         icon="filter_alt_off"
@@ -426,7 +432,7 @@ export function AdminDataTable<T extends { id: string }>({
                 <th className="w-10 px-4 py-3">
                   <input
                     type="checkbox"
-                    aria-label="Pilih semua baris"
+                    aria-label={t('table.selectAll')}
                     checked={allSelected}
                     ref={(el) => {
                       if (el) el.indeterminate = someSelected;
@@ -453,7 +459,7 @@ export function AdminDataTable<T extends { id: string }>({
                   {column.header}
                 </th>
               ))}
-              {rowActions ? <th className="px-4 py-3.5 text-right">Aksi</th> : null}
+              {rowActions ? <th className="px-4 py-3.5 text-right">{t('table.actions')}</th> : null}
             </tr>
           </thead>
           <tbody>
@@ -470,7 +476,7 @@ export function AdminDataTable<T extends { id: string }>({
                     <td className={`px-4 ${cellY} align-middle`}>
                       <input
                         type="checkbox"
-                        aria-label={`Pilih ${row.id}`}
+                        aria-label={t('table.selectRow', { id: row.id })}
                         checked={selected}
                         onChange={() => onToggleRow?.(row.id)}
                         className="h-4 w-4 rounded border-[#b9afa2] text-[#171717] focus:ring-[#171717]/30"
@@ -505,8 +511,12 @@ export function AdminDataTable<T extends { id: string }>({
         </table>
       </div>
       <div className="flex items-center justify-between border-t border-[#ddd4c8]/40 bg-[#faf8f5] px-4 py-3 text-[12px] text-[#8a8379]">
-        <span className="font-semibold text-[#514b44]">{rows.length} baris</span>
-        <span className="text-[11px] font-medium tracking-wide uppercase">{footerNote}</span>
+        <span className="font-semibold text-[#514b44]">
+          {t('table.rows', { count: rows.length })}
+        </span>
+        <span className="text-[11px] font-medium tracking-wide uppercase">
+          {footerNote ?? t('table.footerNote')}
+        </span>
       </div>
     </div>
   );
@@ -562,19 +572,21 @@ export function AdminPill({
   );
 }
 
-export function AdminContentLoading({ label = 'Memuat data…' }: { label?: string }) {
+export function AdminContentLoading({ label }: { label?: string }) {
+  const t = useTranslations('admin');
+  const resolved = label ?? t('contentLoading.label');
   return (
     <div
       className="fixed top-4 right-28 z-40 inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border border-[#ddd4c8]/90 bg-white/95 backdrop-blur-md shadow-md text-[12px] font-medium text-[#171717] transition-all animate-in fade-in slide-in-from-top-2"
       aria-busy="true"
       aria-live="polite"
-      aria-label={label}
+      aria-label={resolved}
     >
       <span className="relative flex h-2.5 w-2.5 items-center justify-center">
         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-accent opacity-75" />
         <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-accent" />
       </span>
-      <span className="text-[12px] font-semibold text-[#171717]">{label}</span>
+      <span className="text-[12px] font-semibold text-[#171717]">{resolved}</span>
     </div>
   );
 }
@@ -583,7 +595,7 @@ export function AdminSelect<T extends string>({
   value,
   onChange,
   options,
-  placeholder = 'Pilih...',
+  placeholder,
   className = '',
 }: {
   value: T;
@@ -592,6 +604,7 @@ export function AdminSelect<T extends string>({
   placeholder?: string;
   className?: string;
 }) {
+  const t = useTranslations('admin');
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -616,7 +629,9 @@ export function AdminSelect<T extends string>({
         onClick={() => setOpen((p) => !p)}
         className="h-9 px-3.5 rounded-xl border border-[#ddd4c8] bg-white text-[12px] font-medium text-[#171717] hover:bg-[#faf7f2] hover:border-[#b8ad9e] focus:outline-none focus:ring-2 focus:ring-[#171717]/20 inline-flex items-center gap-2 transition-all cursor-pointer shadow-sm select-none"
       >
-        <span>{selectedOption ? selectedOption.label : placeholder}</span>
+        <span>
+          {selectedOption ? selectedOption.label : (placeholder ?? t('select.placeholder'))}
+        </span>
         <span
           className={`material-symbols-outlined text-[16px] text-[#6d665d] transition-transform duration-150 ${open ? 'rotate-180' : ''}`}
         >
@@ -672,6 +687,7 @@ export function AdminShell({
   actorMeta?: string;
   children: ReactNode;
 }) {
+  const t = useTranslations('admin');
   const pathname = usePathname() ?? '/';
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -679,8 +695,8 @@ export function AdminShell({
   const [collapsed, setCollapsed] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const isOps = brand.includes('ops');
-  const resolvedActorName = actorName ?? (isOps ? 'Ops Superadmin' : 'Admin');
-  const resolvedActorMeta = actorMeta ?? (isOps ? 'platform · least privilege' : 'Sekolah');
+  const resolvedActorName = actorName ?? (isOps ? t('actor.opsName') : t('actor.schoolName'));
+  const resolvedActorMeta = actorMeta ?? (isOps ? t('actor.opsMeta') : t('actor.schoolMeta'));
   const profileMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -719,7 +735,7 @@ export function AdminShell({
         href="#konten-admin"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[var(--z-toast)] focus:rounded-md focus:bg-white focus:px-3 focus:py-2"
       >
-        Lewati ke konten
+        {t('shell.skipToContent')}
       </a>
       <div className="flex h-full w-full">
         {/* Fixed-height rail: never scrolls with page content */}
@@ -735,8 +751,8 @@ export function AdminShell({
                   type="button"
                   onClick={() => setCollapsed(false)}
                   className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 text-white hover:bg-brand-accent hover:text-white transition-all shadow-sm"
-                  title="Perluas sidebar"
-                  aria-label="Perluas sidebar"
+                  title={t('shell.expandSidebar')}
+                  aria-label={t('shell.expandSidebar')}
                 >
                   <span className="material-symbols-outlined text-[20px]" aria-hidden>
                     menu_open
@@ -759,7 +775,7 @@ export function AdminShell({
                       </span>
                     </div>
                     <div className="text-[9px] tracking-wider uppercase text-white/40 font-bold">
-                      Console
+                      {t('brand.console')}
                     </div>
                   </div>
                 </div>
@@ -767,8 +783,8 @@ export function AdminShell({
                   type="button"
                   onClick={() => setCollapsed(true)}
                   className="hidden md:flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-white/50 hover:bg-white/10 hover:text-white transition-colors"
-                  title="Ciutkan sidebar"
-                  aria-label="Ciutkan sidebar"
+                  title={t('shell.collapseSidebar')}
+                  aria-label={t('shell.collapseSidebar')}
                 >
                   <span className="material-symbols-outlined text-[18px]" aria-hidden>
                     dock_to_left
@@ -779,23 +795,24 @@ export function AdminShell({
           </div>
 
           <nav
-            aria-label="Navigasi panel"
+            aria-label={t('shell.navLabel')}
             className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto p-3 pb-6"
           >
             {!collapsed ? (
               <div className="px-2.5 pb-1.5 pt-1 text-[10px] font-bold uppercase tracking-[0.12em] text-white/30">
-                Workspace
+                {t('brand.workspace')}
               </div>
             ) : null}
             {nav.map((item) => {
+              const label = t(item.labelKey);
               const active = isAdminNavActive(item.href, pathname);
               return (
                 <Link
                   key={item.href}
                   href={item.href}
                   prefetch
-                  title={collapsed ? item.label : undefined}
-                  aria-label={collapsed ? item.label : undefined}
+                  title={collapsed ? label : undefined}
+                  aria-label={collapsed ? label : undefined}
                   onClick={(event) => {
                     if (!event.metaKey && !event.ctrlKey && !event.shiftKey && event.button === 0) {
                       event.preventDefault();
@@ -821,7 +838,7 @@ export function AdminShell({
                       {item.icon || 'circle'}
                     </span>
                     {!collapsed ? (
-                      <span className="truncate font-medium tracking-[-0.01em]">{item.label}</span>
+                      <span className="truncate font-medium tracking-[-0.01em]">{label}</span>
                     ) : null}
                   </span>
                   {!collapsed && item.badge ? (
@@ -847,7 +864,7 @@ export function AdminShell({
                   collapsed ? 'left-full ml-3 bottom-0' : 'bottom-full left-3 mb-2'
                 }`}
                 role="menu"
-                aria-label="Menu profil"
+                aria-label={t('shell.profileMenu')}
               >
                 <div className="flex items-center gap-3 border-b border-white/10 pb-3">
                   <AdminAvatar name={resolvedActorName} size="md" />
@@ -871,7 +888,7 @@ export function AdminShell({
                     >
                       person
                     </span>
-                    Profil Sesi
+                    {t('shell.profileSession')}
                   </Link>
                   <Link
                     href="/app"
@@ -884,7 +901,7 @@ export function AdminShell({
                     >
                       open_in_new
                     </span>
-                    Buka aplikasi guru
+                    {t('shell.openTeacherApp')}
                   </Link>
                   <button
                     type="button"
@@ -897,7 +914,7 @@ export function AdminShell({
                     <span className="material-symbols-outlined text-[16px]" aria-hidden>
                       logout
                     </span>
-                    Keluar Sesi
+                    {t('shell.logout')}
                   </button>
                 </div>
               </div>
@@ -910,7 +927,7 @@ export function AdminShell({
                 profileOpen ? 'ring-2 ring-white/20 bg-white/10' : ''
               } ${collapsed ? 'h-10 w-10 justify-center mx-auto p-0' : 'gap-3 p-2'}`}
               title={collapsed ? resolvedActorName : undefined}
-              aria-label={`Profil ${resolvedActorName}`}
+              aria-label={t('shell.profileMenuLabel', { name: resolvedActorName })}
               aria-expanded={profileOpen}
               aria-haspopup="menu"
             >
@@ -953,7 +970,7 @@ export function AdminShell({
                       >
                         progress_activity
                       </span>
-                      memuat
+                      {t('shell.loadingShort')}
                     </span>
                   ) : null}
                 </div>
@@ -966,7 +983,7 @@ export function AdminShell({
           </header>
 
           <div className="shrink-0 border-b border-[#ddd4c8]/80 bg-white px-4 py-2 md:hidden">
-            <nav aria-label="Navigasi panel mobile" className="flex gap-2 overflow-x-auto pb-1">
+            <nav aria-label={t('shell.navLabelMobile')} className="flex gap-2 overflow-x-auto pb-1">
               {nav.map((item) => {
                 const active = isAdminNavActive(item.href, pathname);
                 return (
@@ -995,7 +1012,7 @@ export function AdminShell({
                     <span className="material-symbols-outlined text-[16px]" aria-hidden>
                       {item.icon || 'circle'}
                     </span>
-                    {item.label}
+                    {t(item.labelKey)}
                   </Link>
                 );
               })}
@@ -1033,7 +1050,7 @@ export function AdminShell({
                   type="button"
                   className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[#8a8379] hover:bg-[#faf7f2] hover:text-[#171717] transition-colors ml-2"
                   onClick={() => setToast(null)}
-                  aria-label="Tutup notifikasi"
+                  aria-label={t('shell.closeToast')}
                 >
                   <span
                     className="material-symbols-outlined text-[16px] leading-none inline-flex items-center justify-center"

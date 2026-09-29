@@ -17,8 +17,8 @@ describe('admin accessibility basics', () => {
           brand="lembar school"
           title="Audit"
           nav={[
-            { href: '/school', label: 'Ringkasan' },
-            { href: '/school/audit', label: 'Audit' },
+            { href: '/school', labelKey: 'nav.ringkasan' },
+            { href: '/school/audit', labelKey: 'nav.audit' },
           ]}
         >
           Konten

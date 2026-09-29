@@ -1,1 +1,11 @@
-{}
+{
+  "onboarding": {
+    "meta": {
+      "title": "Selamat datang — lembar"
+    },
+    "heading": "Selamat datang di lembar",
+    "description": "Akun Anda sudah siap. Workspace pribadi Anda akan dibuat secara otomatis saat Anda mulai menggunakan aplikasi.",
+    "cta": "Mulai sekarang",
+    "guide": "Lihat panduan"
+  }
+}

@@ -1,1 +1,115 @@
-{}
+{
+  "admin": {
+    "brand": {
+      "console": "Console",
+      "workspace": "Workspace"
+    },
+    "shell": {
+      "skipToContent": "Skip to content",
+      "navLabel": "Panel navigation",
+      "navLabelMobile": "Mobile panel navigation",
+      "expandSidebar": "Expand sidebar",
+      "collapseSidebar": "Collapse sidebar",
+      "loadingShort": "loading",
+      "profileMenu": "Profile menu",
+      "profileMenuLabel": "Profile {name}",
+      "profileSession": "Session Profile",
+      "openTeacherApp": "Open teacher app",
+      "logout": "Sign Out",
+      "closeToast": "Close notification"
+    },
+    "actor": {
+      "opsName": "Ops Superadmin",
+      "opsMeta": "platform · least privilege",
+      "schoolName": "Admin",
+      "schoolMeta": "School",
+      "schoolBadge": "School Admin",
+      "opsBadge": "Superadmin"
+    },
+    "shells": {
+      "schoolTitleFallback": "Overview",
+      "schoolSubtitle": "School admin panel · manage teachers, invitations, and usage",
+      "opsBrand": "Lembar ops",
+      "schoolBrand": "lembar school"
+    },
+    "nav": {
+      "ringkasan": "Overview",
+      "accounts": "Accounts",
+      "schools": "Schools",
+      "catalog": "Catalog",
+      "prompts": "Prompts",
+      "learningSignals": "Learning Signals",
+      "jobs": "Jobs",
+      "quality": "Quality",
+      "audit": "Audit",
+      "billing": "Billing",
+      "plans": "Plans & Pricing",
+      "flags": "Flags",
+      "content": "Marketing CMS",
+      "aiProvider": "AI Configuration",
+      "waGateway": "WA Gateway",
+      "guru": "Teachers",
+      "undang": "Invite",
+      "undangan": "Pending invitations",
+      "penggunaan": "Usage",
+      "schoolBilling": "Subscription & Billing",
+      "pengaturan": "Settings",
+      "library": "Library",
+      "notifikasi": "Notifications"
+    },
+    "roles": {
+      "teacher": "Teacher",
+      "schoolAdmin": "School Admin",
+      "superadmin": "Superadmin"
+    },
+    "toolbar": {
+      "search": "Search",
+      "searchPlaceholder": "Search…"
+    },
+    "emptyState": {
+      "title": "No data."
+    },
+    "confirm": {
+      "title": "Confirm Action",
+      "confirm": "Yes, Continue",
+      "cancel": "Cancel",
+      "processing": "Processing…"
+    },
+    "bulk": {
+      "selected": "{count} selected",
+      "clear": "Clear"
+    },
+    "table": {
+      "selectAll": "Select all rows",
+      "selectRow": "Select {id}",
+      "actions": "Actions",
+      "rows": "{count} rows",
+      "footerNote": "Data preview"
+    },
+    "select": {
+      "placeholder": "Select..."
+    },
+    "contentLoading": {
+      "label": "Loading data…"
+    },
+    "status": {
+      "draft": "Draft",
+      "review": "Needs review",
+      "failed": "Failed",
+      "processing": "Processing",
+      "final": "Final"
+    },
+    "console": {
+      "unknownSection": "Section {section}",
+      "unknownSectionDescription": "This page has no management content yet. Pick an available ops menu from the sidebar.",
+      "comingSoon": "coming soon",
+      "noContent": "There is no content for this section yet.",
+      "comingSoonNote": "This section is not available yet."
+    },
+    "impersonate": {
+      "starting": "Starting impersonation as {name}...",
+      "success": "Impersonating {name}. Redirecting...",
+      "failed": "Failed: {message}"
+    }
+  }
+}

@@ -1,1 +1,31 @@
-{}
+{
+  "analytics": {
+    "title": "Creator analytics",
+    "subtitle": "Summary of the active workspace's assessments.",
+    "range": {
+      "d7": "7 days",
+      "d30": "30 days",
+      "semester": "Semester"
+    },
+    "error": {
+      "title": "Analytics failed to load"
+    },
+    "metric": {
+      "created": "Worksheets created",
+      "final": "Final worksheets",
+      "review": "Needs review",
+      "questions": "Saved questions"
+    },
+    "subjects": {
+      "title": "Subjects",
+      "description": "Assessment distribution for the selected period.",
+      "empty": "No activity in this period yet."
+    },
+    "activity": {
+      "title": "Recent activity",
+      "description": "{count} assessments in the selected period.",
+      "itemMeta": "{lifecycle} · {count} questions",
+      "empty": "Create your first worksheet"
+    }
+  }
+}
