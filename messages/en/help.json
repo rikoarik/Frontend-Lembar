@@ -1,47 +1,49 @@
 {
-  "title": "Help & quality reports",
-  "description": "A short guide and a way to report problem questions without leaking the full assessment content.",
-  "topics": {
-    "generate": {
-      "title": "Generate a draft",
-      "body": "Fill in the source and configuration, then follow the job progress. The draft still needs teacher review."
+  "help": {
+    "title": "Help & quality reports",
+    "description": "A short guide and a way to report problem questions without leaking the full assessment content.",
+    "topics": {
+      "generate": {
+        "title": "Generate a draft",
+        "body": "Fill in the source and configuration, then follow the job progress. The draft still needs teacher review."
+      },
+      "review": {
+        "title": "Review questions",
+        "body": "Use quick mode for the list, detail mode to edit question by question. Finalizing needs a separate confirmation."
+      },
+      "output": {
+        "title": "Output & share",
+        "body": "Printing and downloading use the same artifact. A share link can be revoked at any time."
+      },
+      "privacy": {
+        "title": "Source privacy",
+        "body": "Private PDFs are processed for the draft. Do not upload sensitive data you do not need."
+      }
     },
-    "review": {
-      "title": "Review questions",
-      "body": "Use quick mode for the list, detail mode to edit question by question. Finalizing needs a separate confirmation."
-    },
-    "output": {
-      "title": "Output & share",
-      "body": "Printing and downloading use the same artifact. A share link can be revoked at any time."
-    },
-    "privacy": {
-      "title": "Source privacy",
-      "body": "Private PDFs are processed for the draft. Do not upload sensitive data you do not need."
-    }
-  },
-  "report": {
-    "title": "Report a problem question",
-    "description": "Send the reference ID plus the reason. Avoid pasting the full stem/options when it is not necessary.",
-    "assessmentLabel": "Assessment ID (optional)",
-    "assessmentPlaceholder": "asm_...",
-    "questionLabel": "Question ID (optional)",
-    "questionPlaceholder": "asm_...-q1",
-    "reasonLabel": "Reason",
-    "reasons": {
-      "quality": "Question quality",
-      "answerKey": "Unclear key/explanation",
-      "privacy": "Source privacy issue",
-      "other": "Other"
-    },
-    "noteLabel": "Safe note",
-    "notePlaceholder": "Describe the problem briefly without sensitive data.",
-    "submit": "Send report",
-    "submitBusy": "Sending…",
-    "publicHelp": "Public help",
-    "status": {
-      "sent": "Report received ({reportId}). The question content was not sent in full.",
-      "failed": "The report could not be sent.",
-      "offline": "Could not connect. Please try again."
+    "report": {
+      "title": "Report a problem question",
+      "description": "Send the reference ID plus the reason. Avoid pasting the full stem/options when it is not necessary.",
+      "assessmentLabel": "Assessment ID (optional)",
+      "assessmentPlaceholder": "asm_...",
+      "questionLabel": "Question ID (optional)",
+      "questionPlaceholder": "asm_...-q1",
+      "reasonLabel": "Reason",
+      "reasons": {
+        "quality": "Question quality",
+        "answerKey": "Unclear key/explanation",
+        "privacy": "Source privacy issue",
+        "other": "Other"
+      },
+      "noteLabel": "Safe note",
+      "notePlaceholder": "Describe the problem briefly without sensitive data.",
+      "submit": "Send report",
+      "submitBusy": "Sending…",
+      "publicHelp": "Public help",
+      "status": {
+        "sent": "Report received ({reportId}). The question content was not sent in full.",
+        "failed": "The report could not be sent.",
+        "offline": "Could not connect. Please try again."
+      }
     }
   }
 }

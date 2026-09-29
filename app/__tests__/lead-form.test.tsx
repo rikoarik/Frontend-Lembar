@@ -2,6 +2,18 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import KontakPage from '../(marketing)/kontak/page';
+import MarketingSubPageLayout from '@/app/components/marketing/MarketingSubPageLayout';
+
+/**
+ * `KontakPage` is an async server component that renders its hero through the
+ * async `MarketingSubPageLayout`; await both before mounting the tree.
+ */
+async function renderKontakPage() {
+  const page = await KontakPage();
+  const props = (page as React.ReactElement<React.ComponentProps<typeof MarketingSubPageLayout>>)
+    .props;
+  return render(await MarketingSubPageLayout(props));
+}
 
 const leadsLookup: Record<
   string,
@@ -84,8 +96,8 @@ beforeEach(() => {
 });
 
 describe('school lead form', () => {
-  it('renders required fields with accessible labels and consent', () => {
-    render(<KontakPage />);
+  it('renders required fields with accessible labels and consent', async () => {
+    await renderKontakPage();
     expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
     expect(screen.getByLabelText(/^Nama$/)).toBeInTheDocument();
     expect(screen.getByLabelText(/Email kerja/i)).toBeInTheDocument();
@@ -100,7 +112,7 @@ describe('school lead form', () => {
 
   it('shows inline validation when required fields missing', async () => {
     const user = userEvent.setup();
-    render(<KontakPage />);
+    await renderKontakPage();
     await user.click(screen.getByRole('button', { name: /Kirim permintaan/i }));
     expect(await screen.findByText(/Nama wajib diisi/i)).toBeInTheDocument();
     expect(screen.getByText(/Sekolah wajib diisi/i)).toBeInTheDocument();
@@ -112,7 +124,7 @@ describe('school lead form', () => {
 
   it('submits successfully with phone instead of email without revealing contact existence', async () => {
     const user = userEvent.setup();
-    render(<KontakPage />);
+    await renderKontakPage();
     await user.type(screen.getByLabelText(/^Nama$/), 'Ibu Sari');
     await user.type(screen.getByLabelText(/Nomor telepon kerja/i), '81234567890');
     await user.type(screen.getByLabelText(/^Sekolah$/), 'SDN Contoh 01');
@@ -129,7 +141,7 @@ describe('school lead form', () => {
 
   it('surfaces rate-limit copy (HTTP 429) without exposing internals', async () => {
     const user = userEvent.setup();
-    render(<KontakPage />);
+    await renderKontakPage();
     await user.type(screen.getByLabelText(/^Nama$/), 'Ibu Sari');
     await user.type(screen.getByLabelText(/Email kerja/i), 'rate-limited@example.com');
     await user.type(screen.getByLabelText(/^Sekolah$/), 'SDN Contoh 01');

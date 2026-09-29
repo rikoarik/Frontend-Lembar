@@ -1,80 +1,49 @@
 import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 import MarketingSubPageLayout from '@/app/components/marketing/MarketingSubPageLayout';
 
-export const metadata: Metadata = {
-  title: 'Syarat & Ketentuan - lembar',
-  description:
-    'Syarat dan ketentuan penggunaan platform lembar — akun, penggunaan yang diizinkan, kepemilikan konten, dan ketersediaan layanan.',
-  openGraph: {
-    title: 'Syarat & Ketentuan - lembar',
-    description: 'Ketentuan penggunaan platform lembar untuk guru dan institusi pendidikan.',
-  },
-};
+/** Sections whose copy is a single paragraph. */
+const PLAIN_SECTIONS = ['0', '1', '2', '4', '5'] as const;
+/** Sections that interleave a highlighted phrase. */
+const EMPHASIS_SECTIONS = ['3'] as const;
 
-export default function SyaratPage() {
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('marketing.terms.meta');
+  return {
+    title: t('title'),
+    description: t('description'),
+    openGraph: {
+      title: t('ogTitle'),
+      description: t('ogDescription'),
+    },
+  };
+}
+
+export default async function SyaratPage() {
+  const t = await getTranslations('marketing.terms');
   return (
-    <MarketingSubPageLayout
-      title="Syarat & Ketentuan"
-      updateDate="Terakhir diperbarui: 18 Juli 2026"
-    >
+    <MarketingSubPageLayout title={t('title')} updateDate={t('updated')}>
       <section className="py-unit-16 px-margin-mobile md:px-margin-desktop bg-surface">
         <div className="max-w-3xl mx-auto">
           <article className="flex flex-col gap-unit-10">
-            <div>
-              <h2 className="font-h3 text-h3 text-ink mb-unit-3">1. Penerimaan ketentuan</h2>
-              <p className="text-secondary text-body-sm leading-[1.8]">
-                Dengan mengakses dan menggunakan platform lembar, Anda menyetujui untuk terikat oleh
-                syarat ini. Jika Anda mewakili institusi pendidikan, Anda menyatakan memiliki
-                wewenang untuk mengikat institusi tersebut.
-              </p>
-            </div>
-
-            <div>
-              <h2 className="font-h3 text-h3 text-ink mb-unit-3">2. Akun pengguna</h2>
-              <p className="text-secondary text-body-sm leading-[1.8]">
-                Anda bertanggung jawab menjaga kerahasiaan kredensial akun Anda. Satu akun untuk
-                satu pengguna — berbagi akun tidak diperkenankan. Segera hubungi kami jika terjadi
-                akses tidak sah.
-              </p>
-            </div>
-
-            <div>
-              <h2 className="font-h3 text-h3 text-ink mb-unit-3">3. Penggunaan yang diizinkan</h2>
-              <p className="text-secondary text-body-sm leading-[1.8]">
-                Layanan lembar hanya boleh digunakan untuk tujuan pendidikan yang sah. Dilarang
-                keras: membuat konten yang melanggar hukum, melakukan reverse-engineering platform,
-                atau menggunakan API secara berlebihan di luar batas wajar.
-              </p>
-            </div>
-
-            <div>
-              <h2 className="font-h3 text-h3 text-ink mb-unit-3">4. Kepemilikan konten</h2>
-              <p className="text-secondary text-body-sm leading-[1.8]">
-                Soal yang Anda buat melalui lembar{' '}
-                <strong className="text-ink">tetap 100% milik Anda</strong> atau institusi Anda.
-                Kami tidak mengklaim kepemilikan atas konten buatan pengguna. Anda memberikan kami
-                lisensi terbatas hanya untuk menyimpan dan menampilkan konten tersebut dalam
-                platform.
-              </p>
-            </div>
-
-            <div>
-              <h2 className="font-h3 text-h3 text-ink mb-unit-3">5. Ketersediaan layanan</h2>
-              <p className="text-secondary text-body-sm leading-[1.8]">
-                Kami menargetkan uptime 99.9% dan melakukan maintenance terjadwal di luar jam kerja.
-                Namun, kami tidak menjamin layanan akan selalu bebas gangguan. Notifikasi
-                maintenance akan dikirim minimal 24 jam sebelumnya.
-              </p>
-            </div>
-
-            <div>
-              <h2 className="font-h3 text-h3 text-ink mb-unit-3">6. Perubahan ketentuan</h2>
-              <p className="text-secondary text-body-sm leading-[1.8]">
-                Perubahan material akan diberitahukan via email minimal 30 hari sebelum berlaku.
-                Untuk perubahan minor (typo, klarifikasi), kami akan memperbarui tanggal
-                &quot;Terakhir diperbarui&quot; di halaman ini.
-              </p>
-            </div>
+            {PLAIN_SECTIONS.map((key) => (
+              <div key={key}>
+                <h2 className="font-h3 text-h3 text-ink mb-unit-3">{t(`sections.${key}.title`)}</h2>
+                <p className="text-secondary text-body-sm leading-[1.8]">
+                  {t(`sections.${key}.body`)}
+                </p>
+              </div>
+            ))}
+            {EMPHASIS_SECTIONS.map((key) => (
+              <div key={key}>
+                <h2 className="font-h3 text-h3 text-ink mb-unit-3">{t(`sections.${key}.title`)}</h2>
+                <p className="text-secondary text-body-sm leading-[1.8]">
+                  {t(`sections.${key}.before`)}
+                  <strong className="text-ink">{t(`sections.${key}.strong`)}</strong>
+                  {t(`sections.${key}.after`)}
+                </p>
+              </div>
+            ))}
           </article>
         </div>
       </section>

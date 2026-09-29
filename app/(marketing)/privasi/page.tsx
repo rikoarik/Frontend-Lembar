@@ -1,85 +1,57 @@
 import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 import MarketingSubPageLayout from '@/app/components/marketing/MarketingSubPageLayout';
 
-export const metadata: Metadata = {
-  title: 'Kebijakan Privasi - lembar',
-  description:
-    'Kebijakan privasi lembar — data yang dikumpulkan, penggunaan, perlindungan, hak pengguna, dan perubahan kebijakan.',
-  openGraph: {
-    title: 'Kebijakan Privasi - lembar',
-    description: 'Pelajari bagaimana lembar melindungi data pribadi Anda sesuai UU PDP Indonesia.',
-  },
-};
+/** Sections whose copy is a single paragraph. */
+const PLAIN_SECTIONS = ['2', '3', '5'] as const;
+/** Sections that interleave a highlighted phrase (and, for `4`, a contact link). */
+const EMPHASIS_SECTIONS = ['0', '1', '4'] as const;
 
-export default function PrivasiPage() {
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('marketing.privacy.meta');
+  return {
+    title: t('title'),
+    description: t('description'),
+    openGraph: {
+      title: t('ogTitle'),
+      description: t('ogDescription'),
+    },
+  };
+}
+
+export default async function PrivasiPage() {
+  const t = await getTranslations('marketing.privacy');
   return (
-    <MarketingSubPageLayout
-      title="Kebijakan Privasi"
-      updateDate="Terakhir diperbarui: 18 Juli 2026"
-    >
+    <MarketingSubPageLayout title={t('title')} updateDate={t('updated')}>
       <section className="py-unit-16 px-margin-mobile md:px-margin-desktop bg-surface">
         <div className="max-w-3xl mx-auto">
           <article className="flex flex-col gap-unit-10">
-            <div>
-              <h2 className="font-h3 text-h3 text-ink mb-unit-3">1. Data yang kami kumpulkan</h2>
-              <p className="text-secondary text-body-sm leading-[1.8]">
-                Saat mendaftar: nama, email, nama sekolah, dan peran (guru/admin). Saat menggunakan
-                platform: log aktivitas pembuatan soal, metadata ekspor, dan preferensi pengaturan.
-                Kami <strong className="text-ink">tidak</strong> mengumpulkan data siswa secara
-                langsung.
-              </p>
-            </div>
-
-            <div>
-              <h2 className="font-h3 text-h3 text-ink mb-unit-3">
-                2. Bagaimana kami menggunakannya
-              </h2>
-              <p className="text-secondary text-body-sm leading-[1.8]">
-                Informasi Anda digunakan untuk menyediakan layanan lembar, mempersonalisasi
-                pengalaman (misal: rekomendasi mata pelajaran), dan mengirim notifikasi terkait
-                akun. Kami <strong className="text-ink">tidak pernah</strong> menjual data Anda
-                kepada pihak ketiga untuk iklan.
-              </p>
-            </div>
-
-            <div>
-              <h2 className="font-h3 text-h3 text-ink mb-unit-3">3. Perlindungan data</h2>
-              <p className="text-secondary text-body-sm leading-[1.8]">
-                Semua data dienkripsi AES-256 saat tersimpan dan TLS 1.3 saat ditransmisikan.
-                Infrastruktur kami tersertifikasi ISO 27001 and mematuhi UU Perlindungan Data
-                Pribadi (UU PDP) Indonesia.
-              </p>
-            </div>
-
-            <div>
-              <h2 className="font-h3 text-h3 text-ink mb-unit-3">4. Berbagi data</h2>
-              <p className="text-secondary text-body-sm leading-[1.8]">
-                Data hanya dibagikan jika: (a) diwajibkan hukum yang berlaku, atau (b) atas
-                persetujuan eksplisit Anda. Kami menggunakan sub-processor (hosting, email) yang
-                terikat perjanjian kerahasiaan setara.
-              </p>
-            </div>
-
-            <div>
-              <h2 className="font-h3 text-h3 text-ink mb-unit-3">5. Hak Anda</h2>
-              <p className="text-secondary text-body-sm leading-[1.8]">
-                Anda berhak mengakses, memperbarui, mengekspor, atau menghapus data pribadi Anda
-                kapan saja melalui pengaturan akun. Untuk permintaan penghapusan menyeluruh, hubungi{' '}
-                <a href="mailto:privasi@lembar.id" className="text-burgundy hover:underline">
-                  privasi@lembar.id
-                </a>
-                .
-              </p>
-            </div>
-
-            <div>
-              <h2 className="font-h3 text-h3 text-ink mb-unit-3">6. Perubahan kebijakan</h2>
-              <p className="text-secondary text-body-sm leading-[1.8]">
-                Jika ada perubahan material, kami akan mengirim notifikasi email minimal 30 hari
-                sebelum perubahan berlaku. Penggunaan berkelanjutan setelah tanggal efektif berarti
-                Anda menyetujui versi terbaru.
-              </p>
-            </div>
+            {PLAIN_SECTIONS.map((key) => (
+              <div key={key}>
+                <h2 className="font-h3 text-h3 text-ink mb-unit-3">{t(`sections.${key}.title`)}</h2>
+                <p className="text-secondary text-body-sm leading-[1.8]">
+                  {t(`sections.${key}.body`)}
+                </p>
+              </div>
+            ))}
+            {EMPHASIS_SECTIONS.map((key) => (
+              <div key={key}>
+                <h2 className="font-h3 text-h3 text-ink mb-unit-3">{t(`sections.${key}.title`)}</h2>
+                <p className="text-secondary text-body-sm leading-[1.8]">
+                  {t(`sections.${key}.before`)}
+                  <strong className="text-ink">{t(`sections.${key}.strong`)}</strong>
+                  {t(`sections.${key}.after`)}
+                  {key === '4' && (
+                    <>
+                      <a href="mailto:privasi@lembar.id" className="text-burgundy hover:underline">
+                        privasi@lembar.id
+                      </a>
+                      .
+                    </>
+                  )}
+                </p>
+              </div>
+            ))}
           </article>
         </div>
       </section>

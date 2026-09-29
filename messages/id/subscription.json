@@ -1,96 +1,98 @@
 {
-  "title": "Paket & kuota",
-  "description": "Kelola paket berlangganan dan pantau penggunaan token Anda.",
-  "loading": "Memuat data paket…",
-  "error": {
-    "load": "Gagal memuat data paket",
-    "unavailable": "Data tidak tersedia"
-  },
-  "states": {
-    "free": {
-      "heading": "Paket Gratis",
-      "body": "Anda saat ini menggunakan paket gratis dengan kuota token terbatas. Tingkatkan paket untuk kuota lebih besar."
+  "subscription": {
+    "title": "Paket & kuota",
+    "description": "Kelola paket berlangganan dan pantau penggunaan token Anda.",
+    "loading": "Memuat data paket…",
+    "error": {
+      "load": "Gagal memuat data paket",
+      "unavailable": "Data tidak tersedia"
     },
-    "active": {
-      "heading": "Paket aktif",
-      "body": "Paket Anda aktif. Anda dapat membuat dan mendistribusikan lembar kerja."
-    },
-    "grace": {
-      "heading": "Masa tenggang",
-      "body": "Paket Anda memasuki masa tenggang. Fitur tetap aktif sementara. Hubungi tim kami di {whatsapp} untuk perpanjangan."
-    },
-    "blocked": {
-      "heading": "Akses ditangguhkan",
-      "body": "Akses ke fitur berbayar ditangguhkan. Hubungi tim kami di {whatsapp} untuk memulihkan akses."
-    },
-    "expired": {
-      "heading": "Paket berakhir",
-      "body": "Paket Anda telah berakhir. Hubungi tim kami di {whatsapp} untuk melanjutkan."
-    }
-  },
-  "fallbackPlanName": "Paket Gratis",
-  "token": {
-    "usageTitle": "Penggunaan token",
-    "usedThisMonth": "Token digunakan bulan ini",
-    "unlimited": "Tidak terbatas",
-    "unlimitedAria": "Penggunaan token: tidak terbatas",
-    "usedAria": "Token digunakan: {used} dari {limit}",
-    "percentAria": "{percent}% terpakai",
-    "quotaNote": "Kuota token: {quota}. Reset setiap awal siklus tagihan."
-  },
-  "upgrade": {
-    "title": "Upgrade paket",
-    "description": "Pilih paket berlangganan dengan kuota token lebih besar.",
-    "chooseAria": "Pilih paket upgrade",
-    "plans": {
-      "pro": {
-        "label": "Guru Pro",
-        "price": "Rp49.000/bln"
+    "states": {
+      "free": {
+        "heading": "Paket Gratis",
+        "body": "Anda saat ini menggunakan paket gratis dengan kuota token terbatas. Tingkatkan paket untuk kuota lebih besar."
       },
-      "plus": {
-        "label": "Plus",
-        "price": "Rp149.000/bln"
+      "active": {
+        "heading": "Paket aktif",
+        "body": "Paket Anda aktif. Anda dapat membuat dan mendistribusikan lembar kerja."
+      },
+      "grace": {
+        "heading": "Masa tenggang",
+        "body": "Paket Anda memasuki masa tenggang. Fitur tetap aktif sementara. Hubungi tim kami di {whatsapp} untuk perpanjangan."
+      },
+      "blocked": {
+        "heading": "Akses ditangguhkan",
+        "body": "Akses ke fitur berbayar ditangguhkan. Hubungi tim kami di {whatsapp} untuk memulihkan akses."
+      },
+      "expired": {
+        "heading": "Paket berakhir",
+        "body": "Paket Anda telah berakhir. Hubungi tim kami di {whatsapp} untuk melanjutkan."
       }
     },
-    "submit": "Lanjutkan ke {plan}",
-    "submitBusy": "Memproses…",
-    "qrisNote": "Pembayaran via QRIS. Aman dan instan.",
-    "error": {
-      "notConfigured": "Gateway pembayaran belum aktif. Hubungi tim kami via WhatsApp untuk upgrade manual.",
-      "createOrder": "Gagal membuat pesanan. Coba lagi.",
-      "offline": "Tidak dapat terhubung. Periksa koneksi Anda.",
-      "contactWhatsapp": "Hubungi tim via WhatsApp"
-    }
-  },
-  "checkout": {
-    "eyebrow": "Pembayaran aman",
-    "title": "Scan QRIS",
-    "description": "Buka aplikasi pembayaran lalu scan kode berikut.",
-    "close": "Tutup",
-    "closeAria": "Tutup pembayaran",
-    "qrAlt": "Kode QRIS pembayaran paket Lembar",
-    "totalLabel": "Total pembayaran",
-    "expiresAt": "Berlaku hingga {datetime}",
-    "openProvider": "Buka QRIS di Pakasir",
-    "activationNote": "Paket aktif otomatis setelah pembayaran terkonfirmasi."
-  },
-  "trial": {
-    "eyebrow": "Tautan sekali pakai",
-    "title": "Konfirmasi trial Guru Pro",
-    "description": "Trial aktif selama 60 hari dan akan terikat ke perangkat yang dipakai saat konfirmasi.",
-    "checking": "Memeriksa tautan…",
-    "warning": "Tautan ini hanya dapat digunakan satu kali. Setelah trial diaktifkan, tautan akan langsung ditandai terpakai dan tidak bisa diputar ulang.",
-    "claim": "Aktifkan trial 2 bulan",
-    "claimBusy": "Mengaktifkan trial…",
-    "cancel": "Batal dan kembali",
-    "success": "Trial berhasil diaktifkan.",
-    "successUntil": "Akses Guru Pro aktif hingga {date}.",
-    "viewPlan": "Lihat paket & kuota",
-    "backToPlan": "Kembali dan hubungi tim Lembar",
-    "error": {
-      "invalidLink": "Tautan klaim tidak valid atau sudah tidak tersedia.",
-      "claimFailed": "Tautan klaim tidak valid, kedaluwarsa, atau sudah pernah digunakan.",
-      "offline": "Tidak dapat terhubung. Periksa koneksi Anda lalu coba lagi."
+    "fallbackPlanName": "Paket Gratis",
+    "token": {
+      "usageTitle": "Penggunaan token",
+      "usedThisMonth": "Token digunakan bulan ini",
+      "unlimited": "Tidak terbatas",
+      "unlimitedAria": "Penggunaan token: tidak terbatas",
+      "usedAria": "Token digunakan: {used} dari {limit}",
+      "percentAria": "{percent}% terpakai",
+      "quotaNote": "Kuota token: {quota}. Reset setiap awal siklus tagihan."
+    },
+    "upgrade": {
+      "title": "Upgrade paket",
+      "description": "Pilih paket berlangganan dengan kuota token lebih besar.",
+      "chooseAria": "Pilih paket upgrade",
+      "plans": {
+        "pro": {
+          "label": "Guru Pro",
+          "price": "Rp49.000/bln"
+        },
+        "plus": {
+          "label": "Plus",
+          "price": "Rp149.000/bln"
+        }
+      },
+      "submit": "Lanjutkan ke {plan}",
+      "submitBusy": "Memproses…",
+      "qrisNote": "Pembayaran via QRIS. Aman dan instan.",
+      "error": {
+        "notConfigured": "Gateway pembayaran belum aktif. Hubungi tim kami via WhatsApp untuk upgrade manual.",
+        "createOrder": "Gagal membuat pesanan. Coba lagi.",
+        "offline": "Tidak dapat terhubung. Periksa koneksi Anda.",
+        "contactWhatsapp": "Hubungi tim via WhatsApp"
+      }
+    },
+    "checkout": {
+      "eyebrow": "Pembayaran aman",
+      "title": "Scan QRIS",
+      "description": "Buka aplikasi pembayaran lalu scan kode berikut.",
+      "close": "Tutup",
+      "closeAria": "Tutup pembayaran",
+      "qrAlt": "Kode QRIS pembayaran paket Lembar",
+      "totalLabel": "Total pembayaran",
+      "expiresAt": "Berlaku hingga {datetime}",
+      "openProvider": "Buka QRIS di Pakasir",
+      "activationNote": "Paket aktif otomatis setelah pembayaran terkonfirmasi."
+    },
+    "trial": {
+      "eyebrow": "Tautan sekali pakai",
+      "title": "Konfirmasi trial Guru Pro",
+      "description": "Trial aktif selama 60 hari dan akan terikat ke perangkat yang dipakai saat konfirmasi.",
+      "checking": "Memeriksa tautan…",
+      "warning": "Tautan ini hanya dapat digunakan satu kali. Setelah trial diaktifkan, tautan akan langsung ditandai terpakai dan tidak bisa diputar ulang.",
+      "claim": "Aktifkan trial 2 bulan",
+      "claimBusy": "Mengaktifkan trial…",
+      "cancel": "Batal dan kembali",
+      "success": "Trial berhasil diaktifkan.",
+      "successUntil": "Akses Guru Pro aktif hingga {date}.",
+      "viewPlan": "Lihat paket & kuota",
+      "backToPlan": "Kembali dan hubungi tim Lembar",
+      "error": {
+        "invalidLink": "Tautan klaim tidak valid atau sudah tidak tersedia.",
+        "claimFailed": "Tautan klaim tidak valid, kedaluwarsa, atau sudah pernah digunakan.",
+        "offline": "Tidak dapat terhubung. Periksa koneksi Anda lalu coba lagi."
+      }
     }
   }
 }
