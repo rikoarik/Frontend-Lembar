@@ -22,7 +22,7 @@ const ROUTES = [
   {
     name: 'harga',
     path: '/harga',
-    heading: /Pilih paket yang sesuai untuk kebutuhan mengajar Anda\./i,
+    heading: /Pilih paket yang sesuai dengan cara Anda mengajar\./i,
     cta: /Daftar Sekarang/i,
   },
 ] as const;
