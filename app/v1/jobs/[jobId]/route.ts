@@ -15,6 +15,21 @@ function workspaceIdFromToken(token: string): string | null {
   }
 }
 
+/**
+ * Presentation stage for the FE progress panel.
+ *
+ * The backend only distinguishes queued / running / terminal, so we derive a
+ * finer stage from the neutral status: a finished job is `finalizing` (the
+ * review handoff is being attached), a job waiting to retry is `preparing`.
+ * Anything else falls back to the raw backend status.
+ */
+function jobStageFor(rawStatus: string, neutralStatus: string): string {
+  if (neutralStatus === 'succeeded' || neutralStatus === 'partially_succeeded') return 'finalizing';
+  if (neutralStatus === 'retry_wait' || rawStatus === 'retry_wait') return 'preparing';
+  if (neutralStatus === 'running') return 'generating';
+  return rawStatus;
+}
+
 async function proxy(request: NextRequest, jobId: string, cancel: boolean) {
   const jar = await cookies();
   const token = jar.get(JWT_COOKIE)?.value || jar.get(SESSION_COOKIE)?.value;
@@ -73,10 +88,19 @@ async function proxy(request: NextRequest, jobId: string, cancel: boolean) {
             : rawStatus;
     const progressCurrent = Number(data.progressCurrent);
     const progressTotal = Number(data.progressTotal);
-    const progressPercent =
+    const rawProgress =
       Number.isFinite(progressCurrent) && Number.isFinite(progressTotal) && progressTotal > 0
         ? Math.round((progressCurrent / progressTotal) * 100)
         : undefined;
+    // `100%` is reserved for a job that has actually reached a terminal state.
+    // The worker reports progress per generated item, so the counter hits the
+    // total while review import / finalization is still running.
+    const progressPercent =
+      rawProgress === undefined
+        ? undefined
+        : ['succeeded', 'partially_succeeded', 'failed', 'cancelled'].includes(status)
+          ? Math.min(100, rawProgress)
+          : Math.min(99, rawProgress);
     return NextResponse.json({
       data: {
         jobId: data.id ?? jobId,
@@ -84,7 +108,7 @@ async function proxy(request: NextRequest, jobId: string, cancel: boolean) {
         compositionId: data.compositionId,
         reviewMode,
         status,
-        stage: rawStatus === 'completed' ? 'finalizing' : rawStatus,
+        stage: jobStageFor(rawStatus, status),
         ...(progressPercent === undefined ? {} : { progressPercent }),
         createdAt: data.createdAt,
         updatedAt: data.updatedAt,
@@ -94,7 +118,10 @@ async function proxy(request: NextRequest, jobId: string, cancel: boolean) {
           ? {
               error: {
                 code: data.failureCode,
-                safeMessage: 'Pembuatan soal gagal. Silakan coba kembali.',
+                safeMessage:
+                  typeof data.failureMessage === 'string' && data.failureMessage.trim()
+                    ? data.failureMessage
+                    : 'Pembuatan soal gagal. Silakan coba kembali.',
                 retryable: true,
               },
             }

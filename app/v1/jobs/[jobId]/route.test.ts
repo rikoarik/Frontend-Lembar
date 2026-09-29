@@ -137,4 +137,115 @@ describe('GET /v1/jobs/[jobId] handoff contract', () => {
     expect(body.data.jobId).toBe('job-only');
     expect(body.data.assessmentId).toBeUndefined();
   });
+
+  it('never reports 100% while the job is still running', async () => {
+    const { GET } = await import('./route');
+    backendFetch.mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          data: {
+            id: 'job-full',
+            status: 'running',
+            progressCurrent: 4,
+            progressTotal: 4,
+            createdAt: '2026-07-29T10:00:00.000Z',
+            updatedAt: '2026-07-29T10:01:00.000Z',
+          },
+        }),
+        { status: 200, headers: { 'content-type': 'application/json' } },
+      ),
+    );
+
+    const response = await GET(
+      new Request('http://localhost/api/v1/jobs/job-full') as never,
+      params('job-full'),
+    );
+    const body = await response.json();
+
+    expect(body.data.status).toBe('running');
+    expect(body.data.progressPercent).toBe(99);
+  });
+
+  it('reports 100% once the job reaches a terminal status', async () => {
+    const { GET } = await import('./route');
+    backendFetch.mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          data: {
+            id: 'job-done',
+            status: 'completed',
+            progressCurrent: 4,
+            progressTotal: 4,
+            createdAt: '2026-07-29T10:00:00.000Z',
+            updatedAt: '2026-07-29T10:01:00.000Z',
+          },
+        }),
+        { status: 200, headers: { 'content-type': 'application/json' } },
+      ),
+    );
+
+    const response = await GET(
+      new Request('http://localhost/api/v1/jobs/job-done') as never,
+      params('job-done'),
+    );
+    const body = await response.json();
+
+    expect(body.data.status).toBe('succeeded');
+    expect(body.data.stage).toBe('finalizing');
+    expect(body.data.progressPercent).toBe(100);
+  });
+
+  it('maps a waiting retry to the preparing stage', async () => {
+    const { GET } = await import('./route');
+    backendFetch.mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          data: {
+            id: 'job-retry',
+            status: 'retry_wait',
+            createdAt: '2026-07-29T10:00:00.000Z',
+            updatedAt: '2026-07-29T10:01:00.000Z',
+          },
+        }),
+        { status: 200, headers: { 'content-type': 'application/json' } },
+      ),
+    );
+
+    const response = await GET(
+      new Request('http://localhost/api/v1/jobs/job-retry') as never,
+      params('job-retry'),
+    );
+    const body = await response.json();
+
+    expect(body.data.status).toBe('retry_wait');
+    expect(body.data.stage).toBe('preparing');
+  });
+
+  it('forwards the backend root failure code and message instead of a generic UNKNOWN', async () => {
+    const { GET } = await import('./route');
+    backendFetch.mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          data: {
+            id: 'job-failed',
+            status: 'failed',
+            failureCode: 'GENERATION_ERROR',
+            failureMessage: 'AI provider error for question at sequence 0: error',
+            createdAt: '2026-07-29T10:00:00.000Z',
+            updatedAt: '2026-07-29T10:01:00.000Z',
+          },
+        }),
+        { status: 200, headers: { 'content-type': 'application/json' } },
+      ),
+    );
+
+    const response = await GET(
+      new Request('http://localhost/api/v1/jobs/job-failed') as never,
+      params('job-failed'),
+    );
+    const body = await response.json();
+
+    expect(body.data.error.code).toBe('GENERATION_ERROR');
+    expect(body.data.error.safeMessage).toContain('provider error');
+  });
 });
