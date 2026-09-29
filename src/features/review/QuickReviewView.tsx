@@ -2,9 +2,11 @@
 
 import Link from 'next/link';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Button, Panel, StatusBadge } from '@/app/components/ui';
 import type { StatusLabel } from '@/app/components/ui';
 import { assessmentService } from '@/src/services/assessments/assessmentService';
+import type { Translate } from '@/src/i18n/types';
 import type {
   AssessmentDetail,
   QuestionRubricCriterion,
@@ -16,18 +18,18 @@ import { QuestionImageDisplay } from '@/src/features/questions/QuestionImageDisp
 
 type FilterKey = 'all' | 'unreviewed' | 'warnings' | 'accepted';
 
-function badgeForLifecycle(lifecycle: AssessmentDetail['lifecycle']): StatusLabel {
+function badgeForLifecycle(lifecycle: AssessmentDetail['lifecycle'], t: Translate): StatusLabel {
   switch (lifecycle) {
     case 'final':
-      return 'Final';
+      return t('badge.final') as StatusLabel;
     case 'generating':
-      return 'Diproses';
+      return t('badge.generating') as StatusLabel;
     case 'review':
-      return 'Perlu ditinjau';
+      return t('badge.review') as StatusLabel;
     case 'archived':
-      return 'Kedaluwarsa';
+      return t('badge.archived') as StatusLabel;
     default:
-      return 'Draft';
+      return t('badge.draft') as StatusLabel;
   }
 }
 
@@ -51,6 +53,7 @@ export function QuickReviewView({
   assessmentId: string;
   mode?: 'quick' | 'detail';
 }) {
+  const t = useTranslations('review');
   const [assessment, setAssessment] = useState<AssessmentDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -91,12 +94,12 @@ export function QuickReviewView({
       setConflictMessage(null);
       setSelected(new Set());
     } catch {
-      setError('Tinjauan belum siap dimuat. Silakan coba lagi.');
+      setError(t('quickReview.loadError'));
       setAssessment(null);
     } finally {
       setLoading(false);
     }
-  }, [assessmentId]);
+  }, [assessmentId, t]);
 
   useEffect(() => {
     // Existing async load owns the component's request state.
@@ -207,7 +210,7 @@ export function QuickReviewView({
       return;
     }
     setAssessment(result.value);
-    setStatusNote('Status soal diperbarui.');
+    setStatusNote(t('quickReview.statusUpdated'));
   };
 
   const onBulkAccept = async () => {
@@ -221,7 +224,7 @@ export function QuickReviewView({
     }
     setAssessment(result.value);
     setSelected(new Set());
-    setStatusNote(`${selected.size} soal ditandai diterima.`);
+    setStatusNote(t('quickReview.bulkAccepted', { count: selected.size }));
   };
 
   const onSaveEdit = async (questionId: string) => {
@@ -258,12 +261,16 @@ export function QuickReviewView({
     }
     setConflictMessage(null);
     setAssessment(result.value);
-    setStatusNote('Perubahan soal disimpan.');
+    setStatusNote(t('quickReview.editSaved'));
   };
 
   if (loading) {
     return (
-      <div className="flex flex-col gap-3" aria-busy="true" aria-label="Memuat tinjauan">
+      <div
+        className="flex flex-col gap-3"
+        aria-busy="true"
+        aria-label={t('quickReview.loadingLabel')}
+      >
         <div className="h-10 w-64 animate-pulse rounded bg-brand-line" />
         <div className="h-40 animate-pulse rounded bg-brand-line" />
       </div>
@@ -272,14 +279,14 @@ export function QuickReviewView({
 
   if (error || !assessment) {
     return (
-      <Panel title="Tinjauan belum bisa dimuat" description={error ?? 'Lembar tidak ditemukan.'}>
+      <Panel title={t('quickReview.errorTitle')} description={error ?? t('quickReview.notFound')}>
         <div className="flex flex-wrap gap-3">
-          <Button onClick={() => void load()}>Coba lagi</Button>
+          <Button onClick={() => void load()}>{t('quickReview.retry')}</Button>
           <Link
             href="/app/riwayat"
             className="inline-flex min-h-[var(--control-md)] items-center rounded-md border border-brand-line px-4"
           >
-            Buka riwayat
+            {t('quickReview.openHistory')}
           </Link>
         </div>
       </Panel>
@@ -291,9 +298,9 @@ export function QuickReviewView({
   const canFinalize = assessment.canFinalize;
   const canOpenOutput = assessment.canOpenOutput;
   const lifecycleSubtitle = canOpenOutput
-    ? 'Output siap dibuka.'
+    ? t('quickReview.outputReady')
     : assessment.lifecycle === 'final'
-      ? 'Output belum tersedia.'
+      ? t('quickReview.outputNotReady')
       : null;
 
   return (
@@ -302,14 +309,18 @@ export function QuickReviewView({
         <div className="flex flex-col gap-1">
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-h1 font-semibold text-brand-ink">{assessment.title}</h1>
-            <StatusBadge label={badgeForLifecycle(assessment.lifecycle)} />
+            <StatusBadge label={badgeForLifecycle(assessment.lifecycle, t)} />
           </div>
           <p className="text-body-sm text-brand-ink-muted">
             {lifecycleSubtitle ? (
               <span data-testid="lifecycle-subtitle">{lifecycleSubtitle}</span>
             ) : null}{' '}
-            {assessment.subject} · {assessment.gradeLabel} · {assessment.reviewedCount}/
-            {assessment.questionCount} ditinjau · {assessment.warningCount} peringatan
+            {assessment.subject} · {assessment.gradeLabel} ·{' '}
+            {t('quickReview.reviewedCount', {
+              reviewed: assessment.reviewedCount,
+              total: assessment.questionCount,
+            })}{' '}
+            · {t('quickReview.warnings', { count: assessment.warningCount })}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -317,13 +328,13 @@ export function QuickReviewView({
             href={`/app/review/${assessment.id}?mode=quick`}
             className={`inline-flex min-h-[var(--control-md)] items-center rounded-md border px-3 text-body-sm ${mode === 'quick' ? 'border-brand-accent bg-brand-accent-soft text-brand-accent' : 'border-brand-line text-brand-ink'}`}
           >
-            Mode cepat
+            {t('quickReview.modeQuick')}
           </Link>
           <Link
             href={`/app/review/${assessment.id}?mode=detail`}
             className={`inline-flex min-h-[var(--control-md)] items-center rounded-md border px-3 text-body-sm ${mode === 'detail' ? 'border-brand-accent bg-brand-accent-soft text-brand-accent' : 'border-brand-line text-brand-ink'}`}
           >
-            Mode detail
+            {t('quickReview.modeDetail')}
           </Link>
           {canFinalize ? (
             <Link
@@ -338,7 +349,7 @@ export function QuickReviewView({
                 busy ? 'cursor-not-allowed opacity-60' : '',
               ].join(' ')}
             >
-              Finalisasi
+              {t('quickReview.finalize')}
             </Link>
           ) : null}
           {canOpenOutput ? (
@@ -346,19 +357,19 @@ export function QuickReviewView({
               href={`/app/output/${assessment.id}`}
               className="inline-flex min-h-[var(--control-md)] items-center rounded-md bg-brand-accent px-4 text-body-default font-medium text-white"
             >
-              Buka output
+              {t('quickReview.openOutput')}
             </Link>
           ) : null}
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2" role="toolbar" aria-label="Filter soal">
+      <div className="flex flex-wrap gap-2" role="toolbar" aria-label={t('quickReview.filterAria')}>
         {(
           [
-            ['all', 'Semua'],
-            ['unreviewed', 'Belum ditinjau'],
-            ['warnings', 'Ada peringatan'],
-            ['accepted', 'Sudah ditinjau'],
+            ['all', t('quickReview.filterAll')],
+            ['unreviewed', t('quickReview.filterUnreviewed')],
+            ['warnings', t('quickReview.filterWarnings')],
+            ['accepted', t('quickReview.filterAccepted')],
           ] as const
         ).map(([key, label]) => (
           <button
@@ -389,7 +400,7 @@ export function QuickReviewView({
         >
           <span className="text-body-sm text-brand-ink">{conflictMessage}</span>
           <Button size="sm" variant="secondary" onClick={() => void load()}>
-            Muat ulang
+            {t('quickReview.reload')}
           </Button>
         </div>
       ) : null}
@@ -400,7 +411,7 @@ export function QuickReviewView({
             <label className="inline-flex items-center gap-2 text-body-sm text-brand-ink">
               <input
                 type="checkbox"
-                aria-label="Pilih semua soal yang dapat diterima di tampilan ini"
+                aria-label={t('quickReview.selectAllViewAria')}
                 checked={allVisibleSelected}
                 disabled={
                   visibleActionableQuestions.length === 0 ||
@@ -410,7 +421,7 @@ export function QuickReviewView({
                 onChange={toggleSelectVisible}
                 className="h-4 w-4"
               />
-              Pilih semua di tampilan ini
+              {t('quickReview.selectAllView')}
             </label>
             <Button
               variant="secondary"
@@ -419,24 +430,22 @@ export function QuickReviewView({
               }
               onClick={selectAllUnreviewed}
             >
-              Pilih semua soal belum ditinjau
+              {t('quickReview.selectAllUnreviewed')}
             </Button>
-            <p className="text-body-sm text-brand-ink-muted">
-              Finalisasi tetap butuh konfirmasi terpisah.
-            </p>
+            <p className="text-body-sm text-brand-ink-muted">{t('quickReview.finalizeNote')}</p>
           </div>
 
           <ul className="flex flex-col gap-2" role="list">
             {questions.map((question) => (
               <li key={question.id}>
                 <Panel
-                  title={`Soal ${question.number}`}
-                  description={`${reviewStateLabel(question.reviewState)} · ${question.topic} · ${question.difficulty} · ${question.sourceLabel}`}
+                  title={t('quickReview.question', { number: question.number })}
+                  description={`${reviewStateLabel(question.reviewState, t)} · ${question.topic} · ${question.difficulty} · ${question.sourceLabel}`}
                   actions={
                     canAccept(question) ? (
                       <input
                         type="checkbox"
-                        aria-label={`Pilih soal ${question.number}`}
+                        aria-label={t('quickReview.selectQuestion', { number: question.number })}
                         checked={selected.has(question.id)}
                         disabled={busy || assessment.lifecycle === 'final'}
                         onChange={() => toggleSelect(question.id)}
@@ -444,7 +453,7 @@ export function QuickReviewView({
                       />
                     ) : (
                       <span className="text-label-semibold text-brand-ink-muted">
-                        {reviewStateLabel(question.reviewState)}
+                        {reviewStateLabel(question.reviewState, t)}
                       </span>
                     )
                   }
@@ -453,16 +462,18 @@ export function QuickReviewView({
                     <p className="text-body-sm text-brand-ink">{question.stem}</p>
                     <QuestionImageDisplay
                       image={question.image}
-                      fallbackAlt={`Gambar pendukung soal ${question.number}`}
+                      fallbackAlt={t('quickReview.supportingImage', { number: question.number })}
                       className="my-2"
                     />
                     {question.questionType === 'short_answer' ? (
-                      <p className="text-body-sm text-brand-ink-muted">Jawaban singkat</p>
+                      <p className="text-body-sm text-brand-ink-muted">
+                        {t('quickReview.shortAnswer')}
+                      </p>
                     ) : question.questionType === 'essay' ? (
                       <p className="text-body-sm text-brand-ink-muted">
                         {question.rubric && question.rubric.length > 0
-                          ? `Esai · ${question.rubric.length} kriteria rubrik`
-                          : 'Esai'}
+                          ? t('quickReview.essayWithRubric', { count: question.rubric.length })
+                          : t('quickReview.essay')}
                       </p>
                     ) : (
                       <>
@@ -481,7 +492,10 @@ export function QuickReviewView({
                           ))}
                         </ul>
                         <p className="text-body-sm text-brand-ink-muted">
-                          Kunci: {question.answerKey.toUpperCase()} · Sumber: {question.sourceLabel}
+                          {t('quickReview.answerKey', {
+                            key: question.answerKey.toUpperCase(),
+                            source: question.sourceLabel,
+                          })}
                         </p>
                       </>
                     )}
@@ -489,7 +503,7 @@ export function QuickReviewView({
                       <div className="rounded-md border border-brand-warning/30 bg-brand-warning-soft px-3 py-2">
                         {question.warnings.map((warning) => (
                           <p key={warning.code} className="text-body-sm text-brand-ink">
-                            {warning.message}
+                            {t(`warnings.${warning.code}`)}
                           </p>
                         ))}
                       </div>
@@ -501,7 +515,7 @@ export function QuickReviewView({
                           disabled={busy}
                           onClick={() => void setState(question.id, 'accepted')}
                         >
-                          Terima
+                          {t('quickReview.accept')}
                         </Button>
                       ) : null}
                       {canAccept(question) && assessment.lifecycle !== 'final' ? (
@@ -511,7 +525,7 @@ export function QuickReviewView({
                           disabled={busy}
                           onClick={() => void setState(question.id, 'needs_attention')}
                         >
-                          Tandai perhatian
+                          {t('quickReview.markAttention')}
                         </Button>
                       ) : null}
                       {['accepted', 'edited'].includes(question.reviewState) &&
@@ -522,14 +536,14 @@ export function QuickReviewView({
                           disabled={busy}
                           onClick={() => void setState(question.id, 'needs_attention')}
                         >
-                          Ubah keputusan
+                          {t('quickReview.changeDecision')}
                         </Button>
                       ) : null}
                       <Link
                         href={`/app/review/${assessment.id}?mode=detail&q=${question.number}`}
                         className="inline-flex min-h-[var(--control-sm)] items-center rounded-md border border-brand-line px-3 text-body-sm"
                       >
-                        Buka detail
+                        {t('quickReview.openDetail')}
                       </Link>
                     </div>
                   </div>
@@ -540,20 +554,20 @@ export function QuickReviewView({
 
           {selected.size > 0 ? (
             <section
-              aria-label="Tindakan soal terpilih"
+              aria-label={t('quickReview.selectedAria')}
               className="sticky bottom-0 flex flex-wrap items-center gap-3 rounded-t-md border border-brand-line bg-brand-surface px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] shadow-lg"
             >
               <span className="flex-1 text-body-sm font-medium text-brand-ink">
-                {selected.size} soal dipilih
+                {t('quickReview.selectedCount', { count: selected.size })}
               </span>
               <Button
                 disabled={busy || assessment.lifecycle === 'final'}
                 onClick={() => void onBulkAccept()}
               >
-                Terima {selected.size} soal
+                {t('quickReview.acceptCount', { count: selected.size })}
               </Button>
               <Button variant="secondary" onClick={() => setSelected(new Set())}>
-                Batal
+                {t('quickReview.cancel')}
               </Button>
             </section>
           ) : null}
@@ -562,19 +576,22 @@ export function QuickReviewView({
         <Panel
           title={
             current
-              ? `Soal ${current.number} dari ${questions.length || assessment.questionCount}`
-              : 'Tidak ada soal'
+              ? t('quickReview.questionOf', {
+                  current: current.number,
+                  total: questions.length || assessment.questionCount,
+                })
+              : t('quickReview.noQuestions')
           }
           description={
             current
-              ? `${reviewStateLabel(current.reviewState)} · ${current.topic}`
-              : 'Ubah filter untuk melihat soal.'
+              ? `${reviewStateLabel(current.reviewState, t)} · ${current.topic}`
+              : t('quickReview.changeFilterHint')
           }
         >
           {current ? (
             <div className="flex flex-col gap-4">
               <label className="flex flex-col gap-1">
-                <span className="text-label-semibold">Stem soal</span>
+                <span className="text-label-semibold">{t('quickReview.stem')}</span>
                 <textarea
                   className="min-h-24 rounded-md border border-brand-line px-3 py-2"
                   value={editStem}
@@ -584,16 +601,16 @@ export function QuickReviewView({
               </label>
               <QuestionImageDisplay
                 image={current.image}
-                fallbackAlt={`Gambar pendukung soal ${current.number}`}
+                fallbackAlt={t('quickReview.supportingImage', { number: current.number })}
               />
               {current.questionType === 'short_answer' ||
               current.questionType === 'essay' ? null : (
                 <fieldset
                   role="group"
-                  aria-label="Daftar pilihan"
+                  aria-label={t('quickReview.optionsList')}
                   className="flex flex-col gap-2 rounded-md border border-brand-line p-3"
                 >
-                  <legend className="text-label-semibold">Daftar pilihan</legend>
+                  <legend className="text-label-semibold">{t('quickReview.optionsList')}</legend>
                   <ul className="flex flex-col gap-2" role="list">
                     {visibleEditOptions.map((option, index) => (
                       <li
@@ -621,17 +638,17 @@ export function QuickReviewView({
                           <input
                             type="radio"
                             name={`answer-${current.id}`}
-                            aria-label={`Kunci jawaban ${option.label}`}
+                            aria-label={t('quickReview.answerKeyLabel', { label: option.label })}
                             checked={(editOptionsAnswerKey || current.answerKey) === option.id}
                             disabled={assessment.lifecycle === 'final' || busy}
                             onChange={() => setEditOptionsAnswerKey(option.id)}
                           />
-                          Kunci
+                          {t('quickReview.key')}
                         </label>
                         <div className="flex flex-wrap gap-1">
                           <button
                             type="button"
-                            aria-label="Pindah ke atas"
+                            aria-label={t('quickReview.moveUp')}
                             disabled={index === 0 || assessment.lifecycle === 'final' || busy}
                             onClick={() =>
                               setEditOptions((opts) => {
@@ -646,7 +663,7 @@ export function QuickReviewView({
                           </button>
                           <button
                             type="button"
-                            aria-label="Pindah ke bawah"
+                            aria-label={t('quickReview.moveDown')}
                             disabled={
                               index === visibleEditOptions.length - 1 ||
                               assessment.lifecycle === 'final' ||
@@ -665,7 +682,7 @@ export function QuickReviewView({
                           </button>
                           <button
                             type="button"
-                            aria-label="Hapus pilihan"
+                            aria-label={t('quickReview.deleteOption')}
                             disabled={
                               visibleEditOptions.length <= 2 ||
                               assessment.lifecycle === 'final' ||
@@ -683,7 +700,7 @@ export function QuickReviewView({
                             }
                             className="rounded-md border border-brand-line px-2 py-1 text-body-sm disabled:opacity-60"
                           >
-                            Hapus
+                            {t('quickReview.delete')}
                           </button>
                         </div>
                       </li>
@@ -691,7 +708,7 @@ export function QuickReviewView({
                   </ul>
                   <button
                     type="button"
-                    aria-label="Tambah pilihan"
+                    aria-label={t('quickReview.addOption')}
                     disabled={
                       visibleEditOptions.length >= 6 || assessment.lifecycle === 'final' || busy
                     }
@@ -705,12 +722,12 @@ export function QuickReviewView({
                     }}
                     className="self-start rounded-md border border-brand-line px-3 py-2 text-body-sm disabled:opacity-60"
                   >
-                    Tambah pilihan
+                    {t('quickReview.addOption')}
                   </button>
                 </fieldset>
               )}
               <label className="flex flex-col gap-1">
-                <span className="text-label-semibold">Pembahasan</span>
+                <span className="text-label-semibold">{t('quickReview.explanation')}</span>
                 <textarea
                   className="min-h-20 rounded-md border border-brand-line px-3 py-2"
                   value={editExplanation}
@@ -721,7 +738,7 @@ export function QuickReviewView({
               {(current.questionType === 'short_answer' || current.questionType === 'essay') &&
               assessment.lifecycle !== 'final' ? (
                 <label className="flex flex-col gap-1">
-                  <span className="text-label-semibold">Kunci / pedoman jawaban</span>
+                  <span className="text-label-semibold">{t('quickReview.answerGuide')}</span>
                   <textarea
                     className="min-h-20 rounded-md border border-brand-line px-3 py-2"
                     value={editAnswerKey}
@@ -733,10 +750,10 @@ export function QuickReviewView({
               {current.questionType === 'essay' && assessment.lifecycle !== 'final' ? (
                 <fieldset
                   role="group"
-                  aria-label="Rubrik penilaian"
+                  aria-label={t('quickReview.rubricAria')}
                   className="flex flex-col gap-2 rounded-md border border-brand-line p-3"
                 >
-                  <legend className="text-label-semibold">Rubrik penilaian</legend>
+                  <legend className="text-label-semibold">{t('quickReview.rubric')}</legend>
                   <ul className="flex flex-col gap-2" role="list">
                     {editRubric.map((criterion, index) => (
                       <li
@@ -744,10 +761,12 @@ export function QuickReviewView({
                         className="flex flex-wrap items-center gap-2 rounded-md border border-brand-line px-3 py-2"
                       >
                         <label className="flex min-w-0 flex-1 flex-col gap-1">
-                          <span className="sr-only">Deskripsi kriteria {index + 1}</span>
+                          <span className="sr-only">
+                            {t('quickReview.criterionDesc', { index: index + 1 })}
+                          </span>
                           <input
                             type="text"
-                            aria-label={`Deskripsi kriteria ${index + 1}`}
+                            aria-label={t('quickReview.criterionDesc', { index: index + 1 })}
                             className="min-w-0 flex-1 rounded-md border border-brand-line px-3 py-2"
                             value={criterion.description}
                             disabled={busy}
@@ -761,10 +780,12 @@ export function QuickReviewView({
                           />
                         </label>
                         <label className="flex items-center gap-1">
-                          <span className="sr-only">Skor maksimum kriteria {index + 1}</span>
+                          <span className="sr-only">
+                            {t('quickReview.criterionMaxScore', { index: index + 1 })}
+                          </span>
                           <input
                             type="number"
-                            aria-label={`Skor maksimum kriteria ${index + 1}`}
+                            aria-label={t('quickReview.criterionMaxScore', { index: index + 1 })}
                             className="w-20 rounded-md border border-brand-line px-3 py-2"
                             value={criterion.maxScore}
                             min={0}
@@ -782,21 +803,21 @@ export function QuickReviewView({
                         </label>
                         <button
                           type="button"
-                          aria-label="Hapus kriteria"
+                          aria-label={t('quickReview.deleteCriterion')}
                           disabled={busy}
                           className="rounded-md border border-brand-line px-2 py-1 text-body-sm"
                           onClick={() =>
                             setEditRubric((rows) => rows.filter((r) => r.id !== criterion.id))
                           }
                         >
-                          Hapus
+                          {t('quickReview.delete')}
                         </button>
                       </li>
                     ))}
                   </ul>
                   <button
                     type="button"
-                    aria-label="Tambah kriteria"
+                    aria-label={t('quickReview.addCriterion')}
                     disabled={busy}
                     className="self-start rounded-md border border-brand-line px-3 py-1 text-body-sm"
                     onClick={() => {
@@ -811,19 +832,22 @@ export function QuickReviewView({
                       ]);
                     }}
                   >
-                    Tambah kriteria
+                    {t('quickReview.addCriterion')}
                   </button>
                 </fieldset>
               ) : null}
               <p className="text-body-sm text-brand-ink-muted">
-                Kunci: {current.answerKey.toUpperCase()} · Sumber: {current.sourceLabel} ·
-                Kesulitan: {current.difficulty}
+                {t('quickReview.detailMeta', {
+                  key: current.answerKey.toUpperCase(),
+                  source: current.sourceLabel,
+                  difficulty: current.difficulty,
+                })}
               </p>
               {current.warnings.length > 0 ? (
                 <div className="rounded-md border border-brand-warning/30 bg-brand-warning-soft px-3 py-2">
                   {current.warnings.map((warning) => (
                     <p key={warning.code} className="text-body-sm">
-                      {warning.message}
+                      {t(`warnings.${warning.code}`)}
                     </p>
                   ))}
                 </div>
@@ -833,34 +857,34 @@ export function QuickReviewView({
                   disabled={busy || assessment.lifecycle === 'final'}
                   onClick={() => void onSaveEdit(current.id)}
                 >
-                  Simpan edit
+                  {t('quickReview.saveEdit')}
                 </Button>
                 <Button
                   variant="secondary"
                   disabled={busy || assessment.lifecycle === 'final'}
                   onClick={() => void setState(current.id, 'accepted')}
                 >
-                  Terima
+                  {t('quickReview.accept')}
                 </Button>
                 <Button
                   variant="secondary"
                   disabled={detailIndex <= 0}
                   onClick={() => setDetailIndex((i) => Math.max(0, i - 1))}
                 >
-                  Sebelumnya
+                  {t('quickReview.previous')}
                 </Button>
                 <Button
                   variant="secondary"
                   disabled={detailIndex >= questions.length - 1}
                   onClick={() => setDetailIndex((i) => Math.min(questions.length - 1, i + 1))}
                 >
-                  Berikutnya
+                  {t('quickReview.next')}
                 </Button>
               </div>
             </div>
           ) : (
             <p className="text-body-default text-brand-ink-muted">
-              Tidak ada soal pada filter ini.
+              {t('quickReview.noQuestionsFilter')}
             </p>
           )}
         </Panel>

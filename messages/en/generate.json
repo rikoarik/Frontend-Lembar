@@ -1,1 +1,218 @@
-{}
+{
+  "generate": {
+    "fields": {
+      "sourceMode": "Material source",
+      "curriculumVersionId": "Curriculum",
+      "gradeId": "Grade",
+      "subjectId": "Subject",
+      "gradeLabel": "Grade",
+      "subjectLabel": "Subject",
+      "materialIds": "Material",
+      "sourceId": "PDF source",
+      "assessmentType": "Worksheet type",
+      "academicYear": "Academic year",
+      "difficulty": "Difficulty",
+      "questionCount": "Number of questions",
+      "durationMinutes": "Working time",
+      "questionTypeCounts": "Question type distribution",
+      "imageMode": "Question images",
+      "imageMaxCount": "Maximum number of images",
+      "imageStyle": "Image style",
+      "reviewMode": "Review mode",
+      "teacherFocus": "Teacher focus / goal",
+      "exampleQuestion": "Example question"
+    },
+    "curriculum": {
+      "kurmer-1": "Kurikulum Merdeka (Phase A)",
+      "kurmer-2": "Kurikulum Merdeka (Phase B)",
+      "kurmer-3": "Kurikulum Merdeka (Phase C)",
+      "k13": "Kurikulum 2013"
+    },
+    "assessmentType": {
+      "practice": "Practice exercises",
+      "daily": "Daily quiz",
+      "midterm": "Midterm",
+      "final": "Final exam",
+      "promotion": "Grade promotion exam",
+      "tka": "Academic ability test"
+    },
+    "difficulty": {
+      "easy": "Easy",
+      "medium": "Medium",
+      "hard": "Hard",
+      "mixed": "Mixed"
+    },
+    "reviewMode": {
+      "quick": {
+        "label": "Quick",
+        "desc": "Review in a single list"
+      },
+      "detail": {
+        "label": "Detailed",
+        "desc": "Review one by one"
+      }
+    },
+    "imageStyle": {
+      "auto": "Automatic",
+      "diagram": "Diagram",
+      "illustration": "Illustration"
+    },
+    "questionTypes": {
+      "multiple_choice": "Multiple choice",
+      "short_answer": "Short answer",
+      "essay": "Essay",
+      "true_false": "True / False"
+    },
+    "validation": {
+      "curriculumVersionId": "Select a curriculum.",
+      "gradeId": "Select a grade.",
+      "subjectId": "Select a subject.",
+      "materialIds": "Select at least one material.",
+      "sourceId": "Upload a PDF document.",
+      "assessmentType": "Select a worksheet type.",
+      "difficulty": "Select a difficulty.",
+      "questionCount": "Number of questions must be between 1–200.",
+      "questionTypeCounts": "Question type distribution must equal the total question count.",
+      "reviewMode": "Select a review mode.",
+      "teacherFocus": "Maximum 500 characters.",
+      "exampleQuestion": "Maximum 2,000 characters."
+    },
+    "hints": {
+      "missingSource": "Upload a PDF document to continue.",
+      "missingOutcomes": "Select at least one material to continue."
+    },
+    "status": {
+      "empty": "Configuration is incomplete. Choose a material source and settings to begin.",
+      "permissionTitle": "Quota exhausted",
+      "permissionBody": "You have reached the monthly worksheet limit.",
+      "upgrade": "Upgrade plan →",
+      "successTitle": "Generation accepted",
+      "successBody": "Opening the progress page. You can leave this page at any time."
+    },
+    "announce": {
+      "curriculumUpdated": "Curriculum updated. Grade, subject, and material cleared.",
+      "gradeUpdated": "Grade updated. Subject and material cleared.",
+      "subjectUpdated": "Subject updated. Material cleared."
+    },
+    "summary": {
+      "label": "Summary ({readiness})",
+      "title": "Configuration summary",
+      "readiness": "Readiness: {label}",
+      "hide": "Hide",
+      "show": "Show",
+      "empty": "Choose a material and settings to see the summary.",
+      "topics": "{count} topics",
+      "uploaded": "Uploaded",
+      "maxImages": "Maximum {count} · {style}",
+      "labels": {
+        "curriculum": "Curriculum",
+        "grade": "Grade",
+        "subject": "Subject",
+        "material": "Material",
+        "sourcePdf": "PDF source",
+        "type": "Type",
+        "academicYear": "Academic year",
+        "difficulty": "Difficulty",
+        "questionCount": "Questions",
+        "image": "Images",
+        "reviewMode": "Review mode"
+      }
+    },
+    "panels": {
+      "materi": {
+        "title": "Exam material",
+        "desc": "Choose the source and scope of material."
+      },
+      "questions": {
+        "title": "Question settings",
+        "desc": "Configure question types and counts."
+      },
+      "context": {
+        "title": "Context & reference",
+        "desc": "Extra information for the AI (optional)."
+      },
+      "template": {
+        "title": "Save as template",
+        "desc": "Reuse this configuration without reselecting settings."
+      },
+      "output": {
+        "title": "Output settings",
+        "desc": "Configure the format and layout of the generated sheet."
+      }
+    },
+    "sourceMode": {
+      "label": "Material source",
+      "katalog": "Available books/catalog",
+      "pdf": "My PDF only",
+      "both": "Books/catalog + my PDF"
+    },
+    "select": {
+      "curriculum": "Select curriculum",
+      "grade": "Select grade",
+      "subject": "Select subject",
+      "gradeFirst": "Select a grade first",
+      "loadingGrades": "Loading grades…",
+      "loadingMaterials": "Loading materials…",
+      "noMaterials": "No materials available",
+      "materialHelp": "Select at least one material",
+      "materialAria": "Select material"
+    },
+    "academicYear": {
+      "placeholder": "Example: 2026/2027",
+      "help": "Shown just below the exam title on the PDF."
+    },
+    "questionCount": {
+      "help": "Between 1–200 questions"
+    },
+    "duration": {
+      "help": "Minutes. Enter 0 for no time limit."
+    },
+    "distribution": {
+      "label": "Question type distribution",
+      "help": "The total of each type must equal the total question count."
+    },
+    "image": {
+      "label": "Question images",
+      "toggleTitle": "Add images when helpful",
+      "toggleHelp": "Images are only generated when relevant. The process is slower and uses extra quota.",
+      "maxCountHelp": "Between 1–5 images per assessment."
+    },
+    "teacherFocus": {
+      "placeholder": "Example: Focus on understanding the concept of fractions",
+      "help": "Maximum 500 characters. Not sent to analytics."
+    },
+    "exampleQuestion": {
+      "placeholder": "Write an example question to use as a style or reference",
+      "help": "Maximum 2,000 characters. Guides style, does not guarantee copying."
+    },
+    "template": {
+      "namePlaceholder": "Template name, e.g. Math Daily Quiz Grade 5",
+      "save": "Save template",
+      "saving": "Saving…",
+      "notFound": "Template not found or could not be loaded.",
+      "applied": "Template “{name}” applied.",
+      "nameRequired": "Template name is required.",
+      "saveFailed": "Failed to save the template.",
+      "saved": "Template “{name}” saved."
+    },
+    "submit": {
+      "fixIncomplete": "Fix the incomplete fields before continuing.",
+      "creating": "Creating draft…",
+      "create": "Create {count}-question draft",
+      "help": "The AI drafts according to the selected context. You review before finalizing.",
+      "retry": "Try again"
+    },
+    "outputSettings": {
+      "paperSize": "Paper size",
+      "orientation": "Orientation",
+      "font": "Font",
+      "defaultNote": "Default format: A4, Portrait, Inter. Advanced settings coming soon."
+    },
+    "page": {
+      "backToDashboard": "← Back to Dashboard",
+      "loadingAria": "Loading form",
+      "title": "Create a worksheet",
+      "subtitle": "Set the material, question types, and worksheet identity to create a new draft."
+    }
+  }
+}

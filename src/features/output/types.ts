@@ -1,3 +1,4 @@
+import type { Translate } from '@/src/i18n/types';
 import type { QuestionImage } from '@/src/types/questionImage';
 import { toQuestionImage } from '@/src/types/questionImage';
 
@@ -55,22 +56,20 @@ export type PrintDTO = {
   metadata?: PrintMetadata;
 };
 
-export function formatExamHeading(dto: Pick<PrintDTO, 'assessmentType' | 'title'>): string {
+export function formatExamHeading(
+  dto: Pick<PrintDTO, 'assessmentType' | 'title'>,
+  t: Translate,
+): string {
   switch (dto.assessmentType) {
     case 'practice':
-      return 'LATIHAN SOAL';
     case 'daily':
-      return 'ULANGAN HARIAN';
     case 'midterm':
-      return 'UJIAN TENGAH SEMESTER';
     case 'final':
-      return 'UJIAN AKHIR SEMESTER';
     case 'promotion':
-      return 'UJIAN KENAIKAN KELAS';
     case 'tka':
-      return 'TES KEMAMPUAN AKADEMIK';
+      return t(`examHeading.${dto.assessmentType}`);
     default:
-      return `UJIAN ${dto.title}`.toUpperCase();
+      return t('examHeading.default', { title: dto.title.toUpperCase() });
   }
 }
 

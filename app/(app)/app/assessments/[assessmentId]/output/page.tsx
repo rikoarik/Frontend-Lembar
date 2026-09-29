@@ -2,6 +2,7 @@
 
 import { use, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { MetadataForm } from '@/src/features/output/MetadataForm';
 import { StudentWorksheetRenderer } from '@/src/features/output/StudentWorksheetRenderer';
 import { TeacherKeyRenderer } from '@/src/features/output/TeacherKeyRenderer';
@@ -28,6 +29,7 @@ export default function OutputPage({ params }: Params) {
 }
 
 export function OutputCenterContent({ assessmentId }: { assessmentId: string }) {
+  const t = useTranslations('output');
   const router = useRouter();
   // ponytail: ref prevents router identity churn from re-firing the fetch effect
   const routerRef = useRef(router);
@@ -59,7 +61,7 @@ export function OutputCenterContent({ assessmentId }: { assessmentId: string }) 
           error?: { message?: string };
         } | null;
         if (!response.ok || !body?.data)
-          throw new Error(body?.error?.message ?? 'Gagal memuat output.');
+          throw new Error(body?.error?.message ?? t('outputCenter.loadFailed'));
         return body.data;
       })
       .then((next) => {
@@ -68,27 +70,27 @@ export function OutputCenterContent({ assessmentId }: { assessmentId: string }) 
         setMetadata({ ...blankMetadata, ...loadPrintTemplate(), ...(next.metadata ?? {}) });
       })
       .catch((err: unknown) => {
-        if (active) setError(err instanceof Error ? err.message : 'Gagal memuat output.');
+        if (active) setError(err instanceof Error ? err.message : t('outputCenter.loadFailed'));
       });
     return () => {
       active = false;
     };
-  }, [assessmentId]);
+  }, [assessmentId, t]);
 
   const toggle = (key: SectionKey) =>
     setVisible((current) => ({ ...current, [key]: !current[key] }));
 
   if (error) return <p role="alert">{error}</p>;
-  if (!dto) return <div aria-busy="true">Memuat output…</div>;
+  if (!dto) return <div aria-busy="true">{t('outputCenter.loading')}</div>;
 
   const dtoWithMetadata = { ...dto, ...(visible.metadata ? { metadata } : {}) };
 
   return (
     <main className="flex flex-col gap-4">
       <header>
-        <h1 className="text-h1 font-semibold text-brand-ink">Pusat output</h1>
+        <h1 className="text-h1 font-semibold text-brand-ink">{t('outputCenter.title')}</h1>
         <p className="text-body-sm text-brand-ink-muted">
-          {dto.title} · {dto.questionCount} soal
+          {dto.title} · {t('outputCenter.questionCount', { count: dto.questionCount })}
         </p>
       </header>
 
@@ -96,15 +98,33 @@ export function OutputCenterContent({ assessmentId }: { assessmentId: string }) 
         data-testid="output-center-layout"
         className="grid gap-4 lg:grid-cols-[minmax(18rem,24rem)_minmax(0,1fr)]"
       >
-        <aside aria-label="Kontrol output" className="order-1 flex flex-col gap-4 lg:order-none">
-          <div className="flex flex-wrap gap-2" aria-label="Kontrol bagian output">
-            <Toggle label="Lembar siswa" show={visible.student} onClick={() => toggle('student')} />
-            <Toggle label="Kunci guru" show={visible.teacher} onClick={() => toggle('teacher')} />
-            <Toggle label="Metadata" show={visible.metadata} onClick={() => toggle('metadata')} />
+        <aside
+          aria-label={t('outputCenter.controlsAria')}
+          className="order-1 flex flex-col gap-4 lg:order-none"
+        >
+          <div className="flex flex-wrap gap-2" aria-label={t('outputCenter.sectionControlsAria')}>
+            <Toggle
+              label={t('outputCenter.studentSheet')}
+              show={visible.student}
+              onClick={() => toggle('student')}
+            />
+            <Toggle
+              label={t('outputCenter.teacherKey')}
+              show={visible.teacher}
+              onClick={() => toggle('teacher')}
+            />
+            <Toggle
+              label={t('outputCenter.metadata')}
+              show={visible.metadata}
+              onClick={() => toggle('metadata')}
+            />
           </div>
 
           {visible.metadata ? (
-            <section aria-label="Metadata" className="rounded-md border border-brand-line p-4">
+            <section
+              aria-label={t('outputCenter.metadataAria')}
+              className="rounded-md border border-brand-line p-4"
+            >
               <MetadataForm
                 value={metadata}
                 onChange={setMetadata}
@@ -119,17 +139,23 @@ export function OutputCenterContent({ assessmentId }: { assessmentId: string }) 
         </aside>
 
         <section
-          aria-label="Pratinjau output"
+          aria-label={t('outputCenter.previewAria')}
           className="order-2 flex flex-col gap-4 lg:sticky lg:top-4 lg:self-start"
         >
           {visible.student ? (
-            <section aria-label="Lembar siswa" className="rounded-md border border-brand-line p-4">
+            <section
+              aria-label={t('outputCenter.studentSheet')}
+              className="rounded-md border border-brand-line p-4"
+            >
               <StudentWorksheetRenderer dto={dtoWithMetadata} />
             </section>
           ) : null}
 
           {visible.teacher ? (
-            <section aria-label="Kunci guru" className="rounded-md border border-brand-line p-4">
+            <section
+              aria-label={t('outputCenter.teacherKey')}
+              className="rounded-md border border-brand-line p-4"
+            >
               <TeacherKeyRenderer dto={dtoWithMetadata} />
             </section>
           ) : null}
@@ -140,13 +166,16 @@ export function OutputCenterContent({ assessmentId }: { assessmentId: string }) 
 }
 
 function Toggle({ label, show, onClick }: { label: string; show: boolean; onClick: () => void }) {
+  const t = useTranslations('output');
   return (
     <button
       type="button"
       className="inline-flex min-h-[var(--control-md)] items-center rounded-md border border-brand-line px-4"
       onClick={onClick}
     >
-      {show ? 'Sembunyikan' : 'Tampilkan'} {label.toLowerCase()}
+      {t(show ? 'outputCenter.toggleHide' : 'outputCenter.toggleShow', {
+        label: label.toLowerCase(),
+      })}
     </button>
   );
 }

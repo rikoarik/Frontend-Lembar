@@ -23,9 +23,18 @@ vi.mock('next-intl', async () => {
     );
   };
 
+  // next-intl memoizes the translator per (locale, namespace) pair. Mirror that:
+  // components put `t` in useCallback/useEffect dependency arrays, so a fresh
+  // function identity on every render would re-trigger the effects forever.
+  const translators = new Map<string, unknown>();
+
   return {
     useLocale: () => 'id',
     useTranslations: (namespace?: string) => {
+      const cacheKey = namespace ?? '';
+      const cached = translators.get(cacheKey);
+      if (cached) return cached;
+
       const translate = (key: string, values?: Record<string, unknown>): string => {
         const fullKey = namespace ? `${namespace}.${key}` : key;
         const value = resolve(fullKey);
@@ -37,6 +46,7 @@ vi.mock('next-intl', async () => {
       const raw = (key: string): unknown => resolve(key);
       (translate as unknown as { rich: unknown }).rich = rich;
       (translate as unknown as { raw: unknown }).raw = raw;
+      translators.set(cacheKey, translate);
       return translate;
     },
     NextIntlClientProvider: ({ children }: { children?: React.ReactNode }) => children ?? null,

@@ -11,6 +11,9 @@ import {
   jobStatusLabel,
   type JobStatus,
 } from '@/src/features/jobs/types';
+import { testTranslate } from '@/src/features/__tests__/i18n';
+
+const t = testTranslate('jobs');
 
 describe('job helpers', () => {
   const store = new Map<string, string>();
@@ -55,14 +58,15 @@ describe('job helpers', () => {
   });
 
   it('uses teacher-facing Indonesian status labels', () => {
-    expect(jobStatusLabel('running')).toMatch(/menyiapkan/i);
-    expect(jobStatusLabel('succeeded')).toMatch(/ditinjau/i);
-    expect(jobStatusLabel('failed')).toMatch(/gagal/i);
+    expect(jobStatusLabel('running', t)).toMatch(/menyiapkan/i);
+    expect(jobStatusLabel('succeeded', t)).toMatch(/ditinjau/i);
+    expect(jobStatusLabel('failed', t)).toMatch(/gagal/i);
   });
 
   it('does not show a misleading zero-minute duration', () => {
     const result = formatJobTiming(
       { createdAt: '2026-08-03T10:00:00.000Z', progressPercent: undefined },
+      t,
       Date.parse('2026-08-03T10:00:30.000Z'),
     );
     expect(result.elapsed).toBe('Baru saja dimulai');

@@ -60,7 +60,6 @@ const seedQuestions = (assessmentId: string): ReviewQuestion[] => [
     warnings: [
       {
         code: 'AMBIGUOUS_STEM',
-        message: 'Redaksi bisa disalahartikan sebagai perbandingan pecahan murni.',
         severity: 'warning',
       },
     ],
@@ -102,7 +101,6 @@ const seedQuestions = (assessmentId: string): ReviewQuestion[] => [
     warnings: [
       {
         code: 'LOW_DIVERSITY',
-        message: 'Pola soal mirip dengan item lain pada topik yang sama.',
         severity: 'info',
       },
     ],

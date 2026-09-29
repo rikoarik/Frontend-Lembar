@@ -1,3 +1,5 @@
+import type { Translate } from '@/src/i18n/types';
+
 export type SourceMode = 'katalog' | 'pdf' | 'katalog+pdf';
 export type AssessmentType = 'practice' | 'daily' | 'midterm' | 'final' | 'tka' | 'promotion';
 export type Difficulty = 'easy' | 'medium' | 'hard' | 'mixed';
@@ -134,17 +136,8 @@ export function normalizeQuestionTypeCounts(
     : buildEvenQuestionTypeCounts(safeTotal);
 }
 
-export function getQuestionTypeLabel(type: QuestionType): string {
-  switch (type) {
-    case 'multiple_choice':
-      return 'Pilihan Ganda';
-    case 'short_answer':
-      return 'Jawaban Singkat';
-    case 'essay':
-      return 'Esai';
-    case 'true_false':
-      return 'Benar / Salah';
-  }
+export function getQuestionTypeLabel(type: QuestionType, t: Translate): string {
+  return t(`questionTypes.${type}`);
 }
 
 export function parseQuestionCountInput(value: string): number {

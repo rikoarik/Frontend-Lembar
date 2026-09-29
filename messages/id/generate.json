@@ -1,1 +1,218 @@
-{}
+{
+  "generate": {
+    "fields": {
+      "sourceMode": "Sumber materi",
+      "curriculumVersionId": "Kurikulum",
+      "gradeId": "Kelas",
+      "subjectId": "Mata Pelajaran",
+      "gradeLabel": "Kelas",
+      "subjectLabel": "Mata Pelajaran",
+      "materialIds": "Materi",
+      "sourceId": "Sumber PDF",
+      "assessmentType": "Jenis Lembar",
+      "academicYear": "Tahun Pelajaran",
+      "difficulty": "Tingkat Kesulitan",
+      "questionCount": "Jumlah Soal",
+      "durationMinutes": "Waktu pengerjaan",
+      "questionTypeCounts": "Distribusi tipe soal",
+      "imageMode": "Gambar soal",
+      "imageMaxCount": "Jumlah maksimum gambar",
+      "imageStyle": "Gaya gambar",
+      "reviewMode": "Mode Review",
+      "teacherFocus": "Fokus / Tujuan Guru",
+      "exampleQuestion": "Contoh Soal"
+    },
+    "curriculum": {
+      "kurmer-1": "Kurikulum Merdeka (Fase A)",
+      "kurmer-2": "Kurikulum Merdeka (Fase B)",
+      "kurmer-3": "Kurikulum Merdeka (Fase C)",
+      "k13": "Kurikulum 2013"
+    },
+    "assessmentType": {
+      "practice": "Latihan Soal",
+      "daily": "Ulangan Harian",
+      "midterm": "UTS",
+      "final": "UAS",
+      "promotion": "Ujian Kenaikan Kelas",
+      "tka": "TKA"
+    },
+    "difficulty": {
+      "easy": "Mudah",
+      "medium": "Sedang",
+      "hard": "Sulit",
+      "mixed": "Campuran"
+    },
+    "reviewMode": {
+      "quick": {
+        "label": "Cepat",
+        "desc": "Tinjau dalam satu daftar"
+      },
+      "detail": {
+        "label": "Detail",
+        "desc": "Tinjau satu per satu"
+      }
+    },
+    "imageStyle": {
+      "auto": "Otomatis",
+      "diagram": "Diagram",
+      "illustration": "Ilustrasi"
+    },
+    "questionTypes": {
+      "multiple_choice": "Pilihan Ganda",
+      "short_answer": "Jawaban Singkat",
+      "essay": "Esai",
+      "true_false": "Benar / Salah"
+    },
+    "validation": {
+      "curriculumVersionId": "Pilih kurikulum.",
+      "gradeId": "Pilih kelas.",
+      "subjectId": "Pilih mata pelajaran.",
+      "materialIds": "Pilih minimal satu materi.",
+      "sourceId": "Unggah dokumen PDF.",
+      "assessmentType": "Pilih jenis lembar.",
+      "difficulty": "Pilih tingkat kesulitan.",
+      "questionCount": "Jumlah soal antara 1–200.",
+      "questionTypeCounts": "Distribusi tipe soal harus sama dengan jumlah soal.",
+      "reviewMode": "Pilih mode review.",
+      "teacherFocus": "Maksimal 500 karakter.",
+      "exampleQuestion": "Maksimal 2.000 karakter."
+    },
+    "hints": {
+      "missingSource": "Unggah dokumen PDF untuk melanjutkan.",
+      "missingOutcomes": "Pilih minimal satu materi untuk melanjutkan."
+    },
+    "status": {
+      "empty": "Konfigurasi belum lengkap. Pilih sumber materi dan pengaturan untuk memulai.",
+      "permissionTitle": "Kuota habis",
+      "permissionBody": "Anda telah mencapai batas lembar yang dapat dibuat bulan ini.",
+      "upgrade": "Tingkatkan paket →",
+      "successTitle": "Generate diterima",
+      "successBody": "Sedang membuka halaman progres. Anda boleh meninggalkan halaman ini kapan saja."
+    },
+    "announce": {
+      "curriculumUpdated": "Kurikulum diperbarui. Kelas, mata pelajaran, dan materi dihapus.",
+      "gradeUpdated": "Kelas diperbarui. Mata pelajaran dan materi dihapus.",
+      "subjectUpdated": "Mata pelajaran diperbarui. Materi dihapus."
+    },
+    "summary": {
+      "label": "Ringkasan ({readiness})",
+      "title": "Ringkasan Konfigurasi",
+      "readiness": "Kesiapan: {label}",
+      "hide": "Sembunyikan",
+      "show": "Lihat",
+      "empty": "Pilih materi dan pengaturan untuk melihat ringkasan.",
+      "topics": "{count} topik",
+      "uploaded": "Terunggah",
+      "maxImages": "Maksimal {count} · {style}",
+      "labels": {
+        "curriculum": "Kurikulum",
+        "grade": "Kelas",
+        "subject": "Mata Pelajaran",
+        "material": "Materi",
+        "sourcePdf": "Sumber PDF",
+        "type": "Jenis",
+        "academicYear": "Tahun Pelajaran",
+        "difficulty": "Kesulitan",
+        "questionCount": "Jumlah Soal",
+        "image": "Gambar",
+        "reviewMode": "Mode Review"
+      }
+    },
+    "panels": {
+      "materi": {
+        "title": "Materi Ujian",
+        "desc": "Pilih sumber dan lingkup materi."
+      },
+      "questions": {
+        "title": "Pengaturan Soal",
+        "desc": "Konfigurasi jenis dan jumlah soal."
+      },
+      "context": {
+        "title": "Konteks & Referensi",
+        "desc": "Tambahan informasi untuk AI (opsional)."
+      },
+      "template": {
+        "title": "Simpan sebagai template",
+        "desc": "Gunakan kembali konfigurasi ini tanpa memilih ulang pengaturan."
+      },
+      "output": {
+        "title": "Pengaturan Output",
+        "desc": "Konfigurasi format dan layout lembar yang dihasilkan."
+      }
+    },
+    "sourceMode": {
+      "label": "Sumber materi",
+      "katalog": "Buku/katalog yang tersedia",
+      "pdf": "PDF saya saja",
+      "both": "Buku/katalog + PDF saya"
+    },
+    "select": {
+      "curriculum": "Pilih kurikulum",
+      "grade": "Pilih kelas",
+      "subject": "Pilih mata pelajaran",
+      "gradeFirst": "Pilih kelas terlebih dahulu",
+      "loadingGrades": "Memuat daftar kelas…",
+      "loadingMaterials": "Memuat daftar materi…",
+      "noMaterials": "Tidak ada materi tersedia",
+      "materialHelp": "Pilih minimal satu materi",
+      "materialAria": "Pilih materi"
+    },
+    "academicYear": {
+      "placeholder": "Contoh: 2026/2027",
+      "help": "Ditampilkan tepat di bawah judul ujian pada PDF."
+    },
+    "questionCount": {
+      "help": "Antara 1–200 soal"
+    },
+    "duration": {
+      "help": "Menit. Isi 0 jika tanpa batas waktu."
+    },
+    "distribution": {
+      "label": "Distribusi tipe soal",
+      "help": "Total tiap tipe harus sama dengan jumlah soal."
+    },
+    "image": {
+      "label": "Gambar soal",
+      "toggleTitle": "Tambahkan gambar jika membantu",
+      "toggleHelp": "Gambar hanya dibuat bila relevan. Proses lebih lambat dan memakai kuota tambahan.",
+      "maxCountHelp": "Antara 1–5 gambar per asesmen."
+    },
+    "teacherFocus": {
+      "placeholder": "Contoh: Fokus pada pemahaman konsep pecahan",
+      "help": "Maksimal 500 karakter. Tidak dikirim ke analitik."
+    },
+    "exampleQuestion": {
+      "placeholder": "Tulis contoh soal untuk dijadikan gaya atau referensi",
+      "help": "Maksimal 2.000 karakter. Memandu gaya, tidak menjamin penyalinan."
+    },
+    "template": {
+      "namePlaceholder": "Nama template, mis. UH Matematika Kelas 5",
+      "save": "Simpan template",
+      "saving": "Menyimpan…",
+      "notFound": "Template tidak ditemukan atau tidak dapat dimuat.",
+      "applied": "Template “{name}” diterapkan.",
+      "nameRequired": "Nama template wajib diisi.",
+      "saveFailed": "Gagal menyimpan template.",
+      "saved": "Template “{name}” tersimpan."
+    },
+    "submit": {
+      "fixIncomplete": "Perbaiki isian yang belum lengkap sebelum melanjutkan.",
+      "creating": "Membuat draft…",
+      "create": "Buat draft {count} soal",
+      "help": "AI membuat draft sesuai konteks terpilih. Anda meninjau sebelum final.",
+      "retry": "Coba lagi"
+    },
+    "outputSettings": {
+      "paperSize": "Ukuran kertas",
+      "orientation": "Orientasi",
+      "font": "Font",
+      "defaultNote": "Format default: A4, Portrait, Inter. Pengaturan lanjutan segera hadir."
+    },
+    "page": {
+      "backToDashboard": "← Kembali ke Dashboard",
+      "loadingAria": "Memuat formulir",
+      "title": "Buat lembar",
+      "subtitle": "Atur materi, jenis soal, dan identitas lembar untuk membuat draft baru."
+    }
+  }
+}

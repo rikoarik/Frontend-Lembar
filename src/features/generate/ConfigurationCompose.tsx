@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { catalogService } from '@/src/services/catalog/catalogService';
 import { useWorkspace } from '@/src/features/workspace/workspaceContext';
@@ -11,6 +12,7 @@ import { OutputSettings } from './OutputSettings';
 import { Button, Panel } from '@/app/components/ui';
 import { validateComposition, getMissingSourceHint, getMissingOutcomesHint } from './validation';
 import { useGenerateSubmit } from './state/useGenerateSubmit';
+import type { Translate } from '@/src/i18n/types';
 import type { components } from '@/src/lib/api/schema';
 import type {
   CompositionState,
@@ -39,67 +41,51 @@ import {
 
 type CatalogOption = components['schemas']['CatalogOption'];
 
-const CURRICULUM_OPTIONS = [
-  { id: 'kurmer-1', label: 'Kurikulum Merdeka (Fase A)' },
-  { id: 'kurmer-2', label: 'Kurikulum Merdeka (Fase B)' },
-  { id: 'kurmer-3', label: 'Kurikulum Merdeka (Fase C)' },
-  { id: 'k13', label: 'Kurikulum 2013' },
-] as const;
-
-const ASSESSMENT_TYPE_OPTIONS: { value: AssessmentType; label: string }[] = [
-  { value: 'practice', label: 'Latihan Soal' },
-  { value: 'daily', label: 'Ulangan Harian' },
-  { value: 'midterm', label: 'UTS' },
-  { value: 'final', label: 'UAS' },
-  { value: 'promotion', label: 'Ujian Kenaikan Kelas' },
-  { value: 'tka', label: 'TKA' },
+const CURRICULUM_IDS = ['kurmer-1', 'kurmer-2', 'kurmer-3', 'k13'] as const;
+const ASSESSMENT_TYPES: AssessmentType[] = [
+  'practice',
+  'daily',
+  'midterm',
+  'final',
+  'promotion',
+  'tka',
 ];
-
-const DIFFICULTY_OPTIONS: { value: Difficulty; label: string }[] = [
-  { value: 'easy', label: 'Mudah' },
-  { value: 'medium', label: 'Sedang' },
-  { value: 'hard', label: 'Sulit' },
-  { value: 'mixed', label: 'Campuran' },
-];
-
-const REVIEW_MODE_OPTIONS: { value: ReviewMode; label: string; desc: string }[] = [
-  { value: 'quick', label: 'Cepat', desc: 'Tinjau dalam satu daftar' },
-  { value: 'detail', label: 'Detail', desc: 'Tinjau satu per satu' },
-];
-
-const IMAGE_STYLE_OPTIONS: { value: ImageStyle; label: string }[] = [
-  { value: 'auto', label: 'Otomatis' },
-  { value: 'diagram', label: 'Diagram' },
-  { value: 'illustration', label: 'Ilustrasi' },
-];
+const DIFFICULTIES: Difficulty[] = ['easy', 'medium', 'hard', 'mixed'];
+const REVIEW_MODES: ReviewMode[] = ['quick', 'detail'];
+const IMAGE_STYLES: ImageStyle[] = ['auto', 'diagram', 'illustration'];
 
 const MIN_QUESTIONS = 1;
 const MAX_QUESTIONS = 200;
 
-const LABELS: Record<CompositionFieldKey, string> = {
-  sourceMode: 'Sumber materi',
-  curriculumVersionId: 'Kurikulum',
-  gradeId: 'Kelas',
-  subjectId: 'Mata Pelajaran',
-  gradeLabel: 'Kelas',
-  subjectLabel: 'Mata Pelajaran',
-  materialIds: 'Materi',
-  sourceId: 'Sumber PDF',
-  assessmentType: 'Jenis Lembar',
-  academicYear: 'Tahun Pelajaran',
-  difficulty: 'Tingkat Kesulitan',
-  questionCount: 'Jumlah Soal',
-  durationMinutes: 'Waktu pengerjaan',
-  questionTypeCounts: 'Distribusi tipe soal',
-  imageMode: 'Gambar soal',
-  imageMaxCount: 'Jumlah maksimum gambar',
-  imageStyle: 'Gaya gambar',
-  reviewMode: 'Mode Review',
-  teacherFocus: 'Fokus / Tujuan Guru',
-  exampleQuestion: 'Contoh Soal',
-};
+/** Exhaustive field labels. The `Record<CompositionFieldKey, string>` return type
+ *  preserves the compile-time guarantee that every composition field is labelled. */
+function buildLabels(t: Translate): Record<CompositionFieldKey, string> {
+  return {
+    sourceMode: t('fields.sourceMode'),
+    curriculumVersionId: t('fields.curriculumVersionId'),
+    gradeId: t('fields.gradeId'),
+    subjectId: t('fields.subjectId'),
+    gradeLabel: t('fields.gradeLabel'),
+    subjectLabel: t('fields.subjectLabel'),
+    materialIds: t('fields.materialIds'),
+    sourceId: t('fields.sourceId'),
+    assessmentType: t('fields.assessmentType'),
+    academicYear: t('fields.academicYear'),
+    difficulty: t('fields.difficulty'),
+    questionCount: t('fields.questionCount'),
+    durationMinutes: t('fields.durationMinutes'),
+    questionTypeCounts: t('fields.questionTypeCounts'),
+    imageMode: t('fields.imageMode'),
+    imageMaxCount: t('fields.imageMaxCount'),
+    imageStyle: t('fields.imageStyle'),
+    reviewMode: t('fields.reviewMode'),
+    teacherFocus: t('fields.teacherFocus'),
+    exampleQuestion: t('fields.exampleQuestion'),
+  };
+}
 
 export default function ConfigurationCompose() {
+  const t = useTranslations('generate');
   const router = useRouter();
   const searchParams = useSearchParams();
   const { activeWorkspace } = useWorkspace();
@@ -114,6 +100,33 @@ export default function ConfigurationCompose() {
   const [summaryOpen, setSummaryOpen] = useState(false);
   const [announcement, setAnnouncement] = useState('');
   const announcementTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const LABELS = useMemo(() => buildLabels(t), [t]);
+  const curriculumOptions = useMemo(
+    () => CURRICULUM_IDS.map((id) => ({ id, label: t(`curriculum.${id}`) })),
+    [t],
+  );
+  const assessmentTypeOptions = useMemo(
+    () => ASSESSMENT_TYPES.map((value) => ({ value, label: t(`assessmentType.${value}`) })),
+    [t],
+  );
+  const difficultyOptions = useMemo(
+    () => DIFFICULTIES.map((value) => ({ value, label: t(`difficulty.${value}`) })),
+    [t],
+  );
+  const reviewModeOptions = useMemo(
+    () =>
+      REVIEW_MODES.map((value) => ({
+        value,
+        label: t(`reviewMode.${value}.label`),
+        desc: t(`reviewMode.${value}.desc`),
+      })),
+    [t],
+  );
+  const imageStyleOptions = useMemo(
+    () => IMAGE_STYLES.map((value) => ({ value, label: t(`imageStyle.${value}`) })),
+    [t],
+  );
 
   useEffect(() => {
     return () => {
@@ -143,7 +156,7 @@ export default function ConfigurationCompose() {
       const template = payload?.data?.find((item: { id?: string }) => item.id === templateId);
       if (cancelled) return;
       if (!response.ok || !template?.config) {
-        setTemplateStatus('Template tidak ditemukan atau tidak dapat dimuat.');
+        setTemplateStatus(t('template.notFound'));
         return;
       }
       setValues(
@@ -154,12 +167,12 @@ export default function ConfigurationCompose() {
         }),
       );
       setTemplateName(template.name ?? '');
-      setTemplateStatus(`Template “${template.name}” diterapkan.`);
+      setTemplateStatus(t('template.applied', { name: template.name }));
     })();
     return () => {
       cancelled = true;
     };
-  }, [searchParams]);
+  }, [searchParams, t]);
 
   const loadGrades = useCallback(async () => {
     setLoading((prev) => ({ ...prev, gradeId: true }));
@@ -271,7 +284,7 @@ export default function ConfigurationCompose() {
     if (successState) return 'success';
     if (compositionError) return 'error';
     if (submitted) {
-      const validation = validateComposition(values);
+      const validation = validateComposition(values, t);
       if (!validation.ok) return 'invalid';
     }
     const hasAnyValue =
@@ -282,7 +295,7 @@ export default function ConfigurationCompose() {
       values.sourceId;
     if (hasAnyValue) return 'composing';
     return 'empty';
-  }, [values, submitted, compositionError, permissionState, successState]);
+  }, [values, submitted, compositionError, permissionState, successState, t]);
 
   const hasKatalog = values.sourceMode === 'katalog' || values.sourceMode === 'katalog+pdf';
   const hasPdf = values.sourceMode === 'pdf' || values.sourceMode === 'katalog+pdf';
@@ -299,17 +312,17 @@ export default function ConfigurationCompose() {
           next.materialIds = [];
           setSubjects([]);
           setMaterials([]);
-          ann = 'Kurikulum diperbarui. Kelas, mata pelajaran, dan materi dihapus.';
+          ann = t('announce.curriculumUpdated');
         } else if (key === 'gradeId' && value !== prev.gradeId) {
           next.subjectId = '';
           next.materialIds = [];
           setSubjects([]);
           setMaterials([]);
-          ann = 'Kelas diperbarui. Mata pelajaran dan materi dihapus.';
+          ann = t('announce.gradeUpdated');
         } else if (key === 'subjectId' && value !== prev.subjectId) {
           next.materialIds = [];
           setMaterials([]);
-          ann = 'Mata pelajaran diperbarui. Materi dihapus.';
+          ann = t('announce.subjectUpdated');
         }
 
         if (key === 'questionCount') {
@@ -344,7 +357,7 @@ export default function ConfigurationCompose() {
         setSuccessState(false);
       }
     },
-    [compositionError, permissionState, successState],
+    [compositionError, permissionState, successState, t],
   );
 
   const updateQuestionTypeCount = useCallback((type: QuestionType, rawValue: number) => {
@@ -384,7 +397,7 @@ export default function ConfigurationCompose() {
     async (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
       setSubmitted(true);
-      const validation = validateComposition(values);
+      const validation = validateComposition(values, t);
       if (!validation.ok) {
         const next: Partial<Record<CompositionFieldKey, string>> = {};
         for (const failure of validation.failures) {
@@ -413,13 +426,13 @@ export default function ConfigurationCompose() {
         setCompositionError(result.error);
       }
     },
-    [values, workspaceId, generateSubmit, grades, subjects],
+    [values, workspaceId, generateSubmit, grades, subjects, t],
   );
 
   const saveTemplate = useCallback(async () => {
     const name = templateName.trim();
     if (!name) {
-      setTemplateStatus('Nama template wajib diisi.');
+      setTemplateStatus(t('template.nameRequired'));
       return;
     }
     setTemplateBusy(true);
@@ -433,51 +446,69 @@ export default function ConfigurationCompose() {
     const payload = await response.json().catch(() => null);
     setTemplateBusy(false);
     if (!response.ok) {
-      setTemplateStatus(payload?.error?.message ?? 'Gagal menyimpan template.');
+      setTemplateStatus(payload?.error?.message ?? t('template.saveFailed'));
       return;
     }
-    setTemplateStatus(`Template “${name}” tersimpan.`);
-  }, [templateName, values]);
+    setTemplateStatus(t('template.saved', { name }));
+  }, [templateName, values, t]);
 
   const summaryItems = useMemo(() => {
     const items: { label: string; value: string }[] = [];
     const gradeLabel = grades.find((g) => g.id === values.gradeId)?.label;
     const subjectLabel = subjects.find((s) => s.id === values.subjectId)?.label;
-    const curriculumLabel = CURRICULUM_OPTIONS.find(
+    const curriculumLabel = curriculumOptions.find(
       (c) => c.id === values.curriculumVersionId,
     )?.label;
 
-    if (curriculumLabel) items.push({ label: 'Kurikulum', value: curriculumLabel });
-    if (gradeLabel) items.push({ label: 'Kelas', value: gradeLabel });
-    if (subjectLabel) items.push({ label: 'Mata Pelajaran', value: subjectLabel });
+    if (curriculumLabel)
+      items.push({ label: t('summary.labels.curriculum'), value: curriculumLabel });
+    if (gradeLabel) items.push({ label: t('summary.labels.grade'), value: gradeLabel });
+    if (subjectLabel) items.push({ label: t('summary.labels.subject'), value: subjectLabel });
     if (values.materialIds.length > 0) {
       const names = values.materialIds
         .map((id) => materials.find((m) => m.id === id)?.label)
         .filter(Boolean) as string[];
-      items.push({ label: 'Materi', value: `${names.length} topik` });
-    }
-    if (values.sourceId) {
-      items.push({ label: 'Sumber PDF', value: 'Terunggah' });
-    }
-    const atype = ASSESSMENT_TYPE_OPTIONS.find((a) => a.value === values.assessmentType);
-    if (atype) items.push({ label: 'Jenis', value: atype.label });
-    if (values.academicYear.trim()) {
-      items.push({ label: 'Tahun Pelajaran', value: values.academicYear.trim() });
-    }
-    const diff = DIFFICULTY_OPTIONS.find((d) => d.value === values.difficulty);
-    if (diff) items.push({ label: 'Kesulitan', value: diff.label });
-    items.push({ label: 'Jumlah Soal', value: String(values.questionCount) });
-    if (values.imageMode === 'auto') {
-      const imageStyle = IMAGE_STYLE_OPTIONS.find((style) => style.value === values.imageStyle);
       items.push({
-        label: 'Gambar',
-        value: `Maksimal ${values.imageMaxCount} · ${imageStyle?.label ?? 'Otomatis'}`,
+        label: t('summary.labels.material'),
+        value: t('summary.topics', { count: names.length }),
       });
     }
-    const rm = REVIEW_MODE_OPTIONS.find((r) => r.value === values.reviewMode);
-    if (rm) items.push({ label: 'Mode Review', value: rm.label });
+    if (values.sourceId) {
+      items.push({ label: t('summary.labels.sourcePdf'), value: t('summary.uploaded') });
+    }
+    const atype = assessmentTypeOptions.find((a) => a.value === values.assessmentType);
+    if (atype) items.push({ label: t('summary.labels.type'), value: atype.label });
+    if (values.academicYear.trim()) {
+      items.push({ label: t('summary.labels.academicYear'), value: values.academicYear.trim() });
+    }
+    const diff = difficultyOptions.find((d) => d.value === values.difficulty);
+    if (diff) items.push({ label: t('summary.labels.difficulty'), value: diff.label });
+    items.push({ label: t('summary.labels.questionCount'), value: String(values.questionCount) });
+    if (values.imageMode === 'auto') {
+      const imageStyle = imageStyleOptions.find((style) => style.value === values.imageStyle);
+      items.push({
+        label: t('summary.labels.image'),
+        value: t('summary.maxImages', {
+          count: values.imageMaxCount,
+          style: imageStyle?.label ?? t('imageStyle.auto'),
+        }),
+      });
+    }
+    const rm = reviewModeOptions.find((r) => r.value === values.reviewMode);
+    if (rm) items.push({ label: t('summary.labels.reviewMode'), value: rm.label });
     return items;
-  }, [values, grades, subjects, materials]);
+  }, [
+    values,
+    grades,
+    subjects,
+    materials,
+    curriculumOptions,
+    assessmentTypeOptions,
+    difficultyOptions,
+    reviewModeOptions,
+    imageStyleOptions,
+    t,
+  ]);
 
   const readinessChecks: Array<{ ok: boolean }> = hasKatalog
     ? [
@@ -525,9 +556,7 @@ export default function ConfigurationCompose() {
           role="status"
           className="rounded-md border border-brand-line bg-brand-paper p-6 text-center"
         >
-          <p className="text-body-sm text-brand-ink-muted">
-            Konfigurasi belum lengkap. Pilih sumber materi dan pengaturan untuk memulai.
-          </p>
+          <p className="text-body-sm text-brand-ink-muted">{t('status.empty')}</p>
         </div>
       )}
 
@@ -551,7 +580,7 @@ export default function ConfigurationCompose() {
               }}
               className="mt-3"
             >
-              Coba lagi
+              {t('submit.retry')}
             </Button>
           )}
         </div>
@@ -563,10 +592,10 @@ export default function ConfigurationCompose() {
           aria-live="assertive"
           className="rounded-md border border-brand-warning/30 bg-brand-warning-soft p-4"
         >
-          <p className="text-body-sm text-brand-warning font-medium">Kuota habis</p>
-          <p className="mt-1 text-body-sm text-brand-ink-muted">
-            Anda telah mencapai batas lembar yang dapat dibuat bulan ini.
+          <p className="text-body-sm text-brand-warning font-medium">
+            {t('status.permissionTitle')}
           </p>
+          <p className="mt-1 text-body-sm text-brand-ink-muted">{t('status.permissionBody')}</p>
           <div className="mt-3 flex flex-wrap gap-2">
             <Button
               variant="secondary"
@@ -576,13 +605,13 @@ export default function ConfigurationCompose() {
                 void loadGrades();
               }}
             >
-              Coba lagi
+              {t('submit.retry')}
             </Button>
             <Link
               href="/app/pengaturan/langganan"
               className="inline-flex items-center rounded-md border border-brand-accent px-3 py-1.5 text-body-sm font-medium text-brand-accent hover:bg-brand-accent/5 transition-colors"
             >
-              Tingkatkan paket →
+              {t('status.upgrade')}
             </Link>
           </div>
         </div>
@@ -594,10 +623,8 @@ export default function ConfigurationCompose() {
           aria-live="polite"
           className="rounded-md border border-brand-accent/30 bg-brand-accent-soft p-4"
         >
-          <p className="text-body-sm text-brand-accent font-medium">Generate diterima</p>
-          <p className="mt-1 text-body-sm text-brand-ink-muted">
-            Sedang membuka halaman progres. Anda boleh meninggalkan halaman ini kapan saja.
-          </p>
+          <p className="text-body-sm text-brand-accent font-medium">{t('status.successTitle')}</p>
+          <p className="mt-1 text-body-sm text-brand-ink-muted">{t('status.successBody')}</p>
         </div>
       )}
 
@@ -609,12 +636,21 @@ export default function ConfigurationCompose() {
             className="flex w-full items-center justify-between rounded-md border border-brand-line bg-brand-surface-raised px-4 py-3 text-left"
             aria-expanded={summaryOpen}
           >
-            <span className="text-label-semibold text-brand-ink">Ringkasan ({readinessLabel})</span>
-            <span className="text-brand-ink-muted">{summaryOpen ? 'Sembunyikan' : 'Lihat'}</span>
+            <span className="text-label-semibold text-brand-ink">
+              {t('summary.label', { readiness: readinessLabel })}
+            </span>
+            <span className="text-brand-ink-muted">
+              {summaryOpen ? t('summary.hide') : t('summary.show')}
+            </span>
           </button>
           {summaryOpen && (
             <div className="mt-2 rounded-md border border-brand-line bg-brand-paper px-4 py-3">
-              <SummaryContent items={summaryItems} readinessLabel={readinessLabel} />
+              <SummaryContent
+                items={summaryItems}
+                readinessLabel={readinessLabel}
+                readiness={t('summary.readiness', { label: readinessLabel })}
+                empty={t('summary.empty')}
+              />
             </div>
           )}
         </div>
@@ -628,10 +664,10 @@ export default function ConfigurationCompose() {
           aria-busy={isAnyLoading ? true : undefined}
         >
           <div className="flex flex-col gap-8">
-            <Panel title="Materi Ujian" description="Pilih sumber dan lingkup materi.">
+            <Panel title={t('panels.materi.title')} description={t('panels.materi.desc')}>
               <div className="flex flex-col gap-5">
                 <fieldset>
-                  <legend className={`${labelClass} mb-2`}>Sumber materi</legend>
+                  <legend className={`${labelClass} mb-2`}>{t('sourceMode.label')}</legend>
                   <div className={radioGroupClass}>
                     {(['katalog', 'pdf', 'katalog+pdf'] as const).map((mode) => (
                       <label
@@ -663,10 +699,10 @@ export default function ConfigurationCompose() {
                         </span>
                         <span className="text-body-default">
                           {mode === 'katalog'
-                            ? 'Buku/katalog yang tersedia'
+                            ? t('sourceMode.katalog')
                             : mode === 'pdf'
-                              ? 'PDF saya saja'
-                              : 'Buku/katalog + PDF saya'}
+                              ? t('sourceMode.pdf')
+                              : t('sourceMode.both')}
                         </span>
                       </label>
                     ))}
@@ -677,7 +713,7 @@ export default function ConfigurationCompose() {
                   <>
                     <div className="flex flex-col gap-2">
                       <label htmlFor="compose-curriculumVersionId" className={labelClass}>
-                        Kurikulum <span className="text-brand-danger">*</span>
+                        {LABELS.curriculumVersionId} <span className="text-brand-danger">*</span>
                       </label>
                       <select
                         id="compose-curriculumVersionId"
@@ -686,8 +722,8 @@ export default function ConfigurationCompose() {
                         className={selectClass}
                         aria-invalid={localErrors.curriculumVersionId ? true : undefined}
                       >
-                        <option value="">Pilih kurikulum</option>
-                        {CURRICULUM_OPTIONS.map((c) => (
+                        <option value="">{t('select.curriculum')}</option>
+                        {curriculumOptions.map((c) => (
                           <option key={c.id} value={c.id}>
                             {c.label}
                           </option>
@@ -702,13 +738,13 @@ export default function ConfigurationCompose() {
 
                     <div className="flex flex-col gap-2">
                       <label htmlFor="compose-gradeId" className={labelClass}>
-                        Kelas <span className="text-brand-danger">*</span>
+                        {LABELS.gradeId} <span className="text-brand-danger">*</span>
                       </label>
                       {initialLoadError ? (
                         <div className="flex flex-col gap-2" role="alert">
                           <p className={errorClass}>{initialLoadError}</p>
                           <Button variant="secondary" size="sm" onClick={() => void loadGrades()}>
-                            Coba lagi
+                            {t('submit.retry')}
                           </Button>
                         </div>
                       ) : (
@@ -722,7 +758,7 @@ export default function ConfigurationCompose() {
                             aria-invalid={localErrors.gradeId ? true : undefined}
                           >
                             <option value="">
-                              {loading.gradeId ? 'Memuat daftar kelas…' : 'Pilih kelas'}
+                              {loading.gradeId ? t('select.loadingGrades') : t('select.grade')}
                             </option>
                             {!loading.gradeId &&
                               grades.map((g) => (
@@ -742,7 +778,7 @@ export default function ConfigurationCompose() {
 
                     <div className="flex flex-col gap-2">
                       <label htmlFor="compose-subjectId" className={labelClass}>
-                        Mata Pelajaran <span className="text-brand-danger">*</span>
+                        {LABELS.subjectId} <span className="text-brand-danger">*</span>
                       </label>
                       <select
                         id="compose-subjectId"
@@ -754,10 +790,10 @@ export default function ConfigurationCompose() {
                       >
                         <option value="">
                           {loading.subjectId
-                            ? 'Memuat…'
+                            ? t('select.loadingMaterials')
                             : values.gradeId
-                              ? 'Pilih mata pelajaran'
-                              : 'Pilih kelas terlebih dahulu'}
+                              ? t('select.subject')
+                              : t('select.gradeFirst')}
                         </option>
                         {subjects.map((s) => (
                           <option key={s.id} value={s.id}>
@@ -775,25 +811,25 @@ export default function ConfigurationCompose() {
                     <div className="flex min-w-0 flex-col gap-2">
                       <fieldset className="min-w-0">
                         <legend className={labelClass}>
-                          Materi <span className="text-brand-danger">*</span>
-                          <p className={`${helpClass} mt-0.5`}>Pilih minimal satu materi</p>
+                          {LABELS.materialIds} <span className="text-brand-danger">*</span>
+                          <p className={`${helpClass} mt-0.5`}>{t('select.materialHelp')}</p>
                         </legend>
                         <div
                           className="mt-2 max-h-48 overflow-hidden overflow-y-auto rounded-md border border-brand-line bg-brand-surface-raised"
                           role="group"
-                          aria-label="Pilih materi"
+                          aria-label={t('select.materialAria')}
                         >
                           {loading.materialIds ? (
                             <div className="px-3 py-4 text-body-sm text-brand-ink-muted">
-                              Memuat daftar materi…
+                              {t('select.loadingMaterials')}
                             </div>
                           ) : !values.subjectId ? (
                             <div className="px-3 py-4 text-body-sm text-brand-ink-muted">
-                              Pilih mata pelajaran terlebih dahulu
+                              {t('select.gradeFirst')}
                             </div>
                           ) : materials.length === 0 ? (
                             <div className="px-3 py-4 text-body-sm text-brand-ink-muted">
-                              Tidak ada materi tersedia
+                              {t('select.noMaterials')}
                             </div>
                           ) : (
                             materials.map((m) => {
@@ -833,7 +869,7 @@ export default function ConfigurationCompose() {
                 {hasPdf && (
                   <div className="flex flex-col gap-2">
                     <label className={labelClass}>
-                      Sumber PDF <span className="text-brand-danger">*</span>
+                      {LABELS.sourceId} <span className="text-brand-danger">*</span>
                     </label>
                     <PrivatePdfSource workspaceId={workspaceId} onSuccess={handleSourceSuccess} />
                     {localErrors.sourceId ? (
@@ -846,11 +882,11 @@ export default function ConfigurationCompose() {
               </div>
             </Panel>
 
-            <Panel title="Pengaturan Soal" description="Konfigurasi jenis dan jumlah soal.">
+            <Panel title={t('panels.questions.title')} description={t('panels.questions.desc')}>
               <div className="flex flex-col gap-5">
                 <div className="flex flex-col gap-2">
                   <label htmlFor="compose-assessmentType" className={labelClass}>
-                    Jenis Lembar <span className="text-brand-danger">*</span>
+                    {LABELS.assessmentType} <span className="text-brand-danger">*</span>
                   </label>
                   <select
                     id="compose-assessmentType"
@@ -859,7 +895,7 @@ export default function ConfigurationCompose() {
                     className={selectClass}
                     aria-invalid={localErrors.assessmentType ? true : undefined}
                   >
-                    {ASSESSMENT_TYPE_OPTIONS.map((a) => (
+                    {assessmentTypeOptions.map((a) => (
                       <option key={a.value} value={a.value}>
                         {a.label}
                       </option>
@@ -874,27 +910,27 @@ export default function ConfigurationCompose() {
 
                 <div className="flex flex-col gap-2">
                   <label htmlFor="compose-academicYear" className={labelClass}>
-                    Tahun Pelajaran
+                    {LABELS.academicYear}
                   </label>
                   <input
                     id="compose-academicYear"
                     type="text"
                     inputMode="numeric"
                     pattern="[0-9]{4}/[0-9]{4}"
-                    placeholder="Contoh: 2026/2027"
+                    placeholder={t('academicYear.placeholder')}
                     value={values.academicYear}
                     onChange={(event) => update('academicYear', event.target.value)}
                     className={fieldClass}
                     aria-describedby="compose-academicYear-help"
                   />
                   <p className={helpClass} id="compose-academicYear-help">
-                    Ditampilkan tepat di bawah judul ujian pada PDF.
+                    {t('academicYear.help')}
                   </p>
                 </div>
 
                 <div className="flex flex-col gap-2">
                   <label htmlFor="compose-difficulty" className={labelClass}>
-                    Tingkat Kesulitan <span className="text-brand-danger">*</span>
+                    {LABELS.difficulty} <span className="text-brand-danger">*</span>
                   </label>
                   <select
                     id="compose-difficulty"
@@ -903,7 +939,7 @@ export default function ConfigurationCompose() {
                     className={selectClass}
                     aria-invalid={localErrors.difficulty ? true : undefined}
                   >
-                    {DIFFICULTY_OPTIONS.map((d) => (
+                    {difficultyOptions.map((d) => (
                       <option key={d.value} value={d.value}>
                         {d.label}
                       </option>
@@ -918,7 +954,7 @@ export default function ConfigurationCompose() {
 
                 <div className="flex flex-col gap-2">
                   <label htmlFor="compose-questionCount" className={labelClass}>
-                    Jumlah Soal <span className="text-brand-danger">*</span>
+                    {LABELS.questionCount} <span className="text-brand-danger">*</span>
                   </label>
                   <input
                     id="compose-questionCount"
@@ -943,7 +979,7 @@ export default function ConfigurationCompose() {
                     aria-describedby="compose-questionCount-help"
                   />
                   <p className={helpClass} id="compose-questionCount-help">
-                    Antara 1–200 soal
+                    {t('questionCount.help')}
                   </p>
                   {localErrors.questionCount ? (
                     <p className={errorClass} role="alert">
@@ -954,7 +990,7 @@ export default function ConfigurationCompose() {
 
                 <div className="flex flex-col gap-2">
                   <label htmlFor="compose-durationMinutes" className={labelClass}>
-                    Waktu pengerjaan
+                    {LABELS.durationMinutes}
                   </label>
                   <input
                     id="compose-durationMinutes"
@@ -972,15 +1008,13 @@ export default function ConfigurationCompose() {
                     aria-describedby="compose-durationMinutes-help"
                   />
                   <p className={helpClass} id="compose-durationMinutes-help">
-                    Menit. Isi 0 jika tanpa batas waktu.
+                    {t('duration.help')}
                   </p>
                 </div>
 
                 <fieldset>
-                  <legend className={labelClass}>Distribusi tipe soal</legend>
-                  <p className={`${helpClass} mt-0.5`}>
-                    Total tiap tipe harus sama dengan jumlah soal.
-                  </p>
+                  <legend className={labelClass}>{t('distribution.label')}</legend>
+                  <p className={`${helpClass} mt-0.5`}>{t('distribution.help')}</p>
                   <div className="mt-3 grid gap-3 sm:grid-cols-2">
                     {QUESTION_TYPES.map((type) => (
                       <div key={type} className="flex flex-col gap-2">
@@ -988,7 +1022,7 @@ export default function ConfigurationCompose() {
                           htmlFor={`compose-questionTypeCounts-${type}`}
                           className={labelClass}
                         >
-                          {getQuestionTypeLabel(type)}
+                          {getQuestionTypeLabel(type, t)}
                         </label>
                         <input
                           id={`compose-questionTypeCounts-${type}`}
@@ -1016,7 +1050,9 @@ export default function ConfigurationCompose() {
                 </fieldset>
 
                 <fieldset className="rounded-md border border-brand-line p-4">
-                  <legend className="px-1 text-label-semibold text-brand-ink">Gambar soal</legend>
+                  <legend className="px-1 text-label-semibold text-brand-ink">
+                    {t('image.label')}
+                  </legend>
                   <label className="flex cursor-pointer items-start gap-3">
                     <input
                       id="compose-imageMode"
@@ -1029,12 +1065,9 @@ export default function ConfigurationCompose() {
                     />
                     <span className="flex flex-col gap-1">
                       <span className="text-body-default font-medium text-brand-ink">
-                        Tambahkan gambar jika membantu
+                        {t('image.toggleTitle')}
                       </span>
-                      <span className={helpClass}>
-                        Gambar hanya dibuat bila relevan. Proses lebih lambat dan memakai kuota
-                        tambahan.
-                      </span>
+                      <span className={helpClass}>{t('image.toggleHelp')}</span>
                     </span>
                   </label>
 
@@ -1042,7 +1075,7 @@ export default function ConfigurationCompose() {
                     <div className="mt-4 grid gap-4 sm:grid-cols-2">
                       <div className="flex flex-col gap-2">
                         <label htmlFor="compose-imageMaxCount" className={labelClass}>
-                          Jumlah maksimum gambar
+                          {LABELS.imageMaxCount}
                         </label>
                         <input
                           id="compose-imageMaxCount"
@@ -1060,13 +1093,13 @@ export default function ConfigurationCompose() {
                           aria-describedby="compose-imageMaxCount-help"
                         />
                         <p id="compose-imageMaxCount-help" className={helpClass}>
-                          Antara 1–5 gambar per asesmen.
+                          {t('image.maxCountHelp')}
                         </p>
                       </div>
 
                       <div className="flex flex-col gap-2">
                         <label htmlFor="compose-imageStyle" className={labelClass}>
-                          Gaya gambar
+                          {LABELS.imageStyle}
                         </label>
                         <select
                           id="compose-imageStyle"
@@ -1076,7 +1109,7 @@ export default function ConfigurationCompose() {
                           }
                           className={selectClass}
                         >
-                          {IMAGE_STYLE_OPTIONS.map((style) => (
+                          {imageStyleOptions.map((style) => (
                             <option key={style.value} value={style.value}>
                               {style.label}
                             </option>
@@ -1089,10 +1122,10 @@ export default function ConfigurationCompose() {
 
                 <fieldset>
                   <legend className={`${labelClass} mb-2`}>
-                    Mode Review <span className="text-brand-danger">*</span>
+                    {LABELS.reviewMode} <span className="text-brand-danger">*</span>
                   </legend>
                   <div className={radioGroupClass}>
-                    {REVIEW_MODE_OPTIONS.map((r) => (
+                    {reviewModeOptions.map((r) => (
                       <button
                         key={r.value}
                         type="button"
@@ -1133,27 +1166,24 @@ export default function ConfigurationCompose() {
               </div>
             </Panel>
 
-            <Panel
-              title="Konteks & Referensi"
-              description="Tambahan informasi untuk AI (opsional)."
-            >
+            <Panel title={t('panels.context.title')} description={t('panels.context.desc')}>
               <div className="flex flex-col gap-5">
                 <div className="flex flex-col gap-2">
                   <label htmlFor="compose-teacherFocus" className={labelClass}>
-                    Fokus / Tujuan Guru
+                    {LABELS.teacherFocus}
                   </label>
                   <textarea
                     id="compose-teacherFocus"
                     value={values.teacherFocus}
                     onChange={(e) => update('teacherFocus', e.target.value)}
                     className={`${fieldClass} min-h-24 max-h-64 resize-y overflow-y-auto`}
-                    placeholder="Contoh: Fokus pada pemahaman konsep pecahan"
+                    placeholder={t('teacherFocus.placeholder')}
                     maxLength={500}
                     rows={4}
                     data-lenis-prevent
                     aria-invalid={localErrors.teacherFocus ? true : undefined}
                   />
-                  <p className={helpClass}>Maksimal 500 karakter. Tidak dikirim ke analitik.</p>
+                  <p className={helpClass}>{t('teacherFocus.help')}</p>
                   {localErrors.teacherFocus ? (
                     <p className={errorClass} role="alert">
                       {localErrors.teacherFocus}
@@ -1163,22 +1193,20 @@ export default function ConfigurationCompose() {
 
                 <div className="flex flex-col gap-2">
                   <label htmlFor="compose-exampleQuestion" className={labelClass}>
-                    Contoh Soal
+                    {LABELS.exampleQuestion}
                   </label>
                   <textarea
                     id="compose-exampleQuestion"
                     value={values.exampleQuestion}
                     onChange={(e) => update('exampleQuestion', e.target.value)}
                     className={`${fieldClass} min-h-28 max-h-80 resize-y overflow-y-auto`}
-                    placeholder="Tulis contoh soal untuk dijadikan gaya atau referensi"
+                    placeholder={t('exampleQuestion.placeholder')}
                     maxLength={2000}
                     rows={5}
                     data-lenis-prevent
                     aria-invalid={localErrors.exampleQuestion ? true : undefined}
                   />
-                  <p className={helpClass}>
-                    Maksimal 2.000 karakter. Memandu gaya, tidak menjamin penyalinan.
-                  </p>
+                  <p className={helpClass}>{t('exampleQuestion.help')}</p>
                   {localErrors.exampleQuestion ? (
                     <p className={errorClass} role="alert">
                       {localErrors.exampleQuestion}
@@ -1190,16 +1218,13 @@ export default function ConfigurationCompose() {
 
             <OutputSettings />
 
-            <Panel
-              title="Simpan sebagai template"
-              description="Gunakan kembali konfigurasi ini tanpa memilih ulang pengaturan."
-            >
+            <Panel title={t('panels.template.title')} description={t('panels.template.desc')}>
               <div className="flex flex-col gap-3 sm:flex-row">
                 <input
                   value={templateName}
                   onChange={(event) => setTemplateName(event.target.value)}
                   maxLength={100}
-                  placeholder="Nama template, mis. UH Matematika Kelas 5"
+                  placeholder={t('template.namePlaceholder')}
                   className={`${fieldClass} flex-1`}
                 />
                 <Button
@@ -1208,7 +1233,7 @@ export default function ConfigurationCompose() {
                   onClick={() => void saveTemplate()}
                   disabled={templateBusy || !templateName.trim()}
                 >
-                  {templateBusy ? 'Menyimpan…' : 'Simpan template'}
+                  {templateBusy ? t('template.saving') : t('template.save')}
                 </Button>
               </div>
               {templateStatus ? (
@@ -1218,16 +1243,14 @@ export default function ConfigurationCompose() {
               ) : null}
             </Panel>
 
-            {submitted && !validateComposition(values).ok && (
+            {submitted && !validateComposition(values, t).ok && (
               <div
                 role="alert"
                 className="rounded-md border border-brand-danger bg-brand-danger-soft px-4 py-3"
               >
-                <p className="text-body-sm text-brand-danger">
-                  Perbaiki isian yang belum lengkap sebelum melanjutkan.
-                </p>
+                <p className="text-body-sm text-brand-danger">{t('submit.fixIncomplete')}</p>
                 <ul className="mt-2 list-disc pl-5">
-                  {validateComposition(values).failures.map((f) => (
+                  {validateComposition(values, t).failures.map((f) => (
                     <li key={f.field} className="text-body-sm text-brand-danger">
                       {LABELS[f.field]}: {f.message}
                     </li>
@@ -1236,15 +1259,15 @@ export default function ConfigurationCompose() {
               </div>
             )}
 
-            {getMissingSourceHint(values) && (
+            {getMissingSourceHint(values, t) && (
               <p className="text-body-sm text-brand-warning" role="status">
-                {getMissingSourceHint(values)}
+                {getMissingSourceHint(values, t)}
               </p>
             )}
 
-            {getMissingOutcomesHint(values) && (
+            {getMissingOutcomesHint(values, t) && (
               <p className="text-body-sm text-brand-warning" role="status">
-                {getMissingOutcomesHint(values)}
+                {getMissingOutcomesHint(values, t)}
               </p>
             )}
 
@@ -1262,19 +1285,21 @@ export default function ConfigurationCompose() {
                 }
                 aria-busy={generateSubmit.busy ? true : undefined}
               >
-                {generateSubmit.busy ? 'Membuat draft…' : `Buat draft ${values.questionCount} soal`}
+                {generateSubmit.busy
+                  ? t('submit.creating')
+                  : t('submit.create', { count: values.questionCount })}
               </Button>
-              <p className={helpClass}>
-                AI membuat draft sesuai konteks terpilih. Anda meninjau sebelum final.
-              </p>
+              <p className={helpClass}>{t('submit.help')}</p>
             </div>
           </div>
         </form>
 
         <aside className="hidden min-w-0 self-start lg:block lg:sticky lg:top-6">
           <div className="rounded-md border border-brand-line bg-brand-surface-raised px-4 py-4">
-            <h3 className="text-label-semibold text-brand-ink">Ringkasan Konfigurasi</h3>
-            <p className={`${helpClass} mb-3`}>Kesiapan: {readinessLabel}</p>
+            <h3 className="text-label-semibold text-brand-ink">{t('summary.title')}</h3>
+            <p className={`${helpClass} mb-3`}>
+              {t('summary.readiness', { label: readinessLabel })}
+            </p>
             {summaryItems.length > 0 ? (
               <ul className="flex flex-col gap-2">
                 {summaryItems.map((item) => (
@@ -1287,7 +1312,7 @@ export default function ConfigurationCompose() {
                 ))}
               </ul>
             ) : (
-              <p className={helpClass}>Pilih materi dan pengaturan untuk melihat ringkasan.</p>
+              <p className={helpClass}>{t('summary.empty')}</p>
             )}
           </div>
         </aside>
@@ -1299,13 +1324,17 @@ export default function ConfigurationCompose() {
 function SummaryContent({
   items,
   readinessLabel,
+  readiness,
+  empty,
 }: {
   items: { label: string; value: string }[];
   readinessLabel: string;
+  readiness: string;
+  empty: string;
 }) {
   return (
     <>
-      <p className="text-body-sm text-brand-ink-muted mb-2">Kesiapan: {readinessLabel}</p>
+      <p className="text-body-sm text-brand-ink-muted mb-2">{readiness}</p>
       {items.length > 0 ? (
         <ul className="flex flex-col gap-1">
           {items.map((item) => (
@@ -1318,9 +1347,7 @@ function SummaryContent({
           ))}
         </ul>
       ) : (
-        <p className="text-body-sm text-brand-ink-muted">
-          Pilih materi dan pengaturan untuk melihat ringkasan.
-        </p>
+        <p className="text-body-sm text-brand-ink-muted">{empty}</p>
       )}
     </>
   );

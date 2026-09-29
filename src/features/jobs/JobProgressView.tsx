@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useSyncExternalStore } from 'react';
+import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { JobProgressPanel } from '@/src/features/jobs/JobProgressPanel';
 import { useJobProgress } from '@/src/features/jobs/state/useJobProgress';
@@ -14,6 +15,7 @@ type JobProgressViewProps = {
 };
 
 export function JobProgressView({ jobId }: JobProgressViewProps) {
+  const t = useTranslations('jobs');
   const router = useRouter();
   const { activeWorkspace } = useWorkspace();
   const workspaceId = activeWorkspace.id;
@@ -49,10 +51,8 @@ export function JobProgressView({ jobId }: JobProgressViewProps) {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
-        <h1 className="text-h1 font-semibold text-brand-ink">Progres generate</h1>
-        <p className="text-body-sm text-brand-ink-muted">
-          Status netral dan aman dimuat ulang. Draft final tetap membutuhkan tinjauan guru.
-        </p>
+        <h1 className="text-h1 font-semibold text-brand-ink">{t('viewTitle')}</h1>
+        <p className="text-body-sm text-brand-ink-muted">{t('viewSubtitle')}</p>
       </div>
       <JobProgressPanel
         job={jobWithReviewMode}

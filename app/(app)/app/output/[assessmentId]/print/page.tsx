@@ -1,6 +1,7 @@
 'use client';
 
 import { use, useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import OutputPackagePreview from '@/app/components/print/OutputPackagePreview';
 import { MetadataForm } from '@/src/features/output/MetadataForm';
 import { StudentWorksheetRenderer } from '@/src/features/output/StudentWorksheetRenderer';
@@ -24,6 +25,7 @@ const EMPTY_METADATA: PrintMetadata = {
 
 export default function OutputPrintPage({ params }: { params: Promise<{ assessmentId: string }> }) {
   const { assessmentId } = use(params);
+  const t = useTranslations('output');
   const [assessment, setAssessment] = useState<AssessmentDetail | null>(null);
   const [error, setError] = useState('');
   const [metadata, setMetadata] = useState<PrintMetadata>(EMPTY_METADATA);
@@ -60,12 +62,12 @@ export default function OutputPrintPage({ params }: { params: Promise<{ assessme
         const data = (await res.json()) as { data?: { token?: string }; token?: string };
         const token = data.data?.token ?? data.token ?? '';
         if (token) setShareUrl(`${window.location.origin}/attempt/${token}`);
-        else setShareUrl('Token tidak tersedia.');
+        else setShareUrl(t('print.shareTokenMissing'));
       } else {
-        setShareUrl('Gagal membuat link berbagi.');
+        setShareUrl(t('print.shareFailed'));
       }
     } catch {
-      setShareUrl('Gagal membuat link berbagi.');
+      setShareUrl(t('print.shareFailed'));
     } finally {
       setSharing(false);
     }
@@ -99,11 +101,11 @@ export default function OutputPrintPage({ params }: { params: Promise<{ assessme
       {/* Toolbar */}
       <div className="flex flex-wrap items-center justify-between gap-3 print:hidden">
         <div>
-          <h1 className="text-h1 font-semibold text-brand-ink">Print preview A4</h1>
+          <h1 className="text-h1 font-semibold text-brand-ink">{t('print.title')}</h1>
           <p className="text-body-sm text-brand-ink-muted">
             {assessment
-              ? `${humanizeAssessmentLabel(assessment.title)} · ${humanizeAssessmentLabel(assessment.subject ?? '')}${assessment.gradeLabel ? ` · ${humanizeAssessmentLabel(assessment.gradeLabel)}` : ''} · ${assessment.questionCount} soal`
-              : error || 'Memuat dokumen final…'}
+              ? `${humanizeAssessmentLabel(assessment.title, t)} · ${humanizeAssessmentLabel(assessment.subject ?? '', t)}${assessment.gradeLabel ? ` · ${humanizeAssessmentLabel(assessment.gradeLabel, t)}` : ''} · ${t('print.questionCount', { count: assessment.questionCount })}`
+              : error || t('print.loading')}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -112,7 +114,7 @@ export default function OutputPrintPage({ params }: { params: Promise<{ assessme
             onClick={() => setShowForm((v) => !v)}
             className="inline-flex min-h-[var(--control-md)] items-center rounded-md border border-brand-line px-4"
           >
-            {showForm ? 'Sembunyikan metadata' : 'Isi metadata'}
+            {showForm ? t('print.hideMetadata') : t('print.showMetadata')}
           </button>
           <button
             type="button"
@@ -120,7 +122,7 @@ export default function OutputPrintPage({ params }: { params: Promise<{ assessme
             disabled={!assessment || sharing}
             className="inline-flex min-h-[var(--control-md)] items-center rounded-md border border-brand-line px-4 disabled:opacity-50"
           >
-            {sharing ? 'Membuat link…' : 'Bagikan via link'}
+            {sharing ? t('print.creatingLink') : t('print.shareLink')}
           </button>
           <button
             type="button"
@@ -135,7 +137,7 @@ export default function OutputPrintPage({ params }: { params: Promise<{ assessme
             disabled={!assessment || printing !== null}
             className="inline-flex min-h-[var(--control-md)] items-center gap-2 rounded-md bg-brand-accent px-4 text-white disabled:opacity-50"
           >
-            {printing === 'student' ? 'Menyiapkan…' : 'Cetak lembar siswa'}
+            {printing === 'student' ? t('print.preparing') : t('print.printStudent')}
           </button>
           <button
             type="button"
@@ -150,13 +152,13 @@ export default function OutputPrintPage({ params }: { params: Promise<{ assessme
             disabled={!assessment || printing !== null}
             className="inline-flex min-h-[var(--control-md)] items-center rounded-md border border-brand-line px-4 disabled:opacity-50"
           >
-            {printing === 'teacher' ? 'Menyiapkan…' : 'Cetak kunci guru'}
+            {printing === 'teacher' ? t('print.preparing') : t('print.printTeacher')}
           </button>
           <a
             href={`/app/output/${assessmentId}`}
             className="inline-flex min-h-[var(--control-md)] items-center rounded-md border border-brand-line px-4"
           >
-            Kembali
+            {t('print.back')}
           </a>
         </div>
       </div>
@@ -164,7 +166,7 @@ export default function OutputPrintPage({ params }: { params: Promise<{ assessme
       {/* Share URL output */}
       {shareUrl ? (
         <div className="flex items-center gap-2 rounded-md border border-brand-line bg-brand-paper px-4 py-3 text-body-sm print:hidden">
-          <span className="text-brand-ink-muted">Link berbagi:</span>
+          <span className="text-brand-ink-muted">{t('print.shareLinkLabel')}</span>
           <a
             href={shareUrl}
             className="break-all text-brand-accent underline"
@@ -177,9 +179,9 @@ export default function OutputPrintPage({ params }: { params: Promise<{ assessme
             type="button"
             onClick={() => void navigator.clipboard.writeText(shareUrl)}
             className="ml-auto shrink-0 text-brand-ink-muted hover:text-brand-ink"
-            aria-label="Salin link"
+            aria-label={t('print.copyLink')}
           >
-            Salin
+            {t('print.copy')}
           </button>
         </div>
       ) : null}
@@ -208,14 +210,14 @@ export default function OutputPrintPage({ params }: { params: Promise<{ assessme
             <StudentWorksheetRenderer dto={dto} />
           ) : (
             <div className="space-y-5 text-body-sm">
-              <p className="text-brand-ink-muted italic">Memuat…</p>
+              <p className="text-brand-ink-muted italic">{t('loading')}</p>
             </div>
           ),
           'kunci-jawaban': dto ? (
             <TeacherKeyRenderer dto={dto} />
           ) : (
             <div className="space-y-5 text-body-sm">
-              <p className="text-brand-ink-muted italic">Memuat…</p>
+              <p className="text-brand-ink-muted italic">{t('loading')}</p>
             </div>
           ),
         }}

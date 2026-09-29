@@ -3,6 +3,9 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { HistoryView, humanizeAssessmentLabel } from '@/src/features/history/HistoryView';
 import { assessmentService } from '@/src/services/assessments/assessmentService';
 import type { AssessmentSummary } from '@/src/features/review/types';
+import { testTranslate } from '@/src/features/__tests__/i18n';
+
+const t = testTranslate('review');
 
 vi.mock('@/src/services/assessments/assessmentService', () => ({
   assessmentService: { list: vi.fn() },
@@ -80,10 +83,10 @@ describe('history lifecycle UX', () => {
   });
 
   it('humanizes known official slugs and types', () => {
-    expect(humanizeAssessmentLabel('practice')).toBe('Latihan');
-    expect(humanizeAssessmentLabel('official-subject-sd-mi-a-seni-tari')).toBe('Seni Tari');
-    expect(humanizeAssessmentLabel('official-grade-sd-mi-2')).toBe('Kelas 2 SD/MI');
-    expect(humanizeAssessmentLabel('official-subject-a12345678901234567890')).toBe(
+    expect(humanizeAssessmentLabel('practice', t)).toBe('Latihan');
+    expect(humanizeAssessmentLabel('official-subject-sd-mi-a-seni-tari', t)).toBe('Seni Tari');
+    expect(humanizeAssessmentLabel('official-grade-sd-mi-2', t)).toBe('Kelas 2 SD/MI');
+    expect(humanizeAssessmentLabel('official-subject-a12345678901234567890', t)).toBe(
       'Mata pelajaran',
     );
   });

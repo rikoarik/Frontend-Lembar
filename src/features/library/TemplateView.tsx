@@ -2,12 +2,13 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Button, Panel } from '@/app/components/ui';
 import type { CompositionValues } from '@/src/features/generate/types';
 
 type Template = { id: string; name: string; config: CompositionValues; updatedAt: string };
 
-async function fetchTemplates(): Promise<Template[]> {
+async function fetchTemplates(loadFailedMessage: string): Promise<Template[]> {
   const response = await fetch('/v1/templates', { credentials: 'include' });
   const payload = (await response.json().catch(() => null)) as {
     data?: Template[];
@@ -15,13 +16,14 @@ async function fetchTemplates(): Promise<Template[]> {
   } | null;
 
   if (!response.ok) {
-    throw new Error(payload?.error?.message ?? 'Gagal memuat template.');
+    throw new Error(payload?.error?.message ?? loadFailedMessage);
   }
 
   return payload?.data ?? [];
 }
 
 export function TemplateView() {
+  const t = useTranslations('library');
   const [templates, setTemplates] = useState<Template[]>([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
@@ -31,7 +33,7 @@ export function TemplateView() {
   useEffect(() => {
     let cancelled = false;
 
-    void fetchTemplates()
+    void fetchTemplates(t('template.loadFailed'))
       .then((nextTemplates) => {
         if (cancelled) return;
         setTemplates(nextTemplates);
@@ -39,14 +41,14 @@ export function TemplateView() {
       })
       .catch((cause) => {
         if (cancelled) return;
-        setError(cause instanceof Error ? cause.message : 'Gagal memuat template.');
+        setError(cause instanceof Error ? cause.message : t('template.loadFailed'));
         setLoading(false);
       });
 
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [t]);
 
   const confirmRemove = (id: string) => setConfirmDeleteId(id);
   const cancelRemove = () => setConfirmDeleteId(null);
@@ -59,7 +61,7 @@ export function TemplateView() {
     });
     if (!response.ok) {
       const payload = await response.json().catch(() => null);
-      setError(payload?.error?.message ?? 'Gagal menghapus template.');
+      setError(payload?.error?.message ?? t('template.deleteFailed'));
     } else {
       setTemplates((current) => current.filter((item) => item.id !== template.id));
     }
@@ -71,16 +73,14 @@ export function TemplateView() {
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-h1 font-semibold text-brand-ink">Template konfigurasi</h1>
-          <p className="text-body-sm text-brand-ink-muted">
-            Simpan konfigurasi generate yang sering dipakai.
-          </p>
+          <h1 className="text-h1 font-semibold text-brand-ink">{t('template.title')}</h1>
+          <p className="text-body-sm text-brand-ink-muted">{t('template.subtitle')}</p>
         </div>
         <Link
           href="/app/generate?saveTemplate=1"
           className="inline-flex min-h-[var(--control-md)] items-center justify-center rounded-md bg-brand-accent px-4 text-white"
         >
-          Buat template baru
+          {t('template.createNew')}
         </Link>
       </div>
       {error ? (
@@ -89,29 +89,27 @@ export function TemplateView() {
         </p>
       ) : null}
       <Panel
-        title="Template tersimpan"
-        description={`${templates.length} template di workspace aktif`}
+        title={t('template.savedTemplates')}
+        description={t('template.count', { count: templates.length })}
       >
         {loading ? (
-          <p className="text-body-sm text-brand-ink-muted">Memuat…</p>
+          <p className="text-body-sm text-brand-ink-muted">{t('template.loading')}</p>
         ) : templates.length === 0 ? (
-          <p className="text-body-sm text-brand-ink-muted">
-            Belum ada template. Isi konfigurasi generate lalu simpan sebagai template.
-          </p>
+          <p className="text-body-sm text-brand-ink-muted">{t('template.empty')}</p>
         ) : (
           <ul className="grid gap-3 md:grid-cols-2">
             {templates.map((template) => (
               <li key={template.id} className="rounded-md border border-brand-line p-4">
                 <h2 className="font-semibold text-brand-ink">{template.name}</h2>
                 <p className="mt-1 text-body-sm text-brand-ink-muted">
-                  {template.config.questionCount} soal · {template.config.difficulty} ·{' '}
-                  {template.config.assessmentType}
+                  {t('template.questionCount', { count: template.config.questionCount })} ·{' '}
+                  {template.config.difficulty} · {template.config.assessmentType}
                 </p>
 
                 {confirmDeleteId === template.id ? (
                   <div className="mt-4 flex flex-wrap items-center gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2">
                     <span className="flex-1 text-body-sm text-red-700">
-                      Hapus &ldquo;{template.name}&rdquo;?
+                      {t('template.deleteConfirm', { name: template.name })}
                     </span>
                     <Button
                       type="button"
@@ -120,7 +118,7 @@ export function TemplateView() {
                       disabled={deleting}
                       onClick={() => void executeRemove(template)}
                     >
-                      {deleting ? 'Menghapus…' : 'Ya, hapus'}
+                      {deleting ? t('template.deleting') : t('template.yesDelete')}
                     </Button>
                     <Button
                       type="button"
@@ -129,7 +127,7 @@ export function TemplateView() {
                       disabled={deleting}
                       onClick={cancelRemove}
                     >
-                      Batal
+                      {t('template.cancel')}
                     </Button>
                   </div>
                 ) : (
@@ -138,7 +136,7 @@ export function TemplateView() {
                       href={`/app/generate?templateId=${template.id}`}
                       className="inline-flex min-h-9 items-center rounded-md bg-brand-accent px-3 text-body-sm text-white"
                     >
-                      Pakai template
+                      {t('template.useTemplate')}
                     </Link>
                     <Button
                       type="button"
@@ -146,7 +144,7 @@ export function TemplateView() {
                       size="sm"
                       onClick={() => confirmRemove(template.id)}
                     >
-                      Hapus
+                      {t('template.delete')}
                     </Button>
                   </div>
                 )}

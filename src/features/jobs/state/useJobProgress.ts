@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { jobService } from '@/src/services/jobs/jobService';
 import type { JobError } from '@/src/services/jobs/jobErrors';
 import { isTerminalJobStatus, type JobSnapshot } from '@/src/features/jobs/types';
@@ -38,6 +39,7 @@ export function useJobProgress({
   const activeJobId = useRef(jobId);
   const onTerminalRef = useRef(onTerminal);
   const handoffDeadlineAt = useRef<number | null>(null);
+  const t = useTranslations('jobs');
 
   useEffect(() => {
     onTerminalRef.current = onTerminal;
@@ -95,7 +97,7 @@ export function useJobProgress({
       if (handoffDeadlineAt.current !== null && Date.now() >= handoffDeadlineAt.current) {
         setError({
           code: 'TIMEOUT',
-          safeMessage: 'Belum dapat assessmentId, coba lagi',
+          safeMessage: t('handoffTimeout'),
           retryable: true,
         });
         handoffDeadlineAt.current = null;
@@ -105,7 +107,7 @@ export function useJobProgress({
     }, pollIntervalMs);
 
     return () => window.clearInterval(id);
-  }, [jobId, handoffComplete, pollIntervalMs, refresh]);
+  }, [jobId, handoffComplete, pollIntervalMs, refresh, t]);
 
   useEffect(() => {
     if (!jobId || handoffComplete || typeof EventSource === 'undefined') return;

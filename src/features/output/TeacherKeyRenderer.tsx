@@ -1,3 +1,6 @@
+'use client';
+
+import { useTranslations } from 'next-intl';
 import {
   type PrintDTO,
   type PrintQuestion,
@@ -7,11 +10,12 @@ import { DocumentLetterhead } from '@/src/features/output/DocumentLetterhead';
 import { QuestionImageDisplay } from '@/src/features/questions/QuestionImageDisplay';
 
 export function TeacherKeyRenderer({ dto }: { dto: PrintDTO }) {
+  const t = useTranslations('output');
   return (
     <article className="teacher-key-print print:bg-white print:text-black">
       <DocumentLetterhead dto={dto} copy="teacher" />
 
-      <ol className="flex flex-col gap-6" aria-label="Teacher answer key questions">
+      <ol className="flex flex-col gap-6" aria-label={t('teacherKey.questionsAria')}>
         {dto.questions.map((question) => (
           <li key={question.number} className="break-inside-avoid print:break-inside-avoid">
             <div className="flex gap-3">
@@ -22,7 +26,7 @@ export function TeacherKeyRenderer({ dto }: { dto: PrintDTO }) {
                 <p className="text-body text-brand-ink print:text-black">{question.stem}</p>
                 <QuestionImageDisplay
                   image={question.image}
-                  fallbackAlt={`Gambar pendukung soal ${question.number}`}
+                  fallbackAlt={t('worksheet.supportingImage', { number: question.number })}
                   className="mt-3 max-h-80 print:max-h-64"
                 />
                 <AnswerSection question={question} />
@@ -36,6 +40,7 @@ export function TeacherKeyRenderer({ dto }: { dto: PrintDTO }) {
 }
 
 function AnswerSection({ question }: { question: PrintQuestion }) {
+  const t = useTranslations('output');
   const { questionType, options, answerKey, explanation, rubric } = question;
 
   if (questionType === 'multiple_choice' || questionType === 'true_false') {
@@ -52,7 +57,11 @@ function AnswerSection({ question }: { question: PrintQuestion }) {
                     ? 'text-body-sm font-semibold text-green-700 print:text-black print:underline'
                     : 'text-body-sm text-brand-ink print:text-black'
                 }
-                aria-label={isCorrect ? `Correct answer: ${option.key}. ${option.text}` : undefined}
+                aria-label={
+                  isCorrect
+                    ? t('teacherKey.correctAnswer', { key: option.key, text: option.text })
+                    : undefined
+                }
               >
                 {isCorrect && <span aria-hidden="true">✓ </span>}
                 <span className="font-medium">{option.key}.</span> {option.text}
@@ -70,7 +79,7 @@ function AnswerSection({ question }: { question: PrintQuestion }) {
       <>
         <div className="mt-3 rounded-sm border border-brand-line p-3 print:border-black">
           <p className="text-label-sm font-semibold text-brand-ink-muted print:text-black">
-            Answer key
+            {t('teacherKey.answerKey')}
           </p>
           <p className="mt-1 text-body-sm text-brand-ink print:text-black">{answerKey}</p>
         </div>
@@ -85,7 +94,7 @@ function AnswerSection({ question }: { question: PrintQuestion }) {
       <>
         <div className="mt-3 rounded-sm border border-brand-line p-3 print:border-black">
           <p className="text-label-sm font-semibold text-brand-ink-muted print:text-black">
-            Model answer
+            {t('teacherKey.modelAnswer')}
           </p>
           <p className="mt-1 text-body-sm text-brand-ink print:text-black">{answerKey}</p>
         </div>
@@ -93,11 +102,11 @@ function AnswerSection({ question }: { question: PrintQuestion }) {
           <div className="mt-3">
             <div className="flex items-baseline gap-3">
               <p className="text-label-sm font-semibold text-brand-ink-muted print:text-black">
-                Rubric
+                {t('teacherKey.rubric')}
               </p>
               {maxScore != null && (
                 <p className="text-body-sm text-brand-ink-muted print:text-black">
-                  Max score: {maxScore}
+                  {t('teacherKey.maxScore', { score: maxScore })}
                 </p>
               )}
             </div>
@@ -113,8 +122,9 @@ function AnswerSection({ question }: { question: PrintQuestion }) {
 }
 
 function RubricList({ criteria }: { criteria: PrintRubricCriterion[] }) {
+  const t = useTranslations('output');
   return (
-    <ul className="mt-2 flex flex-col gap-1" aria-label="Rubric criteria">
+    <ul className="mt-2 flex flex-col gap-1" aria-label={t('teacherKey.rubricAria')}>
       {criteria.map((c) => (
         <li
           key={c.label}
@@ -122,7 +132,9 @@ function RubricList({ criteria }: { criteria: PrintRubricCriterion[] }) {
         >
           <span className="min-w-[6rem] font-semibold">{c.label}</span>
           <span className="flex-1">{c.description}</span>
-          <span className="shrink-0 text-brand-ink-muted print:text-black">{c.points} pts</span>
+          <span className="shrink-0 text-brand-ink-muted print:text-black">
+            {t('teacherKey.pts', { points: c.points })}
+          </span>
         </li>
       ))}
     </ul>

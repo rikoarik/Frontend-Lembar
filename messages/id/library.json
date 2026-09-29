@@ -1,1 +1,33 @@
-{}
+{
+  "library": {
+    "bank": {
+      "loadFailed": "Bank soal gagal dimuat",
+      "title": "Bank soal pribadi",
+      "subtitle": "Soal hasil generate tersimpan secara pribadi di workspace aktif.",
+      "collection": "Koleksi",
+      "loading": "Memuat…",
+      "count": "{count} soal tersimpan",
+      "empty": "Belum ada soal tersimpan.",
+      "generateQuestions": "Generate soal",
+      "answer": "Jawaban {answer}"
+    },
+    "template": {
+      "loadFailed": "Gagal memuat template.",
+      "deleteFailed": "Gagal menghapus template.",
+      "title": "Template konfigurasi",
+      "subtitle": "Simpan konfigurasi generate yang sering dipakai.",
+      "createNew": "Buat template baru",
+      "savedTemplates": "Template tersimpan",
+      "count": "{count} template di workspace aktif",
+      "loading": "Memuat…",
+      "empty": "Belum ada template. Isi konfigurasi generate lalu simpan sebagai template.",
+      "deleteConfirm": "Hapus “{name}”?",
+      "deleting": "Menghapus…",
+      "yesDelete": "Ya, hapus",
+      "cancel": "Batal",
+      "useTemplate": "Pakai template",
+      "delete": "Hapus",
+      "questionCount": "{count} soal"
+    }
+  }
+}
