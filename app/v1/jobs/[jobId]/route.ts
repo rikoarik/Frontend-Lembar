@@ -15,6 +15,30 @@ function workspaceIdFromToken(token: string): string | null {
   }
 }
 
+/**
+ * Presentation stage for the FE progress panel.
+ *
+ * The backend reports neutral statuses (queued / preparing / generating /
+ * validating / rendering / terminal), but a plain `generating` covers both the
+ * generation loop and the tail work after every item has been produced. We use
+ * the progress ratio to split that: once `progressCurrent` reaches
+ * `progressTotal` the remaining work is schema validation plus the review
+ * handoff, so the stage becomes `validating`. Without this the `validating`
+ * label was unreachable and the panel jumped straight from generating to done.
+ */
+function jobStageFor(rawStatus: string, neutralStatus: string, progressRatio?: number): string {
+  if (neutralStatus === 'succeeded' || neutralStatus === 'partially_succeeded') return 'finalizing';
+  if (rawStatus === 'retry_wait' || neutralStatus === 'retry_wait') return 'preparing';
+  if (rawStatus === 'preparing') return 'preparing';
+  // `rendering` is the backend's export stage; the panel has no separate label
+  // for it, so it reads as validation.
+  if (rawStatus === 'validating' || rawStatus === 'rendering') return 'validating';
+  if (rawStatus === 'generating' || neutralStatus === 'running') {
+    return progressRatio !== undefined && progressRatio >= 1 ? 'validating' : 'generating';
+  }
+  return rawStatus;
+}
+
 async function proxy(request: NextRequest, jobId: string, cancel: boolean) {
   const jar = await cookies();
   const token = jar.get(JWT_COOKIE)?.value || jar.get(SESSION_COOKIE)?.value;
@@ -73,10 +97,20 @@ async function proxy(request: NextRequest, jobId: string, cancel: boolean) {
             : rawStatus;
     const progressCurrent = Number(data.progressCurrent);
     const progressTotal = Number(data.progressTotal);
-    const progressPercent =
+    const progressRatio =
       Number.isFinite(progressCurrent) && Number.isFinite(progressTotal) && progressTotal > 0
-        ? Math.round((progressCurrent / progressTotal) * 100)
+        ? progressCurrent / progressTotal
         : undefined;
+    const rawProgress = progressRatio === undefined ? undefined : Math.round(progressRatio * 100);
+    // `100%` is reserved for a job that has actually reached a terminal state.
+    // The worker reports progress per generated item, so the counter hits the
+    // total while review import / finalization is still running.
+    const progressPercent =
+      rawProgress === undefined
+        ? undefined
+        : ['succeeded', 'partially_succeeded', 'failed', 'cancelled'].includes(status)
+          ? Math.min(100, rawProgress)
+          : Math.min(99, rawProgress);
     return NextResponse.json({
       data: {
         jobId: data.id ?? jobId,
@@ -84,7 +118,7 @@ async function proxy(request: NextRequest, jobId: string, cancel: boolean) {
         compositionId: data.compositionId,
         reviewMode,
         status,
-        stage: rawStatus === 'completed' ? 'finalizing' : rawStatus,
+        stage: jobStageFor(rawStatus, status, progressRatio),
         ...(progressPercent === undefined ? {} : { progressPercent }),
         createdAt: data.createdAt,
         updatedAt: data.updatedAt,
@@ -94,7 +128,10 @@ async function proxy(request: NextRequest, jobId: string, cancel: boolean) {
           ? {
               error: {
                 code: data.failureCode,
-                safeMessage: 'Pembuatan soal gagal. Silakan coba kembali.',
+                safeMessage:
+                  typeof data.failureMessage === 'string' && data.failureMessage.trim()
+                    ? data.failureMessage
+                    : 'Pembuatan soal gagal. Silakan coba kembali.',
                 retryable: true,
               },
             }
