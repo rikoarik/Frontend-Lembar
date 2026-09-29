@@ -70,6 +70,15 @@ jobs:
             pnpm install --frozen-lockfile
             pnpm run build
             pm2 restart lembar-frontend --update-env
-            curl --fail --silent --show-error http://127.0.0.1:3000/ >/dev/null
-            echo "deployed ${TARGET_SHA}"
+            # The restart returns before Next is listening, so poll instead of
+            # curl-ing once and failing on a connection refused.
+            for attempt in $(seq 1 30); do
+              if curl --fail --silent --show-error http://127.0.0.1:3000/ >/dev/null 2>&1; then
+                echo "deployed ${TARGET_SHA} (healthy after ${attempt} attempt(s))"
+                exit 0
+              fi
+              sleep 2
+            done
+            echo "app did not become healthy on :3000 after restart"
+            exit 1
           '
