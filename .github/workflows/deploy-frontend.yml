@@ -1,10 +1,19 @@
 name: Deploy Frontend to VPS
 
+# Triggered on push to dev (NOT workflow_run): a `workflow_run` workflow only
+# fires if its file exists on the DEFAULT branch (main), and this file lives on
+# dev only — that is why the deploy silently stopped firing after 2026-08-23.
+# The gate below polls the ci run for the pushed SHA and refuses to deploy
+# unless it concluded successfully, preserving the "deploy verified commits
+# only" guarantee.
+
 on:
-  workflow_run:
-    workflows: [ci]
-    types: [completed]
+  push:
     branches: [dev]
+
+permissions:
+  actions: read
+  contents: read
 
 concurrency:
   group: deploy-frontend-dev
@@ -12,16 +21,50 @@ concurrency:
 
 jobs:
   deploy:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: self-hosted
     steps:
-      - name: Deploy verified commit
-        working-directory: /home/hermes/Projects/Frontend-Lembar
+      - name: Wait for ci to pass on this commit
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SHA: ${{ github.sha }}
+          REPO: ${{ github.repository }}
         run: |
           set -eu
-          git fetch origin dev
-          git checkout -B dev ${{ github.event.workflow_run.head_sha }}
-          pnpm install --frozen-lockfile
-          pnpm run build
-          pm2 restart lembar-frontend --update-env
-          curl --fail --silent --show-error http://127.0.0.1:3000/ >/dev/null
+          i=0
+          while [ "$i" -lt 60 ]; do
+            i=$((i + 1))
+            state=$(gh api \
+              "repos/${REPO}/actions/workflows/ci.yml/runs?head_sha=${SHA}&per_page=1" \
+              --jq 'if (.workflow_runs | length) == 0 then "none"
+                    else (.workflow_runs[0].status + "/" + (.workflow_runs[0].conclusion // "pending")) end')
+            echo "attempt ${i}: ci=${state}"
+            case "$state" in
+              completed/success) echo "ci passed for ${SHA}"; exit 0 ;;
+              completed/*) echo "ci concluded '${state#completed/}' for ${SHA} — refusing to deploy"; exit 1 ;;
+            esac
+            sleep 20
+          done
+          echo "timed out waiting for ci on ${SHA}"
+          exit 1
+
+      - name: Deploy verified commit
+        env:
+          TARGET_SHA: ${{ github.sha }}
+        run: |
+          set -eu
+          # The self-hosted runner executes as root with no HOME in its
+          # environment, so git cannot read /root/.gitconfig, rejects the
+          # hermes-owned checkout as "dubious ownership", and has no ssh key
+          # for the origin remote; pm2 would also attach to root's daemon
+          # instead of the one serving app.lembar.web.id. Deploy as the owner.
+          sudo -u hermes -H env TARGET_SHA="${TARGET_SHA}" bash -lc '
+            set -eu
+            cd /home/hermes/Projects/Frontend-Lembar
+            git fetch origin dev
+            git checkout -B dev "${TARGET_SHA}"
+            pnpm install --frozen-lockfile
+            pnpm run build
+            pm2 restart lembar-frontend --update-env
+            curl --fail --silent --show-error http://127.0.0.1:3000/ >/dev/null
+            echo "deployed ${TARGET_SHA}"
+          '
