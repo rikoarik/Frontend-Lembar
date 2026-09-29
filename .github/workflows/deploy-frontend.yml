@@ -29,19 +29,24 @@ jobs:
           SHA: ${{ github.sha }}
           REPO: ${{ github.repository }}
         run: |
-          set -eu
+          set -u
           i=0
           while [ "$i" -lt 60 ]; do
             i=$((i + 1))
-            state=$(gh api \
+            # A transient API/TLS failure must not abort the gate: treat it as
+            # "not known yet" and retry, otherwise a blip fails the deploy.
+            if state=$(gh api \
               "repos/${REPO}/actions/workflows/ci.yml/runs?head_sha=${SHA}&per_page=1" \
               --jq 'if (.workflow_runs | length) == 0 then "none"
-                    else (.workflow_runs[0].status + "/" + (.workflow_runs[0].conclusion // "pending")) end')
-            echo "attempt ${i}: ci=${state}"
-            case "$state" in
-              completed/success) echo "ci passed for ${SHA}"; exit 0 ;;
-              completed/*) echo "ci concluded '${state#completed/}' for ${SHA} — refusing to deploy"; exit 1 ;;
-            esac
+                    else (.workflow_runs[0].status + "/" + (.workflow_runs[0].conclusion // "pending")) end' 2>/dev/null); then
+              echo "attempt ${i}: ci=${state}"
+              case "$state" in
+                completed/success) echo "ci passed for ${SHA}"; exit 0 ;;
+                completed/*) echo "ci concluded '${state#completed/}' for ${SHA} — refusing to deploy"; exit 1 ;;
+              esac
+            else
+              echo "attempt ${i}: ci lookup failed (transient), retrying"
+            fi
             sleep 20
           done
           echo "timed out waiting for ci on ${SHA}"
