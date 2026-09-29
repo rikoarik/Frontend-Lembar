@@ -30,13 +30,25 @@ type Requirement = { label: string; met: boolean };
 export function planRequirements(planKey: string, edit: EditRow): Requirement[] {
   const price = Number(edit.priceAmount);
   const tokens = edit.tokenMonthlyLimit.trim() === '' ? null : Number(edit.tokenMonthlyLimit);
-  const features = edit.features.split(',').map((item) => item.trim()).filter(Boolean);
+  const features = edit.features
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean);
   const paid = planKey !== 'free';
   return [
     { label: 'Nama paket diisi', met: edit.displayName.trim().length > 0 },
-    { label: paid ? 'Harga lebih dari Rp0' : 'Harga tepat Rp0', met: paid ? Number.isInteger(price) && price > 0 : price === 0 },
-    { label: paid ? 'Periode tagihan: bulanan' : 'Periode tagihan kosong', met: paid ? edit.billingPeriod === 'monthly' : edit.billingPeriod === '' },
-    { label: 'Kuota token diisi dan lebih dari 0', met: tokens !== null && Number.isInteger(tokens) && tokens > 0 },
+    {
+      label: paid ? 'Harga lebih dari Rp0' : 'Harga tepat Rp0',
+      met: paid ? Number.isInteger(price) && price > 0 : price === 0,
+    },
+    {
+      label: paid ? 'Periode tagihan: bulanan' : 'Periode tagihan kosong',
+      met: paid ? edit.billingPeriod === 'monthly' : edit.billingPeriod === '',
+    },
+    {
+      label: 'Kuota token diisi dan lebih dari 0',
+      met: tokens !== null && Number.isInteger(tokens) && tokens > 0,
+    },
     { label: 'Minimal satu fitur/manfaat', met: features.length > 0 },
   ];
 }
@@ -210,11 +222,15 @@ function PlanEditor({
       <div className="mt-4 rounded-xl border border-[#eadfce] bg-[#fffaf4] p-4">
         <p className="font-semibold text-[#1e1814]">Syarat sebelum paket diaktifkan</p>
         <p id={`${plan.key}-activation-hint`} className="mt-1 text-body-xs text-[#6d665d]">
-          Status Aktif membuat paket dapat dipilih pengguna. Lengkapi semua poin ini terlebih dahulu.
+          Status Aktif membuat paket dapat dipilih pengguna. Lengkapi semua poin ini terlebih
+          dahulu.
         </p>
         <ul className="mt-3 grid gap-2 text-body-xs sm:grid-cols-2">
           {requirements.map((requirement) => (
-            <li key={requirement.label} className={requirement.met ? 'text-emerald-700' : 'font-medium text-[#851925]'}>
+            <li
+              key={requirement.label}
+              className={requirement.met ? 'text-emerald-700' : 'font-medium text-[#851925]'}
+            >
               {requirement.met ? '✓' : 'Perlu diisi:'} {requirement.label}
             </li>
           ))}
@@ -222,11 +238,17 @@ function PlanEditor({
       </div>
 
       <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-        {field('Nama paket', 'displayName', 'Contoh: Guru Pro. Tampil di halaman harga dan langganan.')}
+        {field(
+          'Nama paket',
+          'displayName',
+          'Contoh: Guru Pro. Tampil di halaman harga dan langganan.',
+        )}
         {field(
           'Harga per bulan (Rp)',
           'priceAmount',
-          plan.key === 'free' ? 'Wajib 0 untuk paket Free.' : 'Wajib lebih dari 0. Contoh: 49000 untuk Rp49.000/bulan.',
+          plan.key === 'free'
+            ? 'Wajib 0 untuk paket Free.'
+            : 'Wajib lebih dari 0. Contoh: 49000 untuk Rp49.000/bulan.',
         )}
         {field(
           'Kuota token per bulan',
@@ -234,19 +256,28 @@ function PlanEditor({
           'Wajib diisi saat aktif. Contoh: 300000. Ini batas penggunaan AI per akun tiap bulan.',
         )}
         <div className="flex flex-col gap-1.5">
-          <label className="text-body-xs font-semibold text-[#6d665d]" htmlFor={`${plan.key}-billingPeriod`}>
+          <label
+            className="text-body-xs font-semibold text-[#6d665d]"
+            htmlFor={`${plan.key}-billingPeriod`}
+          >
             Periode tagihan
           </label>
           <select
             id={`${plan.key}-billingPeriod`}
             className="rounded-xl border border-[#e2ddd6] bg-white px-3 py-2 text-body-sm text-[#171717] focus:outline-none focus:ring-2 focus:ring-[#851925]/25"
             value={edit.billingPeriod}
-            onChange={(e) => setEdit((prev) => ({ ...prev, billingPeriod: e.target.value as '' | 'monthly' }))}
+            onChange={(e) =>
+              setEdit((prev) => ({ ...prev, billingPeriod: e.target.value as '' | 'monthly' }))
+            }
           >
             <option value="">{plan.key === 'free' ? 'Tidak ada tagihan' : 'Pilih periode'}</option>
             {plan.key !== 'free' && <option value="monthly">Bulanan</option>}
           </select>
-          <p className="text-[11px] text-[#6d665d]">{plan.key === 'free' ? 'Free wajib tanpa periode tagihan.' : 'Saat ini platform hanya mendukung tagihan bulanan.'}</p>
+          <p className="text-[11px] text-[#6d665d]">
+            {plan.key === 'free'
+              ? 'Free wajib tanpa periode tagihan.'
+              : 'Saat ini platform hanya mendukung tagihan bulanan.'}
+          </p>
         </div>
         {field(
           'Fitur dan manfaat',

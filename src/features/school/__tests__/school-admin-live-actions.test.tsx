@@ -136,7 +136,9 @@ describe('SectionUndang — inviteMember live action', () => {
     // Toast must include the email returned by the service — not the submitted/static value.
     await waitFor(() =>
       expect(
-        screen.getByText(/undangan dibuat untuk server-budi@sdn1\.sch\.id\. email akan dikirim setelah provider notifikasi dikonfigurasi/i),
+        screen.getByText(
+          /undangan dibuat untuk server-budi@sdn1\.sch\.id\. email akan dikirim setelah provider notifikasi dikonfigurasi/i,
+        ),
       ).toBeInTheDocument(),
     );
 

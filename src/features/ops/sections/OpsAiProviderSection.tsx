@@ -317,7 +317,10 @@ export function OpsAiProviderSection({ setToast }: { setToast?: (msg: string) =>
               />
             </ProviderField>
 
-            <ProviderField label="Maks. output token" hint="Batas output untuk satu panggilan Hermes.">
+            <ProviderField
+              label="Maks. output token"
+              hint="Batas output untuk satu panggilan Hermes."
+            >
               <input
                 type="number"
                 className={fieldCls}
@@ -404,17 +407,50 @@ export function OpsAiProviderSection({ setToast }: { setToast?: (msg: string) =>
       <Panel title="Image generation via Hermes">
         <div className="space-y-4">
           <label className="flex items-center gap-2 text-sm font-medium text-[#403a34]">
-            <input type="checkbox" checked={imageEnabled} onChange={(e) => setImageEnabled(e.target.checked)} disabled={saving} />
+            <input
+              type="checkbox"
+              checked={imageEnabled}
+              onChange={(e) => setImageEnabled(e.target.checked)}
+              disabled={saving}
+            />
             Aktifkan gambar opsional untuk soal
           </label>
-          <ProviderField label="Base URL xAI" hint="Hermes image_gen yang memanggil xAI; Lembar tidak memanggil provider langsung.">
-            <input type="url" className={fieldCls} placeholder="https://api.x.ai/v1" value={imageBaseUrl} onChange={(e) => setImageBaseUrl(e.target.value)} disabled={saving} />
+          <ProviderField
+            label="Base URL xAI"
+            hint="Hermes image_gen yang memanggil xAI; Lembar tidak memanggil provider langsung."
+          >
+            <input
+              type="url"
+              className={fieldCls}
+              placeholder="https://api.x.ai/v1"
+              value={imageBaseUrl}
+              onChange={(e) => setImageBaseUrl(e.target.value)}
+              disabled={saving}
+            />
           </ProviderField>
-          <ProviderField label="API Key xAI" hint="Biarkan kosong untuk mempertahankan key yang tersimpan.">
-            <input type="password" className={fieldCls} placeholder="Biarkan kosong bila tidak diubah" value={imageApiKey} onChange={(e) => setImageApiKey(e.target.value)} autoComplete="new-password" disabled={saving} />
+          <ProviderField
+            label="API Key xAI"
+            hint="Biarkan kosong untuk mempertahankan key yang tersimpan."
+          >
+            <input
+              type="password"
+              className={fieldCls}
+              placeholder="Biarkan kosong bila tidak diubah"
+              value={imageApiKey}
+              onChange={(e) => setImageApiKey(e.target.value)}
+              autoComplete="new-password"
+              disabled={saving}
+            />
           </ProviderField>
           <ProviderField label="Model gambar Hermes" hint="Default: grok-imagine-image.">
-            <input type="text" className={fieldCls} placeholder="grok-imagine-image" value={imageModelId} onChange={(e) => setImageModelId(e.target.value)} disabled={saving} />
+            <input
+              type="text"
+              className={fieldCls}
+              placeholder="grok-imagine-image"
+              value={imageModelId}
+              onChange={(e) => setImageModelId(e.target.value)}
+              disabled={saving}
+            />
           </ProviderField>
         </div>
       </Panel>

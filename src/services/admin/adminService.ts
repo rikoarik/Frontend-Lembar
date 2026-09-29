@@ -1024,7 +1024,13 @@ export const adminService = {
     code: string;
     kind: 'lesson' | 'exercise' | 'reading' | 'video' | 'assessment' | 'reference';
     title: string;
-    sourceRights: 'license:internal' | 'license:cc-by' | 'license:cc-by-sa' | 'license:cc-by-nc' | 'license:cc-by-nd' | 'license:unknown';
+    sourceRights:
+      | 'license:internal'
+      | 'license:cc-by'
+      | 'license:cc-by-sa'
+      | 'license:cc-by-nc'
+      | 'license:cc-by-nd'
+      | 'license:unknown';
     publish: boolean;
   }): Promise<Result<{ id: string; title: string; published: boolean }, AdminError>> {
     return request('/v1/admin/catalog/materials', 'POST', data);

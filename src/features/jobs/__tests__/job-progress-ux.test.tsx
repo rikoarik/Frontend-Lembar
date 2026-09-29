@@ -128,7 +128,11 @@ describe('job progress UX', () => {
       <JobProgressPanel
         job={running}
         loading={false}
-        error={{ code: 'UNKNOWN', safeMessage: 'Tidak dapat memuat status pekerjaan saat ini.', retryable: true }}
+        error={{
+          code: 'UNKNOWN',
+          safeMessage: 'Tidak dapat memuat status pekerjaan saat ini.',
+          retryable: true,
+        }}
       />,
     );
 

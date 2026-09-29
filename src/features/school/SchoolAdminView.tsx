@@ -472,7 +472,9 @@ function SectionUndang({ setToast }: { setToast: (msg: string) => void }) {
     setLoading(true);
     const res = await schoolService.inviteMember({ email: trimmed, role });
     if (res.ok) {
-      setToast(`Undangan dibuat untuk ${res.value.email}. Email akan dikirim setelah provider notifikasi dikonfigurasi.`);
+      setToast(
+        `Undangan dibuat untuk ${res.value.email}. Email akan dikirim setelah provider notifikasi dikonfigurasi.`,
+      );
       setEmail('');
     } else {
       setToast(`Gagal mengirim undangan: ${res.error.safeMessage}`);
