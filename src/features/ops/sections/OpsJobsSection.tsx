@@ -10,6 +10,7 @@ import {
 import { AdminPagination } from '../components/AdminPagination';
 import { jobTone } from '../utils/opsToneUtils';
 import { adminService, type AdminJobRow } from '@/src/services/admin/adminService';
+import { useLocaleFormat } from '@/src/i18n/useLocaleFormat';
 
 export function OpsJobsSection({
   jobs,
@@ -50,6 +51,7 @@ export function OpsJobsSection({
   loadJobs: (pg?: number, searchVal?: string, statusVal?: AdminJobRow['status']) => void;
   setToast: (msg: string) => void;
 }) {
+  const { dateTime } = useLocaleFormat();
   return (
     <>
       <div className="flex items-center justify-between px-1 py-1">
@@ -145,15 +147,11 @@ export function OpsJobsSection({
                   </span>
                   <span className="font-semibold text-[#6d665d]">Dibuat</span>
                   <span className="col-span-2 text-[11px]">
-                    {jobDetailData.created_at
-                      ? new Date(String(jobDetailData.created_at)).toLocaleString('id-ID')
-                      : '—'}
+                    {jobDetailData.created_at ? dateTime(String(jobDetailData.created_at)) : '—'}
                   </span>
                   <span className="font-semibold text-[#6d665d]">Update</span>
                   <span className="col-span-2 text-[11px]">
-                    {jobDetailData.updated_at
-                      ? new Date(String(jobDetailData.updated_at)).toLocaleString('id-ID')
-                      : '—'}
+                    {jobDetailData.updated_at ? dateTime(String(jobDetailData.updated_at)) : '—'}
                   </span>
                 </div>
                 {jobDetailData.input ? (

@@ -14,6 +14,7 @@ import {
   type AdminBillingRow,
   type PaymentOrder,
 } from '@/src/services/admin/adminService';
+import { useLocaleFormat } from '@/src/i18n/useLocaleFormat';
 
 export function OpsBillingSection({
   billingData,
@@ -78,6 +79,7 @@ export function OpsBillingSection({
   loadBilling: (stateVal?: AdminBillingRow['state'], searchVal?: string, pg?: number) => void;
   setToast: (msg: string) => void;
 }) {
+  const { number } = useLocaleFormat();
   return (
     <>
       <div className="flex items-center justify-between px-1 py-1">
@@ -319,7 +321,7 @@ export function OpsBillingSection({
                 render: (row: any) => (
                   <span className="tabular-nums">
                     {row.currency}{' '}
-                    {(Number(row.amountCents) / 100).toLocaleString('id-ID', {
+                    {number(Number(row.amountCents) / 100, {
                       minimumFractionDigits: 0,
                     })}
                   </span>

@@ -6,6 +6,8 @@ import { Button, Panel, StatusBadge } from '@/app/components/ui';
 import type { StatusLabel } from '@/app/components/ui';
 import { assessmentService } from '@/src/services/assessments/assessmentService';
 import type { AssessmentLifecycle, AssessmentSummary } from '@/src/features/review/types';
+import { DATE_SHORT, type LocaleFormat } from '@/src/i18n/formats';
+import { useLocaleFormat } from '@/src/i18n/useLocaleFormat';
 
 const DEFAULT_REFRESH_MS = 10_000;
 const KNOWN_LABELS: Record<string, string> = {
@@ -56,13 +58,8 @@ function badge(lifecycle: AssessmentLifecycle): StatusLabel {
   }
 }
 
-function formatDate(value: string): string {
-  const date = new Date(value);
-  return Number.isNaN(date.getTime())
-    ? value
-    : new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }).format(
-        date,
-      );
+function formatDate(value: string, date: LocaleFormat['date']): string {
+  return date(value, DATE_SHORT, value);
 }
 
 function lifecycleCopy(item: AssessmentSummary): string {
@@ -95,6 +92,7 @@ export function HistoryView({
   const [error, setError] = useState<string | null>(null);
   const [q, setQ] = useState('');
   const [lifecycle, setLifecycle] = useState<AssessmentLifecycle | 'all'>('all');
+  const { date } = useLocaleFormat();
   const loaded = useRef(false);
   const requestSeq = useRef(0);
 
@@ -185,7 +183,7 @@ export function HistoryView({
             <li key={item.id}>
               <Panel
                 title={humanizeAssessmentLabel(item.title)}
-                description={`${humanizeAssessmentLabel(item.subject)} · ${humanizeAssessmentLabel(item.gradeLabel)} · Diperbarui ${formatDate(item.updatedAt)}`}
+                description={`${humanizeAssessmentLabel(item.subject)} · ${humanizeAssessmentLabel(item.gradeLabel)} · Diperbarui ${formatDate(item.updatedAt, date)}`}
                 actions={<StatusBadge label={badge(item.lifecycle)} />}
               >
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

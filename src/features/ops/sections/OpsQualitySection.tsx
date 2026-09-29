@@ -10,6 +10,7 @@ import {
 import { AdminPagination } from '../components/AdminPagination';
 import { qualityTone } from '../utils/opsToneUtils';
 import { adminService, type AdminQualityRow } from '@/src/services/admin/adminService';
+import { useLocaleFormat } from '@/src/i18n/useLocaleFormat';
 
 export function OpsQualitySection({
   quality,
@@ -64,6 +65,7 @@ export function OpsQualitySection({
   loadQuality: (pg?: number, searchVal?: string, qualityVal?: AdminQualityRow['status']) => void;
   setToast: (msg: string) => void;
 }) {
+  const { dateTime } = useLocaleFormat();
   return (
     <>
       <div className="flex items-center justify-between px-1 py-1">
@@ -121,7 +123,7 @@ export function OpsQualitySection({
                   </span>
                   <span className="font-semibold text-[#6d665d]">Dibuat</span>
                   <span className="col-span-2 text-[11px]">
-                    {new Date(qualityDetailData.createdAt).toLocaleString('id-ID')}
+                    {dateTime(qualityDetailData.createdAt)}
                   </span>
                 </div>
                 <div>

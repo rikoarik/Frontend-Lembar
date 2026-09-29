@@ -1,8 +1,10 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { getLocale, getTranslations } from 'next-intl/server';
+import { getTranslations } from 'next-intl/server';
 
 import { fetchPublicPlans, type PublicPlan } from '@/src/lib/api/plans';
+import type { NumberFormat } from '@/src/i18n/formats';
+import { getLocaleFormat } from '@/src/i18n/formatServer';
 
 import { marketingMetadata } from '@/src/lib/marketing/marketingMetadata';
 import JsonLd from '@/app/components/marketing/JsonLd';
@@ -46,13 +48,9 @@ type PricingCopy = {
   };
 };
 
-function tokenQuotaLabel(plan: PublicPlan, locale: string, copy: PricingCopy): string {
+function tokenQuotaLabel(plan: PublicPlan, number: NumberFormat, copy: PricingCopy): string {
   if (plan.tokenMonthlyLimit === null) return copy.quotaFromCatalog;
-  return copy.tokenQuota({
-    count: new Intl.NumberFormat(locale === 'id' ? 'id-ID' : 'en-US').format(
-      plan.tokenMonthlyLimit,
-    ),
-  });
+  return copy.tokenQuota({ count: number(plan.tokenMonthlyLimit) });
 }
 
 function CatalogUpdateCard({ copy }: { copy: PricingCopy }) {
@@ -86,7 +84,7 @@ function PlanCard({
   ctaHref,
   subtitle,
   name,
-  locale,
+  number,
   copy,
 }: {
   plan: PublicPlan;
@@ -95,17 +93,17 @@ function PlanCard({
   ctaHref: string;
   subtitle: string;
   name: string;
-  locale: string;
+  number: NumberFormat;
   copy: PricingCopy;
 }) {
   const isFree = plan.priceAmount === 0;
   const price = isFree
     ? 'Rp0'
-    : new Intl.NumberFormat(locale === 'id' ? 'id-ID' : 'en-US', {
+    : number(plan.priceAmount, {
         style: 'currency',
         currency: plan.currency,
         maximumFractionDigits: 0,
-      }).format(plan.priceAmount);
+      });
   return (
     <article
       className={`group relative flex min-h-[32rem] flex-col rounded-2xl border p-7 transition duration-300 hover:-translate-y-1 ${
@@ -141,7 +139,7 @@ function PlanCard({
         <div className="flex items-start gap-3">
           <CheckIcon inverted={isPopular} />
           <span className={`text-body-default leading-6 ${isPopular ? 'text-white' : 'text-ink'}`}>
-            {tokenQuotaLabel(plan, locale, copy)}
+            {tokenQuotaLabel(plan, number, copy)}
           </span>
         </div>
         {plan.features.map((feat) => (
@@ -185,11 +183,8 @@ export default async function HargaPage() {
   };
   // Prices and quotas must only be rendered from the live catalog. Marketing CMS
   // blocks intentionally cannot override this page with stale commercial information.
-  const [plans, t, locale] = await Promise.all([
-    fetchPublicPlans(),
-    getTranslations('pricing'),
-    getLocale(),
-  ]);
+  const [plans, t] = await Promise.all([fetchPublicPlans(), getTranslations('pricing')]);
+  const { number } = await getLocaleFormat();
   const copy: PricingCopy = {
     popular: t('popular'),
     priceFree: t('priceFree'),
@@ -244,7 +239,7 @@ export default async function HargaPage() {
                 cta={t('plans.free.cta')}
                 ctaHref="/daftar"
                 subtitle={t('plans.free.subtitle')}
-                locale={locale}
+                number={number}
                 copy={copy}
               />
             )}
@@ -256,7 +251,7 @@ export default async function HargaPage() {
                 cta={t('plans.pro.cta')}
                 ctaHref="/daftar"
                 subtitle={t('plans.pro.subtitle')}
-                locale={locale}
+                number={number}
                 copy={copy}
               />
             )}
@@ -267,7 +262,7 @@ export default async function HargaPage() {
                 cta={t('plans.plus.cta')}
                 ctaHref="/daftar"
                 subtitle={t('plans.plus.subtitle')}
-                locale={locale}
+                number={number}
                 copy={copy}
               />
             ) : (
