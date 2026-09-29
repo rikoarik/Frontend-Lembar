@@ -5,7 +5,10 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export default async function LiveStatusPage() {
-  const [doc, initialLogs] = await Promise.all([buildLiveStatus(), loadLiveActivity()]);
+  const [doc, initialLogs] = await Promise.all([
+    buildLiveStatus(),
+    loadLiveActivity().catch(() => ({ lines: [], heartbeatCount: 0 })),
+  ]);
 
   return (
     <div

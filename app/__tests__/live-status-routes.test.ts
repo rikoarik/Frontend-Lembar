@@ -1,9 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const tasks = [
+const baseTasks = [
   {
     id: 't_79f6e720',
-    title: 'LEM-OPS-LIVE-001 Hubungkan live-status ke state durable Hermes dan evidence engineering',
+    title:
+      'LEM-OPS-LIVE-001 Hubungkan live-status ke state durable Hermes dan evidence engineering',
     body: 'Story points: 5',
     assignee: 'lembar-frontend',
     status: 'running',
@@ -42,12 +43,14 @@ const tasks = [
   },
 ];
 
-const events = [
+const baseEvents = [
   { task_id: 't_79f6e720', kind: 'created', payload: null, created_at: 1785244462 },
   { task_id: 't_79f6e720', kind: 'heartbeat', payload: null, created_at: 1785244750 },
+  { task_id: 't_79f6e720', kind: 'heartbeat', payload: null, created_at: 1785244810 },
+  { task_id: 't_79f6e720', kind: 'heartbeat', payload: null, created_at: 1785244870 },
 ];
 
-const pm2 = {
+const pm2Online = {
   services: {
     lembarApi: 'online',
     lembarFrontend: 'online',
@@ -60,39 +63,188 @@ const pm2 = {
   ],
 };
 
+const pm2Noisy = {
+  services: {
+    lembarApi: 'online',
+    lembarFrontend: 'online',
+    lembarWorker: 'online',
+  },
+  evidence: [
+    'PM2 lembar-api: online · uptime 30s · restart 17',
+    'PM2 lembar-frontend: online · uptime 25s · restart 21',
+    'PM2 lembar-worker: online · uptime 180s · restart 0',
+  ],
+};
+
+const pm2Fixtures = {
+  online: pm2Online,
+  noisy: pm2Noisy,
+};
+
+function stubBaseEnv(
+  tasks = baseTasks,
+  events = baseEvents,
+  pm2Key: keyof typeof pm2Fixtures = 'online',
+) {
+  vi.stubEnv('LEMBAR_LIVE_STATUS_TASKS_JSON', JSON.stringify(tasks));
+  vi.stubEnv('LEMBAR_LIVE_STATUS_EVENTS_JSON', JSON.stringify(events));
+  vi.stubEnv(
+    'LEMBAR_LIVE_STATUS_FE_COMMITS_JSON',
+    JSON.stringify(['fe12345 feat(fe): durable live status']),
+  );
+  vi.stubEnv(
+    'LEMBAR_LIVE_STATUS_BE_COMMITS_JSON',
+    JSON.stringify(['be12345 feat(be): durable queue']),
+  );
+  vi.stubEnv('LEMBAR_LIVE_STATUS_PM2_JSON', JSON.stringify(pm2Fixtures[pm2Key]));
+  vi.stubEnv('LEMBAR_LIVE_STATUS_COMMENTS_JSON', JSON.stringify([]));
+}
+
 describe('live-status routes', () => {
   beforeEach(() => {
     vi.resetModules();
-    vi.stubEnv('LEMBAR_LIVE_STATUS_TASKS_JSON', JSON.stringify(tasks));
-    vi.stubEnv('LEMBAR_LIVE_STATUS_EVENTS_JSON', JSON.stringify(events));
-    vi.stubEnv('LEMBAR_LIVE_STATUS_FE_COMMITS_JSON', JSON.stringify(['fe12345 feat(fe): durable live status']));
-    vi.stubEnv('LEMBAR_LIVE_STATUS_BE_COMMITS_JSON', JSON.stringify(['be12345 feat(be): durable queue']));
-    vi.stubEnv('LEMBAR_LIVE_STATUS_PM2_JSON', JSON.stringify(pm2));
+    stubBaseEnv();
   });
 
   afterEach(() => {
     vi.unstubAllEnvs();
   });
 
-  it('serves durable status derived from Hermes board', async () => {
+  it('serves durable status derived from Hermes board with evidence-gated progress', async () => {
     const route = await import('../live-status/status.json/route');
     const response = await route.GET();
     expect(response.status).toBe(200);
     const json = await response.json();
     expect(json.board).toMatchObject({ name: 'lembar', taskId: 't_79f6e720', status: 'running' });
-    expect(json.overallPercent).toBe(45);
+    // running=10, no other evidence yet → 10, NOT a hardcoded number like 91 or 45
+    expect(json.overallPercent).toBe(10);
+    expect(json.evidenceGates).toMatchObject({
+      created: true,
+      running: true,
+      firstFileChanged: false,
+      commit: false,
+      tests: false,
+      review: false,
+      qa: false,
+      deploy: false,
+      publicVerification: false,
+    });
     expect(json.currentTask).toContain('t_79f6e720');
     expect(json.latestFrontendCommits[0]).toContain('fe12345');
     expect(json.latestBackendCommits[0]).toContain('be12345');
     expect(json.evidence.some((line: string) => line.includes('PM2 lembar-frontend'))).toBe(true);
   });
 
-  it('serves activity lines from task events', async () => {
+  it('progress does not climb from heartbeats alone', async () => {
+    const onlyHeartbeats = baseEvents.filter((event) => event.kind === 'heartbeat');
+    vi.stubEnv('LEMBAR_LIVE_STATUS_EVENTS_JSON', JSON.stringify(onlyHeartbeats));
+    const route = await import('../live-status/status.json/route');
+    const json = await (await route.GET()).json();
+    // Even with 50 heartbeats, evidence gates still gate progress at the highest gate that fired.
+    expect(json.overallPercent).toBe(10);
+  });
+
+  it('progress climbs through evidence gates in owner-defined order', async () => {
+    const comments = [
+      {
+        author: 'orchestrator',
+        body: 'file_changed: first durable UI/source-of-truth edit detected.',
+      },
+      { author: 'lembar-reviewer', body: 'Review handoff: looks good.' },
+      { author: 'lembar-qa', body: 'QA signed off.' },
+      { author: 'orchestrator', body: 'Deploy dev: pnpm build both repos, push origin/dev.' },
+      {
+        author: 'orchestrator',
+        body: 'Live E2E on app.lembar.web.id using deployed T5 artifact only.',
+      },
+    ];
+    vi.stubEnv('LEMBAR_LIVE_STATUS_COMMENTS_JSON', JSON.stringify(comments));
+    const route = await import('../live-status/status.json/route');
+    const json = await (await route.GET()).json();
+    expect(json.evidenceGates.firstFileChanged).toBe(true);
+    expect(json.evidenceGates.commit).toBe(true); // commit is auto-detected from git log (origin/dev has commits since started_at)
+    expect(json.evidenceGates.review).toBe(true);
+    expect(json.evidenceGates.qa).toBe(true);
+    expect(json.evidenceGates.deploy).toBe(true);
+    expect(json.evidenceGates.publicVerification).toBe(true);
+    expect(json.overallPercent).toBe(100);
+  });
+
+  it('emits PM2 warning when any service restart count is high', async () => {
+    stubBaseEnv(baseTasks, baseEvents, 'noisy');
+    const route = await import('../live-status/status.json/route');
+    const json = await (await route.GET()).json();
+    expect(json.warnings.some((line: string) => /restart/i.test(line))).toBe(true);
+    expect(json.warnings.some((line: string) => line.includes('lembar-frontend'))).toBe(true);
+  });
+
+  it('activity feed collapses heartbeats and exposes a counter', async () => {
     const route = await import('../live-status/activity.json/route');
-    const response = await route.GET();
-    expect(response.status).toBe(200);
-    const json = await response.json();
-    expect(json.lines).toHaveLength(2);
-    expect(json.lines.some((line: string) => line.includes('heartbeat t_79f6e720'))).toBe(true);
+    const json = await (await route.GET()).json();
+    // Only one 'created' line should remain; heartbeats must NOT flood the feed.
+    expect(json.lines).toHaveLength(1);
+    expect(json.lines[0]).toContain('created t_79f6e720');
+    expect(json.heartbeatCount).toBe(3);
+  });
+
+  it('ignores reviewer/QA/deploy comments that belong to a DIFFERENT card', async () => {
+    // Regression: loadComments used to be board-wide, so another card's review/QA
+    // comments fired this card's gates and pushed an unfinished task to 100%.
+    vi.stubEnv(
+      'LEMBAR_LIVE_STATUS_COMMENTS_JSON',
+      JSON.stringify([
+        { task_id: 't_OTHER', author: 'lembar-reviewer', body: 'Verdict: PASS' },
+        { task_id: 't_OTHER', author: 'lembar-qa', body: 'QA signed off.' },
+        { task_id: 't_OTHER', author: 'orchestrator', body: 'Deploy dev: pm2 restart all' },
+        {
+          task_id: 't_OTHER',
+          author: 'orchestrator',
+          body: 'Live E2E on app.lembar.web.id using deployed artifact only.',
+        },
+      ]),
+    );
+    const route = await import('../live-status/status.json/route');
+    const json = await (await route.GET()).json();
+    expect(json.evidenceGates.review).toBe(false);
+    expect(json.evidenceGates.qa).toBe(false);
+    expect(json.evidenceGates.deploy).toBe(false);
+    expect(json.evidenceGates.publicVerification).toBe(false);
+    expect(json.overallPercent).toBe(10);
+  });
+
+  it('counts only this card own file_changed evidence', async () => {
+    vi.stubEnv(
+      'LEMBAR_LIVE_STATUS_COMMENTS_JSON',
+      JSON.stringify([
+        { task_id: 't_OTHER', author: 'orchestrator', body: 'file_changed: other card' },
+      ]),
+    );
+    const route = await import('../live-status/status.json/route');
+    const json = await (await route.GET()).json();
+    expect(json.evidenceGates.firstFileChanged).toBe(false);
+    expect(json.overallPercent).toBe(10);
+  });
+
+  it('does not self-fire gates from a comment that merely NAMES them', async () => {
+    // Regression: the owner's progress spec lists "deploy=95, public verification=100,
+    // PM2 restart" as prose. A mid-sentence match used to fire deploy + publicVerification
+    // and report 100% for work that had not happened.
+    vi.stubEnv(
+      'LEMBAR_LIVE_STATUS_COMMENTS_JSON',
+      JSON.stringify([
+        {
+          task_id: 't_79f6e720',
+          author: 'orchestrator',
+          body: 'Progress wajib pakai evidence gates: created=0, running=10, first file changed=25, commit=50, tests=65, review=75, QA=85, deploy=95, public verification=100. Heartbeat tidak boleh menaikkan progress. High PM2 restart count wajib jadi warning.',
+        },
+      ]),
+    );
+    const route = await import('../live-status/status.json/route');
+    const json = await (await route.GET()).json();
+    expect(json.evidenceGates.deploy).toBe(false);
+    expect(json.evidenceGates.publicVerification).toBe(false);
+    expect(json.evidenceGates.tests).toBe(false);
+    expect(json.evidenceGates.qa).toBe(false);
+    expect(json.overallPercent).toBe(10);
   });
 });

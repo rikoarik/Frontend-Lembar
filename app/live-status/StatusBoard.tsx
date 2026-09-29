@@ -22,6 +22,8 @@ type StatusDoc = {
   nextAction: string;
   blockers: string[];
   evidence: string[];
+  evidenceGates: Record<string, boolean>;
+  warnings: string[];
   items: StatusItem[];
   latestBackendCommits: string[];
   latestFrontendCommits: string[];
@@ -34,6 +36,18 @@ type StatusDoc = {
 const STATUS_PATH = '/live-status/status.json';
 const LOG_PATH = '/live-status/activity.json';
 
+const GATE_LABELS: { key: string; percent: number; label: string }[] = [
+  { key: 'created', percent: 0, label: 'created' },
+  { key: 'running', percent: 10, label: 'running' },
+  { key: 'firstFileChanged', percent: 25, label: 'file_changed' },
+  { key: 'commit', percent: 50, label: 'commit' },
+  { key: 'tests', percent: 65, label: 'tests' },
+  { key: 'review', percent: 75, label: 'review' },
+  { key: 'qa', percent: 85, label: 'qa' },
+  { key: 'deploy', percent: 95, label: 'deploy' },
+  { key: 'publicVerification', percent: 100, label: 'public verify' },
+];
+
 async function fetchStatus(): Promise<StatusDoc | null> {
   try {
     const res = await fetch(STATUS_PATH, { cache: 'no-store' });
@@ -44,14 +58,16 @@ async function fetchStatus(): Promise<StatusDoc | null> {
   }
 }
 
-async function fetchLogs(): Promise<string[]> {
+type ActivityDoc = { lines: string[]; heartbeatCount: number };
+
+async function fetchLogs(): Promise<ActivityDoc> {
   try {
     const res = await fetch(LOG_PATH, { cache: 'no-store' });
-    if (!res.ok) return [];
-    const json = (await res.json()) as { lines: string[] };
-    return json.lines ?? [];
+    if (!res.ok) return { lines: [], heartbeatCount: 0 };
+    const json = (await res.json()) as ActivityDoc;
+    return { lines: json.lines ?? [], heartbeatCount: json.heartbeatCount ?? 0 };
   } catch {
-    return [];
+    return { lines: [], heartbeatCount: 0 };
   }
 }
 
@@ -74,15 +90,20 @@ const statusTone: Record<StatusItem['status'], { dot: string; ring: string; labe
 };
 
 const serviceTone: Record<string, string> = {
-  online: 'text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/10 ring-emerald-200 dark:ring-emerald-500/30',
-  offline: 'text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-500/10 ring-rose-200 dark:ring-rose-500/30',
-  degraded: 'text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-500/10 ring-amber-200 dark:ring-amber-500/30',
+  online:
+    'text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/10 ring-emerald-200 dark:ring-emerald-500/30',
+  offline:
+    'text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-500/10 ring-rose-200 dark:ring-rose-500/30',
+  degraded:
+    'text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-500/10 ring-amber-200 dark:ring-amber-500/30',
 };
 
 function StatusDot({ status }: { status: StatusItem['status'] }) {
   return (
     <span className="relative inline-flex h-2 w-2 items-center justify-center" aria-hidden>
-      <span className={`absolute inline-flex h-full w-full rounded-full ${statusTone[status].dot}`} />
+      <span
+        className={`absolute inline-flex h-full w-full rounded-full ${statusTone[status].dot}`}
+      />
     </span>
   );
 }
@@ -106,14 +127,20 @@ function ProgressBar({ value, status }: { value: number; status: StatusItem['sta
 }
 
 function ServiceBadge({ name, state }: { name: string; state: string }) {
-  const tone = serviceTone[state] ?? 'text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 ring-zinc-200 dark:ring-zinc-700';
+  const tone =
+    serviceTone[state] ??
+    'text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 ring-zinc-200 dark:ring-zinc-700';
   return (
     <li className={`flex items-center justify-between gap-3 rounded-xl px-3 py-2.5 ring-1 ${tone}`}>
       <span className="text-[11px] font-medium uppercase tracking-[0.16em] opacity-80">{name}</span>
       <span className="flex items-center gap-2 text-sm font-semibold">
         <span
           className={`inline-flex h-1.5 w-1.5 rounded-full ${
-            state === 'online' ? 'bg-emerald-500' : state === 'offline' ? 'bg-rose-500' : 'bg-amber-500'
+            state === 'online'
+              ? 'bg-emerald-500'
+              : state === 'offline'
+                ? 'bg-rose-500'
+                : 'bg-amber-500'
           } ${state === 'online' ? 'animate-pulse' : ''}`}
         />
         {state}
@@ -128,18 +155,22 @@ function parseLogLine(line: string) {
   return { ts: match[1] ?? '', lane: match[2] ?? 'GLOBAL', msg: match[3] ?? line };
 }
 
-function LogFeed({ initialLines }: { initialLines: string[] }) {
-  const [lines, setLines] = useState<string[]>(initialLines);
+function LogFeed({ initial }: { initial: ActivityDoc }) {
+  const [lines, setLines] = useState<string[]>(initial.lines);
+  const [heartbeatCount, setHeartbeatCount] = useState<number>(initial.heartbeatCount);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
-    const seenTs = new Set(initialLines);
+    const seenTs = new Set(initial.lines);
 
     async function tick() {
       const fresh = await fetchLogs();
-      if (cancelled || !fresh.length) return;
-      const sliced = fresh.slice(-200);
-      const newLines = sliced.filter((l) => !seenTs.has(l));
+      if (cancelled) return;
+      if (typeof fresh.heartbeatCount === 'number') setHeartbeatCount(fresh.heartbeatCount);
+      if (!fresh.lines.length) return;
+      const sliced = fresh.lines.slice(-200);
+      const newLines = sliced.filter((l: string) => !seenTs.has(l));
       if (newLines.length > 0) {
         for (const l of newLines) seenTs.add(l);
         setLines(sliced);
@@ -151,7 +182,7 @@ function LogFeed({ initialLines }: { initialLines: string[] }) {
       cancelled = true;
       clearInterval(id);
     };
-  }, [initialLines]);
+  }, [initial.lines]);
 
   if (lines.length === 0) {
     return (
@@ -164,49 +195,81 @@ function LogFeed({ initialLines }: { initialLines: string[] }) {
 
   return (
     <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-[inset_0_1px_0_rgba(0,0,0,0.02)] dark:border-zinc-800 dark:bg-zinc-950/60">
-      <div className="flex items-center justify-between border-b border-zinc-200 bg-zinc-50 px-4 py-2.5 dark:border-zinc-800 dark:bg-zinc-900/60">
-        <h2 className="text-[11px] font-medium uppercase tracking-[0.22em] text-zinc-500">
-          Activity log
-        </h2>
-        <span className="font-mono text-[11px] text-zinc-500">
-          {lines.length} baris · live
+      <button
+        type="button"
+        onClick={() => setOpen((value) => !value)}
+        aria-expanded={open}
+        className="flex w-full items-center justify-between border-b border-zinc-200 bg-zinc-50 px-4 py-2.5 text-left dark:border-zinc-800 dark:bg-zinc-900/60"
+      >
+        <span className="flex items-center gap-2">
+          <span
+            className={`inline-block transition-transform ${open ? 'rotate-90' : ''}`}
+            aria-hidden
+          >
+            ›
+          </span>
+          <span className="text-[11px] font-medium uppercase tracking-[0.22em] text-zinc-500">
+            Activity log
+          </span>
         </span>
-      </div>
-      <div className="h-[260px] overflow-y-auto px-4 py-3 font-mono text-[11.5px] leading-relaxed">
-        {lines.map((raw, idx) => {
-          const parsed = parseLogLine(raw);
-          if (!parsed) {
+        <span className="flex items-center gap-3 font-mono text-[11px] text-zinc-500">
+          <span>{heartbeatCount} heartbeat disembunyikan</span>
+          <span>·</span>
+          <span>{lines.length} baris</span>
+        </span>
+      </button>
+      {!open ? (
+        <div className="px-4 py-3 font-mono text-[11.5px] text-zinc-500 dark:text-zinc-400">
+          Klik judul untuk membuka {lines.length} baris event (heartbeat tersembunyi agar tidak
+          membanjiri feed).
+        </div>
+      ) : (
+        <div className="h-[260px] overflow-y-auto px-4 py-3 font-mono text-[11.5px] leading-relaxed">
+          {lines.map((raw, idx) => {
+            const parsed = parseLogLine(raw);
+            if (!parsed) {
+              return (
+                <div key={`raw-${idx}`} className="flex gap-3 text-zinc-500 dark:text-zinc-400">
+                  <span className="w-12 shrink-0 text-right text-zinc-400 dark:text-zinc-600">
+                    ·
+                  </span>
+                  <span className="whitespace-pre-wrap break-words">{raw}</span>
+                </div>
+              );
+            }
+            const laneTone =
+              parsed.lane === 'FE'
+                ? 'text-amber-700 dark:text-amber-300'
+                : parsed.lane === 'BE'
+                  ? 'text-emerald-700 dark:text-emerald-300'
+                  : 'text-zinc-500';
             return (
-              <div key={`raw-${idx}`} className="flex gap-3 text-zinc-500 dark:text-zinc-400">
-                <span className="w-12 shrink-0 text-right text-zinc-400 dark:text-zinc-600">·</span>
-                <span className="whitespace-pre-wrap break-words">{raw}</span>
+              <div key={`${parsed.ts}-${idx}`} className="flex gap-2.5">
+                <span className="w-[68px] shrink-0 truncate text-right text-zinc-400 dark:text-zinc-600">
+                  {parsed.ts.split('T')[1]?.slice(0, 8) ?? parsed.ts}
+                </span>
+                <span className={`w-10 shrink-0 ${laneTone}`}>[{parsed.lane}]</span>
+                <span className="whitespace-pre-wrap break-words text-zinc-800 dark:text-zinc-200">
+                  {parsed.msg}
+                </span>
               </div>
             );
-          }
-          const laneTone =
-            parsed.lane === 'FE'
-              ? 'text-amber-700 dark:text-amber-300'
-              : parsed.lane === 'BE'
-                ? 'text-emerald-700 dark:text-emerald-300'
-                : 'text-zinc-500';
-          return (
-            <div key={`${parsed.ts}-${idx}`} className="flex gap-2.5">
-              <span className="w-[68px] shrink-0 truncate text-right text-zinc-400 dark:text-zinc-600">
-                {parsed.ts.split('T')[1]?.slice(0, 8) ?? parsed.ts}
-              </span>
-              <span className={`w-10 shrink-0 ${laneTone}`}>[{parsed.lane}]</span>
-              <span className="whitespace-pre-wrap break-words text-zinc-800 dark:text-zinc-200">
-                {parsed.msg}
-              </span>
-            </div>
-          );
-        })}
-      </div>
+          })}
+        </div>
+      )}
     </div>
   );
 }
 
-function CommitPanel({ title, commits, accent }: { title: string; commits: string[]; accent: 'amber' | 'emerald' }) {
+function CommitPanel({
+  title,
+  commits,
+  accent,
+}: {
+  title: string;
+  commits: string[];
+  accent: 'amber' | 'emerald';
+}) {
   const ring =
     accent === 'amber'
       ? 'border-amber-200/60 dark:border-amber-500/20 bg-amber-50/40 dark:bg-amber-500/5'
@@ -224,10 +287,15 @@ function CommitPanel({ title, commits, accent }: { title: string; commits: strin
       <ol className="flex flex-col gap-1.5">
         {commits.slice(0, 3).map((commit, idx) => {
           const [hash, ...rest] = commit.split(' ');
-          const tag = accent === 'amber' ? 'bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300' : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300';
+          const tag =
+            accent === 'amber'
+              ? 'bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300'
+              : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300';
           return (
             <li key={commit} className="flex items-start gap-2 text-[11.5px] leading-snug">
-              <span className={`mt-0.5 select-none rounded px-1.5 py-0.5 font-mono text-[9.5px] uppercase tracking-wider ${tag}`}>
+              <span
+                className={`mt-0.5 select-none rounded px-1.5 py-0.5 font-mono text-[9.5px] uppercase tracking-wider ${tag}`}
+              >
                 {idx + 1}
               </span>
               <span className="font-mono text-zinc-500 dark:text-zinc-500">{hash}</span>
@@ -249,7 +317,9 @@ function ItemRow({ item }: { item: StatusItem }) {
           <StatusDot status={item.status} />
           <span className="leading-tight">{item.label}</span>
         </div>
-        <span className={`shrink-0 rounded-full px-2 py-0.5 text-[9.5px] font-semibold uppercase tracking-wider ring-1 ${tone.ring}`}>
+        <span
+          className={`shrink-0 rounded-full px-2 py-0.5 text-[9.5px] font-semibold uppercase tracking-wider ring-1 ${tone.ring}`}
+        >
           {tone.label}
         </span>
       </div>
@@ -257,7 +327,9 @@ function ItemRow({ item }: { item: StatusItem }) {
       <div className="flex items-center justify-between font-mono text-[10.5px] text-zinc-500">
         <span>{item.percent}% complete</span>
         <span>
-          <span className="text-amber-700 dark:text-amber-300">{item.percent.toString().padStart(2, '0')}</span>
+          <span className="text-amber-700 dark:text-amber-300">
+            {item.percent.toString().padStart(2, '0')}
+          </span>
           <span className="px-1 text-zinc-400 dark:text-zinc-600">/</span>
           <span>100</span>
         </span>
@@ -271,16 +343,20 @@ function useTheme() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    // Theme is restored from localStorage on mount. It cannot be read during render
+    // without risking a hydration mismatch (the server always renders light), so the
+    // sync happens here once.
+    const apply = (next: 'light' | 'dark') => {
+      setTheme(next);
+      document.documentElement.classList.toggle('dark', next === 'dark');
+    };
     const saved = window.localStorage.getItem('lembar-theme');
     if (saved === 'light' || saved === 'dark') {
-      setTheme(saved);
-      document.documentElement.classList.toggle('dark', saved === 'dark');
+      apply(saved);
       return;
     }
     const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
-    const initial = prefersDark ? 'dark' : 'light';
-    setTheme(initial);
-    document.documentElement.classList.toggle('dark', initial === 'dark');
+    apply(prefersDark ? 'dark' : 'light');
   }, []);
 
   function toggle() {
@@ -307,7 +383,13 @@ function ThemeToggle({ theme, onToggle }: { theme: 'light' | 'dark'; onToggle: (
   );
 }
 
-export function StatusBoard({ doc, initialLogs }: { doc: StatusDoc | null; initialLogs: string[] }) {
+export function StatusBoard({
+  doc,
+  initialLogs,
+}: {
+  doc: StatusDoc | null;
+  initialLogs: ActivityDoc;
+}) {
   const [latest, setLatest] = useState<StatusDoc | null>(doc);
   const [pulse, setPulse] = useState<number>(0);
   const { theme, toggle } = useTheme();
@@ -340,8 +422,10 @@ export function StatusBoard({ doc, initialLogs }: { doc: StatusDoc | null; initi
       <div className="flex h-[100dvh] w-screen items-center justify-center bg-zinc-50 px-6 text-center dark:bg-zinc-950">
         <p className="max-w-md text-sm text-zinc-500 dark:text-zinc-400">
           Belum ada snapshot. Begitu saya commit perubahan pertama ke{' '}
-          <code className="font-mono text-amber-700 dark:text-amber-300">lembar-live-status.json</code>,
-          halaman ini akan otomatis muncul.
+          <code className="font-mono text-amber-700 dark:text-amber-300">
+            lembar-live-status.json
+          </code>
+          , halaman ini akan otomatis muncul.
         </p>
       </div>
     );
@@ -349,7 +433,9 @@ export function StatusBoard({ doc, initialLogs }: { doc: StatusDoc | null; initi
 
   const allServices = Object.values(latest.services);
   const offlineCount = allServices.filter((state) => state === 'offline').length;
-  const degradedCount = allServices.filter((state) => state === 'degraded' || state === 'unknown').length;
+  const degradedCount = allServices.filter(
+    (state) => state === 'degraded' || state === 'unknown',
+  ).length;
   const connected = offlineCount === 0 && degradedCount === 0;
   const heartbeatStale =
     latest.worker.heartbeatAgeSeconds !== null && latest.worker.heartbeatAgeSeconds > 600;
@@ -391,7 +477,8 @@ export function StatusBoard({ doc, initialLogs }: { doc: StatusDoc | null; initi
                 Overall progress
               </span>
               <span className="text-[12.5px] text-zinc-600 dark:text-zinc-400">
-                Dikerjakan: <span className="text-zinc-900 dark:text-zinc-100">{latest.currentTask}</span>
+                Dikerjakan:{' '}
+                <span className="text-zinc-900 dark:text-zinc-100">{latest.currentTask}</span>
               </span>
             </div>
             <span className="font-mono text-5xl font-semibold tabular-nums leading-none text-emerald-700 lg:text-6xl dark:text-emerald-300">
@@ -400,13 +487,66 @@ export function StatusBoard({ doc, initialLogs }: { doc: StatusDoc | null; initi
             </span>
           </div>
 
+          <section
+            aria-label="Evidence gates"
+            className="flex shrink-0 flex-col gap-2 rounded-2xl border border-zinc-200 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900/50"
+          >
+            <div className="flex items-center justify-between">
+              <h2 className="text-[10.5px] font-medium uppercase tracking-[0.22em] text-zinc-500">
+                Evidence gates
+              </h2>
+              <span className="font-mono text-[10px] text-zinc-500">heartbeat tidak dihitung</span>
+            </div>
+            <ol className="flex flex-wrap gap-1.5">
+              {GATE_LABELS.map((gate) => {
+                const fired = Boolean(latest.evidenceGates?.[gate.key]);
+                return (
+                  <li
+                    key={gate.key}
+                    className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 font-mono text-[10.5px] ring-1 ${
+                      fired
+                        ? 'bg-emerald-50 text-emerald-700 ring-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-300 dark:ring-emerald-500/30'
+                        : 'bg-zinc-50 text-zinc-500 ring-zinc-200 dark:bg-zinc-800/50 dark:text-zinc-400 dark:ring-zinc-700'
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-1.5 w-1.5 rounded-full ${
+                        fired ? 'bg-emerald-500' : 'bg-zinc-400 dark:bg-zinc-600'
+                      }`}
+                      aria-hidden
+                    />
+                    <span>{gate.label}</span>
+                    <span className="opacity-60">{gate.percent}%</span>
+                  </li>
+                );
+              })}
+            </ol>
+          </section>
+
+          {(latest.warnings?.length ?? 0) > 0 && (
+            <section
+              role="alert"
+              className="flex shrink-0 flex-col gap-1 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-rose-700 ring-1 ring-rose-200 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-300 dark:ring-rose-500/30"
+            >
+              <h2 className="text-[10.5px] font-medium uppercase tracking-[0.22em]">Peringatan</h2>
+              <ul className="space-y-1 text-[12px]">
+                {latest.warnings.map((warning) => (
+                  <li key={warning} className="leading-snug">
+                    · {warning}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
           <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-3">
             <div className="flex items-center justify-between">
               <h2 className="text-[10.5px] font-medium uppercase tracking-[0.22em] text-zinc-500">
                 Antrian kerja
               </h2>
               <span className="font-mono text-[10.5px] text-zinc-500">
-                {latest.items.filter((i) => i.status === 'done').length} / {latest.items.length} done
+                {latest.items.filter((i) => i.status === 'done').length} / {latest.items.length}{' '}
+                done
               </span>
             </div>
             <ul className="grid flex-1 grid-cols-1 auto-rows-min gap-2 overflow-y-auto pr-1 md:grid-cols-2">
@@ -457,29 +597,54 @@ export function StatusBoard({ doc, initialLogs }: { doc: StatusDoc | null; initi
               <h2 className="text-[10.5px] font-medium uppercase tracking-[0.22em] text-zinc-500">
                 Activity log (FE + BE)
               </h2>
-              <span className="font-mono text-[10px] uppercase tracking-wider text-zinc-500">live / tail</span>
+              <span className="font-mono text-[10px] uppercase tracking-wider text-zinc-500">
+                live / tail
+              </span>
             </div>
-            <LogFeed initialLines={initialLogs} />
+            <LogFeed initial={initialLogs} />
           </section>
 
           <section className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            <CommitPanel title="Backend origin/dev" commits={latest.latestBackendCommits} accent="emerald" />
-            <CommitPanel title="Frontend origin/dev" commits={latest.latestFrontendCommits} accent="amber" />
+            <CommitPanel
+              title="Backend origin/dev"
+              commits={latest.latestBackendCommits}
+              accent="emerald"
+            />
+            <CommitPanel
+              title="Frontend origin/dev"
+              commits={latest.latestFrontendCommits}
+              accent="amber"
+            />
           </section>
 
           <section className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900/30">
-              <h2 className="mb-2 text-[10.5px] font-medium uppercase tracking-[0.22em] text-zinc-500">Alur otomatis</h2>
+              <h2 className="mb-2 text-[10.5px] font-medium uppercase tracking-[0.22em] text-zinc-500">
+                Alur otomatis
+              </h2>
               <dl className="space-y-2 text-[12.5px]">
-                <div><dt className="text-zinc-500">Mode</dt><dd>{latest.workMode ?? 'Lanjut otomatis sampai blocker material'}</dd></div>
-                <div><dt className="text-zinc-500">Mulai</dt><dd className="font-mono text-[11px]">{latest.startedAt ?? '—'}</dd></div>
-                <div><dt className="text-zinc-500">Setelah ini</dt><dd>{latest.nextAction ?? 'Ambil item pending berikutnya'}</dd></div>
+                <div>
+                  <dt className="text-zinc-500">Mode</dt>
+                  <dd>{latest.workMode ?? 'Lanjut otomatis sampai blocker material'}</dd>
+                </div>
+                <div>
+                  <dt className="text-zinc-500">Mulai</dt>
+                  <dd className="font-mono text-[11px]">{latest.startedAt ?? '—'}</dd>
+                </div>
+                <div>
+                  <dt className="text-zinc-500">Setelah ini</dt>
+                  <dd>{latest.nextAction ?? 'Ambil item pending berikutnya'}</dd>
+                </div>
               </dl>
             </div>
             <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900/30">
-              <h2 className="mb-2 text-[10.5px] font-medium uppercase tracking-[0.22em] text-zinc-500">Blocker & bukti</h2>
+              <h2 className="mb-2 text-[10.5px] font-medium uppercase tracking-[0.22em] text-zinc-500">
+                Blocker & bukti
+              </h2>
               <p className="text-[12.5px] text-zinc-700 dark:text-zinc-300">
-                {(latest.blockers?.length ?? 0) > 0 ? latest.blockers?.join(' · ') : 'Tidak ada blocker.'}
+                {(latest.blockers?.length ?? 0) > 0
+                  ? latest.blockers?.join(' · ')
+                  : 'Tidak ada blocker.'}
               </p>
               {(latest.evidence?.length ?? 0) > 0 && (
                 <ul className="mt-2 space-y-1 font-mono text-[10.5px] text-zinc-500">
