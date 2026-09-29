@@ -221,6 +221,113 @@ describe('GET /v1/jobs/[jobId] handoff contract', () => {
     expect(body.data.stage).toBe('preparing');
   });
 
+  it('passes the backend preparing stage through to the panel', async () => {
+    const { GET } = await import('./route');
+    backendFetch.mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          data: {
+            id: 'job-preparing',
+            status: 'preparing',
+            createdAt: '2026-07-29T10:00:00.000Z',
+            updatedAt: '2026-07-29T10:01:00.000Z',
+          },
+        }),
+        { status: 200, headers: { 'content-type': 'application/json' } },
+      ),
+    );
+
+    const response = await GET(
+      new Request('http://localhost/api/v1/jobs/job-preparing') as never,
+      params('job-preparing'),
+    );
+    const body = await response.json();
+
+    expect(body.data.status).toBe('running');
+    expect(body.data.stage).toBe('preparing');
+  });
+
+  it('reaches the validating stage once every item is generated but the job is still running', async () => {
+    const { GET } = await import('./route');
+    backendFetch.mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          data: {
+            id: 'job-validating',
+            status: 'generating',
+            progressCurrent: 4,
+            progressTotal: 4,
+            createdAt: '2026-07-29T10:00:00.000Z',
+            updatedAt: '2026-07-29T10:01:00.000Z',
+          },
+        }),
+        { status: 200, headers: { 'content-type': 'application/json' } },
+      ),
+    );
+
+    const response = await GET(
+      new Request('http://localhost/api/v1/jobs/job-validating') as never,
+      params('job-validating'),
+    );
+    const body = await response.json();
+
+    expect(body.data.status).toBe('running');
+    expect(body.data.stage).toBe('validating');
+    expect(body.data.progressPercent).toBe(99);
+  });
+
+  it('stays in generating while items remain', async () => {
+    const { GET } = await import('./route');
+    backendFetch.mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          data: {
+            id: 'job-generating',
+            status: 'generating',
+            progressCurrent: 1,
+            progressTotal: 4,
+            createdAt: '2026-07-29T10:00:00.000Z',
+            updatedAt: '2026-07-29T10:01:00.000Z',
+          },
+        }),
+        { status: 200, headers: { 'content-type': 'application/json' } },
+      ),
+    );
+
+    const response = await GET(
+      new Request('http://localhost/api/v1/jobs/job-generating') as never,
+      params('job-generating'),
+    );
+    const body = await response.json();
+
+    expect(body.data.stage).toBe('generating');
+    expect(body.data.progressPercent).toBe(25);
+  });
+
+  it('maps the backend rendering stage to validating', async () => {
+    const { GET } = await import('./route');
+    backendFetch.mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          data: {
+            id: 'job-rendering',
+            status: 'rendering',
+            createdAt: '2026-07-29T10:00:00.000Z',
+            updatedAt: '2026-07-29T10:01:00.000Z',
+          },
+        }),
+        { status: 200, headers: { 'content-type': 'application/json' } },
+      ),
+    );
+
+    const response = await GET(
+      new Request('http://localhost/api/v1/jobs/job-rendering') as never,
+      params('job-rendering'),
+    );
+
+    expect((await response.json()).data.stage).toBe('validating');
+  });
+
   it('forwards the backend root failure code and message instead of a generic UNKNOWN', async () => {
     const { GET } = await import('./route');
     backendFetch.mockResolvedValue(
