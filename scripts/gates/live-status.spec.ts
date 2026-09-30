@@ -68,4 +68,16 @@ test.describe('live-status public board', () => {
     expect(feed.heartbeatCount).toBeGreaterThanOrEqual(0);
     expect(feed.lines.length).toBeLessThan(400);
   });
+
+  test('AC4: poll counter advances on every successful poll', async ({ page }) => {
+    await page.goto(`${BASE}/live-status`, { waitUntil: 'domcontentloaded' });
+    const counter = page.getByText(/poll #\d+/);
+    await expect(counter).toBeVisible({ timeout: 15000 });
+    const first = await counter.innerText();
+    await expect
+      .poll(async () => await counter.innerText(), { timeout: 20000, intervals: [1000] })
+      .not.toBe(first);
+    const second = await counter.innerText();
+    expect(Number(/#(\d+)/.exec(second)?.[1])).toBeGreaterThan(Number(/#(\d+)/.exec(first)?.[1]));
+  });
 });

@@ -392,6 +392,7 @@ export function StatusBoard({
 }) {
   const [latest, setLatest] = useState<StatusDoc | null>(doc);
   const [pulse, setPulse] = useState<number>(0);
+  const [lastPollAt, setLastPollAt] = useState<string | null>(null);
   const { theme, toggle } = useTheme();
 
   useEffect(() => {
@@ -400,16 +401,15 @@ export function StatusBoard({
     async function tick() {
       const fresh = await fetchStatus();
       if (!cancelled && fresh) {
-        setLatest((prev) => {
-          if (!prev) return fresh;
-          if (prev.updatedAt !== fresh.updatedAt) {
-            setPulse((p) => p + 1);
-          }
-          return fresh;
-        });
+        // AC 4: the counter must advance on every successful poll, not only on
+        // a kanban event. A frozen counter reads as a dead page.
+        setPulse((p) => p + 1);
+        setLastPollAt(new Date().toISOString());
+        setLatest((prev) => fresh ?? prev);
       }
     }
 
+    void tick();
     const id = setInterval(tick, 4000);
     return () => {
       cancelled = true;
@@ -589,6 +589,7 @@ export function StatusBoard({
             </div>
             <span className="font-mono text-[10.5px] text-zinc-500">
               poll #{pulse.toString().padStart(3, '0')}
+              {lastPollAt ? ` · ${lastPollAt.slice(11, 19)}Z` : ''}
             </span>
           </header>
 
