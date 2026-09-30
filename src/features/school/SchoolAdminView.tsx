@@ -1399,25 +1399,8 @@ export function SchoolAdminView({ section = '' }: { section?: string }) {
 
       {current === 'notifikasi' ? <SectionNotifikasi setToast={setToast} /> : null}
 
-      {![
-        '',
-        'guru',
-        'undang',
-        'undangan',
-        'penggunaan',
-        'billing',
-        'pengaturan',
-        'library',
-        'audit',
-        'notifikasi',
-      ].includes(current) ? (
-        <div
-          role="alert"
-          className="rounded-xl border border-[#ddd4c8] bg-white px-6 py-8 text-center"
-        >
-          {t('notFound')}
-        </div>
-      ) : null}
+      {/* BUG-25: unknown sections never reach here — the route calls notFound()
+          before rendering, so this placeholder is unreachable dead code. */}
     </div>
   );
 }

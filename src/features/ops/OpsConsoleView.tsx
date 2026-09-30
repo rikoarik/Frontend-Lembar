@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button } from '@/app/components/ui';
-import { AdminAvatar, AdminPageHeader, AdminPill } from '@/src/features/admin/AdminChrome';
+import { AdminAvatar } from '@/src/features/admin/AdminChrome';
 import { useAdminSectionState } from '@/src/features/admin/adminPanelState';
 import {
   adminService,
@@ -1032,31 +1032,8 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
 
       {key === 'wa-gateway' ? <OpsWaGatewaySection setToast={setToast} /> : null}
 
-      {key !== '' &&
-      !key.startsWith('accounts/') &&
-      ![
-        'accounts',
-        'schools',
-        'catalog',
-        'prompts',
-        'learning-signals',
-        'jobs',
-        'quality',
-        'audit',
-        'billing',
-        'plans',
-        'flags',
-        'content',
-        'profile',
-        'ai-provider',
-        'wa-gateway',
-      ].includes(key) ? (
-        <AdminPageHeader
-          title={`Section ${key}`}
-          description="Halaman ini belum punya konten management. Pilih menu ops yang tersedia di sidebar."
-          meta={<AdminPill tone="warn">coming soon</AdminPill>}
-        />
-      ) : null}
+      {/* BUG-25: unknown sections never reach here — the route calls notFound()
+          before rendering, so this placeholder is unreachable dead code. */}
     </div>
   );
 }

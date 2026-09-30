@@ -286,14 +286,18 @@ describe('SchoolAdminView honest contract rendering', () => {
     expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
   });
 
-  it('shows a safe fallback for an unknown section', () => {
-    render(
+  // BUG-25: unknown sections are rejected by `notFound()` in the route before
+  // the view renders, so the view itself must stay inert for them (no shell
+  // chrome leaking a "tidak ditemukan" soft-404 body).
+  it('renders nothing for an unknown section (the route 404s first)', () => {
+    const { container } = render(
       <AdminPanelProvider panelId="school-unknown-test">
         <SchoolAdminView section="tidak-ada" />
       </AdminPanelProvider>,
     );
 
-    expect(screen.getByRole('alert')).toHaveTextContent(/halaman tidak ditemukan/i);
+    expect(container.textContent).not.toMatch(/tidak ditemukan/i);
+    expect(container.querySelector('[role="alert"]')).toBeNull();
   });
 
   it('renders a non-string audit target safely', async () => {

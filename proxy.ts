@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server';
+import { isKnownAppPath } from '@/src/lib/routing/appRoutes';
 
 /**
  * Name of the session cookie set by the backend on login/register.
@@ -169,6 +170,15 @@ export function proxy(request: NextRequest): NextResponse {
 
   if (!isApp && !isSchool && !isOps) {
     return NextResponse.next();
+  }
+
+  // BUG-25: `/app/<unknown>` streams its shell before `notFound()` runs, so the
+  // response is flushed as 200. Rewrite unknown paths to a path that does not
+  // exist so Next answers a real 404 while the status is still settable.
+  if (isApp && !isKnownAppPath(pathname)) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/halaman-tidak-ada';
+    return NextResponse.rewrite(url);
   }
 
   if (!session || !isValidSession(session)) {
