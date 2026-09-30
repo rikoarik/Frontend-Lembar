@@ -16,10 +16,15 @@ const DISMISSED_KEY = 'lembar.announcement.dismissed-revision';
 
 export default function AnnouncementBanner() {
   const t = useTranslations('marketing.announcement');
-  // Keep the translator in a ref: the effect below must run exactly once, and
-  // translate functions are not guaranteed to be referentially stable.
+  // Keep the translator in a ref: the fetch effect below must run exactly once,
+  // and translate functions are not guaranteed to be referentially stable.
+  // The ref is assigned from an effect (never during render) so React's
+  // "no ref writes while rendering" rule holds; it is declared first, so it
+  // runs before the fetch effect on mount.
   const tRef = useRef(t);
-  tRef.current = t;
+  useEffect(() => {
+    tRef.current = t;
+  }, [t]);
   const [announcement, setAnnouncement] = useState<Announcement>(() => ({
     enabled: true,
     label: t('fallbackLabel'),
