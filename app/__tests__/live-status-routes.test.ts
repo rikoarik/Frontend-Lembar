@@ -380,6 +380,29 @@ describe('live-status routes', () => {
     expect(json.overallPercent).toBe(10);
   });
 
+  it('a lone "Review verdict: FAIL" comment leaves review false at the running floor', async () => {
+    // Analogue of the QA case above: a rejecting verdict from the reviewer is an
+    // outcome, and a rejecting outcome must not fire the gate. The compound test
+    // only proves FAIL overrides a prior PASS; this one proves a FAIL alone fires
+    // nothing, which is what the live board must show for a rejected card.
+    vi.stubEnv('LEMBAR_LIVE_STATUS_TASKS_JSON', JSON.stringify(liveQaTask));
+    vi.stubEnv(
+      'LEMBAR_LIVE_STATUS_COMMENTS_JSON',
+      JSON.stringify([
+        {
+          task_id: 't_1d228272',
+          author: 'lembar-reviewer',
+          body: 'Review verdict: FAIL — gates still prose.',
+        },
+      ]),
+    );
+    const route = await import('../live-status/status.json/route');
+    const json = await (await route.GET()).json();
+    expect(json.evidenceGates.review).toBe(false);
+    expect(json.evidenceGates.qa).toBe(false);
+    expect(json.overallPercent).toBe(10);
+  });
+
   it('author alone is never evidence: a reviewer/QA author without a verdict fires nothing', async () => {
     vi.stubEnv('LEMBAR_LIVE_STATUS_TASKS_JSON', JSON.stringify(liveQaTask));
     vi.stubEnv(
