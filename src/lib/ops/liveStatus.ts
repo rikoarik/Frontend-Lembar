@@ -269,6 +269,46 @@ function pm2FromFixture(fixture: Pm2Detail['evidence']): Pm2Detail['restarts'] {
     .filter((row): row is NonNullable<typeof row> => row !== null);
 }
 
+// --- Gate vocabulary -------------------------------------------------------
+// Every text gate is matched ONE LINE AT A TIME (see `anyLine`) and must see an
+// OUTCOME. Two failure modes this closes, both observed live on card t_1d228272
+// (failed twice by QA, yet the board reported 100%):
+//   * topic-as-evidence: the instruction "Live E2E on app.lembar.web.id using
+//     deployed T5 artifact only." fired `publicVerification` on a todo;
+//   * author-as-evidence: `/lembar-qa/.test(author)` fired `qa` on a FAIL verdict.
+// So: a gate fires on an approving statement about the gate's subject, and a
+// rejecting statement on the same subject vetoes it (a later FAIL is not evidence).
+const MARKER_PREFIX = String.raw`(?:[-*•]\s+)?(?:\*\*|__|#{1,6}\s*)?\s*(?:evidence|proof|result|status|verdict)?\s*:?\s*`;
+const QA_SUBJECT = String.raw`(?:qa|q\.?a\.?\s*(?:verdict|review|sign[- ]?off)|quality\s+assurance)`;
+const REVIEW_SUBJECT = String.raw`(?:code\s+review|re-?review|review)`;
+const DEPLOY_SUBJECT = String.raw`(?:deploy(?:ed|ment)?|release(?:d)?|pm2\s+restart|restart(?:ed)?\s+dev)`;
+const PUBLIC_SUBJECT = String.raw`(?:public\s+verification|public\s+probe|live\s+verification|live\s+verify|live\s+e2e)`;
+const VERDICT_SUBJECT = String.raw`(?:verdict|status|result)`;
+const APPROVE_WORDS = String.raw`pass(?:ed|es)?|approv(?:e|ed|al)|signed\s+off|sign[- ]?off|green|succeed(?:ed)?|success|ok(?:ay)?|done|verified|complete(?:d)?`;
+const REJECT_WORDS = String.raw`fail(?:ed|ure)?|reject(?:ed)?|request(?:ing)?\s+changes|changes\s+requested|block(?:ed|er)?|veto|not\s+(?:run|verified|passed|approved|done)|never\s+(?:run|verified)`;
+
+const QA_AUTHOR = /qa/i;
+const REVIEW_AUTHOR = /review/i;
+
+function anyLine(comments: CommentRow[], pattern: RegExp, author?: RegExp): boolean {
+  return comments.some(
+    (comment) =>
+      (!author || author.test(comment.author)) &&
+      (comment.body ?? '').split('\n').some((line) => pattern.test(line)),
+  );
+}
+
+function approveLine(subject: string): RegExp {
+  return new RegExp(
+    String.raw`^\s*${MARKER_PREFIX}${subject}\b[^\n]*\b(?:${APPROVE_WORDS})\b`,
+    'i',
+  );
+}
+
+function rejectLine(subject: string): RegExp {
+  return new RegExp(String.raw`^\s*${MARKER_PREFIX}${subject}\b[^\n]*\b(?:${REJECT_WORDS})\b`, 'i');
+}
+
 function evaluateEvidenceGates(input: {
   active: TaskRow;
   comments: CommentRow[];
@@ -295,28 +335,50 @@ function evaluateEvidenceGates(input: {
   // comment that merely *mentions* the gate names (e.g. the owner's own progress
   // spec, which literally lists "deploy=95, public verification=100, PM2 restart")
   // self-fires the gates and reports 100% for work that never happened.
-  const firstFileChanged = comments.some((comment) => /^\s*file_changed:/im.test(comment.body));
+  const firstFileChanged = anyLine(comments, /^\s*file_changed:/i);
   // Commit gate: orchestrator marked the first durable edit AND this task's code is on origin/dev.
   const commit =
     firstFileChanged && (latestFrontendCommits.length > 0 || latestBackendCommits.length > 0);
-  const tests = comments.some((comment) =>
-    /^\s*tests?\b[^\n]*\b(pass|passed|green|ok|done)\b/im.test(comment.body),
-  );
-  const review = comments.some(
-    (comment) =>
-      /lembar-reviewer/.test(comment.author) || /^\s*review\s+handoff:/im.test(comment.body),
-  );
-  const qa =
-    comments.some((comment) => /lembar-qa/.test(comment.author)) ||
-    comments.some((comment) =>
-      /^\s*qa\s+(signed\s+off|approved|passed|complete)\b/im.test(comment.body),
-    );
+  const tests = anyLine(comments, /^\s*tests?\b[^\n]*\b(pass|passed|green|ok|done)\b/i);
+
+  // The remaining gates must be EARNED BY AN OUTCOME. Neither an author name nor a
+  // topic is evidence: "Live E2E on app.lembar.web.id using deployed T5 artifact
+  // only." is a task instruction, "Deploy dev: push origin/dev." is a todo, and
+  // "QA verdict: FAIL" is the opposite of a pass. All three used to fire their gate
+  // (the first one twice over) and reported 100% for work that never happened.
+  // Rule: an approving statement fires the gate, a rejecting one vetoes it.
+  const qaPass =
+    anyLine(comments, approveLine(QA_SUBJECT)) ||
+    anyLine(comments, approveLine(VERDICT_SUBJECT), QA_AUTHOR);
+  const qaFail =
+    anyLine(comments, rejectLine(QA_SUBJECT)) ||
+    anyLine(comments, rejectLine(VERDICT_SUBJECT), QA_AUTHOR);
+  const qa = qaPass && !qaFail;
+  const reviewPass =
+    anyLine(comments, approveLine(REVIEW_SUBJECT)) ||
+    anyLine(comments, approveLine(VERDICT_SUBJECT), REVIEW_AUTHOR);
+  const reviewFail =
+    anyLine(comments, rejectLine(REVIEW_SUBJECT)) ||
+    anyLine(comments, rejectLine(VERDICT_SUBJECT), REVIEW_AUTHOR);
+  const review = reviewPass && !reviewFail;
   const deploy =
-    comments.some((comment) => /^\s*(deploy|restart)\s+dev\b/im.test(comment.body)) ||
-    comments.some((comment) => /^\s*pm2\s+restart/im.test(comment.body));
-  const publicVerification = comments.some((comment) =>
-    /^\s*(live\s+e2e\s+on\s+app\.lembar\.web\.id|public\s+verification)\b/im.test(comment.body),
-  );
+    anyLine(comments, approveLine(DEPLOY_SUBJECT)) &&
+    !anyLine(comments, rejectLine(DEPLOY_SUBJECT));
+  // A public verification is only evidence when it states its own result on an
+  // explicit marker line. Naming the origin (or the phrase "public verification")
+  // in prose is not a verification.
+  const publicVerification =
+    anyLine(comments, approveLine(PUBLIC_SUBJECT)) &&
+    !anyLine(comments, rejectLine(PUBLIC_SUBJECT));
+
+  if (qaFail) {
+    warnings.push(
+      'QA verdict terakhir untuk task aktif: FAIL — gate qa tidak menyala sampai ada verdict approve.',
+    );
+  }
+  if (reviewFail) {
+    warnings.push('Review verdict terakhir untuk task aktif: FAIL / request changes.');
+  }
 
   for (const entry of pm2Restarts) {
     if (entry.restarts >= PM2_RESTART_WARN_THRESHOLD) {
@@ -346,12 +408,26 @@ function evaluateEvidenceGates(input: {
   };
 }
 
-function progressFromGates(gates: EvidenceGates): number {
+function progressFromGates(
+  gates: EvidenceGates,
+  storyPointsDone = 0,
+  storyPointsTotal = 0,
+): number {
   let percent = 0;
   for (const step of GATE_ORDER) {
     if (gates[step.key]) percent = Math.max(percent, step.percent);
   }
-  return percent;
+  if (percent >= 100) return 100;
+  // AC 9 — progress from story points. The ordinal gates give the floor and the
+  // ceiling of the CURRENT band; inside that band the number advances with the
+  // story points of the board's completed work. The band is clamped to the next
+  // unearned gate (percent - 1) so a story-point fraction can never fake a gate
+  // that has not fired (AC 10: still never a hardcoded number).
+  const next = GATE_ORDER.find((step) => step.percent > percent);
+  if (!next || storyPointsTotal <= 0) return percent;
+  const span = next.percent - percent;
+  const fraction = Math.min(1, Math.max(0, storyPointsDone / storyPointsTotal));
+  return Math.min(next.percent - 1, Math.round(percent + span * fraction));
 }
 
 export async function buildLiveStatus(): Promise<LiveStatusDoc | null> {
@@ -412,6 +488,16 @@ export async function buildLiveStatus(): Promise<LiveStatusDoc | null> {
       ),
     ) ?? generatedAt;
   const testTasks = tasks.filter((task) => /\b(test|qa|e2e)\b/i.test(task.title));
+  // AC 9 — story points. The denominator is the active work band (the running task
+  // plus everything still queued); finished cards are already inside a fired gate.
+  const storyPointsTotal = items.reduce(
+    (sum, item) => (item.status === 'done' ? sum : sum + item.storyPoints),
+    0,
+  );
+  const storyPointsDone = items.reduce(
+    (sum, item) => (item.status === 'done' ? sum + item.storyPoints : sum),
+    0,
+  );
   const { gates, warnings } = evaluateEvidenceGates({
     active,
     comments,
@@ -421,7 +507,7 @@ export async function buildLiveStatus(): Promise<LiveStatusDoc | null> {
     pm2Services: pm2.services,
     allTasks: tasks,
   });
-  const overallPercent = progressFromGates(gates);
+  const overallPercent = progressFromGates(gates, storyPointsDone, storyPointsTotal);
 
   return {
     generatedAt,
@@ -449,7 +535,8 @@ export async function buildLiveStatus(): Promise<LiveStatusDoc | null> {
     latestFrontendCommits,
     services: pm2.services,
     notes: [
-      `Progress = max gate aktif (created=0, running=10, file_changed=25, commit=50, tests=65, review=75, qa=85, deploy=95, public=100). Saat ini: ${overallPercent}%.`,
+      `Progress = band gate ordinal aktif (created=0, running=10, file_changed=25, commit=50, tests=65, review=75, qa=85, deploy=95, public=100), diisi story point di dalam band (${storyPointsDone}/${storyPointsTotal} SP selesai). Saat ini: ${overallPercent}%.`,
+      'Gate review/qa/deploy/public hanya menyala oleh OUTCOME (verdict approve / deploy selesai / public verification berhasil) — bukan oleh nama author atau kalimat topik. Verdict FAIL mencegah gate menyala.',
       'Heartbeat, jam, dan command count TIDAK menaikkan progress — hanya evidence gates.',
       'State task dan heartbeat dibaca read-only dari database kanban Hermes.',
       'Commit dibaca dari origin/dev; service/deploy evidence dibaca dari PM2.',

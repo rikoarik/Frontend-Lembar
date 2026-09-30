@@ -43,6 +43,29 @@ const baseTasks = [
   },
 ];
 
+// The base board has 2 SP done out of the 8 SP still in flight (5 running + 3 todo),
+// so inside the `running` band (10 → 24, next gate 25) the story-point fill reads
+// 10 + 15 * 2/8 = 13.75 → 14. It can never reach 25: that gate has to be earned.
+const BASE_PERCENT = 14;
+
+// A board with nothing completed yet: the band fill is 0 and the number is exactly
+// the ordinal gate value. Regression tests use it so their expectations stay crisp.
+const liveQaTask = [
+  {
+    id: 't_1d228272',
+    title: '[QA] Live E2E on app.lembar.web.id',
+    body: 'Story points: 3',
+    assignee: 'lembar-qa',
+    status: 'running',
+    priority: 1,
+    created_at: 1785244016,
+    started_at: 1785244018,
+    completed_at: null,
+    last_heartbeat_at: null,
+    result: null,
+  },
+];
+
 const baseEvents = [
   { task_id: 't_79f6e720', kind: 'created', payload: null, created_at: 1785244462 },
   { task_id: 't_79f6e720', kind: 'heartbeat', payload: null, created_at: 1785244750 },
@@ -116,8 +139,9 @@ describe('live-status routes', () => {
     expect(response.status).toBe(200);
     const json = await response.json();
     expect(json.board).toMatchObject({ name: 'lembar', taskId: 't_79f6e720', status: 'running' });
-    // running=10, no other evidence yet → 10, NOT a hardcoded number like 91 or 45
-    expect(json.overallPercent).toBe(10);
+    // running=10 is the band floor; the 2 completed SP of 8 in flight fill it to 14.
+    // The number is derived, never hardcoded (AC 10).
+    expect(json.overallPercent).toBe(BASE_PERCENT);
     expect(json.evidenceGates).toMatchObject({
       created: true,
       running: true,
@@ -141,7 +165,18 @@ describe('live-status routes', () => {
     const route = await import('../live-status/status.json/route');
     const json = await (await route.GET()).json();
     // Even with 50 heartbeats, evidence gates still gate progress at the highest gate that fired.
-    expect(json.overallPercent).toBe(10);
+    expect(json.overallPercent).toBe(BASE_PERCENT);
+  });
+
+  it('climbs the story-point band without ever faking the next gate (AC 9)', async () => {
+    // 8 SP in flight, 2 SP done → 14% inside the running band. The `running` gate is
+    // worth 10 and the next gate (file_changed) is worth 25; the fill must stay
+    // strictly below 25 so story points can never pretend a gate fired.
+    const route = await import('../live-status/status.json/route');
+    const json = await (await route.GET()).json();
+    expect(json.overallPercent).toBeGreaterThan(10);
+    expect(json.overallPercent).toBeLessThan(25);
+    expect(json.items.find((item: { id: string }) => item.id === 't_bc88d5dc').storyPoints).toBe(2);
   });
 
   it('progress climbs through evidence gates in owner-defined order', async () => {
@@ -150,13 +185,10 @@ describe('live-status routes', () => {
         author: 'orchestrator',
         body: 'file_changed: first durable UI/source-of-truth edit detected.',
       },
-      { author: 'lembar-reviewer', body: 'Review handoff: looks good.' },
+      { author: 'lembar-reviewer', body: 'Review verdict: PASS — gates are outcome-based.' },
       { author: 'lembar-qa', body: 'QA signed off.' },
-      { author: 'orchestrator', body: 'Deploy dev: pnpm build both repos, push origin/dev.' },
-      {
-        author: 'orchestrator',
-        body: 'Live E2E on app.lembar.web.id using deployed T5 artifact only.',
-      },
+      { author: 'orchestrator', body: 'Deploy dev: done, pm2 restart completed.' },
+      { author: 'orchestrator', body: 'public verification: PASS — /live-status 200 live.' },
     ];
     vi.stubEnv('LEMBAR_LIVE_STATUS_COMMENTS_JSON', JSON.stringify(comments));
     const route = await import('../live-status/status.json/route');
@@ -168,6 +200,32 @@ describe('live-status routes', () => {
     expect(json.evidenceGates.deploy).toBe(true);
     expect(json.evidenceGates.publicVerification).toBe(true);
     expect(json.overallPercent).toBe(100);
+  });
+
+  it('an approving verdict followed by a FAIL verdict leaves the gate OFF', async () => {
+    vi.stubEnv('LEMBAR_LIVE_STATUS_TASKS_JSON', JSON.stringify(liveQaTask));
+    vi.stubEnv(
+      'LEMBAR_LIVE_STATUS_COMMENTS_JSON',
+      JSON.stringify([
+        { task_id: 't_1d228272', author: 'lembar-reviewer', body: 'Review verdict: PASS' },
+        { task_id: 't_1d228272', author: 'lembar-qa', body: 'QA signed off.' },
+        {
+          task_id: 't_1d228272',
+          author: 'lembar-reviewer',
+          body: 'Review verdict: FAIL — gates still prose.',
+        },
+        {
+          task_id: 't_1d228272',
+          author: 'lembar-qa',
+          body: 'QA verdict: FAIL — regression found.',
+        },
+      ]),
+    );
+    const route = await import('../live-status/status.json/route');
+    const json = await (await route.GET()).json();
+    expect(json.evidenceGates.qa).toBe(false);
+    expect(json.evidenceGates.review).toBe(false);
+    expect(json.overallPercent).toBe(10);
   });
 
   it('emits PM2 warning when any service restart count is high', async () => {
@@ -209,7 +267,7 @@ describe('live-status routes', () => {
     expect(json.evidenceGates.qa).toBe(false);
     expect(json.evidenceGates.deploy).toBe(false);
     expect(json.evidenceGates.publicVerification).toBe(false);
-    expect(json.overallPercent).toBe(10);
+    expect(json.overallPercent).toBe(BASE_PERCENT);
   });
 
   it('counts only this card own file_changed evidence', async () => {
@@ -222,7 +280,7 @@ describe('live-status routes', () => {
     const route = await import('../live-status/status.json/route');
     const json = await (await route.GET()).json();
     expect(json.evidenceGates.firstFileChanged).toBe(false);
-    expect(json.overallPercent).toBe(10);
+    expect(json.overallPercent).toBe(BASE_PERCENT);
   });
 
   it('does not self-fire gates from a comment that merely NAMES them', async () => {
@@ -245,6 +303,97 @@ describe('live-status routes', () => {
     expect(json.evidenceGates.publicVerification).toBe(false);
     expect(json.evidenceGates.tests).toBe(false);
     expect(json.evidenceGates.qa).toBe(false);
+    expect(json.overallPercent).toBe(BASE_PERCENT);
+  });
+
+  // --- Live false positive on card t_1d228272 (failed twice by QA) ---------------
+  // The reviewer reproduced 100% for a card whose only two comments were a task
+  // instruction and a FAIL verdict. Both fixtures below are that card verbatim.
+
+  it('a task instruction naming the public origin does NOT fire publicVerification', async () => {
+    vi.stubEnv('LEMBAR_LIVE_STATUS_TASKS_JSON', JSON.stringify(liveQaTask));
+    vi.stubEnv(
+      'LEMBAR_LIVE_STATUS_COMMENTS_JSON',
+      JSON.stringify([
+        {
+          task_id: 't_1d228272',
+          author: 'orchestrator',
+          body: 'Live E2E on app.lembar.web.id using deployed T5 artifact only. Drive login, generate, status, review, output. No redeploy.',
+        },
+      ]),
+    );
+    const route = await import('../live-status/status.json/route');
+    const json = await (await route.GET()).json();
+    expect(json.evidenceGates.publicVerification).toBe(false);
+    expect(json.evidenceGates.deploy).toBe(false);
     expect(json.overallPercent).toBe(10);
+  });
+
+  it('a "QA verdict: FAIL" comment leaves qa false and the card at the running floor', async () => {
+    vi.stubEnv('LEMBAR_LIVE_STATUS_TASKS_JSON', JSON.stringify(liveQaTask));
+    vi.stubEnv(
+      'LEMBAR_LIVE_STATUS_COMMENTS_JSON',
+      JSON.stringify([
+        {
+          task_id: 't_1d228272',
+          author: 'orchestrator',
+          body: 'Live E2E on app.lembar.web.id using deployed T5 artifact only. Drive login, generate, status, review, output. No redeploy.',
+        },
+        {
+          task_id: 't_1d228272',
+          author: 'lembar-qa',
+          body: 'QA verdict: FAIL for full E2E generate \u2192 status/history \u2192 review \u2192 output.',
+        },
+      ]),
+    );
+    const route = await import('../live-status/status.json/route');
+    const json = await (await route.GET()).json();
+    expect(json.evidenceGates.qa).toBe(false);
+    expect(json.evidenceGates.publicVerification).toBe(false);
+    expect(json.overallPercent).toBe(10);
+  });
+
+  it('author alone is never evidence: a reviewer/QA author without a verdict fires nothing', async () => {
+    vi.stubEnv('LEMBAR_LIVE_STATUS_TASKS_JSON', JSON.stringify(liveQaTask));
+    vi.stubEnv(
+      'LEMBAR_LIVE_STATUS_COMMENTS_JSON',
+      JSON.stringify([
+        {
+          task_id: 't_1d228272',
+          author: 'lembar-reviewer',
+          body: 'Review handoff: please take a look.',
+        },
+        { task_id: 't_1d228272', author: 'lembar-qa', body: 'Mulai cek sebentar lagi.' },
+      ]),
+    );
+    const route = await import('../live-status/status.json/route');
+    const json = await (await route.GET()).json();
+    expect(json.evidenceGates.review).toBe(false);
+    expect(json.evidenceGates.qa).toBe(false);
+    expect(json.overallPercent).toBe(10);
+  });
+
+  it('approving verdicts still fire their gates', async () => {
+    vi.stubEnv('LEMBAR_LIVE_STATUS_TASKS_JSON', JSON.stringify(liveQaTask));
+    vi.stubEnv(
+      'LEMBAR_LIVE_STATUS_COMMENTS_JSON',
+      JSON.stringify([
+        { task_id: 't_1d228272', author: 'lembar-reviewer', body: 'Review verdict: PASS' },
+        { task_id: 't_1d228272', author: 'lembar-qa', body: 'QA signed off.' },
+        { task_id: 't_1d228272', author: 'orchestrator', body: 'Deploy dev: completed.' },
+        {
+          task_id: 't_1d228272',
+          author: 'orchestrator',
+          body: 'public verification: PASS — /live-status 200, gates match live card.',
+        },
+      ]),
+    );
+    const route = await import('../live-status/status.json/route');
+    const json = await (await route.GET()).json();
+    expect(json.evidenceGates.review).toBe(true);
+    expect(json.evidenceGates.qa).toBe(true);
+    expect(json.evidenceGates.deploy).toBe(true);
+    expect(json.evidenceGates.publicVerification).toBe(true);
+    expect(json.overallPercent).toBe(100);
   });
 });
