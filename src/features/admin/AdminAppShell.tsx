@@ -6,6 +6,7 @@ import { AdminBadge, AdminShell } from '@/src/features/admin/AdminChrome';
 import { AdminPanelProvider } from '@/src/features/admin/adminPanelState';
 import { OPS_NAV, SCHOOL_NAV, sectionFromPath } from '@/src/features/admin/types';
 import { RoleSwitcher } from '@/src/features/admin/RoleSwitcher';
+import { useActorIdentity } from '@/src/features/admin/useActorIdentity';
 
 function titleFromPath(pathname: string, root: '/school' | '/ops', nav: typeof SCHOOL_NAV): string {
   const exact = nav.find((item) => item.href === pathname);
@@ -27,6 +28,7 @@ export function SchoolAdminShell({
 }) {
   const pathname = usePathname() ?? '/school';
   const title = titleFromPath(pathname, '/school', SCHOOL_NAV);
+  const identity = useActorIdentity();
 
   return (
     <AdminPanelProvider panelId="school">
@@ -46,8 +48,8 @@ export function SchoolAdminShell({
                 </span>
               </div>
             }
-            actorName={actorName}
-            actorMeta={actorMeta}
+            actorName={actorName ?? identity?.name ?? undefined}
+            actorMeta={actorMeta ?? identity?.meta ?? undefined}
           >
             {children}
           </AdminShell>
@@ -60,6 +62,7 @@ export function SchoolAdminShell({
 export function OpsAdminShell({ children }: { children: ReactNode }) {
   const pathname = usePathname() ?? '/ops';
   const title = titleFromPath(pathname, '/ops', OPS_NAV);
+  const identity = useActorIdentity();
 
   return (
     <AdminPanelProvider panelId="ops">
@@ -78,8 +81,8 @@ export function OpsAdminShell({ children }: { children: ReactNode }) {
                 </span>
               </div>
             }
-            actorName="Ops Superadmin"
-            actorMeta="platform · least privilege"
+            actorName={identity?.name ?? undefined}
+            actorMeta={identity?.meta ?? undefined}
           >
             {children}
           </AdminShell>

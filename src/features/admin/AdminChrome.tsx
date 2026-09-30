@@ -679,8 +679,9 @@ export function AdminShell({
   const [collapsed, setCollapsed] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const isOps = brand.includes('ops');
-  const resolvedActorName = actorName ?? (isOps ? 'Ops Superadmin' : 'Admin');
-  const resolvedActorMeta = actorMeta ?? (isOps ? 'platform · least privilege' : 'Sekolah');
+  // Neutral role fallbacks only — never a fabricated account name (FE-VER-02 F-3).
+  const resolvedActorName = actorName ?? (isOps ? 'Superadmin' : 'Admin');
+  const resolvedActorMeta = actorMeta ?? (isOps ? 'Platform' : 'Sekolah');
   const profileMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
