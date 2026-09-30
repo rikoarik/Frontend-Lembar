@@ -413,9 +413,19 @@ function hasVerdict(comments: CommentRow[], shapes: RegExp[], author?: RegExp): 
   );
 }
 
-// Looser completion: the subject opens the statement and the outcome appears later
-// on the same line, with no intent/reject word in between. Used for deploy / tests,
-// where the natural phrasing varies ("Deployed to VPS, pm2 restarted").
+// Completion: the subject opens the statement and the outcome appears later on the
+// same line. Used for deploy / tests, where the natural phrasing varies ("Deployed
+// to VPS, pm2 restarted").
+//
+// The intent veto is LINE-WIDE, exactly like `hasVerdict`: a line carrying any
+// imperative / modal / future token anywhere — before OR after the outcome word —
+// is an instruction, not a result, and must not fire the gate. Scoping the veto to
+// the substring BEFORE the outcome (the previous `outcomeOk`-only behaviour) left
+// the class open: an instruction whose approve-word lands first ("Deploy dev: CI
+// done, push origin/dev.", "tests: pass required before we ship.") slipped past the
+// veto because the imperative token sat after the outcome, where it was never read.
+// Fail-closed on intent — a missed gate costs a re-run, a false gate is the defect
+// this card exists to remove.
 function hasCompletion(
   comments: CommentRow[],
   subject: string,
@@ -426,7 +436,9 @@ function hasCompletion(
   return comments.some(
     (comment) =>
       (!author || author.test(comment.author)) &&
-      (comment.body ?? '').split('\n').some((text) => outcomeOk(text, shape, outcomeRe)),
+      (comment.body ?? '')
+        .split('\n')
+        .some((text) => !INTENT_RE.test(text) && outcomeOk(text, shape, outcomeRe)),
   );
 }
 

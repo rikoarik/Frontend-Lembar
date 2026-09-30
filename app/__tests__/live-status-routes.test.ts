@@ -578,6 +578,61 @@ describe('live-status routes', () => {
     },
   );
 
+  // --- Round-5 closure: the intent veto must be LINE-WIDE -------------------------
+  // R1 requires deploy/tests to use the SAME strict rule as qa/review/publicVerification:
+  // any imperative/modal/future token ON THE LINE means the gate never fires. The
+  // previous `outcomeOk`-only path scoped the veto to the substring BEFORE the outcome
+  // word, so an instruction whose approve-word lands FIRST was never vetoed by the
+  // imperative token that followed it. Every line below is an INSTRUCTION (the action
+  // is still to be performed) and fired its gate before this fix.
+  const approveBeforeImperative: { gate: string; body: string }[] = [
+    { gate: 'deploy', body: 'Deploy dev: CI done, push origin/dev.' },
+    { gate: 'deploy', body: 'Deploy dev: ok to push origin/dev now.' },
+    { gate: 'deploy', body: 'Deploy dev: green light, push origin/dev.' },
+    { gate: 'deploy', body: 'Deploy dev: done on my branch, please push origin/dev.' },
+    { gate: 'tests', body: 'tests: all green, now push.' },
+    { gate: 'tests', body: 'tests: passed locally, please re-run on CI.' },
+    { gate: 'tests', body: 'tests: pass required before we ship.' },
+  ];
+
+  it.each(approveBeforeImperative)(
+    'an instruction with the approve-word BEFORE the imperative ("$body") does NOT fire the $gate gate',
+    async ({ gate, body }) => {
+      vi.stubEnv('LEMBAR_LIVE_STATUS_TASKS_JSON', JSON.stringify(liveQaTask));
+      vi.stubEnv(
+        'LEMBAR_LIVE_STATUS_COMMENTS_JSON',
+        JSON.stringify([{ task_id: 't_1d228272', author: 'orchestrator', body }]),
+      );
+      const route = await import('../live-status/status.json/route');
+      const json = await (await route.GET()).json();
+      expect(json.evidenceGates[gate]).toBe(false);
+      expect(json.overallPercent).toBe(10);
+    },
+  );
+
+  // The mirror: the line-wide veto must not mute a genuine outcome. Each line below
+  // reports a real result and carries no imperative / modal / future token.
+  const lineWideOutcomes: { gate: string; body: string }[] = [
+    { gate: 'deploy', body: 'Deploy dev: completed, pm2 restarted.' },
+    { gate: 'deploy', body: 'Deployed to VPS, pm2 restarted.' },
+    { gate: 'tests', body: 'Tests passed.' },
+    { gate: 'tests', body: 'tests: green.' },
+  ];
+
+  it.each(lineWideOutcomes)(
+    'a genuine outcome ("$body") still fires the $gate gate under the line-wide veto',
+    async ({ gate, body }) => {
+      vi.stubEnv('LEMBAR_LIVE_STATUS_TASKS_JSON', JSON.stringify(liveQaTask));
+      vi.stubEnv(
+        'LEMBAR_LIVE_STATUS_COMMENTS_JSON',
+        JSON.stringify([{ task_id: 't_1d228272', author: 'orchestrator', body }]),
+      );
+      const route = await import('../live-status/status.json/route');
+      const json = await (await route.GET()).json();
+      expect(json.evidenceGates[gate]).toBe(true);
+    },
+  );
+
   const completionCases: { gate: string; author: string; body: string }[] = [
     { gate: 'deploy', author: 'orchestrator', body: 'Deploy dev: done.' },
     { gate: 'deploy', author: 'orchestrator', body: 'Deployed to VPS, pm2 restarted.' },
