@@ -41,4 +41,6 @@ export type InvitationPreview = {
   status: InvitationStatus;
   schoolName?: string;
   email?: string;
+  role?: string;
+  expiresAt?: string;
 };
