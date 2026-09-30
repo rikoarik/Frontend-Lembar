@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { marketingNavigation, type MarketingNavItem } from '@/src/lib/marketing/navigation';
 import { getMarketingCta } from '@/src/lib/marketing/ctas';
 import ActiveNavIndicator from './ActiveNavIndicator';
@@ -19,6 +20,8 @@ export default function MarketingNavbar({
 }: {
   session: { displayName: string; homePath: string } | null;
 }) {
+  const t = useTranslations('marketing.nav');
+  const tCta = useTranslations('marketing.cta');
   const pathname = usePathname() ?? '/';
   const [mobileOpen, setMobileOpen] = useState(false);
   const menuId = useId();
@@ -58,14 +61,14 @@ export default function MarketingNavbar({
 
   return (
     <header
-      aria-label="Navigasi utama"
+      aria-label={t('ariaLabel')}
       style={{ position: 'sticky', top: 0, zIndex: 1000000 }}
       className="w-full border-b border-brand-line bg-brand-paper/90 backdrop-blur supports-[backdrop-filter]:bg-brand-paper/70"
     >
       <div className="mx-auto flex min-h-control-lg max-w-container-max items-center justify-between gap-unit-4 px-margin-mobile py-unit-3 md:px-margin-desktop md:py-unit-4">
         <Link
           href="/"
-          aria-label="lembar — beranda"
+          aria-label={t('ariaHome')}
           className="flex shrink-0 items-center gap-unit-2 text-brand-ink"
           onClick={closeMobile}
         >
@@ -73,7 +76,7 @@ export default function MarketingNavbar({
           <span className="sr-only">lembar</span>
         </Link>
 
-        <nav aria-label="Bagian" className="hidden items-center gap-unit-1 md:flex">
+        <nav aria-label={t('ariaSections')} className="hidden items-center gap-unit-1 md:flex">
           {marketingNavigation.map((item) => {
             const active = isActive(item, pathname);
             return (
@@ -88,7 +91,7 @@ export default function MarketingNavbar({
                 }
               >
                 {active ? <ActiveNavIndicator /> : null}
-                <span>{item.label}</span>
+                <span>{t(`items.${item.labelKey}`)}</span>
               </Link>
             );
           })}
@@ -106,7 +109,7 @@ export default function MarketingNavbar({
               <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
                 account_circle
               </span>
-              Buka workspace
+              {t('openWorkspace')}
             </Link>
           ) : (
             <>
@@ -115,14 +118,14 @@ export default function MarketingNavbar({
                 className="inline-flex h-control-md items-center rounded-md px-unit-2 text-label-semibold text-brand-ink hover:text-brand-accent sm:px-unit-3"
                 onClick={closeMobile}
               >
-                {loginCta.label}
+                {tCta(loginCta.labelKey)}
               </Link>
               <Link
                 href={tryFreeCta.href}
                 className="inline-flex h-control-md items-center rounded-md bg-brand-accent px-unit-3 text-label-semibold text-white hover:bg-brand-accent-hover sm:px-unit-4"
                 onClick={closeMobile}
               >
-                {tryFreeCta.label}
+                {tCta(tryFreeCta.labelKey)}
               </Link>
             </>
           )}
@@ -131,7 +134,7 @@ export default function MarketingNavbar({
             ref={toggleRef}
             type="button"
             className="inline-flex h-control-md w-control-md items-center justify-center rounded-md border border-brand-line text-brand-ink hover:bg-brand-paper focus-visible:outline-2 focus-visible:outline focus-visible:outline-brand-focus focus-visible:outline-offset-2 md:hidden"
-            aria-label={mobileOpen ? 'Tutup menu navigasi' : 'Buka menu navigasi'}
+            aria-label={mobileOpen ? t('closeMenu') : t('openMenu')}
             aria-expanded={mobileOpen}
             aria-controls={menuId}
             onClick={() => setMobileOpen((open) => !open)}
@@ -150,7 +153,7 @@ export default function MarketingNavbar({
           className="border-t border-brand-line bg-brand-paper md:hidden"
         >
           <nav
-            aria-label="Navigasi seluler"
+            aria-label={t('ariaMobile')}
             className="mx-auto flex max-w-container-max flex-col gap-1 px-margin-mobile py-unit-3"
           >
             {marketingNavigation.map((item) => {
@@ -167,7 +170,7 @@ export default function MarketingNavbar({
                       : 'inline-flex min-h-[var(--control-lg)] items-center rounded-md px-unit-3 text-label-semibold text-brand-ink hover:bg-brand-paper'
                   }
                 >
-                  {item.label}
+                  {t(`items.${item.labelKey}`)}
                 </Link>
               );
             })}
@@ -182,7 +185,7 @@ export default function MarketingNavbar({
                 onClick={closeMobile}
                 className="inline-flex min-h-[var(--control-lg)] items-center justify-center rounded-md bg-brand-accent px-unit-4 text-label-semibold text-white hover:bg-brand-accent-hover"
               >
-                Buka workspace
+                {t('openWorkspace')}
               </Link>
             ) : (
               <>
@@ -191,14 +194,14 @@ export default function MarketingNavbar({
                   onClick={closeMobile}
                   className="inline-flex min-h-[var(--control-lg)] items-center rounded-md px-unit-3 text-label-semibold text-brand-ink hover:bg-brand-paper"
                 >
-                  {loginCta.label}
+                  {tCta(loginCta.labelKey)}
                 </Link>
                 <Link
                   href={tryFreeCta.href}
                   onClick={closeMobile}
                   className="inline-flex min-h-[var(--control-lg)] items-center justify-center rounded-md bg-brand-accent px-unit-4 text-label-semibold text-white hover:bg-brand-accent-hover"
                 >
-                  {tryFreeCta.label}
+                  {tCta(tryFreeCta.labelKey)}
                 </Link>
               </>
             )}

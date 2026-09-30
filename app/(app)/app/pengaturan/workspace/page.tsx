@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Panel, Button } from '@/app/components/ui';
 import FormStatus from '@/app/(auth)/components/FormStatus';
 
@@ -26,12 +27,6 @@ interface MeResponse {
   data?: { activeWorkspaceId?: string; workspaces?: MeWorkspace[] };
 }
 
-const ROLE_LABEL: Record<WorkspaceRole, string> = {
-  owner: 'Pemilik',
-  admin: 'Admin',
-  member: 'Anggota',
-};
-
 function mapRole(backendRole: string, workspaceType: string): WorkspaceRole {
   if (workspaceType === 'personal' || backendRole === 'owner' || backendRole === 'superadmin') {
     return 'owner';
@@ -41,6 +36,7 @@ function mapRole(backendRole: string, workspaceType: string): WorkspaceRole {
 }
 
 export default function WorkspaceSettingsPage() {
+  const t = useTranslations('settings.workspace');
   const [memberships, setMemberships] = useState<WorkspaceMembership[]>([]);
   const [loading, setLoading] = useState(true);
   const [switchTarget, setSwitchTarget] = useState<WorkspaceMembership | null>(null);
@@ -51,7 +47,7 @@ export default function WorkspaceSettingsPage() {
     async function fetchWorkspaces() {
       try {
         const res = await fetch('/v1/me', { credentials: 'include' });
-        if (!res.ok) throw new Error('Gagal memuat data workspace');
+        if (!res.ok) throw new Error(t('error.load'));
         const json = (await res.json()) as MeResponse;
         const raw = json.data?.workspaces ?? [];
         const activeWorkspaceId = json.data?.activeWorkspaceId;
@@ -69,13 +65,15 @@ export default function WorkspaceSettingsPage() {
 
         setMemberships(mapped);
       } catch {
-        setActionStatus('Gagal memuat data workspace.');
+        setActionStatus(t('error.load'));
       } finally {
         setLoading(false);
       }
     }
 
     fetchWorkspaces();
+    // The translator identity is stable per locale; re-fetching on every render is not desired.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSwitch = async () => {
@@ -88,22 +86,22 @@ export default function WorkspaceSettingsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ workspaceId: switchTarget.id }),
       });
-      if (!res.ok) throw new Error('Gagal beralih workspace');
+      if (!res.ok) throw new Error('switch failed');
       window.location.reload();
     } catch {
       setActionBusy(false);
       setSwitchTarget(null);
-      setActionStatus(`Gagal beralih ke workspace "${switchTarget.name}".`);
+      setActionStatus(t('error.switch', { name: switchTarget.name }));
     }
   };
 
   if (loading) {
     return (
       <div className="flex flex-col gap-4">
-        <h1 className="text-brand-ink font-semibold text-body-xl">Workspace</h1>
-        <Panel title="Keanggotaan workspace" description="Memuat data…">
+        <h1 className="text-brand-ink font-semibold text-body-xl">{t('title')}</h1>
+        <Panel title={t('membershipTitle')} description={t('loading')}>
           <div className="flex items-center justify-center py-8">
-            <span className="text-body-sm text-brand-muted">Memuat…</span>
+            <span className="text-body-sm text-brand-muted">{t('loading')}</span>
           </div>
         </Panel>
       </div>
@@ -112,20 +110,17 @@ export default function WorkspaceSettingsPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-brand-ink font-semibold text-body-xl">Workspace</h1>
+      <h1 className="text-brand-ink font-semibold text-body-xl">{t('title')}</h1>
 
       {actionStatus && <FormStatus tone="idle" message={actionStatus} />}
 
-      <Panel
-        title="Keanggotaan workspace"
-        description="Workspace yang Anda ikuti dan peran Anda di masing-masing."
-      >
+      <Panel title={t('membershipTitle')} description={t('membershipDescription')}>
         {memberships.length === 0 ? (
           <div className="flex items-center justify-center py-8">
-            <span className="text-body-sm text-brand-muted">Tidak ada workspace ditemukan.</span>
+            <span className="text-body-sm text-brand-muted">{t('empty')}</span>
           </div>
         ) : (
-          <ul className="flex flex-col gap-2" aria-label="Daftar workspace">
+          <ul className="flex flex-col gap-2" aria-label={t('listAria')}>
             {memberships.map((ws) => (
               <li
                 key={ws.id}
@@ -137,13 +132,13 @@ export default function WorkspaceSettingsPage() {
                     {ws.isActive && (
                       <span
                         className="text-label-xs text-brand-accent bg-brand-accent/10 rounded px-1.5 py-0.5"
-                        aria-label="workspace aktif"
+                        aria-label={t('activeAria')}
                       >
-                        Aktif
+                        {t('activeBadge')}
                       </span>
                     )}
                   </div>
-                  <span className="text-body-xs text-brand-muted">{ROLE_LABEL[ws.role]}</span>
+                  <span className="text-body-xs text-brand-muted">{t(`roles.${ws.role}`)}</span>
                 </div>
 
                 <div className="flex gap-2 shrink-0">
@@ -156,7 +151,7 @@ export default function WorkspaceSettingsPage() {
                         setSwitchTarget(ws);
                       }}
                     >
-                      Pilih
+                      {t('select')}
                     </Button>
                   )}
                 </div>
@@ -168,27 +163,24 @@ export default function WorkspaceSettingsPage() {
 
       {/* Switch workspace confirmation */}
       {switchTarget && (
-        <Panel title="Beralih workspace">
+        <Panel title={t('switchTitle')}>
           <div className="flex flex-col gap-3">
             <p className="text-body-sm text-brand-ink">
-              Beralih ke workspace <strong>{switchTarget.name}</strong>? Perubahan yang belum
-              disimpan akan hilang.
+              {t('switchConfirm', { name: switchTarget.name })}
             </p>
             <div className="flex gap-2">
               <Button size="sm" onClick={handleSwitch} loading={actionBusy} disabled={actionBusy}>
-                {actionBusy ? 'Beralih…' : 'Ya, beralih'}
+                {actionBusy ? t('switchBusy') : t('switchSubmit')}
               </Button>
               <Button variant="quiet" size="sm" onClick={() => setSwitchTarget(null)}>
-                Batal
+                {t('cancel')}
               </Button>
             </div>
           </div>
         </Panel>
       )}
 
-      <p className="text-body-xs text-brand-muted">
-        Perubahan keanggotaan workspace dikelola oleh admin sekolah.
-      </p>
+      <p className="text-body-xs text-brand-muted">{t('managedByAdmin')}</p>
     </div>
   );
 }

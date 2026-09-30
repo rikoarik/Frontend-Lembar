@@ -1,14 +1,14 @@
 import { readFile } from 'node:fs/promises';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import GeneratorSoalAiPage, { metadata } from './(marketing)/generator-soal-ai/page';
+import GeneratorSoalAiPage, { generateMetadata } from './(marketing)/generator-soal-ai/page';
 import JsonLd from './components/marketing/JsonLd';
 import robots from './robots';
 import sitemap from './sitemap';
 
 describe('SEO and AI discovery surfaces', () => {
-  it('renders a crawlable generator page with factual schema and internal links', () => {
-    const { container } = render(<GeneratorSoalAiPage />);
+  it('renders a crawlable generator page with factual schema and internal links', async () => {
+    const { container } = render(await GeneratorSoalAiPage());
 
     expect(
       screen.getByRole('heading', { level: 1, name: 'Generator soal AI untuk guru Indonesia' }),
@@ -48,7 +48,8 @@ describe('SEO and AI discovery surfaces', () => {
     expect(content).not.toContain('</script>');
   });
 
-  it('publishes focused metadata and includes the landing page in the sitemap', () => {
+  it('publishes focused metadata and includes the landing page in the sitemap', async () => {
+    const metadata = await generateMetadata();
     expect(metadata.title).toBe('Generator Soal AI untuk Guru Indonesia | Lembar');
     expect(metadata.alternates).toMatchObject({ canonical: '/generator-soal-ai' });
     expect(sitemap()).toEqual(

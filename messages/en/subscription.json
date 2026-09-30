@@ -1,1 +1,98 @@
-{}
+{
+  "subscription": {
+    "title": "Plan & quota",
+    "description": "Manage your subscription plan and monitor your token usage.",
+    "loading": "Loading plan data…",
+    "error": {
+      "load": "Could not load plan data",
+      "unavailable": "Data unavailable"
+    },
+    "states": {
+      "free": {
+        "heading": "Free plan",
+        "body": "You are currently on the free plan with a limited token quota. Upgrade for a larger quota."
+      },
+      "active": {
+        "heading": "Active plan",
+        "body": "Your plan is active. You can create and distribute worksheets."
+      },
+      "grace": {
+        "heading": "Grace period",
+        "body": "Your plan has entered a grace period. Features stay active for now. Contact our team at {whatsapp} to renew."
+      },
+      "blocked": {
+        "heading": "Access suspended",
+        "body": "Access to paid features is suspended. Contact our team at {whatsapp} to restore access."
+      },
+      "expired": {
+        "heading": "Plan expired",
+        "body": "Your plan has expired. Contact our team at {whatsapp} to continue."
+      }
+    },
+    "fallbackPlanName": "Free plan",
+    "token": {
+      "usageTitle": "Token usage",
+      "usedThisMonth": "Tokens used this month",
+      "unlimited": "Unlimited",
+      "unlimitedAria": "Token usage: unlimited",
+      "usedAria": "Tokens used: {used} of {limit}",
+      "percentAria": "{percent}% used",
+      "quotaNote": "Token quota: {quota}. Resets at the start of each billing cycle."
+    },
+    "upgrade": {
+      "title": "Upgrade plan",
+      "description": "Choose a subscription plan with a larger token quota.",
+      "chooseAria": "Choose an upgrade plan",
+      "plans": {
+        "pro": {
+          "label": "Teacher Pro",
+          "price": "Rp49,000/mo"
+        },
+        "plus": {
+          "label": "Plus",
+          "price": "Rp149,000/mo"
+        }
+      },
+      "submit": "Continue to {plan}",
+      "submitBusy": "Processing…",
+      "qrisNote": "Payment via QRIS. Secure and instant.",
+      "error": {
+        "notConfigured": "The payment gateway is not active yet. Contact our team on WhatsApp to upgrade manually.",
+        "createOrder": "Could not create the order. Please try again.",
+        "offline": "Could not connect. Check your connection.",
+        "contactWhatsapp": "Contact the team on WhatsApp"
+      }
+    },
+    "checkout": {
+      "eyebrow": "Secure payment",
+      "title": "Scan QRIS",
+      "description": "Open your payment app and scan the code below.",
+      "close": "Close",
+      "closeAria": "Close payment",
+      "qrAlt": "QRIS payment code for the Lembar plan",
+      "totalLabel": "Total payment",
+      "expiresAt": "Valid until {datetime}",
+      "openProvider": "Open QRIS on Pakasir",
+      "activationNote": "The plan activates automatically once payment is confirmed."
+    },
+    "trial": {
+      "eyebrow": "Single-use link",
+      "title": "Confirm Teacher Pro trial",
+      "description": "The trial runs for 60 days and will be bound to the device used at confirmation.",
+      "checking": "Checking the link…",
+      "warning": "This link can only be used once. After the trial is activated, the link is immediately marked as used and cannot be replayed.",
+      "claim": "Activate the 2-month trial",
+      "claimBusy": "Activating the trial…",
+      "cancel": "Cancel and go back",
+      "success": "The trial was activated successfully.",
+      "successUntil": "Teacher Pro access is active until {date}.",
+      "viewPlan": "View plan & quota",
+      "backToPlan": "Go back and contact the Lembar team",
+      "error": {
+        "invalidLink": "The claim link is invalid or no longer available.",
+        "claimFailed": "The claim link is invalid, expired, or has already been used.",
+        "offline": "Could not connect. Check your connection and try again."
+      }
+    }
+  }
+}

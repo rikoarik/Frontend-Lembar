@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 
 interface MarketingSubPageLayoutProps {
   title: ReactNode;
@@ -10,7 +11,7 @@ interface MarketingSubPageLayoutProps {
   children: ReactNode;
 }
 
-export default function MarketingSubPageLayout({
+export default async function MarketingSubPageLayout({
   title,
   description,
   badge,
@@ -18,6 +19,7 @@ export default function MarketingSubPageLayout({
   asymmetric = false,
   children,
 }: MarketingSubPageLayoutProps) {
+  const t = await getTranslations('marketing.subpage');
   return (
     <>
       <main>
@@ -31,7 +33,7 @@ export default function MarketingSubPageLayout({
               <span className="material-symbols-outlined text-[16px] group-hover:-translate-x-0.5 transition-transform">
                 arrow_back
               </span>
-              Beranda
+              {t('backHome')}
             </Link>
 
             {asymmetric ? (

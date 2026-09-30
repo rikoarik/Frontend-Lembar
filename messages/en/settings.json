@@ -1,1 +1,48 @@
-{}
+{
+  "settings": {
+    "profile": {
+      "title": "Profile",
+      "description": "Account information currently in use on lembar.",
+      "loading": "Loading profile…",
+      "emailFallback": "Email not available yet",
+      "infoTitle": "Account information",
+      "infoDescription": "This data comes from the authentication service and cannot be changed from the frontend at this time.",
+      "nameLabel": "Name",
+      "emailLabel": "Email",
+      "securityTitle": "Account security",
+      "securityDescription": "Use the verified recovery flow to change your password.",
+      "resetPassword": "Reset password",
+      "error": {
+        "load": "Could not load the profile. Please sign in again.",
+        "incomplete": "Profile data is incomplete.",
+        "generic": "Could not load the profile."
+      }
+    },
+    "workspace": {
+      "title": "Workspace",
+      "membershipTitle": "Workspace membership",
+      "membershipDescription": "The workspaces you belong to and your role in each.",
+      "loading": "Loading data…",
+      "empty": "No workspaces found.",
+      "listAria": "Workspace list",
+      "activeBadge": "Active",
+      "activeAria": "active workspace",
+      "select": "Select",
+      "roles": {
+        "owner": "Owner",
+        "admin": "Admin",
+        "member": "Member"
+      },
+      "switchTitle": "Switch workspace",
+      "switchConfirm": "Switch to workspace {name}? Unsaved changes will be lost.",
+      "switchSubmit": "Yes, switch",
+      "switchBusy": "Switching…",
+      "cancel": "Cancel",
+      "managedByAdmin": "Workspace membership changes are managed by the school admin.",
+      "error": {
+        "load": "Could not load workspace data.",
+        "switch": "Could not switch to workspace \"{name}\"."
+      }
+    }
+  }
+}

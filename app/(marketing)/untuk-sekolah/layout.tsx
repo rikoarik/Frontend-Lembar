@@ -1,15 +1,15 @@
 import type { ReactNode } from 'react';
 import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 import { marketingMetadata } from '@/src/lib/marketing/marketingMetadata';
 
-// Per-route metadata lives in a sibling server layout because the route's
-// page.tsx is marked 'use client' and the App Router forbids exporting
-// metadata from a client component. The page's JSX is unchanged.
+// Per-route metadata lives in a sibling server layout so it can stay a server
+// module regardless of how page.tsx is rendered. The page's JSX is unchanged.
 export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('marketing.school.meta');
   return marketingMetadata('untuk-sekolah', {
-    title: 'Untuk sekolah — workspace asesmen terkelola',
-    description:
-      'Workspace organisasi lembar untuk sekolah: manajemen akun guru, bank soal internal, template bersama, dan audit trail. Program pilot untuk institusi pendidikan.',
+    title: t('title'),
+    description: t('description'),
     canonical: '/untuk-sekolah',
   });
 }

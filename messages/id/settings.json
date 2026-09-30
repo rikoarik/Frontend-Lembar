@@ -1,1 +1,48 @@
-{}
+{
+  "settings": {
+    "profile": {
+      "title": "Profil",
+      "description": "Informasi akun yang sedang digunakan di lembar.",
+      "loading": "Memuat profil…",
+      "emailFallback": "Email belum tersedia",
+      "infoTitle": "Informasi akun",
+      "infoDescription": "Data ini berasal dari layanan autentikasi dan tidak dapat diubah dari frontend saat ini.",
+      "nameLabel": "Nama",
+      "emailLabel": "Email",
+      "securityTitle": "Keamanan akun",
+      "securityDescription": "Gunakan alur pemulihan terverifikasi untuk mengganti kata sandi.",
+      "resetPassword": "Atur ulang kata sandi",
+      "error": {
+        "load": "Gagal memuat profil. Silakan masuk ulang.",
+        "incomplete": "Data profil tidak lengkap.",
+        "generic": "Gagal memuat profil."
+      }
+    },
+    "workspace": {
+      "title": "Workspace",
+      "membershipTitle": "Keanggotaan workspace",
+      "membershipDescription": "Workspace yang Anda ikuti dan peran Anda di masing-masing.",
+      "loading": "Memuat data…",
+      "empty": "Tidak ada workspace ditemukan.",
+      "listAria": "Daftar workspace",
+      "activeBadge": "Aktif",
+      "activeAria": "workspace aktif",
+      "select": "Pilih",
+      "roles": {
+        "owner": "Pemilik",
+        "admin": "Admin",
+        "member": "Anggota"
+      },
+      "switchTitle": "Beralih workspace",
+      "switchConfirm": "Beralih ke workspace {name}? Perubahan yang belum disimpan akan hilang.",
+      "switchSubmit": "Ya, beralih",
+      "switchBusy": "Beralih…",
+      "cancel": "Batal",
+      "managedByAdmin": "Perubahan keanggotaan workspace dikelola oleh admin sekolah.",
+      "error": {
+        "load": "Gagal memuat data workspace.",
+        "switch": "Gagal beralih ke workspace \"{name}\"."
+      }
+    }
+  }
+}

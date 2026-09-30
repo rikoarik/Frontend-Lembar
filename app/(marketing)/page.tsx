@@ -11,10 +11,10 @@ import type { NumberFormat } from '@/src/i18n/formats';
 import { getLocaleFormat } from '@/src/i18n/formatServer';
 
 export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('marketing.home.meta');
   const metadata = await marketingMetadata('home', {
-    title: 'Generator Soal AI untuk Guru — lembar',
-    description:
-      'Generator soal otomatis berbasis AI untuk guru Indonesia. Buat draft ujian, ulangan, dan latihan dari materi atau PDF, lalu tinjau sebelum digunakan.',
+    title: t('title'),
+    description: t('description'),
     canonical: '/',
   });
 
@@ -37,7 +37,11 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-const HOME_SCHEMA = [
+const FEATURE_ICONS = ['quiz', 'auto_stories', 'fact_check', 'print'] as const;
+const STEP_ICONS = ['upload_file', 'auto_awesome', 'task_alt'] as const;
+const BENEFIT_KEYS = ['0', '1', '2', '3'] as const;
+
+const HOME_SCHEMA = (description: string, pageName: string) => [
   {
     '@type': 'Organization',
     '@id': 'https://app.lembar.web.id/#organization',
@@ -60,8 +64,7 @@ const HOME_SCHEMA = [
     applicationCategory: 'EducationalApplication',
     operatingSystem: 'Web',
     url: 'https://app.lembar.web.id',
-    description:
-      'Generator soal otomatis berbasis AI untuk guru Indonesia. Buat dan tinjau draft soal dari materi kurikulum atau PDF.',
+    description,
     inLanguage: 'id-ID',
     publisher: { '@id': 'https://app.lembar.web.id/#organization' },
   },
@@ -69,7 +72,7 @@ const HOME_SCHEMA = [
     '@type': 'WebPage',
     '@id': 'https://app.lembar.web.id/#webpage',
     url: 'https://app.lembar.web.id',
-    name: 'Generator Soal AI untuk Guru Indonesia',
+    name: pageName,
     inLanguage: 'id-ID',
     isPartOf: { '@id': 'https://app.lembar.web.id/#website' },
     about: { '@id': 'https://app.lembar.web.id/#software' },
@@ -168,11 +171,12 @@ function LivePlanCatalog({
 }
 
 export default async function LandingPage() {
-  const [session, cmsDoc, plans, t] = await Promise.all([
+  const [session, cmsDoc, plans, t, th] = await Promise.all([
     getMarketingSession(),
     fetchMarketingPage('home'),
     fetchPublicPlans(),
     getTranslations('pricing.landing'),
+    getTranslations('marketing.home'),
   ]);
   const { number } = await getLocaleFormat();
   const pricingCopy: LandingPricingCopy = {
@@ -190,11 +194,12 @@ export default async function LandingPage() {
     schoolBody: t('schoolBody'),
   };
   const primaryHref = session?.homePath ?? '/daftar';
-  const primaryLabel = session ? 'Buka workspace' : 'Mulai membuat soal';
+  const primaryLabel = session ? th('primaryCtaSession') : th('primaryCta');
+  const homeSchema = HOME_SCHEMA(th('schemaDescription'), th('schemaPageName'));
   if (cmsDoc) {
     return (
       <>
-        <JsonLd schema={HOME_SCHEMA} />
+        <JsonLd schema={homeSchema} />
         <BlockRenderer blocks={cmsDoc.blocks.filter((block) => block.type !== 'pricing')} />
         <LivePlanCatalog plans={plans} copy={pricingCopy} number={number} />
       </>
@@ -202,22 +207,18 @@ export default async function LandingPage() {
   }
   return (
     <>
-      <JsonLd schema={HOME_SCHEMA} />
+      <JsonLd schema={homeSchema} />
       <main className="flex-grow">
         <section className="py-24 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto overflow-hidden">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-center">
             <div className="lg:col-span-5 flex flex-col gap-6 relative z-10">
               <span className="font-label-semibold text-label-semibold text-secondary uppercase tracking-wider">
-                Generator soal AI untuk guru Indonesia
+                {th('eyebrow')}
               </span>
               <h1 className="font-display-xl-mobile md:font-display-xl text-display-xl-mobile md:text-display-xl text-ink leading-tight">
-                Buat soal ujian otomatis dari materi kurikulum atau PDF Anda
+                {th('title')}
               </h1>
-              <p className="font-body-lead text-body-lead text-secondary max-w-md">
-                Generator soal berbasis AI yang menghasilkan draft ujian, ulangan, dan latihan dari
-                Buku Siswa atau materi Anda. Tinjau setiap butir soal sebelum cetak atau bagikan.
-                Harga dan kuota mengikuti katalog paket yang sedang aktif.
-              </p>
+              <p className="font-body-lead text-body-lead text-secondary max-w-md">{th('body')}</p>
               <div className="flex flex-wrap gap-4 mt-4">
                 <Link
                   className="font-label-semibold text-label-semibold bg-burgundy text-white px-6 py-3 rounded h-[44px] flex items-center justify-center transition-colors hover:bg-primary shadow-sm"
@@ -229,7 +230,7 @@ export default async function LandingPage() {
                   className="font-label-semibold text-label-semibold text-ink border border-ink px-6 py-3 rounded h-[44px] flex items-center justify-center transition-colors hover:bg-surface-container-highest"
                   href="#contoh-hasil"
                 >
-                  Lihat contoh hasil generator
+                  {th('secondaryCta')}
                 </a>
               </div>
             </div>
@@ -246,72 +247,27 @@ export default async function LandingPage() {
                     check_circle
                   </span>
                   <span className="font-label-semibold text-label-semibold text-secondary">
-                    Draft AI siap tinjau
+                    {th('cardBadge')}
                   </span>
                 </div>
 
                 <div className="space-y-4 text-caption text-secondary">
-                  <div className="flex items-start gap-2">
-                    <span
-                      className="material-symbols-outlined text-[20px] text-primary mt-0.5"
-                      aria-hidden
-                    >
-                      quiz
-                    </span>
-                    <div className="flex-1">
-                      <h3 className="font-label-semibold text-label-semibold text-ink mb-1">
-                        Generator soal pilihan ganda dan esai
-                      </h3>
-                      <p>Buat soal PG, esai, atau campuran otomatis dari materi yang Anda pilih</p>
+                  {FEATURE_ICONS.map((icon, index) => (
+                    <div key={icon} className="flex items-start gap-2">
+                      <span
+                        className="material-symbols-outlined text-[20px] text-primary mt-0.5"
+                        aria-hidden
+                      >
+                        {icon}
+                      </span>
+                      <div className="flex-1">
+                        <h3 className="font-label-semibold text-label-semibold text-ink mb-1">
+                          {th(`features.${index}.title`)}
+                        </h3>
+                        <p>{th(`features.${index}.body`)}</p>
+                      </div>
                     </div>
-                  </div>
-
-                  <div className="flex items-start gap-2">
-                    <span
-                      className="material-symbols-outlined text-[20px] text-primary mt-0.5"
-                      aria-hidden
-                    >
-                      auto_stories
-                    </span>
-                    <div className="flex-1">
-                      <h3 className="font-label-semibold text-label-semibold text-ink mb-1">
-                        Dari kurikulum atau PDF
-                      </h3>
-                      <p>
-                        Upload materi, pilih topik dari katalog kurikulum, atau gabungkan keduanya
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-2">
-                    <span
-                      className="material-symbols-outlined text-[20px] text-primary mt-0.5"
-                      aria-hidden
-                    >
-                      fact_check
-                    </span>
-                    <div className="flex-1">
-                      <h3 className="font-label-semibold text-label-semibold text-ink mb-1">
-                        Tinjau sebelum pakai
-                      </h3>
-                      <p>Setiap soal bisa diedit, regenerate, atau dihapus sebelum final</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-2">
-                    <span
-                      className="material-symbols-outlined text-[20px] text-primary mt-0.5"
-                      aria-hidden
-                    >
-                      print
-                    </span>
-                    <div className="flex-1">
-                      <h3 className="font-label-semibold text-label-semibold text-ink mb-1">
-                        Cetak atau bagikan link
-                      </h3>
-                      <p>Download PDF siap cetak atau buat link aman untuk dibagikan ke siswa</p>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -321,103 +277,45 @@ export default async function LandingPage() {
         <section className="py-16 px-margin-mobile md:px-margin-desktop bg-surface-container">
           <div className="max-w-container-max mx-auto">
             <h2 className="font-display-lg text-display-lg text-ink text-center mb-12">
-              Cara kerja generator soal AI lembar
+              {th('howTitle')}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="text-center">
-                <div className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-primary-fixed mb-4">
-                  <span
-                    className="material-symbols-outlined text-[28px] text-on-primary-fixed"
-                    aria-hidden
-                  >
-                    upload_file
-                  </span>
+              {STEP_ICONS.map((icon, index) => (
+                <div key={icon} className="text-center">
+                  <div className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-primary-fixed mb-4">
+                    <span
+                      className="material-symbols-outlined text-[28px] text-on-primary-fixed"
+                      aria-hidden
+                    >
+                      {icon}
+                    </span>
+                  </div>
+                  <h3 className="font-label-large text-label-large text-ink mb-2">
+                    {th(`steps.${index}.title`)}
+                  </h3>
+                  <p className="text-body-medium text-secondary">{th(`steps.${index}.body`)}</p>
                 </div>
-                <h3 className="font-label-large text-label-large text-ink mb-2">1. Pilih materi</h3>
-                <p className="text-body-medium text-secondary">
-                  Upload PDF materi Anda atau pilih topik dari katalog kurikulum Merdeka dan K-13
-                </p>
-              </div>
-              <div className="text-center">
-                <div className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-primary-fixed mb-4">
-                  <span
-                    className="material-symbols-outlined text-[28px] text-on-primary-fixed"
-                    aria-hidden
-                  >
-                    auto_awesome
-                  </span>
-                </div>
-                <h3 className="font-label-large text-label-large text-ink mb-2">
-                  2. Generate draft soal
-                </h3>
-                <p className="text-body-medium text-secondary">
-                  AI membuat draft soal berdasarkan materi, lengkap dengan kunci jawaban dan
-                  referensi sumber
-                </p>
-              </div>
-              <div className="text-center">
-                <div className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-primary-fixed mb-4">
-                  <span
-                    className="material-symbols-outlined text-[28px] text-on-primary-fixed"
-                    aria-hidden
-                  >
-                    task_alt
-                  </span>
-                </div>
-                <h3 className="font-label-large text-label-large text-ink mb-2">
-                  3. Tinjau & finalkan
-                </h3>
-                <p className="text-body-medium text-secondary">
-                  Periksa, edit, atau regenerate soal sampai puas, lalu cetak atau bagikan link aman
-                </p>
-              </div>
+              ))}
             </div>
           </div>
         </section>
 
         <section className="py-16 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
           <h2 className="font-display-lg text-display-lg text-ink text-center mb-4">
-            Kenapa guru pilih generator soal lembar?
+            {th('whyTitle')}
           </h2>
           <p className="text-body-lead text-secondary text-center max-w-2xl mx-auto mb-12">
-            Generator soal AI yang dirancang khusus untuk guru Indonesia, dengan kuota yang jelas
-            untuk setiap paket.
+            {th('whyBody')}
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="border border-border-subtle rounded-DEFAULT p-6 bg-surface">
-              <h3 className="font-label-large text-label-large text-ink mb-2">
-                ✓ Paket Gratis dengan kuota jelas
-              </h3>
-              <p className="text-body-medium text-secondary">
-                Mulai tanpa kartu kredit. Kuota generasi per bulan dan opsi trial ditampilkan
-                transparan di halaman paket.
-              </p>
-            </div>
-            <div className="border border-border-subtle rounded-DEFAULT p-6 bg-surface">
-              <h3 className="font-label-large text-label-large text-ink mb-2">
-                ✓ Kontrol penuh di tangan guru
-              </h3>
-              <p className="text-body-medium text-secondary">
-                Draft AI selalu ditinjau guru. Edit, regenerate, hapus soal sesuka Anda sebelum
-                final.
-              </p>
-            </div>
-            <div className="border border-border-subtle rounded-DEFAULT p-6 bg-surface">
-              <h3 className="font-label-large text-label-large text-ink mb-2">
-                ✓ Katalog kurikulum lengkap
-              </h3>
-              <p className="text-body-medium text-secondary">
-                Pilih topik dari Kurikulum Merdeka atau K-13, atau upload materi sendiri.
-              </p>
-            </div>
-            <div className="border border-border-subtle rounded-DEFAULT p-6 bg-surface">
-              <h3 className="font-label-large text-label-large text-ink mb-2">
-                ✓ Hasil siap pakai
-              </h3>
-              <p className="text-body-medium text-secondary">
-                PDF siap cetak atau link bagikan yang aman, tanpa iklan atau watermark.
-              </p>
-            </div>
+            {BENEFIT_KEYS.map((key) => (
+              <div key={key} className="border border-border-subtle rounded-DEFAULT p-6 bg-surface">
+                <h3 className="font-label-large text-label-large text-ink mb-2">
+                  {th(`benefits.${key}.title`)}
+                </h3>
+                <p className="text-body-medium text-secondary">{th(`benefits.${key}.body`)}</p>
+              </div>
+            ))}
           </div>
         </section>
 
@@ -425,18 +323,15 @@ export default async function LandingPage() {
 
         <section className="py-16 px-margin-mobile md:px-margin-desktop bg-surface-container">
           <div className="max-w-container-max mx-auto text-center">
-            <h2 className="font-display-lg text-display-lg text-ink mb-4">
-              Mulai buat soal otomatis sekarang
-            </h2>
+            <h2 className="font-display-lg text-display-lg text-ink mb-4">{th('finalTitle')}</h2>
             <p className="text-body-lead text-secondary max-w-2xl mx-auto mb-8">
-              Generator soal AI untuk guru Indonesia. Daftar gratis, langsung buat soal tanpa kartu
-              kredit.
+              {th('finalBody')}
             </p>
             <Link
               className="inline-flex font-label-semibold text-label-semibold bg-burgundy text-white px-8 py-4 rounded h-[52px] items-center justify-center transition-colors hover:bg-primary shadow-sm"
               href={primaryHref}
             >
-              {session ? 'Buka workspace' : 'Daftar & buat soal gratis'}
+              {session ? th('finalCtaSession') : th('finalCta')}
             </Link>
           </div>
         </section>
