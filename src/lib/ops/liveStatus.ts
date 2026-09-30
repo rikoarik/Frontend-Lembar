@@ -418,6 +418,11 @@ function progressFromGates(
     if (gates[step.key]) percent = Math.max(percent, step.percent);
   }
   if (percent >= 100) return 100;
+  // A finished card is only evidence of the gate its lane already carries (tests/
+  // review/qa/deploy), so when nothing is left in flight there is no band left to
+  // fill. Without this the ratio below would run away: on the live board more SP
+  // was done than remained, and the fill read past the next gate.
+  if (storyPointsTotal <= 0) return percent;
   // AC 9 — progress from story points. The ordinal gates give the floor and the
   // ceiling of the CURRENT band; inside that band the number advances with the
   // story points of the board's completed work. The band is clamped to the next
@@ -535,7 +540,7 @@ export async function buildLiveStatus(): Promise<LiveStatusDoc | null> {
     latestFrontendCommits,
     services: pm2.services,
     notes: [
-      `Progress = band gate ordinal aktif (created=0, running=10, file_changed=25, commit=50, tests=65, review=75, qa=85, deploy=95, public=100), diisi story point di dalam band (${storyPointsDone}/${storyPointsTotal} SP selesai). Saat ini: ${overallPercent}%.`,
+      `Progress = band gate ordinal aktif (created=0, running=10, file_changed=25, commit=50, tests=65, review=75, qa=85, deploy=95, public=100), diisi story point task in-flight (${Math.min(storyPointsDone, storyPointsTotal)}/${storyPointsTotal} SP selesai). Saat ini: ${overallPercent}%.`,
       'Gate review/qa/deploy/public hanya menyala oleh OUTCOME (verdict approve / deploy selesai / public verification berhasil) — bukan oleh nama author atau kalimat topik. Verdict FAIL mencegah gate menyala.',
       'Heartbeat, jam, dan command count TIDAK menaikkan progress — hanya evidence gates.',
       'State task dan heartbeat dibaca read-only dari database kanban Hermes.',

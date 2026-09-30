@@ -228,6 +228,33 @@ describe('live-status routes', () => {
     expect(json.overallPercent).toBe(10);
   });
 
+  it('a board with nothing in flight stays at the ordinal gate, no runaway fill', async () => {
+    // Live regression: with more SP done than remained in flight the story-point
+    // ratio ran past the next gate. A finished board has no band left to fill.
+    vi.stubEnv(
+      'LEMBAR_LIVE_STATUS_TASKS_JSON',
+      JSON.stringify([
+        {
+          id: 't_done1',
+          title: 'finished epic',
+          body: 'Story points: 21',
+          assignee: 'default',
+          status: 'done',
+          priority: 1,
+          created_at: 1785244013,
+          started_at: 1785244043,
+          completed_at: 1785244127,
+          last_heartbeat_at: null,
+          result: null,
+        },
+      ]),
+    );
+    const route = await import('../live-status/status.json/route');
+    const json = await (await route.GET()).json();
+    expect(json.evidenceGates.running).toBe(false);
+    expect(json.overallPercent).toBe(0);
+  });
+
   it('emits PM2 warning when any service restart count is high', async () => {
     stubBaseEnv(baseTasks, baseEvents, 'noisy');
     const route = await import('../live-status/status.json/route');
