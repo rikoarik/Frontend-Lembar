@@ -6,6 +6,8 @@
  * Uses plain fetch — no extra dependency.
  */
 
+import type { NumberFormat } from '@/src/i18n/formats';
+
 // ── Types ──────────────────────────────────────────────────────────────────
 
 export type PlanKey = 'free' | 'pro' | (string & {});
@@ -59,23 +61,23 @@ export type AdminPlan = PublicPlan & {
 
 // ── Format helpers ──────────────────────────────────────────────────────────
 
-/** Rp49.000 / bulan */
-export function formatPrice(plan: PublicPlan): string {
+/** Rp49.000 / bulan — `format` comes from the locale-aware next-intl formatter. */
+export function formatPrice(plan: PublicPlan, format: NumberFormat): string {
   if (plan.priceAmount === 0) return 'Gratis';
-  const rp = new Intl.NumberFormat('id-ID', {
+  const rp = format(plan.priceAmount, {
     style: 'currency',
     currency: 'IDR',
     maximumFractionDigits: 0,
-  }).format(plan.priceAmount);
+  });
   if (plan.billingPeriod === 'monthly') return `${rp} / bulan`;
   if (plan.billingPeriod === 'yearly') return `${rp} / tahun`;
   return rp;
 }
 
 /** "60.000 token / bulan" or "Tidak terbatas" */
-export function formatTokenLimit(limit: number | null): string {
+export function formatTokenLimit(limit: number | null, format: NumberFormat): string {
   if (limit === null) return 'Tidak terbatas';
-  return `${new Intl.NumberFormat('id-ID').format(limit)} token / bulan`;
+  return `${format(limit)} token / bulan`;
 }
 
 // ── Server-side public plans fetcher (called from RSC / page.tsx) ───────────

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { entitlementCta, formatQuota } from '../TopBar';
 import { loadMessages } from '@/src/i18n/messages';
+import type { NumberFormat } from '@/src/i18n/formats';
 
 /** Minimal translator backed by the real id catalog, so assertions stay honest. */
 const translate = (key: string): string => {
@@ -14,26 +15,43 @@ const translate = (key: string): string => {
   return typeof value === 'string' ? value : key;
 };
 
+/** Test-local formatter; components get theirs from next-intl. */
+const idNumber: NumberFormat = (value, options) =>
+  new Intl.NumberFormat('id-ID', options).format(value);
+const enNumber: NumberFormat = (value, options) =>
+  new Intl.NumberFormat('en-US', options).format(value);
+
 describe('formatQuota', () => {
   it('formats the same finite token quota used by the plan catalog', () => {
-    expect(formatQuota({ tokenUsedThisMonth: 1_500, tokenMonthlyLimit: 30_000 })).toEqual({
-      label: '1.500/30.000',
-      percent: 5,
-    });
+    expect(formatQuota({ tokenUsedThisMonth: 1_500, tokenMonthlyLimit: 30_000 }, idNumber)).toEqual(
+      {
+        label: '1.500/30.000',
+        percent: 5,
+      },
+    );
   });
 
   it('formats unlimited token quota', () => {
-    expect(formatQuota({ tokenUsedThisMonth: 7_000, tokenMonthlyLimit: null })).toEqual({
+    expect(formatQuota({ tokenUsedThisMonth: 7_000, tokenMonthlyLimit: null }, idNumber)).toEqual({
       label: '7.000/∞',
       percent: 0,
     });
   });
 
   it('handles a zero token limit without dividing by zero', () => {
-    expect(formatQuota({ tokenUsedThisMonth: 1, tokenMonthlyLimit: 0 })).toEqual({
+    expect(formatQuota({ tokenUsedThisMonth: 1, tokenMonthlyLimit: 0 }, idNumber)).toEqual({
       label: '1/0',
       percent: 100,
     });
+  });
+
+  it('follows the active locale instead of a hardcoded tag', () => {
+    expect(formatQuota({ tokenUsedThisMonth: 1_500, tokenMonthlyLimit: 30_000 }, enNumber)).toEqual(
+      {
+        label: '1,500/30,000',
+        percent: 5,
+      },
+    );
   });
 });
 

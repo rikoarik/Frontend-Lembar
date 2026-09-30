@@ -1,13 +1,15 @@
 import '@testing-library/jest-dom/vitest';
 import { vi } from 'vitest';
 import { loadMessages } from './src/i18n/messages';
+import { intlLocale } from './src/i18n/formats';
+import { localeState } from './test/locale-state';
 
-// Global next-intl test double: resolves keys against the id catalog so
-// component tests do not need an explicit NextIntlClientProvider wrapper.
+// Global next-intl test double: resolves keys against the catalog for the
+// locale held in `localeState`, so component tests do not need an explicit
+// NextIntlClientProvider wrapper. Tests that assert a locale switch mutate
+// `localeState` (see test/locale-state.ts) and re-render.
 vi.mock('next-intl', async () => {
-  const messages = loadMessages('id');
-
-  const resolve = (path: string): unknown =>
+  const resolve = (messages: unknown, path: string): unknown =>
     path
       .split('.')
       .reduce<unknown>(
@@ -23,30 +25,40 @@ vi.mock('next-intl', async () => {
     );
   };
 
+  const createTranslator = (namespace?: string) => {
+    const messages = loadMessages(localeState.locale);
+    const translate = (key: string, values?: Record<string, unknown>): string => {
+      const fullKey = namespace ? `${namespace}.${key}` : key;
+      const value = resolve(messages, fullKey);
+      if (typeof value !== 'string') return fullKey;
+      return format(value, values);
+    };
+    const rich = (key: string, values?: Record<string, unknown>): React.ReactNode =>
+      translate(key, values as Record<string, unknown>);
+    const raw = (key: string): unknown => resolve(loadMessages(localeState.locale), key);
+    (translate as unknown as { rich: unknown }).rich = rich;
+    (translate as unknown as { raw: unknown }).raw = raw;
+    return translate;
+  };
+
   return {
-    useLocale: () => 'id',
-    useTranslations: (namespace?: string) => {
-      const translate = (key: string, values?: Record<string, unknown>): string => {
-        const fullKey = namespace ? `${namespace}.${key}` : key;
-        const value = resolve(fullKey);
-        if (typeof value !== 'string') return fullKey;
-        return format(value, values);
+    useLocale: () => localeState.locale,
+    useTranslations: (namespace?: string) => createTranslator(namespace),
+    useFormatter: () => {
+      const locale = intlLocale(localeState.locale);
+      return {
+        dateTime: (value: Date | number, options?: Intl.DateTimeFormatOptions) =>
+          new Intl.DateTimeFormat(locale, options).format(value),
+        number: (value: number | bigint, options?: Intl.NumberFormatOptions) =>
+          new Intl.NumberFormat(locale, options).format(value),
       };
-      const rich = (key: string, values?: Record<string, unknown>): React.ReactNode =>
-        translate(key, values as Record<string, unknown>);
-      const raw = (key: string): unknown => resolve(key);
-      (translate as unknown as { rich: unknown }).rich = rich;
-      (translate as unknown as { raw: unknown }).raw = raw;
-      return translate;
     },
     NextIntlClientProvider: ({ children }: { children?: React.ReactNode }) => children ?? null,
   };
 });
 
 vi.mock('next-intl/server', async () => {
-  const messages = loadMessages('id');
-
-  const resolve = (path: string): unknown =>
+  const resolve = (messages: unknown, path: string): unknown =>
     path
       .split('.')
       .reduce<unknown>(
@@ -63,13 +75,23 @@ vi.mock('next-intl/server', async () => {
   };
 
   return {
-    getLocale: async () => 'id',
-    getMessages: async () => messages,
+    getLocale: async () => localeState.locale,
+    getMessages: async () => loadMessages(localeState.locale),
+    getFormatter: async () => {
+      const locale = intlLocale(localeState.locale);
+      return {
+        dateTime: (value: Date | number, options?: Intl.DateTimeFormatOptions) =>
+          new Intl.DateTimeFormat(locale, options).format(value),
+        number: (value: number | bigint, options?: Intl.NumberFormatOptions) =>
+          new Intl.NumberFormat(locale, options).format(value),
+      };
+    },
     getTranslations: async (namespace?: string | object) => {
       const ns = typeof namespace === 'string' ? namespace : undefined;
+      const messages = loadMessages(localeState.locale);
       return (key: string, values?: Record<string, unknown>) => {
         const fullKey = ns ? `${ns}.${key}` : key;
-        const value = resolve(fullKey);
+        const value = resolve(messages, fullKey);
         if (typeof value !== 'string') return fullKey;
         return format(value, values);
       };

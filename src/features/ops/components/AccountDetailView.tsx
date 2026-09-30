@@ -8,6 +8,7 @@ import {
   type AdminAccountAuditItem,
   type AdminAccountPatchResult,
 } from '@/src/services/admin/adminService';
+import { useLocaleFormat } from '@/src/i18n/useLocaleFormat';
 
 export function AccountDetailView({
   accountId,
@@ -20,6 +21,7 @@ export function AccountDetailView({
   setToast: (msg: string) => void;
   onUpdated: () => void;
 }) {
+  const { dateTime, number } = useLocaleFormat();
   const [loading, setLoading] = useState(true);
   const [detail, setDetail] = useState<AdminAccountDetail | null>(null);
   const [editName, setEditName] = useState('');
@@ -44,7 +46,7 @@ export function AccountDetailView({
   const planLabel = (plan: 'free' | 'pro' | 'plus') =>
     plan === 'plus' ? 'Plus' : plan === 'pro' ? 'Pro' : 'Free';
   const tokenUsage = detail?.workspacePlan ?? null;
-  const formatTokens = (value: number) => new Intl.NumberFormat('id-ID').format(value);
+  const formatTokens = (value: number) => number(value);
   const tokenUsageLabel = tokenUsage
     ? `${formatTokens(tokenUsage.tokenUsedThisMonth)} / ${
         tokenUsage.tokenMonthlyLimit === null
@@ -463,12 +465,8 @@ export function AccountDetailView({
                         </Button>
                       </div>
                       <p className="text-[11px] text-[#6d665d]">
-                        Berlaku sampai{' '}
-                        {new Date(trialClaimLink.expiresAt).toLocaleString('id-ID', {
-                          dateStyle: 'medium',
-                          timeStyle: 'short',
-                        })}
-                        . Tautan lama otomatis tidak berlaku ketika tautan baru diterbitkan.
+                        Berlaku sampai {dateTime(trialClaimLink.expiresAt)}. Tautan lama otomatis
+                        tidak berlaku ketika tautan baru diterbitkan.
                       </p>
                     </div>
                   ) : null}

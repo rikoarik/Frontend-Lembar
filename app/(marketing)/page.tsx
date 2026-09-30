@@ -1,12 +1,14 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { getLocale, getTranslations } from 'next-intl/server';
+import { getTranslations } from 'next-intl/server';
 import { fetchMarketingPage } from '@/src/lib/marketing/fetchMarketingPage';
 import { BlockRenderer } from '@/app/components/marketing/BlockRenderer';
 import { getMarketingSession } from '@/src/lib/api/marketingSession';
 import JsonLd from '@/app/components/marketing/JsonLd';
 import { marketingMetadata } from '@/src/lib/marketing/marketingMetadata';
 import { fetchPublicPlans, type PublicPlan } from '@/src/lib/api/plans';
+import type { NumberFormat } from '@/src/i18n/formats';
+import { getLocaleFormat } from '@/src/i18n/formatServer';
 
 export async function generateMetadata(): Promise<Metadata> {
   const metadata = await marketingMetadata('home', {
@@ -92,11 +94,11 @@ type LandingPricingCopy = {
 function LivePlanCatalog({
   plans,
   copy,
-  locale,
+  number,
 }: {
   plans: PublicPlan[];
   copy: LandingPricingCopy;
-  locale: string;
+  number: NumberFormat;
 }) {
   if (plans.length === 0) {
     return (
@@ -135,20 +137,16 @@ function LivePlanCatalog({
                 <p className="mt-2 font-h3 text-h3 text-ink">
                   {plan.priceAmount === 0
                     ? copy.freePrice
-                    : new Intl.NumberFormat(locale === 'id' ? 'id-ID' : 'en-US', {
+                    : number(plan.priceAmount, {
                         style: 'currency',
                         currency: plan.currency,
                         maximumFractionDigits: 0,
-                      }).format(plan.priceAmount)}
+                      })}
                 </p>
                 <p className="mt-2 text-body-sm text-secondary">
                   {plan.tokenMonthlyLimit === null
                     ? copy.quotaFromCatalog
-                    : copy.tokenQuota({
-                        count: new Intl.NumberFormat(locale === 'id' ? 'id-ID' : 'en-US').format(
-                          plan.tokenMonthlyLimit,
-                        ),
-                      })}
+                    : copy.tokenQuota({ count: number(plan.tokenMonthlyLimit) })}
                 </p>
               </article>
             );
@@ -170,13 +168,13 @@ function LivePlanCatalog({
 }
 
 export default async function LandingPage() {
-  const [session, cmsDoc, plans, t, locale] = await Promise.all([
+  const [session, cmsDoc, plans, t] = await Promise.all([
     getMarketingSession(),
     fetchMarketingPage('home'),
     fetchPublicPlans(),
     getTranslations('pricing.landing'),
-    getLocale(),
   ]);
+  const { number } = await getLocaleFormat();
   const pricingCopy: LandingPricingCopy = {
     emptyTitle: t('emptyTitle'),
     emptyBody: t('emptyBody'),
@@ -198,7 +196,7 @@ export default async function LandingPage() {
       <>
         <JsonLd schema={HOME_SCHEMA} />
         <BlockRenderer blocks={cmsDoc.blocks.filter((block) => block.type !== 'pricing')} />
-        <LivePlanCatalog plans={plans} copy={pricingCopy} locale={locale} />
+        <LivePlanCatalog plans={plans} copy={pricingCopy} number={number} />
       </>
     );
   }
@@ -423,7 +421,7 @@ export default async function LandingPage() {
           </div>
         </section>
 
-        <LivePlanCatalog plans={plans} copy={pricingCopy} locale={locale} />
+        <LivePlanCatalog plans={plans} copy={pricingCopy} number={number} />
 
         <section className="py-16 px-margin-mobile md:px-margin-desktop bg-surface-container">
           <div className="max-w-container-max mx-auto text-center">

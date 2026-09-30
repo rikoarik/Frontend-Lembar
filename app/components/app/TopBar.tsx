@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { RoleSwitcher } from '@/src/features/admin/RoleSwitcher';
 import { LocaleSwitcher } from '@/src/i18n/LocaleSwitcher';
+import { useLocaleFormat } from '@/src/i18n/useLocaleFormat';
 
 type PlanUsage = {
   plan: 'free' | 'pro' | 'plus';
@@ -22,14 +23,16 @@ export function entitlementCta(plan: Pick<PlanUsage, 'plan'>, t: Translate) {
   return { label: t('plan.upgradePro'), icon: 'workspace_premium' };
 }
 
-export function formatQuota(plan: Pick<PlanUsage, 'tokenUsedThisMonth' | 'tokenMonthlyLimit'>): {
+export function formatQuota(
+  plan: Pick<PlanUsage, 'tokenUsedThisMonth' | 'tokenMonthlyLimit'>,
+  formatNumber: (value: number) => string,
+): {
   label: string;
   percent: number;
 } {
   const { tokenUsedThisMonth: used, tokenMonthlyLimit: limit } = plan;
-  const format = (value: number) => new Intl.NumberFormat('id-ID').format(value);
   return {
-    label: `${format(used)}/${limit === null ? '∞' : format(limit)}`,
+    label: `${formatNumber(used)}/${limit === null ? '∞' : formatNumber(limit)}`,
     percent:
       limit === null
         ? 0
@@ -89,6 +92,7 @@ export function TopBar({
   onToggleCollapse,
 }: TopBarProps) {
   const t = useTranslations('appShell');
+  const { number } = useLocaleFormat();
   const pathname = usePathname() ?? '/app';
   const title = t(titleKeyFromPath(pathname));
   const [plan, setPlan] = useState<PlanUsage | null>(null);
@@ -105,7 +109,7 @@ export function TopBar({
     return () => controller.abort();
   }, [workspaceName]);
 
-  const quota = plan ? formatQuota(plan) : null;
+  const quota = plan ? formatQuota(plan, number) : null;
   const entitlement = plan ? entitlementCta(plan, t) : null;
 
   return (

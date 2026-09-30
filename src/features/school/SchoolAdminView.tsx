@@ -28,6 +28,8 @@ import {
   type SchoolNotification,
   type SchoolNotificationsResult,
 } from '@/src/services/school/schoolService';
+import { DATE_SHORT, type LocaleFormat } from '@/src/i18n/formats';
+import { useLocaleFormat } from '@/src/i18n/useLocaleFormat';
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
@@ -48,17 +50,10 @@ function memberStateLabel(state: SchoolMember['state']): string {
   return 'Dicabut';
 }
 
-function fmtDate(iso: string | null | undefined): string {
+/** Locale-aware short date, e.g. "29 Jul 2026" (id) / "Jul 29, 2026" (en). */
+function fmtDate(iso: string | null | undefined, date: LocaleFormat['date']): string {
   if (!iso) return '—';
-  try {
-    return new Date(iso).toLocaleDateString('id-ID', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    });
-  } catch {
-    return iso;
-  }
+  return date(iso, DATE_SHORT, iso);
 }
 
 function safeText(value: unknown): string {
@@ -163,6 +158,7 @@ function SectionGuru({
   setFilter: (v: string) => void;
   setToast: (msg: string) => void;
 }) {
+  const { date } = useLocaleFormat();
   const [members, setMembers] = useState<SchoolMember[]>([]);
   const [meta, setMeta] = useState<SchoolMembersResult['meta'] | null>(null);
   const [page, setPage] = useState(1);
@@ -373,7 +369,7 @@ function SectionGuru({
             {
               key: 'lastActiveAt',
               header: 'Aktif terakhir',
-              render: (row) => fmtDate(row.lastActiveAt),
+              render: (row) => fmtDate(row.lastActiveAt, date),
             },
             {
               key: 'actions',
@@ -626,6 +622,7 @@ function SectionPenggunaan({ setToast }: { setToast: (msg: string) => void }) {
 // ── Section: Pengaturan ───────────────────────────────────────────────────────
 
 function SectionPengaturan({ setToast }: { setToast: (msg: string) => void }) {
+  const { date } = useLocaleFormat();
   const [settings, setSettings] = useState<SchoolSettings | null>(null);
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(true);
@@ -688,7 +685,7 @@ function SectionPengaturan({ setToast }: { setToast: (msg: string) => void }) {
           <div>Level: {neutralMetadataLabel(settings.level)}</div>
           <div>Paket: {neutralMetadataLabel(settings.plan)}</div>
           <div>Kursi: {settings.seats}</div>
-          {settings.renewsAt && <div>Perpanjang: {fmtDate(settings.renewsAt)}</div>}
+          {settings.renewsAt && <div>Perpanjang: {fmtDate(settings.renewsAt, date)}</div>}
         </div>
       )}
       <Button type="submit" size="sm" disabled={saving}>
@@ -701,6 +698,7 @@ function SectionPengaturan({ setToast }: { setToast: (msg: string) => void }) {
 // ── Section: Billing ──────────────────────────────────────────────────────────
 
 function SectionBilling() {
+  const { date } = useLocaleFormat();
   const [billing, setBilling] = useState<
     import('@/src/services/school/schoolService').SchoolBilling | null
   >(null);
@@ -757,7 +755,7 @@ function SectionBilling() {
           },
           {
             label: 'Mulai Siklus Billing',
-            value: fmtDate(billing.billingCycleStartedAt),
+            value: fmtDate(billing.billingCycleStartedAt, date),
             hint: 'Tanggal mulai siklus, bukan tanggal perpanjangan',
             tone: 'neutral',
           },
@@ -784,6 +782,7 @@ function SectionLibrary({
   setSearch: (v: string) => void;
   setToast: (msg: string) => void;
 }) {
+  const { date } = useLocaleFormat();
   const [items, setItems] = useState<SchoolLibraryItem[]>([]);
   const [meta, setMeta] = useState<SchoolLibraryResult['meta'] | null>(null);
   const [page, setPage] = useState(1);
@@ -876,7 +875,7 @@ function SectionLibrary({
             {
               key: 'updatedAt',
               header: 'Diperbarui',
-              render: (row) => fmtDate(row.updatedAt),
+              render: (row) => fmtDate(row.updatedAt, date),
             },
           ]}
         />
@@ -921,6 +920,7 @@ function SectionAudit({
   setSearch: (v: string) => void;
   setToast: (msg: string) => void;
 }) {
+  const { date } = useLocaleFormat();
   const [rows, setRows] = useState<SchoolAuditRow[]>([]);
   const [meta, setMeta] = useState<SchoolAuditResult['meta'] | null>(null);
   const [page, setPage] = useState(1);
@@ -986,7 +986,7 @@ function SectionAudit({
             {
               key: 'createdAt',
               header: 'Waktu',
-              render: (row) => fmtDate(row.at),
+              render: (row) => fmtDate(row.at, date),
             },
             {
               key: 'actorEmail',
@@ -1038,6 +1038,7 @@ function SectionAudit({
 // ── Section: Undangan ────────────────────────────────────────────────────────
 
 function SectionUndangan({ setToast }: { setToast: (msg: string) => void }) {
+  const { date } = useLocaleFormat();
   const [invitations, setInvitations] = useState<SchoolInvitation[]>([]);
   const [loading, setLoading] = useState(true);
   const [cancelId, setCancelId] = useState<string | null>(null);
@@ -1118,12 +1119,12 @@ function SectionUndangan({ setToast }: { setToast: (msg: string) => void }) {
           {
             key: 'createdAt',
             header: 'Dikirim',
-            render: (row) => fmtDate(row.createdAt),
+            render: (row) => fmtDate(row.createdAt, date),
           },
           {
             key: 'expiresAt',
             header: 'Kedaluwarsa',
-            render: (row) => fmtDate(row.expiresAt),
+            render: (row) => fmtDate(row.expiresAt, date),
           },
           {
             key: 'actions',

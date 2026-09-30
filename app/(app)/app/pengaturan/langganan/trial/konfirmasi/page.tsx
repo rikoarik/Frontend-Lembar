@@ -4,10 +4,13 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Button, Panel } from '@/app/components/ui';
 import type { MePlanData } from '@/src/lib/api/plans';
+import { DATE_LONG } from '@/src/i18n/formats';
+import { useLocaleFormat } from '@/src/i18n/useLocaleFormat';
 
 type ClaimState = 'loading-link' | 'ready' | 'submitting' | 'success' | 'error';
 
 export default function TrialClaimConfirmationPage() {
+  const { date } = useLocaleFormat();
   const [claimToken, setClaimToken] = useState('');
   const [state, setState] = useState<ClaimState>('loading-link');
   const [error, setError] = useState('');
@@ -108,15 +111,7 @@ export default function TrialClaimConfirmationPage() {
               <p className="font-semibold text-green-800">Trial berhasil diaktifkan.</p>
               {plan?.trial?.endsAt && (
                 <p className="text-body-sm text-[#6d665d]">
-                  Akses Guru Pro aktif hingga{' '}
-                  <strong>
-                    {new Date(plan.trial.endsAt).toLocaleDateString('id-ID', {
-                      day: 'numeric',
-                      month: 'long',
-                      year: 'numeric',
-                    })}
-                  </strong>
-                  .
+                  Akses Guru Pro aktif hingga <strong>{date(plan.trial.endsAt, DATE_LONG)}</strong>.
                 </p>
               )}
               <Link

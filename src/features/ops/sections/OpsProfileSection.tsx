@@ -4,21 +4,17 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Button } from '@/app/components/ui';
 import { AdminAvatar, AdminPill, AdminConfirmModal } from '@/src/features/admin/AdminChrome';
+import { useLocaleFormat } from '@/src/i18n/useLocaleFormat';
 
 export function OpsProfileSection({ setToast }: { setToast: (msg: string) => void }) {
+  const { dateTime } = useLocaleFormat();
   const router = useRouter();
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
   const [logoutLoading, setLogoutLoading] = useState(false);
-  const [sessionStartedAt, setSessionStartedAt] = useState<string | null>(null);
+  const [sessionStartedAt, setSessionStartedAt] = useState<Date | null>(null);
 
   useEffect(() => {
-    const timer = window.setTimeout(
-      () =>
-        setSessionStartedAt(
-          new Date().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }),
-        ),
-      0,
-    );
+    const timer = window.setTimeout(() => setSessionStartedAt(new Date()), 0);
     return () => window.clearTimeout(timer);
   }, []);
 
@@ -104,7 +100,9 @@ export function OpsProfileSection({ setToast }: { setToast: (msg: string) => voi
             </div>
             <div className="flex justify-between items-center">
               <span className="text-[#57534e]">Sesi Aktif Sejak</span>
-              <span className="font-medium text-[#171717]">{sessionStartedAt ?? '—'}</span>
+              <span className="font-medium text-[#171717]">
+                {sessionStartedAt ? dateTime(sessionStartedAt) : '—'}
+              </span>
             </div>
           </div>
           <div className="border-t border-[#eee6da]/60 pt-4 space-y-2">

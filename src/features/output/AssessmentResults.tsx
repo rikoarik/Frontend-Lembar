@@ -1,6 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { Component, useEffect, useState, type ReactNode } from 'react';
+import { useLocaleFormat } from '@/src/i18n/useLocaleFormat';
 
 // ponytail: no reset — add reset prop + this.setState when retry UX needed
 class ErrorBoundary extends Component<{ children: ReactNode }, { caught: boolean }> {
@@ -41,6 +42,7 @@ function statusLabel(s: string) {
 }
 
 export default function AssessmentResults({ assessmentId }: { assessmentId: string }) {
+  const { dateTime } = useLocaleFormat();
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -152,7 +154,7 @@ export default function AssessmentResults({ assessmentId }: { assessmentId: stri
                       {r.needsGrading ? 'Perlu dinilai' : 'Selesai'}
                     </td>
                     <td className="px-4 py-3 text-brand-ink-muted">
-                      {r.submittedAt ? new Date(r.submittedAt).toLocaleString('id-ID') : '—'}
+                      {r.submittedAt ? dateTime(r.submittedAt) : '—'}
                     </td>
                   </tr>
                 ))}

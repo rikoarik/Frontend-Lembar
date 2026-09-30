@@ -13,6 +13,7 @@ import {
 } from '@/src/services/admin/adminService';
 import type { Result } from '@/src/types/result';
 import { formatPrice, formatTokenLimit } from '@/src/lib/api/plans';
+import { useLocaleFormat } from '@/src/i18n/useLocaleFormat';
 
 type SaveState = 'idle' | 'saving' | 'saved' | 'error';
 
@@ -73,6 +74,7 @@ function PlanListItem({
   active: boolean;
   onEdit: () => void;
 }) {
+  const { number } = useLocaleFormat();
   return (
     <button
       type="button"
@@ -85,8 +87,8 @@ function PlanListItem({
         <div className="min-w-0">
           <p className="font-semibold text-[#171717]">{plan.displayName}</p>
           <p className="text-body-xs text-[#6d665d]">
-            {plan.key} · {formatPrice({ ...plan, key: plan.key })} ·{' '}
-            {formatTokenLimit(plan.tokenMonthlyLimit)}
+            {plan.key} · {formatPrice({ ...plan, key: plan.key }, number)} ·{' '}
+            {formatTokenLimit(plan.tokenMonthlyLimit, number)}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -116,6 +118,7 @@ function PlanEditor({
   onSaved: (updated: AdminPlanRow) => void;
   setToast: (msg: string) => void;
 }) {
+  const { number } = useLocaleFormat();
   const [edit, setEdit] = useState<EditRow>(toEditRow(plan));
   const [saveState, setSaveState] = useState<SaveState>('idle');
   const [saveError, setSaveError] = useState('');
@@ -201,8 +204,8 @@ function PlanEditor({
           </p>
           <h3 className="text-body-lead font-semibold text-[#171717]">{plan.displayName}</h3>
           <p className="text-body-xs text-[#6d665d]">
-            {plan.key} · {formatPrice({ ...plan, key: plan.key })} ·{' '}
-            {formatTokenLimit(plan.tokenMonthlyLimit)} · Revisi #{plan.revision}
+            {plan.key} · {formatPrice({ ...plan, key: plan.key }, number)} ·{' '}
+            {formatTokenLimit(plan.tokenMonthlyLimit, number)} · Revisi #{plan.revision}
           </p>
         </div>
         <label className="flex items-center gap-2 cursor-pointer select-none">

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { Button, Panel, StatusBadge } from '@/app/components/ui';
+import { useLocaleFormat } from '@/src/i18n/useLocaleFormat';
 
 type ShareLink = {
   id: string;
@@ -34,6 +35,7 @@ function fetchShareLinks(assessmentId: string) {
 }
 
 export function ShareManager({ assessmentId, title }: { assessmentId: string; title: string }) {
+  const fmt = useLocaleFormat();
   const [items, setItems] = useState<ShareLink[]>([]);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
@@ -142,9 +144,9 @@ export function ShareManager({ assessmentId, title }: { assessmentId: string; ti
                   </div>
                   <p className="text-caption text-brand-ink-muted">
                     {item.revokedAt
-                      ? `Dicabut ${new Date(item.revokedAt).toLocaleDateString('id-ID')}`
+                      ? `Dicabut ${fmt.date(item.revokedAt)}`
                       : item.expiresAt
-                        ? `Berlaku hingga ${new Date(item.expiresAt).toLocaleDateString('id-ID')}`
+                        ? `Berlaku hingga ${fmt.date(item.expiresAt)}`
                         : 'Tidak ada kedaluwarsa'}
                   </p>
                 </div>

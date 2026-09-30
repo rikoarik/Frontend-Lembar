@@ -6,6 +6,7 @@ import QRCode from 'qrcode';
 import { Panel, Button } from '@/app/components/ui';
 import { formatTokenLimit } from '@/src/lib/api/plans';
 import type { MePlanData } from '@/src/lib/api/plans';
+import { useLocaleFormat } from '@/src/i18n/useLocaleFormat';
 
 type EntitlementState = 'free' | 'active' | 'grace' | 'blocked' | 'expired';
 
@@ -35,12 +36,13 @@ const STATE_COPY: Record<EntitlementState, { heading: string; body: string }> = 
 };
 
 function TokenMeter({ used, limit }: { used: number; limit: number | null }) {
+  const { number } = useLocaleFormat();
   if (limit === null) {
     return (
       <div className="flex flex-col gap-1.5" aria-label="Penggunaan token: tidak terbatas">
         <div className="flex justify-between text-body-xs text-brand-muted">
           <span>Token digunakan bulan ini</span>
-          <span>{new Intl.NumberFormat('id-ID').format(used)} / Tidak terbatas</span>
+          <span>{number(used)} / Tidak terbatas</span>
         </div>
       </div>
     );
@@ -52,8 +54,7 @@ function TokenMeter({ used, limit }: { used: number; limit: number | null }) {
       <div className="flex justify-between text-body-xs text-brand-muted">
         <span>Token digunakan bulan ini</span>
         <span>
-          {new Intl.NumberFormat('id-ID').format(used)} /{' '}
-          {new Intl.NumberFormat('id-ID').format(limit)}
+          {number(used)} / {number(limit)}
         </span>
       </div>
       <div
@@ -74,6 +75,7 @@ function TokenMeter({ used, limit }: { used: number; limit: number | null }) {
 }
 
 export default function PlanUsageSettingsPage() {
+  const { dateTime, number } = useLocaleFormat();
   const [plan, setPlan] = useState<MePlanData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -222,7 +224,7 @@ export default function PlanUsageSettingsPage() {
           <p className="font-semibold text-body-lead text-brand-ink">Penggunaan token</p>
           <TokenMeter used={tokenUsed} limit={tokenLimit} />
           <p className="text-body-xs text-[#6d665d]">
-            Kuota token: {formatTokenLimit(tokenLimit)}. Reset setiap awal siklus tagihan.
+            Kuota token: {formatTokenLimit(tokenLimit, number)}. Reset setiap awal siklus tagihan.
           </p>
         </div>
       </Panel>
@@ -341,15 +343,15 @@ export default function PlanUsageSettingsPage() {
             <div className="mt-5 rounded-2xl border border-[#e6dfd4] bg-white p-4 text-center">
               <p className="text-xs text-[#6d665d]">Total pembayaran</p>
               <p className="mt-1 text-2xl font-bold text-brand-ink">
-                {new Intl.NumberFormat('id-ID', {
+                {number(checkout.totalPayment, {
                   style: 'currency',
                   currency: 'IDR',
                   maximumFractionDigits: 0,
-                }).format(checkout.totalPayment)}
+                })}
               </p>
               {checkout.expiredAt && (
                 <p className="mt-1 text-xs text-[#6d665d]">
-                  Berlaku hingga {new Date(checkout.expiredAt).toLocaleString('id-ID')}
+                  Berlaku hingga {dateTime(checkout.expiredAt)}
                 </p>
               )}
             </div>
