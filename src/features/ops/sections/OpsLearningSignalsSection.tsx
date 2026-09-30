@@ -7,7 +7,7 @@ import {
   AdminDataTable,
   AdminContentLoading,
 } from '@/src/features/admin/AdminChrome';
-import { adminService } from '@/src/services/admin/adminService';
+import { adminService, type AdminLearningSignal } from '@/src/services/admin/adminService';
 
 export function OpsLearningSignalsSection({
   signalsData,
@@ -15,14 +15,8 @@ export function OpsLearningSignalsSection({
   signalsLoading,
   setSignalsLoading,
 }: {
-  signalsData: {
-    prompt_template_id: string;
-    pattern: string;
-    frequency: number;
-    avg_rating: number;
-    suggested_action: string;
-  }[];
-  setSignalsData: (data: any[]) => void;
+  signalsData: AdminLearningSignal[];
+  setSignalsData: (data: AdminLearningSignal[]) => void;
   signalsLoading: boolean;
   setSignalsLoading: (v: boolean) => void;
 }) {
@@ -36,10 +30,7 @@ export function OpsLearningSignalsSection({
           onClick={() => {
             setSignalsLoading(true);
             adminService.learningSignals().then((res) => {
-              if (res.ok) {
-                const val = res.value as any;
-                setSignalsData(Array.isArray(val?.data) ? val.data : Array.isArray(val) ? val : []);
-              }
+              if (res.ok) setSignalsData(res.value);
               setSignalsLoading(false);
             });
           }}
@@ -89,9 +80,13 @@ export function OpsLearningSignalsSection({
               key: 'rating',
               header: 'Avg Rating',
               render: (row) => {
-                const r = Number((row as any).avg_rating ?? 0);
-                const tone = r < 2.5 ? 'bad' : r < 3.5 ? 'warn' : 'ok';
-                return <AdminPill tone={tone}>{r.toFixed(1)} ★</AdminPill>;
+                const rating = (row as AdminLearningSignal).avg_rating;
+                if (rating === null || !Number.isFinite(rating)) {
+                  return <span className="text-[12px] text-[#6d665d]">—</span>;
+                }
+                const tone = rating < 2.5 ? 'bad' : rating < 3.5 ? 'warn' : 'ok';
+                const label = Number.isInteger(rating) ? rating.toFixed(1) : rating.toFixed(2);
+                return <AdminPill tone={tone}>{label} ★</AdminPill>;
               },
             },
             {

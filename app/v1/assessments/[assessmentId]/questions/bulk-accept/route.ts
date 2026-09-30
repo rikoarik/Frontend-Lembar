@@ -3,10 +3,39 @@ import { bulkAcceptHandler } from '@/src/lib/mock-api/assessmentHandlers';
 import { backendFetch, isMockApiMode } from '@/src/lib/api/session';
 import { liveClaims, loadLiveAssessment } from '@/src/lib/api/liveAssessment';
 
-export async function POST(
-  request: Request,
-  context: { params: Promise<{ assessmentId: string }> },
-) {
+type Context = { params: Promise<{ assessmentId: string }> };
+
+/**
+ * FE-VER-02 F-9: this route only exported POST, so a `PATCH` fell through to the
+ * framework's empty 405 body. Answer unsupported verbs with the same JSON error
+ * envelope the rest of the BFF uses, so callers/monitors see a real reason.
+ */
+function methodNotAllowed(allow: string) {
+  return NextResponse.json(
+    {
+      error: {
+        code: 'METHOD_NOT_ALLOWED',
+        message: `Metode tidak didukung. Gunakan ${allow} untuk endpoint ini.`,
+        retryable: false,
+      },
+    },
+    { status: 405, headers: { Allow: allow } },
+  );
+}
+
+export async function PATCH() {
+  return methodNotAllowed('POST');
+}
+
+export async function PUT() {
+  return methodNotAllowed('POST');
+}
+
+export async function DELETE() {
+  return methodNotAllowed('POST');
+}
+
+export async function POST(request: Request, context: Context) {
   const { assessmentId } = await context.params;
   if (isMockApiMode()) return bulkAcceptHandler(request, assessmentId);
   const auth = await liveClaims();

@@ -52,6 +52,55 @@ export function isAdminNavActive(href: string, currentPath: string): boolean {
   return currentPath === href || currentPath.startsWith(`${href}/`);
 }
 
+/**
+ * Sections that are actually rendered by each console view. Any other slug is a
+ * dead link (FE-VER-02 F-5) and must 404 instead of returning a 200 shell.
+ */
+export const OPS_SECTIONS: readonly string[] = [
+  '',
+  'accounts',
+  'schools',
+  'catalog',
+  'prompts',
+  'learning-signals',
+  'jobs',
+  'quality',
+  'audit',
+  'billing',
+  'plans',
+  'flags',
+  'content',
+  'profile',
+  'ai-provider',
+  'wa-gateway',
+];
+
+export const SCHOOL_SECTIONS: readonly string[] = [
+  '',
+  'guru',
+  'undang',
+  'undangan',
+  'penggunaan',
+  'billing',
+  'pengaturan',
+  'library',
+  'audit',
+  'notifikasi',
+];
+
+/** Sub-routes that render a detail view of a section (e.g. `/ops/accounts/<id>`). */
+const SECTION_DETAIL_PREFIXES: Record<string, readonly string[]> = {
+  accounts: ['accounts/'],
+};
+
+export function isKnownAdminSection(root: '/school' | '/ops', section: string): boolean {
+  const known = root === '/ops' ? OPS_SECTIONS : SCHOOL_SECTIONS;
+  if (known.includes(section)) return true;
+  return (SECTION_DETAIL_PREFIXES[section.split('/')[0] ?? ''] ?? []).some((prefix) =>
+    section.startsWith(prefix),
+  );
+}
+
 export function sectionFromPath(pathname: string, root: '/school' | '/ops'): string {
   if (pathname === root) return '';
   if (!pathname.startsWith(`${root}/`)) return '';

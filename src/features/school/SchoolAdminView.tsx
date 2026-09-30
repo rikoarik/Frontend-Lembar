@@ -495,7 +495,7 @@ function SectionUndang({ setToast }: { setToast: (msg: string) => void }) {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="guru@sekolah.sch.id"
-          className="w-full rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white"
+          className="w-full rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
       <div>
@@ -506,7 +506,7 @@ function SectionUndang({ setToast }: { setToast: (msg: string) => void }) {
           id="invite-role"
           value={role}
           onChange={(e) => setRole(e.target.value as 'teacher' | 'school_admin')}
-          className="w-full rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white"
+          className="w-full rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="teacher">Guru</option>
           <option value="school_admin">Admin sekolah</option>
@@ -552,7 +552,7 @@ function SectionPenggunaan({ setToast }: { setToast: (msg: string) => void }) {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-lg border border-neutral-200 p-4 dark:border-neutral-700">
+      <div className="rounded-lg border border-neutral-200 p-4">
         <div className="flex justify-between text-sm mb-2">
           <span className="font-medium">Kuota terpakai</span>
           <span className="text-neutral-500">
@@ -566,7 +566,7 @@ function SectionPenggunaan({ setToast }: { setToast: (msg: string) => void }) {
             aria-valuemin={0}
             aria-valuemax={usage.quotaLimit}
             aria-valuenow={Math.min(usage.quotaUsed, usage.quotaLimit)}
-            className="h-2 rounded-full bg-neutral-100 dark:bg-neutral-800"
+            className="h-2 rounded-full bg-neutral-100"
           >
             <div
               className={`h-2 rounded-full transition-all ${
@@ -607,7 +607,7 @@ function SectionPenggunaan({ setToast }: { setToast: (msg: string) => void }) {
       )}
 
       {usage.trend.length > 0 && (
-        <div className="rounded-lg border border-neutral-200 p-4 dark:border-neutral-700">
+        <div className="rounded-lg border border-neutral-200 p-4">
           <div className="text-sm font-medium mb-3">Tren bulanan</div>
           <div className="space-y-2">
             {usage.trend.map((t) => (
@@ -677,7 +677,7 @@ function SectionPengaturan({ setToast }: { setToast: (msg: string) => void }) {
           required
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white"
+          className="w-full rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
       {settings && (

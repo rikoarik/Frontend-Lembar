@@ -79,6 +79,49 @@ async function request<T>(
   }
 }
 
+export type AdminLearningSignal = {
+  prompt_template_id: string | null;
+  pattern: string | null;
+  frequency: number;
+  avg_rating: number | null;
+  suggested_action: string | null;
+};
+
+/**
+ * Backend `/v1/admin/learning-signals` sends camelCase
+ * (`promptTemplateId`, `avgRating`, `suggestedAction`); the table reads snake_case.
+ * Normalize both shapes so the columns never fall back to placeholder values.
+ */
+export function normalizeLearningSignals(raw: unknown): AdminLearningSignal[] {
+  const rows = Array.isArray(raw)
+    ? raw
+    : Array.isArray((raw as { data?: unknown } | null)?.data)
+      ? ((raw as { data: unknown[] }).data as unknown[])
+      : [];
+  const pick = (row: Record<string, unknown>, ...keys: string[]): unknown => {
+    for (const key of keys) {
+      const value = row[key];
+      if (value !== undefined && value !== null && value !== '') return value;
+    }
+    return undefined;
+  };
+  const asText = (value: unknown): string | null =>
+    value === undefined || value === null || value === '' ? null : String(value);
+  return rows
+    .filter((row): row is Record<string, unknown> => !!row && typeof row === 'object')
+    .map((row) => {
+      const rating = Number(pick(row, 'avg_rating', 'avgRating'));
+      const frequency = Number(pick(row, 'frequency'));
+      return {
+        prompt_template_id: asText(pick(row, 'prompt_template_id', 'promptTemplateId')),
+        pattern: asText(pick(row, 'pattern')),
+        frequency: Number.isFinite(frequency) ? frequency : 0,
+        avg_rating: Number.isFinite(rating) ? rating : null,
+        suggested_action: asText(pick(row, 'suggested_action', 'suggestedAction')),
+      };
+    });
+}
+
 // ── Types ──────────────────────────────────────────────────────────────────
 
 export type AdminDashboard = {
@@ -901,27 +944,10 @@ export const adminService = {
     return request(`/v1/admin/prompts/${id}/metrics`);
   },
 
-  learningSignals(): Promise<
-    Result<
-      {
-        prompt_template_id: string;
-        pattern: string;
-        frequency: number;
-        avg_rating: number;
-        suggested_action: string;
-      }[],
-      AdminError
-    >
-  > {
-    return request<
-      {
-        prompt_template_id: string;
-        pattern: string;
-        frequency: number;
-        avg_rating: number;
-        suggested_action: string;
-      }[]
-    >('/v1/admin/learning-signals');
+  learningSignals(): Promise<Result<AdminLearningSignal[], AdminError>> {
+    return request<unknown[]>('/v1/admin/learning-signals').then((res) =>
+      res.ok ? ok(normalizeLearningSignals(res.value)) : res,
+    );
   },
 
   createPrompt(data: {

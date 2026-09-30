@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button } from '@/app/components/ui';
 import { AdminAvatar, AdminPageHeader, AdminPill } from '@/src/features/admin/AdminChrome';
 import { useAdminSectionState } from '@/src/features/admin/adminPanelState';
+import { isKnownAdminSection } from '@/src/features/admin/types';
 import {
   adminService,
   type AdminDashboard,
@@ -17,6 +18,7 @@ import {
   type AdminAuditRow,
   type AdminMeta,
   type AdminAuditDetail,
+  type AdminLearningSignal,
 } from '@/src/services/admin/adminService';
 
 // Re-export AdminPagination for backward compatibility
@@ -236,15 +238,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
   const [createPromptLoading, setCreatePromptLoading] = useState(false);
 
   // Learning Signals state
-  const [signalsData, setSignalsData] = useState<
-    {
-      prompt_template_id: string;
-      pattern: string;
-      frequency: number;
-      avg_rating: number;
-      suggested_action: string;
-    }[]
-  >([]);
+  const [signalsData, setSignalsData] = useState<AdminLearningSignal[]>([]);
   const [signalsLoading, setSignalsLoading] = useState(key === 'learning-signals');
 
   const [createFlagOpen, setCreateFlagOpen] = useState(false);
@@ -584,10 +578,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
   useEffect(() => {
     if (key === 'learning-signals') {
       adminService.learningSignals().then((res) => {
-        if (res.ok) {
-          const val = res.value as any;
-          setSignalsData(Array.isArray(val?.data) ? val.data : Array.isArray(val) ? val : []);
-        }
+        if (res.ok) setSignalsData(res.value);
         setSignalsLoading(false);
       });
     }
@@ -1032,25 +1023,7 @@ export function OpsConsoleView({ section = '' }: { section?: string }) {
 
       {key === 'wa-gateway' ? <OpsWaGatewaySection setToast={setToast} /> : null}
 
-      {key !== '' &&
-      !key.startsWith('accounts/') &&
-      ![
-        'accounts',
-        'schools',
-        'catalog',
-        'prompts',
-        'learning-signals',
-        'jobs',
-        'quality',
-        'audit',
-        'billing',
-        'plans',
-        'flags',
-        'content',
-        'profile',
-        'ai-provider',
-        'wa-gateway',
-      ].includes(key) ? (
+      {key !== '' && !isKnownAdminSection('/ops', key) ? (
         <AdminPageHeader
           title={`Section ${key}`}
           description="Halaman ini belum punya konten management. Pilih menu ops yang tersedia di sidebar."

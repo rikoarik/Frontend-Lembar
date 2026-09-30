@@ -1,26 +1,89 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/app/components/ui';
 import { AdminAvatar, AdminPill, AdminConfirmModal } from '@/src/features/admin/AdminChrome';
+
+type ProfileAccount = {
+  displayName?: string;
+  email?: string;
+};
+
+type SessionClaims = {
+  issuedAt: number | null;
+  expiresAt: number | null;
+  source: 'jwt' | 'mock' | 'opaque' | 'unparsable';
+};
+
+const ROLE_LABEL: Record<string, string> = {
+  teacher: 'Guru',
+  school_admin: 'Admin Sekolah',
+  superadmin: 'Superadmin',
+  subscriber: 'Pelanggan',
+};
+
+function formatDateTime(seconds: number | null): string {
+  if (seconds === null) return '—';
+  return new Date(seconds * 1000).toLocaleString('id-ID', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  });
+}
 
 export function OpsProfileSection({ setToast }: { setToast: (msg: string) => void }) {
   const router = useRouter();
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
   const [logoutLoading, setLogoutLoading] = useState(false);
-  const [sessionStartedAt, setSessionStartedAt] = useState<string | null>(null);
+  const [account, setAccount] = useState<ProfileAccount | null>(null);
+  const [role, setRole] = useState<string | null>(null);
+  const [permissions, setPermissions] = useState<string[]>([]);
+  const [claims, setClaims] = useState<SessionClaims | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
+
+  const loadIdentity = useCallback(async () => {
+    setLoadError('');
+    try {
+      const [meRes, sessionRes] = await Promise.all([
+        fetch('/v1/me', { credentials: 'include', headers: { Accept: 'application/json' } }),
+        fetch('/v1/me/session', {
+          credentials: 'include',
+          headers: { Accept: 'application/json' },
+        }),
+      ]);
+      if (!meRes.ok) throw new Error('Gagal memuat identitas sesi. Silakan masuk ulang.');
+      const meBody = (await meRes.json()) as {
+        data?: {
+          account?: ProfileAccount;
+          activeWorkspace?: { role?: string; permissions?: string[] };
+        };
+      };
+      setAccount(meBody.data?.account ?? null);
+      setRole(meBody.data?.activeWorkspace?.role ?? null);
+      setPermissions(
+        Array.isArray(meBody.data?.activeWorkspace?.permissions)
+          ? (meBody.data?.activeWorkspace?.permissions as string[])
+          : [],
+      );
+      if (sessionRes.ok) {
+        const sessionBody = (await sessionRes.json()) as { data?: SessionClaims };
+        setClaims(sessionBody.data ?? null);
+      } else {
+        setClaims(null);
+      }
+    } catch (cause) {
+      setLoadError(cause instanceof Error ? cause.message : 'Gagal memuat profil sesi.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    const timer = window.setTimeout(
-      () =>
-        setSessionStartedAt(
-          new Date().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }),
-        ),
-      0,
-    );
-    return () => window.clearTimeout(timer);
-  }, []);
+    // The async identity fetch owns this component's request state.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void loadIdentity();
+  }, [loadIdentity]);
 
   const handleLogout = async () => {
     setLogoutLoading(true);
@@ -45,24 +108,49 @@ export function OpsProfileSection({ setToast }: { setToast: (msg: string) => voi
           <h3 className="text-[14px] font-bold text-[#171717] border-b border-[#eee6da]/60 pb-2.5">
             Detail Akun
           </h3>
+          {loadError ? (
+            <div role="alert" className="rounded-xl border border-[#e6b3b3] bg-[#fdf2f2] px-4 py-3">
+              <div className="text-[12px] text-[#a3202b]">{loadError}</div>
+              <Button
+                size="sm"
+                variant="secondary"
+                className="mt-2"
+                onClick={() => void loadIdentity()}
+              >
+                Coba lagi
+              </Button>
+            </div>
+          ) : null}
           <div className="flex items-center gap-4">
-            <AdminAvatar name="Ops Superadmin" size="lg" />
+            <AdminAvatar name={account?.displayName || 'Pengguna'} size="lg" />
             <div>
-              <div className="text-[16px] font-bold text-[#171717]">Ops Superadmin</div>
-              <div className="text-[12px] text-[#57534e]">ops@lembar.id</div>
+              <div className="text-[16px] font-bold text-[#171717]">
+                {loading ? 'Memuat…' : (account?.displayName ?? '—')}
+              </div>
+              <div className="text-[12px] text-[#57534e]">
+                {loading ? '—' : (account?.email ?? '—')}
+              </div>
               <div className="mt-1.5">
-                <AdminPill tone="ok">superadmin</AdminPill>
+                <AdminPill tone="ok">{role ? (ROLE_LABEL[role] ?? role) : '—'}</AdminPill>
               </div>
             </div>
           </div>
           <div className="border-t border-[#eee6da]/60 pt-4 space-y-2.5 text-[12px]">
             <div className="flex justify-between items-center">
               <span className="text-[#57534e]">Akses Hak</span>
-              <span className="font-semibold text-brand-accent">FULL_CONTROL</span>
+              <span className="font-semibold text-brand-accent text-right max-w-[65%]">
+                {permissions.length ? permissions.join(' · ') : '—'}
+              </span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-[#57534e]">Masa Berlaku Sesi</span>
-              <span className="font-medium text-[#171717]">Selamanya</span>
+              <span className="font-medium text-[#171717]">
+                {loading
+                  ? '—'
+                  : claims?.expiresAt
+                    ? `s.d. ${formatDateTime(claims.expiresAt)}`
+                    : 'Selamanya'}
+              </span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-[#57534e]">Metode Autentikasi</span>
@@ -104,7 +192,9 @@ export function OpsProfileSection({ setToast }: { setToast: (msg: string) => voi
             </div>
             <div className="flex justify-between items-center">
               <span className="text-[#57534e]">Sesi Aktif Sejak</span>
-              <span className="font-medium text-[#171717]">{sessionStartedAt ?? '—'}</span>
+              <span className="font-medium text-[#171717]">
+                {loading ? '—' : formatDateTime(claims?.issuedAt ?? null)}
+              </span>
             </div>
           </div>
           <div className="border-t border-[#eee6da]/60 pt-4 space-y-2">
