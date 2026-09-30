@@ -91,7 +91,7 @@ export const authHandlers = [
   }),
 
   http.post<never, { token: string; password: string }>(
-    '/v1/auth/recovery/reset',
+    '/v1/auth/reset-password',
     async ({ request }) => {
       await delay(180);
       const body = (await request.json()) as { token?: string; password?: string };

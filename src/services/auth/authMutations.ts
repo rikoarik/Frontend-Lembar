@@ -102,7 +102,12 @@ export const authMutations = {
     });
   },
   resetPassword(input: ResetPasswordInput, idempotencyKey: string) {
-    return request<{ ok: true }>('/auth/recovery/reset', 'POST', input, {
+    // BUG-19: `/auth/recovery/reset` never had a BFF route (404) and its upstream
+    // (`/v1/auth/recovery/complete`) does not exist. The backend endpoint that
+    // does exist — and was proven live to return 200 with the new password
+    // taking effect — is `POST /v1/auth/reset-password` (body `{token,newPassword}`),
+    // proxied here by the thin BFF route of the same name.
+    return request<{ ok: true }>('/auth/reset-password', 'POST', input, {
       idempotencyKey,
     });
   },

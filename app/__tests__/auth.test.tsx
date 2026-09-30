@@ -44,7 +44,7 @@ const lookup = {
     status: 200,
     body: { data: { ok: true } },
   }),
-  '/v1/auth/recovery/reset': (body: { token: string }) => {
+  '/v1/auth/reset-password': (body: { token: string }) => {
     if (body.token !== 'demo-reset') {
       return {
         ok: false as const,

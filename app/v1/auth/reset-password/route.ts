@@ -1,11 +1,15 @@
 /**
- * Reset password via recovery token. Proxies the FE service call
- * `authMutations.resetPassword` (POST /auth/recovery/reset) to the
- * backend endpoint that actually exists: /v1/auth/recovery/complete.
+ * BUG-19 (FE-AUD-01-2026-09-30): the reset-password form called
+ * `/auth/recovery/reset`, a path that never had a BFF route (404) and whose
+ * upstream (`/v1/auth/recovery/complete`) does not exist on the backend either.
  *
- * Ponytail: until the BE adds a `/v1/auth/reset-password` helper (currently
- * used by superadmin-initiated resets only), all end-user reset flows
- * funnel through this recovery/complete route so we don't have a 404.
+ * The backend endpoint that does exist — and was proven to return 200 with the
+ * new password taking effect immediately — is `POST /v1/auth/reset-password`
+ * with body `{ token, newPassword }`.
+ *
+ * This route is the thin BFF proxy for it. The FE service speaks
+ * `{ token, password }`; the upstream contract wants `newPassword`, so the
+ * rename happens here, in one place.
  */
 import { cookies } from 'next/headers';
 import { NextResponse, type NextRequest } from 'next/server';
@@ -22,7 +26,7 @@ export async function POST(request: NextRequest) {
     body = {};
   }
 
-  if (!body.token || !body.password) {
+  if (typeof body.token !== 'string' || !body.token || typeof body.password !== 'string') {
     return NextResponse.json(
       {
         error: {
@@ -35,12 +39,13 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const upstream = await backendFetch('/v1/auth/recovery/complete', {
+  const upstream = await backendFetch('/v1/auth/reset-password', {
     method: 'POST',
     token,
     body: JSON.stringify({
       token: body.token,
       newPassword: body.password,
+      ...(typeof body.captchaToken === 'string' ? { captchaToken: body.captchaToken } : {}),
     }),
   });
 
@@ -51,11 +56,12 @@ export async function POST(request: NextRequest) {
         error: {
           code: 'UPSTREAM_ERROR',
           message: 'Tidak dapat mengatur ulang sandi.',
+          retryable: true,
         },
       },
       { status: upstream.status },
     );
   }
 
-  return NextResponse.json({ ok: true, ...(payload ?? {}) }, { status: 200 });
+  return NextResponse.json({ data: { ok: true, ...((payload as { data?: object })?.data ?? {}) } });
 }
