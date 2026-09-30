@@ -1,3 +1,6 @@
+'use client';
+
+import { useTranslations } from 'next-intl';
 import {
   formatExamContext,
   formatExamHeading,
@@ -39,9 +42,10 @@ function SchoolIdentity({ metadata }: { metadata: PrintMetadata }) {
 }
 
 export function DocumentLetterhead({ dto, copy }: { dto: PrintDTO; copy: 'student' | 'teacher' }) {
+  const t = useTranslations('output');
   const metadata = dto.metadata;
   const template = metadata?.headerTemplate ?? 'official';
-  const heading = formatExamHeading(dto);
+  const heading = formatExamHeading(dto, t);
   const context = formatExamContext(dto);
 
   return (
@@ -55,13 +59,13 @@ export function DocumentLetterhead({ dto, copy }: { dto: PrintDTO; copy: 'studen
         <>
           {template === 'official' ? (
             <div className="grid grid-cols-[4.5rem_minmax(0,1fr)_4.5rem] items-center gap-3 px-1">
-              <Logo src={metadata.leftLogoDataUrl} alt="Logo kiri kop sekolah" />
+              <Logo src={metadata.leftLogoDataUrl} alt={t('letterhead.logoLeftAlt')} />
               <SchoolIdentity metadata={metadata} />
-              <Logo src={metadata.rightLogoDataUrl} alt="Logo kanan kop sekolah" />
+              <Logo src={metadata.rightLogoDataUrl} alt={t('letterhead.logoRightAlt')} />
             </div>
           ) : template === 'compact' ? (
             <div className="grid grid-cols-[4.5rem_minmax(0,1fr)] items-center gap-3 px-1">
-              <Logo src={metadata.leftLogoDataUrl} alt="Logo kop sekolah" />
+              <Logo src={metadata.leftLogoDataUrl} alt={t('letterhead.logoAlt')} />
               <SchoolIdentity metadata={metadata} />
             </div>
           ) : (
@@ -83,34 +87,37 @@ export function DocumentLetterhead({ dto, copy }: { dto: PrintDTO; copy: 'studen
         <h1 className="text-[13px] font-bold uppercase leading-tight">{heading}</h1>
         {!metadata && context ? <p className="mt-1 text-[10px]">{context}</p> : null}
         {dto.academicYear ? (
-          <p className="text-[10px] font-semibold uppercase">TAHUN PELAJARAN {dto.academicYear}</p>
+          <p className="text-[10px] font-semibold uppercase">
+            {t('letterhead.academicYear', { year: dto.academicYear })}
+          </p>
         ) : null}
         <p className="mt-0.5 text-[9px] font-semibold uppercase tracking-wide">
-          {copy === 'student' ? 'LEMBAR SOAL SISWA' : 'KUNCI JAWABAN GURU'}
+          {copy === 'student' ? t('letterhead.studentSheet') : t('letterhead.teacherKey')}
         </p>
       </div>
 
       {metadata ? (
         <div className="mt-3 grid grid-cols-2 gap-x-8 text-[10px] leading-5">
           <div>
-            <MetaLine label="Mata Pelajaran" value={metadata.subject || dto.subject} />
-            <MetaLine label="Kelas" value={metadata.class || dto.gradeLabel} />
-            <MetaLine label="Hari / Tanggal" value={metadata.date} />
+            <MetaLine label={t('letterhead.metaSubject')} value={metadata.subject || dto.subject} />
+            <MetaLine label={t('letterhead.metaClass')} value={metadata.class || dto.gradeLabel} />
+            <MetaLine label={t('letterhead.metaDate')} value={metadata.date} />
           </div>
           <div>
-            <MetaLine label="Waktu" value={metadata.duration} />
+            <MetaLine label={t('letterhead.metaTime')} value={metadata.duration} />
             {copy === 'student' ? (
               <>
-                <MetaLine label="Nama" value="" blank />
-                <MetaLine label="No. Peserta" value="" blank />
+                <MetaLine label={t('letterhead.metaName')} value="" blank />
+                <MetaLine label={t('letterhead.metaParticipantNo')} value="" blank />
               </>
             ) : (
-              <MetaLine label="Guru" value={metadata.teacherName} />
+              <MetaLine label={t('letterhead.metaTeacher')} value={metadata.teacherName} />
             )}
           </div>
           {metadata.instructions ? (
             <p className="col-span-2 mt-2 border-t border-black pt-2">
-              <span className="font-semibold">Petunjuk:</span> {metadata.instructions}
+              <span className="font-semibold">{t('letterhead.instructions')}</span>{' '}
+              {metadata.instructions}
             </p>
           ) : null}
         </div>

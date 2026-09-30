@@ -3,13 +3,18 @@
 import { Component, type ReactNode } from 'react';
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Button, Panel, StatusBadge } from '@/app/components/ui';
+import type { StatusLabel } from '@/app/components/ui';
 import { assessmentService } from '@/src/services/assessments/assessmentService';
 import { ShareManager } from '@/src/features/share/ShareManager';
 import type { OutputPackage, AssessmentDetail } from '@/src/features/review/types';
 
 // ponytail: no reset button — add reset prop + this.setState when retry UX is needed
-class ErrorBoundary extends Component<{ children: ReactNode }, { caught: boolean }> {
+class ErrorBoundary extends Component<
+  { children: ReactNode; message: string },
+  { caught: boolean }
+> {
   state = { caught: false };
   static getDerivedStateFromError() {
     return { caught: true };
@@ -21,7 +26,7 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { caught: boolean
           role="alert"
           className="rounded-lg border border-brand-danger/30 bg-brand-danger/5 px-4 py-3 text-body-sm text-brand-danger"
         >
-          Terjadi kesalahan tak terduga. Muat ulang halaman untuk mencoba lagi.
+          {this.props.message}
         </div>
       );
     }
@@ -39,6 +44,7 @@ function fetchOutputCenterData(assessmentId: string) {
 type OutputCenterResult = Awaited<ReturnType<typeof fetchOutputCenterData>>;
 
 export function OutputCenterView({ assessmentId }: { assessmentId: string }) {
+  const t = useTranslations('output');
   const [output, setOutput] = useState<OutputPackage | null>(null);
   const [detail, setDetail] = useState<AssessmentDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -83,18 +89,15 @@ export function OutputCenterView({ assessmentId }: { assessmentId: string }) {
 
   if (error || !output) {
     return (
-      <Panel
-        title="Hasil belum tersedia"
-        description={error ?? 'Finalisasi lembar dulu untuk membuka hasil.'}
-      >
+      <Panel title={t('resultUnavailable')} description={error ?? t('finalizeFirst')}>
         <div className="flex flex-wrap gap-3">
-          <Button onClick={() => void load()}>Coba lagi</Button>
+          <Button onClick={() => void load()}>{t('retry')}</Button>
           {errorStatus !== 401 && errorStatus !== 403 ? (
             <Link
               href={`/app/review/${assessmentId}/finalize`}
               className="inline-flex min-h-[var(--control-md)] items-center rounded-md border border-brand-line px-4"
             >
-              Ke finalisasi
+              {t('toFinalize')}
             </Link>
           ) : null}
         </div>
@@ -103,46 +106,41 @@ export function OutputCenterView({ assessmentId }: { assessmentId: string }) {
   }
 
   return (
-    <ErrorBoundary>
+    <ErrorBoundary message={t('errorBoundary')}>
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
-          <h1 className="text-h1 font-semibold text-brand-ink">Lihat hasil</h1>
-          <p className="text-body-sm text-brand-ink-muted">
-            Tinjau, unduh, dan bagikan lembar yang sudah selesai.
-          </p>
+          <h1 className="text-h1 font-semibold text-brand-ink">{t('title')}</h1>
+          <p className="text-body-sm text-brand-ink-muted">{t('subtitle')}</p>
         </div>
 
         {/* Actions */}
-        <Panel
-          title="Aksi"
-          description="Atur kop sekolah terlebih dahulu, lalu cetak atau simpan dokumen sebagai PDF."
-        >
+        <Panel title={t('actionsPanel')} description={t('actionsDesc')}>
           <div className="flex flex-wrap gap-3">
             <Link
               href={`/app/output/${assessmentId}/print`}
               className="inline-flex min-h-[var(--control-md)] items-center rounded-md bg-brand-accent px-4 text-body-sm font-medium text-white"
             >
-              Atur kop & simpan PDF
+              {t('setLetterhead')}
             </Link>
             <Link
               href={`/app/review/${assessmentId}`}
               className="inline-flex min-h-[var(--control-md)] items-center rounded-md border border-brand-line px-4 text-body-sm"
             >
-              Edit soal
+              {t('editQuestions')}
             </Link>
             <Link
               href={`/app/output/${assessmentId}/results`}
               className="inline-flex min-h-[var(--control-md)] items-center rounded-md border border-brand-line px-4 text-body-sm"
             >
-              Lihat hasil siswa
+              {t('viewResults')}
             </Link>
             <StatusBadge
               label={
-                output.status === 'ready'
-                  ? 'Final'
+                (output.status === 'ready'
+                  ? t('badge.ready')
                   : output.status === 'failed'
-                    ? 'Gagal'
-                    : 'Sedang dibuat'
+                    ? t('badge.failed')
+                    : t('badge.rendering')) as StatusLabel
               }
             />
           </div>
@@ -150,7 +148,10 @@ export function OutputCenterView({ assessmentId }: { assessmentId: string }) {
 
         {/* Daftar soal */}
         {detail && detail.questions.length > 0 ? (
-          <Panel title="Daftar soal" description={`${detail.questions.length} soal`}>
+          <Panel
+            title={t('questionsPanel')}
+            description={t('questionCount', { count: detail.questions.length })}
+          >
             <ol className="flex flex-col gap-4">
               {detail.questions.map((q) => (
                 <li
@@ -159,7 +160,7 @@ export function OutputCenterView({ assessmentId }: { assessmentId: string }) {
                 >
                   <span
                     className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-accent-soft text-label-sm font-semibold text-brand-accent"
-                    aria-label={`Soal ${q.number}`}
+                    aria-label={t('questionAria', { number: q.number })}
                   >
                     {q.number}
                   </span>
@@ -180,7 +181,7 @@ export function OutputCenterView({ assessmentId }: { assessmentId: string }) {
                     )}
                     {q.options.length === 0 && q.answerKey ? (
                       <p className="ml-4 text-body-sm text-brand-ink-muted">
-                        Jawaban: {q.answerKey}
+                        {t('answer', { answer: q.answerKey })}
                       </p>
                     ) : null}
                   </div>
@@ -189,9 +190,9 @@ export function OutputCenterView({ assessmentId }: { assessmentId: string }) {
             </ol>
           </Panel>
         ) : (
-          <Panel title="Daftar soal" description="Memuat soal…">
+          <Panel title={t('questionsPanel')} description={t('loadingQuestions')}>
             <p className="text-body-sm text-brand-ink-muted">
-              {loading ? 'Sedang memuat…' : 'Soal belum tersedia.'}
+              {loading ? t('loading') : t('noQuestions')}
             </p>
           </Panel>
         )}

@@ -1,1 +1,60 @@
-{}
+{
+  "jobs": {
+    "status": {
+      "queued": "In queue",
+      "running": "Preparing questions",
+      "retry_wait": "Waiting to retry",
+      "succeeded": "Draft ready for review",
+      "partially_succeeded": "Draft partially ready",
+      "failed": "Failed to prepare questions",
+      "cancellation_requested": "Cancelling…",
+      "cancelled": "Cancelled",
+      "unknown": "Processing"
+    },
+    "stage": {
+      "preparing": "Preparing context",
+      "generating": "Drafting questions",
+      "validating": "Checking completeness",
+      "finalizing": "Compiling review results"
+    },
+    "timing": {
+      "justStarted": "Just started",
+      "running": "Running for {minutes} minutes",
+      "typicalEta": "Usually finishes within a few minutes",
+      "almostDone": "Almost done",
+      "remainingEta": "Estimated {low}–{high} minutes left"
+    },
+    "badge": {
+      "needsReview": "Needs review",
+      "failed": "Failed",
+      "draft": "Draft",
+      "processing": "Processing"
+    },
+    "panel": {
+      "preparing": { "title": "Preparing job", "desc": "Loading generation status." },
+      "unavailable": { "title": "Status unavailable" },
+      "noJob": { "title": "Job unavailable", "desc": "No active generation status." },
+      "progress": {
+        "title": "Generation progress",
+        "desc": "The process keeps running even if you leave this page."
+      }
+    },
+    "actions": {
+      "retry": "Try again",
+      "backToDashboard": "Back to dashboard",
+      "newWorksheet": "Create new worksheet",
+      "cancel": "Cancel",
+      "cancelling": "Cancelling…",
+      "retryGenerate": "Retry generation",
+      "openReview": "Open review",
+      "refresh": "Reload status",
+      "percentDone": "{percent}% done",
+      "processing": "Process is active.",
+      "progressLabel": "Generation progress"
+    },
+    "staleStatus": "The latest status may be out of date.",
+    "handoffTimeout": "Assessment ID not available yet, try again",
+    "viewTitle": "Generation progress",
+    "viewSubtitle": "Neutral status that is safe to reload. The final draft still requires teacher review."
+  }
+}

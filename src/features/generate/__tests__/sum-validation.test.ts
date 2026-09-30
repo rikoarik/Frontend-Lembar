@@ -9,6 +9,12 @@ import { describe, expect, it } from 'vitest';
 import { validateComposition } from '../validation';
 import { INITIAL_COMPOSITION_VALUES, rebalanceQuestionTypeCounts } from '../types';
 import type { CompositionValues } from '../types';
+import { testTranslate } from '@/src/features/__tests__/i18n';
+
+// i18n: validation messages now come from the `generate` catalog, so the pure
+// helper takes a translator. Bind the id-locale translator once for the suite.
+const t = testTranslate('generate');
+const validate = (values: CompositionValues) => validateComposition(values, t);
 
 // ── helpers ──
 
@@ -42,22 +48,22 @@ function valid(overrides: Partial<CompositionValues> = {}): CompositionValues {
 
 describe('sum-validation — questionCount bounds', () => {
   it('accepts the minimum boundary value (1)', () => {
-    const result = validateComposition(valid({ questionCount: 1 }));
+    const result = validate(valid({ questionCount: 1 }));
     expect(result.ok).toBe(true);
   });
 
   it('accepts the maximum boundary value (200)', () => {
-    const result = validateComposition(valid({ questionCount: 200 }));
+    const result = validate(valid({ questionCount: 200 }));
     expect(result.ok).toBe(true);
   });
 
   it('accepts a mid-range value (20)', () => {
-    const result = validateComposition(valid({ questionCount: 20 }));
+    const result = validate(valid({ questionCount: 20 }));
     expect(result.ok).toBe(true);
   });
 
   it('rejects questionCount below minimum (0)', () => {
-    const result = validateComposition(valid({ questionCount: 0 }));
+    const result = validate(valid({ questionCount: 0 }));
     expect(result.ok).toBe(false);
     if (!result.ok) {
       const field = result.failures.find((f) => f.field === 'questionCount');
@@ -67,7 +73,7 @@ describe('sum-validation — questionCount bounds', () => {
   });
 
   it('rejects questionCount below minimum (negative)', () => {
-    const result = validateComposition(valid({ questionCount: -1 }));
+    const result = validate(valid({ questionCount: -1 }));
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.failures.some((f) => f.field === 'questionCount')).toBe(true);
@@ -75,7 +81,7 @@ describe('sum-validation — questionCount bounds', () => {
   });
 
   it('rejects questionCount above maximum (201)', () => {
-    const result = validateComposition(valid({ questionCount: 201 }));
+    const result = validate(valid({ questionCount: 201 }));
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.failures.some((f) => f.field === 'questionCount')).toBe(true);
@@ -83,7 +89,7 @@ describe('sum-validation — questionCount bounds', () => {
   });
 
   it('rejects questionCount above maximum (9999)', () => {
-    const result = validateComposition(valid({ questionCount: 9999 }));
+    const result = validate(valid({ questionCount: 9999 }));
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.failures.some((f) => f.field === 'questionCount')).toBe(true);
@@ -97,7 +103,7 @@ describe('sum-validation — difficulty composition', () => {
   it('accepts all valid difficulty levels', () => {
     const levels = ['easy', 'medium', 'hard', 'mixed'] as const;
     for (const difficulty of levels) {
-      const result = validateComposition(valid({ difficulty }));
+      const result = validate(valid({ difficulty }));
       expect(result.ok).toBe(true);
     }
   });
@@ -105,7 +111,7 @@ describe('sum-validation — difficulty composition', () => {
   it('rejects an empty difficulty', () => {
     // Force an empty string to simulate an unset field (runtime guard)
     const values = valid({ difficulty: '' as never });
-    const result = validateComposition(values);
+    const result = validate(values);
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.failures.some((f) => f.field === 'difficulty')).toBe(true);
@@ -117,18 +123,18 @@ describe('sum-validation — difficulty composition', () => {
 
 describe('sum-validation — reviewMode composition', () => {
   it('accepts quick review mode', () => {
-    const result = validateComposition(valid({ reviewMode: 'quick' }));
+    const result = validate(valid({ reviewMode: 'quick' }));
     expect(result.ok).toBe(true);
   });
 
   it('accepts detail review mode', () => {
-    const result = validateComposition(valid({ reviewMode: 'detail' }));
+    const result = validate(valid({ reviewMode: 'detail' }));
     expect(result.ok).toBe(true);
   });
 
   it('rejects an empty reviewMode', () => {
     const values = valid({ reviewMode: '' as never });
-    const result = validateComposition(values);
+    const result = validate(values);
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.failures.some((f) => f.field === 'reviewMode')).toBe(true);
@@ -140,7 +146,7 @@ describe('sum-validation — reviewMode composition', () => {
 
 describe('sum-validation — katalog source mode', () => {
   it('requires curriculumVersionId when sourceMode is katalog', () => {
-    const result = validateComposition(valid({ curriculumVersionId: '' }));
+    const result = validate(valid({ curriculumVersionId: '' }));
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.failures.some((f) => f.field === 'curriculumVersionId')).toBe(true);
@@ -148,7 +154,7 @@ describe('sum-validation — katalog source mode', () => {
   });
 
   it('requires gradeId when sourceMode is katalog', () => {
-    const result = validateComposition(valid({ gradeId: '' }));
+    const result = validate(valid({ gradeId: '' }));
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.failures.some((f) => f.field === 'gradeId')).toBe(true);
@@ -156,7 +162,7 @@ describe('sum-validation — katalog source mode', () => {
   });
 
   it('requires subjectId when sourceMode is katalog', () => {
-    const result = validateComposition(valid({ subjectId: '' }));
+    const result = validate(valid({ subjectId: '' }));
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.failures.some((f) => f.field === 'subjectId')).toBe(true);
@@ -164,7 +170,7 @@ describe('sum-validation — katalog source mode', () => {
   });
 
   it('requires at least one materialId when sourceMode is katalog', () => {
-    const result = validateComposition(valid({ materialIds: [] }));
+    const result = validate(valid({ materialIds: [] }));
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.failures.some((f) => f.field === 'materialIds')).toBe(true);
@@ -172,7 +178,7 @@ describe('sum-validation — katalog source mode', () => {
   });
 
   it('does NOT require sourceId when sourceMode is katalog', () => {
-    const result = validateComposition(valid({ sourceMode: 'katalog', sourceId: '' }));
+    const result = validate(valid({ sourceMode: 'katalog', sourceId: '' }));
     expect(result.ok).toBe(true);
   });
 });
@@ -181,7 +187,7 @@ describe('sum-validation — katalog source mode', () => {
 
 describe('sum-validation — pdf source mode', () => {
   it('requires sourceId when sourceMode is pdf', () => {
-    const result = validateComposition(
+    const result = validate(
       valid({
         sourceMode: 'pdf',
         // katalog fields not required for pdf-only mode
@@ -199,7 +205,7 @@ describe('sum-validation — pdf source mode', () => {
   });
 
   it('does NOT require katalog fields when sourceMode is pdf', () => {
-    const result = validateComposition(
+    const result = validate(
       valid({
         sourceMode: 'pdf',
         curriculumVersionId: '',
@@ -217,7 +223,7 @@ describe('sum-validation — pdf source mode', () => {
 
 describe('sum-validation — katalog+pdf source mode', () => {
   it('requires both katalog fields and sourceId when sourceMode is katalog+pdf', () => {
-    const result = validateComposition(
+    const result = validate(
       valid({
         sourceMode: 'katalog+pdf',
         sourceId: '', // missing PDF
@@ -230,7 +236,7 @@ describe('sum-validation — katalog+pdf source mode', () => {
   });
 
   it('passes when all katalog+pdf required fields are set', () => {
-    const result = validateComposition(
+    const result = validate(
       valid({
         sourceMode: 'katalog+pdf',
         sourceId: 'src-test-01',
@@ -244,7 +250,7 @@ describe('sum-validation — katalog+pdf source mode', () => {
 
 describe('sum-validation — failure aggregation', () => {
   it('collects all failures at once rather than short-circuiting', () => {
-    const result = validateComposition(
+    const result = validate(
       valid({
         curriculumVersionId: '',
         gradeId: '',

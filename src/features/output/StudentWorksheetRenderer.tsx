@@ -1,8 +1,12 @@
+'use client';
+
+import { useTranslations } from 'next-intl';
 import { type PrintDTO, type PrintQuestion } from '@/src/features/output/types';
 import { DocumentLetterhead } from '@/src/features/output/DocumentLetterhead';
 import { QuestionImageDisplay } from '@/src/features/questions/QuestionImageDisplay';
 
 export function StudentWorksheetRenderer({ dto }: { dto: PrintDTO }) {
+  const t = useTranslations('output');
   return (
     <article className="worksheet-print print:bg-white print:text-black">
       <DocumentLetterhead dto={dto} copy="student" />
@@ -21,7 +25,7 @@ export function StudentWorksheetRenderer({ dto }: { dto: PrintDTO }) {
                 <p className="text-body text-brand-ink print:text-black">{question.stem}</p>
                 <QuestionImageDisplay
                   image={question.image}
-                  fallbackAlt={`Gambar pendukung soal ${question.number}`}
+                  fallbackAlt={t('worksheet.supportingImage', { number: question.number })}
                   className="mt-3 max-h-80 print:max-h-64"
                 />
                 <AnswerArea question={question} />

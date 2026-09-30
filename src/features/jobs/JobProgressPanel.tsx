@@ -1,8 +1,8 @@
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { Button, Panel, StatusBadge } from '@/app/components/ui';
 import type { StatusLabel } from '@/app/components/ui';
 import {
-  ASSESSMENT_HANDOFF_TIMEOUT_MESSAGE,
   isTerminalJobStatus,
   formatJobTiming,
   jobStageLabel,
@@ -10,6 +10,7 @@ import {
   type JobSnapshot,
   type JobStatus,
 } from '@/src/features/jobs/types';
+import type { Translate } from '@/src/i18n/types';
 import type { JobError } from '@/src/services/jobs/jobErrors';
 
 type JobProgressPanelProps = {
@@ -22,17 +23,17 @@ type JobProgressPanelProps = {
   onRefresh?: () => void;
 };
 
-function badgeLabelFor(status: JobStatus): StatusLabel {
+function badgeLabelFor(status: JobStatus, t: Translate): StatusLabel {
   switch (status) {
     case 'succeeded':
     case 'partially_succeeded':
-      return 'Perlu ditinjau';
+      return t('badge.needsReview') as StatusLabel;
     case 'failed':
-      return 'Gagal';
+      return t('badge.failed') as StatusLabel;
     case 'cancelled':
-      return 'Draf';
+      return t('badge.draft') as StatusLabel;
     default:
-      return 'Diproses';
+      return t('badge.processing') as StatusLabel;
   }
 }
 
@@ -45,9 +46,15 @@ export function JobProgressPanel({
   onRetry,
   onRefresh,
 }: JobProgressPanelProps) {
+  const t = useTranslations('jobs');
+
   if (loading && !job) {
     return (
-      <Panel title="Menyiapkan pekerjaan" description="Memuat status generate." aria-busy="true">
+      <Panel
+        title={t('panel.preparing.title')}
+        description={t('panel.preparing.desc')}
+        aria-busy="true"
+      >
         <div className="space-y-3 animate-pulse" aria-hidden="true">
           <div className="h-4 w-40 rounded bg-brand-paper" />
           <div className="h-3 w-full rounded bg-brand-paper" />
@@ -59,16 +66,18 @@ export function JobProgressPanel({
 
   if (error && !job) {
     return (
-      <Panel title="Status belum bisa dimuat" description={error.safeMessage}>
+      <Panel title={t('panel.unavailable.title')} description={error.safeMessage}>
         <div className="flex flex-col gap-3">
           {error.hint ? <p className="text-body-sm text-brand-ink-muted">{error.hint}</p> : null}
           <div className="flex flex-wrap gap-3">
-            {error.retryable && onRefresh ? <Button onClick={onRefresh}>Coba lagi</Button> : null}
+            {error.retryable && onRefresh ? (
+              <Button onClick={onRefresh}>{t('actions.retry')}</Button>
+            ) : null}
             <Link
               href="/app"
               className="inline-flex min-h-[var(--control-md)] items-center rounded-md border border-brand-line px-4 text-body-default text-brand-ink"
             >
-              Kembali ke dashboard
+              {t('actions.backToDashboard')}
             </Link>
           </div>
         </div>
@@ -78,35 +87,35 @@ export function JobProgressPanel({
 
   if (!job) {
     return (
-      <Panel title="Pekerjaan tidak tersedia" description="Tidak ada status generate aktif.">
+      <Panel title={t('panel.noJob.title')} description={t('panel.noJob.desc')}>
         <Link
           href="/app/generate"
           className="inline-flex min-h-[var(--control-md)] w-fit items-center rounded-md bg-brand-accent px-4 text-body-default font-medium text-white"
         >
-          Buat lembar baru
+          {t('actions.newWorksheet')}
         </Link>
       </Panel>
     );
   }
 
   const terminal = isTerminalJobStatus(job.status);
-  const stage = jobStageLabel(job.stage);
+  const stage = jobStageLabel(job.stage, t);
   const percent =
     typeof job.progressPercent === 'number'
       ? Math.max(0, Math.min(100, Math.round(job.progressPercent)))
       : undefined;
-  const timing = formatJobTiming(job);
+  const timing = formatJobTiming(job, t);
 
   return (
     <Panel
-      title="Progres generate"
-      description="Proses tetap berjalan meski kamu meninggalkan halaman ini."
-      actions={<StatusBadge label={badgeLabelFor(job.status)} />}
+      title={t('panel.progress.title')}
+      description={t('panel.progress.desc')}
+      actions={<StatusBadge label={badgeLabelFor(job.status, t)} />}
     >
       <div className="flex flex-col gap-4" aria-live="polite">
         <div className="flex flex-col gap-1">
           <p className="text-body-default font-semibold text-brand-ink">
-            {jobStatusLabel(job.status)}
+            {jobStatusLabel(job.status, t)}
           </p>
           {stage ? <p className="text-body-sm text-brand-ink-muted">{stage}</p> : null}
         </div>
@@ -119,7 +128,7 @@ export function JobProgressPanel({
               aria-valuemin={0}
               aria-valuemax={100}
               aria-valuenow={percent}
-              aria-label="Progres generate"
+              aria-label={t('actions.progressLabel')}
             >
               <div
                 className={[
@@ -130,7 +139,9 @@ export function JobProgressPanel({
               />
             </div>
             <p className="text-body-sm text-brand-ink-muted">
-              {percent === undefined ? 'Proses sedang aktif.' : `${percent}% selesai`}
+              {percent === undefined
+                ? t('actions.processing')
+                : t('actions.percentDone', { percent })}
             </p>
             {timing.elapsed ? (
               <p className="text-body-sm text-brand-ink-muted">{timing.elapsed}</p>
@@ -150,7 +161,7 @@ export function JobProgressPanel({
 
         {error ? (
           <p className="text-body-sm text-brand-danger" role="status">
-            Status terakhir mungkin tidak terbaru. {error.safeMessage}
+            {t('staleStatus')} {error.safeMessage}
           </p>
         ) : null}
 
@@ -159,16 +170,16 @@ export function JobProgressPanel({
             <Button
               variant="secondary"
               loading={cancelling}
-              loadingLabel="Membatalkan…"
+              loadingLabel={t('actions.cancelling')}
               onClick={onCancel}
               disabled={cancelling}
             >
-              Batalkan
+              {t('actions.cancel')}
             </Button>
           ) : null}
 
           {job.canRetry && job.status === 'failed' && onRetry ? (
-            <Button onClick={onRetry}>Coba generate lagi</Button>
+            <Button onClick={onRetry}>{t('actions.retryGenerate')}</Button>
           ) : null}
 
           {(job.status === 'succeeded' || job.status === 'partially_succeeded') &&
@@ -181,7 +192,7 @@ export function JobProgressPanel({
               }
               className="inline-flex min-h-[var(--control-md)] items-center rounded-md bg-brand-accent px-4 text-body-default font-medium text-white"
             >
-              Buka tinjauan
+              {t('actions.openReview')}
             </Link>
           ) : null}
 
@@ -192,7 +203,7 @@ export function JobProgressPanel({
               data-testid="assessment-handoff-pending"
               className="text-body-sm text-brand-ink-muted"
             >
-              {ASSESSMENT_HANDOFF_TIMEOUT_MESSAGE}
+              {t('handoffTimeout')}
             </p>
           ) : null}
 
@@ -200,12 +211,12 @@ export function JobProgressPanel({
             href="/app"
             className="inline-flex min-h-[var(--control-md)] items-center rounded-md border border-brand-line px-4 text-body-default text-brand-ink"
           >
-            Kembali ke dashboard
+            {t('actions.backToDashboard')}
           </Link>
 
           {!terminal && onRefresh ? (
             <Button variant="quiet" onClick={onRefresh}>
-              Muat ulang status
+              {t('actions.refresh')}
             </Button>
           ) : null}
         </div>

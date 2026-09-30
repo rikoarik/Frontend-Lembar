@@ -1,1 +1,60 @@
-{}
+{
+  "jobs": {
+    "status": {
+      "queued": "Dalam antrean",
+      "running": "Sedang menyiapkan soal",
+      "retry_wait": "Menunggu coba ulang",
+      "succeeded": "Draft siap ditinjau",
+      "partially_succeeded": "Draft sebagian siap",
+      "failed": "Gagal menyiapkan soal",
+      "cancellation_requested": "Membatalkan…",
+      "cancelled": "Dibatalkan",
+      "unknown": "Sedang diproses"
+    },
+    "stage": {
+      "preparing": "Menyiapkan konteks",
+      "generating": "Menyusun draft soal",
+      "validating": "Memeriksa kelengkapan",
+      "finalizing": "Menyusun hasil tinjauan"
+    },
+    "timing": {
+      "justStarted": "Baru saja dimulai",
+      "running": "Berjalan {minutes} menit",
+      "typicalEta": "Biasanya selesai dalam beberapa menit",
+      "almostDone": "Hampir selesai",
+      "remainingEta": "Perkiraan tersisa {low}–{high} menit"
+    },
+    "badge": {
+      "needsReview": "Perlu ditinjau",
+      "failed": "Gagal",
+      "draft": "Draf",
+      "processing": "Diproses"
+    },
+    "panel": {
+      "preparing": { "title": "Menyiapkan pekerjaan", "desc": "Memuat status generate." },
+      "unavailable": { "title": "Status belum bisa dimuat" },
+      "noJob": { "title": "Pekerjaan tidak tersedia", "desc": "Tidak ada status generate aktif." },
+      "progress": {
+        "title": "Progres generate",
+        "desc": "Proses tetap berjalan meski kamu meninggalkan halaman ini."
+      }
+    },
+    "actions": {
+      "retry": "Coba lagi",
+      "backToDashboard": "Kembali ke dashboard",
+      "newWorksheet": "Buat lembar baru",
+      "cancel": "Batalkan",
+      "cancelling": "Membatalkan…",
+      "retryGenerate": "Coba generate lagi",
+      "openReview": "Buka tinjauan",
+      "refresh": "Muat ulang status",
+      "percentDone": "{percent}% selesai",
+      "processing": "Proses sedang aktif.",
+      "progressLabel": "Progres generate"
+    },
+    "staleStatus": "Status terakhir mungkin tidak terbaru.",
+    "handoffTimeout": "Belum dapat assessmentId, coba lagi",
+    "viewTitle": "Progres generate",
+    "viewSubtitle": "Status netral dan aman dimuat ulang. Draft final tetap membutuhkan tinjauan guru."
+  }
+}

@@ -1,1 +1,33 @@
-{}
+{
+  "library": {
+    "bank": {
+      "loadFailed": "Failed to load question bank",
+      "title": "Personal question bank",
+      "subtitle": "Generated questions are stored privately in the active workspace.",
+      "collection": "Collection",
+      "loading": "Loading…",
+      "count": "{count} questions stored",
+      "empty": "No questions stored yet.",
+      "generateQuestions": "Generate questions",
+      "answer": "Answer {answer}"
+    },
+    "template": {
+      "loadFailed": "Failed to load templates.",
+      "deleteFailed": "Failed to delete the template.",
+      "title": "Configuration templates",
+      "subtitle": "Save frequently used generate configurations.",
+      "createNew": "Create new template",
+      "savedTemplates": "Saved templates",
+      "count": "{count} templates in the active workspace",
+      "loading": "Loading…",
+      "empty": "No templates yet. Fill in a generate configuration and save it as a template.",
+      "deleteConfirm": "Delete “{name}”?",
+      "deleting": "Deleting…",
+      "yesDelete": "Yes, delete",
+      "cancel": "Cancel",
+      "useTemplate": "Use template",
+      "delete": "Delete",
+      "questionCount": "{count} questions"
+    }
+  }
+}

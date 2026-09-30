@@ -14,6 +14,12 @@ import { describe, expect, it } from 'vitest';
 import { validateComposition } from '../validation';
 import { INITIAL_COMPOSITION_VALUES } from '../types';
 import type { CompositionValues } from '../types';
+import { testTranslate } from '@/src/features/__tests__/i18n';
+
+// i18n: validation messages now come from the `generate` catalog, so the pure
+// helper takes a translator. Bind the id-locale translator once for the suite.
+const t = testTranslate('generate');
+const validate = (values: CompositionValues) => validateComposition(values, t);
 
 // ── helpers ──
 
@@ -44,22 +50,22 @@ function repeat(char: string, n: number): string {
 
 describe('content-telemetry-audit — teacherFocus', () => {
   it('accepts an empty teacherFocus (field is optional)', () => {
-    const result = validateComposition(valid({ teacherFocus: '' }));
+    const result = validate(valid({ teacherFocus: '' }));
     expect(result.ok).toBe(true);
   });
 
   it('accepts teacherFocus exactly at the maximum (500 chars)', () => {
-    const result = validateComposition(valid({ teacherFocus: repeat('a', TEACHER_FOCUS_MAX) }));
+    const result = validate(valid({ teacherFocus: repeat('a', TEACHER_FOCUS_MAX) }));
     expect(result.ok).toBe(true);
   });
 
   it('accepts teacherFocus one below the maximum (499 chars)', () => {
-    const result = validateComposition(valid({ teacherFocus: repeat('a', TEACHER_FOCUS_MAX - 1) }));
+    const result = validate(valid({ teacherFocus: repeat('a', TEACHER_FOCUS_MAX - 1) }));
     expect(result.ok).toBe(true);
   });
 
   it('rejects teacherFocus one above the maximum (501 chars)', () => {
-    const result = validateComposition(valid({ teacherFocus: repeat('a', TEACHER_FOCUS_MAX + 1) }));
+    const result = validate(valid({ teacherFocus: repeat('a', TEACHER_FOCUS_MAX + 1) }));
     expect(result.ok).toBe(false);
     if (!result.ok) {
       const f = result.failures.find((x) => x.field === 'teacherFocus');
@@ -69,7 +75,7 @@ describe('content-telemetry-audit — teacherFocus', () => {
   });
 
   it('rejects teacherFocus significantly over the maximum (1000 chars)', () => {
-    const result = validateComposition(valid({ teacherFocus: repeat('a', 1000) }));
+    const result = validate(valid({ teacherFocus: repeat('a', 1000) }));
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.failures.some((x) => x.field === 'teacherFocus')).toBe(true);
@@ -80,7 +86,7 @@ describe('content-telemetry-audit — teacherFocus', () => {
     // Validate that the limit check does not mutate the input (immutable audit).
     const content = repeat('x', TEACHER_FOCUS_MAX);
     const values = valid({ teacherFocus: content });
-    validateComposition(values);
+    validate(values);
     // The original object must remain unchanged after validation.
     expect(values.teacherFocus).toHaveLength(TEACHER_FOCUS_MAX);
     expect(values.teacherFocus).toBe(content);
@@ -91,28 +97,22 @@ describe('content-telemetry-audit — teacherFocus', () => {
 
 describe('content-telemetry-audit — exampleQuestion', () => {
   it('accepts an empty exampleQuestion (field is optional)', () => {
-    const result = validateComposition(valid({ exampleQuestion: '' }));
+    const result = validate(valid({ exampleQuestion: '' }));
     expect(result.ok).toBe(true);
   });
 
   it('accepts exampleQuestion exactly at the maximum (2000 chars)', () => {
-    const result = validateComposition(
-      valid({ exampleQuestion: repeat('q', EXAMPLE_QUESTION_MAX) }),
-    );
+    const result = validate(valid({ exampleQuestion: repeat('q', EXAMPLE_QUESTION_MAX) }));
     expect(result.ok).toBe(true);
   });
 
   it('accepts exampleQuestion one below the maximum (1999 chars)', () => {
-    const result = validateComposition(
-      valid({ exampleQuestion: repeat('q', EXAMPLE_QUESTION_MAX - 1) }),
-    );
+    const result = validate(valid({ exampleQuestion: repeat('q', EXAMPLE_QUESTION_MAX - 1) }));
     expect(result.ok).toBe(true);
   });
 
   it('rejects exampleQuestion one above the maximum (2001 chars)', () => {
-    const result = validateComposition(
-      valid({ exampleQuestion: repeat('q', EXAMPLE_QUESTION_MAX + 1) }),
-    );
+    const result = validate(valid({ exampleQuestion: repeat('q', EXAMPLE_QUESTION_MAX + 1) }));
     expect(result.ok).toBe(false);
     if (!result.ok) {
       const f = result.failures.find((x) => x.field === 'exampleQuestion');
@@ -122,7 +122,7 @@ describe('content-telemetry-audit — exampleQuestion', () => {
   });
 
   it('rejects exampleQuestion significantly over the maximum (5000 chars)', () => {
-    const result = validateComposition(valid({ exampleQuestion: repeat('q', 5000) }));
+    const result = validate(valid({ exampleQuestion: repeat('q', 5000) }));
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.failures.some((x) => x.field === 'exampleQuestion')).toBe(true);
@@ -132,7 +132,7 @@ describe('content-telemetry-audit — exampleQuestion', () => {
   it('carries the authored content unchanged at boundary — no silent mutation', () => {
     const content = repeat('y', EXAMPLE_QUESTION_MAX);
     const values = valid({ exampleQuestion: content });
-    validateComposition(values);
+    validate(values);
     expect(values.exampleQuestion).toHaveLength(EXAMPLE_QUESTION_MAX);
     expect(values.exampleQuestion).toBe(content);
   });
@@ -142,7 +142,7 @@ describe('content-telemetry-audit — exampleQuestion', () => {
 
 describe('content-telemetry-audit — combined content fields', () => {
   it('both fields at max simultaneously pass', () => {
-    const result = validateComposition(
+    const result = validate(
       valid({
         teacherFocus: repeat('f', TEACHER_FOCUS_MAX),
         exampleQuestion: repeat('e', EXAMPLE_QUESTION_MAX),
@@ -152,7 +152,7 @@ describe('content-telemetry-audit — combined content fields', () => {
   });
 
   it('both fields over limit simultaneously produce two separate failures', () => {
-    const result = validateComposition(
+    const result = validate(
       valid({
         teacherFocus: repeat('f', TEACHER_FOCUS_MAX + 1),
         exampleQuestion: repeat('e', EXAMPLE_QUESTION_MAX + 1),
@@ -166,7 +166,7 @@ describe('content-telemetry-audit — combined content fields', () => {
   });
 
   it('one field over limit does not suppress the other field failure', () => {
-    const result = validateComposition(
+    const result = validate(
       valid({
         teacherFocus: repeat('f', TEACHER_FOCUS_MAX + 1),
         exampleQuestion: '',
@@ -204,7 +204,7 @@ describe('content-telemetry-audit — payload immutability', () => {
     // Take a deep snapshot before validation
     const snapshot = JSON.parse(JSON.stringify(original)) as CompositionValues;
 
-    validateComposition(original);
+    validate(original);
 
     // Every field must remain identical after the call
     expect(original).toStrictEqual(snapshot);
@@ -213,7 +213,7 @@ describe('content-telemetry-audit — payload immutability', () => {
   it('materialIds array is not mutated during validation', () => {
     const materials = ['m-10', 'm-11', 'm-12'];
     const values = valid({ materialIds: materials });
-    validateComposition(values);
+    validate(values);
     expect(values.materialIds).toEqual(['m-10', 'm-11', 'm-12']);
     expect(values.materialIds).toHaveLength(3);
   });

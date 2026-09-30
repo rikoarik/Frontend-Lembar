@@ -1,4 +1,6 @@
 /** Canonical frontend statuses normalized by the jobs BFF. */
+import type { Translate } from '@/src/i18n/types';
+
 export type JobStatus =
   | 'queued'
   | 'running'
@@ -40,7 +42,6 @@ export type JobSnapshot = {
  * stops building any review link from the jobId.
  */
 export const ASSESSMENT_HANDOFF_TIMEOUT_MS = 5_000;
-export const ASSESSMENT_HANDOFF_TIMEOUT_MESSAGE = 'Belum dapat assessmentId, coba lagi';
 export const ASSESSMENT_HANDOFF_TIMEOUT_CODE = 'ASSESSMENT_HANDOFF_TIMEOUT';
 
 export type GenerateSubmitResult = {
@@ -59,40 +60,40 @@ export function isTerminalJobStatus(status: JobStatus): boolean {
   );
 }
 
-export function jobStatusLabel(status: JobStatus): string {
+export function jobStatusLabel(status: JobStatus, t: Translate): string {
   switch (status) {
     case 'queued':
-      return 'Dalam antrean';
+      return t('status.queued');
     case 'running':
-      return 'Sedang menyiapkan soal';
+      return t('status.running');
     case 'retry_wait':
-      return 'Menunggu coba ulang';
+      return t('status.retry_wait');
     case 'succeeded':
-      return 'Draft siap ditinjau';
+      return t('status.succeeded');
     case 'partially_succeeded':
-      return 'Draft sebagian siap';
+      return t('status.partially_succeeded');
     case 'failed':
-      return 'Gagal menyiapkan soal';
+      return t('status.failed');
     case 'cancellation_requested':
-      return 'Membatalkan…';
+      return t('status.cancellation_requested');
     case 'cancelled':
-      return 'Dibatalkan';
+      return t('status.cancelled');
     default:
-      return 'Sedang diproses';
+      return t('status.unknown');
   }
 }
 
-export function jobStageLabel(stage?: JobStage): string | undefined {
+export function jobStageLabel(stage: JobStage | undefined, t: Translate): string | undefined {
   if (!stage) return undefined;
   switch (stage) {
     case 'preparing':
-      return 'Menyiapkan konteks';
+      return t('stage.preparing');
     case 'generating':
-      return 'Menyusun draft soal';
+      return t('stage.generating');
     case 'validating':
-      return 'Memeriksa kelengkapan';
+      return t('stage.validating');
     case 'finalizing':
-      return 'Menyusun hasil tinjauan';
+      return t('stage.finalizing');
     default:
       return undefined;
   }
@@ -100,6 +101,7 @@ export function jobStageLabel(stage?: JobStage): string | undefined {
 
 export function formatJobTiming(
   job: Pick<JobSnapshot, 'createdAt' | 'progressPercent'>,
+  t: Translate,
   now = Date.now(),
 ): { elapsed?: string; eta: string } {
   const createdAt = Date.parse(job.createdAt);
@@ -110,17 +112,17 @@ export function formatJobTiming(
     elapsedMinutes === undefined
       ? undefined
       : elapsedMinutes === 0
-        ? 'Baru saja dimulai'
-        : `Berjalan ${elapsedMinutes} menit`;
+        ? t('timing.justStarted')
+        : t('timing.running', { minutes: elapsedMinutes });
   const progress = job.progressPercent;
   if (progress === undefined || progress <= 0 || progress >= 100 || elapsedMinutes === undefined) {
-    return { elapsed, eta: 'Biasanya selesai dalam beberapa menit' };
+    return { elapsed, eta: t('timing.typicalEta') };
   }
-  if (progress >= 95) return { elapsed, eta: 'Hampir selesai' };
+  if (progress >= 95) return { elapsed, eta: t('timing.almostDone') };
 
   const estimate = (elapsedMinutes * (100 - progress)) / progress;
-  if (!Number.isFinite(estimate) || estimate < 1) return { elapsed, eta: 'Hampir selesai' };
+  if (!Number.isFinite(estimate) || estimate < 1) return { elapsed, eta: t('timing.almostDone') };
   const low = Math.max(1, Math.floor(estimate * 0.75));
   const high = Math.max(low + 1, Math.ceil(estimate * 1.5));
-  return { elapsed, eta: `Perkiraan tersisa ${low}–${high} menit` };
+  return { elapsed, eta: t('timing.remainingEta', { low, high }) };
 }

@@ -3,7 +3,10 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { JobProgressPanel } from '@/src/features/jobs/JobProgressPanel';
 import { useJobProgress } from '@/src/features/jobs/state/useJobProgress';
 import { formatJobTiming, type JobSnapshot } from '@/src/features/jobs/types';
+import { testTranslate } from '@/src/features/__tests__/i18n';
 import { jobService } from '@/src/services/jobs/jobService';
+
+const t = testTranslate('jobs');
 
 vi.mock('@/src/services/jobs/jobService', () => ({
   jobService: { getJob: vi.fn(), cancelJob: vi.fn() },
@@ -141,13 +144,13 @@ describe('job progress UX', () => {
 
   it('formats ETA only within evidence boundaries', () => {
     const now = new Date('2026-07-29T10:02:00.000Z').getTime();
-    expect(formatJobTiming({ ...running, progressPercent: 0 }, now).eta).toBe(
+    expect(formatJobTiming({ ...running, progressPercent: 0 }, t, now).eta).toBe(
       'Biasanya selesai dalam beberapa menit',
     );
-    expect(formatJobTiming({ ...running, progressPercent: 50 }, now).eta).toBe(
+    expect(formatJobTiming({ ...running, progressPercent: 50 }, t, now).eta).toBe(
       'Perkiraan tersisa 1–3 menit',
     );
-    expect(formatJobTiming({ ...running, progressPercent: 99 }, now).eta).toBe('Hampir selesai');
-    expect(formatJobTiming({ ...running, createdAt: 'invalid' }, now).elapsed).toBeUndefined();
+    expect(formatJobTiming({ ...running, progressPercent: 99 }, t, now).eta).toBe('Hampir selesai');
+    expect(formatJobTiming({ ...running, createdAt: 'invalid' }, t, now).elapsed).toBeUndefined();
   });
 });

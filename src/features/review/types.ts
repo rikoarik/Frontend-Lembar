@@ -1,3 +1,4 @@
+import type { Translate } from '@/src/i18n/types';
 import type { QuestionImage } from '@/src/types/questionImage';
 
 export type QuestionReviewState =
@@ -41,9 +42,22 @@ export type AssessmentLifecycle =
   | 'archived'
   | 'failed';
 
+/**
+ * Warning kinds produced by the deterministic review checks plus the mock
+ * fixtures. Kept as a closed union so the renderer's `warnings.<code>` lookup
+ * stays exhaustive at compile time (same guarantee `LABELS` gives the
+ * composition form).
+ */
+export type QuestionWarningCode =
+  | 'INVALID_OPTIONS'
+  | 'DUPLICATE_OPTION'
+  | 'INVALID_ANSWER_KEY'
+  | 'OPTION_LENGTH_CLUE'
+  | 'AMBIGUOUS_STEM'
+  | 'LOW_DIVERSITY';
+
 export type QuestionWarning = {
-  code: string;
-  message: string;
+  code: QuestionWarningCode;
   severity: 'info' | 'warning' | 'critical';
 };
 
@@ -135,35 +149,35 @@ export type OutputPackage = {
   failureMessage?: string;
 };
 
-export function reviewStateLabel(state: QuestionReviewState): string {
+export function reviewStateLabel(state: QuestionReviewState, t: Translate): string {
   switch (state) {
     case 'unreviewed':
-      return 'Belum ditinjau';
+      return t('reviewState.unreviewed');
     case 'accepted':
-      return 'Diterima';
+      return t('reviewState.accepted');
     case 'edited':
-      return 'Diedit';
+      return t('reviewState.edited');
     case 'rejected':
-      return 'Ditolak';
+      return t('reviewState.rejected');
     case 'needs_attention':
-      return 'Perlu perhatian';
+      return t('reviewState.needs_attention');
     default:
       return state;
   }
 }
 
-export function lifecycleLabel(lifecycle: AssessmentLifecycle): string {
+export function lifecycleLabel(lifecycle: AssessmentLifecycle, t: Translate): string {
   switch (lifecycle) {
     case 'draft':
-      return 'Draf';
+      return t('lifecycle.draft');
     case 'generating':
-      return 'Diproses';
+      return t('lifecycle.generating');
     case 'review':
-      return 'Perlu ditinjau';
+      return t('lifecycle.review');
     case 'final':
-      return 'Final';
+      return t('lifecycle.final');
     case 'archived':
-      return 'Kedaluwarsa';
+      return t('lifecycle.archived');
     default:
       return lifecycle;
   }
