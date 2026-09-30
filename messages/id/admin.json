@@ -1,1 +1,115 @@
-{}
+{
+  "admin": {
+    "brand": {
+      "console": "Console",
+      "workspace": "Workspace"
+    },
+    "shell": {
+      "skipToContent": "Lewati ke konten",
+      "navLabel": "Navigasi panel",
+      "navLabelMobile": "Navigasi panel mobile",
+      "expandSidebar": "Perluas sidebar",
+      "collapseSidebar": "Ciutkan sidebar",
+      "loadingShort": "memuat",
+      "profileMenu": "Menu profil",
+      "profileMenuLabel": "Profil {name}",
+      "profileSession": "Profil Sesi",
+      "openTeacherApp": "Buka aplikasi guru",
+      "logout": "Keluar Sesi",
+      "closeToast": "Tutup notifikasi"
+    },
+    "actor": {
+      "opsName": "Ops Superadmin",
+      "opsMeta": "platform · least privilege",
+      "schoolName": "Admin",
+      "schoolMeta": "Sekolah",
+      "schoolBadge": "Admin Sekolah",
+      "opsBadge": "Superadmin"
+    },
+    "shells": {
+      "schoolTitleFallback": "Ringkasan",
+      "schoolSubtitle": "Panel admin sekolah · kelola guru, undangan, dan penggunaan",
+      "opsBrand": "Lembar ops",
+      "schoolBrand": "lembar school"
+    },
+    "nav": {
+      "ringkasan": "Ringkasan",
+      "accounts": "Akun",
+      "schools": "Sekolah",
+      "catalog": "Katalog",
+      "prompts": "Prompt",
+      "learningSignals": "Learning Signals",
+      "jobs": "Jobs",
+      "quality": "Quality",
+      "audit": "Audit",
+      "billing": "Billing",
+      "plans": "Plan & Harga",
+      "flags": "Flags",
+      "content": "Marketing CMS",
+      "aiProvider": "Konfigurasi AI",
+      "waGateway": "WA Gateway",
+      "guru": "Guru",
+      "undang": "Undang",
+      "undangan": "Undangan menunggu",
+      "penggunaan": "Penggunaan",
+      "schoolBilling": "Langganan & Billing",
+      "pengaturan": "Pengaturan",
+      "library": "Library",
+      "notifikasi": "Notifikasi"
+    },
+    "roles": {
+      "teacher": "Guru",
+      "schoolAdmin": "Admin Sekolah",
+      "superadmin": "Superadmin"
+    },
+    "toolbar": {
+      "search": "Cari",
+      "searchPlaceholder": "Cari…"
+    },
+    "emptyState": {
+      "title": "Tidak ada data."
+    },
+    "confirm": {
+      "title": "Konfirmasi Tindakan",
+      "confirm": "Ya, Lanjutkan",
+      "cancel": "Batal",
+      "processing": "Memproses…"
+    },
+    "bulk": {
+      "selected": "{count} dipilih",
+      "clear": "Batal"
+    },
+    "table": {
+      "selectAll": "Pilih semua baris",
+      "selectRow": "Pilih {id}",
+      "actions": "Aksi",
+      "rows": "{count} baris",
+      "footerNote": "Data preview"
+    },
+    "select": {
+      "placeholder": "Pilih..."
+    },
+    "contentLoading": {
+      "label": "Memuat data…"
+    },
+    "status": {
+      "draft": "Draft",
+      "review": "Perlu ditinjau",
+      "failed": "Gagal",
+      "processing": "Diproses",
+      "final": "Final"
+    },
+    "console": {
+      "unknownSection": "Section {section}",
+      "unknownSectionDescription": "Halaman ini belum punya konten management. Pilih menu ops yang tersedia di sidebar.",
+      "comingSoon": "coming soon",
+      "noContent": "Belum ada konten untuk bagian ini.",
+      "comingSoonNote": "Bagian ini belum tersedia."
+    },
+    "impersonate": {
+      "starting": "Memulai impersonasi sebagai {name}...",
+      "success": "Impersonasi {name} berhasil. Mengalihkan...",
+      "failed": "Gagal: {message}"
+    }
+  }
+}

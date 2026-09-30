@@ -1,1 +1,11 @@
-{}
+{
+  "onboarding": {
+    "meta": {
+      "title": "Welcome — lembar"
+    },
+    "heading": "Welcome to lembar",
+    "description": "Your account is ready. Your personal workspace is created automatically as soon as you start using the app.",
+    "cta": "Get started",
+    "guide": "Read the guide"
+  }
+}

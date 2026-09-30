@@ -1,1 +1,143 @@
-{}
+{
+  "catalog": {
+    "labels": {
+      "sourceMode": "Sumber materi",
+      "curriculumVersionId": "Kurikulum",
+      "gradeId": "Kelas",
+      "subjectId": "Mata Pelajaran",
+      "materialIds": "Materi",
+      "assessmentType": "Jenis Lembar",
+      "difficulty": "Tingkat Kesulitan",
+      "questionCount": "Jumlah Soal",
+      "reviewMode": "Mode Review",
+      "teacherFocus": "Fokus / Tujuan Guru",
+      "exampleQuestion": "Contoh Soal"
+    },
+    "sections": {
+      "examMaterial": {
+        "title": "Materi Ujian",
+        "description": "Pilih sumber dan lingkup materi."
+      },
+      "questionSettings": {
+        "title": "Pengaturan Soal",
+        "description": "Konfigurasi jenis dan jumlah soal."
+      },
+      "context": {
+        "title": "Konteks & Referensi",
+        "description": "Tambahan informasi untuk AI (opsional)."
+      }
+    },
+    "sourceMode": {
+      "katalog": "Buku/katalog yang tersedia",
+      "pdf": "PDF saya saja",
+      "katalogPdf": "Buku/katalog + PDF saya"
+    },
+    "curriculum": {
+      "kurmer1": "Kurikulum Merdeka (Fase A)",
+      "kurmer2": "Kurikulum Merdeka (Fase B)",
+      "kurmer3": "Kurikulum Merdeka (Fase C)",
+      "k13": "Kurikulum 2013"
+    },
+    "assessmentType": {
+      "practice": "Latihan Soal",
+      "daily": "Ulangan Harian",
+      "midterm": "UTS",
+      "final": "UAS",
+      "tka": "TKA"
+    },
+    "difficulty": {
+      "easy": "Mudah",
+      "medium": "Sedang",
+      "hard": "Sulit",
+      "mixed": "Campuran"
+    },
+    "reviewMode": {
+      "quick": "Cepat",
+      "quickDesc": "Tinjau dalam satu daftar",
+      "detail": "Detail",
+      "detailDesc": "Tinjau satu per satu"
+    },
+    "select": {
+      "curriculum": "Pilih kurikulum",
+      "gradeLoading": "Memuat daftar kelas…",
+      "grade": "Pilih kelas",
+      "subjectLoading": "Memuat…",
+      "subject": "Pilih mata pelajaran",
+      "subjectNeedsGrade": "Pilih kelas terlebih dahulu",
+      "materialsLoading": "Memuat daftar materi…",
+      "materialsNeedsSubject": "Pilih mata pelajaran terlebih dahulu",
+      "materialsEmpty": "Tidak ada materi tersedia"
+    },
+    "material": {
+      "hint": "Pilih minimal satu materi",
+      "groupLabel": "Pilih materi"
+    },
+    "questionCount": {
+      "help": "Antara 1–200 soal"
+    },
+    "teacherFocus": {
+      "placeholder": "Contoh: Fokus pada pemahaman konsep pecahan",
+      "help": "Maksimal 500 karakter. Tidak dikirim ke analitik."
+    },
+    "exampleQuestion": {
+      "placeholder": "Tulis contoh soal untuk dijadikan gaya atau referensi",
+      "help": "Maksimal 2.000 karakter. Memandu gaya, tidak menjamin penyalinan."
+    },
+    "submit": {
+      "invalid": "Perbaiki isian yang belum lengkap sebelum melanjutkan.",
+      "createDraft": "Buat draft {count} soal",
+      "disclaimer": "AI membuat draft sesuai konteks terpilih. Anda meninjau sebelum final.",
+      "preview": "Draft akan dibuat:\n{payload}"
+    },
+    "summary": {
+      "title": "Ringkasan Konfigurasi",
+      "readiness": "Kesiapan: {label}",
+      "readinessFull": "Kesiapan: {label}. {text}",
+      "empty": "Pilih materi dan pengaturan untuk melihat ringkasan.",
+      "curriculum": "Kurikulum",
+      "grade": "Kelas",
+      "subject": "Mata Pelajaran",
+      "material": "Materi",
+      "assessmentType": "Jenis",
+      "difficulty": "Kesulitan",
+      "questionCount": "Jumlah Soal",
+      "reviewMode": "Mode Review",
+      "topicCount": "{count} topik",
+      "readinessTitleKatalog": "Langkah konfigurasi",
+      "readinessTitleOther": "Kesiapan konfigurasi",
+      "complete": "Semua bagian utama sudah lengkap.",
+      "incomplete": "Belum lengkap: {steps}.",
+      "stepGrade": "kelas",
+      "stepSubject": "mata pelajaran",
+      "stepMaterial": "materi",
+      "stepAssessmentType": "jenis lembar",
+      "stepDifficulty": "tingkat kesulitan",
+      "stepReviewMode": "mode review"
+    },
+    "mobileSummary": {
+      "toggleLabel": "Status konfigurasi",
+      "show": "Lihat",
+      "hide": "Sembunyikan"
+    },
+    "announce": {
+      "curriculum": "Kurikulum diperbarui. Kelas, mata pelajaran, dan materi dihapus.",
+      "grade": "Kelas diperbarui. Mata pelajaran dan materi dihapus.",
+      "subject": "Mata pelajaran diperbarui. Materi dihapus."
+    },
+    "errors": {
+      "loadSubjects": "Gagal memuat mata pelajaran."
+    },
+    "validation": {
+      "curriculumVersionId": "Pilih kurikulum.",
+      "gradeId": "Pilih kelas.",
+      "subjectId": "Pilih mata pelajaran.",
+      "materialIds": "Pilih minimal satu materi.",
+      "assessmentType": "Pilih jenis lembar.",
+      "difficulty": "Pilih tingkat kesulitan.",
+      "questionCount": "Jumlah soal antara 1–200.",
+      "reviewMode": "Pilih mode review.",
+      "teacherFocus": "Maksimal 500 karakter.",
+      "exampleQuestion": "Maksimal 2.000 karakter."
+    }
+  }
+}

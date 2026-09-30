@@ -1,1 +1,33 @@
-{}
+{
+  "share": {
+    "title": "Publish assessment",
+    "description": "Share a link so students can take the assessment.",
+    "actions": {
+      "publish": "Publish assessment",
+      "publishing": "Creating…",
+      "reload": "Reload",
+      "open": "Open assessment",
+      "copy": "Copy",
+      "revoke": "Revoke"
+    },
+    "status": {
+      "revoked": "Revoked",
+      "final": "Final"
+    },
+    "expiry": {
+      "revokedAt": "Revoked {date}",
+      "expiresAt": "Valid until {date}",
+      "none": "No expiry"
+    },
+    "empty": "No links for this worksheet yet.",
+    "messages": {
+      "published": "Assessment published: {path}",
+      "revoked": "Link revoked.",
+      "copied": "Link copied.",
+      "loadFailed": "Failed to load links.",
+      "createFailed": "Failed to create the link.",
+      "revokeFailed": "Failed to revoke the link.",
+      "requestFailed": "Failed to process the share link."
+    }
+  }
+}

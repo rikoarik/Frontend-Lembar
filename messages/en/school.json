@@ -1,1 +1,180 @@
-{}
+{
+  "school": {
+    "roles": {
+      "schoolAdmin": "School admin",
+      "teacher": "Teacher"
+    },
+    "memberState": {
+      "active": "Active",
+      "suspended": "Suspended",
+      "revoked": "Revoked"
+    },
+    "unknownValue": "Not available yet",
+    "notificationStatus": {
+      "pending": "Pending",
+      "delivered": "Delivered",
+      "failed": "Failed"
+    },
+    "common": {
+      "all": "All",
+      "adminShort": "Admin",
+      "emDash": "—",
+      "retry": "Try again",
+      "previous": "‹ Previous",
+      "next": "Next ›",
+      "refresh": "Refresh",
+      "cancel": "Cancel",
+      "noData": "No data"
+    },
+    "ringkasan": {
+      "activeMembers": "Active members",
+      "membersFromTotal": "of {count} total",
+      "quotaUsed": "Quota used",
+      "quotaValue": "{used} / {limit}",
+      "quotaUnlimited": "∞",
+      "percentPeriod": "{percent}% this period",
+      "school": "School",
+      "unavailable": "Summary data is unavailable",
+      "loadFailed": "Failed to load the summary: {message}"
+    },
+    "guru": {
+      "searchPlaceholder": "Search name / email…",
+      "loadingList": "Loading school members…",
+      "loadingListLabel": "Loading school members",
+      "loadFailedTitle": "Failed to load school members",
+      "loadFailedLabel": "Failed to load school members",
+      "emptyTitle": "No school members yet",
+      "emptyLabel": "No school members yet",
+      "emptyHint": "Invite the first teacher so they can start using the school workspace.",
+      "columns": {
+        "member": "Member",
+        "role": "Role",
+        "status": "Status",
+        "lastActive": "Last active"
+      },
+      "suspend": "Suspend",
+      "activate": "Activate",
+      "delete": "Delete",
+      "suspendedToast": "{name} suspended",
+      "activatedToast": "{name} reactivated",
+      "deletedToast": "{name} deleted",
+      "suspendFailed": "Failed to suspend: {message}",
+      "activateFailed": "Failed to activate: {message}",
+      "deleteFailed": "Failed to delete: {message}",
+      "removeTitle": "Delete School Member",
+      "removeConfirm": "Are you sure you want to remove {name} from this school?",
+      "removeConfirmAction": "Yes, Delete Member",
+      "pageSummary": "{total} members · page {page} / {pages}"
+    },
+    "undang": {
+      "email": "Email",
+      "emailPlaceholder": "teacher@school.edu",
+      "role": "Role",
+      "roleTeacher": "Teacher",
+      "roleAdmin": "School admin",
+      "submit": "Send invitation",
+      "submitting": "Sending…",
+      "success": "Invitation created for {email}. The email will be sent once a notification provider is configured.",
+      "failed": "Failed to send the invitation: {message}"
+    },
+    "penggunaan": {
+      "quotaUsed": "Quota used",
+      "quotaValue": "{used} / {limit}",
+      "quotaPercent": "{limit} ({percent}%)",
+      "unlimited": "Unlimited",
+      "unavailable": "Data is unavailable",
+      "teacher": "Teacher",
+      "quotaUsedColumn": "Quota used",
+      "monthlyTrend": "Monthly trend",
+      "loadFailed": "Failed to load usage: {message}"
+    },
+    "pengaturan": {
+      "nameLabel": "School name",
+      "slug": "Slug",
+      "level": "Level",
+      "plan": "Plan",
+      "seats": "Seats",
+      "renewsAt": "Renews",
+      "save": "Save settings",
+      "saving": "Saving…",
+      "saved": "Settings saved",
+      "loadFailed": "Failed to load settings: {message}",
+      "saveFailed": "Failed to save: {message}"
+    },
+    "billing": {
+      "title": "School Subscription & Billing",
+      "description": "Actual plan summary from the billing service.",
+      "loadFailed": "Failed to load school billing",
+      "unavailable": "Billing data is unavailable.",
+      "plan": "Plan",
+      "teacherSeats": "Teacher Licenses",
+      "teacherSeatsValue": "{count} Teachers",
+      "teacherSeatsHint": "Active members",
+      "usageThisMonth": "Usage This Month",
+      "usageValue": "{used} / {limit}",
+      "unlimited": "Unlimited",
+      "cycleStart": "Billing Cycle Start",
+      "cycleStartHint": "Cycle start date, not the renewal date",
+      "invoiceUnavailable": "Invoice history and downloads are not available yet."
+    },
+    "library": {
+      "searchPlaceholder": "Search title / subject / author…",
+      "empty": "No assessments in the library",
+      "columns": {
+        "title": "Title",
+        "author": "Author",
+        "questions": "Questions",
+        "updated": "Updated"
+      },
+      "loadFailed": "Failed to load the library: {message}",
+      "pageSummary": "{total} items · page {page} / {pages}"
+    },
+    "audit": {
+      "searchPlaceholder": "Search actor / action / target…",
+      "empty": "No audit log entries",
+      "columns": {
+        "time": "Time",
+        "actor": "Actor",
+        "action": "Action",
+        "target": "Target"
+      },
+      "loadFailed": "Failed to load the audit log: {message}",
+      "pageSummary": "{total} entries · page {page} / {pages}"
+    },
+    "undangan": {
+      "empty": "No pending invitations",
+      "invitedBy": "Invited by {name}",
+      "columns": {
+        "email": "Email",
+        "role": "Role",
+        "sent": "Sent",
+        "expires": "Expires"
+      },
+      "cancel": "Cancel",
+      "cancelling": "Cancelling…",
+      "cancelledToast": "Invitation to {email} cancelled",
+      "cancelFailed": "Failed to cancel: {message}",
+      "cancelTitle": "Cancel Invitation",
+      "cancelConfirm": "Are you sure you want to cancel the invitation to {email}?",
+      "cancelConfirmAction": "Yes, Cancel Invitation",
+      "loadFailed": "Failed to load invitations: {message}"
+    },
+    "notifikasi": {
+      "empty": "No notifications yet.",
+      "emptyTable": "No notifications.",
+      "refresh": "Refresh",
+      "columns": {
+        "type": "Type",
+        "status": "Status",
+        "attempt": "Attempt",
+        "error": "Error",
+        "created": "Created"
+      },
+      "pageSummary": "{total} notifications · page {page} / {pages}",
+      "prevPage": "Previous notifications page",
+      "nextPage": "Next notifications page",
+      "loadFailed": "Failed to load notifications: {message}"
+    },
+    "notFound": "Page not found."
+  }
+}

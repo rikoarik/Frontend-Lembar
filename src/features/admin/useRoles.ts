@@ -4,12 +4,6 @@ import { useEffect, useState } from 'react';
 
 export type Role = 'teacher' | 'school_admin' | 'superadmin';
 
-const ROLE_LABELS: Record<Role, string> = {
-  teacher: 'Guru',
-  school_admin: 'Admin Sekolah',
-  superadmin: 'Superadmin',
-};
-
 const ROLE_PATHS: Record<Role, string> = {
   teacher: '/app',
   school_admin: '/school',
@@ -22,8 +16,15 @@ export function activeRoleFromPathname(pathname: string): Role {
   return 'teacher';
 }
 
-export function roleLabel(role: Role): string {
-  return ROLE_LABELS[role] ?? role;
+/** i18n key inside the `admin` namespace for a role label. */
+const ROLE_LABEL_KEYS: Record<Role, string> = {
+  teacher: 'roles.teacher',
+  school_admin: 'roles.schoolAdmin',
+  superadmin: 'roles.superadmin',
+};
+
+export function roleLabelKey(role: Role): string {
+  return ROLE_LABEL_KEYS[role] ?? role;
 }
 
 export function rolePath(role: Role): string {

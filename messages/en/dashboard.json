@@ -1,1 +1,67 @@
-{}
+{
+  "dashboard": {
+    "loadingLabel": "Loading dashboard",
+    "error": {
+      "title": "Failed to load home",
+      "load": "Failed to load the summary. Try again.",
+      "retry": "Try again"
+    },
+    "activeJob": {
+      "running": "Generation in progress",
+      "processing": "Processing…"
+    },
+    "greeting": {
+      "fallbackName": "Teacher",
+      "hello": "Hello, {name}",
+      "subtitle": "Continue a draft, review generated results, or create a new worksheet from your material.",
+      "emptyTitle": "Hello, {name}. Ready to create your first worksheet?",
+      "emptyDescription": "Start from material or a topic, then review the draft before finalizing it in {workspace}."
+    },
+    "personalBadge": "Personal space",
+    "actions": {
+      "create": "Create worksheet",
+      "createFirst": "Create your first worksheet",
+      "openHistory": "Open history",
+      "viewTemplates": "View templates"
+    },
+    "quickActions": {
+      "title": "Quick actions",
+      "scope": "Subscriber workspace",
+      "generate": {
+        "title": "Create worksheet",
+        "description": "Generate draft questions from material or a topic."
+      },
+      "history": {
+        "title": "View history",
+        "description": "Continue a draft, review, or final worksheet."
+      },
+      "bank": {
+        "title": "Question bank",
+        "description": "Reuse items you have used before."
+      },
+      "template": {
+        "title": "Templates",
+        "description": "Start from a ready-made structure."
+      }
+    },
+    "metrics": {
+      "assessmentsTotal": "Total assessments",
+      "assessmentsTotalHint": "All worksheets in the active workspace",
+      "sourcesReady": "Sources ready",
+      "sourcesReadyHint": "{count} sources in the active workspace",
+      "inReview": "Needs review",
+      "inReviewHint": "Ready to check before finalizing",
+      "final": "Final",
+      "finalHint": "Ready to print or download"
+    },
+    "status": {
+      "title": "Workspace status",
+      "workspace": "Workspace",
+      "type": "Type",
+      "typeSchool": "School",
+      "typePersonal": "Personal",
+      "role": "Active role",
+      "activeSpace": "Active space"
+    }
+  }
+}

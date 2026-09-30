@@ -1,1 +1,53 @@
-{}
+{
+  "leads": {
+    "title": "Minta konsultasi sekolah",
+    "description": "Isi data singkat. Tim lembar akan meninjau kebutuhan sekolah sebelum menghubungi Anda.",
+    "labels": {
+      "name": "Nama",
+      "contactLegend": "Kontak kerja",
+      "email": "Email kerja",
+      "phone": "Nomor telepon kerja",
+      "school": "Sekolah",
+      "role": "Peran",
+      "teacherCount": "Perkiraan jumlah guru",
+      "goal": "Tujuan (opsional)",
+      "consent": "Saya menyetujui pemrosesan data untuk menindaklanjuti permintaan sekolah."
+    },
+    "placeholders": {
+      "name": "Nama lengkap",
+      "email": "nama@sekolah.sch.id",
+      "phone": "081234567890",
+      "school": "Nama sekolah",
+      "teacherCount": "Contoh: 24",
+      "goal": "Ceritakan kebutuhan sekolah secara singkat"
+    },
+    "contactHelp": "Isi email kerja atau nomor telepon kerja. Salah satu cukup.",
+    "goalHelp": "Jangan tulis data siswa atau informasi sensitif.",
+    "roleOptions": {
+      "placeholder": "Pilih peran",
+      "principal": "Kepala Sekolah",
+      "teacher": "Guru",
+      "curriculum": "Kurikulum",
+      "other": "Lainnya"
+    },
+    "actions": {
+      "submit": "Kirim permintaan",
+      "submitting": "Mengirim…"
+    },
+    "status": {
+      "sending": "Mengirim permintaan…",
+      "sent": "Permintaan terkirim. Tim kami akan menindaklanjuti dalam 1–2 hari kerja."
+    },
+    "validation": {
+      "name": "Nama wajib diisi (2–80 karakter).",
+      "contact": "Masukkan email atau nomor telepon kerja.",
+      "email": "Format email tidak valid.",
+      "phone": "Nomor telepon kerja tidak valid.",
+      "school": "Sekolah wajib diisi (2–120 karakter).",
+      "role": "Pilih peran Anda di sekolah.",
+      "teacherCount": "Perkiraan jumlah guru tidak valid.",
+      "goal": "Tujuan maksimal 280 karakter.",
+      "consent": "Persetujuan wajib dicentang."
+    }
+  }
+}

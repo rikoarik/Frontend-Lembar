@@ -1,1 +1,31 @@
-{}
+{
+  "analytics": {
+    "title": "Analitik pembuat",
+    "subtitle": "Ringkasan dari assessment workspace aktif.",
+    "range": {
+      "d7": "7 Hari",
+      "d30": "30 Hari",
+      "semester": "Semester"
+    },
+    "error": {
+      "title": "Analitik gagal dimuat"
+    },
+    "metric": {
+      "created": "Lembar dibuat",
+      "final": "Lembar final",
+      "review": "Perlu review",
+      "questions": "Soal tersimpan"
+    },
+    "subjects": {
+      "title": "Mata pelajaran",
+      "description": "Distribusi assessment pada periode terpilih.",
+      "empty": "Belum ada aktivitas pada periode ini."
+    },
+    "activity": {
+      "title": "Aktivitas terbaru",
+      "description": "{count} assessment pada periode terpilih.",
+      "itemMeta": "{lifecycle} · {count} soal",
+      "empty": "Buat lembar pertama"
+    }
+  }
+}

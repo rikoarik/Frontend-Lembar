@@ -1,1 +1,53 @@
-{}
+{
+  "leads": {
+    "title": "Request a school consultation",
+    "description": "Fill in a few details. The lembar team will review your school's needs before contacting you.",
+    "labels": {
+      "name": "Name",
+      "contactLegend": "Work contact",
+      "email": "Work email",
+      "phone": "Work phone number",
+      "school": "School",
+      "role": "Role",
+      "teacherCount": "Estimated number of teachers",
+      "goal": "Goal (optional)",
+      "consent": "I agree to the processing of my data to follow up on the school's request."
+    },
+    "placeholders": {
+      "name": "Full name",
+      "email": "name@school.edu",
+      "phone": "+62 812 3456 7890",
+      "school": "School name",
+      "teacherCount": "E.g. 24",
+      "goal": "Briefly describe your school's needs"
+    },
+    "contactHelp": "Provide a work email or a work phone number. Either one is enough.",
+    "goalHelp": "Do not include student data or sensitive information.",
+    "roleOptions": {
+      "placeholder": "Select a role",
+      "principal": "Principal",
+      "teacher": "Teacher",
+      "curriculum": "Curriculum",
+      "other": "Other"
+    },
+    "actions": {
+      "submit": "Send request",
+      "submitting": "Sending…"
+    },
+    "status": {
+      "sending": "Sending request…",
+      "sent": "Request sent. Our team will follow up within 1–2 business days."
+    },
+    "validation": {
+      "name": "Name is required (2–80 characters).",
+      "contact": "Enter a work email or phone number.",
+      "email": "Email format is invalid.",
+      "phone": "Work phone number is invalid.",
+      "school": "School is required (2–120 characters).",
+      "role": "Select your role at the school.",
+      "teacherCount": "Estimated number of teachers is invalid.",
+      "goal": "Goal is limited to 280 characters.",
+      "consent": "Consent must be checked."
+    }
+  }
+}

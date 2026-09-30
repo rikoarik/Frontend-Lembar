@@ -1,1 +1,180 @@
-{}
+{
+  "school": {
+    "roles": {
+      "schoolAdmin": "Admin sekolah",
+      "teacher": "Guru"
+    },
+    "memberState": {
+      "active": "Aktif",
+      "suspended": "Ditangguhkan",
+      "revoked": "Dicabut"
+    },
+    "unknownValue": "Belum tersedia",
+    "notificationStatus": {
+      "pending": "Menunggu",
+      "delivered": "Terkirim",
+      "failed": "Gagal"
+    },
+    "common": {
+      "all": "Semua",
+      "adminShort": "Admin",
+      "emDash": "—",
+      "retry": "Coba lagi",
+      "previous": "‹ Sebelumnya",
+      "next": "Berikutnya ›",
+      "refresh": "Refresh",
+      "cancel": "Batal",
+      "noData": "Tidak ada data"
+    },
+    "ringkasan": {
+      "activeMembers": "Anggota aktif",
+      "membersFromTotal": "dari {count} total",
+      "quotaUsed": "Kuota terpakai",
+      "quotaValue": "{used} / {limit}",
+      "quotaUnlimited": "∞",
+      "percentPeriod": "{percent}% periode ini",
+      "school": "Sekolah",
+      "unavailable": "Data ringkasan tidak tersedia",
+      "loadFailed": "Gagal memuat ringkasan: {message}"
+    },
+    "guru": {
+      "searchPlaceholder": "Cari nama / email…",
+      "loadingList": "Memuat daftar anggota sekolah…",
+      "loadingListLabel": "Memuat daftar anggota sekolah",
+      "loadFailedTitle": "Gagal memuat anggota sekolah",
+      "loadFailedLabel": "Gagal memuat anggota sekolah",
+      "emptyTitle": "Belum ada anggota sekolah",
+      "emptyLabel": "Belum ada anggota sekolah",
+      "emptyHint": "Undang guru pertama agar mereka bisa mulai memakai workspace sekolah.",
+      "columns": {
+        "member": "Anggota",
+        "role": "Peran",
+        "status": "Status",
+        "lastActive": "Aktif terakhir"
+      },
+      "suspend": "Tangguhkan",
+      "activate": "Aktifkan",
+      "delete": "Hapus",
+      "suspendedToast": "{name} ditangguhkan",
+      "activatedToast": "{name} diaktifkan kembali",
+      "deletedToast": "{name} dihapus",
+      "suspendFailed": "Gagal menangguhkan: {message}",
+      "activateFailed": "Gagal mengaktifkan: {message}",
+      "deleteFailed": "Gagal menghapus: {message}",
+      "removeTitle": "Hapus Anggota Sekolah",
+      "removeConfirm": "Apakah Anda yakin ingin menghapus {name} dari sekolah ini?",
+      "removeConfirmAction": "Ya, Hapus Anggota",
+      "pageSummary": "{total} anggota · halaman {page} / {pages}"
+    },
+    "undang": {
+      "email": "Email",
+      "emailPlaceholder": "guru@sekolah.sch.id",
+      "role": "Peran",
+      "roleTeacher": "Guru",
+      "roleAdmin": "Admin sekolah",
+      "submit": "Kirim undangan",
+      "submitting": "Mengirim…",
+      "success": "Undangan dibuat untuk {email}. Email akan dikirim setelah provider notifikasi dikonfigurasi.",
+      "failed": "Gagal mengirim undangan: {message}"
+    },
+    "penggunaan": {
+      "quotaUsed": "Kuota terpakai",
+      "quotaValue": "{used} / {limit}",
+      "quotaPercent": "{limit} ({percent}%)",
+      "unlimited": "Tidak terbatas",
+      "unavailable": "Data tidak tersedia",
+      "teacher": "Guru",
+      "quotaUsedColumn": "Kuota dipakai",
+      "monthlyTrend": "Tren bulanan",
+      "loadFailed": "Gagal memuat penggunaan: {message}"
+    },
+    "pengaturan": {
+      "nameLabel": "Nama sekolah",
+      "slug": "Slug",
+      "level": "Level",
+      "plan": "Paket",
+      "seats": "Kursi",
+      "renewsAt": "Perpanjang",
+      "save": "Simpan pengaturan",
+      "saving": "Menyimpan…",
+      "saved": "Pengaturan disimpan",
+      "loadFailed": "Gagal memuat pengaturan: {message}",
+      "saveFailed": "Gagal menyimpan: {message}"
+    },
+    "billing": {
+      "title": "Langganan & Tagihan Sekolah",
+      "description": "Ringkasan paket aktual dari layanan billing.",
+      "loadFailed": "Gagal memuat billing sekolah",
+      "unavailable": "Data billing tidak tersedia.",
+      "plan": "Paket",
+      "teacherSeats": "Lisensi Guru",
+      "teacherSeatsValue": "{count} Guru",
+      "teacherSeatsHint": "Anggota aktif",
+      "usageThisMonth": "Penggunaan Bulan Ini",
+      "usageValue": "{used} / {limit}",
+      "unlimited": "Tidak terbatas",
+      "cycleStart": "Mulai Siklus Billing",
+      "cycleStartHint": "Tanggal mulai siklus, bukan tanggal perpanjangan",
+      "invoiceUnavailable": "Riwayat dan unduhan faktur belum tersedia."
+    },
+    "library": {
+      "searchPlaceholder": "Cari judul / mapel / penulis…",
+      "empty": "Tidak ada asesmen di library",
+      "columns": {
+        "title": "Judul",
+        "author": "Penulis",
+        "questions": "Soal",
+        "updated": "Diperbarui"
+      },
+      "loadFailed": "Gagal memuat library: {message}",
+      "pageSummary": "{total} item · halaman {page} / {pages}"
+    },
+    "audit": {
+      "searchPlaceholder": "Cari aktor / aksi / target…",
+      "empty": "Tidak ada log audit",
+      "columns": {
+        "time": "Waktu",
+        "actor": "Aktor",
+        "action": "Aksi",
+        "target": "Target"
+      },
+      "loadFailed": "Gagal memuat audit: {message}",
+      "pageSummary": "{total} entri · halaman {page} / {pages}"
+    },
+    "undangan": {
+      "empty": "Tidak ada undangan menunggu",
+      "invitedBy": "Diundang oleh {name}",
+      "columns": {
+        "email": "Email",
+        "role": "Peran",
+        "sent": "Dikirim",
+        "expires": "Kedaluwarsa"
+      },
+      "cancel": "Batalkan",
+      "cancelling": "Membatalkan…",
+      "cancelledToast": "Undangan ke {email} dibatalkan",
+      "cancelFailed": "Gagal membatalkan: {message}",
+      "cancelTitle": "Batalkan Undangan",
+      "cancelConfirm": "Apakah Anda yakin ingin membatalkan undangan ke {email}?",
+      "cancelConfirmAction": "Ya, Batalkan Undangan",
+      "loadFailed": "Gagal memuat undangan: {message}"
+    },
+    "notifikasi": {
+      "empty": "Belum ada notifikasi.",
+      "emptyTable": "Tidak ada notifikasi.",
+      "refresh": "Refresh",
+      "columns": {
+        "type": "Tipe",
+        "status": "Status",
+        "attempt": "Attempt",
+        "error": "Error",
+        "created": "Dibuat"
+      },
+      "pageSummary": "{total} notifikasi · halaman {page} / {pages}",
+      "prevPage": "Halaman notifikasi sebelumnya",
+      "nextPage": "Halaman notifikasi berikutnya",
+      "loadFailed": "Gagal memuat notifikasi: {message}"
+    },
+    "notFound": "Halaman tidak ditemukan."
+  }
+}

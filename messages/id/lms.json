@@ -1,1 +1,78 @@
-{}
+{
+  "lms": {
+    "loading": "Memuat asesmen…",
+    "starting": "Memulai…",
+    "retry": "Coba lagi",
+    "eyebrow": "Asesmen",
+    "duration": "Waktu pengerjaan: {minutes} menit",
+    "identity": {
+      "name": "Nama",
+      "namePlaceholder": "Nama lengkap",
+      "class": "Kelas",
+      "classOptional": "(opsional)",
+      "classPlaceholder": "cth. 5A",
+      "start": "Mulai asesmen",
+      "restart": "Coba mulai lagi"
+    },
+    "done": {
+      "title": "Jawaban terkirim",
+      "description": "Jawaban kamu sudah tercatat. Kamu boleh menutup halaman ini."
+    },
+    "progress": {
+      "answered": "{answered} dari {total} soal terjawab",
+      "remaining": "Sisa waktu",
+      "saving": "Menyimpan...",
+      "saved": "Jawaban tersimpan",
+      "saveFailed": "Gagal menyimpan",
+      "answerProgress": "{answered}/{total}",
+      "questionNav": "Navigasi soal",
+      "questionNumbers": "Nomor soal",
+      "answeredLegend": "Terjawab",
+      "emptyLegend": "Kosong",
+      "empty": "Belum ada soal yang dapat dikerjakan."
+    },
+    "question": {
+      "counter": "Soal {number} dari {total}",
+      "sectionLabel": "Soal {number}",
+      "imageAlt": "Gambar pendukung soal {number}",
+      "choicesLegend": "Pilihan jawaban soal {number}",
+      "optionLabel": "{key}. {text}",
+      "navAnswered": "Soal {number}, sudah dijawab",
+      "navUnanswered": "Soal {number}, belum dijawab"
+    },
+    "types": {
+      "multipleChoice": "Pilihan ganda",
+      "trueFalse": "Benar atau salah",
+      "shortAnswer": "Jawaban singkat",
+      "essay": "Esai"
+    },
+    "trueFalseOptions": {
+      "true": "Benar",
+      "false": "Salah"
+    },
+    "answer": {
+      "essayLabel": "Jawaban esai",
+      "label": "Jawaban",
+      "essayPlaceholder": "Tulis jawaban secara runtut dan lengkap.",
+      "shortPlaceholder": "Tulis jawaban singkat.",
+      "essayHint": "Jawaban tersimpan otomatis saat kamu mengetik.",
+      "shortHint": "Periksa kembali ejaan jawabanmu.",
+      "characters": "{count} karakter"
+    },
+    "actions": {
+      "previous": "Sebelumnya",
+      "next": "Berikutnya",
+      "submit": "Kirim jawaban",
+      "submitNow": "Kirim sekarang",
+      "retrySubmit": "Coba kirim lagi",
+      "finishEarly": "Selesai lebih awal?",
+      "submitAll": "Kirim semua jawaban"
+    },
+    "errors": {
+      "revoked": "Tautan asesmen telah dicabut.",
+      "expired": "Tautan asesmen kedaluwarsa.",
+      "generic": "Terjadi kesalahan.",
+      "saveFailed": "Jawaban belum tersimpan."
+    }
+  }
+}
