@@ -466,6 +466,65 @@ describe('live-status routes', () => {
     },
   );
 
+  // --- Round-3 class closure: instruction + incidental approve-word --------------
+  // The narrow forms above (`"Deploy dev: push origin/dev."`, `"… once CI is done."`)
+  // carry NO approve-word, so they were green while the class stayed open: every line
+  // below is an INSTRUCTION whose trailing approve-word (`green`, `ok`, `verified`,
+  // `done`, `success`, `succeeded`, `pass`, `restarted`) is what the instruction asks
+  // to be CONFIRMED, not a reported outcome. 11/17 of these fired deploy (95%) or
+  // tests (65%) before this fix. Each must leave its gate OFF at the running floor.
+  const instructionWithApproveWord: { gate: string; body: string }[] = [
+    { gate: 'deploy', body: 'Deploy dev: push origin/dev and confirm the board is green.' },
+    { gate: 'deploy', body: 'Deploy dev: push origin/dev, verify the deploy is ok.' },
+    { gate: 'deploy', body: 'Deploy dev: push origin/dev and make sure the release is verified.' },
+    { gate: 'deploy', body: 'Deploy dev: push origin/dev, then mark the card done.' },
+    { gate: 'deploy', body: 'Deploy dev: push origin/dev, confirm pm2 restarted.' },
+    { gate: 'deploy', body: 'Deploy dev: trigger the workflow and watch for success.' },
+    { gate: 'deploy', body: 'Deploy dev: push origin/dev and check that everything is green.' },
+    { gate: 'deploy', body: 'Deploy dev: push origin/dev and confirm the release succeeded.' },
+    { gate: 'tests', body: 'tests: run them and make sure they pass.' },
+    { gate: 'tests', body: 'tests: run the suite and confirm it is green.' },
+    { gate: 'tests', body: 'test suite: execute it and verify the result is ok.' },
+  ];
+
+  it.each(instructionWithApproveWord)(
+    'an instruction carrying an incidental approve-word ("$body") does NOT fire the $gate gate',
+    async ({ gate, body }) => {
+      vi.stubEnv('LEMBAR_LIVE_STATUS_TASKS_JSON', JSON.stringify(liveQaTask));
+      vi.stubEnv(
+        'LEMBAR_LIVE_STATUS_COMMENTS_JSON',
+        JSON.stringify([{ task_id: 't_1d228272', author: 'orchestrator', body }]),
+      );
+      const route = await import('../live-status/status.json/route');
+      const json = await (await route.GET()).json();
+      expect(json.evidenceGates[gate]).toBe(false);
+      // Only `running` fired, so the number stays at the running floor (10).
+      expect(json.overallPercent).toBe(10);
+    },
+  );
+
+  // The mirror: the same subjects still fire when they report a genuine outcome, so
+  // the strict rule above did not simply mute deploy/tests.
+  const outcomeNotInstruction: { gate: string; body: string }[] = [
+    { gate: 'deploy', body: 'Deploy dev: completed, pm2 restarted.' },
+    { gate: 'deploy', body: 'Deployed to VPS, pm2 restarted.' },
+    { gate: 'tests', body: 'Tests passed.' },
+  ];
+
+  it.each(outcomeNotInstruction)(
+    'an outcome ("$body") still fires the $gate gate',
+    async ({ gate, body }) => {
+      vi.stubEnv('LEMBAR_LIVE_STATUS_TASKS_JSON', JSON.stringify(liveQaTask));
+      vi.stubEnv(
+        'LEMBAR_LIVE_STATUS_COMMENTS_JSON',
+        JSON.stringify([{ task_id: 't_1d228272', author: 'orchestrator', body }]),
+      );
+      const route = await import('../live-status/status.json/route');
+      const json = await (await route.GET()).json();
+      expect(json.evidenceGates[gate]).toBe(true);
+    },
+  );
+
   const completionCases: { gate: string; author: string; body: string }[] = [
     { gate: 'deploy', author: 'orchestrator', body: 'Deploy dev: done.' },
     { gate: 'deploy', author: 'orchestrator', body: 'Deployed to VPS, pm2 restarted.' },

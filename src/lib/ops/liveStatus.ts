@@ -295,7 +295,16 @@ const TESTS_SUBJECT = String.raw`(?:tests?|test\s+suite)`;
 const APPROVE_WORDS = String.raw`pass(?:ed|es)?|approv(?:e|ed|al)|signed\s+off|sign[- ]?off|green|succeed(?:ed)?|success|ok(?:ay)?|done|verified|complete(?:d)?`;
 const REJECT_WORDS = String.raw`fail(?:ed|ure)?|reject(?:ed)?|request(?:ing)?\s+changes|changes\s+requested|block(?:ed|er)?|veto|not\s+(?:run|verified|passed|approved|done)|never\s+(?:run|verified)`;
 // Future / intent markers. A line that carries one is an instruction, not a result.
-const INTENT_WORDS = String.raw`\b(?:once|after|before|until|when|will|would|shall|should|must|todo|to-?do|belum|pending|nanti|akan|segera|later|planned)\b`;
+const FUTURE_WORDS = String.raw`once|after|before|until|when|will|would|shall|should|must|todo|to-?do|belum|pending|nanti|akan|segera|later|planned`;
+// Imperative / modal / sequencing tokens. An orchestrator INSTRUCTION is exactly a
+// verb phrase ("push … and confirm the board is green", "run them and make sure they
+// pass", "trigger the workflow and watch for success"). Its trailing approve-word
+// (`green`, `ok`, `success`, `pass`, `done`) is what the instruction wants CONFIRMED,
+// not a reported outcome — so any of these tokens on the line means the line is an
+// instruction and no gate may fire from it. `push` is the ship verb in imperative
+// form (`pushed` is not matched: the word boundary excludes the past tense).
+const IMPERATIVE_WORDS = String.raw`and|then|confirm|verify|make\s+sure|check|watch|trigger|run|execute|push|please|ensure|try|look`;
+const INTENT_WORDS = String.raw`\b(?:${FUTURE_WORDS}|${IMPERATIVE_WORDS})\b`;
 
 const QA_AUTHOR = /qa/i;
 const REVIEW_AUTHOR = /review/i;
