@@ -14,7 +14,10 @@ import PhoneField from '../../components/PhoneField';
 import Notice from '../../components/Notice';
 import SubmitButton from '../../components/SubmitButton';
 import { authService } from '@/src/services/auth/authService';
-import { validateInvitationAccept } from '@/src/features/auth/validation/auth-validation';
+import {
+  validateInvitationAccept,
+  translateValidationFailure,
+} from '@/src/features/auth/validation/auth-validation';
 import { useAuthSubmit } from '@/src/features/auth/state/useAuthSubmit';
 import { resolveErrorMessage } from '@/src/services/auth/errorMapping';
 import type { InvitationPreview } from '@/src/types/auth';
@@ -97,7 +100,7 @@ export default function InvitationPage({ params }: { params: Promise<{ token: st
           failure.field === 'phone' ||
           failure.field === 'password'
         ) {
-          next[failure.field] = t(failure.message);
+          next[failure.field] = translateValidationFailure(t, failure);
         }
       }
       setLocalErrors(next);

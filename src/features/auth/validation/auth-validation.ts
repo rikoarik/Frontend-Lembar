@@ -59,6 +59,25 @@ function passwordFailure(password: string): AuthValidationKey | null {
   return passwordRules(password).every((rule) => rule.valid) ? null : 'validation.passwordTooWeak';
 }
 
+/**
+ * BUG-24: `validation.passwordTooWeak` interpolates `{count}`, but every call
+ * site rendered it with a bare `t(message)` — so the user saw the literal
+ * `{count}`. Return the values a message key needs, so renderers never have to
+ * remember which key takes params.
+ */
+export function validationMessageValues(message: AuthValidationKey): { count: number } | undefined {
+  return message === 'validation.passwordTooWeak' ? { count: MIN_PASSWORD } : undefined;
+}
+
+/** Renders a validation failure through a translator with the right params. */
+export function translateValidationFailure(
+  t: (key: string, values?: Record<string, string | number>) => string,
+  failure: ValidationFailure,
+): string {
+  const values = validationMessageValues(failure.message);
+  return values ? t(failure.message, values) : t(failure.message);
+}
+
 function empty(): ValidationResult {
   return { ok: true, value: undefined, failures: [] };
 }

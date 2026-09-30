@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
+  PASSWORD_MIN,
+  translateValidationFailure,
   validateInvitationAccept,
   validateLogin,
   validateRecoveryRequest,
@@ -68,5 +70,57 @@ describe('auth-validation', () => {
       password: 'Lengkap1234!',
     });
     expect(result.ok).toBe(true);
+  });
+
+  // BUG-24: `validation.passwordTooWeak` interpolates `{count}`. Rendering it
+  // through a bare `t(key)` printed the literal placeholder to the user, which
+  // is exactly what `/daftar` did with an 11-character password.
+  it('renders the passwordTooWeak failure with its count parameter', () => {
+    const result = validateRegister({
+      username: 'ok_name',
+      email: 'demo@example.com',
+      phone: '081234567890',
+      password: 'Pendek12345', // 11 chars — the audit's exact repro
+    });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      const failure = result.failures.find((f) => f.field === 'password');
+      expect(failure?.message).toBe('validation.passwordTooWeak');
+      if (!failure) throw new Error('expected a password failure');
+
+      // A translator that records the values it received, so we prove the
+      // parameter is actually supplied (not just that the key was used).
+      let seen: Record<string, string | number> | undefined;
+      const t = (key: string, values?: Record<string, string | number>) => {
+        seen = values;
+        return values ? `minimal ${values.count} karakter` : `RAW:${key}`;
+      };
+
+      const rendered = translateValidationFailure(t, failure);
+      expect(seen).toEqual({ count: PASSWORD_MIN });
+      expect(rendered).toBe(`minimal ${PASSWORD_MIN} karakter`);
+      expect(rendered).not.toContain('{count}');
+    }
+  });
+
+  it('does not pass a count parameter to keys that have no placeholder', () => {
+    const result = validateRegister({
+      username: 'ok_name',
+      email: 'not-an-email',
+      phone: '081234567890',
+      password: 'Lengkap1234!',
+    });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      const failure = result.failures.find((f) => f.field === 'email');
+      if (!failure) throw new Error('expected an email failure');
+      let seen: Record<string, string | number> | undefined | 'unset' = 'unset';
+      const t = (key: string, values?: Record<string, string | number>) => {
+        seen = values;
+        return key;
+      };
+      translateValidationFailure(t, failure);
+      expect(seen).toBeUndefined();
+    }
   });
 });

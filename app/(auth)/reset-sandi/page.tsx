@@ -11,7 +11,10 @@ import PasswordField from '../components/PasswordField';
 import Notice from '../components/Notice';
 import SubmitButton from '../components/SubmitButton';
 import { authService } from '@/src/services/auth/authService';
-import { validateResetPassword } from '@/src/features/auth/validation/auth-validation';
+import {
+  validateResetPassword,
+  translateValidationFailure,
+} from '@/src/features/auth/validation/auth-validation';
 import { useAuthSubmit } from '@/src/features/auth/state/useAuthSubmit';
 import { resolveErrorMessage } from '@/src/services/auth/errorMapping';
 import { useSearchParams } from 'next/navigation';
@@ -24,6 +27,7 @@ function ResetPasswordInner() {
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [matchError, setMatchError] = useState<string | undefined>();
+  const [passwordError, setPasswordError] = useState<string | undefined>();
   const [saved, setSaved] = useState(false);
   const [tokenMissing, setTokenMissing] = useState(token.trim().length === 0);
 
@@ -35,6 +39,19 @@ function ResetPasswordInner() {
     event.preventDefault();
     if (token.trim().length === 0) {
       setTokenMissing(true);
+      return;
+    }
+    // BUG-24: render the password-policy failure through the params-aware
+    // translator, so `validation.passwordTooWeak` interpolates `{count}`
+    // instead of printing the literal placeholder.
+    const validation = validateResetPassword({ token, password });
+    const nextPasswordError = validation.ok
+      ? undefined
+      : validation.failures
+          .filter((failure) => failure.field === 'password')
+          .map((failure) => translateValidationFailure(t, failure))[0];
+    setPasswordError(nextPasswordError);
+    if (nextPasswordError) {
       return;
     }
     if (password !== confirm) {
@@ -117,7 +134,7 @@ function ResetPasswordInner() {
               label={t('labels.newPassword')}
               value={password}
               onChange={setPassword}
-              error={matchError}
+              error={passwordError ?? matchError}
               autoComplete="new-password"
             />
             <PasswordField

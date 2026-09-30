@@ -15,7 +15,10 @@ import PasswordField from '../components/PasswordField';
 import PhoneField from '../components/PhoneField';
 import SubmitButton from '../components/SubmitButton';
 import { authService } from '@/src/services/auth/authService';
-import { validateRegister } from '@/src/features/auth/validation/auth-validation';
+import {
+  validateRegister,
+  translateValidationFailure,
+} from '@/src/features/auth/validation/auth-validation';
 import { useAuthSubmit } from '@/src/features/auth/state/useAuthSubmit';
 
 type FieldKey = 'username' | 'email' | 'phone' | 'password' | 'confirmPassword';
@@ -63,7 +66,7 @@ export default function RegisterPage() {
           failure.field === 'phone' ||
           failure.field === 'password'
         ) {
-          next[failure.field] = t(failure.message);
+          next[failure.field] = translateValidationFailure(t, failure);
         }
       }
     }
