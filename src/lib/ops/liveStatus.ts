@@ -270,22 +270,32 @@ function pm2FromFixture(fixture: Pm2Detail['evidence']): Pm2Detail['restarts'] {
 }
 
 // --- Gate vocabulary -------------------------------------------------------
-// Every text gate is matched ONE LINE AT A TIME (see `anyLine`) and must see an
-// OUTCOME. Two failure modes this closes, both observed live on card t_1d228272
-// (failed twice by QA, yet the board reported 100%):
+// A gate fires on a COMPLETION statement, not on a topic or an author. Two failure
+// modes this closes, both observed live on card t_1d228272 (failed twice by QA, yet
+// the board reported 100%):
 //   * topic-as-evidence: the instruction "Live E2E on app.lembar.web.id using
 //     deployed T5 artifact only." fired `publicVerification` on a todo;
 //   * author-as-evidence: `/lembar-qa/.test(author)` fired `qa` on a FAIL verdict.
-// So: a gate fires on an approving statement about the gate's subject, and a
-// rejecting statement on the same subject vetoes it (a later FAIL is not evidence).
+// A third one followed the first fix: subject + *any* approve word on the line
+// ("Deploy dev: push origin/dev once CI is done." → `done`; "QA: run the suite,
+// then sign off." → `sign off`; "Review the diff and mark done." → `done`) still
+// let an instruction move the number. So the statement must be VERDICT-SHAPED:
+// the gate's subject at the start of the line, then a separator (`:` `=` `—` `-`)
+// or whitespace, then the outcome word — nothing in between that reads as future
+// intent. A rejecting statement on the same subject vetoes the gate outright.
 const MARKER_PREFIX = String.raw`(?:[-*•]\s+)?(?:\*\*|__|#{1,6}\s*)?\s*(?:evidence|proof|result|status|verdict)?\s*:?\s*`;
 const QA_SUBJECT = String.raw`(?:qa|q\.?a\.?\s*(?:verdict|review|sign[- ]?off)|quality\s+assurance)`;
 const REVIEW_SUBJECT = String.raw`(?:code\s+review|re-?review|review)`;
 const DEPLOY_SUBJECT = String.raw`(?:deploy(?:ed|ment)?|release(?:d)?|pm2\s+restart|restart(?:ed)?\s+dev)`;
-const PUBLIC_SUBJECT = String.raw`(?:public\s+verification|public\s+probe|live\s+verification|live\s+verify|live\s+e2e)`;
+// `live e2e` / `live verification` are TOPICS, not results: naming the public
+// origin must never fire the 100% gate. Only an explicit marker line counts.
+const PUBLIC_SUBJECT = String.raw`(?:public\s+verification|public\s+probe)`;
 const VERDICT_SUBJECT = String.raw`(?:verdict|status|result)`;
+const TESTS_SUBJECT = String.raw`(?:tests?|test\s+suite)`;
 const APPROVE_WORDS = String.raw`pass(?:ed|es)?|approv(?:e|ed|al)|signed\s+off|sign[- ]?off|green|succeed(?:ed)?|success|ok(?:ay)?|done|verified|complete(?:d)?`;
 const REJECT_WORDS = String.raw`fail(?:ed|ure)?|reject(?:ed)?|request(?:ing)?\s+changes|changes\s+requested|block(?:ed|er)?|veto|not\s+(?:run|verified|passed|approved|done)|never\s+(?:run|verified)`;
+// Future / intent markers. A line that carries one is an instruction, not a result.
+const INTENT_WORDS = String.raw`\b(?:once|after|before|until|when|will|would|shall|should|must|todo|to-?do|belum|pending|nanti|akan|segera|later|planned)\b`;
 
 const QA_AUTHOR = /qa/i;
 const REVIEW_AUTHOR = /review/i;
@@ -298,15 +308,112 @@ function anyLine(comments: CommentRow[], pattern: RegExp, author?: RegExp): bool
   );
 }
 
+// Verdict shape — "<subject> [noun] <separator> <outcome>": the outcome word must
+// sit where an outcome belongs, right after the subject. "QA verdict: PASS" and
+// "Code review approved." fire; "QA: run the suite, then sign off." and "Review the
+// diff and mark done." cannot, because the outcome is buried in an instruction.
+function subjectHead(subject: string): string {
+  return String.raw`^\s*${MARKER_PREFIX}(?:${subject})\b(?:\s*(?:verdict|review|sign[- ]?off|status|result))?\s*[:=—–]?\s*`;
+}
+
 function approveLine(subject: string): RegExp {
+  return new RegExp(String.raw`${subjectHead(subject)}(?:${APPROVE_WORDS})\b`, 'i');
+}
+
+// Completion shape — the subject opens the statement; `outcomeOk` then scans the
+// REST of the line for the outcome, so the subject word itself is never the
+// outcome and an intent/reject word before it vetoes the line.
+function completionShape(subject: string): RegExp {
+  return new RegExp(String.raw`^\s*${MARKER_PREFIX}(?:${subject})\b`, 'i');
+}
+
+function rejectLine(subject: string): RegExp {
   return new RegExp(
-    String.raw`^\s*${MARKER_PREFIX}${subject}\b[^\n]*\b(?:${APPROVE_WORDS})\b`,
+    String.raw`^\s*${MARKER_PREFIX}(?:${subject})\b[^\n]*\b(?:${REJECT_WORDS})\b`,
     'i',
   );
 }
 
-function rejectLine(subject: string): RegExp {
-  return new RegExp(String.raw`^\s*${MARKER_PREFIX}${subject}\b[^\n]*\b(?:${REJECT_WORDS})\b`, 'i');
+const INTENT_RE = new RegExp(INTENT_WORDS, 'i');
+const REJECT_RE = new RegExp(String.raw`\b(?:${REJECT_WORDS})\b`, 'i');
+const APPROVE_RE = new RegExp(String.raw`\b(?:${APPROVE_WORDS})\b`, 'i');
+// Past-tense ship verbs are completions on their own ("Deployed to VPS, pm2
+// restarted"). `push` is deliberately absent: "Deploy dev: push origin/dev." is
+// a todo, not a deploy.
+const SHIP_WORDS = String.raw`deployed|deploys|released|published|restarted|rolled\s+out|went\s+live|is\s+live`;
+const SHIP_RE = new RegExp(String.raw`\b(?:${SHIP_WORDS})\b`, 'i');
+
+// The outcome must not be preceded — within the same line — by an intent marker
+// ("once CI is done") or a rejection ("not done yet"). This is what separates
+// "Deploy dev: push origin/dev once CI is done." (an instruction ending in `done`)
+// from "Deploy dev: done after CI." (a completion that merely mentions `after`).
+function outcomeOk(text: string, shape: RegExp, outcomeRe: RegExp): boolean {
+  const head = shape.exec(text);
+  if (!head) return false;
+  const rest = text.slice(head[0].length);
+  const outcome = outcomeRe.exec(rest);
+  if (!outcome) return false;
+  const before = rest.slice(0, outcome.index);
+  return !INTENT_RE.test(before) && !REJECT_RE.test(before);
+}
+
+function hasOutcome(
+  comments: CommentRow[],
+  shapes: RegExp[],
+  outcomeRe: RegExp,
+  author?: RegExp,
+): boolean {
+  return comments.some(
+    (comment) =>
+      (!author || author.test(comment.author)) &&
+      (comment.body ?? '')
+        .split('\n')
+        .some((text) => shapes.some((shape) => outcomeOk(text, shape, outcomeRe))),
+  );
+}
+
+// Approve verdict shapes for qa / review / public verification: the outcome word
+// must land immediately after the subject head. `verdictHead` additionally accepts
+// a bare "Verdict: PASS" line when it comes from the gate's own author.
+function verdictShapes(subject: string): RegExp[] {
+  return [approveLine(subject)];
+}
+
+function verdictHead(subject: string): RegExp[] {
+  return [approveLine(subject), approveLine(VERDICT_SUBJECT)];
+}
+
+const DEPLOY_OUTCOME = new RegExp(String.raw`\b(?:${APPROVE_WORDS}|${SHIP_WORDS})\b`, 'i');
+
+// Strict verdict: a verdict-shaped line fires ONLY if the line carries no future /
+// intent marker at all. "QA: approve once tests pass." is an instruction; "QA:
+// approved." is a verdict. Fail-closed on intent — a missed gate costs a re-run,
+// a false gate is the defect this card exists to remove.
+function hasVerdict(comments: CommentRow[], shapes: RegExp[], author?: RegExp): boolean {
+  return comments.some(
+    (comment) =>
+      (!author || author.test(comment.author)) &&
+      (comment.body ?? '')
+        .split('\n')
+        .some((text) => !INTENT_RE.test(text) && shapes.some((shape) => shape.test(text))),
+  );
+}
+
+// Looser completion: the subject opens the statement and the outcome appears later
+// on the same line, with no intent/reject word in between. Used for deploy / tests,
+// where the natural phrasing varies ("Deployed to VPS, pm2 restarted").
+function hasCompletion(
+  comments: CommentRow[],
+  subject: string,
+  outcomeRe: RegExp,
+  author?: RegExp,
+): boolean {
+  const shape = completionShape(subject);
+  return comments.some(
+    (comment) =>
+      (!author || author.test(comment.author)) &&
+      (comment.body ?? '').split('\n').some((text) => outcomeOk(text, shape, outcomeRe)),
+  );
 }
 
 function evaluateEvidenceGates(input: {
@@ -339,36 +446,39 @@ function evaluateEvidenceGates(input: {
   // Commit gate: orchestrator marked the first durable edit AND this task's code is on origin/dev.
   const commit =
     firstFileChanged && (latestFrontendCommits.length > 0 || latestBackendCommits.length > 0);
-  const tests = anyLine(comments, /^\s*tests?\b[^\n]*\b(pass|passed|green|ok|done)\b/i);
+  const tests =
+    hasCompletion(comments, TESTS_SUBJECT, APPROVE_RE) &&
+    !anyLine(comments, rejectLine(TESTS_SUBJECT));
 
   // The remaining gates must be EARNED BY AN OUTCOME. Neither an author name nor a
   // topic is evidence: "Live E2E on app.lembar.web.id using deployed T5 artifact
   // only." is a task instruction, "Deploy dev: push origin/dev." is a todo, and
   // "QA verdict: FAIL" is the opposite of a pass. All three used to fire their gate
   // (the first one twice over) and reported 100% for work that never happened.
-  // Rule: an approving statement fires the gate, a rejecting one vetoes it.
+  // Rule: a verdict-shaped completion statement fires the gate, a rejecting one
+  // vetoes it, and an instruction ("run the suite, then sign off") fires nothing.
   const qaPass =
-    anyLine(comments, approveLine(QA_SUBJECT)) ||
-    anyLine(comments, approveLine(VERDICT_SUBJECT), QA_AUTHOR);
+    hasVerdict(comments, verdictShapes(QA_SUBJECT)) ||
+    hasVerdict(comments, verdictHead(QA_SUBJECT), QA_AUTHOR);
   const qaFail =
     anyLine(comments, rejectLine(QA_SUBJECT)) ||
     anyLine(comments, rejectLine(VERDICT_SUBJECT), QA_AUTHOR);
   const qa = qaPass && !qaFail;
   const reviewPass =
-    anyLine(comments, approveLine(REVIEW_SUBJECT)) ||
-    anyLine(comments, approveLine(VERDICT_SUBJECT), REVIEW_AUTHOR);
+    hasVerdict(comments, verdictShapes(REVIEW_SUBJECT)) ||
+    hasVerdict(comments, verdictHead(REVIEW_SUBJECT), REVIEW_AUTHOR);
   const reviewFail =
     anyLine(comments, rejectLine(REVIEW_SUBJECT)) ||
     anyLine(comments, rejectLine(VERDICT_SUBJECT), REVIEW_AUTHOR);
   const review = reviewPass && !reviewFail;
   const deploy =
-    anyLine(comments, approveLine(DEPLOY_SUBJECT)) &&
+    hasCompletion(comments, DEPLOY_SUBJECT, DEPLOY_OUTCOME) &&
     !anyLine(comments, rejectLine(DEPLOY_SUBJECT));
   // A public verification is only evidence when it states its own result on an
-  // explicit marker line. Naming the origin (or the phrase "public verification")
-  // in prose is not a verification.
+  // explicit marker line. Naming the origin — or the phrase "live e2e" — in prose
+  // is a topic, not a verification, and never fires the 100% gate.
   const publicVerification =
-    anyLine(comments, approveLine(PUBLIC_SUBJECT)) &&
+    hasVerdict(comments, verdictShapes(PUBLIC_SUBJECT)) &&
     !anyLine(comments, rejectLine(PUBLIC_SUBJECT));
 
   if (qaFail) {

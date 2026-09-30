@@ -423,4 +423,75 @@ describe('live-status routes', () => {
     expect(json.evidenceGates.publicVerification).toBe(true);
     expect(json.overallPercent).toBe(100);
   });
+
+  // --- Defect class, not just the named strings ---------------------------------
+  // Round 1 of the review showed the first fix patched the three fixtures but left
+  // the class open: the gates still fired on an instruction carrying one incidental
+  // approve-word (`done`, `sign off`). Each case below is one INSTRUCTION comment on
+  // a running card and must leave its gate OFF.
+  const instructionCases: { gate: string; body: string }[] = [
+    { gate: 'deploy', body: 'Deploy dev: push origin/dev once CI is done.' },
+    { gate: 'deploy', body: 'Deploy dev: push origin/dev.' },
+    { gate: 'deploy', body: 'Deploy to VPS after the review passes.' },
+    { gate: 'deploy', body: 'Deploy dev: not done yet.' },
+    { gate: 'qa', body: 'QA: run the suite, then sign off.' },
+    { gate: 'qa', body: 'QA will sign off after the fix.' },
+    { gate: 'qa', body: 'QA: approve once CI is green.' },
+    { gate: 'review', body: 'Review the diff and mark done.' },
+    { gate: 'review', body: 'Code review will approve once tests pass.' },
+    { gate: 'review', body: 'Review handoff: please take a look.' },
+    {
+      gate: 'publicVerification',
+      body: 'Live E2E on app.lembar.web.id: run after deploy is done.',
+    },
+    { gate: 'publicVerification', body: 'Public verification will run later.' },
+    { gate: 'publicVerification', body: 'We still need public verification.' },
+    { gate: 'tests', body: 'tests will pass after the fix.' },
+    { gate: 'tests', body: 'Run tests once the build is done.' },
+  ];
+
+  it.each(instructionCases)(
+    'an instruction ("$body") does NOT fire the $gate gate',
+    async ({ gate, body }) => {
+      vi.stubEnv('LEMBAR_LIVE_STATUS_TASKS_JSON', JSON.stringify(liveQaTask));
+      vi.stubEnv(
+        'LEMBAR_LIVE_STATUS_COMMENTS_JSON',
+        JSON.stringify([{ task_id: 't_1d228272', author: 'orchestrator', body }]),
+      );
+      const route = await import('../live-status/status.json/route');
+      const json = await (await route.GET()).json();
+      expect(json.evidenceGates[gate]).toBe(false);
+      // Nothing but the running gate fired, so the number stays at the floor.
+      expect(json.overallPercent).toBe(10);
+    },
+  );
+
+  const completionCases: { gate: string; author: string; body: string }[] = [
+    { gate: 'deploy', author: 'orchestrator', body: 'Deploy dev: done.' },
+    { gate: 'deploy', author: 'orchestrator', body: 'Deployed to VPS, pm2 restarted.' },
+    { gate: 'qa', author: 'lembar-qa', body: 'QA verdict: PASS' },
+    { gate: 'qa', author: 'lembar-qa', body: 'QA: approved' },
+    { gate: 'review', author: 'lembar-reviewer', body: 'Code review approved.' },
+    { gate: 'review', author: 'lembar-reviewer', body: 'Review: approved' },
+    {
+      gate: 'publicVerification',
+      author: 'orchestrator',
+      body: 'public verification: PASS — 200.',
+    },
+    { gate: 'tests', author: 'orchestrator', body: 'Tests passed.' },
+  ];
+
+  it.each(completionCases)(
+    'a completion ("$body") still fires the $gate gate',
+    async ({ gate, author, body }) => {
+      vi.stubEnv('LEMBAR_LIVE_STATUS_TASKS_JSON', JSON.stringify(liveQaTask));
+      vi.stubEnv(
+        'LEMBAR_LIVE_STATUS_COMMENTS_JSON',
+        JSON.stringify([{ task_id: 't_1d228272', author, body }]),
+      );
+      const route = await import('../live-status/status.json/route');
+      const json = await (await route.GET()).json();
+      expect(json.evidenceGates[gate]).toBe(true);
+    },
+  );
 });
