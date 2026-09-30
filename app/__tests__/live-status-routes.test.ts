@@ -187,7 +187,7 @@ describe('live-status routes', () => {
       },
       { author: 'lembar-reviewer', body: 'Review verdict: PASS — gates are outcome-based.' },
       { author: 'lembar-qa', body: 'QA signed off.' },
-      { author: 'orchestrator', body: 'Deploy dev: done, pm2 restart completed.' },
+      { author: 'orchestrator', body: 'Deploy dev: done, pm2 restarted.' },
       { author: 'orchestrator', body: 'public verification: PASS — /live-status 200 live.' },
     ];
     vi.stubEnv('LEMBAR_LIVE_STATUS_COMMENTS_JSON', JSON.stringify(comments));
@@ -513,6 +513,59 @@ describe('live-status routes', () => {
 
   it.each(outcomeNotInstruction)(
     'an outcome ("$body") still fires the $gate gate',
+    async ({ gate, body }) => {
+      vi.stubEnv('LEMBAR_LIVE_STATUS_TASKS_JSON', JSON.stringify(liveQaTask));
+      vi.stubEnv(
+        'LEMBAR_LIVE_STATUS_COMMENTS_JSON',
+        JSON.stringify([{ task_id: 't_1d228272', author: 'orchestrator', body }]),
+      );
+      const route = await import('../live-status/status.json/route');
+      const json = await (await route.GET()).json();
+      expect(json.evidenceGates[gate]).toBe(true);
+    },
+  );
+
+  // --- Round-4 closure: `pm2 restart` is a TOPIC, not a deploy subject -------------
+  // Found on the LIVE comment corpus: the reviewer's own `## Verdict: REQUEST CHANGES`
+  // comment on t_0695a61c carries the bullet "- PM2 restart ≥ 10 → warning (verified,
+  // and it is firing on the live board)." Because `pm2\s+restart` was an alternative
+  // of DEPLOY_SUBJECT, that prose line alone advanced deploy to 95%. Every line below
+  // merely NAMES the restart-count feature and must leave deploy false.
+  const pm2RestartMentions: { gate: string; body: string }[] = [
+    {
+      gate: 'deploy',
+      body: '- PM2 restart ≥ 10 → warning (verified, and it is firing on the live board).',
+    },
+    { gate: 'deploy', body: 'PM2 restart count 16732 — verified high.' },
+    { gate: 'deploy', body: 'pm2 restart lembar-frontend succeeded.' },
+    { gate: 'deploy', body: 'PM2 restart lembar-api: restart 68x, service ok.' },
+  ];
+
+  it.each(pm2RestartMentions)(
+    'a line that merely mentions pm2 restart ("$body") does NOT fire the $gate gate',
+    async ({ gate, body }) => {
+      vi.stubEnv('LEMBAR_LIVE_STATUS_TASKS_JSON', JSON.stringify(liveQaTask));
+      vi.stubEnv(
+        'LEMBAR_LIVE_STATUS_COMMENTS_JSON',
+        JSON.stringify([{ task_id: 't_1d228272', author: 'lembar-reviewer', body }]),
+      );
+      const route = await import('../live-status/status.json/route');
+      const json = await (await route.GET()).json();
+      expect(json.evidenceGates[gate]).toBe(false);
+      expect(json.overallPercent).toBe(10);
+    },
+  );
+
+  // The mirror: dropping the `pm2 restart` alternative must not mute a genuine pm2
+  // deploy report. Both shapes below are real outcomes and still fire deploy.
+  const pm2Outcomes: { gate: string; body: string }[] = [
+    { gate: 'deploy', body: 'Deployed to VPS, pm2 restarted.' },
+    { gate: 'deploy', body: 'Deploy dev: completed, pm2 restarted.' },
+    { gate: 'deploy', body: 'Deploy dev: done, pm2 restarted.' },
+  ];
+
+  it.each(pm2Outcomes)(
+    'a genuine pm2 outcome ("$body") still fires the $gate gate',
     async ({ gate, body }) => {
       vi.stubEnv('LEMBAR_LIVE_STATUS_TASKS_JSON', JSON.stringify(liveQaTask));
       vi.stubEnv(

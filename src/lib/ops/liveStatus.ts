@@ -286,7 +286,12 @@ function pm2FromFixture(fixture: Pm2Detail['evidence']): Pm2Detail['restarts'] {
 const MARKER_PREFIX = String.raw`(?:[-*•]\s+)?(?:\*\*|__|#{1,6}\s*)?\s*(?:evidence|proof|result|status|verdict)?\s*:?\s*`;
 const QA_SUBJECT = String.raw`(?:qa|q\.?a\.?\s*(?:verdict|review|sign[- ]?off)|quality\s+assurance)`;
 const REVIEW_SUBJECT = String.raw`(?:code\s+review|re-?review|review)`;
-const DEPLOY_SUBJECT = String.raw`(?:deploy(?:ed|ment)?|release(?:d)?|pm2\s+restart|restart(?:ed)?\s+dev)`;
+const DEPLOY_SUBJECT = String.raw`(?:deploy(?:ed|ment)?|release(?:d)?|restart(?:ed)?\s+dev)`;
+// `pm2 restart` is deliberately NOT a deploy subject. As a noun phrase it names the
+// restart-count FEATURE, so any line that merely mentions it ("PM2 restart ≥ 10 →
+// warning (verified, …)", "PM2 restart count 16732 — verified high.") fired deploy
+// from prose alone. A genuine pm2 outcome is still caught by the `deploy(ed)` subject
+// ("Deployed to VPS, pm2 restarted.") or the SHIP_WORDS past tense (`restarted`).
 // `live e2e` / `live verification` are TOPICS, not results: naming the public
 // origin must never fire the 100% gate. Only an explicit marker line counts.
 const PUBLIC_SUBJECT = String.raw`(?:public\s+verification|public\s+probe)`;
