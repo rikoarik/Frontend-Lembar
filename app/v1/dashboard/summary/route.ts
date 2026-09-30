@@ -45,7 +45,12 @@ export async function GET() {
   }
 
   const summary = dashboardSummaryFromBackendUser(user);
-  const workspaceId = summary.workspace.id;
+  const workspaceId = summary.workspace?.id;
+  // BUG-23: an account with no workspace has no scope to read history from.
+  // Return the honest empty summary instead of querying with a synthetic id.
+  if (!workspaceId) {
+    return mockOk(summary);
+  }
   const history = await backendFetch('/v1/history?limit=100', {
     method: 'GET',
     token,

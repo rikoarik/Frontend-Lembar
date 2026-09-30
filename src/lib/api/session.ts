@@ -211,7 +211,6 @@ export function mePayloadFromBackendUser(
   preferredWorkspaceId?: string,
 ) {
   const accountRoles = normalizeRoles(user);
-  const userId = user.id ?? 'demo';
   const candidates = [
     ...(user.workspaces ?? []),
     ...(user.activeWorkspace ? [user.activeWorkspace] : []),
@@ -222,32 +221,44 @@ export function mePayloadFromBackendUser(
   });
 
   const fallbackRole = activeRoleForRoles(accountRoles);
-  const fallbackWorkspaceId = user.workspaceId ?? `ws_${userId.slice(0, 8)}`;
-  const workspaces = candidates.length
-    ? candidates.map((workspace) => {
-        const role = workspace.role ?? fallbackRole;
-        return {
-          id: workspace.id!,
-          name: workspace.name ?? defaultWorkspaceName(role),
-          type:
-            workspace.type === 'school' || role === 'school_admin'
-              ? ('school' as const)
-              : ('personal' as const),
-          role: activeRoleForRoles([role]),
-          permissions: workspace.permissions ?? defaultPermissions(role),
-          isActive: 'isActive' in workspace ? workspace.isActive : undefined,
-        };
-      })
-    : [
-        {
-          id: fallbackWorkspaceId,
-          name: defaultWorkspaceName(fallbackRole),
-          type: fallbackRole === 'school_admin' ? ('school' as const) : ('personal' as const),
-          role: fallbackRole,
-          permissions: defaultPermissions(fallbackRole),
-          isActive: true,
-        },
-      ];
+  const workspaces = candidates.map((workspace) => {
+    const role = workspace.role ?? fallbackRole;
+    return {
+      id: workspace.id!,
+      name: workspace.name ?? defaultWorkspaceName(role),
+      type:
+        workspace.type === 'school' || role === 'school_admin'
+          ? ('school' as const)
+          : ('personal' as const),
+      role: activeRoleForRoles([role]),
+      permissions: workspace.permissions ?? defaultPermissions(role),
+      isActive: 'isActive' in workspace ? workspace.isActive : undefined,
+    };
+  });
+
+  const account = {
+    id: user.id,
+    displayName: user.name || user.email,
+    email: user.email,
+  };
+
+  // BUG-23: never fabricate a workspace id (`ws_<userId slice>`). An account
+  // that genuinely has no workspace gets an honest "no active workspace"
+  // payload, so the app shell routes it to onboarding instead of handing a
+  // synthetic id to workspace-scoped endpoints (which 409 with
+  // TRIAL_WORKSPACE_REQUIRED).
+  if (workspaces.length === 0) {
+    return {
+      account,
+      activeWorkspaceId: null,
+      activeWorkspace: null,
+      context: {
+        workspaceIds: [] as string[],
+        permissionSet: [] as string[],
+      },
+      workspaces: [] as typeof workspaces,
+    };
+  }
 
   const selected =
     workspaces.find((workspace) => workspace.id === preferredWorkspaceId) ??
@@ -268,11 +279,7 @@ export function mePayloadFromBackendUser(
   };
 
   return {
-    account: {
-      id: user.id,
-      displayName: user.name || user.email,
-      email: user.email,
-    },
+    account,
     activeWorkspaceId: activeWorkspace.id,
     activeWorkspace,
     context: {
@@ -289,13 +296,17 @@ export function mePayloadFromBackendUser(
 export function dashboardSummaryFromBackendUser(user: BackendUser) {
   const me = mePayloadFromBackendUser(user);
   return {
-    workspace: {
-      id: me.activeWorkspace.id,
-      type: me.activeWorkspace.type,
-      name: me.activeWorkspace.name,
-      role: me.activeWorkspace.role,
-      permissions: me.activeWorkspace.permissions,
-    },
+    // BUG-23: null when the account has no workspace yet — callers must not
+    // treat a synthetic id as a usable scope.
+    workspace: me.activeWorkspace
+      ? {
+          id: me.activeWorkspace.id,
+          type: me.activeWorkspace.type,
+          name: me.activeWorkspace.name,
+          role: me.activeWorkspace.role,
+          permissions: me.activeWorkspace.permissions,
+        }
+      : null,
     metrics: {
       assessments: { total: 0, draft: 0, inReview: 0, final: 0 },
       sources: { total: 0, ready: 0, processing: 0, failed: 0 },
