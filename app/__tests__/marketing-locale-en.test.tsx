@@ -24,6 +24,12 @@ vi.mock('next-intl/server', async () => {
   return {
     getLocale: async () => 'en',
     getMessages: async () => messages,
+    getFormatter: async () => ({
+      dateTime: (value: Date | number, options?: Intl.DateTimeFormatOptions) =>
+        new Intl.DateTimeFormat('en-US', options).format(value),
+      number: (value: number | bigint, options?: Intl.NumberFormatOptions) =>
+        new Intl.NumberFormat('en-US', options).format(value),
+    }),
     getTranslations:
       async (namespace?: string) => (key: string, values?: Record<string, unknown>) => {
         const fullKey = namespace ? `${namespace}.${key}` : key;
