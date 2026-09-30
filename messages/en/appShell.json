@@ -1,1 +1,64 @@
-{}
+{
+  "appShell": {
+    "brand": "lembar",
+    "skipToContent": "Skip to main content",
+    "nav": {
+      "primaryLabel": "Main navigation",
+      "appDialogLabel": "Application navigation",
+      "closeDialog": "Close navigation",
+      "openMobile": "Open navigation",
+      "expandSidebar": "Expand sidebar",
+      "collapseSidebar": "Collapse sidebar",
+      "workspaceMenu": "Workspace menu, currently {name}",
+      "profileMenu": "Profile menu {name}",
+      "beranda": "Home",
+      "buatLembar": "Create sheet",
+      "riwayat": "History",
+      "bankSoal": "Question bank",
+      "template": "Templates",
+      "bantuan": "Help",
+      "kelas": "Classes",
+      "analitik": "Analytics",
+      "adminSekolah": "School admin"
+    },
+    "sections": {
+      "library": "Library",
+      "school": "School",
+      "help": "Help"
+    },
+    "titles": {
+      "tinjau": "Review",
+      "output": "Output",
+      "trialConfirmation": "Trial confirmation",
+      "settings": "Settings",
+      "jobProgress": "Generation progress",
+      "onboarding": "Welcome",
+      "assessments": "Assessments"
+    },
+    "plan": {
+      "freeLabel": "Free plan",
+      "plus": "Plus",
+      "pro": "Pro",
+      "upgradePro": "Upgrade to Pro",
+      "quotaAria": "Token quota: {label} used",
+      "quotaProgressAria": "Token usage this month"
+    },
+    "account": {
+      "profile": "Profile",
+      "planAndQuota": "Plan & quota",
+      "help": "Help",
+      "logout": "Sign out",
+      "loggingOut": "Signing out…"
+    },
+    "workspaceSwitcher": {
+      "label": "Workspace",
+      "listLabel": "Workspace list",
+      "currentAria": "Current workspace: {name}",
+      "activeOption": "Active workspace",
+      "switchTo": "Switch to {name}",
+      "switching": "Switching…",
+      "noWorkspace": "No workspace",
+      "switchFailed": "Could not switch workspace. Try again."
+    }
+  }
+}

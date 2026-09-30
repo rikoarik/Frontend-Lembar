@@ -26,21 +26,23 @@ type WorkspaceContextValue = {
   switchWorkspace: (workspaceId: string) => Promise<boolean>;
 };
 
-// Seed data used as fallback during development only (never in production builds)
-const DEMO_WORKSPACES: Workspace[] = [
-  {
-    id: 'ws_demo',
-    name: 'Ruang pribadi',
-    kind: 'personal',
-    activeRole: 'teacher',
-  },
-  {
-    id: 'ws_school_demo',
-    name: 'SDN Contoh 01',
-    kind: 'school',
-    activeRole: 'school_admin',
-  },
-];
+/** Seed data used as fallback during development only (never in production builds). */
+function demoWorkspaces(labels: { personal: string; school: string }): Workspace[] {
+  return [
+    {
+      id: 'ws_demo',
+      name: labels.personal,
+      kind: 'personal',
+      activeRole: 'teacher',
+    },
+    {
+      id: 'ws_school_demo',
+      name: labels.school,
+      kind: 'school',
+      activeRole: 'school_admin',
+    },
+  ];
+}
 
 const WorkspaceContext = createContext<WorkspaceContextValue | null>(null);
 
@@ -49,17 +51,13 @@ const isLiveApi = () => process.env.NEXT_PUBLIC_API_MODE === 'live';
 /** Demo seed data is allowed only outside production and only in mock API mode. */
 const canUseDemoSeed = () => process.env.NODE_ENV !== 'production' && !isLiveApi();
 
-function labelFor(workspace: Workspace, kindLabel: { personal: string; school: string }): string {
-  return `${workspace.name} · ${workspace.kind === 'school' ? kindLabel.school : kindLabel.personal}`;
-}
-
 type WorkspaceProviderProps = {
   children: React.ReactNode;
-  /** Real workspaces from /v1/me. Falls back to DEMO_WORKSPACES when omitted. */
+  /** Real workspaces from /v1/me. Falls back to demo seed when omitted. */
   initialWorkspaces?: Workspace[];
   /** ID of the active workspace from /v1/me. Falls back to first workspace when omitted. */
   initialActiveId?: string;
-  /** Display name from /v1/me account.displayName. Falls back to 'Demo Guru'. */
+  /** Display name from /v1/me account.displayName. Falls back to the demo user label. */
   initialDisplayName?: string;
 };
 
@@ -69,14 +67,22 @@ export function WorkspaceProvider({
   initialActiveId,
   initialDisplayName,
 }: WorkspaceProviderProps) {
-  const live = isLiveApi();
   const allowDemoSeed = canUseDemoSeed();
   const tWorkspace = useTranslations('workspace');
   const kindLabel = {
     personal: tWorkspace('personalLabel'),
     school: tWorkspace('schoolLabel'),
   };
-  const fallbackWorkspaces = useMemo(() => (allowDemoSeed ? DEMO_WORKSPACES : []), [allowDemoSeed]);
+  const fallbackWorkspaces = useMemo(
+    () =>
+      allowDemoSeed
+        ? demoWorkspaces({
+            personal: tWorkspace('personalName'),
+            school: tWorkspace('demoSchoolName'),
+          })
+        : [],
+    [allowDemoSeed, tWorkspace],
+  );
   const workspaceList = initialWorkspaces ?? fallbackWorkspaces;
   const firstWorkspace = workspaceList[0];
   const resolvedActiveId = initialActiveId ?? firstWorkspace?.id ?? '';
@@ -151,7 +157,8 @@ export function WorkspaceProvider({
     () => ({
       activeWorkspace,
       workspaces: workspaceList,
-      displayName: initialDisplayName ?? (allowDemoSeed ? 'Demo Guru' : tWorkspace('fallbackUser')),
+      displayName:
+        initialDisplayName ?? (allowDemoSeed ? tWorkspace('demoUser') : tWorkspace('fallbackUser')),
       announcement,
       cacheScope: activeWorkspace.id,
       getCacheKey,

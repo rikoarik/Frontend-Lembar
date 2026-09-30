@@ -1,4 +1,7 @@
+'use client';
+
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { Button, Panel } from '@/app/components/ui';
 
 export function ShellLoading() {
@@ -23,23 +26,26 @@ export function ShellLoading() {
 }
 
 export function ShellError({ requestId }: { requestId?: string }) {
+  const t = useTranslations('commonUi');
   return (
     <Panel
-      title="Workspace belum bisa dimuat"
-      description="Coba muat ulang. Jika masih gagal, bagikan ID permintaan ke tim bantuan."
+      title={t('shellStates.errorTitle')}
+      description={t('shellStates.errorDescription')}
       className="max-w-reading-max"
     >
       <div className="flex flex-col gap-3">
         <p className="text-body-default text-brand-ink-muted">
-          {requestId ? `ID permintaan: ${requestId}` : 'ID permintaan belum tersedia.'}
+          {requestId
+            ? t('shellStates.requestId', { id: requestId })
+            : t('shellStates.requestIdMissing')}
         </p>
         <div className="flex flex-wrap gap-3">
-          <Button onClick={() => window.location.reload()}>Muat ulang</Button>
+          <Button onClick={() => window.location.reload()}>{t('actions.reload')}</Button>
           <Link
             href="/bantuan"
             className="inline-flex items-center text-body-default text-brand-accent underline underline-offset-4"
           >
-            Buka bantuan
+            {t('actions.openHelp')}
           </Link>
         </div>
       </div>
@@ -48,10 +54,11 @@ export function ShellError({ requestId }: { requestId?: string }) {
 }
 
 export function ShellNotFound() {
+  const t = useTranslations('commonUi');
   return (
     <Panel
-      title="Halaman tidak ditemukan"
-      description="Periksa kembali tautan atau kembali ke dashboard workspace aktif."
+      title={t('shellStates.notFoundTitle')}
+      description={t('shellStates.notFoundDescription')}
       className="max-w-reading-max"
     >
       <div className="flex flex-wrap gap-3">
@@ -59,13 +66,13 @@ export function ShellNotFound() {
           href="/app"
           className="inline-flex min-h-[var(--control-md)] items-center rounded-md bg-brand-accent px-4 text-body-default font-medium text-white"
         >
-          Kembali ke dashboard
+          {t('actions.backToDashboard')}
         </Link>
         <Link
           href="/app/riwayat"
           className="inline-flex min-h-[var(--control-md)] items-center rounded-md border border-brand-line px-4 text-body-default text-brand-ink"
         >
-          Buka riwayat
+          {t('actions.openHistory')}
         </Link>
       </div>
     </Panel>
@@ -73,10 +80,11 @@ export function ShellNotFound() {
 }
 
 export function ShellForbidden() {
+  const t = useTranslations('commonUi');
   return (
     <Panel
-      title="Akses belum tersedia"
-      description="Peran di workspace ini belum membuka halaman yang diminta. Ganti workspace atau hubungi admin sekolah."
+      title={t('shellStates.forbiddenTitle')}
+      description={t('shellStates.forbiddenDescription')}
       className="max-w-reading-max"
     >
       <div className="flex flex-wrap gap-3">
@@ -84,13 +92,13 @@ export function ShellForbidden() {
           href="/app"
           className="inline-flex min-h-[var(--control-md)] items-center rounded-md bg-brand-accent px-4 text-body-default font-medium text-white"
         >
-          Kembali ke dashboard
+          {t('actions.backToDashboard')}
         </Link>
         <Link
           href="/bantuan"
           className="inline-flex min-h-[var(--control-md)] items-center rounded-md border border-brand-line px-4 text-body-default text-brand-ink"
         >
-          Hubungi bantuan
+          {t('actions.contactHelp')}
         </Link>
       </div>
     </Panel>
@@ -98,17 +106,16 @@ export function ShellForbidden() {
 }
 
 export function ShellPlaceholder({ title, description }: { title: string; description: string }) {
+  const t = useTranslations('commonUi');
   return (
     <Panel title={title} description={description} className="max-w-reading-max">
       <div className="flex flex-col gap-3">
-        <p className="text-body-default text-brand-ink-muted">
-          Sementara itu, gunakan dashboard untuk membuat atau membuka lembar yang sudah tersedia.
-        </p>
+        <p className="text-body-default text-brand-ink-muted">{t('shellStates.placeholderBody')}</p>
         <Link
           href="/app"
           className="inline-flex min-h-[var(--control-md)] w-fit items-center rounded-md bg-brand-accent px-4 text-body-default font-medium text-white"
         >
-          Kembali ke dashboard
+          {t('actions.backToDashboard')}
         </Link>
       </div>
     </Panel>

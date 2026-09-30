@@ -1,1 +1,22 @@
-{}
+{
+  "commonUi": {
+    "actions": {
+      "reload": "Reload",
+      "openHelp": "Open help",
+      "contactHelp": "Contact support",
+      "backToDashboard": "Back to dashboard",
+      "openHistory": "Open history"
+    },
+    "shellStates": {
+      "errorTitle": "Workspace could not be loaded",
+      "errorDescription": "Try reloading. If it still fails, share the request ID with the support team.",
+      "requestId": "Request ID: {id}",
+      "requestIdMissing": "Request ID is not available yet.",
+      "notFoundTitle": "Page not found",
+      "notFoundDescription": "Check the link again or return to the active workspace dashboard.",
+      "forbiddenTitle": "Access is not available yet",
+      "forbiddenDescription": "Your role in this workspace does not unlock the requested page. Switch workspace or contact the school admin.",
+      "placeholderBody": "In the meantime, use the dashboard to create or open an existing sheet."
+    }
+  }
+}

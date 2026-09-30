@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useRef, useState } from 'react';
 
 type AccountMenuProps = {
@@ -11,6 +12,7 @@ type AccountMenuProps = {
 };
 
 export function AccountMenu({ displayName, planLabel, compact = false }: AccountMenuProps) {
+  const t = useTranslations('appShell');
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -52,21 +54,21 @@ export function AccountMenu({ displayName, planLabel, compact = false }: Account
               onClick={() => setOpen(false)}
               className="rounded-lg px-2.5 py-2 text-[#171717] hover:bg-[#f7f3ec]"
             >
-              Profil
+              {t('account.profile')}
             </Link>
             <Link
               href="/app/pengaturan/langganan"
               onClick={() => setOpen(false)}
               className="rounded-lg px-2.5 py-2 text-[#171717] hover:bg-[#f7f3ec]"
             >
-              Paket & kuota
+              {t('account.planAndQuota')}
             </Link>
             <Link
               href="/app/bantuan"
               onClick={() => setOpen(false)}
               className="rounded-lg px-2.5 py-2 text-[#171717] hover:bg-[#f7f3ec]"
             >
-              Bantuan
+              {t('account.help')}
             </Link>
             <button
               type="button"
@@ -74,7 +76,7 @@ export function AccountMenu({ displayName, planLabel, compact = false }: Account
               onClick={() => void logout()}
               className="rounded-lg px-2.5 py-2 text-left text-[#9f1d2d] hover:bg-[#fae5e8] disabled:opacity-60"
             >
-              {busy ? 'Keluar…' : 'Keluar'}
+              {busy ? t('account.loggingOut') : t('account.logout')}
             </button>
           </div>
         </div>
@@ -85,7 +87,7 @@ export function AccountMenu({ displayName, planLabel, compact = false }: Account
         onClick={() => setOpen((prev) => !prev)}
         aria-haspopup="true"
         aria-expanded={open}
-        aria-label={`Menu profil ${displayName}`}
+        aria-label={t('nav.profileMenu', { name: displayName })}
         title={displayName}
         className={[
           'flex w-full items-center gap-2.5 rounded-xl border border-[#e6dfd4] bg-white hover:bg-[#f7f3ec]',

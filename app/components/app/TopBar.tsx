@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { RoleSwitcher } from '@/src/features/admin/RoleSwitcher';
 import { LocaleSwitcher } from '@/src/i18n/LocaleSwitcher';
 
@@ -12,10 +13,13 @@ type PlanUsage = {
   tokenMonthlyLimit: number | null;
 };
 
-export function entitlementCta(plan: Pick<PlanUsage, 'plan'>) {
-  if (plan.plan === 'plus') return { label: 'Plus', icon: 'verified' };
-  if (plan.plan === 'pro') return { label: 'Pro', icon: 'verified' };
-  return { label: 'Upgrade Pro', icon: 'workspace_premium' };
+/** Translate function shape used by the label helpers below. */
+export type Translate = (key: string, values?: Record<string, string | number>) => string;
+
+export function entitlementCta(plan: Pick<PlanUsage, 'plan'>, t: Translate) {
+  if (plan.plan === 'plus') return { label: t('plan.plus'), icon: 'verified' };
+  if (plan.plan === 'pro') return { label: t('plan.pro'), icon: 'verified' };
+  return { label: t('plan.upgradePro'), icon: 'workspace_premium' };
 }
 
 export function formatQuota(plan: Pick<PlanUsage, 'tokenUsedThisMonth' | 'tokenMonthlyLimit'>): {
@@ -56,23 +60,24 @@ type TopBarProps = {
   onToggleCollapse?: () => void;
 };
 
-function titleFromPath(pathname: string): string {
-  if (pathname === '/app') return 'Beranda';
-  if (pathname.startsWith('/app/generate')) return 'Buat lembar';
-  if (pathname.startsWith('/app/riwayat')) return 'Riwayat';
-  if (pathname.startsWith('/app/bank-soal')) return 'Bank soal';
-  if (pathname.startsWith('/app/template')) return 'Template';
-  if (pathname.startsWith('/app/bantuan')) return 'Bantuan';
-  if (pathname.startsWith('/app/review')) return 'Tinjau';
-  if (pathname.startsWith('/app/output')) return 'Output';
-  if (pathname.startsWith('/app/pengaturan/langganan/trial')) return 'Konfirmasi trial';
-  if (pathname.startsWith('/app/pengaturan')) return 'Pengaturan';
-  if (pathname.startsWith('/app/kelas')) return 'Kelas';
-  if (pathname.startsWith('/app/analitik')) return 'Analitik';
-  if (pathname.startsWith('/app/jobs')) return 'Progres generate';
-  if (pathname.startsWith('/app/onboarding')) return 'Selamat datang';
-  if (pathname.startsWith('/app/assessments')) return 'Asesmen';
-  return 'lembar';
+/** Route → i18n key for the page title shown in the top bar. */
+export function titleKeyFromPath(pathname: string): string {
+  if (pathname === '/app') return 'nav.beranda';
+  if (pathname.startsWith('/app/generate')) return 'nav.buatLembar';
+  if (pathname.startsWith('/app/riwayat')) return 'nav.riwayat';
+  if (pathname.startsWith('/app/bank-soal')) return 'nav.bankSoal';
+  if (pathname.startsWith('/app/template')) return 'nav.template';
+  if (pathname.startsWith('/app/bantuan')) return 'nav.bantuan';
+  if (pathname.startsWith('/app/review')) return 'titles.tinjau';
+  if (pathname.startsWith('/app/output')) return 'titles.output';
+  if (pathname.startsWith('/app/pengaturan/langganan/trial')) return 'titles.trialConfirmation';
+  if (pathname.startsWith('/app/pengaturan')) return 'titles.settings';
+  if (pathname.startsWith('/app/kelas')) return 'nav.kelas';
+  if (pathname.startsWith('/app/analitik')) return 'nav.analitik';
+  if (pathname.startsWith('/app/jobs')) return 'titles.jobProgress';
+  if (pathname.startsWith('/app/onboarding')) return 'titles.onboarding';
+  if (pathname.startsWith('/app/assessments')) return 'titles.assessments';
+  return 'brand';
 }
 
 export function TopBar({
@@ -83,8 +88,9 @@ export function TopBar({
   collapsed = false,
   onToggleCollapse,
 }: TopBarProps) {
+  const t = useTranslations('appShell');
   const pathname = usePathname() ?? '/app';
-  const title = titleFromPath(pathname);
+  const title = t(titleKeyFromPath(pathname));
   const [plan, setPlan] = useState<PlanUsage | null>(null);
 
   useEffect(() => {
@@ -100,7 +106,7 @@ export function TopBar({
   }, [workspaceName]);
 
   const quota = plan ? formatQuota(plan) : null;
-  const entitlement = plan ? entitlementCta(plan) : null;
+  const entitlement = plan ? entitlementCta(plan, t) : null;
 
   return (
     <header
@@ -111,7 +117,7 @@ export function TopBar({
         <button
           type="button"
           className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[#e6dfd4] bg-white text-[#171717] hover:bg-[#f3eee6] md:hidden"
-          aria-label="Buka navigasi"
+          aria-label={t('nav.openMobile')}
           onClick={onOpenMobileNav}
         >
           <span aria-hidden="true" className="material-symbols-outlined text-[20px]">
@@ -130,15 +136,15 @@ export function TopBar({
             >
               <span className="material-symbols-outlined text-[18px]">layers</span>
             </span>
-            <span className="font-bold">lembar</span>
+            <span className="font-bold">{t('brand')}</span>
           </Link>
 
           {onToggleCollapse ? (
             <button
               type="button"
               onClick={onToggleCollapse}
-              aria-label={collapsed ? 'Perluas sidebar' : 'Ciutkan sidebar'}
-              title={collapsed ? 'Perluas sidebar' : 'Ciutkan sidebar'}
+              aria-label={collapsed ? t('nav.expandSidebar') : t('nav.collapseSidebar')}
+              title={collapsed ? t('nav.expandSidebar') : t('nav.collapseSidebar')}
               className="hidden md:inline-flex h-8 w-8 items-center justify-center rounded-lg text-[#6d665d] hover:bg-[#f0ebe3] hover:text-[#171717] transition-colors"
             >
               <span aria-hidden="true" className="material-symbols-outlined text-[20px]">
@@ -162,7 +168,7 @@ export function TopBar({
           <Link
             href="/app/pengaturan/langganan"
             className="hidden h-9 items-center gap-2 rounded-lg border border-[#e6dfd4] bg-white px-3 text-[12px] font-medium text-[#171717] hover:bg-[#f3eee6] sm:inline-flex"
-            aria-label={`Kuota token: ${quota.label} terpakai`}
+            aria-label={t('plan.quotaAria', { label: quota.label })}
           >
             <span
               aria-hidden="true"
@@ -177,7 +183,7 @@ export function TopBar({
               aria-valuenow={plan?.tokenUsedThisMonth}
               aria-valuemin={0}
               aria-valuemax={plan?.tokenMonthlyLimit ?? undefined}
-              aria-label="Penggunaan token bulan ini"
+              aria-label={t('plan.quotaProgressAria')}
             >
               <span
                 className="block h-full rounded-full bg-[#a3202b]"
@@ -203,7 +209,7 @@ export function TopBar({
         <button
           type="button"
           onClick={onOpenMobileNav}
-          aria-label={`Menu workspace, saat ini ${workspaceName}`}
+          aria-label={t('nav.workspaceMenu', { name: workspaceName })}
           className="inline-flex h-9 max-w-[160px] items-center gap-1.5 rounded-lg border border-[#e6dfd4] bg-white px-2.5 text-[12px] font-medium text-[#171717] hover:bg-[#f3eee6] md:hidden"
         >
           <span aria-hidden="true" className="material-symbols-outlined text-[16px] text-[#8a8379]">
