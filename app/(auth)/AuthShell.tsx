@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 
 type AuthShellProps = {
@@ -8,13 +9,14 @@ type AuthShellProps = {
 };
 
 export default function AuthShell({ side, children }: AuthShellProps) {
+  const t = useTranslations('auth');
   return (
     <div className="grid min-h-screen grid-cols-1 bg-paper text-ink lg:grid-cols-[43%_57%]">
       <a
         href="#main"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-ink focus:px-3 focus:py-2 focus:text-white"
       >
-        Lewati ke formulir
+        {t('skipToForm')}
       </a>
       {side}
       {children}

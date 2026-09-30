@@ -1,4 +1,5 @@
 import { Eye, EyeSlash } from 'iconsax-react';
+import { useTranslations } from 'next-intl';
 import { useId, useState } from 'react';
 import { PASSWORD_MIN, passwordRules } from '@/src/features/auth/validation/auth-validation';
 
@@ -19,9 +20,10 @@ export default function PasswordField({
   onChange,
   error,
   autoComplete = 'current-password',
-  label = 'Kata sandi',
+  label,
   showRules = autoComplete === 'new-password',
 }: PasswordFieldProps) {
+  const t = useTranslations('auth');
   const [visible, setVisible] = useState(false);
   const reactId = useId();
   const inputId = `${reactId}-input`;
@@ -30,11 +32,18 @@ export default function PasswordField({
   const rulesId = showRules ? `${reactId}-rules` : undefined;
   const describedBy = [errorId, rulesId].filter(Boolean).join(' ') || undefined;
   const rules = passwordRules(value);
+  const resolvedLabel = label ?? t('labels.password');
+  const ruleText: Record<string, string> = {
+    length: t('passwordRules.length', { count: PASSWORD_MIN }),
+    uppercase: t('passwordRules.uppercase'),
+    number: t('passwordRules.number'),
+    symbol: t('passwordRules.symbol'),
+  };
 
   return (
     <div className="flex flex-col gap-1.5">
       <label htmlFor={inputId} className="font-caption text-caption font-medium text-ink">
-        {label}
+        {resolvedLabel}
       </label>
       <div className="relative">
         <input
@@ -51,7 +60,7 @@ export default function PasswordField({
           id={toggleId}
           type="button"
           onClick={() => setVisible((prev) => !prev)}
-          aria-label={visible ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
+          aria-label={visible ? t('labels.hidePassword') : t('labels.showPassword')}
           aria-pressed={visible}
           aria-controls={inputId}
           tabIndex={-1}
@@ -67,7 +76,7 @@ export default function PasswordField({
       {showRules ? (
         <ul
           id={rulesId}
-          aria-label="Ketentuan kata sandi"
+          aria-label={t('labels.passwordRules')}
           className="flex flex-wrap gap-x-3 gap-y-0.5 font-caption text-caption text-secondary"
         >
           {rules.map((rule) => (
@@ -76,7 +85,7 @@ export default function PasswordField({
               className={`flex items-center gap-1 ${rule.valid ? 'text-success' : ''}`}
             >
               <span aria-hidden="true">{rule.valid ? '✓' : '·'}</span>
-              {rule.label}
+              {ruleText[rule.key]}
             </li>
           ))}
         </ul>

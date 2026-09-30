@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
@@ -18,6 +19,7 @@ export default function AuthFormShell({
   children,
   foot,
 }: AuthFormShellProps) {
+  const t = useTranslations('auth');
   return (
     <main
       id="main"
@@ -27,7 +29,7 @@ export default function AuthFormShell({
         href="/"
         className="font-caption text-caption font-medium text-secondary hover:text-burgundy"
       >
-        ← kembali ke beranda
+        ← {t('backToHome')}
       </Link>
       <section className="flex flex-col gap-5">
         <div className="flex flex-col gap-2">

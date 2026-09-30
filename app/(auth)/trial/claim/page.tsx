@@ -1,11 +1,13 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 
 const STORED_TOKEN_KEY = 'lembar.trial.claim-token';
 
 export default function TrialClaimHandoffPage() {
-  const [message, setMessage] = useState('Memeriksa tautan aktivasi...');
+  const t = useTranslations('auth');
+  const [message, setMessage] = useState(t('trial.checking'));
 
   useEffect(() => {
     const run = async () => {
@@ -17,14 +19,14 @@ export default function TrialClaimHandoffPage() {
 
       if (claimToken.length < 32 || claimToken.length > 512) {
         window.sessionStorage.removeItem(STORED_TOKEN_KEY);
-        setMessage('Tautan aktivasi tidak valid atau sudah tidak tersedia.');
+        setMessage(t('trial.invalid'));
         return;
       }
 
       window.sessionStorage.setItem(STORED_TOKEN_KEY, claimToken);
       const session = await fetch('/v1/me/plan', { credentials: 'include' }).catch(() => null);
       if (!session?.ok) {
-        setMessage('Silakan masuk untuk melanjutkan aktivasi trial.');
+        setMessage(t('trial.signIn'));
         window.location.replace('/masuk?next=%2Ftrial%2Fclaim');
         return;
       }
@@ -36,7 +38,7 @@ export default function TrialClaimHandoffPage() {
     };
 
     void run();
-  }, []);
+  }, [t]);
 
   return (
     <main className="grid min-h-[100dvh] place-items-center bg-[#f3eee6] px-4">
@@ -44,7 +46,7 @@ export default function TrialClaimHandoffPage() {
         <span className="material-symbols-outlined text-3xl text-brand-accent" aria-hidden="true">
           verified_user
         </span>
-        <h1 className="mt-3 text-body-xl font-semibold text-brand-ink">Aktivasi trial Guru Pro</h1>
+        <h1 className="mt-3 text-body-xl font-semibold text-brand-ink">{t('trial.title')}</h1>
         <p className="mt-2 text-body-sm text-[#6d665d]" role="status">
           {message}
         </p>

@@ -1,26 +1,26 @@
 import { ArrowDown2 } from 'iconsax-react';
+import { useTranslations } from 'next-intl';
 import { useId, useState } from 'react';
 
 export type CountryDial = {
   code: string;
   flag: string;
-  label: string;
   dial: string;
   max: number;
   sample: string;
 };
 
 export const DIAL_COUNTRIES: readonly CountryDial[] = [
-  { code: 'ID', flag: '🇮🇩', label: 'Indonesia', dial: '+62', max: 12, sample: '812 3456 7890' },
-  { code: 'MY', flag: '🇲🇾', label: 'Malaysia', dial: '+60', max: 11, sample: '12 345 6789' },
-  { code: 'SG', flag: '🇸🇬', label: 'Singapura', dial: '+65', max: 10, sample: '8123 4567' },
-  { code: 'TL', flag: '🇹🇱', label: 'Timor Leste', dial: '+670', max: 9, sample: '772 1234' },
-  { code: 'PH', flag: '🇵🇭', label: 'Filipina', dial: '+63', max: 11, sample: '917 123 4567' },
-  { code: 'AU', flag: '🇦🇺', label: 'Australia', dial: '+61', max: 10, sample: '412 345 678' },
-  { code: 'JP', flag: '🇯🇵', label: 'Jepang', dial: '+81', max: 11, sample: '90 1234 5678' },
-  { code: 'KR', flag: '🇰🇷', label: 'Korea Selatan', dial: '+82', max: 11, sample: '10 1234 5678' },
-  { code: 'US', flag: '🇺🇸', label: 'Amerika Serikat', dial: '+1', max: 10, sample: '202 555 0143' },
-  { code: 'GB', flag: '🇬🇧', label: 'Inggris', dial: '+44', max: 11, sample: '7911 123456' },
+  { code: 'ID', flag: '🇮🇩', dial: '+62', max: 12, sample: '812 3456 7890' },
+  { code: 'MY', flag: '🇲🇾', dial: '+60', max: 11, sample: '12 345 6789' },
+  { code: 'SG', flag: '🇸🇬', dial: '+65', max: 10, sample: '8123 4567' },
+  { code: 'TL', flag: '🇹🇱', dial: '+670', max: 9, sample: '772 1234' },
+  { code: 'PH', flag: '🇵🇭', dial: '+63', max: 11, sample: '917 123 4567' },
+  { code: 'AU', flag: '🇦🇺', dial: '+61', max: 10, sample: '412 345 678' },
+  { code: 'JP', flag: '🇯🇵', dial: '+81', max: 11, sample: '90 1234 5678' },
+  { code: 'KR', flag: '🇰🇷', dial: '+82', max: 11, sample: '10 1234 5678' },
+  { code: 'US', flag: '🇺🇸', dial: '+1', max: 10, sample: '202 555 0143' },
+  { code: 'GB', flag: '🇬🇧', dial: '+44', max: 11, sample: '7911 123456' },
 ];
 
 const DEFAULT_COUNTRY = DIAL_COUNTRIES[0];
@@ -89,6 +89,7 @@ export default function PhoneField({
   defaultCountry,
   autoComplete = 'tel',
 }: PhoneFieldProps) {
+  const t = useTranslations('auth');
   const reactId = useId();
   const inputId = `${reactId}-input`;
   const selectId = `${reactId}-country`;
@@ -107,7 +108,7 @@ export default function PhoneField({
   return (
     <div className="flex flex-col gap-1.5">
       <label htmlFor={inputId} className="font-caption text-caption font-medium text-ink">
-        Nomor telepon
+        {t('labels.phone')}
       </label>
       <div className="relative">
         <div
@@ -120,14 +121,14 @@ export default function PhoneField({
         </div>
         <select
           id={selectId}
-          aria-label="Pilih kode negara"
+          aria-label={t('labels.selectCountry')}
           value={country.code}
           onChange={(event) => handleCountryChange(event.target.value)}
           className="absolute inset-y-0 left-0 z-10 w-[6.5rem] cursor-pointer opacity-0"
         >
           {DIAL_COUNTRIES.map((entry) => (
             <option key={entry.code} value={entry.code}>
-              {entry.flag} {entry.label} ({entry.dial})
+              {entry.flag} {t(`countries.${entry.code}`)} ({entry.dial})
             </option>
           ))}
         </select>

@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { Spinner } from '@/app/components/ui/Spinner';
 
@@ -28,9 +29,10 @@ function GoogleMark() {
 }
 
 export default function GoogleAuthButton({ intent }: GoogleAuthButtonProps) {
+  const t = useTranslations('auth');
   const [message, setMessage] = useState<string>();
   const [busy, setBusy] = useState(false);
-  const label = intent === 'masuk' ? 'Masuk dengan Google' : 'Daftar dengan Google';
+  const label = intent === 'masuk' ? t('google.signIn') : t('google.signUp');
 
   const onClick = async () => {
     setBusy(true);
@@ -42,13 +44,13 @@ export default function GoogleAuthButton({ intent }: GoogleAuthButtonProps) {
       });
       const payload = await response.json().catch(() => null);
       if (!response.ok || !payload?.url) {
-        setMessage(payload?.error?.message || 'Google OAuth belum siap. Coba lagi nanti.');
+        setMessage(payload?.error?.message || t('google.notReady'));
         setBusy(false);
         return;
       }
       window.location.href = payload.url as string;
     } catch {
-      setMessage('Tidak dapat terhubung ke server autentikasi.');
+      setMessage(t('google.network'));
       setBusy(false);
     }
   };
@@ -66,7 +68,7 @@ export default function GoogleAuthButton({ intent }: GoogleAuthButtonProps) {
         {busy ? (
           <>
             <Spinner size="sm" className="text-ink opacity-80" />
-            <span>Menghubungkan…</span>
+            <span>{t('google.connecting')}</span>
           </>
         ) : (
           <>

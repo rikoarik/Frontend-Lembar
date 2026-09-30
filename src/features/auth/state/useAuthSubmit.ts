@@ -1,9 +1,10 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { err, ok, type Result } from '@/src/types/result';
 import type { AuthError } from '@/src/services/auth/authErrors';
-import { mapEnvelopeToAuthError } from '@/src/services/auth/errorMapping';
+import { mapEnvelopeToAuthError, resolveErrorMessage } from '@/src/services/auth/errorMapping';
 
 type UseAuthSubmitOptions<TInput> = {
   submit: (input: TInput, idempotencyKey: string) => Promise<Result<unknown, AuthError>>;
@@ -29,6 +30,8 @@ const generateIdempotencyKey = (): string => {
 export function useAuthSubmit<TInput>(
   options: UseAuthSubmitOptions<TInput>,
 ): UseAuthSubmitApi<TInput> {
+  const t = useTranslations('auth');
+  const tErrors = useTranslations();
   const idempotencyKeyRef = useRef<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<AuthError | undefined>();
@@ -40,7 +43,7 @@ export function useAuthSubmit<TInput>(
       setBusy(true);
       setError(undefined);
       setFieldErrors({});
-      setStatusMessage('Mengirim permintaan…');
+      setStatusMessage(t('status.sending'));
 
       if (!idempotencyKeyRef.current) {
         idempotencyKeyRef.current = generateIdempotencyKey();
@@ -50,7 +53,7 @@ export function useAuthSubmit<TInput>(
 
       if (result.ok) {
         setBusy(false);
-        setStatusMessage('Berhasil.');
+        setStatusMessage(t('status.success'));
         idempotencyKeyRef.current = null;
         options.onSuccess?.(result.value);
         return result;
@@ -59,11 +62,11 @@ export function useAuthSubmit<TInput>(
       const authError: AuthError = result.error ?? mapEnvelopeToAuthError(null);
       setError(authError);
       setFieldErrors(authError.fieldErrors ?? {});
-      setStatusMessage(authError.safeMessage);
+      setStatusMessage(resolveErrorMessage(tErrors, authError.safeMessage));
       setBusy(false);
       return err(authError);
     },
-    [options],
+    [options, t, tErrors],
   );
 
   const reset = useCallback(() => {

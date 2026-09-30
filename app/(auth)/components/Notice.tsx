@@ -1,11 +1,13 @@
 'use client';
 
+import type { ReactNode } from 'react';
+
 type Tone = 'info' | 'success' | 'warning' | 'danger';
 
 type NoticeProps = {
   tone?: Tone;
   title?: string;
-  children: string;
+  children: ReactNode;
 };
 
 const TONE: Record<Tone, string> = {

@@ -1,15 +1,17 @@
 'use client';
 
 import { useEffect, useState, useSyncExternalStore } from 'react';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import AuthShell from '../../(auth)/AuthShell';
 import AuthFormShell from '../../(auth)/components/AuthFormShell';
 import AuthSidePanel from '../../(auth)/components/AuthSidePanel';
 import { Spinner } from '@/app/components/ui/Spinner';
+import { resolveErrorMessage } from '@/src/services/auth/errorMapping';
 
 type Status =
   | { kind: 'loading' }
-  | { kind: 'error'; message: string }
+  | { kind: 'error'; message?: string | undefined; messageKey?: string | undefined }
   | { kind: 'success'; homePath: string };
 
 type CallbackResult = Exclude<Status, { kind: 'loading' }>;
@@ -27,6 +29,8 @@ function getServerLocationSearch() {
 }
 
 export default function GoogleAuthCallbackPage() {
+  const t = useTranslations('auth');
+  const tErrors = useTranslations();
   const locationSearch = useSyncExternalStore(
     subscribeToLocationSearch,
     getLocationSearch,
@@ -58,11 +62,13 @@ export default function GoogleAuthCallbackPage() {
         if (cancelled) return;
 
         if (!response.ok) {
+          const upstream = payload?.error?.message as string | undefined;
           setResult({
             requestKey,
             status: {
               kind: 'error',
-              message: payload?.error?.message || 'Autentikasi Google gagal.',
+              message: upstream,
+              messageKey: upstream ? undefined : 'callback.errorGeneric',
             },
           });
           return;
@@ -75,10 +81,7 @@ export default function GoogleAuthCallbackPage() {
         if (!cancelled) {
           setResult({
             requestKey,
-            status: {
-              kind: 'error',
-              message: 'Tidak dapat terhubung ke server autentikasi.',
-            },
+            status: { kind: 'error', messageKey: 'google.network' },
           });
         }
       }
@@ -93,40 +96,40 @@ export default function GoogleAuthCallbackPage() {
   let status: Status = { kind: 'loading' };
   if (locationSearch !== null) {
     if (oauthError) {
-      status = {
-        kind: 'error',
-        message: 'Google membatalkan autentikasi. Coba lagi.',
-      };
+      status = { kind: 'error', messageKey: 'callback.errorCancelled' };
     } else if (!code) {
-      status = {
-        kind: 'error',
-        message: 'Kode autentikasi Google tidak ditemukan.',
-      };
+      status = { kind: 'error', messageKey: 'callback.errorMissingCode' };
     } else if (result?.requestKey === requestKey) {
       status = result.status;
     }
   }
 
+  const errorText =
+    status.kind === 'error'
+      ? (resolveErrorMessage(tErrors, status.message) ??
+        t(status.messageKey ?? 'callback.errorGeneric'))
+      : '';
+
   return (
     <AuthShell
       side={
         <AuthSidePanel
-          eyebrow="Google"
-          title="Menyelesaikan masuk dengan Google."
-          description="Kami memverifikasi akun Google Anda dan menyiapkan ruang kerja lembar."
+          eyebrow={t('callback.sideEyebrow')}
+          title={t('callback.sideTitle')}
+          description={t('callback.sideDescription')}
         />
       }
     >
-      <AuthFormShell title="Autentikasi Google">
+      <AuthFormShell title={t('callback.formTitle')}>
         {status.kind === 'loading' ? (
           <div className="flex flex-col items-center justify-center gap-4 rounded-xl border border-border-subtle bg-surface-container-lowest p-8 text-center shadow-sm">
             <Spinner size="lg" className="text-burgundy" />
             <div className="flex flex-col gap-1">
               <p className="font-label-semibold text-body-default text-ink">
-                Memverifikasi akun Google…
+                {t('callback.verifyingTitle')}
               </p>
               <p className="font-body-sm text-body-sm text-secondary">
-                Mohon tunggu sebentar, kami sedang mengonfirmasi identitas Anda.
+                {t('callback.verifyingBody')}
               </p>
             </div>
           </div>
@@ -145,9 +148,11 @@ export default function GoogleAuthCallbackPage() {
               </svg>
             </div>
             <div className="flex flex-col gap-1">
-              <p className="font-label-semibold text-body-default text-ink">Autentikasi Berhasil</p>
+              <p className="font-label-semibold text-body-default text-ink">
+                {t('callback.successTitle')}
+              </p>
               <p className="font-body-sm text-body-sm text-secondary">
-                Mengalihkan Anda ke portal ({status.homePath})…
+                {t('callback.successRedirecting', { path: status.homePath })}
               </p>
             </div>
           </div>
@@ -172,16 +177,16 @@ export default function GoogleAuthCallbackPage() {
               </div>
               <div className="flex flex-col gap-1">
                 <h2 className="font-label-semibold text-body-default text-ink">
-                  Gagal Memverifikasi
+                  {t('callback.failedTitle')}
                 </h2>
-                <p className="font-body-sm text-body-sm text-secondary">{status.message}</p>
+                <p className="font-body-sm text-body-sm text-secondary">{errorText}</p>
               </div>
             </div>
             <Link
               href="/masuk"
               className="inline-flex h-10 items-center justify-center rounded-md bg-burgundy px-4 font-label-semibold text-body-sm text-white transition-colors hover:bg-primary"
             >
-              Kembali ke halaman masuk
+              {t('backToLogin')}
             </Link>
           </div>
         ) : null}
