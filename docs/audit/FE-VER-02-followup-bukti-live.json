@@ -1,0 +1,64 @@
+{
+  "ts": "2026-09-30T09:45:21+0800",
+  "app": "http://127.0.0.1:3100 (worktree t_90a72c5f)",
+  "F3": {
+    "http": 200,
+    "literal_ops_superadmin": 0,
+    "literal_full_control": 0,
+    "literal_ops_email": 0,
+    "me": "{\"data\":{\"account\":{\"id\":\"249c9731-e224-46c6-8051-102b2b957dd3\",\"displayName\":\"All Roles\",\"email\":\"allroles@test.com\"},\"activeWorkspaceId\":\"e96e9772-d9e4-4cdf-a960-8c82b68bc1c6\",\"activeWorkspace\":{\"id\":\"e96e9772-d9e4-4cd",
+    "session": "{\"data\":{\"issuedAt\":1790730860,\"expiresAt\":1791335660,\"source\":\"jwt\"}}"
+  },
+  "F4": {
+    "api_http": 200,
+    "api_body": "{\"data\":[{\"promptTemplateId\":\"assessment_output\",\"pattern\":\"general_feedback\",\"frequency\":15,\"avgRating\":3.67,\"suggestedAction\":null},{\"promptTemplateId\":\"quality.guard\",\"pattern\":\"quality_issues\",\"frequency\":1,\"avgRating\":4,\"suggestedAction\":null}]}"
+  },
+  "F5": {
+    "/ops/zzz-unknown": 404,
+    "/school/zzz-unknown": 404,
+    "/ops/notifikasi": 404,
+    "/school/learning-signals": 404,
+    "/ops/learning-signals": 200,
+    "/school/guru": 200,
+    "/ops/accounts": 200,
+    "/ops/profile": 200
+  },
+  "F7": {
+    "superadmin": {
+      "http": 200,
+      "body": "{\"data\":[]}"
+    },
+    "teacher": {
+      "http": 403,
+      "body": "{\"error\":{\"code\":\"ROLE_FORBIDDEN\",\"message\":\"Akses superadmin diperlukan.\",\"retryable\":false}}"
+    }
+  },
+  "F9": {
+    "PATCH": {
+      "http": 405,
+      "body": "{\"error\":{\"code\":\"METHOD_NOT_ALLOWED\",\"message\":\"Metode tidak didukung. Gunakan POST untuk endpoint ini.\",\"retryable\":false}}"
+    },
+    "PUT": {
+      "http": 405,
+      "body": "{\"error\":{\"code\":\"METHOD_NOT_ALLOWED\",\"message\":\"Metode tidak didukung. Gunakan POST untuk endpoint ini.\",\"retryable\":false}}"
+    },
+    "DELETE": {
+      "http": 405,
+      "body": "{\"error\":{\"code\":\"METHOD_NOT_ALLOWED\",\"message\":\"Metode tidak didukung. Gunakan POST untuk endpoint ini.\",\"retryable\":false}}"
+    }
+  },
+  "F12": {
+    "/app/review/zzz": {
+      "http": 200,
+      "skeleton": true
+    },
+    "/app/output/zzz": {
+      "http": 200,
+      "skeleton": true
+    },
+    "/app/review/zzz/finalize": {
+      "http": 200,
+      "skeleton": true
+    }
+  }
+}
