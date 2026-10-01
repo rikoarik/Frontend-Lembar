@@ -13,7 +13,7 @@ Minimal `lembar` frontend foundation. Next.js 16 App Router, TypeScript strict, 
 pnpm install
 pnpm dev               # next dev -p 3000
 pnpm typecheck         # tsc --noEmit
-pnpm lint              # eslint . --ext .ts,.tsx
+pnpm lint              # eslint . (flat config; `next lint` was removed in Next 16)
 pnpm format:check      # prettier --check .
 pnpm format            # prettier --write .
 pnpm test              # vitest run
