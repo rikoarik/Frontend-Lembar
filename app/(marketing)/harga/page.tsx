@@ -97,13 +97,13 @@ function PlanCard({
   copy: PricingCopy;
 }) {
   const isFree = plan.priceAmount === 0;
-  const price = isFree
-    ? 'Rp0'
-    : number(plan.priceAmount, {
-        style: 'currency',
-        currency: plan.currency,
-        maximumFractionDigits: 0,
-      });
+  // The catalog is the only source of a price; even the zero is formatted from
+  // it rather than written into the component (docs/product/PRD.md §16).
+  const price = number(plan.priceAmount, {
+    style: 'currency',
+    currency: plan.currency,
+    maximumFractionDigits: 0,
+  });
   return (
     <article
       className={`group relative flex min-h-[32rem] flex-col rounded-2xl border p-7 transition duration-300 hover:-translate-y-1 ${

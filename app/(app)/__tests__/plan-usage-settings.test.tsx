@@ -36,14 +36,34 @@ describe('hidden trial controls - /app/pengaturan/langganan', () => {
 
   beforeEach(() => {
     vi.restoreAllMocks();
+    // Route by URL: the workspace plan and the public catalog are two different
+    // payloads, and the upgrade price must come from the latter.
     vi.stubGlobal(
       'fetch',
-      vi.fn().mockResolvedValue(
-        new Response(JSON.stringify({ data: plan }), {
-          status: 200,
-          headers: { 'content-type': 'application/json' },
-        }),
-      ),
+      vi.fn().mockImplementation((input: RequestInfo | URL) => {
+        const url = String(input);
+        const body = url.includes('/v1/public/plans')
+          ? {
+              data: [
+                {
+                  key: 'pro',
+                  displayName: 'Pro',
+                  priceAmount: 149000,
+                  currency: 'IDR',
+                  billingPeriod: 'monthly',
+                  tokenMonthlyLimit: 300000,
+                  features: [],
+                },
+              ],
+            }
+          : { data: plan };
+        return Promise.resolve(
+          new Response(JSON.stringify(body), {
+            status: 200,
+            headers: { 'content-type': 'application/json' },
+          }),
+        );
+      }),
     );
   });
 
@@ -58,11 +78,22 @@ describe('hidden trial controls - /app/pengaturan/langganan', () => {
     expect(screen.queryByRole('button', { name: /klaim trial 2 bulan/i })).not.toBeInTheDocument();
   });
 
+  it('renders the upgrade price from the catalog, not from the message files', async () => {
+    render(<PlanUsageSettingsPage />);
+
+    // Free non-trial workspace → the upgrade panel is visible.
+    expect(await screen.findByText('Upgrade paket')).toBeInTheDocument();
+    expect(await screen.findByText(/Rp\s?149\.000 \/ bulan/)).toBeInTheDocument();
+  });
+
   it('never calls the removed self-issue endpoint', async () => {
     render(<PlanUsageSettingsPage />);
 
     await screen.findByText('1.500 / 30.000');
-    expect(fetch).toHaveBeenCalledTimes(1);
+    // The page reads the workspace plan and the public catalog, and nothing
+    // else — in particular no trial self-issue endpoint.
+    const calls = (fetch as unknown as { mock: { calls: unknown[][] } }).mock.calls;
+    expect(calls.map((call) => call[0]).sort()).toEqual(['/v1/me/plan', '/v1/public/plans']);
     expect(fetch).toHaveBeenCalledWith('/v1/me/plan', { credentials: 'include' });
   });
 

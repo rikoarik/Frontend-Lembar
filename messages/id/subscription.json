@@ -45,14 +45,13 @@
       "chooseAria": "Pilih paket upgrade",
       "plans": {
         "pro": {
-          "label": "Guru Pro",
-          "price": "Rp49.000/bln"
+          "label": "Guru Pro"
         },
         "plus": {
-          "label": "Plus",
-          "price": "Rp149.000/bln"
+          "label": "Plus"
         }
       },
+      "priceFromCatalog": "Harga mengikuti katalog aktif",
       "submit": "Lanjutkan ke {plan}",
       "submitBusy": "Memproses…",
       "qrisNote": "Pembayaran via QRIS. Aman dan instan.",

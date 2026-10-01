@@ -5,8 +5,8 @@ import Link from 'next/link';
 import QRCode from 'qrcode';
 import { useTranslations } from 'next-intl';
 import { Panel, Button } from '@/app/components/ui';
-import { formatTokenLimit } from '@/src/lib/api/plans';
-import type { MePlanData } from '@/src/lib/api/plans';
+import { formatPrice, formatTokenLimit } from '@/src/lib/api/plans';
+import type { MePlanData, PublicPlan } from '@/src/lib/api/plans';
 import { useLocaleFormat } from '@/src/i18n/useLocaleFormat';
 
 type EntitlementState = 'free' | 'active' | 'grace' | 'blocked' | 'expired';
@@ -71,6 +71,7 @@ export default function PlanUsageSettingsPage() {
   const [upgradeLoading, setUpgradeLoading] = useState(false);
   const [upgradeError, setUpgradeError] = useState('');
   const [upgradePlan, setUpgradePlan] = useState<'pro' | 'plus'>('pro');
+  const [catalog, setCatalog] = useState<PublicPlan[]>([]);
   const [checkout, setCheckout] = useState<{
     qrImage: string;
     paymentUrl: string;
@@ -94,6 +95,18 @@ export default function PlanUsageSettingsPage() {
         if (cancelled) return;
         setError(err.message || t('error.load'));
         setLoading(false);
+      });
+    // Upgrade prices are commercial data owned by the plan catalog. They are
+    // fetched at runtime and never hardcoded in the message catalogs
+    // (docs/product/PRD.md §16, decision D-009).
+    fetch('/v1/public/plans')
+      .then((res) => (res.ok ? (res.json() as Promise<{ data?: PublicPlan[] }>) : null))
+      .then((json) => {
+        if (cancelled || !json) return;
+        setCatalog(Array.isArray(json.data) ? json.data : []);
+      })
+      .catch(() => {
+        // Without a catalog the price slot stays neutral instead of showing a stale number.
       });
     return () => {
       cancelled = true;
@@ -183,6 +196,17 @@ export default function PlanUsageSettingsPage() {
   const tokenUsed = plan.tokenUsedThisMonth ?? 0;
   const isPaidPlan = plan.plan !== 'free';
 
+  /**
+   * Price for an upgrade option, read from the live catalog. Returns null when
+   * the catalog has no active row for that plan, so the UI falls back to the
+   * neutral "follows the catalog" copy instead of printing a stale number.
+   */
+  const upgradePrice = (option: 'pro' | 'plus'): string | null => {
+    const entry = catalog.find((item) => item.key === option);
+    if (!entry || entry.priceAmount <= 0) return null;
+    return formatPrice(entry, number);
+  };
+
   return (
     <div className="flex flex-col gap-6 w-full">
       <div className="flex flex-col gap-1">
@@ -248,7 +272,7 @@ export default function PlanUsageSettingsPage() {
                     {t(`upgrade.plans.${option}.label`)}
                   </span>
                   <span className="block text-body-xs text-[#6d665d]">
-                    {t(`upgrade.plans.${option}.price`)}
+                    {upgradePrice(option) ?? t('upgrade.priceFromCatalog')}
                   </span>
                 </button>
               ))}

@@ -45,14 +45,13 @@
       "chooseAria": "Choose an upgrade plan",
       "plans": {
         "pro": {
-          "label": "Teacher Pro",
-          "price": "Rp49,000/mo"
+          "label": "Teacher Pro"
         },
         "plus": {
-          "label": "Plus",
-          "price": "Rp149,000/mo"
+          "label": "Plus"
         }
       },
+      "priceFromCatalog": "Price follows the active catalog",
       "submit": "Continue to {plan}",
       "submitBusy": "Processing…",
       "qrisNote": "Payment via QRIS. Secure and instant.",
