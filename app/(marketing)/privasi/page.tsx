@@ -6,6 +6,12 @@ import MarketingSubPageLayout from '@/app/components/marketing/MarketingSubPageL
 const PLAIN_SECTIONS = ['2', '3', '5'] as const;
 /** Sections that interleave a highlighted phrase (and, for `4`, a contact link). */
 const EMPHASIS_SECTIONS = ['0', '1', '4'] as const;
+/**
+ * Only some emphasis sections carry a `strong` key: `4` renders a mailto link
+ * instead, and asking next-intl for a key that does not exist throws
+ * MISSING_MESSAGE at render time. Gate the lookup on the sections that have it.
+ */
+const STRONG_SECTIONS = new Set<string>(['0', '1']);
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('marketing.privacy.meta');
@@ -39,15 +45,18 @@ export default async function PrivasiPage() {
                 <h2 className="font-h3 text-h3 text-ink mb-unit-3">{t(`sections.${key}.title`)}</h2>
                 <p className="text-secondary text-body-sm leading-[1.8]">
                   {t(`sections.${key}.before`)}
-                  <strong className="text-ink">{t(`sections.${key}.strong`)}</strong>
-                  {t(`sections.${key}.after`)}
-                  {key === '4' && (
+                  {STRONG_SECTIONS.has(key) && (
+                    <strong className="text-ink">{t(`sections.${key}.strong`)}</strong>
+                  )}
+                  {key === '4' ? (
                     <>
                       <a href="mailto:privasi@lembar.id" className="text-burgundy hover:underline">
                         privasi@lembar.id
                       </a>
-                      .
+                      {t(`sections.${key}.after`)}
                     </>
+                  ) : (
+                    t(`sections.${key}.after`)
                   )}
                 </p>
               </div>
