@@ -128,3 +128,33 @@ describe('school admin management panel', () => {
     expect(screen.getAllByText(/Undang/i).length).toBeGreaterThan(0);
   });
 });
+
+describe('school sidebar invitation nav labels', () => {
+  it('labels the send and manage invitation entries by their action, not one letter apart', async () => {
+    render(
+      <SchoolAdminShell>
+        <div />
+      </SchoolAdminShell>,
+    );
+    await waitForRoleSwitcher();
+
+    const sendLinks = screen.getAllByRole('link', { name: 'Kirim undangan' });
+    const manageLinks = screen.getAllByRole('link', { name: 'Kelola undangan' });
+
+    expect(sendLinks.length).toBeGreaterThan(0);
+    expect(manageLinks.length).toBeGreaterThan(0);
+    for (const link of sendLinks) expect(link).toHaveAttribute('href', '/school/undang');
+    for (const link of manageLinks) expect(link).toHaveAttribute('href', '/school/undangan');
+
+    // Rendered copy states the action verb.
+    expect(sendLinks[0]!.textContent).toMatch(/Kirim undangan/);
+    expect(manageLinks[0]!.textContent).toMatch(/Kelola undangan/);
+
+    // The old copy differed by a single letter ("Undang" / "Undangan menunggu").
+    const sendLabel = (sendLinks[0]!.textContent ?? '').trim();
+    const manageLabel = (manageLinks[0]!.textContent ?? '').trim();
+    expect(sendLabel).not.toBe(manageLabel);
+    expect(manageLabel.startsWith(sendLabel)).toBe(false);
+    expect(document.body.textContent ?? '').not.toMatch(/Undangan menunggu/);
+  });
+});

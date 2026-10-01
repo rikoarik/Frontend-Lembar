@@ -19,7 +19,7 @@ export type AdminColumn<T> = {
 export const SCHOOL_NAV: AdminNavItem[] = [
   { href: '/school', labelKey: 'nav.ringkasan', icon: 'dashboard' },
   { href: '/school/guru', labelKey: 'nav.guru', icon: 'group' },
-  { href: '/school/undang', labelKey: 'nav.undang', icon: 'person_add' },
+  { href: '/school/undang', labelKey: 'nav.undang', icon: 'send' },
   { href: '/school/undangan', labelKey: 'nav.undangan', icon: 'mail' },
   { href: '/school/penggunaan', labelKey: 'nav.penggunaan', icon: 'monitoring' },
   { href: '/school/billing', labelKey: 'nav.schoolBilling', icon: 'payments' },
