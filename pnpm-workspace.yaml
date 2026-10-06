@@ -1,0 +1,13 @@
+# Workspace-level pnpm settings (pnpm >= 10 reads package settings here, not
+# from the "pnpm" field in package.json).
+#
+# source-map-js transitively (next > postcss) resolves to 1.2.1, which is
+# affected by GHSA-68fv-2mgg-jv7q (event-loop DoS via indexed source-map
+# section offsets). Pinned to the patched release so `pnpm audit --prod` stays
+# green; drop the pin once next ships postcss with source-map-js >= 1.2.2.
+overrides:
+  source-map-js: ^1.2.2
+
+# This repo is a single package; listing it keeps the workspace manifest valid.
+packages:
+  - '.'
