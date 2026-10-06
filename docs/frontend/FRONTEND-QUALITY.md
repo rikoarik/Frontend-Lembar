@@ -96,6 +96,39 @@ The CI workflow is defined in `.github/workflows/ci.yml` and runs the gates list
 Playwright smoke is gated on the static-and-build job so flaky browser runs do not hide
 real failures.
 
+### Lint entry point — `eslint .`, never `next lint`
+
+Next.js 16 **removed** the `next lint` command
+(`node_modules/next/dist/docs/01-app/03-api-reference/05-config/03-eslint.md` → "next lint
+removal"). Worse, the removal is silent: `next lint` resolves `lint` as a project directory
+and exits **0**, so a script calling it looks green while nothing is linted.
+
+The gate is therefore the ESLint CLI directly:
+
+```bash
+pnpm lint     # → eslint .
+```
+
+`eslint.config.mjs` is a flat config that layers two entry points from `eslint-config-next`:
+
+| Layer                                | Why it is required                                                                  |
+| ------------------------------------ | ----------------------------------------------------------------------------------- |
+| `eslint-config-next/core-web-vitals` | Next.js, React, React-Hooks and `jsx-a11y` rules; Web-Vitals rules as **errors**    |
+| `eslint-config-next/typescript`      | `@typescript-eslint/recommended` — unused vars, explicit `any`, `require()` imports |
+
+The bare `eslint-config-next` entry point enables **zero** `@typescript-eslint` rules, so
+omitting the `/typescript` layer silently disables the whole TypeScript rule class. CommonJS
+build config (`*.cjs`, `tailwind.config.js`, `postcss.config.js`) turns
+`@typescript-eslint/no-require-imports` off — `require()` is correct there.
+
+`@typescript-eslint/no-explicit-any` and `no-unused-vars` are held at `warn` to keep the
+existing baseline from blocking the gate; promoting them to `error` is a follow-up cleanup,
+not a reason to drop the layer.
+
+`scripts/__tests__/ci-gates.test.ts` is the regression gate: it fails if `next lint` returns
+to any script or workflow, if either config layer is removed, or if the CI workflow stops
+gating `pull_request` to `dev`.
+
 ### Local-equivalent commands
 
 Run each gate locally with the script under `scripts/gates/`. They mirror what CI executes
