@@ -87,7 +87,7 @@ type LandingPricingCopy = {
   body: string;
   details: string;
   freePrice: string;
-  tokenQuota: (values: { count: string }) => string;
+  quotaPerMonth: (values: { count: string }) => string;
   quotaFromCatalog: string;
   schoolName: string;
   schoolPrice: string;
@@ -149,7 +149,7 @@ function LivePlanCatalog({
                 <p className="mt-2 text-body-sm text-secondary">
                   {plan.tokenMonthlyLimit === null
                     ? copy.quotaFromCatalog
-                    : copy.tokenQuota({ count: number(plan.tokenMonthlyLimit) })}
+                    : copy.quotaPerMonth({ count: number(plan.tokenMonthlyLimit) })}
                 </p>
               </article>
             );
@@ -187,7 +187,7 @@ export default async function LandingPage() {
     body: t('body'),
     details: t('details'),
     freePrice: t('freePrice'),
-    tokenQuota: ({ count }) => t('tokenQuota', { count }),
+    quotaPerMonth: ({ count }) => t('quotaPerMonth', { count }),
     quotaFromCatalog: t('quotaFromCatalog'),
     schoolName: t('schoolName'),
     schoolPrice: t('schoolPrice'),

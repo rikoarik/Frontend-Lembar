@@ -134,7 +134,7 @@
       "shareLinkLabel": "Link berbagi:",
       "copyLink": "Salin link",
       "copy": "Salin",
-      "shareTokenMissing": "Token tidak tersedia.",
+      "shareLinkUnavailable": "Link berbagi tidak tersedia.",
       "shareFailed": "Gagal membuat link berbagi."
     },
     "errorRoute": {

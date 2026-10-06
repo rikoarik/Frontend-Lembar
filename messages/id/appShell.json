@@ -40,8 +40,8 @@
       "plus": "Plus",
       "pro": "Pro",
       "upgradePro": "Upgrade Pro",
-      "quotaAria": "Kuota token: {label} terpakai",
-      "quotaProgressAria": "Penggunaan token bulan ini"
+      "quotaAria": "Sisa kuota pembuatan soal: {label} terpakai",
+      "quotaProgressAria": "Pemakaian kuota pembuatan soal bulan ini"
     },
     "account": {
       "profile": "Profil",

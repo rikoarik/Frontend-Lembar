@@ -134,7 +134,7 @@
       "shareLinkLabel": "Share link:",
       "copyLink": "Copy link",
       "copy": "Copy",
-      "shareTokenMissing": "Token is not available.",
+      "shareLinkUnavailable": "The share link is not available.",
       "shareFailed": "Failed to create a share link."
     },
     "errorRoute": {

@@ -39,8 +39,8 @@
       "message": "This email or phone number is already registered.",
       "hint": "Use another identity or recover your account."
     },
-    "recoveryTokenInvalid": {
-      "message": "The recovery link is invalid.",
+    "recoveryLinkInvalid": {
+      "message": "The recovery link is not valid.",
       "hint": "Request a new link to continue."
     },
     "invitationInvalid": {

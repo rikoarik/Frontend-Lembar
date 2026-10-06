@@ -39,7 +39,7 @@
       "message": "Email atau nomor telepon sudah terdaftar.",
       "hint": "Gunakan identitas lain atau pulihkan akun."
     },
-    "recoveryTokenInvalid": {
+    "recoveryLinkInvalid": {
       "message": "Tautan pemulihan tidak valid.",
       "hint": "Minta tautan baru untuk melanjutkan."
     },

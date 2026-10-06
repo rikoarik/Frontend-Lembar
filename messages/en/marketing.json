@@ -18,25 +18,25 @@
       },
       "pro": {
         "name": "Pro",
-        "subtitle": "For teachers who create questions regularly: more quota and a faster review flow.",
+        "subtitle": "For teachers who create questions every week: more quota, faster review.",
         "cta": "Start Pro"
       }
     },
     "priceFree": "Free forever",
     "perMonth": "per month",
     "noCard": "No credit card required",
-    "tokenQuota": "{count} generation tokens / month",
-    "quotaFromCatalog": "Token quota follows the active catalog",
+    "quotaPerMonth": "{count} question-creation quota / month",
+    "quotaFromCatalog": "Question-creation quota follows the active catalog",
     "popular": "Popular",
     "landing": {
       "emptyTitle": "Transparent plans and quotas",
       "emptyBody": "Pricing is loading from the active catalog. Visit the plans page for current information.",
       "viewPlans": "View plans",
       "title": "Transparent plans and quotas",
-      "body": "The prices and token limits below come directly from the active plan catalog.",
+      "body": "The prices and question-creation quota below come directly from the active plan catalog.",
       "details": "View plan details and features",
       "freePrice": "Free",
-      "tokenQuota": "{count} tokens / month",
+      "quotaPerMonth": "{count} question-creation quota / month",
       "quotaFromCatalog": "Quota follows the active catalog",
       "schoolName": "Schools & Institutions",
       "schoolPrice": "Contact us",
@@ -61,8 +61,8 @@
     },
     "faq": {
       "title": "Frequently asked questions",
-      "tokenQuestion": "What are generation tokens?",
-      "tokenAnswer": "Tokens are consumed when you create questions. Each plan limit follows the active catalog shown on this page.",
+      "quotaQuestion": "How is the question-creation quota counted?",
+      "quotaAnswer": "Quota is used each time you create a question draft. Each plan limit follows the active catalog shown on this page.",
       "billingQuestion": "Are there hidden fees?",
       "billingAnswer": "Pricing and payment methods follow the information shown at checkout. Review the summary before continuing payment.",
       "upgradeQuestion": "How do I upgrade to Pro?",
@@ -452,8 +452,8 @@
       "firstStepTitle": "Create your first assessment",
       "firstStepBody": "Sign up, pick a subject, enter a topic — our AI composes a question draft in seconds. Just review and adjust.",
       "tipEyebrow": "AI Tips",
-      "tipTitle": "Prompts that produce good questions",
-      "tipBody": "The more specific the topic and taxonomy level you provide, the sharper the questions the AI produces.",
+      "tipTitle": "Instructions that produce good questions",
+      "tipBody": "The more specific the topic and taxonomy level you give, the sharper the questions AI produces.",
       "collabEyebrow": "Collaboration",
       "collabTitle": "Invite your team",
       "collabBody": "Bring other teachers into the school workspace. Set roles, share the question bank, and review together.",
@@ -479,7 +479,7 @@
         },
         "3": {
           "question": "How is question access controlled?",
-          "answer": "The workspace requires an account session. Student links use limited tokens that can expire or be revoked and never show the answer key."
+          "answer": "The workspace requires an account session. Student links are time-limited, can expire or be revoked, and never show the answer key."
         },
         "4": {
           "question": "Which curricula are available?",
@@ -521,7 +521,7 @@
       "badge": "Security",
       "sessionEyebrow": "Browser session",
       "sessionTitle": "Limited authentication cookies",
-      "sessionBody": "Session tokens are stored as HttpOnly cookies, use SameSite, and are flagged Secure in the production environment. The browser never receives provider secrets or backend credentials.",
+      "sessionBody": "Sign-in sessions are stored as HttpOnly cookies, use SameSite, and are flagged Secure in the production environment. The browser never receives credentials for internal services.",
       "cards": {
         "0": {
           "title": "Workspace separation",
@@ -542,10 +542,22 @@
       "titleLine2": "administration machines.",
       "description": "We built lembar because we believe a teacher's time is too valuable to spend creating questions from scratch. AI can help — the teacher still decides.",
       "stats": {
-        "0": { "value": "2,500+", "label": "Active teachers" },
-        "1": { "value": "150+", "label": "Partner schools" },
-        "2": { "value": "50k+", "label": "Questions generated" },
-        "3": { "value": "12x", "label": "Faster" }
+        "0": {
+          "value": "2,500+",
+          "label": "Active teachers"
+        },
+        "1": {
+          "value": "150+",
+          "label": "Partner schools"
+        },
+        "2": {
+          "value": "50k+",
+          "label": "Questions generated"
+        },
+        "3": {
+          "value": "12x",
+          "label": "Faster"
+        }
       },
       "statsNote": "as of August 2026 · since beta launch",
       "missionEyebrow": "Mission",

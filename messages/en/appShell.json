@@ -40,8 +40,8 @@
       "plus": "Plus",
       "pro": "Pro",
       "upgradePro": "Upgrade to Pro",
-      "quotaAria": "Token quota: {label} used",
-      "quotaProgressAria": "Token usage this month"
+      "quotaAria": "Question-creation quota left: {label} used",
+      "quotaProgressAria": "Question-creation quota used this month"
     },
     "account": {
       "profile": "Profile",

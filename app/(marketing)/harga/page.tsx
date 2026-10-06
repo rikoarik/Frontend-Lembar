@@ -36,7 +36,7 @@ type PricingCopy = {
   perMonth: string;
   noCard: string;
   quotaFromCatalog: string;
-  tokenQuota: (values: { count: string }) => string;
+  quotaPerMonth: (values: { count: string }) => string;
   catalogUpdate: {
     eyebrow: string;
     name: string;
@@ -48,9 +48,9 @@ type PricingCopy = {
   };
 };
 
-function tokenQuotaLabel(plan: PublicPlan, number: NumberFormat, copy: PricingCopy): string {
+function quotaPerMonthLabel(plan: PublicPlan, number: NumberFormat, copy: PricingCopy): string {
   if (plan.tokenMonthlyLimit === null) return copy.quotaFromCatalog;
-  return copy.tokenQuota({ count: number(plan.tokenMonthlyLimit) });
+  return copy.quotaPerMonth({ count: number(plan.tokenMonthlyLimit) });
 }
 
 function CatalogUpdateCard({ copy }: { copy: PricingCopy }) {
@@ -139,7 +139,7 @@ function PlanCard({
         <div className="flex items-start gap-3">
           <CheckIcon inverted={isPopular} />
           <span className={`text-body-default leading-6 ${isPopular ? 'text-white' : 'text-ink'}`}>
-            {tokenQuotaLabel(plan, number, copy)}
+            {quotaPerMonthLabel(plan, number, copy)}
           </span>
         </div>
         {plan.features.map((feat) => (
@@ -191,7 +191,7 @@ export default async function HargaPage() {
     perMonth: t('perMonth'),
     noCard: t('noCard'),
     quotaFromCatalog: t('quotaFromCatalog'),
-    tokenQuota: ({ count }) => t('tokenQuota', { count }),
+    quotaPerMonth: ({ count }) => t('quotaPerMonth', { count }),
     catalogUpdate: {
       eyebrow: t('catalogUpdate.eyebrow'),
       name: t('catalogUpdate.name'),
@@ -301,9 +301,9 @@ export default async function HargaPage() {
             <div className="space-y-unit-6">
               <div>
                 <h3 className="font-label-semibold text-body-lead text-ink mb-unit-2">
-                  {t('faq.tokenQuestion')}
+                  {t('faq.quotaQuestion')}
                 </h3>
-                <p className="text-body-default text-secondary">{t('faq.tokenAnswer')}</p>
+                <p className="text-body-default text-secondary">{t('faq.quotaAnswer')}</p>
               </div>
               <div>
                 <h3 className="font-label-semibold text-body-lead text-ink mb-unit-2">

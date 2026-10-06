@@ -17,7 +17,7 @@ export type AuthValidationKey =
   | 'validation.usernameInvalid'
   | 'validation.phoneRequired'
   | 'validation.phoneInvalid'
-  | 'validation.tokenMissing';
+  | 'validation.recoveryLinkMissing';
 
 const ID_PATTERN = /^[a-zA-Z0-9_.-]{3,32}$/;
 const USERNAME_PATTERN = /^[a-zA-Z0-9_.]{3,24}$/;
@@ -156,7 +156,7 @@ export function validateResetPassword(input: {
 }): ValidationResult {
   const failures: ValidationFailure[] = [];
   if (input.token.trim().length === 0) {
-    push(failures, 'token', 'validation.tokenMissing');
+    push(failures, 'token', 'validation.recoveryLinkMissing');
   }
   const passwordError = passwordFailure(input.password);
   if (passwordError) {
