@@ -25,6 +25,23 @@ import { describe, expect, it } from 'vitest';
 const MESSAGES_ROOT = join(process.cwd(), 'messages');
 const LOCALES = ['id', 'en'] as const;
 const OPERATOR_NAMESPACES = ['ops', 'admin'] as const;
+const PAGES_ROOT = join(process.cwd(), 'app', '(marketing)');
+
+/**
+ * Files that carry a public page's own copy (`generateMetadata` strings and
+ * `<JsonLd>` payloads) rather than reusing a message namespace. They are copied
+ * from the same hypothesis as the message files and drift the same way, so the
+ * same rules apply. `documented-copy.ts` is the published catalogue of the
+ * strings the *backend* should own (docs/frontend/LANDING-PAGE-SPEC.md) — it is
+ * deliberately not rendered, so it is out of scope here.
+ */
+function publicCopySources(): string[] {
+  return readdirSync(PAGES_ROOT, { recursive: true, encoding: 'utf8' })
+    .filter((entry) => entry.endsWith('.tsx') || entry.endsWith('.ts'))
+    .map((entry) => join(PAGES_ROOT, entry))
+    .filter((file) => !file.endsWith('documented-copy.ts'))
+    .sort();
+}
 
 type Json = Record<string, unknown>;
 
@@ -69,6 +86,7 @@ const FORBIDDEN: ReadonlyArray<{ label: string; pattern: RegExp }> = [
 ];
 
 type Finding = { locale: string; namespace: string; key: string; label: string; value: string };
+type FileFinding = { file: string; label: string; text: string };
 
 function scan(locales: readonly string[], namespaces: readonly string[]): Finding[] {
   const found: Finding[] = [];
@@ -82,6 +100,30 @@ function scan(locales: readonly string[], namespaces: readonly string[]): Findin
     }
   }
   return found;
+}
+
+/** Same rules, applied to the source of the public pages themselves. */
+function scanSources(files: readonly string[]): FileFinding[] {
+  const found: FileFinding[] = [];
+  for (const file of files) {
+    const lines = readFileSync(file, 'utf8').split('\n');
+    lines.forEach((line, index) => {
+      for (const { label, pattern } of FORBIDDEN) {
+        if (pattern.test(line)) {
+          found.push({
+            file: `${file.replace(`${process.cwd()}/`, '')}:${index + 1}`,
+            label,
+            text: line.trim(),
+          });
+        }
+      }
+    });
+  }
+  return found;
+}
+
+function describeFileFinding(finding: FileFinding): string {
+  return `${finding.file} [${finding.label}]: ${finding.text}`;
 }
 
 /** `id/marketing.json#pricing.plans.pro.subtitle [price nominal]: Rp149.000/…` */
@@ -117,5 +159,17 @@ describe('public copy carries no commercial data', () => {
     expect(hits).toContain('price nominal');
     expect(hits).toContain('hardcoded quota figure');
     expect(hits).toContain('model name');
+  });
+
+  it('never hardcodes commercial data in the public page sources', () => {
+    // The pages render prices from the catalog and quotas from the catalog —
+    // the metadata strings and JSON-LD payloads alongside them are copy, and
+    // copy is exactly where the hypothesis figure reappeared last time.
+    const findings = scanSources(publicCopySources());
+
+    expect(
+      findings.map(describeFileFinding),
+      'Page-level copy and structured data must not carry a price, quota figure or model name either',
+    ).toEqual([]);
   });
 });
