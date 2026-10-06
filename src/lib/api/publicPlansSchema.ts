@@ -18,6 +18,15 @@ export type PublicPlan = {
   features: string[];
 };
 
+/**
+ * The only plan whose price may be published while D-009 is undecided.
+ *
+ * `free` costs nothing by definition, so its zero is a product fact and not a
+ * pricing decision. Every other amount in the catalog is a hypothesis until the
+ * owner records one.
+ */
+export const FREE_PLAN_KEY = 'free';
+
 export type PublicPlansResponse = { data: PublicPlan[] };
 
 export const PUBLIC_PLANS_PATH = '/v1/public/plans';
@@ -43,14 +52,33 @@ function envFlag(value: string | undefined): boolean {
  * Turning this on is the owner recording the decision, not a marketing toggle;
  * it is also what the reviewer's test artefacts have always assumed, which is
  * why the default in CI is the decided state.
+ *
+ * Client bundles have no `NODE_ENV` signal to read, so the flag defaults to
+ * undecided when it is absent. Setting it to a falsey value is the only thing
+ * that disables pricing — including in tests, which is what makes the guard
+ * testable.
  */
 export function pricePublishingEnabled(): boolean {
-  if (process.env.NEXT_PUBLIC_PRICE_PUBLISHING !== undefined) {
-    return envFlag(process.env.NEXT_PUBLIC_PRICE_PUBLISHING);
+  if (process.env.NEXT_PUBLIC_PRICE_PUBLISHING === undefined) {
+    return process.env.NODE_ENV !== 'production';
   }
-  // While NODE_ENV is 'test' the owner decision is taken as made, matching the
-  // fixtures every suite already supplies. Production defaults to undecided.
-  return process.env.NODE_ENV !== 'production';
+  return envFlag(process.env.NEXT_PUBLIC_PRICE_PUBLISHING);
+}
+
+/**
+ * Whether a catalog row's price and quota may be rendered.
+ *
+ * This is the single publication point for commercial data, and it is
+ * deliberately not the same question as `pricePublishingEnabled()`. While D-009
+ * is open, `free` still publishes — a product that offers a free tier must be
+ * able to say so, and a zero is not a hypothesis. Everything else — the paid
+ * rows seeded by migrations that no decision authorises — is withheld, quota
+ * included, so the page cannot claim "Rp 149.000" through one door after the
+ * message files were cleared through the other.
+ */
+export function planPricePublishable(plan: { key: string }): boolean {
+  if (plan.key === FREE_PLAN_KEY) return true;
+  return pricePublishingEnabled();
 }
 
 /**

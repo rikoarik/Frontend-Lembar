@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl';
 import { Panel, Button } from '@/app/components/ui';
 import { formatPrice, formatTokenLimit } from '@/src/lib/api/plans';
 import type { MePlanData, PublicPlan } from '@/src/lib/api/plans';
+import { planPricePublishable } from '@/src/lib/api/publicPlansSchema';
 import { useLocaleFormat } from '@/src/i18n/useLocaleFormat';
 
 type EntitlementState = 'free' | 'active' | 'grace' | 'blocked' | 'expired';
@@ -103,7 +104,14 @@ export default function PlanUsageSettingsPage() {
       .then((res) => (res.ok ? (res.json() as Promise<{ data?: PublicPlan[] }>) : null))
       .then((json) => {
         if (cancelled || !json) return;
-        setCatalog(Array.isArray(json.data) ? json.data : []);
+        // /v1/public/plans is our own BFF route, so it already withholds rows
+        // the owner has not authorised (planPricePublishable). Filtering again
+        // here is what keeps a *future* unpriced row from leaking onto this
+        // screen: the gate has to hold on whichever side of the boundary the
+        // value is read, because the flag is baked into the server bundle and
+        // is not visible to this client component.
+        const rows = Array.isArray(json.data) ? json.data : [];
+        setCatalog(rows.filter(planPricePublishable));
       })
       .catch(() => {
         // Without a catalog the price slot stays neutral instead of showing a stale number.

@@ -23,9 +23,13 @@ import { describe, expect, it } from 'vitest';
  *    throws `TypeError: Failed to parse URL`, and the failure is swallowed, so
  *    the page simply renders as if no plan existed.
  *
- * 3. Policy. While D-009 is undecided the page publishes no price and no quota.
- *    The catalog only ever becomes the source of a nominal once the owner has
- *    actually decided pricing.
+ * 3. Policy. While D-009 is undecided the page publishes nothing commercial:
+ *    no price and no quota. The catalog only ever becomes the source of a
+ *    nominal once the owner has actually decided pricing. `free` is the one
+ *    exception — a zero is a product fact, not a hypothesis — and a paid row
+ *    that would otherwise render "Rp 149.000 / 300.000 token" is dropped at
+ *    the same point, so clearing the message files cannot be undone by the
+ *    catalog.
  */
 
 const SOURCE = readFileSync('src/lib/api/plans.ts', 'utf8');
@@ -52,18 +56,48 @@ describe('public plan catalog provenance', () => {
 });
 
 describe('pricing policy (D-009)', () => {
-  it('publishes no plan at all while the owner decision is open', async () => {
+  it('publishes the free tier but withholds the paid nominal while the owner decision is open', async () => {
     const { fetchPublicPlans } = await import('@/src/lib/api/plans');
     const previous = process.env.NEXT_PUBLIC_PRICE_PUBLISHING;
 
     process.env.NEXT_PUBLIC_PRICE_PUBLISHING = 'false';
     try {
-      // A catalog that would happily answer with Rp149.000 must not be reached,
-      // let alone rendered: an undecided price is not a price.
-      const neverCalled = () => Promise.reject(new Error('catalog must not be fetched'));
-      expect(await fetchPublicPlans({ fetchImpl: neverCalled as unknown as typeof fetch })).toEqual(
-        [],
-      );
+      // A free tier is a product fact — a product that offers one must be able
+      // to say so. The paid rows seeded by migrations no decision authorises
+      // are dropped, so a nominal cleared out of the message files cannot come
+      // back through the catalog. Note the fetch is *not* refused outright:
+      // withholding everything made the page blank, which hides the free tier
+      // and reads as a broken page rather than an undecided price.
+      const fetchImpl = async () =>
+        new Response(
+          JSON.stringify({
+            data: [
+              {
+                key: 'free',
+                displayName: 'Free',
+                priceAmount: 0,
+                currency: 'IDR',
+                billingPeriod: null,
+                tokenMonthlyLimit: null,
+                features: [],
+              },
+              {
+                key: 'pro',
+                displayName: 'Pro',
+                priceAmount: 149000,
+                currency: 'IDR',
+                billingPeriod: 'monthly',
+                tokenMonthlyLimit: 300000,
+                features: ['Menggunakan GPT-5.6 Sol terbaru.'],
+              },
+            ],
+          }),
+          { status: 200 },
+        );
+      const plans = await fetchPublicPlans({ fetchImpl: fetchImpl as unknown as typeof fetch });
+
+      expect(plans.map((plan) => plan.key)).toEqual(['free']);
+      expect(JSON.stringify(plans)).not.toMatch(/149|300000|GPT/);
     } finally {
       if (previous === undefined) delete process.env.NEXT_PUBLIC_PRICE_PUBLISHING;
       else process.env.NEXT_PUBLIC_PRICE_PUBLISHING = previous;
@@ -100,7 +134,35 @@ describe('pricing policy (D-009)', () => {
       expect(pricePublishingEnabled()).toBe(false);
       process.env.NEXT_PUBLIC_PRICE_PUBLISHING = '1';
       expect(pricePublishingEnabled()).toBe(true);
+      // An explicit value always wins over the environment default, including
+      // in a production build — otherwise the deploy-time switch could not turn
+      // pricing on.
+      process.env.NEXT_PUBLIC_PRICE_PUBLISHING = 'true';
+      expect(pricePublishingEnabled()).toBe(true);
     } finally {
+      if (previous === undefined) delete process.env.NEXT_PUBLIC_PRICE_PUBLISHING;
+      else process.env.NEXT_PUBLIC_PRICE_PUBLISHING = previous;
+    }
+  });
+
+  it('publishes only the free tier by default: the free plan is not a hypothesis', async () => {
+    const { planPricePublishable } = await import('@/src/lib/api/publicPlansSchema');
+    const previous = process.env.NEXT_PUBLIC_PRICE_PUBLISHING;
+
+    try {
+      delete process.env.NEXT_PUBLIC_PRICE_PUBLISHING;
+      (process.env as Record<string, string>).NODE_ENV = 'production';
+      // The production default: no owner decision recorded, so no paid row is
+      // an authoritative price — while the free tier still renders, because a
+      // zero is a catalogue fact rather than a hypothesis.
+      expect(planPricePublishable({ key: 'free' })).toBe(true);
+      expect(planPricePublishable({ key: 'pro' })).toBe(false);
+      expect(planPricePublishable({ key: 'plus' })).toBe(false);
+
+      process.env.NEXT_PUBLIC_PRICE_PUBLISHING = 'true';
+      expect(planPricePublishable({ key: 'pro' })).toBe(true);
+    } finally {
+      (process.env as Record<string, string>).NODE_ENV = 'test';
       if (previous === undefined) delete process.env.NEXT_PUBLIC_PRICE_PUBLISHING;
       else process.env.NEXT_PUBLIC_PRICE_PUBLISHING = previous;
     }

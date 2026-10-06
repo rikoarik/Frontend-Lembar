@@ -9,7 +9,7 @@
 import type { NumberFormat } from '@/src/i18n/formats';
 import {
   parsePublicPlans,
-  pricePublishingEnabled,
+  planPricePublishable,
   publicPlansUrl,
   PUBLIC_PLANS_PATH,
   type PublicPlan,
@@ -91,17 +91,15 @@ export type FetchPublicPlansOptions = {
  * fabricated price.
  */
 export async function fetchPublicPlans(opts?: FetchPublicPlansOptions): Promise<PublicPlan[]> {
-  // No owner decision on pricing (D-009) means no catalog to publish: callers
-  // render their "catalog unavailable" copy instead of a nominal that was never
-  // decided. Returning here rather than filtering keeps the unpriced state
-  // indistinguishable from "catalog is down" — which is the honest description.
-  if (!pricePublishingEnabled()) return [];
-
   const doFetch = opts?.fetchImpl ?? fetch;
   try {
     const res = await doFetch(publicPlansUrl(opts?.baseUrl));
     if (!res.ok) return [];
-    return parsePublicPlans(await res.json());
+    // The owner's decision on pricing (D-009) is applied per row, not by
+    // refusing to read the catalog at all: while it is open the page still
+    // publishes `free` — a free tier is a product fact — and withholds every
+    // number the catalog has no authority for. See planPricePublishable.
+    return parsePublicPlans(await res.json()).filter(planPricePublishable);
   } catch {
     return [];
   }
